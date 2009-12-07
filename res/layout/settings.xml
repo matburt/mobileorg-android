@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TableLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_height="fill_parent"
+    android:layout_width="fill_parent"
+    android:background="#000044">
+  <TableRow>
+    <TextView
+       android:text="URL:"
+       />
+    <EditText
+       android:id="@+id/webURL"
+       />
+  </TableRow>
+  <TableRow>
+    <TextView
+       android:text="User Name:"
+       android:width ="120px"
+       />
+    <EditText
+       android:id="@+id/webUser"
+       android:width="200px" />
+  </TableRow>
+  <TableRow>
+    <TextView
+       android:text="Password:"
+       />
+    <EditText
+       android:id="@+id/webPass"
+       android:password="true"
+       />
+  </TableRow>
+  <TableRow>
+    <TextView />
+    <CheckBox android:id="@+id/chkRememberPassword"
+              android:layout_width="fill_parent"
+              android:layout_height="wrap_content"
+              android:text="Remember Password"
+              />
+  </TableRow>
+  <TableRow>
+    <Button
+       android:id="@+id/buttonSignIn"
+       android:text="Log In" />
+  </TableRow>
+</TableLayout>
