@@ -82,7 +82,7 @@ public class SettingsActivity extends Activity implements OnClickListener
                                                MODE_PRIVATE, null);
         this.appdb.execSQL("UPDATE settings set val = '" + this.webUrl.getText() + "' where key = 'webUrl'");
         this.appdb.execSQL("UPDATE settings set val = '" + this.webUser.getText() + "' where key = 'webUser'");
-        this.appdb.execSQL("UPDATE settings set val = '" + this.webPass.getText() + "' where key - 'webPass'");
+        this.appdb.execSQL("UPDATE settings set val = '" + this.webPass.getText() + "' where key = 'webPass'");
         this.appdb.close();
         this.finish();
     }
