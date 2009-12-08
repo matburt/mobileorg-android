@@ -14,7 +14,7 @@
   </TableRow>
   <TableRow>
     <TextView
-       android:text="User Name:"
+       android:text="Login::"
        android:width ="120px"
        />
     <EditText
@@ -31,16 +31,10 @@
        />
   </TableRow>
   <TableRow>
-    <TextView />
-    <CheckBox android:id="@+id/chkRememberPassword"
-              android:layout_width="fill_parent"
-              android:layout_height="wrap_content"
-              android:text="Remember Password"
-              />
   </TableRow>
   <TableRow>
     <Button
-       android:id="@+id/buttonSignIn"
-       android:text="Log In" />
+       android:id="@+id/settingsSave"
+       android:text="Save" />
   </TableRow>
 </TableLayout>
