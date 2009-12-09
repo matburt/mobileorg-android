@@ -37,7 +37,7 @@ public class SettingsActivity extends Activity implements OnClickListener
     }
 
     public void initializeSettings() {
-        this.appdb = this.openOrCreateDatabase("DatabaseName",
+        this.appdb = this.openOrCreateDatabase("MobileOrg",
                                                MODE_PRIVATE, null);
         this.appdb.execSQL("CREATE TABLE IF NOT EXISTS settings"
                            + " (key VARCHAR, val VARCHAR);");
@@ -63,6 +63,7 @@ public class SettingsActivity extends Activity implements OnClickListener
                             " VALUES ('webPass', '')");
             }
         }
+        result.close();
         this.appdb.close();
     }
 
@@ -78,7 +79,7 @@ public class SettingsActivity extends Activity implements OnClickListener
     }
 
     public void onSave() {
-        this.appdb = this.openOrCreateDatabase("DatabaseName",
+        this.appdb = this.openOrCreateDatabase("MobileOrg",
                                                MODE_PRIVATE, null);
         this.appdb.execSQL("UPDATE settings set val = '" + this.webUrl.getText() + "' where key = 'webUrl'");
         this.appdb.execSQL("UPDATE settings set val = '" + this.webUser.getText() + "' where key = 'webUser'");

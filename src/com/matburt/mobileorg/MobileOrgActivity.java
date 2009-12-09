@@ -12,6 +12,7 @@ public class MobileOrgActivity extends ListActivity
     private static final int OP_MENU_SYNC = 2;
     private static final int OP_MENU_OUTLINE = 3;
     private static final int OP_MENU_CAPTURE = 4;
+    private Synchronizer appSync;
 
     /** Called when the activity is first created. */
     @Override
@@ -41,6 +42,8 @@ public class MobileOrgActivity extends ListActivity
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
         case MobileOrgActivity.OP_MENU_SYNC:
+            appSync = new Synchronizer(this);
+            appSync.pull();
             return true;
         case MobileOrgActivity.OP_MENU_SETTINGS:
             return this.onShowSettings();
