@@ -10,6 +10,9 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.auth.AuthScope;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.ArrayList;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 import java.io.InputStream;
 import java.io.IOException;
 import android.app.Activity;
@@ -23,6 +26,7 @@ public class Synchronizer
     private Map<String, String> appSettings;
     private Activity rootActivity;
     private static final String LT = "MobileOrg";
+
     Synchronizer(Activity parentActivity) {
         this.rootActivity = parentActivity;
         this.appSettings = new HashMap<String, String>();
@@ -42,12 +46,26 @@ public class Synchronizer
                 Log.w(LT, "Stream is null");
                 return false;
             }
-            Log.d(LT, this.ReadInputStream(mainFile));
+            String masterStr = this.ReadInputStream(mainFile);
+            Log.d(LT, masterStr);
+            HashMap<String, String> masterList = this.getOrgFilesFromMaster(masterStr);
         }
         catch (IOException e) {
             Log.e(LT, "Error reading input stream for URL");
         }
         return true;
+    }
+
+    public HashMap<String, String> getOrgFilesFromMaster(String master) {
+        Pattern getOrgFiles = Pattern.compile("\\[file:(.*?\\.org)\\]\\[(.*?)\\]\\]");
+        Matcher m = getOrgFiles.matcher(master);
+        HashMap<String, String> allOrgFiles = new HashMap<String, String>();
+        while (m.find()) {
+            allOrgFiles.put(m.group(1), m.group(2));
+            Log.d(LT, m.group(1));
+            Log.d(LT, m.group(2));
+        }
+        return allOrgFiles;
     }
 
     public DefaultHttpClient createConnection(String user, String password) {
