@@ -13,6 +13,8 @@ import java.util.Map;
 import java.util.ArrayList;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
+import java.net.URL;
+import java.net.MalformedURLException;
 import java.io.InputStream;
 import java.io.IOException;
 import android.app.Activity;
@@ -36,11 +38,39 @@ public class Synchronizer
     }
 
     public boolean pull() {
+        Pattern checkUrl = Pattern.compile("http.*\\.(?:org|txt)$");
+        if (!checkUrl.matcher(this.appSettings.get("webUrl")).find()) {
+            Log.e(LT, "Bad URL");
+            return false;
+        }
+
+        URL manageUrl;
+        try {
+            manageUrl = new URL(this.appSettings.get("webUrl"));
+        }
+        catch (MalformedURLException e) {
+            Log.e(LT, "Malformed URL");
+            return false;
+        }
+
+        String urlPath =  manageUrl.getPath();
+        String[] pathElements = urlPath.split("/");
+        String directoryActual = "/";
+        if (pathElements.length > 1) {
+            for (int idx = 0; idx < pathElements.length - 1; idx++) {
+                directoryActual += pathElements[idx] + "/";
+            }
+        }
+        String urlActual = manageUrl.getProtocol() + "://" +
+            manageUrl.getAuthority() + directoryActual;
+
+
         DefaultHttpClient httpC = this.createConnection(
                                         this.appSettings.get("webUser"),
                                         this.appSettings.get("webPass"));
         InputStream mainFile = this.getUrlStream(this.appSettings.get("webUrl"),
                                                  httpC);
+        HashMap<String, String> masterList;
         try {
             if (mainFile == null) {
                 Log.w(LT, "Stream is null");
@@ -48,11 +78,16 @@ public class Synchronizer
             }
             String masterStr = this.ReadInputStream(mainFile);
             Log.d(LT, masterStr);
-            HashMap<String, String> masterList = this.getOrgFilesFromMaster(masterStr);
+            masterList = this.getOrgFilesFromMaster(masterStr);
         }
         catch (IOException e) {
             Log.e(LT, "Error reading input stream for URL");
+            return false;
         }
+
+        for (String key : masterList.keySet())
+            Log.d(LT, key + ": " + urlActual + masterList.get(key));
+
         return true;
     }
 
@@ -61,10 +96,9 @@ public class Synchronizer
         Matcher m = getOrgFiles.matcher(master);
         HashMap<String, String> allOrgFiles = new HashMap<String, String>();
         while (m.find()) {
-            allOrgFiles.put(m.group(1), m.group(2));
-            Log.d(LT, m.group(1));
-            Log.d(LT, m.group(2));
+            allOrgFiles.put(m.group(2), m.group(1));
         }
+
         return allOrgFiles;
     }
 
