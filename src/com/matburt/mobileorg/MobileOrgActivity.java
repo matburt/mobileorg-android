@@ -4,8 +4,11 @@ import android.app.ListActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ListView;
 import android.widget.ArrayAdapter;
 import android.content.Intent;
+import android.util.Log;
 import java.util.ArrayList;
 import android.database.Cursor;
 import android.database.SQLException;
@@ -17,6 +20,8 @@ public class MobileOrgActivity extends ListActivity
     private static final int OP_MENU_SYNC = 2;
     private static final int OP_MENU_OUTLINE = 3;
     private static final int OP_MENU_CAPTURE = 4;
+    private static final String LT = "MobileOrg";
+    private ArrayList<String> menuList;
     private Synchronizer appSync;
 
     /** Called when the activity is first created. */
@@ -24,11 +29,14 @@ public class MobileOrgActivity extends ListActivity
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+        this.initializeTables();
+        menuList = new ArrayList<String>();
         String[] allOrgList = this.getOrgFiles();
+        for (int idx = 0; idx < allOrgList.length; idx++) {
+            menuList.add(allOrgList[idx]);
+        }
         setListAdapter(new ArrayAdapter<String>(this,
-               android.R.layout.simple_list_item_1, allOrgList));
-
-        //setContentView(R.layout.main);
+                       android.R.layout.simple_list_item_1, allOrgList));
     }
 
     @Override
@@ -38,6 +46,12 @@ public class MobileOrgActivity extends ListActivity
         menu.add(0, MobileOrgActivity.OP_MENU_SYNC, 0, "Sync");
         menu.add(0, MobileOrgActivity.OP_MENU_SETTINGS, 0, "Settings");
         return true;
+    }
+
+    @Override
+    public void onListItemClick(ListView l, View v, int position, long id) {
+        String thisText = this.menuList.get(position);
+        Log.d(LT, thisText + " clicked");
     }
 
     public boolean onShowSettings() {
@@ -74,6 +88,7 @@ public class MobileOrgActivity extends ListActivity
             if (result.getCount() > 0) {
                 result.moveToFirst();
                 do {
+                    Log.d(LT, "pulled " + result.getString(0));
                     allFiles.add(result.getString(0));
                 } while(result.moveToNext());
             }
@@ -81,5 +96,16 @@ public class MobileOrgActivity extends ListActivity
         appdb.close();
         result.close();
         return (String[])allFiles.toArray(new String[0]);
+    }
+
+    public void initializeTables() {
+        SQLiteDatabase appdb = this.openOrCreateDatabase("MobileOrg",
+                                                         MODE_PRIVATE, null);
+        appdb.execSQL("CREATE TABLE IF NOT EXISTS settings"
+                      + " (key VARCHAR, val VARCHAR)");
+        appdb.execSQL("CREATE TABLE IF NOT EXISTS files"
+                      + " (file VARCHAR, name VARCHAR,"
+                      + " checksum VARCHAR);");
+
     }
 }
