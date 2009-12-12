@@ -44,13 +44,50 @@ public class Synchronizer
             return false;
         }
 
+        String masterStr = this.fetchOrgFile(this.appSettings.get("webUrl"));
+        if (masterStr == "") {
+            Log.e(LT, "Failure getting main org file");
+        }
+        HashMap<String, String> masterList;
+        masterList = this.getOrgFilesFromMaster(masterStr);
+
+        String urlActual = this.getRootUrl();
+
+        for (String key : masterList.keySet())
+            Log.d(LT, key + ": " + urlActual + masterList.get(key));
+
+        return true;
+    }
+
+    public String fetchOrgFile(String orgUrl) {
+        DefaultHttpClient httpC = this.createConnection(
+                                        this.appSettings.get("webUser"),
+                                        this.appSettings.get("webPass"));
+        InputStream mainFile = this.getUrlStream(orgUrl, httpC);
+        String masterStr = "";
+        try {
+            if (mainFile == null) {
+                Log.w(LT, "Stream is null");
+                return ""; //Raise exception
+            }
+            masterStr = this.ReadInputStream(mainFile);
+            Log.d(LT, masterStr);
+        }
+        catch (IOException e) {
+            Log.e(LT, "Error reading input stream for URL");
+            return ""; //Raise exception
+        }
+        return masterStr;
+    }
+
+    public String getRootUrl() {
         URL manageUrl;
         try {
             manageUrl = new URL(this.appSettings.get("webUrl"));
         }
         catch (MalformedURLException e) {
             Log.e(LT, "Malformed URL");
-            return false;
+            return ""; //raise exception
         }
 
         String urlPath =  manageUrl.getPath();
@@ -61,34 +98,8 @@ public class Synchronizer
                 directoryActual += pathElements[idx] + "/";
             }
         }
-        String urlActual = manageUrl.getProtocol() + "://" +
+        return manageUrl.getProtocol() + "://" +
             manageUrl.getAuthority() + directoryActual;
-
-
-        DefaultHttpClient httpC = this.createConnection(
-                                        this.appSettings.get("webUser"),
-                                        this.appSettings.get("webPass"));
-        InputStream mainFile = this.getUrlStream(this.appSettings.get("webUrl"),
-                                                 httpC);
-        HashMap<String, String> masterList;
-        try {
-            if (mainFile == null) {
-                Log.w(LT, "Stream is null");
-                return false;
-            }
-            String masterStr = this.ReadInputStream(mainFile);
-            Log.d(LT, masterStr);
-            masterList = this.getOrgFilesFromMaster(masterStr);
-        }
-        catch (IOException e) {
-            Log.e(LT, "Error reading input stream for URL");
-            return false;
-        }
-
-        for (String key : masterList.keySet())
-            Log.d(LT, key + ": " + urlActual + masterList.get(key));
-
-        return true;
     }
 
     public HashMap<String, String> getOrgFilesFromMaster(String master) {
