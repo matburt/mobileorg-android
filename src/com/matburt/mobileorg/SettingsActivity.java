@@ -40,7 +40,10 @@ public class SettingsActivity extends Activity implements OnClickListener
         this.appdb = this.openOrCreateDatabase("MobileOrg",
                                                MODE_PRIVATE, null);
         this.appdb.execSQL("CREATE TABLE IF NOT EXISTS settings"
-                           + " (key VARCHAR, val VARCHAR);");
+                           + " (key VARCHAR, val VARCHAR)");
+        this.appdb.execSQL("CREATE TABLE IF NOT EXISTS files"
+                           + " (file VARCHAR, name VARCHAR,"
+                           + " checksum VARCHAR);");
         Cursor result = this.appdb.rawQuery("SELECT *" +
                                          " FROM settings",
                                          null);

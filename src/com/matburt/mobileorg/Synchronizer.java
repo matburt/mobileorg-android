@@ -16,8 +16,11 @@ import java.util.regex.Matcher;
 import java.net.URL;
 import java.net.MalformedURLException;
 import java.io.InputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.FileNotFoundException;
 import android.app.Activity;
+import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
@@ -52,11 +55,57 @@ public class Synchronizer
         masterList = this.getOrgFilesFromMaster(masterStr);
 
         String urlActual = this.getRootUrl();
+        for (String key : masterList.keySet()) {
+            Log.d(LT, "Fetching: " +
+                  key + ": " + urlActual + masterList.get(key));
+            String fileContents = this.fetchOrgFile(urlActual +
+                                                    masterList.get(key));
+            FileOutputStream fs;
+            try {
+                fs = rootActivity.openFileOutput(
+                                         masterList.get(key), 0);
+            }
+            catch (java.io.FileNotFoundException e) {
+                Log.e(LT, "Could not write to file: " +
+                      masterList.get(key));
+                return false;
+            }
 
-        for (String key : masterList.keySet())
-            Log.d(LT, key + ": " + urlActual + masterList.get(key));
+            try {
+                for (int idx = 0; idx < fileContents.length(); ++idx) {
+                    fs.write((byte)fileContents.charAt(idx));
+                }
+                this.addOrUpdateFile(masterList.get(key), key);
+                fs.flush();
+                fs.close();
+            }
+            catch (java.io.IOException e) {
+                Log.e(LT, "IO Exception trying to write file " +
+                      masterList.get(key));
+                return false;
+            }
+        }
 
         return true;
+    }
+
+    public void addOrUpdateFile(String filename, String name) {
+        SQLiteDatabase appdb = this.rootActivity.openOrCreateDatabase("MobileOrg",
+                                          0, null);
+        Cursor result = appdb.rawQuery("SELECT * FROM files " +
+                                       "WHERE file = '"+filename+"'", null);
+        if (result != null) {
+            if (result.getCount() > 0) {
+                appdb.execSQL("UPDATE files set name = '"+name+"' "+
+                              "checksum = ''");
+            }
+            else {
+                appdb.execSQL("INSERT INTO files (file, name, checksum) " +
+                              "VALUES ('"+filename+"','"+name+"','')");
+            }
+        }
+        result.close();
+        appdb.close();
     }
 
     public String fetchOrgFile(String orgUrl) {
