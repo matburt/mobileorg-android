@@ -96,7 +96,7 @@ public class Synchronizer
                                        "WHERE file = '"+filename+"'", null);
         if (result != null) {
             if (result.getCount() > 0) {
-                appdb.execSQL("UPDATE files set name = '"+name+"' "+
+                appdb.execSQL("UPDATE files set name = '"+name+"', "+
                               "checksum = ''");
             }
             else {

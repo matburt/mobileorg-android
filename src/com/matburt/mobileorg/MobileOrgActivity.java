@@ -4,7 +4,12 @@ import android.app.ListActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ArrayAdapter;
 import android.content.Intent;
+import java.util.ArrayList;
+import android.database.Cursor;
+import android.database.SQLException;
+import android.database.sqlite.SQLiteDatabase;
 
 public class MobileOrgActivity extends ListActivity
 {
@@ -19,6 +24,11 @@ public class MobileOrgActivity extends ListActivity
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+        String[] allOrgList = this.getOrgFiles();
+        setListAdapter(new ArrayAdapter<String>(this,
+               android.R.layout.simple_list_item_1, allOrgList));
+
+        //setContentView(R.layout.main);
     }
 
     @Override
@@ -55,4 +65,21 @@ public class MobileOrgActivity extends ListActivity
         return false;
     }
 
+    public String[] getOrgFiles() {
+        ArrayList<String> allFiles = new ArrayList<String>();
+        SQLiteDatabase appdb = this.openOrCreateDatabase("MobileOrg",
+                                                         MODE_PRIVATE, null);
+        Cursor result = appdb.rawQuery("SELECT name FROM files", null);
+        if (result != null) {
+            if (result.getCount() > 0) {
+                result.moveToFirst();
+                do {
+                    allFiles.add(result.getString(0));
+                } while(result.moveToNext());
+            }
+        }
+        appdb.close();
+        result.close();
+        return (String[])allFiles.toArray(new String[0]);
+    }
 }
