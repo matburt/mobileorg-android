@@ -51,7 +51,11 @@ public class MobileOrgActivity extends ListActivity
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
         String thisText = this.menuList.get(position);
-        Log.d(LT, thisText + " clicked");
+        Intent dispIntent = new Intent();
+        dispIntent.setClassName("com.matburt.mobileorg",
+                                "com.matburt.mobileorg.SimpleTextDisplay");
+        dispIntent.putExtra("fileValue", thisText);
+        startActivity(dispIntent);
     }
 
     public boolean onShowSettings() {

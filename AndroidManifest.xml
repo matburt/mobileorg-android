@@ -15,5 +15,8 @@
     <activity android:name="SettingsActivity"
               android:label="MobileOrg Settings">
     </activity>
+    <activity android:name="SimpleTextDisplay"
+              android:label="Org view">
+    </activity>
   </application>
 </manifest>
