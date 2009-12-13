@@ -31,7 +31,13 @@ public class MobileOrgActivity extends ListActivity
         super.onCreate(savedInstanceState);
         this.initializeTables();
         menuList = new ArrayList<String>();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
         String[] allOrgList = this.getOrgFiles();
+        menuList.clear();
         for (int idx = 0; idx < allOrgList.length; idx++) {
             menuList.add(allOrgList[idx]);
         }
