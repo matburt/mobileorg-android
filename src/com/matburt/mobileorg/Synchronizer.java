@@ -60,6 +60,7 @@ public class Synchronizer
                   key + ": " + urlActual + masterList.get(key));
             String fileContents = this.fetchOrgFile(urlActual +
                                                     masterList.get(key));
+            Log.d(LT, "File contents: " + fileContents);
             FileOutputStream fs;
             try {
                 fs = rootActivity.openFileOutput(
@@ -144,7 +145,9 @@ public class Synchronizer
         String directoryActual = "/";
         if (pathElements.length > 1) {
             for (int idx = 0; idx < pathElements.length - 1; idx++) {
-                directoryActual += pathElements[idx] + "/";
+                if (pathElements[idx].length() > 0) {
+                    directoryActual += pathElements[idx] + "/";
+                }
             }
         }
         return manageUrl.getProtocol() + "://" +

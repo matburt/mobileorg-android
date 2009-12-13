@@ -110,6 +110,7 @@ public class MobileOrgActivity extends ListActivity
         appdb.execSQL("CREATE TABLE IF NOT EXISTS files"
                       + " (file VARCHAR, name VARCHAR,"
                       + " checksum VARCHAR);");
+        appdb.close();
 
     }
 }
