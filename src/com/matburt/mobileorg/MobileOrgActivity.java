@@ -78,6 +78,7 @@ public class MobileOrgActivity extends ListActivity
         case MobileOrgActivity.OP_MENU_SYNC:
             appSync = new Synchronizer(this);
             appSync.pull();
+            this.onResume();
             return true;
         case MobileOrgActivity.OP_MENU_SETTINGS:
             return this.onShowSettings();
