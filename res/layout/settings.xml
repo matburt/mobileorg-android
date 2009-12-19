@@ -10,16 +10,17 @@
        />
     <EditText
        android:id="@+id/webURL"
+       android:hint="http://example.com/index.org"
+       android:singleLine="true"
        />
   </TableRow>
   <TableRow>
     <TextView
        android:text="Login::"
-       android:width ="120px"
        />
     <EditText
        android:id="@+id/webUser"
-       android:width="200px" />
+       android:hint="username"/>
   </TableRow>
   <TableRow>
     <TextView

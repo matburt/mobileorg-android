@@ -60,7 +60,6 @@ public class Synchronizer
                   key + ": " + urlActual + masterList.get(key));
             String fileContents = this.fetchOrgFile(urlActual +
                                                     masterList.get(key));
-            Log.d(LT, "File contents: " + fileContents);
             FileOutputStream fs;
             try {
                 fs = rootActivity.openFileOutput(
