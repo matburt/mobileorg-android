@@ -71,7 +71,6 @@ public class SettingsActivity extends Activity implements OnClickListener
         this.webPass.setText(this.settings.get("webPass"));
     }
 
-    @Override
     public void onClick(View v) {
         this.onSave();
     }
