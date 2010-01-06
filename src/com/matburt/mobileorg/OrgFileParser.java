@@ -17,6 +17,7 @@ class OrgFileParser {
 
     String orgPath = "";
     FileInputStream fstream;
+    ArrayList<Node> nodeList;
     public static final String LT = "MobileOrg";
 
     OrgFileParser(String orgpath) {
@@ -30,6 +31,7 @@ class OrgFileParser {
         try {
             while ((thisLine = breader.readLine()) != null) {
                 Log.d(LT, thisLine);
+
             }
         }
         catch (IOException e) {

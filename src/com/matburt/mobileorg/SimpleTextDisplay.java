@@ -39,6 +39,8 @@ public class SimpleTextDisplay extends Activity
                 result.moveToFirst();
                 Log.d(LT, "Reading file: " + result.getString(0));
                 displayTxt = this.readOrgFile(result.getString(0));
+                OrgFileParser ofp = new OrgFileParser(result.getString(0));
+                ofp.parse();
             }
             else {
                 displayTxt = "File not found";
