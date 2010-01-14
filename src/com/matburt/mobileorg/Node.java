@@ -10,7 +10,7 @@ class Node {
 
     String nodeName = "";
     NodeType nodeType;
-    ArrayList<Node> subNodes;
+    ArrayList<Node> subNodes = new ArrayList<Node>();
     String nodePayload = "";
 
     Node(String heading, NodeType ntype) {

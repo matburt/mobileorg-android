@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.ArrayList;
 import java.util.Stack;
+import java.util.EmptyStackException;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import java.io.FileInputStream;
@@ -18,14 +19,14 @@ class OrgFileParser {
 
     String orgPath = "";
     FileInputStream fstream;
-    ArrayList<Node> nodeList;
+    ArrayList<Node> nodeList = new ArrayList<Node>();
     public static final String LT = "MobileOrg";
 
     OrgFileParser(String orgpath) {
         orgPath = orgpath;
     }
 
-    public Node generateNode(String heading, NodeType nodetype) {
+    public Node generateNode(String heading, Node.NodeType nodetype) {
         return new Node(heading, nodetype);
     }
 
@@ -43,7 +44,7 @@ class OrgFileParser {
                 int numstars = 0;
                 int lastnodedepth = 0;
 
-                if (thisLine.charAt(0) == '#') {
+                if (thisLine.length() < 1 || thisLine.charAt(0) == '#') {
                     continue;
                 }
 
@@ -55,16 +56,20 @@ class OrgFileParser {
                 }
 
                 if (numstars >= thisLine.length() || thisLine.charAt(numstars) != ' ') {
-                    numstars = 0
+                    numstars = 0;
                 }
 
                 //headings
                 if (numstars > 0) {
-                    String title = thisLine.substr(numstars+1);
+                    String title = thisLine.substring(numstars+1);
                     Node newNode = this.generateNode(title, Node.NodeType.HEADING);
                     if (numstars > nodeDepth) {
-                        lastNode = nodeStack.peek();
-                        lastNode.addChildNode(newNode);
+                        try {
+                            Node lastNode = nodeStack.peek();
+                            lastNode.addChildNode(newNode);
+                        } catch (EmptyStackException e) {
+
+                        }
                         nodeStack.push(newNode);
                         nodeDepth++;
                     }
@@ -78,14 +83,14 @@ class OrgFileParser {
                             nodeStack.push(newNode);
                         }
                         else {
-                            lastNode = nodeStack.peek();
+                            Node lastNode = nodeStack.peek();
                             lastNode.addChildNode(newNode);
                         }
                     }
                 }
                 //content
                 else {
-                    lastNode = nodeStack.peek();
+                    Node lastNode = nodeStack.peek();
                     lastNode.addPayload(thisLine);
                 }
             }
