@@ -18,8 +18,8 @@ class Node {
         nodeType = ntype;
     }
 
-    void setPayload(String npayload) {
-        this.nodePayload = npayload
+    void addPayload(String npayload) {
+        this.nodePayload += npayload + "\n";
     }
 
     void addChildNode(Node childNode) {
