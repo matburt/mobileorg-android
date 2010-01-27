@@ -17,98 +17,102 @@ import android.util.Log;
 
 class OrgFileParser {
 
-    String orgPath = "";
-    FileInputStream fstream;
+    ArrayList<String> orgPaths;
     ArrayList<Node> nodeList = new ArrayList<Node>();
+    FileInputStream fstream;
+    Node rootNode = new Node("MobileOrg", Node.NodeType.HEADING);
     public static final String LT = "MobileOrg";
 
-    OrgFileParser(String orgpath) {
-        orgPath = orgpath;
-    }
-
-    public Node generateNode(String heading, Node.NodeType nodetype) {
-        return new Node(heading, nodetype);
+    OrgFileParser(ArrayList<String> orgpaths) {
+        this.orgPaths = orgpaths;
     }
 
     public void parse() {
-        BufferedReader breader = this.getNewHandle();
         Log.d(LT, "Writing out each line from parse.");
         String thisLine;
         Stack<Node> nodeStack = new Stack();
+        nodeStack.push(this.rootNode);
         int nodeDepth = 0;
 
-        try {
-            while ((thisLine = breader.readLine()) != null) {
-                Log.d(LT, thisLine);
+        for (int jdx = 0; jdx < this.orgPaths.size(); jdx++) {
+            try {
+                BufferedReader breader = this.getHandle(this.orgPaths.get(jdx));
+                Node fileNode = new Node(this.orgPaths.get(jdx),
+                                         Node.NodeType.HEADING);
+                nodeStack.peek().addChildNode(fileNode);
+                nodeStack.push(fileNode);
+                while ((thisLine = breader.readLine()) != null) {
+                    Log.d(LT, thisLine);
 
-                int numstars = 0;
-                int lastnodedepth = 0;
+                    int numstars = 0;
+                    int lastnodedepth = 0;
 
-                if (thisLine.length() < 1 || thisLine.charAt(0) == '#') {
-                    continue;
-                }
-
-                for (int idx = 0; idx < thisLine.length(); idx++) {
-                    if (thisLine.charAt(idx) != '*') {
-                        break;
+                    if (thisLine.length() < 1 || thisLine.charAt(0) == '#') {
+                        continue;
                     }
-                    numstars++;
-                }
 
-                if (numstars >= thisLine.length() || thisLine.charAt(numstars) != ' ') {
-                    numstars = 0;
-                }
-
-                //headings
-                if (numstars > 0) {
-                    String title = thisLine.substring(numstars+1);
-                    Node newNode = this.generateNode(title, Node.NodeType.HEADING);
-                    if (numstars > nodeDepth) {
-                        try {
-                            Node lastNode = nodeStack.peek();
-                            lastNode.addChildNode(newNode);
-                        } catch (EmptyStackException e) {
-
+                    for (int idx = 0; idx < thisLine.length(); idx++) {
+                        if (thisLine.charAt(idx) != '*') {
+                            break;
                         }
-                        nodeStack.push(newNode);
-                        nodeDepth++;
+                        numstars++;
                     }
-                    else if (numstars < nodeDepth) {
-                        for (;numstars < nodeDepth; nodeDepth--) {
-                            nodeStack.pop();
-                        }
 
-                        if (nodeDepth == 1) {
-                            nodeList.add(newNode);
+                    if (numstars >= thisLine.length() || thisLine.charAt(numstars) != ' ') {
+                        numstars = 0;
+                    }
+
+                    //headings
+                    if (numstars > 0) {
+                        String title = thisLine.substring(numstars+1);
+                        Node newNode = new Node(title, Node.NodeType.HEADING);
+                        if (numstars > nodeDepth) {
+                            try {
+                                Node lastNode = nodeStack.peek();
+                                lastNode.addChildNode(newNode);
+                            } catch (EmptyStackException e) {
+
+                            }
                             nodeStack.push(newNode);
+                            nodeDepth++;
                         }
-                        else {
+                        else if (numstars < nodeDepth) {
+                            for (;numstars < nodeDepth; nodeDepth--) {
+                                nodeStack.pop();
+                            }
+
                             Node lastNode = nodeStack.peek();
                             lastNode.addChildNode(newNode);
+
+                            if (nodeDepth == 1) {
+                                nodeStack.push(newNode);
+                            }
                         }
                     }
+                    //content
+                    else {
+                        Node lastNode = nodeStack.peek();
+                        lastNode.addPayload(thisLine);
+                    }
                 }
-                //content
-                else {
-                    Node lastNode = nodeStack.peek();
-                    lastNode.addPayload(thisLine);
-                }
+                nodeStack.pop();
+                breader.close();
             }
-        }
-        catch (IOException e) {
-            Log.e(LT, "IO Exception on readerline: " + e.getMessage());
+            catch (IOException e) {
+                Log.e(LT, "IO Exception on readerline: " + e.getMessage());
+            }
         }
     }
 
-    public BufferedReader getNewHandle() {
+    public BufferedReader getHandle(String filename) {
         BufferedReader breader = null;
         try {
-            fstream = new FileInputStream("/data/data/com.matburt.mobileorg/files/" + this.orgPath);
-            DataInputStream in = new DataInputStream(fstream);
+            this.fstream = new FileInputStream("/data/data/com.matburt.mobileorg/files/" + filename);
+            DataInputStream in = new DataInputStream(this.fstream);
             breader = new BufferedReader(new InputStreamReader(in));
         }
         catch (Exception e) {
-            Log.e(LT, "Error: " + e.getMessage());
+            Log.e(LT, "Error: " + e.getMessage() + " in file " + filename);
         }
         return breader;
     }

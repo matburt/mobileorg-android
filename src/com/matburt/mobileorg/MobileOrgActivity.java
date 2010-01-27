@@ -5,9 +5,12 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ListView;
-import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
+import android.widget.TextView;
 import android.content.Intent;
+import android.content.Context;
 import android.util.Log;
 import java.util.ArrayList;
 import android.database.Cursor;
@@ -16,6 +19,41 @@ import android.database.sqlite.SQLiteDatabase;
 
 public class MobileOrgActivity extends ListActivity
 {
+    private static class OrgViewAdapter extends BaseAdapter {
+
+        public Node topNode;
+
+        public OrgViewAdapter(Context context, Node ndx) {
+            this.topNode = ndx;
+        }
+
+        public int getCount() {
+            return this.topNode.subNodes.size();
+        }
+
+        /**
+         * Since the data comes from an array, just returning the index is
+         * sufficent to get at the data. If we were using a more complex data
+         * structure, we would return whatever object represents one row in the
+         * list.
+         *
+         * @see android.widget.ListAdapter#getItem(int)
+         */
+        public Object getItem(int position) {
+            return position;
+        }
+
+        public long getItemId(int position) {
+            return position;
+        }
+
+        public View getView(int position, View convertView, ViewGroup parent) {
+            TextView thisView = (TextView)convertView.findViewById(R.id.orgTxt);
+            thisView.setText(this.topNode.subNodes.get(position).nodeName);
+            return thisView;
+        }
+    }
+
     private static final int OP_MENU_SETTINGS = 1;
     private static final int OP_MENU_SYNC = 2;
     private static final int OP_MENU_OUTLINE = 3;
@@ -36,13 +74,11 @@ public class MobileOrgActivity extends ListActivity
     @Override
     public void onResume() {
         super.onResume();
-        String[] allOrgList = this.getOrgFiles();
-        menuList.clear();
-        for (int idx = 0; idx < allOrgList.length; idx++) {
-            menuList.add(allOrgList[idx]);
-        }
-        setListAdapter(new ArrayAdapter<String>(this,
-                       android.R.layout.simple_list_item_1, allOrgList));
+        ArrayList<String> allOrgList = this.getOrgFiles();
+        OrgFileParser ofp = new OrgFileParser(allOrgList);
+        ofp.parse();
+        Node rootNode = ofp.rootNode;
+        this.setListAdapter(new OrgViewAdapter(this, rootNode));
     }
 
     @Override
@@ -90,7 +126,7 @@ public class MobileOrgActivity extends ListActivity
         return false;
     }
 
-    public String[] getOrgFiles() {
+    public ArrayList<String> getOrgFiles() {
         ArrayList<String> allFiles = new ArrayList<String>();
         SQLiteDatabase appdb = this.openOrCreateDatabase("MobileOrg",
                                                          MODE_PRIVATE, null);
@@ -106,7 +142,8 @@ public class MobileOrgActivity extends ListActivity
         }
         appdb.close();
         result.close();
-        return (String[])allFiles.toArray(new String[0]);
+        return allFiles;
+        //return (String[])allFiles.toArray(new String[0]);
     }
 
     public void initializeTables() {
