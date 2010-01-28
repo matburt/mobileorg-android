@@ -76,10 +76,16 @@ class OrgFileParser {
                             nodeStack.push(newNode);
                             nodeDepth++;
                         }
+                        else if (numstars == nodeDepth) {
+                            nodeStack.pop();
+                            nodeStack.peek().addChildNode(newNode);
+                            Log.d(LT, "Adding '" + newNode.nodeName +
+                                  "' to '" + nodeStack.peek().nodeName + "'");
+                            nodeStack.push(newNode);
+                        }
                         else if (numstars < nodeDepth) {
                             for (;numstars < nodeDepth; nodeDepth--) {
                                 nodeStack.pop();
-                                nodeDepth--;
                             }
 
                             Node lastNode = nodeStack.peek();
@@ -96,6 +102,8 @@ class OrgFileParser {
                     else {
                         Node lastNode = nodeStack.peek();
                         lastNode.addPayload(thisLine);
+                        Log.d(LT, "Adding payload: '" + thisLine +
+                              "' to '" + lastNode.nodeName + "'");
                     }
                 }
                 nodeStack.pop();
