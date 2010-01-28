@@ -28,7 +28,6 @@ class OrgFileParser {
     }
 
     public void parse() {
-        Log.d(LT, "Writing out each line from parse.");
         String thisLine;
         Stack<Node> nodeStack = new Stack();
         nodeStack.push(this.rootNode);
@@ -42,8 +41,6 @@ class OrgFileParser {
                 nodeStack.peek().addChildNode(fileNode);
                 nodeStack.push(fileNode);
                 while ((thisLine = breader.readLine()) != null) {
-                    Log.d(LT, thisLine);
-
                     int numstars = 0;
                     int lastnodedepth = 0;
 
@@ -70,8 +67,11 @@ class OrgFileParser {
                             try {
                                 Node lastNode = nodeStack.peek();
                                 lastNode.addChildNode(newNode);
+                                Log.d(LT, "Adding '" + newNode.nodeName +
+                                      "' to " + lastNode.nodeName);
                             } catch (EmptyStackException e) {
-
+                                Log.d(LT, "Adding '" + newNode.nodeName +
+                                      "' to top");
                             }
                             nodeStack.push(newNode);
                             nodeDepth++;
@@ -79,10 +79,13 @@ class OrgFileParser {
                         else if (numstars < nodeDepth) {
                             for (;numstars < nodeDepth; nodeDepth--) {
                                 nodeStack.pop();
+                                nodeDepth--;
                             }
 
                             Node lastNode = nodeStack.peek();
                             lastNode.addChildNode(newNode);
+                            Log.d(LT, "Adding '" + newNode.nodeName +
+                                  "' to '" + lastNode.nodeName + "'");
 
                             if (nodeDepth == 1) {
                                 nodeStack.push(newNode);

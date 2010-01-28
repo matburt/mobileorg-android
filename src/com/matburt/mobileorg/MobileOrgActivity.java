@@ -6,6 +6,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.LayoutInflater;
 import android.widget.ListView;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
@@ -22,9 +23,11 @@ public class MobileOrgActivity extends ListActivity
     private static class OrgViewAdapter extends BaseAdapter {
 
         public Node topNode;
+        private LayoutInflater lInflator;
 
         public OrgViewAdapter(Context context, Node ndx) {
             this.topNode = ndx;
+            this.lInflator = LayoutInflater.from(context);
         }
 
         public int getCount() {
@@ -48,9 +51,15 @@ public class MobileOrgActivity extends ListActivity
         }
 
         public View getView(int position, View convertView, ViewGroup parent) {
-            TextView thisView = (TextView)convertView.findViewById(R.id.orgTxt);
+            if (convertView == null) {
+                convertView = this.lInflator.inflate(R.layout.main, null);
+            }
+
+            TextView thisView = (TextView)convertView.findViewById(R.id.orgItem);
             thisView.setText(this.topNode.subNodes.get(position).nodeName);
-            return thisView;
+            Log.d("MobileOrg", "Returning view item: " + this.topNode.subNodes.get(position).nodeName);
+            convertView.setTag(thisView);
+            return convertView;
         }
     }
 
@@ -130,7 +139,7 @@ public class MobileOrgActivity extends ListActivity
         ArrayList<String> allFiles = new ArrayList<String>();
         SQLiteDatabase appdb = this.openOrCreateDatabase("MobileOrg",
                                                          MODE_PRIVATE, null);
-        Cursor result = appdb.rawQuery("SELECT name FROM files", null);
+        Cursor result = appdb.rawQuery("SELECT file FROM files", null);
         if (result != null) {
             if (result.getCount() > 0) {
                 result.moveToFirst();
