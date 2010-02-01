@@ -39,9 +39,10 @@ class OrgFileParser {
                 Node fileNode = new Node(this.orgPaths.get(jdx),
                                          Node.NodeType.HEADING);
                 if (nodeDepth > 0) {
-                    for (;nodeDepth >= 0; nodeDepth--) {
+                    for (;nodeDepth > 0; nodeDepth--) {
                         nodeStack.pop();
                     }
+                    nodeStack.pop();
                 }
 
                 Log.d(LT, "(File) Adding '" + fileNode.nodeName +
@@ -74,7 +75,7 @@ class OrgFileParser {
                             try {
                                 Node lastNode = nodeStack.peek();
                                 lastNode.addChildNode(newNode);
-                                Log.d(LT, "Adding '" + newNode.nodeName +
+                                Log.d(LT, "(morestars) Adding '" + newNode.nodeName +
                                       "' to " + lastNode.nodeName);
                             } catch (EmptyStackException e) {
                                 Log.d(LT, "Adding '" + newNode.nodeName +
@@ -86,7 +87,7 @@ class OrgFileParser {
                         else if (numstars == nodeDepth) {
                             nodeStack.pop();
                             nodeStack.peek().addChildNode(newNode);
-                            Log.d(LT, "Adding '" + newNode.nodeName +
+                            Log.d(LT, "(samestars) Adding '" + newNode.nodeName +
                                   "' to '" + nodeStack.peek().nodeName + "'");
                             nodeStack.push(newNode);
                         }
@@ -97,7 +98,7 @@ class OrgFileParser {
 
                             Node lastNode = nodeStack.peek();
                             lastNode.addChildNode(newNode);
-                            Log.d(LT, "Adding '" + newNode.nodeName +
+                            Log.d(LT, "(lesstars) Adding '" + newNode.nodeName +
                                   "' to '" + lastNode.nodeName + "'");
                             nodeStack.push(newNode);
                             nodeDepth++;
