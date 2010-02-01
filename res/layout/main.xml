@@ -7,5 +7,6 @@
         android:layout_gravity="center_vertical"
         android:layout_width="0dip"
         android:layout_weight="1.0"
-        android:layout_height="wrap_content" />
+        android:layout_height=".35in"
+        android:textSize="26sp" />
 </LinearLayout>
