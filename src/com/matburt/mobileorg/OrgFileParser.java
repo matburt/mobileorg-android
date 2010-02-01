@@ -31,7 +31,7 @@ class OrgFileParser {
         String thisLine;
         Stack<Node> nodeStack = new Stack();
         nodeStack.push(this.rootNode);
-        int nodeDepth = 0;
+        int nodeDepth;
 
         for (int jdx = 0; jdx < this.orgPaths.size(); jdx++) {
             try {
@@ -40,9 +40,9 @@ class OrgFileParser {
                                          Node.NodeType.HEADING);
                 nodeStack.peek().addChildNode(fileNode);
                 nodeStack.push(fileNode);
+                nodeDepth = 0;
                 while ((thisLine = breader.readLine()) != null) {
                     int numstars = 0;
-                    int lastnodedepth = 0;
 
                     if (thisLine.length() < 1 || thisLine.charAt(0) == '#') {
                         continue;
@@ -84,7 +84,7 @@ class OrgFileParser {
                             nodeStack.push(newNode);
                         }
                         else if (numstars < nodeDepth) {
-                            for (;numstars < nodeDepth; nodeDepth--) {
+                            for (;numstars <= nodeDepth; nodeDepth--) {
                                 nodeStack.pop();
                             }
 
@@ -92,10 +92,8 @@ class OrgFileParser {
                             lastNode.addChildNode(newNode);
                             Log.d(LT, "Adding '" + newNode.nodeName +
                                   "' to '" + lastNode.nodeName + "'");
-
-                            if (nodeDepth == 1) {
-                                nodeStack.push(newNode);
-                            }
+                            nodeStack.push(newNode);
+                            nodeDepth++;
                         }
                     }
                     //content
@@ -107,6 +105,7 @@ class OrgFileParser {
                     }
                 }
                 nodeStack.pop();
+                nodeDepth--;
                 breader.close();
             }
             catch (IOException e) {
