@@ -31,16 +31,23 @@ class OrgFileParser {
         String thisLine;
         Stack<Node> nodeStack = new Stack();
         nodeStack.push(this.rootNode);
-        int nodeDepth;
+        int nodeDepth = 0;
 
         for (int jdx = 0; jdx < this.orgPaths.size(); jdx++) {
             try {
                 BufferedReader breader = this.getHandle(this.orgPaths.get(jdx));
                 Node fileNode = new Node(this.orgPaths.get(jdx),
                                          Node.NodeType.HEADING);
+                if (nodeDepth > 0) {
+                    for (;nodeDepth >= 0; nodeDepth--) {
+                        nodeStack.pop();
+                    }
+                }
+
+                Log.d(LT, "(File) Adding '" + fileNode.nodeName +
+                      "' to " + nodeStack.peek().nodeName);
                 nodeStack.peek().addChildNode(fileNode);
                 nodeStack.push(fileNode);
-                nodeDepth = 0;
                 while ((thisLine = breader.readLine()) != null) {
                     int numstars = 0;
 
