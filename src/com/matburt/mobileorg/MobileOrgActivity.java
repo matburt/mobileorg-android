@@ -23,15 +23,25 @@ public class MobileOrgActivity extends ListActivity
     private static class OrgViewAdapter extends BaseAdapter {
 
         public Node topNode;
+        public Node thisNode;
+        public ArrayList<Integer> nodeSelection;
         private LayoutInflater lInflator;
 
-        public OrgViewAdapter(Context context, Node ndx) {
+        public OrgViewAdapter(Context context, Node ndx, ArrayList<Integer> selection) {
             this.topNode = ndx;
+            this.thisNode = ndx;
             this.lInflator = LayoutInflater.from(context);
+            this.nodeSelection = selection;
+
+            if (selection != null) {
+                for (int idx = 0; idx < selection.size(); idx++) {
+                    this.thisNode = this.thisNode.subNodes.get(idx);
+                }
+            }
         }
 
         public int getCount() {
-            return this.topNode.subNodes.size();
+            return this.thisNode.subNodes.size();
         }
 
         /**
@@ -56,8 +66,8 @@ public class MobileOrgActivity extends ListActivity
             }
 
             TextView thisView = (TextView)convertView.findViewById(R.id.orgItem);
-            thisView.setText(this.topNode.subNodes.get(position).nodeName);
-            Log.d("MobileOrg", "Returning view item: " + this.topNode.subNodes.get(position).nodeName);
+            thisView.setText(this.thisNode.subNodes.get(position).nodeName);
+            Log.d("MobileOrg", "Returning view item: " + this.thisNode.subNodes.get(position).nodeName);
             convertView.setTag(thisView);
             return convertView;
         }
@@ -68,7 +78,8 @@ public class MobileOrgActivity extends ListActivity
     private static final int OP_MENU_OUTLINE = 3;
     private static final int OP_MENU_CAPTURE = 4;
     private static final String LT = "MobileOrg";
-    private ArrayList<String> menuList;
+    private static Node rootNode = null;
+    private ArrayList<Integer> menuList;
     private Synchronizer appSync;
 
     /** Called when the activity is first created. */
@@ -77,7 +88,6 @@ public class MobileOrgActivity extends ListActivity
     {
         super.onCreate(savedInstanceState);
         this.initializeTables();
-        menuList = new ArrayList<String>();
     }
 
     @Override
@@ -86,8 +96,12 @@ public class MobileOrgActivity extends ListActivity
         ArrayList<String> allOrgList = this.getOrgFiles();
         OrgFileParser ofp = new OrgFileParser(allOrgList);
         ofp.parse();
-        Node rootNode = ofp.rootNode;
-        this.setListAdapter(new OrgViewAdapter(this, rootNode));
+        MobileOrgActivity.rootNode = ofp.rootNode;
+        Intent nodeIntent = getIntent();
+        this.menuList = nodeIntent.getIntegerArrayListExtra("nodePath");
+        this.setListAdapter(new OrgViewAdapter(this,
+                                               MobileOrgActivity.rootNode,
+                                               this.menuList));
     }
 
     @Override
@@ -101,11 +115,15 @@ public class MobileOrgActivity extends ListActivity
 
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
-        String thisText = this.menuList.get(position);
         Intent dispIntent = new Intent();
         dispIntent.setClassName("com.matburt.mobileorg",
-                                "com.matburt.mobileorg.SimpleTextDisplay");
-        dispIntent.putExtra("fileValue", thisText);
+                                "com.matburt.mobileorg.MobileOrgActivity");
+        if (this.menuList == null) {
+            this.menuList = new ArrayList<Integer>();
+        }
+
+        this.menuList.add(new Integer(position));
+        dispIntent.putIntegerArrayListExtra("nodePath", this.menuList);
         startActivity(dispIntent);
     }
 
