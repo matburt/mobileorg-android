@@ -40,8 +40,8 @@ public class SimpleTextDisplay extends Activity
                 Log.d(LT, "Reading file: " + result.getString(0));
                 displayTxt = this.readOrgFile(result.getString(0));
                 Log.d(LT, "Running file through Parser");
-                OrgFileParser ofp = new OrgFileParser(result.getString(0));
-                ofp.parse();
+                /* OrgFileParser ofp = new OrgFileParser(result.getString(0));
+                   ofp.parse(); */
             }
             else {
                 displayTxt = "File not found";
