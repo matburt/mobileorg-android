@@ -80,7 +80,6 @@ public class MobileOrgActivity extends ListActivity
     private static final int OP_MENU_OUTLINE = 3;
     private static final int OP_MENU_CAPTURE = 4;
     private static final String LT = "MobileOrg";
-    private static Node rootNode = null;
     private Synchronizer appSync;
 
     /** Called when the activity is first created. */
@@ -130,7 +129,13 @@ public class MobileOrgActivity extends ListActivity
 
         appInst.nodeSelection.add(new Integer(position));
         dispIntent.putIntegerArrayListExtra("nodePath", appInst.nodeSelection);
-        startActivity(dispIntent);
+        startActivityForResult(dispIntent, 1);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        MobileOrgApplication appInst = (MobileOrgApplication)this.getApplication();
+        appInst.nodeSelection.remove(appInst.nodeSelection.size()-1);
     }
 
     public boolean onShowSettings() {
