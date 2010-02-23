@@ -45,8 +45,6 @@ class OrgFileParser {
                     nodeStack.pop();
                 }
 
-                Log.d(LT, "(File) Adding '" + fileNode.nodeName +
-                      "' to " + nodeStack.peek().nodeName);
                 nodeStack.peek().addChildNode(fileNode);
                 nodeStack.push(fileNode);
                 while ((thisLine = breader.readLine()) != null) {
@@ -75,11 +73,7 @@ class OrgFileParser {
                             try {
                                 Node lastNode = nodeStack.peek();
                                 lastNode.addChildNode(newNode);
-                                Log.d(LT, "(morestars) Adding '" + newNode.nodeName +
-                                      "' to " + lastNode.nodeName);
                             } catch (EmptyStackException e) {
-                                Log.d(LT, "Adding '" + newNode.nodeName +
-                                      "' to top");
                             }
                             nodeStack.push(newNode);
                             nodeDepth++;
@@ -87,8 +81,6 @@ class OrgFileParser {
                         else if (numstars == nodeDepth) {
                             nodeStack.pop();
                             nodeStack.peek().addChildNode(newNode);
-                            Log.d(LT, "(samestars) Adding '" + newNode.nodeName +
-                                  "' to '" + nodeStack.peek().nodeName + "'");
                             nodeStack.push(newNode);
                         }
                         else if (numstars < nodeDepth) {
@@ -98,8 +90,6 @@ class OrgFileParser {
 
                             Node lastNode = nodeStack.peek();
                             lastNode.addChildNode(newNode);
-                            Log.d(LT, "(lesstars) Adding '" + newNode.nodeName +
-                                  "' to '" + lastNode.nodeName + "'");
                             nodeStack.push(newNode);
                             nodeDepth++;
                         }
@@ -108,8 +98,6 @@ class OrgFileParser {
                     else {
                         Node lastNode = nodeStack.peek();
                         lastNode.addPayload(thisLine);
-                        Log.d(LT, "Adding payload: '" + thisLine +
-                              "' to '" + lastNode.nodeName + "'");
                     }
                 }
                 nodeStack.pop();

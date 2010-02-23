@@ -1,6 +1,7 @@
 package com.matburt.mobileorg;
 
 import android.app.ListActivity;
+import android.app.Application;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -32,10 +33,11 @@ public class MobileOrgActivity extends ListActivity
             this.thisNode = ndx;
             this.lInflator = LayoutInflater.from(context);
             this.nodeSelection = selection;
-
+            Log.d("OVA", "Selection Stack");
             if (selection != null) {
                 for (int idx = 0; idx < selection.size(); idx++) {
                     this.thisNode = this.thisNode.subNodes.get(idx);
+                    Log.d("OVA", this.thisNode.nodeName);
                 }
             }
         }
@@ -79,7 +81,6 @@ public class MobileOrgActivity extends ListActivity
     private static final int OP_MENU_CAPTURE = 4;
     private static final String LT = "MobileOrg";
     private static Node rootNode = null;
-    private ArrayList<Integer> menuList;
     private Synchronizer appSync;
 
     /** Called when the activity is first created. */
@@ -93,15 +94,19 @@ public class MobileOrgActivity extends ListActivity
     @Override
     public void onResume() {
         super.onResume();
-        ArrayList<String> allOrgList = this.getOrgFiles();
-        OrgFileParser ofp = new OrgFileParser(allOrgList);
-        ofp.parse();
-        MobileOrgActivity.rootNode = ofp.rootNode;
+        MobileOrgApplication appInst = (MobileOrgApplication)this.getApplication();
+        if (appInst.rootNode == null) {
+            ArrayList<String> allOrgList = this.getOrgFiles();
+            OrgFileParser ofp = new OrgFileParser(allOrgList);
+            ofp.parse();
+            appInst.rootNode = ofp.rootNode;
+        }
+
         Intent nodeIntent = getIntent();
-        this.menuList = nodeIntent.getIntegerArrayListExtra("nodePath");
+        appInst.nodeSelection = nodeIntent.getIntegerArrayListExtra("nodePath");
         this.setListAdapter(new OrgViewAdapter(this,
-                                               MobileOrgActivity.rootNode,
-                                               this.menuList));
+                                               appInst.rootNode,
+                                               appInst.nodeSelection));
     }
 
     @Override
@@ -116,14 +121,15 @@ public class MobileOrgActivity extends ListActivity
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
         Intent dispIntent = new Intent();
+        MobileOrgApplication appInst = (MobileOrgApplication)this.getApplication();
         dispIntent.setClassName("com.matburt.mobileorg",
                                 "com.matburt.mobileorg.MobileOrgActivity");
-        if (this.menuList == null) {
-            this.menuList = new ArrayList<Integer>();
+        if (appInst.nodeSelection == null) {
+            appInst.nodeSelection = new ArrayList<Integer>();
         }
 
-        this.menuList.add(new Integer(position));
-        dispIntent.putIntegerArrayListExtra("nodePath", this.menuList);
+        appInst.nodeSelection.add(new Integer(position));
+        dispIntent.putIntegerArrayListExtra("nodePath", appInst.nodeSelection);
         startActivity(dispIntent);
     }
 
