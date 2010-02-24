@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.widget.ListView;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
+import android.widget.AdapterView;
 import android.content.Intent;
 import android.content.Context;
 import android.util.Log;
@@ -70,7 +71,8 @@ public class MobileOrgActivity extends ListActivity
 
             TextView thisView = (TextView)convertView.findViewById(R.id.orgItem);
             thisView.setText(this.thisNode.subNodes.get(position).nodeName);
-            Log.d("MobileOrg", "Returning view item: " + this.thisNode.subNodes.get(position).nodeName);
+            Log.d("MobileOrg", "Returning view item: " +
+                  this.thisNode.subNodes.get(position).nodeName);
             convertView.setTag(thisView);
             return convertView;
         }
@@ -89,9 +91,20 @@ public class MobileOrgActivity extends ListActivity
     {
         super.onCreate(savedInstanceState);
         this.initializeTables();
+        ListView lv = this.getListView();
+        lv.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener
+                                      (){
+                @Override
+                    public boolean onItemLongClick(AdapterView<?> av, View v,
+                                                   int pos, long id) {
+                    onLongListItemClick(v,pos,id);
+                    return true;
+                }
+            });
     }
 
     public void runParser() {
+        MobileOrgApplication appInst = (MobileOrgApplication)this.getApplication();
         ArrayList<String> allOrgList = this.getOrgFiles();
         OrgFileParser ofp = new OrgFileParser(allOrgList);
         ofp.parse();
@@ -122,11 +135,24 @@ public class MobileOrgActivity extends ListActivity
         return true;
     }
 
+    protected void onLongListItemClick(View av, int pos, long id) {
+        Intent dispIntent = new Intent();
+        MobileOrgApplication appInst = (MobileOrgApplication)this.getApplication();
+        dispIntent.setClassName("com.matburt.mobileorg",
+                                "com.matburt.mobileorg.OrgContextMenu");
+        if (appInst.nodeSelection == null) {
+            appInst.nodeSelection = new ArrayList<Integer>();
+        }
+
+        appInst.nodeSelection.add(new Integer(pos));
+        dispIntent.putIntegerArrayListExtra("nodePath", appInst.nodeSelection);
+        startActivity(dispIntent);
+    }
+
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
         Intent dispIntent = new Intent();
         MobileOrgApplication appInst = (MobileOrgApplication)this.getApplication();
-        Log.d("OVA", "Item selected was: " + position);
         dispIntent.setClassName("com.matburt.mobileorg",
                                 "com.matburt.mobileorg.MobileOrgActivity");
         if (appInst.nodeSelection == null) {

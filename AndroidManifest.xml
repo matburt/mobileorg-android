@@ -20,5 +20,8 @@
     <activity android:name="SimpleTextDisplay"
               android:label="Org view">
     </activity>
+    <activity android:name="OrgContextMenu"
+              android:label="OrgMenu">
+    </activity>
   </application>
 </manifest>
