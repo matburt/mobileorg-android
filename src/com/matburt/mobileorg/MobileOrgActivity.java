@@ -36,7 +36,8 @@ public class MobileOrgActivity extends ListActivity
             Log.d("OVA", "Selection Stack");
             if (selection != null) {
                 for (int idx = 0; idx < selection.size(); idx++) {
-                    this.thisNode = this.thisNode.subNodes.get(idx);
+                    this.thisNode = this.thisNode.subNodes.get(
+                                          selection.get(idx));
                     Log.d("OVA", this.thisNode.nodeName);
                 }
             }
@@ -121,6 +122,7 @@ public class MobileOrgActivity extends ListActivity
     public void onListItemClick(ListView l, View v, int position, long id) {
         Intent dispIntent = new Intent();
         MobileOrgApplication appInst = (MobileOrgApplication)this.getApplication();
+        Log.d("OVA", "Item selected was: " + position);
         dispIntent.setClassName("com.matburt.mobileorg",
                                 "com.matburt.mobileorg.MobileOrgActivity");
         if (appInst.nodeSelection == null) {
