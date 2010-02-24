@@ -91,15 +91,19 @@ public class MobileOrgActivity extends ListActivity
         this.initializeTables();
     }
 
+    public void runParser() {
+        ArrayList<String> allOrgList = this.getOrgFiles();
+        OrgFileParser ofp = new OrgFileParser(allOrgList);
+        ofp.parse();
+        appInst.rootNode = ofp.rootNode;
+    }
+
     @Override
     public void onResume() {
         super.onResume();
         MobileOrgApplication appInst = (MobileOrgApplication)this.getApplication();
         if (appInst.rootNode == null) {
-            ArrayList<String> allOrgList = this.getOrgFiles();
-            OrgFileParser ofp = new OrgFileParser(allOrgList);
-            ofp.parse();
-            appInst.rootNode = ofp.rootNode;
+            this.runParser();
         }
 
         Intent nodeIntent = getIntent();
@@ -154,6 +158,7 @@ public class MobileOrgActivity extends ListActivity
         case MobileOrgActivity.OP_MENU_SYNC:
             appSync = new Synchronizer(this);
             appSync.pull();
+            this.runParser();
             this.onResume();
             return true;
         case MobileOrgActivity.OP_MENU_SETTINGS:
