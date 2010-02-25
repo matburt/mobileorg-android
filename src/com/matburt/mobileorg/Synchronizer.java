@@ -50,6 +50,7 @@ public class Synchronizer
         String masterStr = this.fetchOrgFile(this.appSettings.get("webUrl"));
         if (masterStr == "") {
             Log.e(LT, "Failure getting main org file");
+            return false;
         }
         HashMap<String, String> masterList;
         masterList = this.getOrgFilesFromMaster(masterStr);

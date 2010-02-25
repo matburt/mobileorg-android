@@ -3,6 +3,7 @@ package com.matburt.mobileorg;
 import android.app.ListActivity;
 import android.app.Application;
 import android.app.ProgressDialog;
+import android.app.AlertDialog;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.Menu;
@@ -16,6 +17,7 @@ import android.widget.TextView;
 import android.widget.AdapterView;
 import android.content.Intent;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.util.Log;
 import java.util.ArrayList;
 import java.lang.Runnable;
@@ -204,11 +206,26 @@ public class MobileOrgActivity extends ListActivity
     public void postSynchronize() {
         syncDialog.dismiss();
         if (!this.syncResults) {
-            Log.d(LT, "Sync Failed");
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setMessage("Synchronization Failed, try again?")
+                .setCancelable(false)
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            runSynchronizer();
+                        }
+                    })
+                .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            dialog.cancel();
+                        }
+                    });
+            AlertDialog alert = builder.create();
+            alert.show();
         }
-
-        this.runParser();
-        this.onResume();
+        else {
+            this.runParser();
+            this.onResume();
+        }
     }
 
     /* Handles item selections */
