@@ -172,8 +172,27 @@ public class MobileOrgActivity extends ListActivity
         }
 
         appInst.nodeSelection.add(new Integer(position));
-        dispIntent.putIntegerArrayListExtra("nodePath", appInst.nodeSelection);
-        startActivityForResult(dispIntent, 1);
+
+        Node thisNode = appInst.rootNode;
+        if (appInst.nodeSelection != null) {
+            for (int idx = 0; idx < appInst.nodeSelection.size(); idx++) {
+                thisNode = thisNode.subNodes.get(appInst.nodeSelection.get(idx));
+            }
+        }
+        if (thisNode.subNodes.size() < 1) {
+            Intent textIntent = new Intent();
+
+            String docBuffer = thisNode.nodeName + "\n\n" +
+                thisNode.nodePayload;
+            textIntent.setClassName("com.matburt.mobileorg",
+                                    "com.matburt.mobileorg.SimpleTextDisplay");
+            textIntent.putExtra("txtValue", docBuffer);
+            startActivity(textIntent);
+        }
+        else {
+            dispIntent.putIntegerArrayListExtra("nodePath", appInst.nodeSelection);
+            startActivityForResult(dispIntent, 1);
+        }
     }
 
     @Override
