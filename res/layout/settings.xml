@@ -8,6 +8,8 @@
     <TextView
        android:text="URL:"
        />
+  </TableRow>
+  <TableRow>
     <EditText
        android:id="@+id/webURL"
        android:hint="http://example.com/index.org"
@@ -18,6 +20,8 @@
     <TextView
        android:text="Login::"
        />
+  </TableRow>
+  <TableRow>
     <EditText
        android:id="@+id/webUser"
        android:hint="username"/>
@@ -26,6 +30,8 @@
     <TextView
        android:text="Password:"
        />
+  </TableRow>
+<TableRow>
     <EditText
        android:id="@+id/webPass"
        android:password="true"
