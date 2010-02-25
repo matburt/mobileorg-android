@@ -2,7 +2,9 @@ package com.matburt.mobileorg;
 
 import android.app.ListActivity;
 import android.app.Application;
+import android.app.ProgressDialog;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -16,6 +18,7 @@ import android.content.Intent;
 import android.content.Context;
 import android.util.Log;
 import java.util.ArrayList;
+import java.lang.Runnable;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
@@ -83,7 +86,14 @@ public class MobileOrgActivity extends ListActivity
     private static final int OP_MENU_OUTLINE = 3;
     private static final int OP_MENU_CAPTURE = 4;
     private static final String LT = "MobileOrg";
-    private Synchronizer appSync;
+    private ProgressDialog syncDialog;
+    final Handler syncHandler = new Handler();
+    final Runnable syncUpdateResults = new Runnable() {
+        public void run() {
+            postSynchronize();
+        }
+    };
+    public boolean syncResults;
 
     /** Called when the activity is first created. */
     @Override
@@ -178,14 +188,34 @@ public class MobileOrgActivity extends ListActivity
         return true;
     }
 
+    public void runSynchronizer() {
+        final Synchronizer appSync = new Synchronizer(this);
+        Thread syncThread = new Thread() {
+                public void run() {
+                    syncResults = appSync.pull();
+                    syncHandler.post(syncUpdateResults);
+            }
+        };
+        syncThread.start();
+        syncDialog = ProgressDialog.show(this, "",
+                        "Synchronizing. Please wait...", true);
+    }
+
+    public void postSynchronize() {
+        syncDialog.dismiss();
+        if (!this.syncResults) {
+            Log.d(LT, "Sync Failed");
+        }
+
+        this.runParser();
+        this.onResume();
+    }
+
     /* Handles item selections */
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
         case MobileOrgActivity.OP_MENU_SYNC:
-            appSync = new Synchronizer(this);
-            appSync.pull();
-            this.runParser();
-            this.onResume();
+            this.runSynchronizer();
             return true;
         case MobileOrgActivity.OP_MENU_SETTINGS:
             return this.onShowSettings();
