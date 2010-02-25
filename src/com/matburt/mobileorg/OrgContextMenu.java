@@ -45,6 +45,7 @@ public class OrgContextMenu extends Activity implements OnClickListener
             thisNode = thisNode.subNodes.get(
                                              this.npath.get(idx));
         }
+        displayBuffer = thisNode.nodeName + "\n"+ thisNode.nodePayload + "\n";
         for (int idx = 0; idx < thisNode.subNodes.size(); idx++) {
             displayBuffer += thisNode.subNodes.get(idx).nodeName +
                 "\n" + thisNode.subNodes.get(idx).nodePayload + "\n\n";
