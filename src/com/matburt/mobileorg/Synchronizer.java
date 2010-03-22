@@ -15,10 +15,13 @@ import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import java.net.URL;
 import java.net.MalformedURLException;
+import java.io.BufferedWriter;
 import java.io.InputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.FileNotFoundException;
+import java.io.OutputStreamWriter;
+
 import android.app.Activity;
 import android.content.Context;
 import android.database.Cursor;
@@ -73,12 +76,11 @@ public class Synchronizer
             }
 
             try {
-                for (int idx = 0; idx < fileContents.length(); ++idx) {
-                    fs.write((byte)fileContents.charAt(idx));
-                }
-                this.addOrUpdateFile(masterList.get(key), key);
-                fs.flush();
-                fs.close();
+            	BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(fs));
+            	writer.write(fileContents);
+            	this.addOrUpdateFile(masterList.get(key), key);
+                writer.flush();
+                writer.close();
             }
             catch (java.io.IOException e) {
                 Log.e(LT, "IO Exception trying to write file " +
