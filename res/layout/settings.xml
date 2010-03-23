@@ -38,6 +38,20 @@
        />
   </TableRow>
   <TableRow>
+    <RadioGroup android:layout_width="fill_parent" 
+                android:layout_height="wrap_content"
+                android:orientation="vertical" 
+                id="@+id/group1"> 
+      <TextView android:layout_width="fill_parent" 
+                android:layout_height="wrap_content" 
+                android:text="Storage Location"/>
+      <RadioButton android:checked="false" 
+                   android:text="Internal"
+                   id="@+id/internalopt" /> 
+      <RadioButton android:checked="false" 
+                   android:text="Storage Card"
+                   id="@+id/sdcardopt" /> 
+    </RadioGroup> 
   </TableRow>
   <TableRow>
     <Button
