@@ -10,6 +10,8 @@ import android.widget.Button;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.database.Cursor;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 
@@ -20,6 +22,9 @@ public class SettingsActivity extends Activity implements OnClickListener
     private EditText webUser;
     private EditText webPass;
     private Button saveButton;
+    RadioGroup storegrp;
+    RadioButton sdcard;
+    RadioButton internal;
 
     private SQLiteDatabase appdb;
 
@@ -32,6 +37,9 @@ public class SettingsActivity extends Activity implements OnClickListener
         this.webUser = (EditText)this.findViewById(R.id.webUser);
         this.webPass = (EditText)this.findViewById(R.id.webPass);
         this.saveButton = (Button)this.findViewById(R.id.settingsSave);
+        this.storegrp = (RadioGroup) findViewById(R.id.storegrp); 
+        this.internal = (RadioButton) findViewById(R.id.internalopt);
+        this.sdcard = (RadioButton) findViewById(R.id.sdcardopt);
         this.saveButton.setOnClickListener(this);
         this.initializeSettings();
     }
@@ -56,9 +64,11 @@ public class SettingsActivity extends Activity implements OnClickListener
                 this.appdb.execSQL("INSERT INTO settings (key, val)" +
                                    " VALUES ('webUrl', '')");
                 this.appdb.execSQL("INSERT INTO settings (key, val)" +
-                            " VALUES ('webUser', '')");
+                                   " VALUES ('webUser', '')");
                 this.appdb.execSQL("INSERT INTO settings (key, val)" +
-                            " VALUES ('webPass', '')");
+                                   " VALUES ('webPass', '')");
+                this.appdb.execSQL("INSERT INTO settings (key, val)" +
+                                   " VALUES ('storage', '')");
             }
         }
         result.close();
@@ -69,6 +79,12 @@ public class SettingsActivity extends Activity implements OnClickListener
         this.webUrl.setText(this.settings.get("webUrl"));
         this.webUser.setText(this.settings.get("webUser"));
         this.webPass.setText(this.settings.get("webPass"));
+        if (this.settings.get("storage") == "internal") {
+            this.storegrp.check(this.internal.getId());
+        }
+        else if (this.settings.get("storage") == "sdcard") {
+            this.storegrp.check(this.sdcard.getId());
+        }
     }
 
     public void onClick(View v) {
@@ -81,6 +97,15 @@ public class SettingsActivity extends Activity implements OnClickListener
         this.appdb.execSQL("UPDATE settings set val = '" + this.webUrl.getText() + "' where key = 'webUrl'");
         this.appdb.execSQL("UPDATE settings set val = '" + this.webUser.getText() + "' where key = 'webUser'");
         this.appdb.execSQL("UPDATE settings set val = '" + this.webPass.getText() + "' where key = 'webPass'");
+        int opId = this.storegrp.getCheckedRadioButtonId();
+        if (opId == this.internal.getId()) {
+            this.appdb.execSQL("UPDATE settings set val = 'internal' " +
+                               "where key = 'storage'");
+        }
+        else if (opId == this.sdcard.getId()) {
+            this.appdb.execSQL("UPDATE settings set val = 'sdcard' " +
+                               "where key = 'storage'");
+        }
         this.appdb.close();
         this.finish();
     }

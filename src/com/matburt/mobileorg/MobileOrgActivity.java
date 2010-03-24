@@ -34,7 +34,8 @@ public class MobileOrgActivity extends ListActivity
         public ArrayList<Integer> nodeSelection;
         private LayoutInflater lInflator;
 
-        public OrgViewAdapter(Context context, Node ndx, ArrayList<Integer> selection) {
+        public OrgViewAdapter(Context context, Node ndx,
+                              ArrayList<Integer> selection) {
             this.topNode = ndx;
             this.thisNode = ndx;
             this.lInflator = LayoutInflater.from(context);

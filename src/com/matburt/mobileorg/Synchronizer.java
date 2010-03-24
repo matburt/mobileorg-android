@@ -50,6 +50,7 @@ public class Synchronizer
             return false;
         }
 
+        //Get the index org file
         String masterStr = this.fetchOrgFile(this.appSettings.get("webUrl"));
         if (masterStr == "") {
             Log.e(LT, "Failure getting main org file");
@@ -57,8 +58,12 @@ public class Synchronizer
         }
         HashMap<String, String> masterList;
         masterList = this.getOrgFilesFromMaster(masterStr);
-
         String urlActual = this.getRootUrl();
+
+        //Get checksums file
+        masterStr = this.fetchOrgFile(urlActual + "checksums.dat");
+
+        //Get other org files
         for (String key : masterList.keySet()) {
             Log.d(LT, "Fetching: " +
                   key + ": " + urlActual + masterList.get(key));

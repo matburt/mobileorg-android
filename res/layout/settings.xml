@@ -41,16 +41,16 @@
     <RadioGroup android:layout_width="fill_parent" 
                 android:layout_height="wrap_content"
                 android:orientation="vertical" 
-                id="@+id/group1"> 
+                android:id="@+id/storegrp"> 
       <TextView android:layout_width="fill_parent" 
                 android:layout_height="wrap_content" 
                 android:text="Storage Location"/>
-      <RadioButton android:checked="false" 
+      <RadioButton android:checked="true" 
                    android:text="Internal"
-                   id="@+id/internalopt" /> 
+                   android:id="@+id/internalopt" /> 
       <RadioButton android:checked="false" 
                    android:text="Storage Card"
-                   id="@+id/sdcardopt" /> 
+                   android:id="@+id/sdcardopt"/>
     </RadioGroup> 
   </TableRow>
   <TableRow>
