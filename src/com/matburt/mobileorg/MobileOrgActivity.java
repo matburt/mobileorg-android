@@ -193,12 +193,13 @@ public class MobileOrgActivity extends ListActivity
             appInst.nodeSelection = new ArrayList<Integer>();
         }
 
-        appInst.nodeSelection.add(new Integer(position));
+        ArrayList<Integer> selection = new ArrayList<Integer>(appInst.nodeSelection);
+        selection.add(new Integer(position));
 
         Node thisNode = appInst.rootNode;
-        if (appInst.nodeSelection != null) {
-            for (int idx = 0; idx < appInst.nodeSelection.size(); idx++) {
-                thisNode = thisNode.subNodes.get(appInst.nodeSelection.get(idx));
+        if (selection != null) {
+            for (int idx = 0; idx < selection.size(); idx++) {
+                thisNode = thisNode.subNodes.get(selection.get(idx));
             }
         }
         if (thisNode.subNodes.size() < 1) {
@@ -212,7 +213,7 @@ public class MobileOrgActivity extends ListActivity
             startActivity(textIntent);
         }
         else {
-            dispIntent.putIntegerArrayListExtra("nodePath", appInst.nodeSelection);
+            dispIntent.putIntegerArrayListExtra("nodePath", selection);
             startActivityForResult(dispIntent, 1);
         }
     }
