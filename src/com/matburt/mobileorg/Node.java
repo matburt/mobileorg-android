@@ -1,6 +1,8 @@
 package com.matburt.mobileorg;
 
 import java.util.ArrayList;
+import java.util.Date;
+
 
 class Node {
 
@@ -9,9 +11,13 @@ class Node {
     }
 
     String nodeName = "";
+    String todo = "";
     NodeType nodeType;
     ArrayList<Node> subNodes = new ArrayList<Node>();
     String nodePayload = "";
+    ArrayList<String> tags = new ArrayList<String>();
+    Date schedule = null;
+    Date deadline = null;
 
     Node(String heading, NodeType ntype) {
         nodeName = heading;

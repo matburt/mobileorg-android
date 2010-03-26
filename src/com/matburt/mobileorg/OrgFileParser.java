@@ -13,18 +13,65 @@ import java.io.InputStreamReader;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.FileNotFoundException;
+
+import android.text.TextUtils;
 import android.util.Log;
 
 class OrgFileParser {
+	
+	class TitleComponents {
+		String title;
+		String todo;
+		ArrayList<String> tags = new ArrayList<String>();
+	}
 
     ArrayList<String> orgPaths;
     ArrayList<Node> nodeList = new ArrayList<Node>();
+    ArrayList<String> todoKeywords = new ArrayList<String>();
+    Pattern titlePattern = null;
     FileInputStream fstream;
     Node rootNode = new Node("MobileOrg", Node.NodeType.HEADING);
     public static final String LT = "MobileOrg";
 
     OrgFileParser(ArrayList<String> orgpaths) {
         this.orgPaths = orgpaths;
+        this.todoKeywords.add("TODO");
+        this.todoKeywords.add("DONE");
+    }
+    
+    private Pattern prepareTitlePattern () {
+    	if (null == this.titlePattern) {
+    		StringBuffer pattern = new StringBuffer();
+    		pattern.append("^(?:(");
+    		pattern.append(TextUtils.join("|", todoKeywords));
+    		pattern.append(")\\s*)?");
+    		pattern.append("(.*?)");
+    		pattern.append("\\s*(?::([^\\s]+):)?$");
+    		this.titlePattern = Pattern.compile(pattern.toString());
+    	}
+		return this.titlePattern;
+    }
+    
+    private TitleComponents parseTitle (String orgTitle) {
+    	TitleComponents component = new TitleComponents();
+    	String title = orgTitle.trim();
+    	Pattern pattern = prepareTitlePattern();
+    	Matcher m = pattern.matcher(title);
+    	if (m.find()) {
+    		if (m.group(1) != null)
+    			component.todo = m.group(1);
+    		component.title = m.group(2);
+    		String tags = m.group(3);
+    		if (tags != null) {
+    			for (String tag : tags.split(":")) {
+    				component.tags.add(tag);
+				}
+    		}
+    	} else {
+    		Log.w(LT, "Title not matched: " + title);
+    		component.title = title;
+    	}
+    	return component;
     }
 
     public void parse() {
@@ -68,7 +115,10 @@ class OrgFileParser {
                     //headings
                     if (numstars > 0) {
                         String title = thisLine.substring(numstars+1);
-                        Node newNode = new Node(title, Node.NodeType.HEADING);
+                        TitleComponents titleComp = parseTitle(title);
+                        Node newNode = new Node(titleComp.title, Node.NodeType.HEADING);
+                        newNode.todo = titleComp.todo;
+                        newNode.tags.addAll(titleComp.tags);
                         if (numstars > nodeDepth) {
                             try {
                                 Node lastNode = nodeStack.peek();
