@@ -11,6 +11,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.LayoutInflater;
+import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
@@ -18,6 +20,7 @@ import android.widget.AdapterView;
 import android.content.Intent;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.text.TextUtils;
 import android.util.Log;
 import java.util.ArrayList;
 import java.lang.Runnable;
@@ -32,6 +35,7 @@ public class MobileOrgActivity extends ListActivity
         public Node topNode;
         public Node thisNode;
         public ArrayList<Integer> nodeSelection;
+        private Context context;
         private LayoutInflater lInflator;
 
         public OrgViewAdapter(Context context, Node ndx,
@@ -40,6 +44,7 @@ public class MobileOrgActivity extends ListActivity
             this.thisNode = ndx;
             this.lInflator = LayoutInflater.from(context);
             this.nodeSelection = selection;
+            this.context = context;
             Log.d("OVA", "Selection Stack");
             if (selection != null) {
                 for (int idx = 0; idx < selection.size(); idx++) {
@@ -76,7 +81,23 @@ public class MobileOrgActivity extends ListActivity
             }
 
             TextView thisView = (TextView)convertView.findViewById(R.id.orgItem);
+            TextView todoView = (TextView)convertView.findViewById(R.id.todoState);
+            LinearLayout tagsLayout = (LinearLayout)convertView.findViewById(R.id.tagsLayout);
+            String todo = this.thisNode.subNodes.get(position).todo;
+            if (TextUtils.isEmpty(todo)) {
+            	todoView.setVisibility(View.GONE);
+            } else {
+            	todoView.setText(todo);
+            	todoView.setVisibility(View.VISIBLE);
+            }
             thisView.setText(this.thisNode.subNodes.get(position).nodeName);
+            tagsLayout.removeAllViews();
+            for (String tag : this.thisNode.subNodes.get(position).tags) {
+				TextView tagView = new TextView(this.context);
+				tagView.setText(tag);
+				tagView.setPadding(0, 0, 5, 0);
+				tagsLayout.addView(tagView);
+			}
             Log.d("MobileOrg", "Returning view item: " +
                   this.thisNode.subNodes.get(position).nodeName);
             convertView.setTag(thisView);
