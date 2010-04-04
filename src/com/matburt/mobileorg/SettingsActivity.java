@@ -2,6 +2,7 @@ package com.matburt.mobileorg;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.ArrayList;
 import android.app.Activity;
 import android.os.Bundle;
 import android.widget.EditText;
@@ -27,6 +28,8 @@ public class SettingsActivity extends Activity implements OnClickListener
     RadioButton internal;
 
     private SQLiteDatabase appdb;
+
+    public static String settingsList[] = {"webUrl", "webUser", "webPass", "storage"};
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -58,6 +61,19 @@ public class SettingsActivity extends Activity implements OnClickListener
                     this.settings.put(result.getString(0),
                                       result.getString(1));
                 } while (result.moveToNext());
+                for (int idx = 0; idx < this.settingsList.length; idx++) {
+                    if (!this.settings.containsKey(this.settingsList[idx])) {
+                        if (this.settingsList[idx] == "storage") {
+                            this.settings.put("storage", "internal");
+                        }
+                        else {
+                            this.settings.put(this.settingsList[idx], "");
+                        }
+                        this.appdb.execSQL("INSERT INTO settings (key, val)" +
+                                           " VALUES ('" + this.settingsList[idx] +"','"+
+                                           this.settings.get(this.settingsList[idx]) + "');");
+                    }
+                }
                 this.populateDisplay();
             }
             else {
@@ -68,7 +84,7 @@ public class SettingsActivity extends Activity implements OnClickListener
                 this.appdb.execSQL("INSERT INTO settings (key, val)" +
                                    " VALUES ('webPass', '')");
                 this.appdb.execSQL("INSERT INTO settings (key, val)" +
-                                   " VALUES ('storage', '')");
+                                   " VALUES ('storage', 'internal')");
             }
         }
         result.close();

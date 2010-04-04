@@ -40,7 +40,7 @@ class OrgFileParser {
     }
     
     private Pattern prepareTitlePattern () {
-    	if (null == this.titlePattern) {
+    	if (this.titlePattern == null) {
     		StringBuffer pattern = new StringBuffer();
     		pattern.append("^(?:(");
     		pattern.append(TextUtils.join("|", todoKeywords));
