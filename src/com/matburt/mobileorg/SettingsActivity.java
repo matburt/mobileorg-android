@@ -63,7 +63,7 @@ public class SettingsActivity extends Activity implements OnClickListener
                 } while (result.moveToNext());
                 for (int idx = 0; idx < this.settingsList.length; idx++) {
                     if (!this.settings.containsKey(this.settingsList[idx])) {
-                        if (this.settingsList[idx] == "storage") {
+                        if (this.settingsList[idx].equals("storage")) {
                             this.settings.put("storage", "internal");
                         }
                         else {
@@ -95,10 +95,10 @@ public class SettingsActivity extends Activity implements OnClickListener
         this.webUrl.setText(this.settings.get("webUrl"));
         this.webUser.setText(this.settings.get("webUser"));
         this.webPass.setText(this.settings.get("webPass"));
-        if (this.settings.get("storage") == "internal") {
+        if (this.settings.get("storage").equals("internal")) {
             this.storegrp.check(this.internal.getId());
         }
-        else if (this.settings.get("storage") == "sdcard") {
+        else if (this.settings.get("storage").equals("sdcard")) {
             this.storegrp.check(this.sdcard.getId());
         }
     }
