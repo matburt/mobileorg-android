@@ -165,14 +165,14 @@ class OrgFileParser {
     public BufferedReader getHandle(String filename) {
         BufferedReader breader = null;
         try {
-            if (this.storageMode == "internal" || this.storageMode == null) {
+            if (this.storageMode.equals("internal") || this.storageMode == null) {
                 this.fstream = new FileInputStream("/data/data/com.matburt.mobileorg/files/" + filename);
             }
-            else if (this.storageMode == "sdcard") {
+            else if (this.storageMode.equals("sdcard")) {
                 this.fstream = new FileInputStream("/sdcard/mobileorg/" + filename);
             }
             else {
-                Log.e(LT, "Unknown storage mechanism: " + this.storageMode);
+                Log.e(LT, "[Parse] Unknown storage mechanism: " + this.storageMode);
                 this.fstream = null;
             }
             DataInputStream in = new DataInputStream(this.fstream);

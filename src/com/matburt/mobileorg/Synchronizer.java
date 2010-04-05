@@ -76,7 +76,7 @@ public class Synchronizer
             String storageMode = this.appSettings.get("storage");
             BufferedWriter writer = new BufferedWriter(new StringWriter());
 
-            if (storageMode == "internal" || storageMode == null) {
+            if (storageMode.equals("internal") || storageMode == null) {
                 FileOutputStream fs;
                 try {
                     fs = rootActivity.openFileOutput(
@@ -93,7 +93,7 @@ public class Synchronizer
                           masterList.get(key));
                 }
             }
-            else if (storageMode == "sdcard") {
+            else if (storageMode.equals("sdcard")) {
 
                 try {
                     File root = Environment.getExternalStorageDirectory();
@@ -112,7 +112,7 @@ public class Synchronizer
                 }
             }
             else {
-                Log.e(LT, "Unknown storage mechanism: " + storageMode);
+                Log.e(LT, "[Sync] Unknown storage mechanism: " + storageMode);
                 return false;
             }
 
