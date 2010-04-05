@@ -165,7 +165,7 @@ class OrgFileParser {
     public BufferedReader getHandle(String filename) {
         BufferedReader breader = null;
         try {
-            if (this.storageMode.equals("internal") || this.storageMode == null) {
+            if (this.storageMode == null || this.storageMode.equals("internal")) {
                 this.fstream = new FileInputStream("/data/data/com.matburt.mobileorg/files/" + filename);
             }
             else if (this.storageMode.equals("sdcard")) {
