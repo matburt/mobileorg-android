@@ -28,12 +28,14 @@ class OrgFileParser {
     ArrayList<String> orgPaths;
     ArrayList<Node> nodeList = new ArrayList<Node>();
     ArrayList<String> todoKeywords = new ArrayList<String>();
+    String storageMode = null;
     Pattern titlePattern = null;
     FileInputStream fstream;
     Node rootNode = new Node("MobileOrg", Node.NodeType.HEADING);
     public static final String LT = "MobileOrg";
 
-    OrgFileParser(ArrayList<String> orgpaths) {
+    OrgFileParser(ArrayList<String> orgpaths, String storageMode) {
+        this.storageMode = storageMode;
         this.orgPaths = orgpaths;
         this.todoKeywords.add("TODO");
         this.todoKeywords.add("DONE");
@@ -163,7 +165,16 @@ class OrgFileParser {
     public BufferedReader getHandle(String filename) {
         BufferedReader breader = null;
         try {
-            this.fstream = new FileInputStream("/data/data/com.matburt.mobileorg/files/" + filename);
+            if (this.storageMode == "internal" || this.storageMode == null) {
+                this.fstream = new FileInputStream("/data/data/com.matburt.mobileorg/files/" + filename);
+            }
+            else if (this.storageMode == "sdcard") {
+                this.fstream = new FileInputStream("/sdcard/mobileorg/" + filename);
+            }
+            else {
+                Log.e(LT, "Unknown storage mechanism: " + this.storageMode);
+                this.fstream = null;
+            }
             DataInputStream in = new DataInputStream(this.fstream);
             breader = new BufferedReader(new InputStreamReader(in));
         }

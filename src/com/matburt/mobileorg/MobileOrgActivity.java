@@ -140,7 +140,8 @@ public class MobileOrgActivity extends ListActivity
     public void runParser() {
         MobileOrgApplication appInst = (MobileOrgApplication)this.getApplication();
         ArrayList<String> allOrgList = this.getOrgFiles();
-        OrgFileParser ofp = new OrgFileParser(allOrgList);
+        String storageMode = this.getStorageLocation();
+        OrgFileParser ofp = new OrgFileParser(allOrgList, storageMode);
         ofp.parse();
         appInst.rootNode = ofp.rootNode;
     }
@@ -284,6 +285,22 @@ public class MobileOrgActivity extends ListActivity
             return true;
         }
         return false;
+    }
+
+    public String getStorageLocation() {
+        SQLiteDatabase appdb = this.openOrCreateDatabase("MobileOrg",
+                                                         MODE_PRIVATE, null);
+        Cursor result = appdb.rawQuery("SELECT val from settings where key='storage'", null);
+        String val = null;
+        if (result != null) {
+            if (result.getCount() > 0) {
+                result.moveToFirst();
+                val = result.getString(0);
+            }
+        }
+        appdb.close();
+        result.close();
+        return val;
     }
 
     public ArrayList<String> getOrgFiles() {
