@@ -16,11 +16,14 @@ import java.util.regex.Matcher;
 import java.net.URL;
 import java.net.MalformedURLException;
 import java.io.BufferedWriter;
+import java.io.StringWriter;
 import java.io.InputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.FileNotFoundException;
 import java.io.OutputStreamWriter;
+import java.io.File;
+import java.io.FileWriter;
 
 import android.app.Activity;
 import android.content.Context;
@@ -28,6 +31,7 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
+import android.os.Environment;
 
 public class Synchronizer
 {
@@ -69,19 +73,50 @@ public class Synchronizer
                   key + ": " + urlActual + masterList.get(key));
             String fileContents = this.fetchOrgFile(urlActual +
                                                     masterList.get(key));
-            FileOutputStream fs;
-            try {
-                fs = rootActivity.openFileOutput(
-                                         masterList.get(key), 0);
+            String storageMode = this.appSettings.get("storage");
+            BufferedWriter writer = new BufferedWriter(new StringWriter());
+
+            if (storageMode == "internal" || storageMode == null) {
+                FileOutputStream fs;
+                try {
+                    fs = rootActivity.openFileOutput(
+                                                     masterList.get(key), 0);
+                    writer = new BufferedWriter(new OutputStreamWriter(fs));
+                }
+                catch (java.io.FileNotFoundException e) {
+                    Log.e(LT, "Could not write to file: " +
+                          masterList.get(key));
+                    return false;
+                }
+                catch (java.io.IOException e) {
+                    Log.e(LT, "IO Exception initializing writer on file " +
+                          masterList.get(key));
+                }
             }
-            catch (java.io.FileNotFoundException e) {
-                Log.e(LT, "Could not write to file: " +
-                      masterList.get(key));
+            else if (storageMode == "sdcard") {
+
+                try {
+                    File root = Environment.getExternalStorageDirectory();
+                    File morgDir = new File(root, "mobileorg");
+                    morgDir.mkdir();
+                    if (morgDir.canWrite()){
+                        File orgFileCard = new File(morgDir, masterList.get(key));
+                        FileWriter orgFWriter = new FileWriter(orgFileCard);
+                        writer = new BufferedWriter(orgFWriter);
+                    }
+                    else {
+                        Log.e(LT, "Write permission denied");
+                    }
+                } catch (java.io.IOException e) {
+                    Log.e(LT, "IO Exception initializing writer on sdcard file");
+                }
+            }
+            else {
+                Log.e(LT, "Unknown storage mechanism: " + storageMode);
                 return false;
             }
 
             try {
-            	BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(fs));
             	writer.write(fileContents);
             	this.addOrUpdateFile(masterList.get(key), key);
                 writer.flush();

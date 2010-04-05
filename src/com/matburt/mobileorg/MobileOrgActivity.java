@@ -303,7 +303,6 @@ public class MobileOrgActivity extends ListActivity
         appdb.close();
         result.close();
         return allFiles;
-        //return (String[])allFiles.toArray(new String[0]);
     }
 
     public void initializeTables() {
