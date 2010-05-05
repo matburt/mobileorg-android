@@ -51,9 +51,29 @@ public class MobileOrgWidget extends AppWidgetProvider {
             RemoteViews updateViews = null;
             updateViews = new RemoteViews(context.getPackageName(),
                                           R.layout.widget_mobileorg);
-            this.getOrgFiles(context);
+            ArrayList<String> allOrgList = this.getOrgFiles(context);
+            String storageMode = this.getStorageLocation(context);
+            OrgFileParser ofp = new OrgFileParser(allOrgList, storageMode);
+            ofp.parse();
             updateViews.setTextViewText(R.id.message, "Everything worked");
             return updateViews;
+        }
+
+        public String getStorageLocation(Context context) {
+            SQLiteDatabase appdb = context.openOrCreateDatabase("MobileOrg",
+                                                             0,
+                                                             null);
+            Cursor result = appdb.rawQuery("SELECT val from settings where key='storage'", null);
+            String val = null;
+            if (result != null) {
+                if (result.getCount() > 0) {
+                    result.moveToFirst();
+                    val = result.getString(0);
+                }
+            }
+            appdb.close();
+            result.close();
+            return val;
         }
 
         public ArrayList<String> getOrgFiles(Context context) {
