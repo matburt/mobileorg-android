@@ -28,10 +28,13 @@
               android:label="MobileOrg Settings">
     </activity>
     <activity android:name="SimpleTextDisplay"
-              android:label="Org view">
+              android:label="Org View">
     </activity>
     <activity android:name="OrgContextMenu"
               android:label="OrgMenu">
+    </activity>
+    <activity android:name="Capture"
+              android:label="Org Capture">
     </activity>
   </application>
 </manifest>

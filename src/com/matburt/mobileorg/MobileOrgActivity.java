@@ -246,6 +246,14 @@ public class MobileOrgActivity extends ListActivity
                         "Synchronizing. Please wait...", true);
     }
 
+    public boolean runCapture() {
+        Intent captureIntent = new Intent();
+        captureIntent.setClassName("com.matburt.mobileorg",
+                                   "com.matburt.mobileorg.Capture");
+        startActivity(captureIntent);
+        return true;
+    }
+
     public void postSynchronize() {
         syncDialog.dismiss();
         if (!this.syncResults) {
@@ -282,7 +290,7 @@ public class MobileOrgActivity extends ListActivity
         case MobileOrgActivity.OP_MENU_OUTLINE:
             return true;
         case MobileOrgActivity.OP_MENU_CAPTURE:
-            return true;
+            return this.runCapture();
         }
         return false;
     }
