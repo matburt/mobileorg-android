@@ -55,7 +55,13 @@ public class MobileOrgWidget extends AppWidgetProvider {
             String storageMode = this.getStorageLocation(context);
             OrgFileParser ofp = new OrgFileParser(allOrgList, storageMode);
             ofp.parse();
-            updateViews.setTextViewText(R.id.message, "Everything worked");
+            Node agendaNode = ofp.rootNode.findChildNode("agendas.org");
+            Node todoNode = agendaNode.findChildNode("ToDo: ALL");
+            String widgetBuffer = "";
+            for (int idx = 0; idx < todoNode.subNodes.size(); idx++) {
+                widgetBuffer = widgetBuffer + todoNode.subNodes.get(idx).nodeName + "\n";
+            }
+            updateViews.setTextViewText(R.id.message, widgetBuffer);
             return updateViews;
         }
 
