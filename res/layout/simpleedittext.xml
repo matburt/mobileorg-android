@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView
+<LinearLayout
    xmlns:android="http://schemas.android.com/apk/res/android"
-   android:id="@+id/scrolleredit" 
-   android:layout_width="fill_parent" 
+   android:orientation="vertical"
    android:layout_height="fill_parent"
-   android:fillViewport="true">	
-  <LinearLayout
-     xmlns:android="http://schemas.android.com/apk/res/android"
-     android:layout_height="fill_parent"
-     android:layout_width="fill_parent">
-    <EditText android:id="@+id/orgEditTxt"
-              android:layout_width="fill_parent"
-              android:layout_height="fill_parent"
-              android:autoLink="all"
-              android:gravity="top"/>
-  </LinearLayout>
-</ScrollView>
+   android:layout_width="fill_parent">
+  <EditText android:id="@+id/orgEditTxt"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="1"
+            android:gravity="top"/>
+  <Button android:id="@+id/captureSave"
+          android:text="Save"
+          android:layout_width="fill_parent"
+          android:layout_height="fill_parent"
+          android:layout_weight="5"/>
+</LinearLayout>
+
