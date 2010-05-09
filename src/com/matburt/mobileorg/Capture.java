@@ -111,7 +111,7 @@ public class Capture extends Activity implements OnClickListener
         else {
             xformed = givenText;
         }
-        return givenText + "\n\n";
+        return xformed + "\n\n";
     }
 
     public void addOrUpdateFile(String filename, String name) {

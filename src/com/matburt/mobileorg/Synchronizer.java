@@ -95,7 +95,7 @@ public class Synchronizer
         String thisLine = "";
         try {
             while ((thisLine = reader.readLine()) != null) {
-                fileContents += thisLine;
+                fileContents += thisLine + "\n";
             }
         }
         catch (java.io.IOException e) {
