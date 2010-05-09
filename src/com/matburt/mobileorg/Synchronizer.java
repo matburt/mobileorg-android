@@ -113,9 +113,9 @@ public class Synchronizer
             File root = Environment.getExternalStorageDirectory();
             File morgDir = new File(root, "mobileorg");
             File morgFile = new File(morgDir, "mobileorg.org");
+            this.removeFile("mobileorg.org");
             morgFile.delete();
         }            
-        this.removeFile("mobileorg.org");
         return true;
     }
 
