@@ -93,6 +93,7 @@ public class Capture extends Activity implements OnClickListener
             Log.e(LT, "IO Exception trying to write file mobileorg.org");
             return false;
         }
+        this.finish();
         return true;
     }
 
