@@ -33,11 +33,12 @@ public class Capture extends Activity implements OnClickListener
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        this.appSettings = new HashMap<String, String>();
+        this.populateApplicationSettings();
         setContentView(R.layout.simpleedittext);
         this.saveButton = (Button)this.findViewById(R.id.captureSave);
         this.orgEditDisplay = (EditText)this.findViewById(R.id.orgEditTxt);
         this.saveButton.setOnClickListener(this);
-        this.populateApplicationSettings();
     }
 
     public boolean onSave() {
