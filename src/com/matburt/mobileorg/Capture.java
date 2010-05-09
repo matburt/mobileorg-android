@@ -104,7 +104,14 @@ public class Capture extends Activity implements OnClickListener
     }
 
     public String transformBuffer(String givenText) {
-        return givenText;
+        String xformed = "";
+        if (!givenText.substring(0,1).equals("*")) {
+            xformed = "* " + givenText;
+        }
+        else {
+            xformed = givenText;
+        }
+        return givenText + "\n\n";
     }
 
     public void addOrUpdateFile(String filename, String name) {

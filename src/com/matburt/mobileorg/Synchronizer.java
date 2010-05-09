@@ -106,6 +106,16 @@ public class Synchronizer
         DefaultHttpClient httpC = this.createConnection(this.appSettings.get("webUser"),
                                                         this.appSettings.get("webPass"));
         this.putUrlFile(urlActual, httpC, fileContents);
+        if (storageMode.equals("internal") || storageMode == null) {
+            this.rootActivity.deleteFile("mobileorg.org");
+        }
+        else if (storageMode.equals("sdcard")) {
+            File root = Environment.getExternalStorageDirectory();
+            File morgDir = new File(root, "mobileorg");
+            File morgFile = new File(morgDir, "mobileorg.org");
+            morgFile.delete();
+        }            
+        this.removeFile("mobileorg.org");
         return true;
     }
 
@@ -192,6 +202,15 @@ public class Synchronizer
         }
 
         return true;
+    }
+
+    public void removeFile(String filename) {
+        SQLiteDatabase appdb = this.rootActivity.openOrCreateDatabase("MobileOrg",
+                                          0, null);
+        Cursor result = appdb.rawQuery("DELETE FROM files " +
+                                       "WHERE file = '"+filename+"'", null);
+        result.close();
+        appdb.close();
     }
 
     public void addOrUpdateFile(String filename, String name) {
@@ -290,7 +309,8 @@ public class Synchronizer
         }
     }
 
-    public void putUrlFile(String url, DefaultHttpClient httpClient,
+    public void putUrlFile(String url,
+                           DefaultHttpClient httpClient,
                            String content) {
         try {
             HttpPut httpPut = new HttpPut(url);
