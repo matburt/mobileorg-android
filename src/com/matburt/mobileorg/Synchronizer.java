@@ -106,6 +106,8 @@ public class Synchronizer
         DefaultHttpClient httpC = this.createConnection(this.appSettings.get("webUser"),
                                                         this.appSettings.get("webPass"));
         this.putUrlFile(urlActual, httpC, fileContents);
+        this.removeFile("mobileorg.org");
+
         if (storageMode.equals("internal") || storageMode == null) {
             this.rootActivity.deleteFile("mobileorg.org");
         }
@@ -113,7 +115,6 @@ public class Synchronizer
             File root = Environment.getExternalStorageDirectory();
             File morgDir = new File(root, "mobileorg");
             File morgFile = new File(morgDir, "mobileorg.org");
-            this.removeFile("mobileorg.org");
             morgFile.delete();
         }            
         return true;
@@ -207,9 +208,9 @@ public class Synchronizer
     public void removeFile(String filename) {
         SQLiteDatabase appdb = this.rootActivity.openOrCreateDatabase("MobileOrg",
                                           0, null);
-        Cursor result = appdb.rawQuery("DELETE FROM files " +
-                                       "WHERE file = '"+filename+"'", null);
-        result.close();
+        appdb.execSQL("DELETE FROM files " +
+                      "WHERE file = '"+filename+"'");
+        Log.i(LT, "Finished deleting from files");
         appdb.close();
     }
 
