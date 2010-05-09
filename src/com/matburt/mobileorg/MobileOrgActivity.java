@@ -237,7 +237,17 @@ public class MobileOrgActivity extends ListActivity
         final Synchronizer appSync = new Synchronizer(this);
         Thread syncThread = new Thread() {
                 public void run() {
-                    syncResults = appSync.pull();
+                    boolean pullResult = appSync.pull();
+                    boolean pushResult = appSync.push();
+                    syncResults = true;
+                    if (!pullResult) {
+                        Log.e(LT, "Pull Synchronization fail");
+                        syncResults = false;
+                    }
+                    if (!pushResult) {
+                        Log.e(LT, "Push Synchronization fail");
+                        syncResults = false;
+                    }
                     syncHandler.post(syncUpdateResults);
             }
         };

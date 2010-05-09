@@ -4,9 +4,11 @@ import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.HttpEntity;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.auth.AuthScope;
 import java.util.HashMap;
 import java.util.Map;
@@ -16,14 +18,19 @@ import java.util.regex.Matcher;
 import java.net.URL;
 import java.net.MalformedURLException;
 import java.io.BufferedWriter;
+import java.io.BufferedReader;
 import java.io.StringWriter;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.FileOutputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.FileNotFoundException;
 import java.io.OutputStreamWriter;
 import java.io.File;
 import java.io.FileWriter;
+import java.io.FileReader;
+import java.io.UnsupportedEncodingException;
 
 import android.app.Activity;
 import android.content.Context;
@@ -45,6 +52,61 @@ public class Synchronizer
         if (this.populateApplicationSettings() == -1) {
             Log.e(LT, "Failed to fetch settings"); //show an error
         }
+    }
+
+    public boolean push() {
+        String urlActual = this.getRootUrl() + "mobileorg.org";
+        String storageMode = this.appSettings.get("storage");
+        BufferedReader reader = null;
+        String fileContents = "";
+
+        if (storageMode.equals("internal") || storageMode == null) {
+            FileInputStream fs;
+            try {
+                fs = rootActivity.openFileInput("mobileorg.org");
+                reader = new BufferedReader(new InputStreamReader(fs));
+            }
+            catch (java.io.FileNotFoundException e) {
+                Log.i(LT, "Did not find mobileorg.org file, not pushing.");
+                return true;
+            }
+        }
+        else if (storageMode.equals("sdcard")) {
+            try {
+                File root = Environment.getExternalStorageDirectory();
+                File morgDir = new File(root, "mobileorg");
+                File morgFile = new File(morgDir, "mobileorg.org");
+                if (!morgFile.exists()) {
+                    Log.i(LT, "Did not find mobileorg.org file, not pushing.");
+                    return true;
+                }
+                FileReader orgFReader = new FileReader(morgFile);
+                reader = new BufferedReader(orgFReader);
+            }
+            catch (java.io.IOException e) {
+                Log.e(LT, "IO Exception initilizing reader on sdcard file");
+            }
+        }
+        else {
+            Log.e(LT, "[Push] Unknown storage mechanism: " + storageMode);
+            return false;
+        }
+
+        String thisLine = "";
+        try {
+            while ((thisLine = reader.readLine()) != null) {
+                fileContents += thisLine;
+            }
+        }
+        catch (java.io.IOException e) {
+            Log.e(LT, "IO Exception trying to read from mobileorg.org file");
+            return false;
+        }
+
+        DefaultHttpClient httpC = this.createConnection(this.appSettings.get("webUser"),
+                                                        this.appSettings.get("webPass"));
+        this.putUrlFile(urlActual, httpC, fileContents);
+        return true;
     }
 
     public boolean pull() {
@@ -225,6 +287,22 @@ public class Synchronizer
             Log.e(LT, e.toString());
             Log.w(LT, "Failed to get URL");
             return null; //handle exception
+        }
+    }
+
+    public void putUrlFile(String url, DefaultHttpClient httpClient,
+                           String content) {
+        try {
+            HttpPut httpPut = new HttpPut(url);
+            httpPut.setEntity(new StringEntity(content));
+            HttpResponse response = httpClient.execute(httpPut);
+            httpClient.getConnectionManager().shutdown();
+        }
+        catch (UnsupportedEncodingException e) {
+            Log.e(LT, "Encountered unsupported encoding pushing mobileorg.org file");
+        }
+        catch (IOException e) {
+            Log.e(LT, "Encountered IO Exception pushing mobileorg.org file");
         }
     }
 
