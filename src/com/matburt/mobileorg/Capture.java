@@ -22,6 +22,8 @@ import java.io.FileNotFoundException;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class Capture extends Activity implements OnClickListener
 {
@@ -103,13 +105,29 @@ public class Capture extends Activity implements OnClickListener
         }
     }
 
+    // * first line of the note
+    //   [2009-09-09 Wed 09:25]
+    //   Rest of the note
     public String transformBuffer(String givenText) {
         String xformed = "";
-        if (!givenText.substring(0,1).equals("*")) {
-            xformed = "* " + givenText;
-        }
-        else {
-            xformed = givenText;
+        String[] bufferLines = givenText.split("\\n");
+        for (int idx = 0; idx < bufferLines.length; idx++) {
+            if (idx == 0) {
+                if (!bufferLines[idx].substring(0,1).equals("*")) {
+                    Date date = new Date();
+                    String DATE_FORMAT = "[yyyy-MM-dd EEE HH:mm]";
+                    SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT);
+                    xformed += "* " + bufferLines[idx] + "\n";
+                    xformed += "  " + sdf.format(date) + "\n";
+                }
+                else {
+                    xformed = givenText;
+                    break;
+                }
+            }
+            else {
+                xformed += "  " + bufferLines[idx] + "\n";
+            }
         }
         return xformed + "\n\n";
     }
