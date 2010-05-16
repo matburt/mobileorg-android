@@ -97,15 +97,10 @@ class OrgFileParser {
 
         for (int jdx = 0; jdx < this.orgPaths.size(); jdx++) {
             try {
+                Log.d(LT, "Parsing: " + orgPaths.get(jdx));
                 BufferedReader breader = this.getHandle(this.orgPaths.get(jdx));
                 Node fileNode = new Node(this.orgPaths.get(jdx),
                                          Node.NodeType.HEADING);
-                if (nodeDepth > 0) {
-                    for (;nodeDepth > 0; nodeDepth--) {
-                        nodeStack.pop();
-                    }
-                    nodeStack.pop();
-                }
 
                 nodeStack.peek().addChildNode(fileNode);
                 nodeStack.push(fileNode);
@@ -165,8 +160,10 @@ class OrgFileParser {
                         lastNode.addPayload(thisLine);
                     }
                 }
+                for (;nodeDepth > 0; nodeDepth--) {
+                    nodeStack.pop();
+                }
                 nodeStack.pop();
-                nodeDepth--;
                 breader.close();
             }
             catch (IOException e) {
