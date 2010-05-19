@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string-array name="storageModes">
+    <item>Internal</item>
+    <item>Storage Card</item>
+  </string-array>
+</resources>
