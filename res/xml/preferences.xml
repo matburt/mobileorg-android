@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+  <PreferenceCategory android:title="Connectivity">
+    <EditTextpreference
+        android:name="URL"
+        android:summary="Full URL path to your index.org file"
+        android:defaultValue="http://example.com/index.org"
+        android:title="URL"
+        android:key="webUrl" />
+    <EditTextpreference
+        android:name="Username"
+        android:summary="Username to login"
+        android:defaultValue="user"
+        android:title="Username"
+        android:key="webUser" />
+    <EditTextpreference
+        android:name="Password"
+        android:summary="Password to login"
+        android:defaultValue="password"
+        android:password="true"
+        android:title="Password"
+        android:key="webPass" />
+  </PreferenceCategory>
+  <PreferenceCategory android:title="Storage">
+    <ListPreference
+        android:title="Storage Mode"
+        android:summary="Where to store the org files"
+        android:key="storageMode"
+        android:entries="@array/storageModes"
+        android:defaultValue="1" />
+  </PreferenceCategory>
+  <PreferenceCategory android:title="Other">
+    <PreferenceScreen
+        android:key="Widget"
+        android:title="Widget Preferences"
+        android:summary="Preferences for a Widget">
+    </PreferenceScreen>
+    <Textpreference
+        android:name="VersionDisp"
+        android:summary="The App Version"
+        android:defaultValue="aversiondisp"
+        android:title="Password"
+        android:key="verDisp" />
+  </PreferenceCategory>
+</PreferenceScreen>
