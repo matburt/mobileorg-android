@@ -105,8 +105,9 @@ public class Synchronizer
 
         DefaultHttpClient httpC = this.createConnection(this.appSettings.get("webUser"),
                                                         this.appSettings.get("webPass"));
-        this.putUrlFile(urlActual, httpC, fileContents);
-        this.removeFile("mobileorg.org");
+        if (this.putUrlFile(urlActual, httpC, fileContents)) {
+            this.removeFile("mobileorg.org");
+        }
 
         if (storageMode.equals("internal") || storageMode == null) {
             this.rootActivity.deleteFile("mobileorg.org");
@@ -310,7 +311,7 @@ public class Synchronizer
         }
     }
 
-    public void putUrlFile(String url,
+    public boolean putUrlFile(String url,
                            DefaultHttpClient httpClient,
                            String content) {
         try {
@@ -318,12 +319,15 @@ public class Synchronizer
             httpPut.setEntity(new StringEntity(content));
             HttpResponse response = httpClient.execute(httpPut);
             httpClient.getConnectionManager().shutdown();
+            return true;
         }
         catch (UnsupportedEncodingException e) {
             Log.e(LT, "Encountered unsupported encoding pushing mobileorg.org file");
+            return false;
         }
         catch (IOException e) {
             Log.e(LT, "Encountered IO Exception pushing mobileorg.org file");
+            return false;
         }
     }
 
