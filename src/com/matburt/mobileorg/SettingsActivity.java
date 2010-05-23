@@ -11,3 +11,4 @@ public class SettingsActivity extends PreferenceActivity
 {
 
 }
+
