@@ -5,7 +5,7 @@
     <item>Storage Card</item>
   </string-array>
   <string-array name="storageModesVals">
-    <item>Internal</item>
-    <item>Storage Card</item>
+    <item>internal</item>
+    <item>sdcard</item>
   </string-array>
 </resources>

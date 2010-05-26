@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.IBinder;
 import android.text.format.Time;
@@ -17,6 +18,7 @@ import android.widget.RemoteViews;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
@@ -36,10 +38,7 @@ public class MobileOrgWidget extends AppWidgetProvider {
     public static class MobileOrgWidgetService extends Service {
         @Override
         public void onStart(Intent intent, int startId) {
-            // Build the widget update for today
             RemoteViews updateViews = this.genUpdateDisplay(this);
-            
-            // Push update for this widget to the home screen
             ComponentName thisWidget = new ComponentName(this,
                                                          MobileOrgWidget.class);
             AppWidgetManager manager = AppWidgetManager.getInstance(this);
@@ -66,20 +65,8 @@ public class MobileOrgWidget extends AppWidgetProvider {
         }
 
         public String getStorageLocation(Context context) {
-            SQLiteDatabase appdb = context.openOrCreateDatabase("MobileOrg",
-                                                             0,
-                                                             null);
-            Cursor result = appdb.rawQuery("SELECT val from settings where key='storage'", null);
-            String val = null;
-            if (result != null) {
-                if (result.getCount() > 0) {
-                    result.moveToFirst();
-                    val = result.getString(0);
-                }
-            }
-            appdb.close();
-            result.close();
-            return val;
+            SharedPreferences appPrefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+            return appPrefs.getString("storageMode", "");
         }
 
         public ArrayList<String> getOrgFiles(Context context) {
