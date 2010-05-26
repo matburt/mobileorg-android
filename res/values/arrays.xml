@@ -4,4 +4,8 @@
     <item>Internal</item>
     <item>Storage Card</item>
   </string-array>
+  <string-array name="storageModesVals">
+    <item>Internal</item>
+    <item>Storage Card</item>
+  </string-array>
 </resources>
