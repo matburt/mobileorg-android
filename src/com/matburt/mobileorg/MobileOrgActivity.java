@@ -20,6 +20,7 @@ import android.widget.AdapterView;
 import android.content.Intent;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Log;
 import java.util.ArrayList;
@@ -27,6 +28,7 @@ import java.lang.Runnable;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
+import android.content.SharedPreferences;
 
 public class MobileOrgActivity extends ListActivity
 {
@@ -111,13 +113,14 @@ public class MobileOrgActivity extends ListActivity
     private static final int OP_MENU_CAPTURE = 4;
     private static final String LT = "MobileOrg";
     private ProgressDialog syncDialog;
+    public boolean syncResults;
+    public SharedPreferences appPrefs;
     final Handler syncHandler = new Handler();
     final Runnable syncUpdateResults = new Runnable() {
         public void run() {
             postSynchronize();
         }
     };
-    public boolean syncResults;
 
     /** Called when the activity is first created. */
     @Override
@@ -126,6 +129,8 @@ public class MobileOrgActivity extends ListActivity
         super.onCreate(savedInstanceState);
         this.initializeTables();
         ListView lv = this.getListView();
+        appPrefs = PreferenceManager.getDefaultSharedPreferences(
+                                       getBaseContext());
         lv.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener
                                       (){
                 @Override
@@ -314,19 +319,7 @@ public class MobileOrgActivity extends ListActivity
     }
 
     public String getStorageLocation() {
-        SQLiteDatabase appdb = this.openOrCreateDatabase("MobileOrg",
-                                                         MODE_PRIVATE, null);
-        Cursor result = appdb.rawQuery("SELECT val from settings where key='storage'", null);
-        String val = null;
-        if (result != null) {
-            if (result.getCount() > 0) {
-                result.moveToFirst();
-                val = result.getString(0);
-            }
-        }
-        appdb.close();
-        result.close();
-        return val;
+        return this.appPrefs.getString("storageMode", "");
     }
 
     public ArrayList<String> getOrgFiles() {
@@ -351,8 +344,6 @@ public class MobileOrgActivity extends ListActivity
     public void initializeTables() {
         SQLiteDatabase appdb = this.openOrCreateDatabase("MobileOrg",
                                                          MODE_PRIVATE, null);
-        appdb.execSQL("CREATE TABLE IF NOT EXISTS settings"
-                      + " (key VARCHAR, val VARCHAR)");
         appdb.execSQL("CREATE TABLE IF NOT EXISTS files"
                       + " (file VARCHAR, name VARCHAR,"
                       + " checksum VARCHAR);");

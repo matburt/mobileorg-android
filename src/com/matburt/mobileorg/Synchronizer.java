@@ -37,26 +37,26 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
+import android.preferences.PreferenceManager;
+import android.content.SharedPreferences;
 import android.util.Log;
 import android.os.Environment;
 
 public class Synchronizer
 {
-    private Map<String, String> appSettings;
+    private SharedPreferences appSettings;
     private Activity rootActivity;
     private static final String LT = "MobileOrg";
 
     Synchronizer(Activity parentActivity) {
         this.rootActivity = parentActivity;
-        this.appSettings = new HashMap<String, String>();
-        if (this.populateApplicationSettings() == -1) {
-            Log.e(LT, "Failed to fetch settings"); //show an error
-        }
+        this.appSettings = PreferenceManager.getDefaultSharedPreferences(
+                                   parentActivity.getBaseContext());
     }
 
     public boolean push() {
         String urlActual = this.getRootUrl() + "mobileorg.org";
-        String storageMode = this.appSettings.get("storage");
+        String storageMode = this.appSettings.get("storageMode", "");
         BufferedReader reader = null;
         String fileContents = "";
 
@@ -103,8 +103,9 @@ public class Synchronizer
             return false;
         }
 
-        DefaultHttpClient httpC = this.createConnection(this.appSettings.get("webUser"),
-                                                        this.appSettings.get("webPass"));
+        DefaultHttpClient httpC = this.createConnection(
+                                    this.appSettings.getString("webUser", ""),
+                                    this.appSettings.getString("webPass", ""));
         if (this.putUrlFile(urlActual, httpC, fileContents)) {
             this.removeFile("mobileorg.org");
         }
@@ -123,13 +124,14 @@ public class Synchronizer
 
     public boolean pull() {
         Pattern checkUrl = Pattern.compile("http.*\\.(?:org|txt)$");
-        if (!checkUrl.matcher(this.appSettings.get("webUrl")).find()) {
+        if (!checkUrl.matcher(this.appSettings.getString("webUrl", "")).find()) {
             Log.e(LT, "Bad URL");
             return false;
         }
 
         //Get the index org file
-        String masterStr = this.fetchOrgFile(this.appSettings.get("webUrl"));
+        String masterStr = this.fetchOrgFile(this.appSettings.getString(
+                                                                "webUrl", ""));
         if (masterStr == "") {
             Log.e(LT, "Failure getting main org file");
             return false;
@@ -147,7 +149,7 @@ public class Synchronizer
                   key + ": " + urlActual + masterList.get(key));
             String fileContents = this.fetchOrgFile(urlActual +
                                                     masterList.get(key));
-            String storageMode = this.appSettings.get("storage");
+            String storageMode = this.appSettings.getString("storageMode", "");
             BufferedWriter writer = new BufferedWriter(new StringWriter());
 
             if (storageMode.equals("internal") || storageMode == null) {
@@ -236,8 +238,8 @@ public class Synchronizer
 
     public String fetchOrgFile(String orgUrl) {
         DefaultHttpClient httpC = this.createConnection(
-                                        this.appSettings.get("webUser"),
-                                        this.appSettings.get("webPass"));
+                                      this.appSettings.getString("webUser", ""),
+                                      this.appSettings.getString("webPass", ""));
         InputStream mainFile = this.getUrlStream(orgUrl, httpC);
         String masterStr = "";
         try {
@@ -258,7 +260,7 @@ public class Synchronizer
     public String getRootUrl() {
         URL manageUrl;
         try {
-            manageUrl = new URL(this.appSettings.get("webUrl"));
+            manageUrl = new URL(this.appSettings.getString("webUrl", ""));
         }
         catch (MalformedURLException e) {
             Log.e(LT, "Malformed URL");
@@ -329,31 +331,6 @@ public class Synchronizer
             Log.e(LT, "Encountered IO Exception pushing mobileorg.org file");
             return false;
         }
-    }
-
-    public int populateApplicationSettings() {
-        SQLiteDatabase appdb = this.rootActivity.openOrCreateDatabase(
-                                     "MobileOrg", 0, null);
-        Cursor result = appdb.rawQuery("SELECT * FROM settings", null);
-        int rc = 0;
-        if (result != null) {
-            if (result.getCount() > 0) {
-                result.moveToFirst();
-                do {
-                    this.appSettings.put(result.getString(0),
-                                         result.getString(1));
-                } while (result.moveToNext());
-            }
-            else {
-                rc = -1;// need to start settings display
-            }
-        }
-        else {
-            rc =  -1;// need to start settings display
-        }
-        result.close();
-        appdb.close();
-        return rc;
     }
 
     public String ReadInputStream(InputStream in) throws IOException {
