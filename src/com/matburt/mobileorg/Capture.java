@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.widget.EditText;
 import android.widget.Button;
 import android.view.View;
@@ -12,6 +13,7 @@ import android.view.View.OnClickListener;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
+import android.preference.PreferenceManager;
 import java.io.OutputStreamWriter;
 import java.io.BufferedWriter;
 import java.io.StringWriter;
@@ -29,14 +31,13 @@ public class Capture extends Activity implements OnClickListener
 {
     private EditText orgEditDisplay;
     private Button saveButton;
-    private Map<String, String> appSettings;
+    private SharedPreferences appSettings;
     public static final String LT = "MobileOrg";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        this.appSettings = new HashMap<String, String>();
-        this.populateApplicationSettings();
+        this.appSettings = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
         setContentView(R.layout.simpleedittext);
         this.saveButton = (Button)this.findViewById(R.id.captureSave);
         this.orgEditDisplay = (EditText)this.findViewById(R.id.orgEditTxt);
@@ -45,7 +46,7 @@ public class Capture extends Activity implements OnClickListener
 
     public boolean onSave() {
         String newNote = this.transformBuffer(this.orgEditDisplay.getText().toString());
-        String storageMode = this.appSettings.get("storage");
+        String storageMode = this.appSettings.getString("storageMode", "");
         BufferedWriter writer = new BufferedWriter(new StringWriter());
         
         if (storageMode.equals("internal") || storageMode == null) {
@@ -149,30 +150,5 @@ public class Capture extends Activity implements OnClickListener
         }
         result.close();
         appdb.close();
-    }
-
-    public int populateApplicationSettings() {
-        SQLiteDatabase appdb = this.openOrCreateDatabase(
-                                     "MobileOrg", 0, null);
-        Cursor result = appdb.rawQuery("SELECT * FROM settings", null);
-        int rc = 0;
-        if (result != null) {
-            if (result.getCount() > 0) {
-                result.moveToFirst();
-                do {
-                    this.appSettings.put(result.getString(0),
-                                         result.getString(1));
-                } while (result.moveToNext());
-            }
-            else {
-                rc = -1;// need to start settings display
-            }
-        }
-        else {
-            rc =  -1;// need to start settings display
-        }
-        result.close();
-        appdb.close();
-        return rc;
     }
 }
