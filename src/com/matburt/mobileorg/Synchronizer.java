@@ -37,7 +37,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
-import android.preferences.PreferenceManager;
+import android.preference.PreferenceManager;
 import android.content.SharedPreferences;
 import android.util.Log;
 import android.os.Environment;
@@ -56,7 +56,7 @@ public class Synchronizer
 
     public boolean push() {
         String urlActual = this.getRootUrl() + "mobileorg.org";
-        String storageMode = this.appSettings.get("storageMode", "");
+        String storageMode = this.appSettings.getString("storageMode", "");
         BufferedReader reader = null;
         String fileContents = "";
 
