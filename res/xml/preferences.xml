@@ -39,7 +39,7 @@
     <PreferenceScreen
         android:key="VersionDisp"
         android:title="Version"
-        android:summary="0.3alpha">
+        android:summary="0.4alpha">
     </PreferenceScreen>
   </PreferenceCategory>
 </PreferenceScreen>
