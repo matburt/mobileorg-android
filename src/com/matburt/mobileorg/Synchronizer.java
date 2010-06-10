@@ -132,7 +132,7 @@ public class Synchronizer
         //Get the index org file
         String masterStr = this.fetchOrgFile(this.appSettings.getString(
                                                                 "webUrl", ""));
-        if (masterStr == "") {
+        if (masterStr.equals("")) {
             Log.e(LT, "Failure getting main org file");
             return false;
         }

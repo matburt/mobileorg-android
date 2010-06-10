@@ -61,14 +61,6 @@ public class MobileOrgActivity extends ListActivity
             return this.thisNode.subNodes.size();
         }
 
-        /**
-         * Since the data comes from an array, just returning the index is
-         * sufficent to get at the data. If we were using a more complex data
-         * structure, we would return whatever object represents one row in the
-         * list.
-         *
-         * @see android.widget.ListAdapter#getItem(int)
-         */
         public Object getItem(int position) {
             return position;
         }
@@ -114,7 +106,7 @@ public class MobileOrgActivity extends ListActivity
     private static final String LT = "MobileOrg";
     private ProgressDialog syncDialog;
     public boolean syncResults;
-    public SharedPreferences appPrefs;
+    public SharedPreferences appSettings;
     final Handler syncHandler = new Handler();
     final Runnable syncUpdateResults = new Runnable() {
         public void run() {
@@ -122,14 +114,13 @@ public class MobileOrgActivity extends ListActivity
         }
     };
 
-    /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         this.initializeTables();
         ListView lv = this.getListView();
-        appPrefs = PreferenceManager.getDefaultSharedPreferences(
+        appSettings = PreferenceManager.getDefaultSharedPreferences(
                                        getBaseContext());
         lv.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener
                                       (){
@@ -140,6 +131,9 @@ public class MobileOrgActivity extends ListActivity
                     return true;
                 }
             });
+        if (this.appSettings.getString("webUrl","").equals("")) {
+            this.onShowSettings();
+        }
     }
 
     public void runParser() {
@@ -319,7 +313,7 @@ public class MobileOrgActivity extends ListActivity
     }
 
     public String getStorageLocation() {
-        return this.appPrefs.getString("storageMode", "");
+        return this.appSettings.getString("storageMode", "");
     }
 
     public ArrayList<String> getOrgFiles() {
