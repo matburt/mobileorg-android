@@ -208,7 +208,7 @@ public class Synchronizer
         return true;
     }
 
-    public void removeFile(String filename) {
+    private void removeFile(String filename) {
         SQLiteDatabase appdb = this.rootActivity.openOrCreateDatabase("MobileOrg",
                                           0, null);
         appdb.execSQL("DELETE FROM files " +
@@ -217,7 +217,7 @@ public class Synchronizer
         appdb.close();
     }
 
-    public void addOrUpdateFile(String filename, String name) {
+    private void addOrUpdateFile(String filename, String name) {
         SQLiteDatabase appdb = this.rootActivity.openOrCreateDatabase("MobileOrg",
                                           0, null);
         Cursor result = appdb.rawQuery("SELECT * FROM files " +
@@ -236,7 +236,7 @@ public class Synchronizer
         appdb.close();
     }
 
-    public String fetchOrgFile(String orgUrl) {
+    private String fetchOrgFile(String orgUrl) {
         DefaultHttpClient httpC = this.createConnection(
                                       this.appSettings.getString("webUser", ""),
                                       this.appSettings.getString("webPass", ""));
@@ -257,7 +257,7 @@ public class Synchronizer
         return masterStr;
     }
 
-    public String getRootUrl() {
+    private String getRootUrl() {
         URL manageUrl;
         try {
             manageUrl = new URL(this.appSettings.getString("webUrl", ""));
@@ -281,7 +281,7 @@ public class Synchronizer
             manageUrl.getAuthority() + directoryActual;
     }
 
-    public HashMap<String, String> getOrgFilesFromMaster(String master) {
+    private HashMap<String, String> getOrgFilesFromMaster(String master) {
         Pattern getOrgFiles = Pattern.compile("\\[file:(.*?\\.org)\\]\\[(.*?)\\]\\]");
         Matcher m = getOrgFiles.matcher(master);
         HashMap<String, String> allOrgFiles = new HashMap<String, String>();
@@ -292,7 +292,7 @@ public class Synchronizer
         return allOrgFiles;
     }
 
-    public DefaultHttpClient createConnection(String user, String password) {
+    private DefaultHttpClient createConnection(String user, String password) {
         DefaultHttpClient httpClient = new DefaultHttpClient();
         UsernamePasswordCredentials bCred = new UsernamePasswordCredentials(user, password);
         BasicCredentialsProvider cProvider = new BasicCredentialsProvider();
@@ -301,7 +301,7 @@ public class Synchronizer
         return httpClient;
     }
 
-    public InputStream getUrlStream(String url, DefaultHttpClient httpClient) {
+    private InputStream getUrlStream(String url, DefaultHttpClient httpClient) {
         try {
             HttpResponse res = httpClient.execute(new HttpGet(url));
             return res.getEntity().getContent();
@@ -313,7 +313,7 @@ public class Synchronizer
         }
     }
 
-    public boolean putUrlFile(String url,
+    private boolean putUrlFile(String url,
                            DefaultHttpClient httpClient,
                            String content) {
         try {
@@ -333,7 +333,7 @@ public class Synchronizer
         }
     }
 
-    public String ReadInputStream(InputStream in) throws IOException {
+    private String ReadInputStream(InputStream in) throws IOException {
         StringBuffer stream = new StringBuffer();
         byte[] b = new byte[4096];
         for (int n; (n = in.read(b)) != -1;) {
