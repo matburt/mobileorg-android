@@ -15,6 +15,8 @@ import java.io.IOException;
 import java.io.FileNotFoundException;
 import android.text.TextUtils;
 import android.util.Log;
+import android.content.ContentValues;
+
 
 class OrgFileParser {
 	
@@ -31,13 +33,18 @@ class OrgFileParser {
     Pattern titlePattern = null;
     FileInputStream fstream;
     Node rootNode = new Node("MobileOrg", Node.NodeType.HEADING);
+    SQLiteDatabase appdb;
     public static final String LT = "MobileOrg";
 
-    OrgFileParser(ArrayList<String> orgpaths, String storageMode) {
+    OrgFileParser(ArrayList<String> orgpaths,
+                  String storageMode,
+                  SQLiteDatabase appdb) {
+        this.appdb = appdb;
         this.storageMode = storageMode;
         this.orgPaths = orgpaths;
         this.todoKeywords.add("TODO");
         this.todoKeywords.add("DONE");
+        
     }
     
     private Pattern prepareTitlePattern () {
@@ -89,18 +96,35 @@ class OrgFileParser {
         return newTitle;
     }
 
+    public long createEntry(String heading, int nodeType,
+                            String content, int parentId) {
+        ContentValues recValues = new ContentValues(); 
+        recValues.put("heading", heading);
+        recValues.put("nodetype", nodeType);
+        recValues.put("content", content);
+        recValues.put("parentid", parentId);
+        return this.appdb.insert();
+    }
+
     public void parse() {
         String thisLine;
         Stack<Node> nodeStack = new Stack();
         nodeStack.push(this.rootNode);
         int nodeDepth = 0;
+        int parentNode = -1;
+        Stack<long> parentNodeStack = new Stack();
+        parentNodeStack.push(parentNode);
 
         for (int jdx = 0; jdx < this.orgPaths.size(); jdx++) {
             try {
                 Log.d(LT, "Parsing: " + orgPaths.get(jdx));
+                //clear data table here
                 BufferedReader breader = this.getHandle(this.orgPaths.get(jdx));
                 Node fileNode = new Node(this.orgPaths.get(jdx),
                                          Node.NodeType.HEADING);
+                this.createEntry(this.orgPaths.get(jdx),
+                                 Node.NodeType.HEADING,
+                                 parentNode);
 
                 nodeStack.peek().addChildNode(fileNode);
                 nodeStack.push(fileNode);

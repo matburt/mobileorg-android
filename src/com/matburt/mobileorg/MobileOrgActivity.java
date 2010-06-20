@@ -138,9 +138,13 @@ public class MobileOrgActivity extends ListActivity
 
     public void runParser() {
         MobileOrgApplication appInst = (MobileOrgApplication)this.getApplication();
+        SQLiteDatabase appdb = this.openOrCreateDatabase("MobileOrg",
+                                                         MODE_PRIVATE, null);
         ArrayList<String> allOrgList = this.getOrgFiles();
         String storageMode = this.getStorageLocation();
-        OrgFileParser ofp = new OrgFileParser(allOrgList, storageMode);
+        OrgFileParser ofp = new OrgFileParser(allOrgList,
+                                              storageMode,
+                                              appdb);
         ofp.parse();
         appInst.rootNode = ofp.rootNode;
     }
@@ -341,6 +345,10 @@ public class MobileOrgActivity extends ListActivity
         appdb.execSQL("CREATE TABLE IF NOT EXISTS files"
                       + " (file VARCHAR, name VARCHAR,"
                       + " checksum VARCHAR);");
+        appdb.execSQL("CREATE TABLE IF NOT EXISTS data"
+                      + "  (id INTEGER PRIMARY KEY AUTOINCREMENT,"
+                      + "   heading VARCHAR, type INTEGER,"
+                      + "   content VARCHAR, parentid INTEGER);");
         appdb.close();
 
     }
