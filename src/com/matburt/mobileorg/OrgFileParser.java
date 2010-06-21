@@ -106,7 +106,7 @@ class OrgFileParser {
         return this.appdb.insert();
     }
 
-    public void parse() {
+    public void newparse() {
         Stack<long> parentNodeStack = new Stack();
         long parentNode = -1;
         parentNodeStack.push(parentNode);
@@ -124,6 +124,8 @@ class OrgFileParser {
                 if (thisLine.length() < 1 || thisLine.charAt(0) == '#') {
                     continue;
                 }
+
+                //star counter
                 for (int idx = 0; idx < thisLine.length(); idx++) {
                     if (thisLine.charAt(idx) != '*') {
                         break;
@@ -141,7 +143,11 @@ class OrgFileParser {
                     newNodeId = this.createEntry(this.orgPaths.get(jdx),
                                                  Node.NodeType.HEADING,
                                                  parentNode);
-                    
+                    //parse todo tags
+                    if (numstars > nodeDepth) {}
+                    else if (numstars == nodeDepth) {}
+                    else if (numstars < nodeDepth) {}
+                    //pop back to parent?
                 }
             }
         }
