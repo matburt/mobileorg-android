@@ -107,11 +107,52 @@ class OrgFileParser {
     }
 
     public void parse() {
+        Stack<long> parentNodeStack = new Stack();
+        long parentNode = -1;
+        parentNodeStack.push(parentNode);
+
+        for (int jdx = 0; jdx < this.orgPaths.size(); jdx++) {
+            Log.d(LT, "Parsing: " + orgPaths.get(jdx));
+            //clear data table here
+            BufferedReader breader = this.getHandle(this.orgPaths.get(jdx));
+            long newNodeId = this.createEntry(this.orgPaths.get(jdx),
+                                              Node.NodeType.HEADING,
+                                              parentNode);
+            parentNode = newNodeId;
+            while ((thisLine = breader.readLine()) != null) {
+                int numstars = 0;
+                if (thisLine.length() < 1 || thisLine.charAt(0) == '#') {
+                    continue;
+                }
+                for (int idx = 0; idx < thisLine.length(); idx++) {
+                    if (thisLine.charAt(idx) != '*') {
+                        break;
+                    }
+                    numstars++;
+                }
+
+                if (numstars >= thisLine.length() || thisLine.charAt(numstars) != ' ') {
+                    numstars = 0;
+                }
+                //headings
+                if (numstars > 0) {
+                    String title = thisLine.substring(numstars+1);
+                    TitleComponents titleComp = parseTitle(this.stripTitle(title));
+                    newNodeId = this.createEntry(this.orgPaths.get(jdx),
+                                                 Node.NodeType.HEADING,
+                                                 parentNode);
+                    
+                }
+            }
+        }
+    }
+
+    public void parse() {
         String thisLine;
         Stack<Node> nodeStack = new Stack();
         nodeStack.push(this.rootNode);
         int nodeDepth = 0;
-        int parentNode = -1;
+        long parentNode = -1;
         Stack<long> parentNodeStack = new Stack();
         parentNodeStack.push(parentNode);
 
@@ -120,12 +161,15 @@ class OrgFileParser {
                 Log.d(LT, "Parsing: " + orgPaths.get(jdx));
                 //clear data table here
                 BufferedReader breader = this.getHandle(this.orgPaths.get(jdx));
+                long newNodeId = this.createEntry(this.orgPaths.get(jdx),
+                                                  Node.NodeType.HEADING,
+                                                  parentNode);
                 Node fileNode = new Node(this.orgPaths.get(jdx),
-                                         Node.NodeType.HEADING);
-                this.createEntry(this.orgPaths.get(jdx),
-                                 Node.NodeType.HEADING,
-                                 parentNode);
-
+                                         Node.NodeType.HEADING,
+                                         newNodeId,
+                                         parentNode);
+                parentNode = newNodeId;
+                parentNodeStack.push(parentNode);
                 nodeStack.peek().addChildNode(fileNode);
                 nodeStack.push(fileNode);
                 while ((thisLine = breader.readLine()) != null) {
@@ -150,7 +194,15 @@ class OrgFileParser {
                     if (numstars > 0) {
                         String title = thisLine.substring(numstars+1);
                         TitleComponents titleComp = parseTitle(this.stripTitle(title));
-                        Node newNode = new Node(titleComp.title, Node.NodeType.HEADING);
+                        newNodeId = this.createEntry(this.orgPaths.get(jdx),
+                                                     Node.NodeType.HEADING,
+                                                     parentNode);
+                        Node newNode = new Node(titleComp.title,
+                                                Node.NodeType.HEADING,
+                                                newNodeId,
+                                                parentNode);
+                        parentNode = newNodeId;
+
                         newNode.todo = titleComp.todo;
                         newNode.tags.addAll(titleComp.tags);
                         if (numstars > nodeDepth) {
@@ -159,10 +211,14 @@ class OrgFileParser {
                                 lastNode.addChildNode(newNode);
                             } catch (EmptyStackException e) {
                             }
+                            parentNodeStack.push(parentNode);
                             nodeStack.push(newNode);
                             nodeDepth++;
                         }
                         else if (numstars == nodeDepth) {
+                            parentNodeStack.pop();
+                            newNodeId = parentNodeStack.peek();
+                            parentNodeStack.push(parentNode);
                             nodeStack.pop();
                             nodeStack.peek().addChildNode(newNode);
                             nodeStack.push(newNode);
@@ -170,6 +226,7 @@ class OrgFileParser {
                         else if (numstars < nodeDepth) {
                             for (;numstars <= nodeDepth; nodeDepth--) {
                                 nodeStack.pop();
+                                parentNodeStack.pop();
                             }
 
                             Node lastNode = nodeStack.peek();

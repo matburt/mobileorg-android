@@ -23,7 +23,7 @@ class Node {
     int nodeId = null;
     int parentNodeId = null;
 
-    Node(String heading, NodeType ntype, int nodeId, int parentNodeId) {
+    Node(String heading, NodeType ntype, long nodeId, long parentNodeId) {
         this.nodeName = heading;
         this.nodeType = ntype;
         this.nodeId = nodeId;
