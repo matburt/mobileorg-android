@@ -8,22 +8,23 @@ import java.util.regex.Matcher;
 
 class Node {
 
-    public enum NodeType {
-        HEADER, HEADING, COMMENT, DATA
-    }
+    static int HEADER = 0;
+    static int HEADING = 1;
+    static int COMMENT = 2;
+    static int DATA = 3;
 
     ArrayList<Node> subNodes = new ArrayList<Node>();
     ArrayList<String> tags = new ArrayList<String>();
     String nodeName = "";
     String todo = "";
-    NodeType nodeType;
+    int nodeType;
     String nodePayload = "";
     Date schedule = null;
     Date deadline = null;
-    int nodeId = null;
-    int parentNodeId = null;
+    long nodeId ;
+    long parentNodeId;
 
-    Node(String heading, NodeType ntype, long nodeId, long parentNodeId) {
+    Node(String heading, int ntype, long nodeId, long parentNodeId) {
         this.nodeName = heading;
         this.nodeType = ntype;
         this.nodeId = nodeId;

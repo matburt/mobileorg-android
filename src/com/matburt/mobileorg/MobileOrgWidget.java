@@ -52,7 +52,9 @@ public class MobileOrgWidget extends AppWidgetProvider {
                                           R.layout.widget_mobileorg);
             ArrayList<String> allOrgList = this.getOrgFiles(context);
             String storageMode = this.getStorageLocation(context);
-            OrgFileParser ofp = new OrgFileParser(allOrgList, storageMode);
+            SQLiteDatabase appdb = this.openOrCreateDatabase("MobileOrg",
+                                                             MODE_PRIVATE, null);
+            OrgFileParser ofp = new OrgFileParser(allOrgList, storageMode, appdb);
             ofp.parse();
             Node agendaNode = ofp.rootNode.findChildNode("agendas.org");
             Node todoNode = agendaNode.findChildNode("ToDo: ALL");
