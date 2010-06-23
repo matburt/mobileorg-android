@@ -166,10 +166,10 @@ public class MobileOrgActivity extends ListActivity
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        menu.add(0, MobileOrgActivity.OP_MENU_OUTLINE, 0, "Outline");
-        menu.add(0, MobileOrgActivity.OP_MENU_CAPTURE, 0, "Capture");
-        menu.add(0, MobileOrgActivity.OP_MENU_SYNC, 0, "Sync");
-        menu.add(0, MobileOrgActivity.OP_MENU_SETTINGS, 0, "Settings");
+        menu.add(0, MobileOrgActivity.OP_MENU_OUTLINE, 0, R.string.menu_outline);
+        menu.add(0, MobileOrgActivity.OP_MENU_CAPTURE, 0, R.string.menu_capture);
+        menu.add(0, MobileOrgActivity.OP_MENU_SYNC, 0, R.string.menu_sync);
+        menu.add(0, MobileOrgActivity.OP_MENU_SETTINGS, 0, R.string.menu_settings);
         return true;
     }
 
@@ -263,8 +263,8 @@ public class MobileOrgActivity extends ListActivity
             }
         };
         syncThread.start();
-        syncDialog = ProgressDialog.show(this, "",
-                        "Synchronizing. Please wait...", true);
+	
+	syncDialog = ProgressDialog.show(this, "",getString(R.string.sync_wait), true);
     }
 
     public boolean runCapture() {
@@ -279,14 +279,14 @@ public class MobileOrgActivity extends ListActivity
         syncDialog.dismiss();
         if (!this.syncResults) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setMessage("Synchronization Failed, try again?")
+            builder.setMessage(R.string.sync_failed)
                 .setCancelable(false)
-                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int id) {
                             runSynchronizer();
                         }
                     })
-                .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                .setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int id) {
                             dialog.cancel();
                         }
