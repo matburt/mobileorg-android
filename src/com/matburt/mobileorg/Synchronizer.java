@@ -106,7 +106,7 @@ public class Synchronizer
         DefaultHttpClient httpC = this.createConnection(
                                     this.appSettings.getString("webUser", ""),
                                     this.appSettings.getString("webPass", ""));
-        if (this.putUrlFile(urlActual, httpC, fileContents)) {
+        if (this.appendUrlFile(urlActual, httpC, fileContents)) {
             this.removeFile("mobileorg.org");
         }
 
@@ -331,6 +331,14 @@ public class Synchronizer
             Log.e(LT, "Encountered IO Exception pushing mobileorg.org file");
             return false;
         }
+    }
+    
+    private boolean appendUrlFile(String url,
+    							DefaultHttpClient httpClient,
+    							String content) {
+    	String originalContent = this.fetchOrgFile(url);
+    	String newContent = originalContent + '\n' + content;
+    	return this.putUrlFile(url, httpClient, newContent);
     }
 
     private String ReadInputStream(InputStream in) throws IOException {
