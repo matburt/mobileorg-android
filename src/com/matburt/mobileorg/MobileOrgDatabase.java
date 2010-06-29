@@ -53,6 +53,10 @@ public class MobileOrgDatabase {
         Log.i(LT, "Finished deleting from files");
     }
 
+    public void clearData() {
+        this.appdb.execSQL("DELETE FROM data");
+    }
+
     public void addOrUpdateFile(String filename, String name) {
         Cursor result = this.appdb.rawQuery("SELECT * FROM files " +
                                        "WHERE file = '"+filename+"'", null);

@@ -122,7 +122,7 @@ class OrgFileParser {
 
         for (int jdx = 0; jdx < this.orgPaths.size(); jdx++) {
             Log.d(LT, "Parsing: " + orgPaths.get(jdx));
-            //clear data table here
+            this.appdb.clearData();
             BufferedReader breader = this.getHandle(this.orgPaths.get(jdx));
             long newNodeId = this.createEntry(this.orgPaths.get(jdx),
                                               Node.HEADING,
@@ -151,7 +151,7 @@ class OrgFileParser {
                         TitleComponents titleComp = parseTitle(this.stripTitle(title));
                         //parse todo tags
                         if (numstars > nodeDepth) {
-                            newNodeId = this.createEntry(this.orgPaths.get(jdx),
+                            newNodeId = this.createEntry(titleComp.title, //this.orgPaths.get(jdx),
                                                          Node.HEADING,
                                                          "",
                                                          parentNodeStack.peek());
@@ -160,7 +160,7 @@ class OrgFileParser {
                         }
                         else if (numstars == nodeDepth) {
                             parentNodeStack.pop();
-                            newNodeId = this.createEntry(this.orgPaths.get(jdx),
+                            newNodeId = this.createEntry(titleComp.title,
                                                          Node.HEADING,
                                                          "",
                                                          parentNodeStack.peek());
@@ -170,7 +170,7 @@ class OrgFileParser {
                             for (;numstars <= nodeDepth; nodeDepth--) {
                                 parentNodeStack.pop();
                             }
-                            newNodeId = this.createEntry(this.orgPaths.get(jdx),
+                            newNodeId = this.createEntry(titleComp.title,
                                                          Node.HEADING,
                                                          "",
                                                          parentNodeStack.peek());
@@ -199,22 +199,15 @@ class OrgFileParser {
         Stack<Node> nodeStack = new Stack();
         nodeStack.push(this.rootNode);
         int nodeDepth = 0;
-        long parentNode = -1;
 
         for (int jdx = 0; jdx < this.orgPaths.size(); jdx++) {
             try {
                 Log.d(LT, "Parsing: " + orgPaths.get(jdx));
-                //clear data table here
                 BufferedReader breader = this.getHandle(this.orgPaths.get(jdx));
-                long newNodeId = this.createEntry(this.orgPaths.get(jdx),
-                                                  Node.HEADING,
-                                                  "",
-                                                  parentNode);
                 Node fileNode = new Node(this.orgPaths.get(jdx),
                                          Node.HEADING,
-                                         newNodeId,
-                                         parentNode);
-                parentNode = newNodeId;
+                                         1,
+                                         1);
                 nodeStack.peek().addChildNode(fileNode);
                 nodeStack.push(fileNode);
                 while ((thisLine = breader.readLine()) != null) {
@@ -239,15 +232,10 @@ class OrgFileParser {
                     if (numstars > 0) {
                         String title = thisLine.substring(numstars+1);
                         TitleComponents titleComp = parseTitle(this.stripTitle(title));
-                        newNodeId = this.createEntry(this.orgPaths.get(jdx),
-                                                     Node.HEADING,
-                                                     "",
-                                                     parentNode);
                         Node newNode = new Node(titleComp.title,
                                                 Node.HEADING,
-                                                newNodeId,
-                                                parentNode);
-                        parentNode = newNodeId;
+                                                1,
+                                                1);
 
                         newNode.todo = titleComp.todo;
                         newNode.tags.addAll(titleComp.tags);
