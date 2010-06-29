@@ -9,19 +9,34 @@ import android.content.Context;
 import android.app.Application;
 import java.util.ArrayList;
 import android.util.Log;
+import android.content.SharedPreferences;
+import java.io.File;
+import android.os.Environment;
 
 public class MobileOrgDatabase {
     private Context appcontext;
     public SQLiteDatabase appdb;
+    public SharedPreferences appSettings;
     public static final String LT = "MobileOrg";
 
     public MobileOrgDatabase(Context appctxt) {
         this.appcontext = appctxt;
+        this.appSettings = PreferenceManager.getDefaultSharedPreferences(appctxt);
         this.initialize();
     }
 
     public void initialize() {
-        this.appdb = this.appcontext.openOrCreateDatabase("MobileOrg", 0, null);
+        String storageMode = this.appSettings.getString("storageMode", "");
+        if (storageMode.equals("inernal") ||
+            storageMode.equals(""))
+            this.appdb = this.appcontext.openOrCreateDatabase("MobileOrg", 0, null);
+        else if (storageMode.equals("sdcard")) {
+            File sdcard = Environment.getExternalStorageDirectory();
+            File morgDir = new File(sdcard, "mobileorg");
+            File morgFile = new File(morgDir, "mobileorg.db");
+            this.appdb = this.appcontext.openOrCreateDatabase(morgFile.getAbsolutePath(), 0, null);
+            Log.d(LT, "Setting database path to " + morgFile.getAbsolutePath());
+        }
         this.appdb.execSQL("CREATE TABLE IF NOT EXISTS files"
                            + " (file VARCHAR, name VARCHAR,"
                            + " checksum VARCHAR);");
