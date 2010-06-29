@@ -27,7 +27,7 @@ public class MobileOrgDatabase {
 
     public void initialize() {
         String storageMode = this.appSettings.getString("storageMode", "");
-        if (storageMode.equals("inernal") ||
+        if (storageMode.equals("internal") ||
             storageMode.equals(""))
             this.appdb = this.appcontext.openOrCreateDatabase("MobileOrg", 0, null);
         else if (storageMode.equals("sdcard")) {
