@@ -46,10 +46,12 @@ public class Synchronizer
 {
     private SharedPreferences appSettings;
     private Activity rootActivity;
+    private MobileOrgDatabase appdb;
     private static final String LT = "MobileOrg";
 
     Synchronizer(Activity parentActivity) {
         this.rootActivity = parentActivity;
+        this.appdb = new MobileOrgDatabase((Context)parentActivity);
         this.appSettings = PreferenceManager.getDefaultSharedPreferences(
                                    parentActivity.getBaseContext());
     }
@@ -107,7 +109,7 @@ public class Synchronizer
                                     this.appSettings.getString("webUser", ""),
                                     this.appSettings.getString("webPass", ""));
         if (this.appendUrlFile(urlActual, httpC, fileContents)) {
-            this.removeFile("mobileorg.org");
+            this.appdb.removeFile("mobileorg.org");
         }
 
         if (storageMode.equals("internal") || storageMode == null) {
@@ -194,7 +196,7 @@ public class Synchronizer
 
             try {
             	writer.write(fileContents);
-            	this.addOrUpdateFile(masterList.get(key), key);
+            	this.appdb.addOrUpdateFile(masterList.get(key), key);
                 writer.flush();
                 writer.close();
             }
@@ -206,34 +208,6 @@ public class Synchronizer
         }
 
         return true;
-    }
-
-    private void removeFile(String filename) {
-        SQLiteDatabase appdb = this.rootActivity.openOrCreateDatabase("MobileOrg",
-                                          0, null);
-        appdb.execSQL("DELETE FROM files " +
-                      "WHERE file = '"+filename+"'");
-        Log.i(LT, "Finished deleting from files");
-        appdb.close();
-    }
-
-    private void addOrUpdateFile(String filename, String name) {
-        SQLiteDatabase appdb = this.rootActivity.openOrCreateDatabase("MobileOrg",
-                                          0, null);
-        Cursor result = appdb.rawQuery("SELECT * FROM files " +
-                                       "WHERE file = '"+filename+"'", null);
-        if (result != null) {
-            if (result.getCount() > 0) {
-                appdb.execSQL("UPDATE files set name = '"+name+"', "+
-                              "checksum = '' where file = '"+filename+"'");
-            }
-            else {
-                appdb.execSQL("INSERT INTO files (file, name, checksum) " +
-                              "VALUES ('"+filename+"','"+name+"','')");
-            }
-        }
-        result.close();
-        appdb.close();
     }
 
     private String fetchOrgFile(String orgUrl) {

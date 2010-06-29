@@ -34,12 +34,12 @@ class OrgFileParser {
     FileInputStream fstream;
     Node rootNode = new Node("MobileOrg", Node.HEADING,
                              -1, -1);
-    SQLiteDatabase appdb;
+    MobileOrgDatabase appdb;
     public static final String LT = "MobileOrg";
 
     OrgFileParser(ArrayList<String> orgpaths,
                   String storageMode,
-                  SQLiteDatabase appdb) {
+                  MobileOrgDatabase appdb) {
         this.appdb = appdb;
         this.storageMode = storageMode;
         this.orgPaths = orgpaths;
@@ -101,16 +101,16 @@ class OrgFileParser {
                             String content, long parentId) {
         ContentValues recValues = new ContentValues(); 
         recValues.put("heading", heading);
-        recValues.put("nodetype", nodeType);
+        recValues.put("type", nodeType);
         recValues.put("content", content);
         recValues.put("parentid", parentId);
-        return this.appdb.insert("data", null, recValues);
+        return this.appdb.appdb.insert("data", null, recValues);
     }
 
     public void addContent(long nodeId, String content) {
         ContentValues recValues = new ContentValues();
         recValues.put("content", content + "\n");
-        this.appdb.update("data", recValues, "id = ?", new String[] {Long.toString(nodeId)});
+        this.appdb.appdb.update("data", recValues, "id = ?", new String[] {Long.toString(nodeId)});
     }
 
     public void newparse() {
@@ -200,8 +200,6 @@ class OrgFileParser {
         nodeStack.push(this.rootNode);
         int nodeDepth = 0;
         long parentNode = -1;
-        Stack<Long> parentNodeStack = new Stack();
-        parentNodeStack.push(parentNode);
 
         for (int jdx = 0; jdx < this.orgPaths.size(); jdx++) {
             try {
@@ -217,7 +215,6 @@ class OrgFileParser {
                                          newNodeId,
                                          parentNode);
                 parentNode = newNodeId;
-                parentNodeStack.push(parentNode);
                 nodeStack.peek().addChildNode(fileNode);
                 nodeStack.push(fileNode);
                 while ((thisLine = breader.readLine()) != null) {
@@ -264,9 +261,6 @@ class OrgFileParser {
                             nodeDepth++;
                         }
                         else if (numstars == nodeDepth) {
-                            parentNodeStack.pop();
-                            newNodeId = parentNodeStack.peek();
-                            parentNodeStack.push(parentNode);
                             nodeStack.pop();
                             nodeStack.peek().addChildNode(newNode);
                             nodeStack.push(newNode);
@@ -274,7 +268,6 @@ class OrgFileParser {
                         else if (numstars < nodeDepth) {
                             for (;numstars <= nodeDepth; nodeDepth--) {
                                 nodeStack.pop();
-                                parentNodeStack.pop();
                             }
 
                             Node lastNode = nodeStack.peek();

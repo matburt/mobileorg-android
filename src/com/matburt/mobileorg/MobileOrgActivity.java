@@ -105,6 +105,7 @@ public class MobileOrgActivity extends ListActivity
     private static final int OP_MENU_CAPTURE = 4;
     private static final String LT = "MobileOrg";
     private ProgressDialog syncDialog;
+    private MobileOrgDatabase appdb;
     public boolean syncResults;
     public SharedPreferences appSettings;
     final Handler syncHandler = new Handler();
@@ -118,8 +119,8 @@ public class MobileOrgActivity extends ListActivity
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        this.initializeTables();
         ListView lv = this.getListView();
+        this.appdb = new MobileOrgDatabase((Context)this);
         appSettings = PreferenceManager.getDefaultSharedPreferences(
                                        getBaseContext());
         lv.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener
@@ -138,13 +139,12 @@ public class MobileOrgActivity extends ListActivity
 
     public void runParser() {
         MobileOrgApplication appInst = (MobileOrgApplication)this.getApplication();
-        SQLiteDatabase appdb = this.openOrCreateDatabase("MobileOrg",
-                                                         MODE_PRIVATE, null);
-        ArrayList<String> allOrgList = this.getOrgFiles();
+        ArrayList<String> allOrgList = this.appdb.getOrgFiles();
         String storageMode = this.getStorageLocation();
         OrgFileParser ofp = new OrgFileParser(allOrgList,
                                               storageMode,
-                                              appdb);
+                                              this.appdb);
+        //ofp.newparse();
         ofp.parse();
         appInst.rootNode = ofp.rootNode;
     }
@@ -318,38 +318,5 @@ public class MobileOrgActivity extends ListActivity
 
     public String getStorageLocation() {
         return this.appSettings.getString("storageMode", "");
-    }
-
-    public ArrayList<String> getOrgFiles() {
-        ArrayList<String> allFiles = new ArrayList<String>();
-        SQLiteDatabase appdb = this.openOrCreateDatabase("MobileOrg",
-                                                         MODE_PRIVATE, null);
-        Cursor result = appdb.rawQuery("SELECT file FROM files", null);
-        if (result != null) {
-            if (result.getCount() > 0) {
-                result.moveToFirst();
-                do {
-                    Log.d(LT, "pulled " + result.getString(0));
-                    allFiles.add(result.getString(0));
-                } while(result.moveToNext());
-            }
-        }
-        appdb.close();
-        result.close();
-        return allFiles;
-    }
-
-    public void initializeTables() {
-        SQLiteDatabase appdb = this.openOrCreateDatabase("MobileOrg",
-                                                         MODE_PRIVATE, null);
-        appdb.execSQL("CREATE TABLE IF NOT EXISTS files"
-                      + " (file VARCHAR, name VARCHAR,"
-                      + " checksum VARCHAR);");
-        appdb.execSQL("CREATE TABLE IF NOT EXISTS data"
-                      + "  (id INTEGER PRIMARY KEY AUTOINCREMENT,"
-                      + "   heading VARCHAR, type INTEGER,"
-                      + "   content VARCHAR, parentid INTEGER);");
-        appdb.close();
-
     }
 }

@@ -31,13 +31,15 @@ public class MobileOrgWidget extends AppWidgetProvider {
     public void onUpdate(Context context, AppWidgetManager appWidgetManager,
             int[] appWidgetIds) {
         // To prevent any ANR timeouts, we perform the update in a service
-        context.startService(new Intent(context,
-                                        MobileOrgWidgetService.class));
+       context.startService(new Intent(context,
+                                       MobileOrgWidgetService.class));
     }
 
     public static class MobileOrgWidgetService extends Service {
+        private MobileOrgDatabase appdb;
         @Override
         public void onStart(Intent intent, int startId) {
+            this.appdb = new MobileOrgDatabase((Context)this);
             RemoteViews updateViews = this.genUpdateDisplay(this);
             ComponentName thisWidget = new ComponentName(this,
                                                          MobileOrgWidget.class);
@@ -50,11 +52,9 @@ public class MobileOrgWidget extends AppWidgetProvider {
             RemoteViews updateViews = null;
             updateViews = new RemoteViews(context.getPackageName(),
                                           R.layout.widget_mobileorg);
-            ArrayList<String> allOrgList = this.getOrgFiles(context);
+            ArrayList<String> allOrgList = this.appdb.getOrgFiles();
             String storageMode = this.getStorageLocation(context);
-            SQLiteDatabase appdb = this.openOrCreateDatabase("MobileOrg",
-                                                             MODE_PRIVATE, null);
-            OrgFileParser ofp = new OrgFileParser(allOrgList, storageMode, appdb);
+            OrgFileParser ofp = new OrgFileParser(allOrgList, storageMode, this.appdb);
             ofp.parse();
             Node agendaNode = ofp.rootNode.findChildNode("agendas.org");
             Node todoNode = agendaNode.findChildNode("ToDo: ALL");
@@ -69,25 +69,6 @@ public class MobileOrgWidget extends AppWidgetProvider {
         public String getStorageLocation(Context context) {
             SharedPreferences appPrefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
             return appPrefs.getString("storageMode", "");
-        }
-
-        public ArrayList<String> getOrgFiles(Context context) {
-            ArrayList<String> allFiles = new ArrayList<String>();
-            SQLiteDatabase appdb = context.openOrCreateDatabase("MobileOrg",
-                                                             0, null);
-            Cursor result = appdb.rawQuery("SELECT file FROM files", null);
-            if (result != null) {
-                if (result.getCount() > 0) {
-                    result.moveToFirst();
-                    do {
-                        Log.d(LT, "pulled " + result.getString(0));
-                        allFiles.add(result.getString(0));
-                    } while(result.moveToNext());
-                }
-            }
-            appdb.close();
-            result.close();
-            return allFiles;
         }
 
         @Override
