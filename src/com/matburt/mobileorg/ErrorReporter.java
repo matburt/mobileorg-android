@@ -12,7 +12,6 @@ public class ErrorReporter
     public static void displayError(Context context,
     		String message)
     {
-    	Log.e(LT, R.string.error_dialog_title + ":\n" + message);
     	AlertDialog.Builder builder = new AlertDialog.Builder(context);
     	builder.setMessage(message)
     		   .setNeutralButton("Ok", new DialogInterface.OnClickListener() {
@@ -22,5 +21,14 @@ public class ErrorReporter
     		   })
     		   .setTitle(R.string.error_dialog_title)
     		   .show();
+    }
+    
+    public static void displayError(Context context,
+    		ReportableError e)
+    {
+    	if(e.getOriginalError() != null) {
+    		Log.e(LT, e.getOriginalError().toString());
+    	}
+    	ErrorReporter.displayError(context, e.getMessage());
     }
 }
