@@ -1,62 +1,60 @@
 package com.matburt.mobileorg;
 
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.apache.http.HttpEntity;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.auth.AuthScope;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.ArrayList;
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
-import java.net.URL;
-import java.net.MalformedURLException;
-import java.io.BufferedWriter;
 import java.io.BufferedReader;
-import java.io.StringWriter;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.FileOutputStream;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.FileNotFoundException;
 import java.io.OutputStreamWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.FileReader;
+import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.StatusLine;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.impl.client.DefaultHttpClient;
 
 import android.app.Activity;
 import android.content.Context;
-import android.database.Cursor;
-import android.database.SQLException;
-import android.database.sqlite.SQLiteDatabase;
-import android.preference.PreferenceManager;
 import android.content.SharedPreferences;
-import android.util.Log;
+import android.content.res.Resources;
+import android.content.res.Resources.NotFoundException;
 import android.os.Environment;
+import android.preference.PreferenceManager;
+import android.util.Log;
 
 public class Synchronizer
 {
     private SharedPreferences appSettings;
     private Activity rootActivity;
     private MobileOrgDatabase appdb;
+    private Resources r;
     private static final String LT = "MobileOrg";
 
     Synchronizer(Activity parentActivity) {
         this.rootActivity = parentActivity;
+        this.r = this.rootActivity.getResources();
         this.appdb = new MobileOrgDatabase((Context)parentActivity);
         this.appSettings = PreferenceManager.getDefaultSharedPreferences(
                                    parentActivity.getBaseContext());
     }
 
-    public boolean push() {
+    public void push() throws NotFoundException, ReportableError {
         String urlActual = this.getRootUrl() + "mobileorg.org";
         String storageMode = this.appSettings.getString("storageMode", "");
         BufferedReader reader = null;
@@ -69,8 +67,8 @@ public class Synchronizer
                 reader = new BufferedReader(new InputStreamReader(fs));
             }
             catch (java.io.FileNotFoundException e) {
-                Log.i(LT, "Did not find mobileorg.org file, not pushing.");
-                return true;
+            	Log.i(LT, "Did not find mobileorg.org file, not pushing.");
+                return;
             }
         }
         else if (storageMode.equals("sdcard")) {
@@ -80,18 +78,21 @@ public class Synchronizer
                 File morgFile = new File(morgDir, "mobileorg.org");
                 if (!morgFile.exists()) {
                     Log.i(LT, "Did not find mobileorg.org file, not pushing.");
-                    return true;
+                    return;
                 }
                 FileReader orgFReader = new FileReader(morgFile);
                 reader = new BufferedReader(orgFReader);
             }
             catch (java.io.IOException e) {
-                Log.e(LT, "IO Exception initilizing reader on sdcard file");
+                throw new ReportableError(
+                		r.getString(R.string.error_file_read, "mobileorg.org"),
+                		e);
             }
         }
         else {
-            Log.e(LT, "[Push] Unknown storage mechanism: " + storageMode);
-            return false;
+        	throw new ReportableError(
+        			r.getString(R.string.error_local_storage_method_unknown, storageMode),
+        			null);
         }
 
         String thisLine = "";
@@ -101,16 +102,16 @@ public class Synchronizer
             }
         }
         catch (java.io.IOException e) {
-            Log.e(LT, "IO Exception trying to read from mobileorg.org file");
-            return false;
+        	throw new ReportableError(
+            		r.getString(R.string.error_file_read, "mobileorg.org"),
+            		e);
         }
 
         DefaultHttpClient httpC = this.createConnection(
                                     this.appSettings.getString("webUser", ""),
                                     this.appSettings.getString("webPass", ""));
-        if (this.appendUrlFile(urlActual, httpC, fileContents)) {
-            this.appdb.removeFile("mobileorg.org");
-        }
+        this.appendUrlFile(urlActual, httpC, fileContents);
+        this.appdb.removeFile("mobileorg.org");
 
         if (storageMode.equals("internal") || storageMode == null) {
             this.rootActivity.deleteFile("mobileorg.org");
@@ -120,23 +121,24 @@ public class Synchronizer
             File morgDir = new File(root, "mobileorg");
             File morgFile = new File(morgDir, "mobileorg.org");
             morgFile.delete();
-        }            
-        return true;
+        }
     }
 
-    public boolean pull() {
+    public void pull() throws NotFoundException, ReportableError {
         Pattern checkUrl = Pattern.compile("http.*\\.(?:org|txt)$");
-        if (!checkUrl.matcher(this.appSettings.getString("webUrl", "")).find()) {
-            Log.e(LT, "Bad URL");
-            return false;
+        String url = this.appSettings.getString("webUrl", "");
+        if (!checkUrl.matcher(url).find()) {
+        	throw new ReportableError(
+            		r.getString(R.string.error_bad_url, url),
+            		null);
         }
 
         //Get the index org file
-        String masterStr = this.fetchOrgFile(this.appSettings.getString(
-                                                                "webUrl", ""));
+        String masterStr = this.fetchOrgFile(url);
         if (masterStr.equals("")) {
-            Log.e(LT, "Failure getting main org file");
-            return false;
+            throw new ReportableError(
+            		r.getString(R.string.error_file_not_found, url),
+            		null);
         }
         HashMap<String, String> masterList;
         masterList = this.getOrgFilesFromMaster(masterStr);
@@ -162,13 +164,9 @@ public class Synchronizer
                     writer = new BufferedWriter(new OutputStreamWriter(fs));
                 }
                 catch (java.io.FileNotFoundException e) {
-                    Log.e(LT, "Could not write to file: " +
-                          masterList.get(key));
-                    return false;
-                }
-                catch (java.io.IOException e) {
-                    Log.e(LT, "IO Exception initializing writer on file " +
-                          masterList.get(key));
+                	throw new ReportableError(
+                    		r.getString(R.string.error_file_not_found, key),
+                    		e);
                 }
             }
             else if (storageMode.equals("sdcard")) {
@@ -183,15 +181,20 @@ public class Synchronizer
                         writer = new BufferedWriter(orgFWriter);
                     }
                     else {
-                        Log.e(LT, "Write permission denied");
+                        throw new ReportableError(
+                        		r.getString(R.string.error_file_permissions, morgDir.getAbsolutePath()),
+                        		null);
                     }
                 } catch (java.io.IOException e) {
-                    Log.e(LT, "IO Exception initializing writer on sdcard file");
+                    throw new ReportableError(
+                    		"IO Exception initializing writer on sdcard file",
+                    		e);
                 }
             }
             else {
-                Log.e(LT, "[Sync] Unknown storage mechanism: " + storageMode);
-                return false;
+                throw new ReportableError(
+                		r.getString(R.string.error_local_storage_method_unknown, storageMode),
+                		null);
             }
 
             try {
@@ -201,44 +204,48 @@ public class Synchronizer
                 writer.close();
             }
             catch (java.io.IOException e) {
-                Log.e(LT, "IO Exception trying to write file " +
-                      masterList.get(key));
-                return false;
+                throw new ReportableError(
+                		r.getString(R.string.error_file_write, masterList.get(key)),
+                		e);
             }
         }
-
-        return true;
     }
 
-    private String fetchOrgFile(String orgUrl) {
+    private String fetchOrgFile(String orgUrl) throws NotFoundException, ReportableError {
         DefaultHttpClient httpC = this.createConnection(
                                       this.appSettings.getString("webUser", ""),
                                       this.appSettings.getString("webPass", ""));
-        InputStream mainFile = this.getUrlStream(orgUrl, httpC);
+        InputStream mainFile;
+		mainFile = this.getUrlStream(orgUrl, httpC);
         String masterStr = "";
         try {
             if (mainFile == null) {
                 Log.w(LT, "Stream is null");
+                
+                //Do we really want to raise an exception here? (John O)
                 return ""; //Raise exception
             }
             masterStr = this.ReadInputStream(mainFile);
             Log.d(LT, masterStr);
         }
         catch (IOException e) {
-            Log.e(LT, "Error reading input stream for URL");
-            return ""; //Raise exception
+            throw new ReportableError(
+            		r.getString(R.string.error_url_fetch, orgUrl),
+            		e);
         }
         return masterStr;
     }
 
-    private String getRootUrl() {
-        URL manageUrl;
+    private String getRootUrl() throws NotFoundException, ReportableError {
+        URL manageUrl = null;
         try {
             manageUrl = new URL(this.appSettings.getString("webUrl", ""));
         }
         catch (MalformedURLException e) {
-            Log.e(LT, "Malformed URL");
-            return ""; //raise exception
+            throw new ReportableError(
+            		r.getString(R.string.error_bad_url,
+            				(manageUrl == null) ? "" : manageUrl.toString()),
+            		e);
         }
 
         String urlPath =  manageUrl.getPath();
@@ -275,9 +282,17 @@ public class Synchronizer
         return httpClient;
     }
 
-    private InputStream getUrlStream(String url, DefaultHttpClient httpClient) {
+    private InputStream getUrlStream(String url, DefaultHttpClient httpClient) throws NotFoundException, ReportableError {
         try {
             HttpResponse res = httpClient.execute(new HttpGet(url));
+            
+            StatusLine status = res.getStatusLine();
+            if(status.getStatusCode() < 200 || status.getStatusCode() > 299) {
+            	throw new ReportableError(
+            			r.getString(R.string.error_url_fetch_detail, url, status.getReasonPhrase()),
+            			null);
+            }
+            
             return res.getEntity().getContent();
         }
         catch (IOException e) {
@@ -287,32 +302,33 @@ public class Synchronizer
         }
     }
 
-    private boolean putUrlFile(String url,
+    private void putUrlFile(String url,
                            DefaultHttpClient httpClient,
-                           String content) {
+                           String content) throws NotFoundException, ReportableError {
         try {
             HttpPut httpPut = new HttpPut(url);
             httpPut.setEntity(new StringEntity(content));
             HttpResponse response = httpClient.execute(httpPut);
             httpClient.getConnectionManager().shutdown();
-            return true;
         }
         catch (UnsupportedEncodingException e) {
-            Log.e(LT, "Encountered unsupported encoding pushing mobileorg.org file");
-            return false;
+        	throw new ReportableError(
+        			r.getString(R.string.error_unsupported_encoding, "mobileorg.org"),
+        			e);
         }
         catch (IOException e) {
-            Log.e(LT, "Encountered IO Exception pushing mobileorg.org file");
-            return false;
+        	throw new ReportableError(
+        			r.getString(R.string.error_url_put, url),
+        			e);
         }
     }
     
-    private boolean appendUrlFile(String url,
+    private void appendUrlFile(String url,
     							DefaultHttpClient httpClient,
-    							String content) {
+    							String content) throws NotFoundException, ReportableError {
     	String originalContent = this.fetchOrgFile(url);
     	String newContent = originalContent + '\n' + content;
-    	return this.putUrlFile(url, httpClient, newContent);
+    	this.putUrlFile(url, httpClient, newContent);
     }
 
     private String ReadInputStream(InputStream in) throws IOException {

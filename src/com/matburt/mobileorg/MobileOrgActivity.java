@@ -107,6 +107,7 @@ public class MobileOrgActivity extends ListActivity
     private ProgressDialog syncDialog;
     private MobileOrgDatabase appdb;
     public boolean syncResults;
+    private ReportableError syncError;
     public SharedPreferences appSettings;
     final Handler syncHandler = new Handler();
     final Runnable syncUpdateResults = new Runnable() {
@@ -125,7 +126,6 @@ public class MobileOrgActivity extends ListActivity
                                        getBaseContext());
         lv.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener
                                       (){
-                @Override
                     public boolean onItemLongClick(AdapterView<?> av, View v,
                                                    int pos, long id) {
                     onLongListItemClick(v,pos,id);
@@ -144,8 +144,13 @@ public class MobileOrgActivity extends ListActivity
         OrgFileParser ofp = new OrgFileParser(allOrgList,
                                               storageMode,
                                               this.appdb);
-        ofp.parse();
-        appInst.rootNode = ofp.rootNode;
+        try {
+        	ofp.parse();
+        	appInst.rootNode = ofp.rootNode;
+        }
+        catch(Throwable e) {
+        	ErrorReporter.displayError(this, "An error occurred during parsing: " + e.toString());
+        }
     }
 
     @Override
@@ -244,20 +249,14 @@ public class MobileOrgActivity extends ListActivity
         final Synchronizer appSync = new Synchronizer(this);
         Thread syncThread = new Thread() {
                 public void run() {
-                    boolean pullResult = appSync.pull();
-                    boolean pushResult = false;
-                    syncResults = true;
-                    if (!pullResult) {
-                        Log.e(LT, "Pull Synchronization fail");
-                        syncResults = false;
-                    }
-                    else {
-                        pushResult = appSync.push();
-                    }
-                    if (!pushResult) {
-                        Log.e(LT, "Push Synchronization fail");
-                        syncResults = false;
-                    }
+                	try {
+                		syncError = null;
+	                    appSync.pull();
+	                    appSync.push();
+                	}
+                	catch(ReportableError e) {
+                		syncError = e;
+                	}
                     syncHandler.post(syncUpdateResults);
             }
         };
@@ -277,21 +276,9 @@ public class MobileOrgActivity extends ListActivity
     public void postSynchronize() {
         syncDialog.dismiss();
         if (!this.syncResults) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setMessage(R.string.sync_failed)
-                .setCancelable(false)
-                .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            runSynchronizer();
-                        }
-                    })
-                .setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            dialog.cancel();
-                        }
-                    });
-            AlertDialog alert = builder.create();
-            alert.show();
+        	if(this.syncError != null) {
+        		ErrorReporter.displayError(this, this.syncError);
+        	}
         }
         else {
             this.runParser();
