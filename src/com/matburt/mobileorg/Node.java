@@ -21,14 +21,10 @@ class Node {
     String nodePayload = "";
     Date schedule = null;
     Date deadline = null;
-    long nodeId ;
-    long parentNodeId;
 
-    Node(String heading, int ntype, long nodeId, long parentNodeId) {
+    Node(String heading, int ntype) {
         this.nodeName = heading;
         this.nodeType = ntype;
-        this.nodeId = nodeId;
-        this.parentNodeId = parentNodeId;
     }
 
     Node findChildNode(String regex) {

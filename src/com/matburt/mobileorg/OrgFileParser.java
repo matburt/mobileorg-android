@@ -113,87 +113,6 @@ class OrgFileParser {
         this.appdb.appdb.update("data", recValues, "id = ?", new String[] {Long.toString(nodeId)});
     }
 
-    public void newparse() {
-        String thisLine;
-        Stack<Long> parentNodeStack = new Stack();
-        long parentNode = -1;
-        int nodeDepth = 0;
-        parentNodeStack.push(parentNode);
-
-        for (int jdx = 0; jdx < this.orgPaths.size(); jdx++) {
-            Log.d(LT, "Parsing: " + orgPaths.get(jdx));
-            this.appdb.clearData();
-            BufferedReader breader = this.getHandle(this.orgPaths.get(jdx));
-            long newNodeId = this.createEntry(this.orgPaths.get(jdx),
-                                              Node.HEADING,
-                                              "",
-                                              parentNodeStack.peek());
-            parentNodeStack.push(newNodeId);
-            try {
-                while ((thisLine = breader.readLine()) != null) {
-                    int numstars = 0;
-                    if (thisLine.length() < 1 || thisLine.charAt(0) == '#') {
-                        continue;
-                    }
-                    //star counter
-                    for (int idx = 0; idx < thisLine.length(); idx++) {
-                        if (thisLine.charAt(idx) != '*') {
-                            break;
-                        }
-                        numstars++;
-                    }
-                    if (numstars >= thisLine.length() || thisLine.charAt(numstars) != ' ') {
-                        numstars = 0;
-                    }
-                    //headings
-                    if (numstars > 0) {
-                        String title = thisLine.substring(numstars+1);
-                        TitleComponents titleComp = parseTitle(this.stripTitle(title));
-                        //parse todo tags
-                        if (numstars > nodeDepth) {
-                            newNodeId = this.createEntry(titleComp.title, //this.orgPaths.get(jdx),
-                                                         Node.HEADING,
-                                                         "",
-                                                         parentNodeStack.peek());
-                            parentNodeStack.push(parentNode);
-                            nodeDepth++;
-                        }
-                        else if (numstars == nodeDepth) {
-                            parentNodeStack.pop();
-                            newNodeId = this.createEntry(titleComp.title,
-                                                         Node.HEADING,
-                                                         "",
-                                                         parentNodeStack.peek());
-                            parentNodeStack.push(newNodeId);
-                        }
-                        else if (numstars < nodeDepth) {
-                            for (;numstars <= nodeDepth; nodeDepth--) {
-                                parentNodeStack.pop();
-                            }
-                            newNodeId = this.createEntry(titleComp.title,
-                                                         Node.HEADING,
-                                                         "",
-                                                         parentNodeStack.peek());
-                            parentNodeStack.push(newNodeId);
-                            nodeDepth++;
-                        }
-                    }
-                    else {
-                        this.addContent(parentNodeStack.peek(), thisLine);
-                    }
-                }
-                for (;nodeDepth > 0; nodeDepth--) {
-                    parentNodeStack.pop();
-                }
-                parentNodeStack.pop();
-                breader.close();
-            }
-            catch (IOException e) {
-                Log.e(LT, "IO Exception on readerline: " + e.getMessage());
-            }
-        }        
-    }
-
     public void parse() {
         String thisLine;
         Stack<Node> nodeStack = new Stack();
@@ -205,9 +124,7 @@ class OrgFileParser {
                 Log.d(LT, "Parsing: " + orgPaths.get(jdx));
                 BufferedReader breader = this.getHandle(this.orgPaths.get(jdx));
                 Node fileNode = new Node(this.orgPaths.get(jdx),
-                                         Node.HEADING,
-                                         1,
-                                         1);
+                                         Node.HEADING);
                 nodeStack.peek().addChildNode(fileNode);
                 nodeStack.push(fileNode);
                 while ((thisLine = breader.readLine()) != null) {
@@ -233,9 +150,7 @@ class OrgFileParser {
                         String title = thisLine.substring(numstars+1);
                         TitleComponents titleComp = parseTitle(this.stripTitle(title));
                         Node newNode = new Node(titleComp.title,
-                                                Node.HEADING,
-                                                1,
-                                                1);
+                                                Node.HEADING);
 
                         newNode.todo = titleComp.todo;
                         newNode.tags.addAll(titleComp.tags);

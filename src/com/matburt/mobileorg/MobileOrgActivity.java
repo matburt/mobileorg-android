@@ -144,7 +144,6 @@ public class MobileOrgActivity extends ListActivity
         OrgFileParser ofp = new OrgFileParser(allOrgList,
                                               storageMode,
                                               this.appdb);
-        //ofp.newparse();
         ofp.parse();
         appInst.rootNode = ofp.rootNode;
     }

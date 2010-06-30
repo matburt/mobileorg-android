@@ -40,10 +40,6 @@ public class MobileOrgDatabase {
         this.appdb.execSQL("CREATE TABLE IF NOT EXISTS files"
                            + " (file VARCHAR, name VARCHAR,"
                            + " checksum VARCHAR);");
-        this.appdb.execSQL("CREATE TABLE IF NOT EXISTS data"
-                      + "  (id INTEGER PRIMARY KEY AUTOINCREMENT,"
-                      + "   heading VARCHAR, type INTEGER,"
-                      + "   content VARCHAR, parentid INTEGER);");
     }
 
     public ArrayList<String> getOrgFiles() {
