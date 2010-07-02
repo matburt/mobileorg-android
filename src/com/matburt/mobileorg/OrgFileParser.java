@@ -32,8 +32,7 @@ class OrgFileParser {
     String storageMode = null;
     Pattern titlePattern = null;
     FileInputStream fstream;
-    Node rootNode = new Node("MobileOrg", Node.HEADING,
-                             -1, -1);
+    Node rootNode = new Node("MobileOrg", Node.HEADING);
     MobileOrgDatabase appdb;
     public static final String LT = "MobileOrg";
 
@@ -201,6 +200,7 @@ class OrgFileParser {
         BufferedReader breader = null;
         try {
             if (this.storageMode == null || this.storageMode.equals("internal")) {
+                String normalized = filename.replace("/", "_");
                 this.fstream = new FileInputStream("/data/data/com.matburt.mobileorg/files/" + filename);
             }
             else if (this.storageMode.equals("sdcard")) {
