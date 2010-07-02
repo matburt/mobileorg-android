@@ -47,6 +47,12 @@ public class MobileOrgWidget extends AppWidgetProvider {
             manager.updateAppWidget(thisWidget, updateViews);
         }
 
+        @Override
+        public void onDestroy() {
+            this.appdb.close();
+            super.onDestroy();
+        }
+
         public RemoteViews genUpdateDisplay(Context context) {
             Resources res = context.getResources();
             RemoteViews updateViews = null;
