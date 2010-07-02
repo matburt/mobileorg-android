@@ -42,6 +42,10 @@ public class MobileOrgDatabase {
                            + " checksum VARCHAR);");
     }
 
+    public void close() {
+        this.appdb.close();
+    }
+
     public ArrayList<String> getOrgFiles() {
         ArrayList<String> allFiles = new ArrayList<String>();
         Cursor result = this.appdb.rawQuery("SELECT file FROM files", null);

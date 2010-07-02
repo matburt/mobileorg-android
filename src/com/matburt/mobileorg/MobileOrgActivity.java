@@ -137,6 +137,12 @@ public class MobileOrgActivity extends ListActivity
         }
     }
 
+    @Override
+    public void onDestroy() {
+        this.appdb.close();
+        super.onDestroy();
+    }
+
     public void runParser() {
         MobileOrgApplication appInst = (MobileOrgApplication)this.getApplication();
         ArrayList<String> allOrgList = this.appdb.getOrgFiles();
@@ -253,6 +259,7 @@ public class MobileOrgActivity extends ListActivity
                 		syncError = null;
 	                    appSync.pull();
 	                    appSync.push();
+                        appSync.close();
                 	}
                 	catch(ReportableError e) {
                 		syncError = e;
