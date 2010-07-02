@@ -35,7 +35,7 @@ public class MobileOrgDatabase {
             File sdcard = Environment.getExternalStorageDirectory();
             File morgDir = new File(sdcard, "mobileorg");
             File morgFile = new File(morgDir, "mobileorg.db");
-            this.appdb = this.appcontext.openOrCreateDatabase(morgFile.getAbsolutePath(), 0, null);
+            this.appdb = SQLiteDatabase.openOrCreateDatabase(morgFile, null);
             Log.d(LT, "Setting database path to " + morgFile.getAbsolutePath());
         }
         this.appdb.execSQL("CREATE TABLE IF NOT EXISTS files"
