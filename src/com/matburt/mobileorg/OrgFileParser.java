@@ -201,7 +201,7 @@ class OrgFileParser {
         try {
             if (this.storageMode == null || this.storageMode.equals("internal")) {
                 String normalized = filename.replace("/", "_");
-                this.fstream = new FileInputStream("/data/data/com.matburt.mobileorg/files/" + filename);
+                this.fstream = new FileInputStream("/data/data/com.matburt.mobileorg/files/" + normalized);
             }
             else if (this.storageMode.equals("sdcard")) {
                 this.fstream = new FileInputStream("/sdcard/mobileorg/" + filename);
