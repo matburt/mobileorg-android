@@ -48,7 +48,7 @@ public class Capture extends Activity implements OnClickListener
     }
 
     @Override
-    public void onDestory() {
+    public void onDestroy() {
         this.appdb.close();
         super.onDestroy();
     }
