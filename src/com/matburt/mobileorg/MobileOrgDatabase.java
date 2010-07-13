@@ -15,6 +15,7 @@ import android.os.Environment;
 
 public class MobileOrgDatabase {
     private Context appcontext;
+    private String lastStorageMode = "";
     public SQLiteDatabase appdb;
     public SharedPreferences appSettings;
     public static final String LT = "MobileOrg";
@@ -34,15 +35,29 @@ public class MobileOrgDatabase {
             File sdcard = Environment.getExternalStorageDirectory();
             File morgDir = new File(sdcard, "mobileorg");
             File morgFile = new File(morgDir, "mobileorg.db");
-            this.appdb = this.appcontext.openOrCreateDatabase(morgFile.getAbsolutePath(), 0, null);
+            this.appdb = SQLiteDatabase.openOrCreateDatabase(morgFile, null);
             Log.d(LT, "Setting database path to " + morgFile.getAbsolutePath());
         }
         this.appdb.execSQL("CREATE TABLE IF NOT EXISTS files"
                            + " (file VARCHAR, name VARCHAR,"
                            + " checksum VARCHAR);");
+        this.lastStorageMode = storageMode;
+    }
+
+    public void close() {
+        this.appdb.close();
+    }
+
+    public void checkStorageMode() {
+        String storageMode = this.appSettings.getString("storageMode", "");
+        if (storageMode != this.lastStorageMode) {
+            this.close();
+            this.initialize();
+        }
     }
 
     public ArrayList<String> getOrgFiles() {
+        this.checkStorageMode();
         ArrayList<String> allFiles = new ArrayList<String>();
         Cursor result = this.appdb.rawQuery("SELECT file FROM files", null);
         if (result != null) {
@@ -59,16 +74,19 @@ public class MobileOrgDatabase {
     }
 
     public void removeFile(String filename) {
+        this.checkStorageMode();
         this.appdb.execSQL("DELETE FROM files " +
                            "WHERE file = '"+filename+"'");
         Log.i(LT, "Finished deleting from files");
     }
 
     public void clearData() {
+        this.checkStorageMode();
         this.appdb.execSQL("DELETE FROM data");
     }
 
     public void addOrUpdateFile(String filename, String name) {
+        this.checkStorageMode();
         Cursor result = this.appdb.rawQuery("SELECT * FROM files " +
                                        "WHERE file = '"+filename+"'", null);
         if (result != null) {

@@ -47,6 +47,12 @@ public class Capture extends Activity implements OnClickListener
         this.saveButton.setOnClickListener(this);
     }
 
+    @Override
+    public void onDestroy() {
+        this.appdb.close();
+        super.onDestroy();
+    }
+
     public boolean onSave() {
         String newNote = this.transformBuffer(this.orgEditDisplay.getText().toString());
         String storageMode = this.appSettings.getString("storageMode", "");

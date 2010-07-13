@@ -106,7 +106,6 @@ public class MobileOrgActivity extends ListActivity
     private static final String LT = "MobileOrg";
     private ProgressDialog syncDialog;
     private MobileOrgDatabase appdb;
-    public boolean syncResults;
     private ReportableError syncError;
     public SharedPreferences appSettings;
     final Handler syncHandler = new Handler();
@@ -135,6 +134,12 @@ public class MobileOrgActivity extends ListActivity
         if (this.appSettings.getString("webUrl","").equals("")) {
             this.onShowSettings();
         }
+    }
+
+    @Override
+    public void onDestroy() {
+        this.appdb.close();
+        super.onDestroy();
     }
 
     public void runParser() {
@@ -257,6 +262,9 @@ public class MobileOrgActivity extends ListActivity
                 	catch(ReportableError e) {
                 		syncError = e;
                 	}
+                    finally {
+                        appSync.close();
+                    }
                     syncHandler.post(syncUpdateResults);
             }
         };
@@ -275,10 +283,8 @@ public class MobileOrgActivity extends ListActivity
 
     public void postSynchronize() {
         syncDialog.dismiss();
-        if (!this.syncResults) {
-        	if(this.syncError != null) {
-        		ErrorReporter.displayError(this, this.syncError);
-        	}
+        if(this.syncError != null) {
+            ErrorReporter.displayError(this, this.syncError);
         }
         else {
             this.runParser();

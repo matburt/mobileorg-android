@@ -54,6 +54,10 @@ public class Synchronizer
                                    parentActivity.getBaseContext());
     }
 
+    public void close() {
+        this.appdb.close();
+    }
+
     public void push() throws NotFoundException, ReportableError {
         String urlActual = this.getRootUrl() + "mobileorg.org";
         String storageMode = this.appSettings.getString("storageMode", "");
@@ -159,8 +163,8 @@ public class Synchronizer
             if (storageMode.equals("internal") || storageMode == null) {
                 FileOutputStream fs;
                 try {
-                    fs = rootActivity.openFileOutput(
-                                                     masterList.get(key), 0);
+                    String normalized = masterList.get(key).replace("/", "_");
+                    fs = rootActivity.openFileOutput(normalized, 0);
                     writer = new BufferedWriter(new OutputStreamWriter(fs));
                 }
                 catch (java.io.FileNotFoundException e) {
@@ -177,6 +181,8 @@ public class Synchronizer
                     morgDir.mkdir();
                     if (morgDir.canWrite()){
                         File orgFileCard = new File(morgDir, masterList.get(key));
+                        File orgDirCard = orgFileCard.getParentFile();
+                        orgDirCard.mkdirs();
                         FileWriter orgFWriter = new FileWriter(orgFileCard);
                         writer = new BufferedWriter(orgFWriter);
                     }
