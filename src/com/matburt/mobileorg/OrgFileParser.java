@@ -32,8 +32,7 @@ class OrgFileParser {
     String storageMode = null;
     Pattern titlePattern = null;
     FileInputStream fstream;
-    Node rootNode = new Node("MobileOrg", Node.HEADING,
-                             -1, -1);
+    Node rootNode = new Node("MobileOrg", Node.HEADING);
     MobileOrgDatabase appdb;
     public static final String LT = "MobileOrg";
 
