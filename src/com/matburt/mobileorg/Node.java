@@ -22,12 +22,17 @@ class Node {
     String todo = "";
     int nodeType;
     String nodePayload = "";
+    String nodeTitle = "";
     Date schedule = null;
     Date deadline = null;
 
     Node(String heading, int ntype) {
         this.nodeName = heading;
         this.nodeType = ntype;
+    }
+
+    void setFullTitle(String title) {
+        this.nodeTitle = title;
     }
 
     Node findChildNode(String regex) {

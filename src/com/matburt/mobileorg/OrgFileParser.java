@@ -149,7 +149,7 @@ class OrgFileParser {
                         TitleComponents titleComp = parseTitle(this.stripTitle(title));
                         Node newNode = new Node(titleComp.title,
                                                 Node.HEADING);
-
+                        newNode.setFullTitle(this.stripTitle(title));
                         newNode.todo = titleComp.todo;
                         newNode.tags.addAll(titleComp.tags);
                         if (numstars > nodeDepth) {
