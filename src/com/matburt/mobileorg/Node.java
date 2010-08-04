@@ -1,6 +1,7 @@
 package com.matburt.mobileorg;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Date;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
@@ -15,6 +16,8 @@ class Node {
 
     ArrayList<Node> subNodes = new ArrayList<Node>();
     ArrayList<String> tags = new ArrayList<String>();
+    HashMap<String, String> properties = new HashMap<String, String>();
+
     String nodeName = "";
     String todo = "";
     int nodeType;
@@ -47,5 +50,9 @@ class Node {
 
     void clearNodes() {
         this.subNodes.clear();
+    }
+
+    void addProperty(String key, String val) {
+        this.properties.put(key, val);
     }
 }

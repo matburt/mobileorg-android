@@ -1,6 +1,5 @@
 package com.matburt.mobileorg;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.ArrayList;
 import java.util.Stack;
@@ -181,6 +180,10 @@ class OrgFileParser {
                     //content
                     else {
                         Node lastNode = nodeStack.peek();
+                        if (thisLine.indexOf(":ID:") != -1) {
+                            String trimmedLine = thisLine.substring(thisLine.indexOf(":ID:")+4).trim();
+                            lastNode.addProperty("ID", trimmedLine);
+                        }
                         lastNode.addPayload(thisLine);
                     }
                 }
