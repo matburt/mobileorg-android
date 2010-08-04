@@ -13,4 +13,11 @@
        android:layout_width="fill_parent"
        android:layout_height="fill_parent" />
   </TableRow>
+  <TableRow>
+    <Button
+       android:id="@+id/documentModeEdit"
+       android:text="Edit Document"
+       android:layout_width="fill_parent"
+       android:layout_height="fill_parent" />    
+  </TableRow>
 </TableLayout>

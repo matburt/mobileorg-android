@@ -21,13 +21,16 @@ public class OrgContextMenu extends Activity implements OnClickListener
     public static final String LT = "MobileOrg";
     ArrayList<Integer> npath;
     private Button docButton;
+    private Button docEditButton;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.longcontext);
         this.docButton = (Button)this.findViewById(R.id.documentMode);
+        this.docEditButton = (Button)this.findViewById(R.id.documentModeEdit);
         this.docButton.setOnClickListener(this);
+        this.docEditButton.setOnClickListener(this);
         this.poplateDisplay();
     }
 
@@ -51,8 +54,14 @@ public class OrgContextMenu extends Activity implements OnClickListener
                 "\n" + thisNode.subNodes.get(idx).nodePayload + "\n\n";
         }
 
-        textIntent.setClassName("com.matburt.mobileorg",
-                                "com.matburt.mobileorg.SimpleTextDisplay");
+        if (v == this.docButton) {
+            textIntent.setClassName("com.matburt.mobileorg",
+                                    "com.matburt.mobileorg.SimpleTextDisplay");
+        }
+        else if (v == this.docEditButton) {
+            textIntent.setClassName("com.matburt.mobileorg",
+                                    "com.matburt.mobileorg.Capture");
+        }
         textIntent.putExtra("txtValue", displayBuffer);
         startActivity(textIntent);
     }

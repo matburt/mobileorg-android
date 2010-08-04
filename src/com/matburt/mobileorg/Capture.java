@@ -45,6 +45,7 @@ public class Capture extends Activity implements OnClickListener
         this.saveButton = (Button)this.findViewById(R.id.captureSave);
         this.orgEditDisplay = (EditText)this.findViewById(R.id.orgEditTxt);
         this.saveButton.setOnClickListener(this);
+        this.populateDisplay();
     }
 
     @Override
@@ -140,5 +141,11 @@ public class Capture extends Activity implements OnClickListener
             }
         }
         return xformed + "\n\n";
+    }
+
+    public void populateDisplay() {
+        Intent txtIntent = getIntent();
+        String srcText = txtIntent.getStringExtra("txtValue");
+        this.orgEditDisplay.setText(srcText);
     }
 }
