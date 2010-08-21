@@ -34,6 +34,9 @@ public class MobileOrgDatabase {
         else if (storageMode.equals("sdcard")) {
             File sdcard = Environment.getExternalStorageDirectory();
             File morgDir = new File(sdcard, "mobileorg");
+            if(!morgDir.exists()) {
+                morgDir.mkdir();
+            }
             File morgFile = new File(morgDir, "mobileorg.db");
             this.appdb = SQLiteDatabase.openOrCreateDatabase(morgFile, null);
             Log.d(LT, "Setting database path to " + morgFile.getAbsolutePath());
