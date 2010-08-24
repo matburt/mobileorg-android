@@ -25,10 +25,17 @@ class Node {
     String nodeTitle = "";
     Date schedule = null;
     Date deadline = null;
+    boolean encrypted = false;
+    boolean parsed = false;
 
     Node(String heading, int ntype) {
+        this(heading, ntype, false);
+    }
+
+    Node(String heading, int ntype, boolean encrypted) {
         this.nodeName = heading;
         this.nodeType = ntype;
+        this.encrypted = encrypted;
     }
 
     void setFullTitle(String title) {

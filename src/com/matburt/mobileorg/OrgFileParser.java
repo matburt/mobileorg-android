@@ -34,7 +34,7 @@ class OrgFileParser {
     Node rootNode = new Node("MobileOrg", Node.HEADING);
     MobileOrgDatabase appdb;
     public static final String LT = "MobileOrg";
-
+    public static final String ORG_DIR = "/sdcard/mobileorg/";
     OrgFileParser(ArrayList<String> orgpaths,
                   String storageMode,
                   MobileOrgDatabase appdb) {
@@ -111,91 +111,112 @@ class OrgFileParser {
         this.appdb.appdb.update("data", recValues, "id = ?", new String[] {Long.toString(nodeId)});
     }
 
-    public void parse() {
-        String thisLine;
-        Stack<Node> nodeStack = new Stack();
-        nodeStack.push(this.rootNode);
-        int nodeDepth = 0;
+    public void parse(Node fileNode)
+    {
+        try
+        {
+            String thisLine;
+            Stack<Node> nodeStack = new Stack();
+            BufferedReader breader = this.getHandle(fileNode.nodeName);
+            nodeStack.push(fileNode);
+            int nodeDepth = 0;
 
-        for (int jdx = 0; jdx < this.orgPaths.size(); jdx++) {
-            try {
-                Log.d(LT, "Parsing: " + orgPaths.get(jdx));
-                BufferedReader breader = this.getHandle(this.orgPaths.get(jdx));
-                Node fileNode = new Node(this.orgPaths.get(jdx),
-                                         Node.HEADING);
-                nodeStack.peek().addChildNode(fileNode);
-                nodeStack.push(fileNode);
-                while ((thisLine = breader.readLine()) != null) {
-                    int numstars = 0;
+            while ((thisLine = breader.readLine()) != null) {
+                int numstars = 0;
 
-                    if (thisLine.length() < 1 || thisLine.charAt(0) == '#') {
-                        continue;
+                if (thisLine.length() < 1 || thisLine.charAt(0) == '#') {
+                    continue;
+                }
+
+                for (int idx = 0; idx < thisLine.length(); idx++) {
+                    if (thisLine.charAt(idx) != '*') {
+                        break;
                     }
+                    numstars++;
+                }
 
-                    for (int idx = 0; idx < thisLine.length(); idx++) {
-                        if (thisLine.charAt(idx) != '*') {
-                            break;
-                        }
-                        numstars++;
-                    }
+                if (numstars >= thisLine.length() || thisLine.charAt(numstars) != ' ') {
+                    numstars = 0;
+                }
 
-                    if (numstars >= thisLine.length() || thisLine.charAt(numstars) != ' ') {
-                        numstars = 0;
-                    }
-
-                    //headings
-                    if (numstars > 0) {
-                        String title = thisLine.substring(numstars+1);
-                        TitleComponents titleComp = parseTitle(this.stripTitle(title));
-                        Node newNode = new Node(titleComp.title,
-                                                Node.HEADING);
-                        newNode.setFullTitle(this.stripTitle(title));
-                        newNode.todo = titleComp.todo;
-                        newNode.tags.addAll(titleComp.tags);
-                        if (numstars > nodeDepth) {
-                            try {
-                                Node lastNode = nodeStack.peek();
-                                lastNode.addChildNode(newNode);
-                            } catch (EmptyStackException e) {
-                            }
-                            nodeStack.push(newNode);
-                            nodeDepth++;
-                        }
-                        else if (numstars == nodeDepth) {
-                            nodeStack.pop();
-                            nodeStack.peek().addChildNode(newNode);
-                            nodeStack.push(newNode);
-                        }
-                        else if (numstars < nodeDepth) {
-                            for (;numstars <= nodeDepth; nodeDepth--) {
-                                nodeStack.pop();
-                            }
-
+                //headings
+                if (numstars > 0) {
+                    String title = thisLine.substring(numstars+1);
+                    TitleComponents titleComp = parseTitle(this.stripTitle(title));
+                    Node newNode = new Node(titleComp.title,
+                                            Node.HEADING);
+                    newNode.setFullTitle(this.stripTitle(title));
+                    newNode.todo = titleComp.todo;
+                    newNode.tags.addAll(titleComp.tags);
+                    if (numstars > nodeDepth) {
+                        try {
                             Node lastNode = nodeStack.peek();
                             lastNode.addChildNode(newNode);
-                            nodeStack.push(newNode);
-                            nodeDepth++;
+                        } catch (EmptyStackException e) {
                         }
+                        nodeStack.push(newNode);
+                        nodeDepth++;
                     }
-                    //content
-                    else {
+                    else if (numstars == nodeDepth) {
+                        nodeStack.pop();
+                        nodeStack.peek().addChildNode(newNode);
+                        nodeStack.push(newNode);
+                    }
+                    else if (numstars < nodeDepth) {
+                        for (;numstars <= nodeDepth; nodeDepth--) {
+                            nodeStack.pop();
+                        }
+
                         Node lastNode = nodeStack.peek();
-                        if (thisLine.indexOf(":ID:") != -1) {
-                            String trimmedLine = thisLine.substring(thisLine.indexOf(":ID:")+4).trim();
-                            lastNode.addProperty("ID", trimmedLine);
-                        }
-                        lastNode.addPayload(thisLine);
+                        lastNode.addChildNode(newNode);
+                        nodeStack.push(newNode);
+                        nodeDepth++;
                     }
                 }
-                for (;nodeDepth > 0; nodeDepth--) {
-                    nodeStack.pop();
+                //content
+                else {
+                    Node lastNode = nodeStack.peek();
+                    if (thisLine.indexOf(":ID:") != -1) {
+                        String trimmedLine = thisLine.substring(thisLine.indexOf(":ID:")+4).trim();
+                        lastNode.addProperty("ID", trimmedLine);
+                    }
+                    lastNode.addPayload(thisLine);
                 }
+            }
+            for (;nodeDepth > 0; nodeDepth--) {
                 nodeStack.pop();
-                breader.close();
             }
-            catch (IOException e) {
-                Log.e(LT, "IO Exception on readerline: " + e.getMessage());
+            fileNode.parsed = true;        
+            breader.close();
+        }
+        catch (IOException e) {
+            Log.e(LT, "IO Exception on readerline: " + e.getMessage());
+        }
+
+    }
+
+    public void parse() {
+        Stack<Node> nodeStack = new Stack();
+        nodeStack.push(this.rootNode);
+
+        for (int jdx = 0; jdx < this.orgPaths.size(); jdx++) {
+            Log.d(LT, "Parsing: " + orgPaths.get(jdx));
+            //if file is encrypted just add a placeholder node to be parsed later
+            if(!orgPaths.get(jdx).endsWith(".org"))
+            {
+                nodeStack.peek().addChildNode(new Node(orgPaths.get(jdx),
+                                                       Node.HEADING,
+                                                       true));
+                continue;
             }
+
+            Node fileNode = new Node(this.orgPaths.get(jdx),
+                                     Node.HEADING,
+                                     false);
+            nodeStack.peek().addChildNode(fileNode);
+            nodeStack.push(fileNode);
+            parse(fileNode);
+            nodeStack.pop();
         }
     }
 
@@ -207,7 +228,7 @@ class OrgFileParser {
                 this.fstream = new FileInputStream("/data/data/com.matburt.mobileorg/files/" + normalized);
             }
             else if (this.storageMode.equals("sdcard")) {
-                this.fstream = new FileInputStream("/sdcard/mobileorg/" + filename);
+                this.fstream = new FileInputStream(ORG_DIR + filename);
             }
             else {
                 Log.e(LT, "[Parse] Unknown storage mechanism: " + this.storageMode);
@@ -222,4 +243,21 @@ class OrgFileParser {
         return breader;
     }
 
+    public static String getRawFileData(String filename)
+    {
+        try {
+            FileInputStream fstream = new FileInputStream(ORG_DIR + filename);
+            BufferedReader breader = new BufferedReader(new InputStreamReader(new DataInputStream(fstream)));
+            String line = null;
+            String buffer = "";
+            while ((line = breader.readLine()) != null) {
+                buffer += line;
+            }
+            return buffer;
+        }
+        catch (Exception e) {
+            Log.e(LT, "Error: " + e.getMessage() + " in file " + filename);
+            return null;
+        }
+    }
 }
