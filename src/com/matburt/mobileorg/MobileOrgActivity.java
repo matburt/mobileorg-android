@@ -251,7 +251,7 @@ public class MobileOrgActivity extends ListActivity
     }
 
     public void runSynchronizer() {
-        final Synchronizer appSync = new Synchronizer(this);
+        final Synchronizer appSync = new WebDAVSynchronizer(this);
         Thread syncThread = new Thread() {
                 public void run() {
                 	try {
