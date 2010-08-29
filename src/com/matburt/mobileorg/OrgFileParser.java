@@ -7,6 +7,7 @@ import java.util.EmptyStackException;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import java.io.FileInputStream;
+import java.io.File;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.DataInputStream;
@@ -111,13 +112,16 @@ class OrgFileParser {
         this.appdb.appdb.update("data", recValues, "id = ?", new String[] {Long.toString(nodeId)});
     }
 
-    public void parse(Node fileNode)
+    public void parse(Node fileNode, BufferedReader breader)
     {
         try
         {
             String thisLine;
             Stack<Node> nodeStack = new Stack();
-            BufferedReader breader = this.getHandle(fileNode.nodeName);
+            if(breader == null)
+            {
+                breader = this.getHandle(fileNode.nodeName);
+            }
             nodeStack.push(fileNode);
             int nodeDepth = 0;
 
@@ -215,7 +219,7 @@ class OrgFileParser {
                                      false);
             nodeStack.peek().addChildNode(fileNode);
             nodeStack.push(fileNode);
-            parse(fileNode);
+            parse(fileNode, null);
             nodeStack.pop();
         }
     }
@@ -243,15 +247,22 @@ class OrgFileParser {
         return breader;
     }
 
-    public static String getRawFileData(String filename)
+    public static byte[] getRawFileData(String filename)
     {
         try {
-            FileInputStream fstream = new FileInputStream(ORG_DIR + filename);
-            BufferedReader breader = new BufferedReader(new InputStreamReader(new DataInputStream(fstream)));
-            String line = null;
-            String buffer = "";
-            while ((line = breader.readLine()) != null) {
-                buffer += line;
+            File file = new File(ORG_DIR + filename);
+            FileInputStream is = new FileInputStream(file);
+            byte[] buffer = new byte[(int)file.length()];
+            int offset = 0;
+            int numRead = 0;
+            while (offset < buffer.length
+                   && (numRead=is.read(buffer, offset, buffer.length-offset)) >= 0) 
+            {
+                offset += numRead;
+            }
+            is.close();
+            if (offset < buffer.length) {
+                throw new IOException("Could not completely read file "+file.getName());
             }
             return buffer;
         }

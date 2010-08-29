@@ -4,6 +4,7 @@ import android.app.ListActivity;
 import android.app.Application;
 import android.app.ProgressDialog;
 import android.app.AlertDialog;
+import android.app.Activity;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.Menu;
@@ -25,6 +26,8 @@ import android.text.TextUtils;
 import android.util.Log;
 import java.util.ArrayList;
 import java.lang.Runnable;
+import java.io.BufferedReader;
+import java.io.StringReader;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
@@ -187,35 +190,39 @@ public class MobileOrgActivity extends ListActivity
         MobileOrgApplication appInst = (MobileOrgApplication)this.getApplication();
         dispIntent.setClassName("com.matburt.mobileorg",
                                 "com.matburt.mobileorg.OrgContextMenu");
-        if (appInst.nodeSelection == null) {
-            appInst.nodeSelection = new ArrayList<Integer>();
-        }
 
-        appInst.nodeSelection.add(new Integer(pos));
+        appInst.pushSelection(pos);
+
         dispIntent.putIntegerArrayListExtra("nodePath", appInst.nodeSelection);
         startActivity(dispIntent);
     }
 
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
-        Intent dispIntent = new Intent();
         MobileOrgApplication appInst = (MobileOrgApplication)this.getApplication();
-        dispIntent.setClassName("com.matburt.mobileorg",
-                                "com.matburt.mobileorg.MobileOrgActivity");
-        if (appInst.nodeSelection == null) {
-            appInst.nodeSelection = new ArrayList<Integer>();
-        }
 
-        ArrayList<Integer> selection = new ArrayList<Integer>(appInst.nodeSelection);
-        selection.add(new Integer(position));
+        appInst.pushSelection(position);
+        Node thisNode = appInst.getSelectedNode();
 
-        Node thisNode = appInst.rootNode;
-        if (selection != null) {
-            for (int idx = 0; idx < selection.size(); idx++) {
-                thisNode = thisNode.subNodes.get(selection.get(idx));
+        if(thisNode.encrypted && !thisNode.parsed)
+        {
+            //if suitable APG version is installed
+            if(Encryption.isAvailable((Context)this))
+            {
+                //retrieve the encrypted file data
+                byte[] rawData = OrgFileParser.getRawFileData(thisNode.nodeName);
+                //and send it to APG for decryption
+                Encryption.decrypt(this, rawData);
             }
+            else
+            {
+                appInst.popSelection();
+            }
+            return;
         }
+
         if (thisNode.subNodes.size() < 1) {
+            appInst.popSelection();
             Intent textIntent = new Intent();
 
             String docBuffer = thisNode.nodeName + "\n\n" +
@@ -226,19 +233,45 @@ public class MobileOrgActivity extends ListActivity
             startActivity(textIntent);
         }
         else {
-            dispIntent.putIntegerArrayListExtra("nodePath", selection);
-            startActivityForResult(dispIntent, 1);
+            expandSelection(appInst.nodeSelection);
         }
+    }
+
+    public void expandSelection(ArrayList<Integer> selection)
+    {
+        Intent dispIntent = new Intent();
+        dispIntent.setClassName("com.matburt.mobileorg",
+                                "com.matburt.mobileorg.MobileOrgActivity");
+        dispIntent.putIntegerArrayListExtra("nodePath", selection);
+        startActivityForResult(dispIntent, 1);        
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        MobileOrgApplication appInst = (MobileOrgApplication)this.getApplication();
         if (requestCode == 3) {
             this.runParser();
         }
+        else if(requestCode == Encryption.DECRYPT_MESSAGE)
+        {
+            if (resultCode != Activity.RESULT_OK || data == null)
+            {
+                appInst.popSelection();
+                return;
+            }
+            
+            Node thisNode = appInst.getSelectedNode();
+
+            String decryptedData = data.getStringExtra(Encryption.EXTRA_DECRYPTED_MESSAGE);
+            OrgFileParser ofp = new OrgFileParser(appdb.getOrgFiles(),
+                                                  getStorageLocation(),
+                                                  appdb);
+
+            ofp.parse(thisNode, new BufferedReader(new StringReader(decryptedData)));
+            expandSelection(appInst.nodeSelection);
+        }
         else {
-            MobileOrgApplication appInst = (MobileOrgApplication)this.getApplication();
-            appInst.nodeSelection.remove(appInst.nodeSelection.size()-1);
+            appInst.popSelection();
         }
     }
 

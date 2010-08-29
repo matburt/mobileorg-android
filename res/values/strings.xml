@@ -9,7 +9,7 @@
     <string name="sync_failed">Synchronization failed, try again?</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
-<string name="error_bad_url">The url %s is not properly formatted</string><string name="error_dialog_title">Error</string>
+    <string name="error_bad_url">The url %s is not properly formatted</string><string name="error_dialog_title">Error</string>
 
 
 
@@ -20,4 +20,6 @@
 <string name="error_url_fetch_detail">An error occurred attempting to fetch the url %s: %s</string>
 
 <string name="error_url_put">An error occurred while attempting to put the URL %s</string>
+<string name="apg_not_found">APG not found</string>
+<string name="apg_version_not_supported">APG version not supported</string>
 </resources>
