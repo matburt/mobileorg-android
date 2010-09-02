@@ -3,6 +3,8 @@
       package="com.matburt.mobileorg"
       android:versionCode="40"
       android:versionName="0.4alpha">
+  <uses-sdk android:minSdkVersion="4"/>
+  <uses-sdk android:targetSdkVersion="8"/>
   <uses-permission android:name="android.permission.INTERNET"/>
   <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
   <application android:name=".MobileOrgApplication"
