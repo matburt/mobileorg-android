@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+  <PreferenceCategory android:title="WebDAV ">
+    <EditTextPreference
+        android:name="URL"
+        android:summary="Full URL path to your index.org file"
+        android:title="URL"
+        android:key="webUrl" />
+    <EditTextPreference
+        android:name="Username"
+        android:summary="Username to login"
+        android:title="Username"
+        android:key="webUser" />
+    <EditTextPreference
+        android:name="Password"
+        android:summary="Password to login"
+        android:password="true"
+        android:title="Password"
+        android:key="webPass" />
+  </PreferenceCategory>
+</PreferenceScreen>

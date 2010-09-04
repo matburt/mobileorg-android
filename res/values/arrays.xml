@@ -8,4 +8,12 @@
     <item>internal</item>
     <item>sdcard</item>
   </string-array>
+  <string-array name="fileSources">
+    <item>WebDAV</item>
+    <item>SDCard</item>
+  </string-array>
+  <string-array name="fileSourcesVals">
+    <item>webdav</item>
+    <item>sdcard</item>
+  </string-array>
 </resources>
