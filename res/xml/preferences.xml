@@ -7,7 +7,11 @@
         android:key="syncSource"
         android:entries="@array/fileSources"
         android:entryValues="@array/fileSourcesVals"
-        android:defaultValues="1" />
+        android:defaultValue="1" />
+     <com.matburt.mobileorg.SynchronizerPreferences
+                android:key="customPref"
+                android:defaultValue="32"
+                android:title="Custom Preference" /> 
   </PreferenceCategory>
   <PreferenceCategory android:title="Storage">
     <ListPreference

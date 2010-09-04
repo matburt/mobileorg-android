@@ -3,7 +3,7 @@ package com.matburt.mobileorg;
 import com.dropbox.client.DropboxAPI;
 import com.dropbox.client.DropboxAPI.Config;
 
-public class SDCardSynchronizer implement Synchronizer
+public class SDCardSynchronizer implements Synchronizer
 {
     SDCardSynchronizer(Activity parentActivity) {
         this.rootActivity = parentActivity;
