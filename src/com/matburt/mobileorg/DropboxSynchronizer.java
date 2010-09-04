@@ -20,4 +20,12 @@ public class DropboxSynchronizer implement Synchronizer
     public void close() {
         this.appdb.close();
     }
+
+    public void push() throws NotFoundException, ReportableError {
+
+    }
+
+    public void pull() throws NotFoundException, ReportableError {
+
+    }
 }
