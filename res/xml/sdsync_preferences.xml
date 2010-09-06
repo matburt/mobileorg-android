@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+  <PreferenceCategory android:title="WebDAV ">
+    <EditTextPreference
+        android:name="sdcardIndex"
+        android:summary="Full local path to your index.org file"
+        android:title="Index Path"
+        android:key="indexFilePath" />
+  </PreferenceCategory>
+</PreferenceScreen>

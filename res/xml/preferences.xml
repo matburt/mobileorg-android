@@ -9,7 +9,7 @@
         android:entryValues="@array/fileSourcesVals"
         android:defaultValue="1" />
      <com.matburt.mobileorg.SynchronizerPreferences
-                android:key="customPref"
+                android:key="syncPref"
                 android:defaultValue="32"
                 android:title="Custom Preference" /> 
   </PreferenceCategory>
