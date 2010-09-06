@@ -7,7 +7,7 @@
         android:key="syncSource"
         android:entries="@array/fileSources"
         android:entryValues="@array/fileSourcesVals"
-        android:defaultValue="1" />
+        android:defaultValue="webdav" />
      <com.matburt.mobileorg.SynchronizerPreferences
                 android:key="syncPref"
                 android:defaultValue="32"
@@ -20,7 +20,7 @@
         android:key="storageMode"
         android:entries="@array/storageModes"
         android:entryValues="@array/storageModesVals"
-        android:defaultValue="1" />
+        android:defaultValue="internal" />
   </PreferenceCategory>
   <PreferenceCategory android:title="Other">
     <PreferenceScreen

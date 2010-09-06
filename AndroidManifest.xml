@@ -38,5 +38,11 @@
     <activity android:name="Capture"
               android:label="Org Capture">
     </activity>
+    <activity android:name="WebDAVSettingsActivity"
+              android:label="WebDAV Settings">
+    </activity>
+    <activity android:name="SDCardSettingsActivity"
+              android:label="SDCard Settings">
+    </activity>
   </application>
 </manifest>
