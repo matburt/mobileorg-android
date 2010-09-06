@@ -33,7 +33,7 @@ public class SynchronizerPreferences extends Preference {
     }
     
     @Override
-        protected View onCreateView(ViewGroup parent){
+    protected View onCreateView(ViewGroup parent){
         
         LinearLayout layout = new LinearLayout(getContext());
         LinearLayout.LayoutParams params1 = new LinearLayout.LayoutParams(
@@ -62,17 +62,17 @@ public class SynchronizerPreferences extends Preference {
         //synchro mode selected, replace with a plugin architecture
         this.setOnPreferenceClickListener(new OnPreferenceClickListener() {
                 public boolean onPreferenceClick(Preference arg0) {
-                    Intent synchroIntent = new Intent();
                     SharedPreferences appSettings = PreferenceManager.getDefaultSharedPreferences(getContext());
                     String synchroMode = appSettings.getString("syncSource","");
+                    Intent synchroIntent = new Intent();
+                    synchroIntent.setClassName("com.matburt.mobileorg",
+                                               "com.matburt.mobileorg.SettingsActivity");
                     if (synchroMode.equals("webdav")) {
-                        synchroIntent.setClassName("com.matburt.mobileorg",
-                                                   "com.matburt.mobileorg.WebDAVSettingsActivity");
+                        synchroIntent.putExtra("prefs",R.xml.webdav_preferences);
                         getContext().startActivity(synchroIntent);
                     }
                     else if (synchroMode.equals("sdcard")) {
-                        synchroIntent.setClassName("com.matburt.mobileorg",
-                                                   "com.matburt.mobileorg.SDCardSettingsActivity");
+                        synchroIntent.putExtra("prefs",R.xml.sdsync_preferences);
                         getContext().startActivity(synchroIntent);
                     }
                     else {

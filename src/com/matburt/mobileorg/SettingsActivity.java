@@ -1,5 +1,6 @@
 package com.matburt.mobileorg;
 import android.app.Activity;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.Preference;
@@ -12,6 +13,8 @@ public class SettingsActivity extends PreferenceActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        addPreferencesFromResource(R.xml.preferences);
+        Intent prefsIntent = getIntent();
+        int resourceID = prefsIntent.getIntExtra("prefs",R.xml.preferences);
+        addPreferencesFromResource(resourceID);                
     }
 }
