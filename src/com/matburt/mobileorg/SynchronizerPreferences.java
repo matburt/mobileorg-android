@@ -76,7 +76,8 @@ public class SynchronizerPreferences extends Preference {
                         getContext().startActivity(synchroIntent);
                     }
                     else {
-                        //throw an error
+                        throw new ReportableError(R.string.error_synchronizer_type_unknown,
+                                                  synchroMode);
                     }
                     return true;
                 }

@@ -15,7 +15,7 @@
 
 <string name="error_file_not_found">The file %s was not found</string><string name="error_file_permissions">Permissions error on file %s</string><string name="error_file_read">An error occurred while reading from file %s</string><string name="error_file_write">An error occurred while writing to file %s</string>
 
-
+<string name="error_synchronizer_type_unknown">Unknown Synchronizer Method %s"</string>
 <string name="error_local_storage_method_unknown">Local storage method %s unknown</string><string name="error_unsupported_encoding">Encountered unsupported encoding on file %s</string><string name="error_url_fetch">An error occurred attempting to fetch the url %s</string>
 <string name="error_url_fetch_detail">An error occurred attempting to fetch the url %s: %s</string>
 

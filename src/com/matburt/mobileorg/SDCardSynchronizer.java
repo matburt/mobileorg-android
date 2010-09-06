@@ -34,6 +34,8 @@ public class SDCardSynchronizer implements Synchronizer
     }
 
     public void pull() throws NotFoundException, ReportableError {
-
+        String urlActual = this.appSettings.getString("sdcardIndex","");
     }
+
+    
 }
