@@ -2,12 +2,19 @@ package com.matburt.mobileorg;
 
 import android.app.Application;
 import java.util.ArrayList;
+import java.util.List;
 import java.io.File;
+import android.util.Log;
 import android.os.Environment;
+import android.content.Intent;
+import android.content.Context;
+import android.content.pm.PackageItemInfo;
+import android.content.pm.ResolveInfo;
 
 public class MobileOrgApplication extends Application {
     public Node rootNode = null;
     public ArrayList<Integer> nodeSelection;
+    public static final String SYNCHRONIZER_PLUGIN_ACTION = "com.matburt.mobileorg.SYNCHRONIZE";
 
     public void pushSelection(int selectedNode)
     {
@@ -40,5 +47,19 @@ public class MobileOrgApplication extends Application {
         return morgDir.getAbsolutePath() + "/";
     }
 
-    
+    static List<PackageItemInfo> discoverSynchronizerPlugins(Context context)
+    {
+        Intent discoverSynchro = new Intent(SYNCHRONIZER_PLUGIN_ACTION);
+        List<ResolveInfo> packages = context.getPackageManager().queryIntentActivities(discoverSynchro,0);
+        Log.d("MobileOrg","Found " + packages.size() + " total synchronizer plugins");
+
+        ArrayList<PackageItemInfo> out = new ArrayList<PackageItemInfo>();
+
+        for (ResolveInfo info : packages)
+        {
+            out.add(info.activityInfo);
+            Log.d("MobileOrg","Found synchronizer plugin: "+info.activityInfo.packageName);            
+        }
+        return out;
+    }
 }

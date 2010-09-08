@@ -16,10 +16,11 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.view.Gravity;
 import android.graphics.Typeface;
+import java.util.HashMap;
 
 public class SynchronizerPreferences extends Preference {
     
-    
+    public static HashMap<String,Intent> syncIntents = new HashMap<String,Intent>();
     public SynchronizerPreferences(Context context) {
         super(context);
     }
@@ -64,16 +65,10 @@ public class SynchronizerPreferences extends Preference {
                 public boolean onPreferenceClick(Preference arg0) {
                     SharedPreferences appSettings = PreferenceManager.getDefaultSharedPreferences(getContext());
                     String synchroMode = appSettings.getString("syncSource","");
-                    Intent synchroIntent = new Intent();
-                    synchroIntent.setClassName("com.matburt.mobileorg",
-                                               "com.matburt.mobileorg.SettingsActivity");
-                    if (synchroMode.equals("webdav")) {
-                        synchroIntent.putExtra("prefs",R.xml.webdav_preferences);
-                        getContext().startActivity(synchroIntent);
-                    }
-                    else if (synchroMode.equals("sdcard")) {
-                        synchroIntent.putExtra("prefs",R.xml.sdsync_preferences);
-                        getContext().startActivity(synchroIntent);
+                    if(syncIntents.containsKey(synchroMode))
+                    {
+                    
+                        getContext().startActivity(syncIntents.get(synchroMode));
                     }
                     else {
                         //throw new ReportableError(R.string.error_synchronizer_type_unknown,
