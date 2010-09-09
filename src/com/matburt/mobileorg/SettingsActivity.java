@@ -29,10 +29,6 @@ public class SettingsActivity extends PreferenceActivity
     protected void populateSyncSources()
     {
         List<PackageItemInfo> synchronizers = MobileOrgApplication.discoverSynchronizerPlugins((Context)this);
-        if(synchronizers.size() == 0)
-        {
-            return;
-        }
 
         ListPreference syncSource = (ListPreference)findPreference("syncSource");
 
