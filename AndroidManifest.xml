@@ -42,6 +42,6 @@
     </activity>
     <activity android:name="SDCardSettingsActivity"
               android:label="SDCard Settings">
-    </activity>
+    </activity>    
   </application>
 </manifest>

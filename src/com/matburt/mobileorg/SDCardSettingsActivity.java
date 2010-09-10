@@ -12,6 +12,6 @@ public class SDCardSettingsActivity extends PreferenceActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        addPreferencesFromResource(R.xml.webdav_preferences);
+        addPreferencesFromResource(R.xml.sdsync_preferences);
     }
 }

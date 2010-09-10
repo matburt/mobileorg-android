@@ -23,10 +23,7 @@ public class SettingsActivity extends PreferenceActivity
         Intent prefsIntent = getIntent();
         int resourceID = prefsIntent.getIntExtra("prefs",R.xml.preferences);
         addPreferencesFromResource(resourceID);                
-        if(resourceID == R.xml.preferences)
-        {
-            populateSyncSources();
-        }
+        populateSyncSources();
     }
 
     protected void populateSyncSources()
@@ -62,14 +59,12 @@ public class SettingsActivity extends PreferenceActivity
         //fill in the Intents for built-in synchronizers
         Intent synchroIntent = new Intent();
         synchroIntent.setClassName("com.matburt.mobileorg",
-                                   "com.matburt.mobileorg.SettingsActivity");
-        synchroIntent.putExtra("prefs",R.xml.webdav_preferences);            
-        SynchronizerPreferences.syncIntents.put("webdav",synchroIntent);
+                                   "com.matburt.mobileorg.WebDAVSettingsActivity");
+         SynchronizerPreferences.syncIntents.put("webdav",synchroIntent);
             
         synchroIntent = new Intent();
         synchroIntent.setClassName("com.matburt.mobileorg",
-                                   "com.matburt.mobileorg.SettingsActivity");
-        synchroIntent.putExtra("prefs",R.xml.sdsync_preferences);     
+                                   "com.matburt.mobileorg.SDCardSettingsActivity");
         SynchronizerPreferences.syncIntents.put("sdcard", synchroIntent);
 
         //populate the sync source list with updated data
