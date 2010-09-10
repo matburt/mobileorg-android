@@ -50,7 +50,7 @@ public class SDCardSynchronizer implements Synchronizer
         HashMap<String, String> masterList = this.getOrgFilesFromMaster(filebuffer);
 
         for (String key : masterList.keySet()) {
-            Log.d(LT, "Fetching: " + key + ": " + urlActual + masterList.get(key));
+            Log.d(LT, "Fetching: " + key + ": " + basePath + masterList.get(key));
             this.appdb.addOrUpdateFile(masterList.get(key), key);
         }
     }
