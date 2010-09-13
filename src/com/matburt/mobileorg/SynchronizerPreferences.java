@@ -50,7 +50,7 @@ public class SynchronizerPreferences extends Preference {
                             30,
                             LinearLayout.LayoutParams.WRAP_CONTENT);
         params3.gravity = Gravity.CENTER;
-        layout.setPadding(15, 5, 10, 5);
+        layout.setPadding(15, 10, 10, 10);
         layout.setOrientation(LinearLayout.HORIZONTAL);
         TextView view = new TextView(getContext());
         view.setText("Configure Synchronizer Settings...");

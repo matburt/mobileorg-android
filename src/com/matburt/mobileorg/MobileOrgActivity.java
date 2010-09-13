@@ -135,7 +135,10 @@ public class MobileOrgActivity extends ListActivity
                     return true;
                 }
             });
-        if (this.appSettings.getString("webUrl","").equals("")) {
+        if ((this.appSettings.getString("syncSource","").equals("webdav") &&
+             this.appSettings.getString("webUrl","").equals("")) ||
+            (this.appSettings.getString("syncSource","").equals("sdcard") &&
+             this.appSettings.getString("indexFilePath","").equals(""))) {
             this.onShowSettings();
         }
     }
