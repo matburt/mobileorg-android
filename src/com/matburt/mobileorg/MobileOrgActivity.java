@@ -284,7 +284,18 @@ public class MobileOrgActivity extends ListActivity
     }
 
     public void runSynchronizer() {
-        final Synchronizer appSync = new WebDAVSynchronizer(this);
+        String userSynchro = this.appSettings.getString("syncSource","");
+        final Synchronizer appSync;
+        if (userSynchro.equals("webdav")) {
+            appSync = new WebDAVSynchronizer(this);
+        }
+        else if (userSynchro.equals("sdcard")) {
+            appSync = new SDCardSynchronizer(this);
+        }
+        else {
+            this.onShowSettings();
+            return;
+        }
         Thread syncThread = new Thread() {
                 public void run() {
                 	try {
@@ -302,8 +313,8 @@ public class MobileOrgActivity extends ListActivity
             }
         };
         syncThread.start();
-	
-	syncDialog = ProgressDialog.show(this, "",getString(R.string.sync_wait), true);
+        
+        syncDialog = ProgressDialog.show(this, "",getString(R.string.sync_wait), true);
     }
 
     public boolean runCapture() {

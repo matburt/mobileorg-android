@@ -43,7 +43,8 @@ public class SDCardSynchronizer implements Synchronizer
     }
 
     public void pull() throws NotFoundException, ReportableError {
-        String indexFile = this.appSettings.getString("sdcardIndex","");
+        String indexFile = this.appSettings.getString("indexFilePath","");
+        Log.d(LT, "Index file at: " + indexFile);
         File fIndexFile = new File(indexFile);
         String basePath = fIndexFile.getParent();
         String filebuffer = this.readFile(indexFile);
@@ -58,8 +59,9 @@ public class SDCardSynchronizer implements Synchronizer
     private String readFile(String filePath) throws ReportableError {
         FileInputStream readerIS;
         BufferedReader fReader;
+        File inpfile = new File(filePath);
         try {
-            readerIS = this.rootActivity.openFileInput(filePath);
+            readerIS = new FileInputStream(inpfile);
             fReader = new BufferedReader(new InputStreamReader(readerIS));
         }
         catch (java.io.FileNotFoundException e) {
