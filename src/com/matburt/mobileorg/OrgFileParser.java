@@ -35,13 +35,15 @@ class OrgFileParser {
     Node rootNode = new Node("MobileOrg", Node.HEADING);
     MobileOrgDatabase appdb;
     public static final String LT = "MobileOrg";
-    public static final String ORG_DIR = "/sdcard/mobileorg/";
+    public String orgDir = "/sdcard/mobileorg/";
     OrgFileParser(ArrayList<String> orgpaths,
                   String storageMode,
-                  MobileOrgDatabase appdb) {
+                  MobileOrgDatabase appdb,
+                  String orgBasePath) {
         this.appdb = appdb;
         this.storageMode = storageMode;
         this.orgPaths = orgpaths;
+        this.orgDir = orgBasePath;
         this.todoKeywords.add("TODO");
         this.todoKeywords.add("DONE");
         
@@ -232,7 +234,7 @@ class OrgFileParser {
                 this.fstream = new FileInputStream("/data/data/com.matburt.mobileorg/files/" + normalized);
             }
             else if (this.storageMode.equals("sdcard")) {
-                this.fstream = new FileInputStream(ORG_DIR + filename);
+                this.fstream = new FileInputStream(this.orgDir + filename);
             }
             else {
                 Log.e(LT, "[Parse] Unknown storage mechanism: " + this.storageMode);
@@ -247,10 +249,10 @@ class OrgFileParser {
         return breader;
     }
 
-    public static byte[] getRawFileData(String filename)
+    public static byte[] getRawFileData(String baseDir, String filename)
     {
         try {
-            File file = new File(ORG_DIR + filename);
+            File file = new File(baseDir + filename);
             FileInputStream is = new FileInputStream(file);
             byte[] buffer = new byte[(int)file.length()];
             int offset = 0;

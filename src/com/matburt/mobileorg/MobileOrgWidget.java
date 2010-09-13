@@ -23,6 +23,7 @@ import android.util.Log;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.io.File;
 
 public class MobileOrgWidget extends AppWidgetProvider {
     private static final String LT = "MobileOrgWidget";
@@ -54,13 +55,26 @@ public class MobileOrgWidget extends AppWidgetProvider {
         }
 
         public RemoteViews genUpdateDisplay(Context context) {
+            SharedPreferences appPrefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
             Resources res = context.getResources();
             RemoteViews updateViews = null;
             updateViews = new RemoteViews(context.getPackageName(),
                                           R.layout.widget_mobileorg);
             ArrayList<String> allOrgList = this.appdb.getOrgFiles();
             String storageMode = this.getStorageLocation(context);
-            OrgFileParser ofp = new OrgFileParser(allOrgList, storageMode, this.appdb);
+            String userSynchro = appPrefs.getString("syncSource","");
+            String orgBasePath = "";
+            if (userSynchro.equals("sdcard")) {
+                String indexFile = appPrefs.getString("indexFilePath","");
+                File fIndexFile = new File(indexFile);
+                orgBasePath = fIndexFile.getParent() + "/";
+            }
+            else {
+                orgBasePath = "/sdcard/mobileorg/";
+            }
+
+            OrgFileParser ofp = new OrgFileParser(allOrgList, storageMode,
+                                                  this.appdb, orgBasePath);
             ofp.parse();
             Node agendaNode = ofp.rootNode.findChildNode("agendas.org");
             Node todoNode = agendaNode.findChildNode("ToDo: ALL");
