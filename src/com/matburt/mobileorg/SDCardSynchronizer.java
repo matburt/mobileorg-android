@@ -8,6 +8,7 @@ import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.InputStream;
@@ -17,6 +18,8 @@ import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 
 public class SDCardSynchronizer implements Synchronizer
 {
@@ -39,6 +42,104 @@ public class SDCardSynchronizer implements Synchronizer
     }
 
     public void push() throws NotFoundException, ReportableError {
+        String storageMode = this.appSettings.getString("storageMode", "");
+        BufferedReader reader = null;
+        String fileContents = "";
+
+        if (storageMode.equals("internal") || storageMode == null) {
+            FileInputStream fs;
+            try {
+                fs = rootActivity.openFileInput("mobileorg.org");
+                reader = new BufferedReader(new InputStreamReader(fs));
+            }
+            catch (java.io.FileNotFoundException e) {
+            	Log.i(LT, "Did not find mobileorg.org file, not pushing.");
+                return;
+            }
+        }
+        else if (storageMode.equals("sdcard")) {
+            try {
+                File root = Environment.getExternalStorageDirectory();
+                File morgDir = new File(root, "mobileorg");
+                File morgFile = new File(morgDir, "mobileorg.org");
+                if (!morgFile.exists()) {
+                    Log.i(LT, "Did not find mobileorg.org file, not pushing.");
+                    return;
+                }
+                FileReader orgFReader = new FileReader(morgFile);
+                reader = new BufferedReader(orgFReader);
+            }
+            catch (java.io.IOException e) {
+                throw new ReportableError(
+                		r.getString(R.string.error_file_read, "mobileorg.org"),
+                		e);
+            }
+        }
+        else {
+        	throw new ReportableError(
+        			r.getString(R.string.error_local_storage_method_unknown, storageMode),
+        			null);
+        }
+
+        String thisLine = "";
+        try {
+            while ((thisLine = reader.readLine()) != null) {
+                fileContents += thisLine + "\n";
+            }
+        }
+        catch (java.io.IOException e) {
+        	throw new ReportableError(
+            		r.getString(R.string.error_file_read, "mobileorg.org"),
+            		e);
+        }
+
+        String indexFile = this.appSettings.getString("indexFilePath", "");
+        File fIndexFile = new File(indexFile);
+        String basePath = fIndexFile.getParent();
+        
+        this.appendSDCardFile(basePath + "/mobileorg.org", fileContents);
+        this.appdb.removeFile("mobileorg.org");
+
+        if (storageMode.equals("internal") || storageMode == null) {
+            this.rootActivity.deleteFile("mobileorg.org");
+        }
+        else if (storageMode.equals("sdcard")) {
+            File root = Environment.getExternalStorageDirectory();
+            File morgDir = new File(root, "mobileorg");
+            File morgFile = new File(morgDir, "mobileorg.org");
+            morgFile.delete();
+        }
+    }
+
+    private void appendSDCardFile(String path,
+                                  String content) throws NotFoundException, ReportableError {
+        String originalContent = "";
+        try {
+            originalContent = this.readFile(path) + "\n";
+        }
+        catch (java.io.FileNotFoundException e) {}
+        String newContent = originalContent + content;
+        this.putFile(path, newContent);
+    }
+
+    private void putFile(String path,
+                         String content) throws NotFoundException, ReportableError {
+        Log.d(LT, "Writing to mobileorg.org file at: " + path);
+        BufferedWriter fWriter;
+        try {
+            File fMobileOrgFile = new File(path);
+            FileWriter orgFWriter = new FileWriter(fMobileOrgFile, true);
+            fWriter = new BufferedWriter(orgFWriter);
+            fWriter.write(content);
+            fWriter.flush();
+            fWriter.close();
+        }
+        catch (java.io.IOException e) {
+            throw new ReportableError(
+                    r.getString(R.string.error_file_write, path),
+                    e);                  
+
+        }
     }
 
     public void pull() throws NotFoundException, ReportableError {
@@ -46,16 +147,24 @@ public class SDCardSynchronizer implements Synchronizer
         Log.d(LT, "Index file at: " + indexFile);
         File fIndexFile = new File(indexFile);
         String basePath = fIndexFile.getParent();
-        String filebuffer = this.readFile(indexFile);
+        String filebuffer = "";
+        try {
+            filebuffer = this.readFile(indexFile);
+        }
+        catch (java.io.FileNotFoundException e) {
+            throw new ReportableError(
+                    r.getString(R.string.error_file_not_found, indexFile),
+                    e);
+        }
         HashMap<String, String> masterList = this.getOrgFilesFromMaster(filebuffer);
 
         for (String key : masterList.keySet()) { 
-            Log.d(LT, "Fetching: " + key + ": " + basePath + masterList.get(key));
+            Log.d(LT, "Fetching: " + key + ": " + basePath + "/" + masterList.get(key));
             this.appdb.addOrUpdateFile(masterList.get(key), key);
         }
     }
 
-    private String readFile(String filePath) throws ReportableError {
+    private String readFile(String filePath) throws ReportableError, java.io.FileNotFoundException {
         FileInputStream readerIS;
         BufferedReader fReader;
         File inpfile = new File(filePath);
@@ -64,8 +173,8 @@ public class SDCardSynchronizer implements Synchronizer
             fReader = new BufferedReader(new InputStreamReader(readerIS));
         }
         catch (java.io.FileNotFoundException e) {
-            throw new ReportableError(r.getString(R.string.error_file_not_found, filePath),
-                                      e);
+            Log.d(LT, "Could not locate file " + filePath);
+            throw e;
         }
         String fileBuffer = "";
         String fileLine = "";

@@ -234,7 +234,14 @@ class OrgFileParser {
                 this.fstream = new FileInputStream("/data/data/com.matburt.mobileorg/files/" + normalized);
             }
             else if (this.storageMode.equals("sdcard")) {
-                this.fstream = new FileInputStream(this.orgDir + filename);
+                String dirActual = "";
+                if (filename.equals("mobileorg.org")) {
+                    dirActual = "/sdcard/mobileorg/";
+                }
+                else {
+                    dirActual = this.orgDir;
+                }
+                this.fstream = new FileInputStream(dirActual + filename);
             }
             else {
                 Log.e(LT, "[Parse] Unknown storage mechanism: " + this.storageMode);

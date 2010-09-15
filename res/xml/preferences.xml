@@ -20,7 +20,7 @@
         android:key="storageMode"
         android:entries="@array/storageModes"
         android:entryValues="@array/storageModesVals"
-        android:defaultValue="internal" />
+        android:defaultValue="sdcard" />
   </PreferenceCategory>
   <PreferenceCategory android:title="Other">
     <PreferenceScreen
