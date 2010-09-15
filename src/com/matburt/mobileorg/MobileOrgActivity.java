@@ -51,12 +51,12 @@ public class MobileOrgActivity extends ListActivity
             this.lInflator = LayoutInflater.from(context);
             this.nodeSelection = selection;
             this.context = context;
-            Log.d("OVA", "Selection Stack");
+            Log.d("MobileOrg", "Selection Stack");
             if (selection != null) {
                 for (int idx = 0; idx < selection.size(); idx++) {
                     this.thisNode = this.thisNode.subNodes.get(
                                           selection.get(idx));
-                    Log.d("OVA", this.thisNode.nodeName);
+                    Log.d("MobileOrg", this.thisNode.nodeName);
                 }
             }
         }

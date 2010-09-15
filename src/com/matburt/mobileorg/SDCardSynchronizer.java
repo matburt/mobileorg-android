@@ -39,7 +39,6 @@ public class SDCardSynchronizer implements Synchronizer
     }
 
     public void push() throws NotFoundException, ReportableError {
-
     }
 
     public void pull() throws NotFoundException, ReportableError {
@@ -50,7 +49,7 @@ public class SDCardSynchronizer implements Synchronizer
         String filebuffer = this.readFile(indexFile);
         HashMap<String, String> masterList = this.getOrgFilesFromMaster(filebuffer);
 
-        for (String key : masterList.keySet()) {
+        for (String key : masterList.keySet()) { 
             Log.d(LT, "Fetching: " + key + ": " + basePath + masterList.get(key));
             this.appdb.addOrUpdateFile(masterList.get(key), key);
         }
