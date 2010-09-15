@@ -31,7 +31,7 @@
     <PreferenceScreen
         android:key="VersionDisp"
         android:title="Version"
-        android:summary="0.4.1">
+        android:summary="0.4.2">
     </PreferenceScreen>
   </PreferenceCategory>
 </PreferenceScreen>
