@@ -62,6 +62,9 @@ public class MobileOrgActivity extends ListActivity
         }
 
         public int getCount() {
+            if (this.thisNode == null ||
+                this.thisNode.subNodes == null)
+                return 0;
             return this.thisNode.subNodes.size();
         }
 
