@@ -12,10 +12,13 @@ import android.util.Log;
 import android.content.SharedPreferences;
 import java.io.File;
 import android.os.Environment;
+import android.content.res.Resources;
+import android.content.res.Resources.NotFoundException;
 
 public class MobileOrgDatabase {
     private Context appcontext;
     private String lastStorageMode = "";
+    private Resources r;
     public SQLiteDatabase appdb;
     public SharedPreferences appSettings;
     public static final String LT = "MobileOrg";
@@ -23,6 +26,7 @@ public class MobileOrgDatabase {
     public MobileOrgDatabase(Context appctxt) {
         this.appcontext = appctxt;
         this.appSettings = PreferenceManager.getDefaultSharedPreferences(appctxt);
+        this.r = appctxt.getResources();
         this.initialize();
     }
 
@@ -40,6 +44,11 @@ public class MobileOrgDatabase {
             File morgFile = new File(morgDir, "mobileorg.db");
             this.appdb = SQLiteDatabase.openOrCreateDatabase(morgFile, null);
             Log.d(LT, "Setting database path to " + morgFile.getAbsolutePath());
+        }
+        else {
+            ErrorReporter.displayError(this.appcontext,
+                                       r.getString(R.string.error_opening_database));
+            return;
         }
         this.appdb.execSQL("CREATE TABLE IF NOT EXISTS files"
                            + " (file VARCHAR, name VARCHAR,"

@@ -124,7 +124,8 @@ public class Capture extends Activity implements OnClickListener
         String[] bufferLines = givenText.split("\\n");
         for (int idx = 0; idx < bufferLines.length; idx++) {
             if (idx == 0) {
-                if (!bufferLines[idx].substring(0,1).equals("*")) {
+                if (bufferLines[idx].length() > 0 &&
+                    !bufferLines[idx].substring(0,1).equals("*")) {
                     Date date = new Date();
                     String DATE_FORMAT = "[yyyy-MM-dd EEE HH:mm]";
                     SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT);
