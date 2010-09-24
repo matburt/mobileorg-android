@@ -208,7 +208,9 @@ class OrgFileParser {
         for (int jdx = 0; jdx < this.orgPaths.size(); jdx++) {
             Log.d(LT, "Parsing: " + orgPaths.get(jdx));
             //if file is encrypted just add a placeholder node to be parsed later
-            if(!orgPaths.get(jdx).endsWith(".org"))
+            if(orgPaths.get(jdx).endsWith(".gpg") ||
+               orgPaths.get(jdx).endsWith(".pgp") ||
+               orgPaths.get(jdx).endsWith(".enc"))
             {
                 nodeStack.peek().addChildNode(new Node(orgPaths.get(jdx),
                                                        Node.HEADING,

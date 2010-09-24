@@ -164,7 +164,8 @@ public class SDCardSynchronizer implements Synchronizer
         }
     }
 
-    private String readFile(String filePath) throws ReportableError, java.io.FileNotFoundException {
+    private String readFile(String filePath) throws ReportableError,
+                                                    java.io.FileNotFoundException {
         FileInputStream readerIS;
         BufferedReader fReader;
         File inpfile = new File(filePath);
@@ -193,7 +194,7 @@ public class SDCardSynchronizer implements Synchronizer
 
     //NOTE: This is a common method and needs to be generalized
     private HashMap<String, String> getOrgFilesFromMaster(String master) {
-        Pattern getOrgFiles = Pattern.compile("\\[file:(.*?\\.org)\\]\\[(.*?)\\]\\]");
+        Pattern getOrgFiles = Pattern.compile("\\[file:(.*?\\.(org|pgp|gpg|enc))\\]\\[(.*?)\\]\\]");
         Matcher m = getOrgFiles.matcher(master);
         HashMap<String, String> allOrgFiles = new HashMap<String, String>();
         while (m.find()) {
