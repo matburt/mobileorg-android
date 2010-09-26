@@ -54,8 +54,15 @@ public class MobileOrgActivity extends ListActivity
             Log.d("MobileOrg", "Selection Stack");
             if (selection != null) {
                 for (int idx = 0; idx < selection.size(); idx++) {
-                    this.thisNode = this.thisNode.subNodes.get(
-                                          selection.get(idx));
+                    try {
+                        this.thisNode = this.thisNode.subNodes.get(
+                                            selection.get(idx));
+                    }
+                    catch (IndexOutOfBoundsException e) {
+                        Log.d("MobileOrg", "IndexOutOfBounds on selection " +
+                              selection.get(idx).toString() + " in node: " + );
+                        return;
+                    }
                     Log.d("MobileOrg", this.thisNode.nodeName);
                 }
             }
