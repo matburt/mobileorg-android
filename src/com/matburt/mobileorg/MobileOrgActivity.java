@@ -60,7 +60,8 @@ public class MobileOrgActivity extends ListActivity
                     }
                     catch (IndexOutOfBoundsException e) {
                         Log.d("MobileOrg", "IndexOutOfBounds on selection " +
-                              selection.get(idx).toString() + " in node: " + );
+                              selection.get(idx).toString() + " in node " +
+                              this.thisNode.nodeName);
                         return;
                     }
                     Log.d("MobileOrg", this.thisNode.nodeName);
