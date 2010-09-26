@@ -269,7 +269,7 @@ public class WebDAVSynchronizer implements Synchronizer
     }
 
     private HashMap<String, String> getOrgFilesFromMaster(String master) {
-        Pattern getOrgFiles = Pattern.compile("\\[file:(.*?\\.(org|pgp|gpg|enc))\\]\\[(.*?)\\]\\]");
+        Pattern getOrgFiles = Pattern.compile("\\[file:(.*?\\.(?:org|pgp|gpg|enc))\\]\\[(.*?)\\]\\]");
         Matcher m = getOrgFiles.matcher(master);
         HashMap<String, String> allOrgFiles = new HashMap<String, String>();
         while (m.find()) {
