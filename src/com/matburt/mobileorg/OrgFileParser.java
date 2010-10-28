@@ -32,7 +32,7 @@ class OrgFileParser {
     String storageMode = null;
     Pattern titlePattern = null;
     FileInputStream fstream;
-    Node rootNode = new Node("MobileOrg", Node.HEADING);
+    Node rootNode = new Node("", Node.HEADING);
     MobileOrgDatabase appdb;
     public static final String LT = "MobileOrg";
     public String orgDir = "/sdcard/mobileorg/";
@@ -118,10 +118,11 @@ class OrgFileParser {
         String npath = baseNode.nodeName;
         Node pnode = baseNode;
         while ((pnode = pnode.parentNode) != null) {
-            npath = pnode.nodeName + "/" + npath;
+            if (pnode.nodeName.length() > 0) {
+                npath = pnode.nodeName + "/" + npath;
+            }
         }
         npath = "olp:" + npath;
-        Log.e(LT, "Returning path: " + npath);
         return npath;
     }
 
