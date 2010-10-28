@@ -27,6 +27,7 @@ class Node {
     Date deadline = null;
     boolean encrypted = false;
     boolean parsed = false;
+    Node parentNode = null;
 
     Node(String heading, int ntype) {
         this(heading, ntype, false);
@@ -50,6 +51,10 @@ class Node {
             }
         }
         return null;
+    }
+
+    void setParentNode(Node pnode) {
+        this.parentNode = pnode;
     }
 
     void addPayload(String npayload) {

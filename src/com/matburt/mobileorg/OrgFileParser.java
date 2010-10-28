@@ -114,6 +114,17 @@ class OrgFileParser {
         this.appdb.appdb.update("data", recValues, "id = ?", new String[] {Long.toString(nodeId)});
     }
 
+    public String getNodePath(Node baseNode) {
+        String npath = baseNode.nodeName;
+        Node pnode = baseNode;
+        while ((pnode = pnode.parentNode) != null) {
+            npath = pnode.nodeName + "/" + npath;
+        }
+        npath = "olp:" + npath;
+        Log.e(LT, "Returning path: " + npath);
+        return npath;
+    }
+
     public void parse(Node fileNode, BufferedReader breader)
     {
         try
@@ -157,6 +168,8 @@ class OrgFileParser {
                     if (numstars > nodeDepth) {
                         try {
                             Node lastNode = nodeStack.peek();
+                            newNode.setParentNode(lastNode);
+                            newNode.addProperty("ID", this.getNodePath(newNode));
                             lastNode.addChildNode(newNode);
                         } catch (EmptyStackException e) {
                         }
@@ -174,6 +187,8 @@ class OrgFileParser {
                         }
 
                         Node lastNode = nodeStack.peek();
+                        newNode.setParentNode(lastNode);
+                        newNode.addProperty("ID", this.getNodePath(newNode));
                         lastNode.addChildNode(newNode);
                         nodeStack.push(newNode);
                         nodeDepth++;
@@ -212,15 +227,20 @@ class OrgFileParser {
                orgPaths.get(jdx).endsWith(".pgp") ||
                orgPaths.get(jdx).endsWith(".enc"))
             {
-                nodeStack.peek().addChildNode(new Node(orgPaths.get(jdx),
-                                                       Node.HEADING,
-                                                       true));
+                Node nnode = new Node(orgPaths.get(jdx),
+                                      Node.HEADING,
+                                      true);
+                nnode.setParentNode(nodeStack.peek());
+                nnode.addProperty("ID", this.getNodePath(nnode));
+                nodeStack.peek().addChildNode(nnode);
                 continue;
             }
 
             Node fileNode = new Node(this.orgPaths.get(jdx),
                                      Node.HEADING,
                                      false);
+            fileNode.setParentNode(nodeStack.peek());
+            fileNode.addProperty("ID", this.getNodePath(fileNode));
             nodeStack.peek().addChildNode(fileNode);
             nodeStack.push(fileNode);
             parse(fileNode, null);
