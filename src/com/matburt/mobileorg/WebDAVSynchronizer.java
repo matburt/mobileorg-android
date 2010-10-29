@@ -18,6 +18,7 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.ArrayList;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
@@ -144,8 +145,9 @@ public class WebDAVSynchronizer implements Synchronizer
             		r.getString(R.string.error_file_not_found, url),
             		null);
         }
-        HashMap<String, String> masterList;
-        masterList = this.getOrgFilesFromMaster(masterStr);
+        HashMap<String, String> masterList = this.getOrgFilesFromMaster(masterStr);
+        ArrayList<ArrayList<String>> todoLists = this.getTodos(masterStr);
+        this.appdb.setTodoList(todoLists);
         String urlActual = this.getRootUrl();
 
         //Get checksums file
@@ -278,6 +280,25 @@ public class WebDAVSynchronizer implements Synchronizer
 
         return allOrgFiles;
     }
+
+    //Get todo state here
+    private ArrayList<ArrayList<String>> getTodos(String master) {
+        Pattern getTodos = Pattern.compile("#\\+TODO:\\s+([\\s\\w-]*)(\\| ([\\s\\w-]*))*");
+        Matcher m = getTodos.matcher(master);
+        ArrayList<ArrayList<String>> todoList = new ArrayList<ArrayList<String>>();
+        while (m.find()) {
+            ArrayList<String> holding = new ArrayList<String>();
+            for (int idx = 1; idx <= m.groupCount(); idx++) {
+                holding.add(m.group(idx));
+            }
+            todoList.add(holding);
+        }
+        return todoList;
+    }
+
+    //TODO: Get Tags
+
+    //TODO: Get Priorities
 
     private DefaultHttpClient createConnection(String user, String password) {
         DefaultHttpClient httpClient = new DefaultHttpClient();

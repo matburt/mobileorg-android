@@ -53,6 +53,9 @@ public class MobileOrgDatabase {
         this.appdb.execSQL("CREATE TABLE IF NOT EXISTS files"
                            + " (file VARCHAR, name VARCHAR,"
                            + " checksum VARCHAR);");
+        this.appdb.execSQL("CREATE TABLE IF NOT EXISTS todos"
+                           + " (tdgroup int, name VARCHAR,"
+                           + " isdone INT)");
         this.lastStorageMode = storageMode;
     }
 
@@ -97,6 +100,11 @@ public class MobileOrgDatabase {
         this.appdb.execSQL("DELETE FROM data");
     }
 
+    public void clearTodos() {
+        this.checkStorageMode();
+        this.appdb.execSQL("DELETE from todos");
+    }
+
     public void addOrUpdateFile(String filename, String name) {
         this.checkStorageMode();
         Cursor result = this.appdb.rawQuery("SELECT * FROM files " +
@@ -112,5 +120,17 @@ public class MobileOrgDatabase {
             }
         }
         result.close();
+    }
+
+    public void setTodoList(ArrayList<ArrayList<String>> newList) {
+        this.clearTodos();
+        for (int idx = 0; idx < newList.size(); idx++) {
+            for (int jdx = 0; jdx < newList.get(idx).size(); jdx++) {
+                this.appdb.execSQL("INSERT INTO todos (tdgroup, name, isdone) " +
+                                   "VALUES (" + Integer.toString(idx) + "," +
+                                   "        '" + newList.get(idx).get(jdx) + "'," +
+                                   "        0)");
+            }
+        }
     }
 }
