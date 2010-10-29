@@ -34,6 +34,8 @@ public class Capture extends Activity implements OnClickListener
     private Button saveButton;
     private SharedPreferences appSettings;
     private MobileOrgDatabase appdb;
+    private boolean editMode = false;
+    private String id = null;
     public static final String LT = "MobileOrg";
 
     @Override
@@ -116,10 +118,23 @@ public class Capture extends Activity implements OnClickListener
         }
     }
 
+    public String transformBuffer(String givenText) {
+        if (this.editMode == false) {
+            return this.transformCreateBuffer(givenText);
+        }
+        else {
+            return this.transformEditBuffer(givenText);
+        }
+    }
+
+    public String transformEditBuffer(String givenText) {
+        return "";
+    }
+
     // * first line of the note
     //   [2009-09-09 Wed 09:25]
     //   Rest of the note
-    public String transformBuffer(String givenText) {
+    public String transformCreateBuffer(String givenText) {
         String xformed = "";
         String[] bufferLines = givenText.split("\\n");
         for (int idx = 0; idx < bufferLines.length; idx++) {
@@ -147,6 +162,13 @@ public class Capture extends Activity implements OnClickListener
     public void populateDisplay() {
         Intent txtIntent = getIntent();
         String srcText = txtIntent.getStringExtra("txtValue");
+        this.id = txtIntent.getStringExtra("nodeId");
+        if (this.id == null) {
+            this.editMode = false;
+        }
+        else {
+            this.editMode = true;
+        }
         this.orgEditDisplay.setText(srcText);
     }
 }

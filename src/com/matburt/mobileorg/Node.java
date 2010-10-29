@@ -72,4 +72,12 @@ class Node {
     void addProperty(String key, String val) {
         this.properties.put(key, val);
     }
+
+    String getProperty(String key) {
+        return this.properties.get("ID");
+    }
+
+    boolean hasProperty(String key) {
+        return this.properties.containsKey(key);
+    }
 }

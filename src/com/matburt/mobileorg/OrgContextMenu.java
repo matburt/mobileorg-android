@@ -61,6 +61,9 @@ public class OrgContextMenu extends Activity implements OnClickListener
         else if (v == this.docEditButton) {
             textIntent.setClassName("com.matburt.mobileorg",
                                     "com.matburt.mobileorg.Capture");
+            if (thisNode.hasProperty("ID")) {
+                textIntent.putExtra("nodeId", thisNode.getProperty("ID"));
+            }
         }
         textIntent.putExtra("txtValue", displayBuffer);
         startActivity(textIntent);
