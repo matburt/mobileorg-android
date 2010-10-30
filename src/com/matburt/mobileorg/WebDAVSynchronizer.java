@@ -281,7 +281,6 @@ public class WebDAVSynchronizer implements Synchronizer
         return allOrgFiles;
     }
 
-    //Get todo state here
     private ArrayList<ArrayList<String>> getTodos(String master) {
         Pattern getTodos = Pattern.compile("#\\+TODO:\\s+([\\s\\w-]*)(\\| ([\\s\\w-]*))*");
         Matcher m = getTodos.matcher(master);
@@ -289,7 +288,14 @@ public class WebDAVSynchronizer implements Synchronizer
         while (m.find()) {
             ArrayList<String> holding = new ArrayList<String>();
             for (int idx = 1; idx <= m.groupCount(); idx++) {
-                holding.add(m.group(idx));
+                if (m.group(idx) != null &&
+                    m.group(idx).indexOf("|") == -1 &&
+                    m.group(idx).length() > 0) {
+                    String[] grouping = m.group(idx).split("\\s+");
+                    for (int jdx = 0; jdx < grouping.length; jdx++) {
+                        holding.add(grouping[jdx].trim());
+                    }
+                }
             }
             todoList.add(holding);
         }
