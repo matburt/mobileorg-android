@@ -15,6 +15,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.io.File;
@@ -157,6 +158,8 @@ public class SDCardSynchronizer implements Synchronizer
                     e);
         }
         HashMap<String, String> masterList = this.getOrgFilesFromMaster(filebuffer);
+        ArrayList<ArrayList<String>> todoLists = this.getTodos(filebuffer);
+        this.appdb.setTodoList(todoLists);
 
         for (String key : masterList.keySet()) { 
             Log.d(LT, "Fetching: " + key + ": " + basePath + "/" + masterList.get(key));
@@ -203,4 +206,27 @@ public class SDCardSynchronizer implements Synchronizer
 
         return allOrgFiles;
     }
+
+    //NOTE: This is a common method and needs to be generalized
+    private ArrayList<ArrayList<String>> getTodos(String master) {
+        Pattern getTodos = Pattern.compile("#\\+TODO:\\s+([\\s\\w-]*)(\\| ([\\s\\w-]*))*");
+        Matcher m = getTodos.matcher(master);
+        ArrayList<ArrayList<String>> todoList = new ArrayList<ArrayList<String>>();
+        while (m.find()) {
+            ArrayList<String> holding = new ArrayList<String>();
+            for (int idx = 1; idx <= m.groupCount(); idx++) {
+                if (m.group(idx) != null &&
+                    m.group(idx).indexOf("|") == -1 &&
+                    m.group(idx).length() > 0) {
+                    String[] grouping = m.group(idx).split("\\s+");
+                    for (int jdx = 0; jdx < grouping.length; jdx++) {
+                        holding.add(grouping[jdx].trim());
+                    }
+                }
+            }
+            todoList.add(holding);
+        }
+        return todoList;
+    }
+
 }
