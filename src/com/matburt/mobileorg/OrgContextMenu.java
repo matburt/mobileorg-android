@@ -22,6 +22,8 @@ public class OrgContextMenu extends Activity implements OnClickListener
     ArrayList<Integer> npath;
     private Button docButton;
     private Button docEditButton;
+    private Button docTodoButton;
+    private Button docPriorityButton;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -29,14 +31,32 @@ public class OrgContextMenu extends Activity implements OnClickListener
         setContentView(R.layout.longcontext);
         this.docButton = (Button)this.findViewById(R.id.documentMode);
         this.docEditButton = (Button)this.findViewById(R.id.documentModeEdit);
+        this.docTodoButton = (Button)this.findViewById(R.id.documentSetTodo);
+        this.docPriorityButton = (Button)this.findViewById(R.id.documentSetPriority);
         this.docButton.setOnClickListener(this);
         this.docEditButton.setOnClickListener(this);
+        this.docTodoButton.setOnClickListener(this);
+        this.docPriorityButton.setOnClickListener(this);
         this.poplateDisplay();
     }
 
     public void poplateDisplay() {
         Intent txtIntent = getIntent();
         this.npath = txtIntent.getIntegerArrayListExtra("nodePath");
+        MobileOrgApplication appInst = (MobileOrgApplication)this.getApplication();
+        Node thisNode = appInst.rootNode;
+        Intent textIntent = new Intent();
+        String displayBuffer = new String();
+        for (int idx = 0; idx < this.npath.size(); idx++) {
+            thisNode = thisNode.subNodes.get(
+                                             this.npath.get(idx));
+        }
+        if (thisNode.todo == null || thisNode.todo.length() < 1) {
+            this.docTodoButton.setVisibility(View.GONE);
+        }
+
+        //We aren't even populating this yet
+        this.docPriorityButton.setVisibility(View.GONE);
     }
 
     public void onClick(View v) {
