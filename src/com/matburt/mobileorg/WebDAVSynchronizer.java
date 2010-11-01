@@ -234,7 +234,6 @@ public class WebDAVSynchronizer implements Synchronizer
                 return ""; //Raise exception
             }
             masterStr = this.ReadInputStream(mainFile);
-            Log.d(LT, masterStr);
         }
         catch (IOException e) {
             throw new ReportableError(

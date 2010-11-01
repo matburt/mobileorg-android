@@ -122,6 +122,29 @@ public class MobileOrgDatabase {
         result.close();
     }
 
+    public ArrayList<ArrayList<String>> getTodos() {
+        ArrayList<ArrayList<String>> allTodos = new ArrayList<ArrayList<String>>();
+        Cursor result = this.appdb.rawQuery("SELECT tdgroup, name FROM todos order by tdgroup", null);
+        if (result != null) {
+            ArrayList<String> grouping = new ArrayList();
+            int resultgroup = 0;
+            if (result.getCount() > 0) {
+                result.moveToFirst();
+                do {
+                    if (result.getInt(0) != resultgroup) {
+                        allTodos.add(grouping);
+                        grouping = new ArrayList();
+                        resultgroup = result.getInt(0);
+                    }
+                    grouping.add(result.getString(1));
+                } while(result.moveToNext());
+                allTodos.add(grouping);
+            }
+        }
+        result.close();
+        return allTodos;
+    }
+
     public void setTodoList(ArrayList<ArrayList<String>> newList) {
         this.clearTodos();
         for (int idx = 0; idx < newList.size(); idx++) {
