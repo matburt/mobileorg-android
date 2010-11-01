@@ -31,6 +31,9 @@
     <activity android:name="SimpleTextDisplay"
               android:label="Org View">
     </activity>
+    <activity android:name="EditDetailsActivity"
+              android:label="TODO State Selection">
+    </activity>
     <activity android:name="OrgContextMenu"
               android:label="OrgMenu">
     </activity>

@@ -85,6 +85,10 @@ public class OrgContextMenu extends Activity implements OnClickListener
                 textIntent.putExtra("nodeId", thisNode.getProperty("ID"));
             }
         }
+        else if (v == this.docTodoButton) {
+            textIntent.setClassName("com.matburt.mobileorg",
+                                    "com.matburt.mobileorg.EditDetailsActivity");
+        }
         textIntent.putExtra("txtValue", displayBuffer);
         startActivity(textIntent);
     }
