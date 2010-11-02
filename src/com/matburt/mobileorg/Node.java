@@ -74,7 +74,7 @@ class Node {
     }
 
     String getProperty(String key) {
-        return this.properties.get("ID");
+        return this.properties.get(key);
     }
 
     boolean hasProperty(String key) {

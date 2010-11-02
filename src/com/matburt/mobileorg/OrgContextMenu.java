@@ -88,6 +88,7 @@ public class OrgContextMenu extends Activity implements OnClickListener
         else if (v == this.docTodoButton) {
             textIntent.setClassName("com.matburt.mobileorg",
                                     "com.matburt.mobileorg.EditDetailsActivity");
+            textIntent.putExtra("nodePath", this.npath);
         }
         textIntent.putExtra("txtValue", displayBuffer);
         startActivity(textIntent);
