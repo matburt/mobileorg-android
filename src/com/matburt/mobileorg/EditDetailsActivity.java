@@ -23,11 +23,18 @@ public class EditDetailsActivity extends Activity implements OnClickListener
     public static final String LT = "MobileOrg";
     private TableLayout mainLayout = null;
     private MobileOrgDatabase appdb;
+    private ArrayList<Integer> npath;
     private ArrayList<Button> buttonList = null;
+    private Node activeNode = null;
+    private CreateEditNote noteEditor = null;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Intent txtIntent = getIntent();
+        this.npath = txtIntent.getIntegerArrayListExtra("nodePath");
+        this.noteEditor = new CreateEditNote(this);
+
         this.appdb = new MobileOrgDatabase((Context)this);
         ArrayList<ArrayList<String>> allTodos = this.appdb.getTodos();
         this.buttonList = new ArrayList<Button>();
@@ -46,6 +53,7 @@ public class EditDetailsActivity extends Activity implements OnClickListener
                 aButton.setText(allTodos.get(idx).get(jdx));
                 aTr.addView(aButton);
                 mainLayout.addView(aTr);
+                this.buttonList.add(aButton);
             }
             TableRow nTr = new TableRow(this);
             nTr.setLayoutParams(
@@ -55,9 +63,43 @@ public class EditDetailsActivity extends Activity implements OnClickListener
             mainLayout.addView(nTr);
         }
         setContentView(mainLayout);
+        this.populateInfo();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (this.noteEditor != null) {
+            this.noteEditor.close();
+        }
+    }
+
+    public void saveEditTodo(String newTodo) {
+        this.noteEditor.editNote("todo",
+                                 this.activeNode.getProperty("ID"),
+                                 this.activeNode.nodeName,
+                                 this.activeNode.todo,
+                                 newTodo);
+    }
+
+    public void populateInfo() {
+        MobileOrgApplication appInst = (MobileOrgApplication)this.getApplication();
+        Node thisNode = appInst.rootNode;
+        Intent textIntent = new Intent();
+        String displayBuffer = new String();
+        for (int idx = 0; idx < this.npath.size(); idx++) {
+            thisNode = thisNode.subNodes.get(
+                                             this.npath.get(idx));
+        }
+        this.activeNode = thisNode;
     }
 
     public void onClick(View v) {
-
+        for (int idx = 0; idx < this.buttonList.size(); idx++) {
+            if (v == this.buttonList.get(idx)) {
+                this.saveEditTodo(this.buttonList.get(idx).getText().toString());
+                this.finish();
+            }
+        }
     }
 }

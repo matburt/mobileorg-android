@@ -37,8 +37,16 @@ public class CreateEditNote
     }
 
     public void writeNewNote(String message) {
-        String newNote = this.transformBuffer(message);
-        this.writeNote(newNote);
+        this.writeNote(this.transformCreateBuffer(message));
+    }
+
+    public void editNote(String edittype,
+                    String nodeId,
+                    String nodeTitle,
+                    String oldValue,
+                    String newValue) {
+        this.writeNote(this.transformEditBuffer(edittype, nodeId,
+                                                nodeTitle, oldValue, newValue));
     }
 
     public boolean writeNote(String message) {
@@ -95,12 +103,24 @@ public class CreateEditNote
         return true;
     }
 
-    public String transformBuffer(String givenText) {
-            return this.transformCreateBuffer(givenText);
-    }
-
-    public String transformEditBuffer(String givenText) {
-        return "";
+    // edittype = heading || body || tags || todo || priority
+    //
+    // * F(edit:edittype) [[id:yyy][Title of node]
+    // ** Old value
+    // Old value goes here
+    // ** New value
+    // New value goes here
+    // ** End of edit
+    public String transformEditBuffer(String edittype,
+                                      String nodeId,
+                                      String nodeTitle,
+                                      String oldValue,
+                                      String newValue) {
+        String editbuffer = "* F(edit:" + edittype + ") [[id:" + nodeId +
+            "][" + nodeTitle + "]\n";
+        editbuffer += "** Old value\n" + oldValue + "\n";
+        editbuffer += "** New value\n" + newValue + "\n";
+        return editbuffer;
     }
 
     // * first line of the note
