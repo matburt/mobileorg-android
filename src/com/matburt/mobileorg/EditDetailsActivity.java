@@ -51,6 +51,7 @@ public class EditDetailsActivity extends Activity implements OnClickListener
                              TableRow.LayoutParams.WRAP_CONTENT));
                 Button aButton = new Button(this);
                 aButton.setText(allTodos.get(idx).get(jdx));
+                aButton.setOnClickListener(this);
                 aTr.addView(aButton);
                 mainLayout.addView(aTr);
                 this.buttonList.add(aButton);
