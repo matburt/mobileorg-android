@@ -159,7 +159,9 @@ public class SDCardSynchronizer implements Synchronizer
         }
         HashMap<String, String> masterList = this.getOrgFilesFromMaster(filebuffer);
         ArrayList<ArrayList<String>> todoLists = this.getTodos(filebuffer);
+        ArrayList<ArrayList<String>> priorityLists = this.getPriorities(masterStr);
         this.appdb.setTodoList(todoLists);
+        this.appdb.setPriorityList(priorityLists);
 
         for (String key : masterList.keySet()) { 
             Log.d(LT, "Fetching: " + key + ": " + basePath + "/" + masterList.get(key));
@@ -227,6 +229,24 @@ public class SDCardSynchronizer implements Synchronizer
             todoList.add(holding);
         }
         return todoList;
+    }
+
+    private ArrayList<ArrayList<String>> getPriorities(String master) {
+        Pattern getPriorities = Pattern.compile("#\\+ALLPRIORITIES:\\s+([A-Z\\s]*)");
+        Matcher t = getPriorities.matcher(master);
+        ArrayList<ArrayList<String>> priorityList = new ArrayList<ArrayList<String>>();
+        while (t.find()) {
+            ArrayList<String> holding = new ArrayList<String>();
+            if (t.group(1) != null &&
+                t.group(1).length() > 0) {
+                String[] grouping = t.group(1).split("\\s+");
+                for (int jdx = 0; jdx < grouping.length; jdx++) {
+                    holding.add(grouping[jdx].trim());
+                }
+            }
+            priorityList.add(holding);
+        }
+        return priorityList;
     }
 
 }
