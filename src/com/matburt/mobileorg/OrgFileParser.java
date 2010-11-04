@@ -23,12 +23,12 @@ class OrgFileParser {
 	class TitleComponents {
 		String title;
 		String todo;
+        String priority;
 		ArrayList<String> tags = new ArrayList<String>();
 	}
 
     ArrayList<String> orgPaths;
     ArrayList<Node> nodeList = new ArrayList<Node>();
-    ArrayList<String> todoKeywords = new ArrayList<String>();
     String storageMode = null;
     Pattern titlePattern = null;
     FileInputStream fstream;
@@ -44,18 +44,15 @@ class OrgFileParser {
         this.storageMode = storageMode;
         this.orgPaths = orgpaths;
         this.orgDir = orgBasePath;
-        this.todoKeywords.add("TODO");
-        this.todoKeywords.add("DONE");
         
     }
     
     private Pattern prepareTitlePattern () {
     	if (this.titlePattern == null) {
     		StringBuffer pattern = new StringBuffer();
-    		pattern.append("^(?:(");
-    		pattern.append(TextUtils.join("|", todoKeywords));
+    		pattern.append("^(?:([A-Z]{2,}:?\\s*");
     		pattern.append(")\\s*)?");
-    		pattern.append("(.*?)");
+    		pattern.append("(\\[\\#.*\\])?(.*?)");
     		pattern.append("\\s*(?::([^\\s]+):)?$");
     		this.titlePattern = Pattern.compile(pattern.toString());
     	}
@@ -70,8 +67,14 @@ class OrgFileParser {
     	if (m.find()) {
     		if (m.group(1) != null)
     			component.todo = m.group(1);
-    		component.title = m.group(2);
-    		String tags = m.group(3);
+            if (m.group(2) != null) {
+                component.priority = m.group(2);
+                component.priority = component.priority.replace("#", "");
+                component.priority = component.priority.replace("[", "");
+                component.priority = component.priority.replace("]", "");
+            }
+    		component.title = m.group(3);
+    		String tags = m.group(4);
     		if (tags != null) {
     			for (String tag : tags.split(":")) {
     				component.tags.add(tag);
@@ -165,6 +168,7 @@ class OrgFileParser {
                                             Node.HEADING);
                     newNode.setFullTitle(this.stripTitle(title));
                     newNode.todo = titleComp.todo;
+                    newNode.priority = titleComp.priority;
                     newNode.tags.addAll(titleComp.tags);
                     if (numstars > nodeDepth) {
                         try {

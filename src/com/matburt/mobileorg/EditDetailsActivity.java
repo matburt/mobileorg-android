@@ -9,6 +9,7 @@ import android.widget.TableRow.LayoutParams;
 import android.widget.Button;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.TextView;
 import android.view.View.OnClickListener;
 import android.preference.Preference;
 import android.preference.ListPreference;
@@ -23,32 +24,85 @@ public class EditDetailsActivity extends Activity implements OnClickListener
     public static final String LT = "MobileOrg";
     private TableLayout mainLayout = null;
     private MobileOrgDatabase appdb;
+    private MobileOrgApplication appinst;
     private ArrayList<Integer> npath;
     private ArrayList<Button> buttonList = null;
     private Node activeNode = null;
     private CreateEditNote noteEditor = null;
+    private String editType;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Intent txtIntent = getIntent();
         this.npath = txtIntent.getIntegerArrayListExtra("nodePath");
-        this.noteEditor = new CreateEditNote(this);
+        this.editType = txtIntent.getStringExtra("editType");
 
+        this.noteEditor = new CreateEditNote(this);
         this.appdb = new MobileOrgDatabase((Context)this);
+
+        if (this.editType.indexOf("todo") != -1) {
+            this.editTodo();
+        }
+        else if (this.editType.indexOf("priority") != -1) {
+            this.editPriority();
+        }
+    }
+
+    private void editPriority() {
+        ArrayList<ArrayList<String>> allPriorities = this.appdb.getPriorities();
+        this.buttonList = new ArrayList<Button>();
+        mainLayout = new TableLayout(this);
+        mainLayout.setLayoutParams(
+                     new TableLayout.LayoutParams(
+                          LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
+        mainLayout.setColumnStretchable(0, true);
+        for (int idx = 0; idx < allPriorities.size(); idx++) {
+            for (int jdx = 0; jdx < allPriorities.get(idx).size(); jdx++) {
+                TableRow aTr = new TableRow(this);
+                aTr.setLayoutParams(
+                      new TableRow.LayoutParams(
+                             TableRow.LayoutParams.FILL_PARENT,
+                             TableRow.LayoutParams.FILL_PARENT));
+                Button aButton = new Button(this);
+                aButton.setText(allPriorities.get(idx).get(jdx));
+                aButton.setOnClickListener(this);
+                aTr.addView(aButton);
+                mainLayout.addView(aTr);
+                this.buttonList.add(aButton);
+            }
+            TableRow nTr = new TableRow(this);
+            nTr.setLayoutParams(
+                      new TableRow.LayoutParams(
+                             TableRow.LayoutParams.FILL_PARENT,
+                             TableRow.LayoutParams.FILL_PARENT));
+            TextView spacer = new TextView(this);
+            spacer.setLayoutParams(
+                      new TableRow.LayoutParams(
+                             TableRow.LayoutParams.FILL_PARENT,
+                             TableRow.LayoutParams.FILL_PARENT));
+            nTr.addView(spacer);
+            mainLayout.addView(nTr);
+        }
+        setContentView(mainLayout);
+        this.populateInfo();
+    }
+
+    private void editTodo() {
         ArrayList<ArrayList<String>> allTodos = this.appdb.getTodos();
         this.buttonList = new ArrayList<Button>();
         mainLayout = new TableLayout(this);
         mainLayout.setLayoutParams(
                      new TableLayout.LayoutParams(
                           LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
+        mainLayout.setColumnStretchable(0, true);
         for (int idx = 0; idx < allTodos.size(); idx++) {
             for (int jdx = 0; jdx < allTodos.get(idx).size(); jdx++) {
                 TableRow aTr = new TableRow(this);
                 aTr.setLayoutParams(
                       new TableRow.LayoutParams(
                              TableRow.LayoutParams.FILL_PARENT,
-                             TableRow.LayoutParams.WRAP_CONTENT));
+                             TableRow.LayoutParams.FILL_PARENT));
                 Button aButton = new Button(this);
                 aButton.setText(allTodos.get(idx).get(jdx));
                 aButton.setOnClickListener(this);
@@ -60,7 +114,13 @@ public class EditDetailsActivity extends Activity implements OnClickListener
             nTr.setLayoutParams(
                       new TableRow.LayoutParams(
                              TableRow.LayoutParams.FILL_PARENT,
-                             TableRow.LayoutParams.WRAP_CONTENT));
+                             TableRow.LayoutParams.FILL_PARENT));
+            TextView spacer = new TextView(this);
+            spacer.setLayoutParams(
+                      new TableRow.LayoutParams(
+                             TableRow.LayoutParams.FILL_PARENT,
+                             TableRow.LayoutParams.FILL_PARENT));
+            nTr.addView(spacer);
             mainLayout.addView(nTr);
         }
         setContentView(mainLayout);
@@ -75,6 +135,14 @@ public class EditDetailsActivity extends Activity implements OnClickListener
         }
     }
 
+    public void saveEditPriority(String newPriority) {
+        this.noteEditor.editNote("priority",
+                                 this.activeNode.getProperty("ID"),
+                                 this.activeNode.nodeName,
+                                 this.activeNode.priority,
+                                 newPriority);
+    }
+
     public void saveEditTodo(String newTodo) {
         this.noteEditor.editNote("todo",
                                  this.activeNode.getProperty("ID"),
@@ -84,13 +152,12 @@ public class EditDetailsActivity extends Activity implements OnClickListener
     }
 
     public void populateInfo() {
-        MobileOrgApplication appInst = (MobileOrgApplication)this.getApplication();
-        Node thisNode = appInst.rootNode;
+        this.appinst = (MobileOrgApplication)this.getApplication();
+        Node thisNode = this.appinst.rootNode;
         Intent textIntent = new Intent();
         String displayBuffer = new String();
         for (int idx = 0; idx < this.npath.size(); idx++) {
-            thisNode = thisNode.subNodes.get(
-                                             this.npath.get(idx));
+            thisNode = thisNode.subNodes.get(this.npath.get(idx));
         }
         this.activeNode = thisNode;
     }
@@ -98,7 +165,13 @@ public class EditDetailsActivity extends Activity implements OnClickListener
     public void onClick(View v) {
         for (int idx = 0; idx < this.buttonList.size(); idx++) {
             if (v == this.buttonList.get(idx)) {
-                this.saveEditTodo(this.buttonList.get(idx).getText().toString());
+                if (this.editType.indexOf("todo") != -1) {
+                    this.saveEditTodo(this.buttonList.get(idx).getText().toString());
+                }
+                else if (this.editType.indexOf("priority") != -1) {
+                    this.saveEditPriority(this.buttonList.get(idx).getText().toString());
+                }
+                this.appinst.rootNode = null;
                 this.finish();
             }
         }
