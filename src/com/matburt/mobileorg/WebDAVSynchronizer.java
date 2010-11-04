@@ -147,7 +147,9 @@ public class WebDAVSynchronizer implements Synchronizer
         }
         HashMap<String, String> masterList = this.getOrgFilesFromMaster(masterStr);
         ArrayList<ArrayList<String>> todoLists = this.getTodos(masterStr);
+        ArrayList<ArrayList<String>> priorityLists = this.getPriorities(masterStr);
         this.appdb.setTodoList(todoLists);
+        this.appdb.setPriorityList(priorityLists);
         String urlActual = this.getRootUrl();
 
         //Get checksums file
@@ -301,9 +303,23 @@ public class WebDAVSynchronizer implements Synchronizer
         return todoList;
     }
 
-    //TODO: Get Tags
-
-    //TODO: Get Priorities
+    private ArrayList<ArrayList<String>> getPriorities(String master) {
+        Pattern getPriorities = Pattern.compile("#\\+ALLPRIORITIES:\\s+([A-Z\\s]*)");
+        Matcher t = getPriorities.matcher(master);
+        ArrayList<ArrayList<String>> priorityList = new ArrayList<ArrayList<String>>();
+        while (t.find()) {
+            ArrayList<String> holding = new ArrayList<String>();
+            if (t.group(1) != null &&
+                t.group(1).length() > 0) {
+                String[] grouping = t.group(1).split("\\s+");
+                for (int jdx = 0; jdx < grouping.length; jdx++) {
+                    holding.add(grouping[jdx].trim());
+                }
+            }
+            priorityList.add(holding);
+        }
+        return priorityList;
+    }
 
     private DefaultHttpClient createConnection(String user, String password) {
         DefaultHttpClient httpClient = new DefaultHttpClient();

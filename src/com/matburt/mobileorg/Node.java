@@ -20,6 +20,7 @@ class Node {
 
     String nodeName = "";
     String todo = "";
+    String priority = "";
     int nodeType;
     String nodePayload = "";
     String nodeTitle = "";

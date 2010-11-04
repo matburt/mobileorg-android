@@ -55,8 +55,9 @@ public class OrgContextMenu extends Activity implements OnClickListener
             this.docTodoButton.setVisibility(View.GONE);
         }
 
-        //We aren't even populating this yet
-        this.docPriorityButton.setVisibility(View.GONE);
+        if (thisNode.priority == null || thisNode.priority.length() < 1) {
+            this.docPriorityButton.setVisibility(View.GONE);
+        }
     }
 
     public void onClick(View v) {
@@ -89,6 +90,13 @@ public class OrgContextMenu extends Activity implements OnClickListener
             textIntent.setClassName("com.matburt.mobileorg",
                                     "com.matburt.mobileorg.EditDetailsActivity");
             textIntent.putExtra("nodePath", this.npath);
+            textIntent.putExtra("editType", "todo");
+        }
+        else if (v == this.docPriorityButton) {
+            textIntent.setClassName("com.matburt.mobileorg",
+                                    "com.matburt.mobileorg.EditDetailsActivity");
+            textIntent.putExtra("nodePath", this.npath);
+            textIntent.putExtra("editType", "priority");
         }
         textIntent.putExtra("txtValue", displayBuffer);
         startActivity(textIntent);
