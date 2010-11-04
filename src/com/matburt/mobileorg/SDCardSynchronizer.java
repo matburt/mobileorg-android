@@ -159,7 +159,7 @@ public class SDCardSynchronizer implements Synchronizer
         }
         HashMap<String, String> masterList = this.getOrgFilesFromMaster(filebuffer);
         ArrayList<ArrayList<String>> todoLists = this.getTodos(filebuffer);
-        ArrayList<ArrayList<String>> priorityLists = this.getPriorities(masterStr);
+        ArrayList<ArrayList<String>> priorityLists = this.getPriorities(filebuffer);
         this.appdb.setTodoList(todoLists);
         this.appdb.setPriorityList(priorityLists);
 
