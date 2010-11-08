@@ -47,7 +47,7 @@ class OrgFileParser {
         
     }
     
-    private Pattern prepareTitlePattern () {
+    private Pattern prepareTitlePattern() {
     	if (this.titlePattern == null) {
     		StringBuffer pattern = new StringBuffer();
     		pattern.append("^(?:([A-Z]{2,}:?\\s*");
@@ -58,7 +58,7 @@ class OrgFileParser {
     	}
 		return this.titlePattern;
     }
-    
+
     private TitleComponents parseTitle (String orgTitle) {
     	TitleComponents component = new TitleComponents();
     	String title = orgTitle.trim();
@@ -253,12 +253,73 @@ class OrgFileParser {
         }
     }
 
+    public ArrayList<EditNode> parseEdits() {
+        Pattern editTitlePattern = Pattern.compile("F\\((edit:.+)\\) \\[\\[(.+)\\]\\[(.+)\\]\\]");
+        Pattern createTitlePattern = Pattern.compile("\\*\\s+(.*)");
+        ArrayList<EditNode> edits = new ArrayList<EditNode>();
+        BufferedReader breader = this.getHandle("mobileorg.org");
+        if (breader == null)
+            return edits;
+
+        String thisLine;
+        boolean awaitingOldVal = false;
+        boolean awaitingNewVal = false;
+        boolean awaitingCaptureBody = false;
+        EditNode thisNode = null;
+
+        try {
+            while ((thisLine = breader.readLine()) != null) {
+                Matcher editm = titlePattern.matcher(thisLine);
+                Matcher createm = createTitlePattern.matcher(thisLine);
+                if (editm.find()) {
+                    if (awaitingNewVal) {
+                        edits.add(thisNode);
+                        awaitingNewVal = false;
+                    }
+                    thisNode = new EditNode();
+                    thisNode.editType = editm.group(1).split(":")[1];
+                    thisNode.nodeId = editm.group(2);
+                    thisNode.title = editm.group(3);
+                }
+                else if (createm.find()) {
+                    if (awaitingNewVal) {
+                        edits.add(thisNode);
+                        awaitingNewVal = false;
+                    }
+                }
+                else {
+                    if (thisLine.indexOf("** Old value") != -1) {
+                        awaitingOldVal = true;
+                        continue;
+                    }
+                    else if (thisLine.indexOf("** New value") != -1) {
+                        awaitingOldVal = false;
+                        awaitingNewVal = true;
+                        continue;
+                    }
+                    
+                    if (awaitingOldVal) {
+                        thisNode.oldVal += thisLine;
+                    }
+                    if (awaitingNewVal) {
+                        thisNode.newVal += thisLine;
+                    }
+                }
+            }
+        }
+        catch (java.io.IOException e) {
+            Log.e(LT, "IO Exception caught trying to read edits file");
+        }
+        return edits;
+    }
+
     public BufferedReader getHandle(String filename) {
         BufferedReader breader = null;
         try {
             if (this.storageMode == null || this.storageMode.equals("internal")) {
                 String normalized = filename.replace("/", "_");
-                this.fstream = new FileInputStream("/data/data/com.matburt.mobileorg/files/" + normalized);
+                this.fstream = new FileInputStream("/data/data/com.matburt.mobileorg/files/" + 
+                                                   normalized);
             }
             else if (this.storageMode.equals("sdcard")) {
                 String dirActual = "";
