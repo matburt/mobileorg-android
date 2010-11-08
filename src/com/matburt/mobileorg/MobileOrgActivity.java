@@ -41,15 +41,18 @@ public class MobileOrgActivity extends ListActivity
         public Node topNode;
         public Node thisNode;
         public ArrayList<Integer> nodeSelection;
+        public ArrayList<EditNode> edits = new ArrayList<EditNode>();
         private Context context;
         private LayoutInflater lInflator;
 
         public OrgViewAdapter(Context context, Node ndx,
-                              ArrayList<Integer> selection) {
+                              ArrayList<Integer> selection,
+                              ArrayList<EditNode> edits) {
             this.topNode = ndx;
             this.thisNode = ndx;
             this.lInflator = LayoutInflater.from(context);
             this.nodeSelection = selection;
+            this.edits = edits;
             this.context = context;
             Log.d("MobileOrg", "Selection Stack");
             if (selection != null) {
@@ -84,31 +87,49 @@ public class MobileOrgActivity extends ListActivity
             return position;
         }
 
+        public EditNode findEdit(String nodeId) {
+            if (this.edits == null)
+                return null;
+            for (int idx = 0 ; idx < this.edits.size(); idx++)
+                {
+                    if (this.edits.get(idx).nodeId == nodeId)
+                        return this.edits.get(idx);
+                }
+            return null;
+        }
+
         public View getView(int position, View convertView, ViewGroup parent) {
             if (convertView == null) {
                 convertView = this.lInflator.inflate(R.layout.main, null);
             }
-
             TextView thisView = (TextView)convertView.findViewById(R.id.orgItem);
             TextView todoView = (TextView)convertView.findViewById(R.id.todoState);
             LinearLayout tagsLayout = (LinearLayout)convertView.findViewById(R.id.tagsLayout);
+            EditNode thisEdit = this.findEdit(this.thisNode.subNodes.get(position).getProperty("ID"));
             String todo = this.thisNode.subNodes.get(position).todo;
-            if (TextUtils.isEmpty(todo)) {
-            	todoView.setVisibility(View.GONE);
-            } else {
-            	todoView.setText(todo);
-            	todoView.setVisibility(View.VISIBLE);
-            }
             thisView.setText(this.thisNode.subNodes.get(position).nodeName);
-            tagsLayout.removeAllViews();
+
+            if (thisEdit != null) {
+                if (thisEdit.editType.equals("todo"))
+                    todo = thisEdit.newVal;
+                else if (thisEdit.editType.equals("heading"))
+                    thisView.setText(thisEdit.newVal);
+            }
+
             for (String tag : this.thisNode.subNodes.get(position).tags) {
 				TextView tagView = new TextView(this.context);
 				tagView.setText(tag);
 				tagView.setPadding(0, 0, 5, 0);
 				tagsLayout.addView(tagView);
 			}
-            Log.d("MobileOrg", "Returning view item: " +
-                  this.thisNode.subNodes.get(position).nodeName);
+
+            if (TextUtils.isEmpty(todo)) {
+            	todoView.setVisibility(View.GONE);
+            } else {
+            	todoView.setText(todo);
+            	todoView.setVisibility(View.VISIBLE);
+            }
+            tagsLayout.removeAllViews();
             convertView.setTag(thisView);
             return convertView;
         }
@@ -184,6 +205,7 @@ public class MobileOrgActivity extends ListActivity
         try {
         	ofp.parse();
         	appInst.rootNode = ofp.rootNode;
+            appInst.edits = ofp.parseEdits();
         }
         catch(Throwable e) {
         	ErrorReporter.displayError(this, "An error occurred during parsing: " + e.toString());
@@ -202,7 +224,8 @@ public class MobileOrgActivity extends ListActivity
         appInst.nodeSelection = nodeIntent.getIntegerArrayListExtra("nodePath");
         this.setListAdapter(new OrgViewAdapter(this,
                                                appInst.rootNode,
-                                               appInst.nodeSelection));
+                                               appInst.nodeSelection,
+                                               appInst.edits));
     }
 
     @Override

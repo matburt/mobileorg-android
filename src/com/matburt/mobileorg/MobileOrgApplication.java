@@ -14,6 +14,7 @@ import android.content.pm.ResolveInfo;
 public class MobileOrgApplication extends Application {
     public Node rootNode = null;
     public ArrayList<Integer> nodeSelection;
+    public ArrayList<EditNode> edits;
     public static final String SYNCHRONIZER_PLUGIN_ACTION = "com.matburt.mobileorg.SYNCHRONIZE";
 
     public void pushSelection(int selectedNode)

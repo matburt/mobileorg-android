@@ -6,6 +6,13 @@ import java.util.Date;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
+class EditNode {
+    public String editType;
+    public String nodeId;
+    public String title;
+    public String oldVal = "";
+    public String newVal = "";
+}
 
 class Node {
 
