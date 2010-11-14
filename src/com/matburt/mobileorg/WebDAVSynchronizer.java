@@ -370,7 +370,7 @@ public class WebDAVSynchronizer implements Synchronizer
                            String content) throws NotFoundException, ReportableError {
         try {
             HttpPut httpPut = new HttpPut(url);
-            httpPut.setEntity(new StringEntity(content));
+            httpPut.setEntity(new StringEntity(content, "UTF-8"));
             HttpResponse response = httpClient.execute(httpPut);
             httpClient.getConnectionManager().shutdown();
         }
