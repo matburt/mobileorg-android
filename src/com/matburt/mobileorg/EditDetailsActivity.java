@@ -133,6 +133,10 @@ public class EditDetailsActivity extends Activity implements OnClickListener
         if (this.noteEditor != null) {
             this.noteEditor.close();
         }
+
+        if (this.appdb != null) {
+            this.appdb.close();
+        }
     }
 
     public void saveEditPriority(String newPriority) {
