@@ -44,7 +44,8 @@ public class Capture extends Activity implements OnClickListener
     }
 
     public boolean onSave() {
-        this.noteCreator.writeNewNote(this.orgEditDisplay.getText().toString());
+        if (this.orgEditDisplay.getText().toString().length() > 0)
+            this.noteCreator.writeNewNote(this.orgEditDisplay.getText().toString());
         this.finish();
         return true;
     }
