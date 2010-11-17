@@ -254,8 +254,8 @@ class OrgFileParser {
     }
 
     public ArrayList<EditNode> parseEdits() {
-        Pattern editTitlePattern = Pattern.compile("F\\((edit:.+)\\) \\[\\[(.+)\\]\\[(.+)\\]\\]");
-        Pattern createTitlePattern = Pattern.compile("\\*\\s+(.*)");
+        Pattern editTitlePattern = Pattern.compile("F\\((edit:.*?)\\) \\[\\[(.*?)\\]\\[(.*?)\\]\\]");
+        Pattern createTitlePattern = Pattern.compile("^\\*\\s+(.*)");
         ArrayList<EditNode> edits = new ArrayList<EditNode>();
         BufferedReader breader = this.getHandle("mobileorg.org");
         if (breader == null)
@@ -269,17 +269,21 @@ class OrgFileParser {
 
         try {
             while ((thisLine = breader.readLine()) != null) {
-                Matcher editm = titlePattern.matcher(thisLine);
+                Matcher editm = editTitlePattern.matcher(thisLine);
                 Matcher createm = createTitlePattern.matcher(thisLine);
                 if (editm.find()) {
                     if (awaitingNewVal) {
                         edits.add(thisNode);
+                        Log.d(LT, "Adding node by new change");
                         awaitingNewVal = false;
                     }
                     thisNode = new EditNode();
-                    thisNode.editType = editm.group(1).split(":")[1];
-                    thisNode.nodeId = editm.group(2);
-                    thisNode.title = editm.group(3);
+                    if (editm.group(1) != null)
+                        thisNode.editType = editm.group(1).split(":")[1];
+                    if (editm.group(2) != null)
+                        thisNode.nodeId = editm.group(2).split(":")[1];
+                    if (editm.group(3) == null)
+                        thisNode.title = editm.group(3);
                 }
                 else if (createm.find()) {
                     if (awaitingNewVal) {
@@ -305,6 +309,10 @@ class OrgFileParser {
                         thisNode.newVal += thisLine;
                     }
                 }
+            }
+            if (thisNode != null) {
+                Log.d(LT, "Adding node by end");
+                edits.add(thisNode);
             }
         }
         catch (java.io.IOException e) {

@@ -54,7 +54,6 @@ public class MobileOrgActivity extends ListActivity
             this.nodeSelection = selection;
             this.edits = edits;
             this.context = context;
-            Log.d("MobileOrg", "Selection Stack");
             if (selection != null) {
                 for (int idx = 0; idx < selection.size(); idx++) {
                     try {
@@ -67,7 +66,6 @@ public class MobileOrgActivity extends ListActivity
                               this.thisNode.nodeName);
                         return;
                     }
-                    Log.d("MobileOrg", this.thisNode.nodeName);
                 }
             }
         }
@@ -92,8 +90,9 @@ public class MobileOrgActivity extends ListActivity
                 return null;
             for (int idx = 0 ; idx < this.edits.size(); idx++)
                 {
-                    if (this.edits.get(idx).nodeId == nodeId)
+                    if (this.edits.get(idx).nodeId.equals(nodeId)) {
                         return this.edits.get(idx);
+                    }
                 }
             return null;
         }

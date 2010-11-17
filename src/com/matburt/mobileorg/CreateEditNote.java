@@ -116,8 +116,8 @@ public class CreateEditNote
                                       String nodeTitle,
                                       String oldValue,
                                       String newValue) {
-        String editbuffer = "*F(edit:" + edittype + ")[[id:" + nodeId +
-            "][" + nodeTitle + "]\n";
+        String editbuffer = "*F(edit:" + edittype + ") [[id:" + nodeId +
+            "][" + nodeTitle + "]]\n";
         editbuffer += "** Old value\n" + oldValue + "\n";
         editbuffer += "** New value\n" + newValue + "\n";
         return editbuffer;
