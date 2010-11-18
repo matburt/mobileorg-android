@@ -272,11 +272,6 @@ class OrgFileParser {
                 Matcher editm = editTitlePattern.matcher(thisLine);
                 Matcher createm = createTitlePattern.matcher(thisLine);
                 if (editm.find()) {
-                    if (awaitingNewVal) {
-                        edits.add(thisNode);
-                        Log.d(LT, "Adding node by new change");
-                        awaitingNewVal = false;
-                    }
                     thisNode = new EditNode();
                     if (editm.group(1) != null)
                         thisNode.editType = editm.group(1).split(":")[1];
@@ -286,10 +281,6 @@ class OrgFileParser {
                         thisNode.title = editm.group(3);
                 }
                 else if (createm.find()) {
-                    if (awaitingNewVal) {
-                        edits.add(thisNode);
-                        awaitingNewVal = false;
-                    }
                 }
                 else {
                     if (thisLine.indexOf("** Old value") != -1) {
@@ -301,6 +292,10 @@ class OrgFileParser {
                         awaitingNewVal = true;
                         continue;
                     }
+                    else if (thisLine.indexOf("** End of edit") != -1) {
+                        awaitingNewVal = false;
+                        edits.add(thisNode);
+                    }
                     
                     if (awaitingOldVal) {
                         thisNode.oldVal += thisLine;
@@ -309,10 +304,6 @@ class OrgFileParser {
                         thisNode.newVal += thisLine;
                     }
                 }
-            }
-            if (thisNode != null) {
-                Log.d(LT, "Adding node by end");
-                edits.add(thisNode);
             }
         }
         catch (java.io.IOException e) {
