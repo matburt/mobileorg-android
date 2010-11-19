@@ -38,4 +38,14 @@
         android:layout_below="@id/orgItem"
 		android:layout_toRightOf="@id/priorityState"
 	/>
+     <TextView
+	    android:id="@+id/dateInfo"
+	    android:layout_width="wrap_content"
+	    android:layout_height="20sp"
+        android:layout_below="@id/todoState"
+        android:gravity="left"
+        android:layout_toRightOf="@id/todoState"
+	    android:textColor="#C0C0C0"
+	     />
+
 </RelativeLayout>

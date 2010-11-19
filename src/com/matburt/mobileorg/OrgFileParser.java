@@ -215,27 +215,28 @@ class OrgFileParser {
                     else if (propm.find()) {
                         continue;
                     }
-                    else if (thisLine.indexOf("DEADLINE:") != -1) {
+                    else if (thisLine.indexOf("DEADLINE:") != -1 ||
+                             thisLine.indexOf("SCHEDULED:") != -1) {
                         try {
+                            Pattern deadlineP = Pattern.compile(
+                                                  "^.*(DEADLINE: <.+?>)");
+                            Matcher deadlineM = deadlineP.matcher(thisLine);
+                            Pattern schedP = Pattern.compile(
+                                                  "^.*(SCHEDULED: <.+?>)");
+                            Matcher schedM = schedP.matcher(thisLine);
                             SimpleDateFormat formatter = new SimpleDateFormat(
                                                             "'DEADLINE': <yyyy-MM-dd EEE>");
-                            lastNode.deadline = formatter.parse(thisLine.trim());
+                            if (deadlineM.find()) {
+                                lastNode.deadline = formatter.parse(deadlineM.group(1));
+                            }
+                            if (schedM.find()) {
+                                lastNode.deadline = formatter.parse(schedM.group(1));
+                            }
                         }
                         catch (java.text.ParseException e) {
                             Log.e(LT, "Could not parse deadline");
                         }
                         continue;
-                    }
-                    else if (thisLine.indexOf("SCHEDULED:") != -1) {
-                        try {
-                            SimpleDateFormat formatter = new SimpleDateFormat(
-                                                            "'SCHEDULED': <yyyy-MM-dd EEE>");
-                            lastNode.schedule = formatter.parse(thisLine.trim());
-                            continue;
-                        }
-                        catch (java.text.ParseException e) {
-                            Log.e(LT, "Could not parse schedule");
-                        }
                     }
                     lastNode.addPayload(thisLine);
                 }

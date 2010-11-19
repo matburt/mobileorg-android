@@ -26,6 +26,8 @@ import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Log;
 import java.util.ArrayList;
+import java.util.Date;
+import java.text.SimpleDateFormat;
 import java.lang.Runnable;
 import java.io.BufferedReader;
 import java.io.StringReader;
@@ -106,9 +108,11 @@ public class MobileOrgActivity extends ListActivity
             TextView todoView = (TextView)convertView.findViewById(R.id.todoState);
             TextView priorityView = (TextView)convertView.findViewById(R.id.priorityState);
             LinearLayout tagsLayout = (LinearLayout)convertView.findViewById(R.id.tagsLayout);
+            TextView dateView = (TextView)convertView.findViewById(R.id.dateInfo);
             EditNode thisEdit = this.findEdit(this.thisNode.subNodes.get(position).getProperty("ID"));
             String todo = this.thisNode.subNodes.get(position).todo;
             String priority = this.thisNode.subNodes.get(position).priority;
+            String dateInfo = "";
             thisView.setText(this.thisNode.subNodes.get(position).nodeName);
 
             if (thisEdit != null) {
@@ -118,6 +122,17 @@ public class MobileOrgActivity extends ListActivity
                     priority = thisEdit.newVal;
                 else if (thisEdit.editType.equals("heading"))
                     thisView.setText(thisEdit.newVal);
+            }
+
+            SimpleDateFormat formatter = new SimpleDateFormat("<yyyy-MM-dd EEE>");
+            if (this.thisNode.subNodes.get(position).deadline != null) {
+                dateInfo += "DEADLINE: " + formatter.format(
+                                this.thisNode.subNodes.get(position).deadline) + " ";
+            }
+            
+            if (this.thisNode.subNodes.get(position).schedule != null) {
+                dateInfo += "SCHEDULED: " + formatter.format(
+                                this.thisNode.subNodes.get(position).schedule) + " ";
             }
 
             for (String tag : this.thisNode.subNodes.get(position).tags) {
@@ -142,6 +157,14 @@ public class MobileOrgActivity extends ListActivity
             else {
                 priorityView.setText(priority);
                 priorityView.setVisibility(View.VISIBLE);
+            }
+
+            if (TextUtils.isEmpty(dateInfo)) {
+                dateView.setVisibility(View.GONE);
+            }
+            else {
+                dateView.setText(dateInfo);
+                dateView.setVisibility(View.VISIBLE);
             }
 
             convertView.setTag(thisView);
