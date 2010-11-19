@@ -103,14 +103,18 @@ public class MobileOrgActivity extends ListActivity
             }
             TextView thisView = (TextView)convertView.findViewById(R.id.orgItem);
             TextView todoView = (TextView)convertView.findViewById(R.id.todoState);
+            TextView priorityView = (TextView)convertView.findViewById(R.id.priorityState);
             LinearLayout tagsLayout = (LinearLayout)convertView.findViewById(R.id.tagsLayout);
             EditNode thisEdit = this.findEdit(this.thisNode.subNodes.get(position).getProperty("ID"));
             String todo = this.thisNode.subNodes.get(position).todo;
+            String priority = this.thisNode.subNodes.get(position).priority;
             thisView.setText(this.thisNode.subNodes.get(position).nodeName);
 
             if (thisEdit != null) {
                 if (thisEdit.editType.equals("todo"))
                     todo = thisEdit.newVal;
+                else if (thisEdit.editType.equals("priority"))
+                    priority = thisEdit.newVal;
                 else if (thisEdit.editType.equals("heading"))
                     thisView.setText(thisEdit.newVal);
             }
@@ -124,10 +128,20 @@ public class MobileOrgActivity extends ListActivity
 
             if (TextUtils.isEmpty(todo)) {
             	todoView.setVisibility(View.GONE);
-            } else {
+            }
+            else {
             	todoView.setText(todo);
             	todoView.setVisibility(View.VISIBLE);
             }
+
+            if (TextUtils.isEmpty(priority)) {
+                priorityView.setVisibility(View.GONE);
+            }
+            else {
+                priorityView.setText(priority);
+                priorityView.setVisibility(View.VISIBLE);
+            }
+
             tagsLayout.removeAllViews();
             convertView.setTag(thisView);
             return convertView;
