@@ -21,6 +21,7 @@ import android.widget.AdapterView;
 import android.content.Intent;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.Color;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Log;
@@ -122,6 +123,7 @@ public class MobileOrgActivity extends ListActivity
             for (String tag : this.thisNode.subNodes.get(position).tags) {
 				TextView tagView = new TextView(this.context);
 				tagView.setText(tag);
+                tagView.setTextColor(Color.LTGRAY);
 				tagView.setPadding(0, 0, 5, 0);
 				tagsLayout.addView(tagView);
 			}
@@ -142,7 +144,6 @@ public class MobileOrgActivity extends ListActivity
                 priorityView.setVisibility(View.VISIBLE);
             }
 
-            tagsLayout.removeAllViews();
             convertView.setTag(thisView);
             return convertView;
         }
