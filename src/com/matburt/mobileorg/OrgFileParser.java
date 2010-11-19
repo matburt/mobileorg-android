@@ -4,6 +4,9 @@ import java.util.Map;
 import java.util.ArrayList;
 import java.util.Stack;
 import java.util.EmptyStackException;
+import java.util.Date;
+import java.text.SimpleDateFormat;
+import java.text.ParseException;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import java.io.FileInputStream;
@@ -135,6 +138,7 @@ class OrgFileParser {
         {
             String thisLine;
             Stack<Node> nodeStack = new Stack();
+            Pattern propertiesLine = Pattern.compile("^\\s*:[A-Z]+:");
             if(breader == null)
             {
                 breader = this.getHandle(fileNode.nodeName);
@@ -201,10 +205,37 @@ class OrgFileParser {
                 }
                 //content
                 else {
+                    Matcher propm = propertiesLine.matcher(thisLine);
                     Node lastNode = nodeStack.peek();
                     if (thisLine.indexOf(":ID:") != -1) {
                         String trimmedLine = thisLine.substring(thisLine.indexOf(":ID:")+4).trim();
                         lastNode.addProperty("ID", trimmedLine);
+                        continue;
+                    }
+                    else if (propm.find()) {
+                        continue;
+                    }
+                    else if (thisLine.indexOf("DEADLINE:") != -1) {
+                        try {
+                            SimpleDateFormat formatter = new SimpleDateFormat(
+                                                            "'DEADLINE': <yyyy-MM-dd EEE>");
+                            lastNode.deadline = formatter.parse(thisLine.trim());
+                        }
+                        catch (java.text.ParseException e) {
+                            Log.e(LT, "Could not parse deadline");
+                        }
+                        continue;
+                    }
+                    else if (thisLine.indexOf("SCHEDULED:") != -1) {
+                        try {
+                            SimpleDateFormat formatter = new SimpleDateFormat(
+                                                            "'SCHEDULED': <yyyy-MM-dd EEE>");
+                            lastNode.schedule = formatter.parse(thisLine.trim());
+                            continue;
+                        }
+                        catch (java.text.ParseException e) {
+                            Log.e(LT, "Could not parse schedule");
+                        }
                     }
                     lastNode.addPayload(thisLine);
                 }
