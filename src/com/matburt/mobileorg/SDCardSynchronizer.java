@@ -148,7 +148,7 @@ public class SDCardSynchronizer implements Synchronizer
         Log.d(LT, "Index file at: " + indexFile);
         File fIndexFile = new File(indexFile);
         String basePath = fIndexFile.getParent();
-        String chkPath = basePath + "checksums.dat";
+        String chkPath = basePath + "/checksums.dat";
         String filebuffer = "";
         try {
             filebuffer = this.readFile(indexFile);
