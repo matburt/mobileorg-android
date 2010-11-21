@@ -323,14 +323,24 @@ public class MobileOrgActivity extends ListActivity
 
         if (thisNode.subNodes.size() < 1) {
             appInst.popSelection();
-            Intent textIntent = new Intent();
-
-            String docBuffer = thisNode.nodeName + "\n\n" +
-                thisNode.nodePayload;
-            textIntent.setClassName("com.matburt.mobileorg",
-                                    "com.matburt.mobileorg.SimpleTextDisplay");
-            textIntent.putExtra("txtValue", docBuffer);
-            startActivity(textIntent);
+            if (thisNode.todo.equals("") &&
+                thisNode.priority.equals("")) {
+                Intent textIntent = new Intent();
+                String docBuffer = thisNode.nodeName + "\n\n" +
+                    thisNode.nodePayload;
+                textIntent.setClassName("com.matburt.mobileorg",
+                                        "com.matburt.mobileorg.SimpleTextDisplay");
+                textIntent.putExtra("txtValue", docBuffer);
+                startActivity(textIntent);
+            }
+            else {
+                Intent dispIntent = new Intent();
+                dispIntent.setClassName("com.matburt.mobileorg",
+                                        "com.matburt.mobileorg.OrgContextMenu");
+                dispIntent.putIntegerArrayListExtra("nodePath", appInst.nodeSelection);
+                appInst.pushSelection(position);
+                startActivity(dispIntent);                
+            }
         }
         else {
             expandSelection(appInst.nodeSelection);
