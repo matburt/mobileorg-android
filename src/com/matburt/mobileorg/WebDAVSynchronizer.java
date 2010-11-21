@@ -154,9 +154,15 @@ public class WebDAVSynchronizer implements Synchronizer
 
         //Get checksums file
         masterStr = this.fetchOrgFile(urlActual + "checksums.dat");
+        HashMap<String, String> newChecksums = this.getChecksums(masterStr);
+        HashMap<String, String> oldChecksums = this.appdb.getChecksums();
 
         //Get other org files
         for (String key : masterList.keySet()) {
+            if (oldChecksums.containsKey(key) &&
+                newChecksums.containsKey(key) &&
+                oldChecksums.get(key).equals(newChecksums.get(key)))
+                continue;
             Log.d(LT, "Fetching: " +
                   key + ": " + urlActual + masterList.get(key));
             String fileContents = this.fetchOrgFile(urlActual +
@@ -209,7 +215,7 @@ public class WebDAVSynchronizer implements Synchronizer
 
             try {
             	writer.write(fileContents);
-            	this.appdb.addOrUpdateFile(masterList.get(key), key);
+            	this.appdb.addOrUpdateFile(masterList.get(key), key, newChecksums.get(key));
                 writer.flush();
                 writer.close();
             }
@@ -280,6 +286,15 @@ public class WebDAVSynchronizer implements Synchronizer
         }
 
         return allOrgFiles;
+    }
+
+    private HashMap<String, String> getChecksums(String master) {
+        HashMap<String, String> chksums = new HashMap<String, String>();
+        for (String eachLine : master.split("[\\n\\r]+")) {
+            String[] chksTuple = eachLine.split("\\s+");
+            chksums.put(chksTuple[1], chksTuple[0]);
+        }
+        return chksums;
     }
 
     private ArrayList<ArrayList<String>> getTodos(String master) {

@@ -148,6 +148,7 @@ public class SDCardSynchronizer implements Synchronizer
         Log.d(LT, "Index file at: " + indexFile);
         File fIndexFile = new File(indexFile);
         String basePath = fIndexFile.getParent();
+        String chkPath = basePath + "checksums.dat";
         String filebuffer = "";
         try {
             filebuffer = this.readFile(indexFile);
@@ -163,9 +164,23 @@ public class SDCardSynchronizer implements Synchronizer
         this.appdb.setTodoList(todoLists);
         this.appdb.setPriorityList(priorityLists);
 
+        try {
+            filebuffer = this.readFile(chkPath);
+        }
+        catch (java.io.FileNotFoundException e) {
+            throw new ReportableError(
+                    r.getString(R.string.error_file_not_found, indexFile),
+                    e);
+        }
+        HashMap<String, String> newChecksums = this.getChecksums(filebuffer);
+        HashMap<String, String> oldChecksums = this.appdb.getChecksums();
         for (String key : masterList.keySet()) { 
+            if (oldChecksums.containsKey(key) &&
+                newChecksums.containsKey(key) &&
+                oldChecksums.get(key).equals(newChecksums.get(key)))
+                continue;
             Log.d(LT, "Fetching: " + key + ": " + basePath + "/" + masterList.get(key));
-            this.appdb.addOrUpdateFile(masterList.get(key), key);
+            this.appdb.addOrUpdateFile(masterList.get(key), key, newChecksums.get(key));
         }
     }
 
@@ -207,6 +222,15 @@ public class SDCardSynchronizer implements Synchronizer
         }
 
         return allOrgFiles;
+    }
+
+    private HashMap<String, String> getChecksums(String master) {
+        HashMap<String, String> chksums = new HashMap<String, String>();
+        for (String eachLine : master.split("[\\n\\r]+")) {
+            String[] chksTuple = eachLine.split("\\s+");
+            chksums.put(chksTuple[1], chksTuple[0]);
+        }
+        return chksums;
     }
 
     //NOTE: This is a common method and needs to be generalized

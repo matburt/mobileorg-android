@@ -8,6 +8,7 @@ import android.preference.PreferenceManager;
 import android.content.Context;
 import android.app.Application;
 import java.util.ArrayList;
+import java.util.HashMap;
 import android.util.Log;
 import android.content.SharedPreferences;
 import java.io.File;
@@ -82,13 +83,29 @@ public class MobileOrgDatabase {
             if (result.getCount() > 0) {
                 result.moveToFirst();
                 do {
-                    Log.d(LT, "pulled " + result.getString(0));
                     allFiles.add(result.getString(0));
                 } while(result.moveToNext());
             }
         }
         result.close();
         return allFiles;
+    }
+
+    public HashMap<String, String> getChecksums() {
+        this.checkStorageMode();
+        HashMap<String, String> fchecks = new HashMap<String, String>();
+        Cursor result = this.appdb.rawQuery("SELECT file, checksum FROM files", null);
+        if (result != null) {
+            if (result.getCount() > 0) {
+                result.moveToFirst();
+                do {
+                    fchecks.put(result.getString(0),
+                                result.getString(1));
+                } while (result.moveToNext());
+            }
+        }
+        result.close();
+        return fchecks;
     }
 
     public void removeFile(String filename) {
@@ -113,18 +130,18 @@ public class MobileOrgDatabase {
         this.appdb.execSQL("DELETE from priorities");
     }
 
-    public void addOrUpdateFile(String filename, String name) {
+    public void addOrUpdateFile(String filename, String name, String checksum) {
         this.checkStorageMode();
         Cursor result = this.appdb.rawQuery("SELECT * FROM files " +
                                        "WHERE file = '"+filename+"'", null);
         if (result != null) {
             if (result.getCount() > 0) {
                 this.appdb.execSQL("UPDATE files set name = '"+name+"', "+
-                              "checksum = '' where file = '"+filename+"'");
+                              "checksum = '"+ checksum + "' where file = '"+filename+"'");
             }
             else {
                 this.appdb.execSQL("INSERT INTO files (file, name, checksum) " +
-                              "VALUES ('"+filename+"','"+name+"','')");
+                              "VALUES ('"+filename+"','"+name+"','"+checksum+"')");
             }
         }
         result.close();
