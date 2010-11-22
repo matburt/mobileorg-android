@@ -25,8 +25,8 @@ class OrgFileParser {
 	
 	class TitleComponents {
 		String title;
-		String todo;
-        String priority;
+		String todo = "";
+        String priority = "";
 		ArrayList<String> tags = new ArrayList<String>();
 	}
 
