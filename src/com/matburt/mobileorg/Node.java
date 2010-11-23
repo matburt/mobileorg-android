@@ -28,6 +28,7 @@ class Node {
     String nodeName = "";
     String todo = "";
     String priority = "";
+    String nodeId = "";
     int nodeType;
     String nodePayload = "";
     String nodeTitle = "";
@@ -82,7 +83,7 @@ class Node {
     }
 
     String getProperty(String key) {
-        return this.properties.get(key);
+    	return this.properties.get(key);
     }
 
     boolean hasProperty(String key) {

@@ -141,7 +141,7 @@ public class EditDetailsActivity extends Activity implements OnClickListener
 
     public void saveEditPriority(String newPriority) {
         this.noteEditor.editNote("priority",
-                                 this.activeNode.getProperty("ID"),
+                                 this.activeNode.nodeId,
                                  this.activeNode.nodeName,
                                  this.activeNode.priority,
                                  newPriority);
@@ -149,7 +149,7 @@ public class EditDetailsActivity extends Activity implements OnClickListener
 
     public void saveEditTodo(String newTodo) {
         this.noteEditor.editNote("todo",
-                                 this.activeNode.getProperty("ID"),
+                                 this.activeNode.nodeId,
                                  this.activeNode.nodeName,
                                  this.activeNode.todo,
                                  newTodo);
