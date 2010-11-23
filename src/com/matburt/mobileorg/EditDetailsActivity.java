@@ -10,6 +10,7 @@ import android.widget.Button;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.ScrollView;
 import android.view.View.OnClickListener;
 import android.preference.Preference;
 import android.preference.ListPreference;
@@ -22,6 +23,7 @@ import java.util.ArrayList;
 public class EditDetailsActivity extends Activity implements OnClickListener
 {
     public static final String LT = "MobileOrg";
+    private ScrollView scrollableLayout = null;
     private TableLayout mainLayout = null;
     private MobileOrgDatabase appdb;
     private MobileOrgApplication appinst;
@@ -91,6 +93,7 @@ public class EditDetailsActivity extends Activity implements OnClickListener
     private void editTodo() {
         ArrayList<ArrayList<String>> allTodos = this.appdb.getTodos();
         this.buttonList = new ArrayList<Button>();
+        scrollableLayout = new ScrollView(this);
         mainLayout = new TableLayout(this);
         mainLayout.setLayoutParams(
                      new TableLayout.LayoutParams(
@@ -123,7 +126,8 @@ public class EditDetailsActivity extends Activity implements OnClickListener
             nTr.addView(spacer);
             mainLayout.addView(nTr);
         }
-        setContentView(mainLayout);
+        scrollableLayout.addView(mainLayout);
+        setContentView(scrollableLayout);
         this.populateInfo();
     }
 
