@@ -210,6 +210,13 @@ class OrgFileParser {
                     if (thisLine.indexOf(":ID:") != -1) {
                         String trimmedLine = thisLine.substring(thisLine.indexOf(":ID:")+4).trim();
                         lastNode.addProperty("ID", trimmedLine);
+                        lastNode.nodeId = trimmedLine;
+                        continue;
+                    }
+                    else if (thisLine.indexOf(":ORIGINAL_ID:") != -1) {
+                    	String trimmedLine = thisLine.substring(thisLine.indexOf(":ORIGINAL_ID:")+13).trim();
+                        lastNode.addProperty("ORIGINAL_ID", trimmedLine);
+                        lastNode.nodeId = trimmedLine;
                         continue;
                     }
                     else if (propm.find()) {

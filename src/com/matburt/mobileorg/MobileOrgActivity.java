@@ -109,7 +109,7 @@ public class MobileOrgActivity extends ListActivity
             TextView priorityView = (TextView)convertView.findViewById(R.id.priorityState);
             LinearLayout tagsLayout = (LinearLayout)convertView.findViewById(R.id.tagsLayout);
             TextView dateView = (TextView)convertView.findViewById(R.id.dateInfo);
-            EditNode thisEdit = this.findEdit(this.thisNode.subNodes.get(position).getProperty("ID"));
+            EditNode thisEdit = this.findEdit(this.thisNode.subNodes.get(position).nodeId);
             String todo = this.thisNode.subNodes.get(position).todo;
             String priority = this.thisNode.subNodes.get(position).priority;
             String dateInfo = "";
