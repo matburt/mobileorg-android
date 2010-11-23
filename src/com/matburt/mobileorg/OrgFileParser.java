@@ -53,7 +53,7 @@ class OrgFileParser {
     private Pattern prepareTitlePattern() {
     	if (this.titlePattern == null) {
     		StringBuffer pattern = new StringBuffer();
-    		pattern.append("^(?:([A-Z]{2,}:?\\s*");
+    		pattern.append("^(?:([A-Z]{2,}:?\\s+");
     		pattern.append(")\\s*)?");
     		pattern.append("(\\[\\#.*\\])?(.*?)");
     		pattern.append("\\s*(?::([^\\s]+):)?$");
@@ -69,7 +69,7 @@ class OrgFileParser {
     	Matcher m = pattern.matcher(title);
     	if (m.find()) {
     		if (m.group(1) != null)
-    			component.todo = m.group(1);
+    			component.todo = m.group(1).trim();
             if (m.group(2) != null) {
                 component.priority = m.group(2);
                 component.priority = component.priority.replace("#", "");
