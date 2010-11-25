@@ -116,6 +116,7 @@ public class WebDAVSynchronizer implements Synchronizer
                                     this.appSettings.getString("webUser", ""),
                                     this.appSettings.getString("webPass", ""));
         this.appendUrlFile(urlActual, httpC, fileContents);
+
         this.appdb.removeFile("mobileorg.org");
 
         if (storageMode.equals("internal") || storageMode == null) {
@@ -291,6 +292,8 @@ public class WebDAVSynchronizer implements Synchronizer
     private HashMap<String, String> getChecksums(String master) {
         HashMap<String, String> chksums = new HashMap<String, String>();
         for (String eachLine : master.split("[\\n\\r]+")) {
+            if (eachLine.isEmpty())
+                continue;
             String[] chksTuple = eachLine.split("\\s+");
             chksums.put(chksTuple[1], chksTuple[0]);
         }
