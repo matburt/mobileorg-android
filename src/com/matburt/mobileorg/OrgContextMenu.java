@@ -65,6 +65,9 @@ public class OrgContextMenu extends Activity implements OnClickListener
         Node thisNode = appInst.rootNode;
         Intent textIntent = new Intent();
         String displayBuffer = new String();
+        if (thisNode == null)
+            return; 
+
         for (int idx = 0; idx < this.npath.size(); idx++) {
             thisNode = thisNode.subNodes.get(
                                              this.npath.get(idx));
