@@ -39,6 +39,8 @@ import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.text.TextUtils;
+import org.apache.http.params.CoreProtocolPNames;
+import org.apache.http.params.HttpParams;
 
 public class WebDAVSynchronizer implements Synchronizer
 {
@@ -354,6 +356,9 @@ public class WebDAVSynchronizer implements Synchronizer
         BasicCredentialsProvider cProvider = new BasicCredentialsProvider();
         cProvider.setCredentials(AuthScope.ANY, bCred);
         httpClient.setCredentialsProvider(cProvider);
+        HttpParams params = httpClient.getParams();
+        params.setBooleanParameter(CoreProtocolPNames.USE_EXPECT_CONTINUE, false);
+        httpClient.setParams(params);
         return httpClient;
     }
 
