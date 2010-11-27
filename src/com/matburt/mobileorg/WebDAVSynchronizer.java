@@ -38,6 +38,7 @@ import android.content.res.Resources.NotFoundException;
 import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.text.TextUtils;
 
 public class WebDAVSynchronizer implements Synchronizer
 {
@@ -45,6 +46,7 @@ public class WebDAVSynchronizer implements Synchronizer
     private Activity rootActivity;
     private MobileOrgDatabase appdb;
     private Resources r;
+    private boolean pushedStageFile = false;
     private static final String LT = "MobileOrg";
 
     WebDAVSynchronizer(Activity parentActivity) {
@@ -64,6 +66,7 @@ public class WebDAVSynchronizer implements Synchronizer
         String storageMode = this.appSettings.getString("storageMode", "");
         BufferedReader reader = null;
         String fileContents = "";
+        this.pushedStageFile = false;
 
         if (storageMode.equals("internal") || storageMode == null) {
             FileInputStream fs;
@@ -117,16 +120,18 @@ public class WebDAVSynchronizer implements Synchronizer
                                     this.appSettings.getString("webPass", ""));
         this.appendUrlFile(urlActual, httpC, fileContents);
 
-        this.appdb.removeFile("mobileorg.org");
+        if (this.pushedStageFile) {
+            this.appdb.removeFile("mobileorg.org");
 
-        if (storageMode.equals("internal") || storageMode == null) {
-            this.rootActivity.deleteFile("mobileorg.org");
-        }
-        else if (storageMode.equals("sdcard")) {
-            File root = Environment.getExternalStorageDirectory();
-            File morgDir = new File(root, "mobileorg");
-            File morgFile = new File(morgDir, "mobileorg.org");
-            morgFile.delete();
+            if (storageMode.equals("internal") || storageMode == null) {
+                this.rootActivity.deleteFile("mobileorg.org");
+            }
+            else if (storageMode.equals("sdcard")) {
+                File root = Environment.getExternalStorageDirectory();
+                File morgDir = new File(root, "mobileorg");
+                File morgFile = new File(morgDir, "mobileorg.org");
+                morgFile.delete();
+            }
         }
     }
 
@@ -238,9 +243,7 @@ public class WebDAVSynchronizer implements Synchronizer
         try {
             if (mainFile == null) {
                 Log.w(LT, "Stream is null");
-                
-                //Do we really want to raise an exception here? (John O)
-                return ""; //Raise exception
+                return "";
             }
             masterStr = this.ReadInputStream(mainFile);
         }
@@ -292,7 +295,7 @@ public class WebDAVSynchronizer implements Synchronizer
     private HashMap<String, String> getChecksums(String master) {
         HashMap<String, String> chksums = new HashMap<String, String>();
         for (String eachLine : master.split("[\\n\\r]+")) {
-            if (eachLine.isEmpty())
+            if (TextUtils.isEmpty(eachLine))
                 continue;
             String[] chksTuple = eachLine.split("\\s+");
             chksums.put(chksTuple[1], chksTuple[0]);
@@ -353,7 +356,11 @@ public class WebDAVSynchronizer implements Synchronizer
             HttpResponse res = httpClient.execute(new HttpGet(url));
             
             StatusLine status = res.getStatusLine();
-            if(status.getStatusCode() < 200 || status.getStatusCode() > 299) {
+            if (status.getStatusCode() == 404) {
+                return null;
+            }
+
+            if (status.getStatusCode() < 200 || status.getStatusCode() > 299) {
             	throw new ReportableError(
             			r.getString(R.string.error_url_fetch_detail, url, status.getReasonPhrase()),
             			null);
@@ -375,6 +382,13 @@ public class WebDAVSynchronizer implements Synchronizer
             HttpPut httpPut = new HttpPut(url);
             httpPut.setEntity(new StringEntity(content, "UTF-8"));
             HttpResponse response = httpClient.execute(httpPut);
+            StatusLine statResp = response.getStatusLine();
+            if (statResp.getStatusCode() >= 400) {
+                this.pushedStageFile = false;
+            } else {
+                this.pushedStageFile = true;
+            }
+
             httpClient.getConnectionManager().shutdown();
         }
         catch (UnsupportedEncodingException e) {

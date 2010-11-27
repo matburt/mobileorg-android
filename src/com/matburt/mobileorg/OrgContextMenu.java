@@ -21,7 +21,8 @@ public class OrgContextMenu extends Activity implements OnClickListener
     public static final String LT = "MobileOrg";
     ArrayList<Integer> npath;
     private Button docButton;
-    private Button docEditButton;
+    private Button docEditTitleButton;
+    private Button docEditBodyButton;
     private Button docTodoButton;
     private Button docPriorityButton;
 
@@ -30,11 +31,13 @@ public class OrgContextMenu extends Activity implements OnClickListener
         super.onCreate(savedInstanceState);
         setContentView(R.layout.longcontext);
         this.docButton = (Button)this.findViewById(R.id.documentMode);
-        this.docEditButton = (Button)this.findViewById(R.id.documentModeEdit);
+        this.docEditTitleButton = (Button)this.findViewById(R.id.documentSetTitle);
+        this.docEditBodyButton = (Button)this.findViewById(R.id.documentSetBody);
         this.docTodoButton = (Button)this.findViewById(R.id.documentSetTodo);
         this.docPriorityButton = (Button)this.findViewById(R.id.documentSetPriority);
         this.docButton.setOnClickListener(this);
-        this.docEditButton.setOnClickListener(this);
+        this.docEditTitleButton.setOnClickListener(this);
+        this.docEditBodyButton.setOnClickListener(this);
         this.docTodoButton.setOnClickListener(this);
         this.docPriorityButton.setOnClickListener(this);
         this.poplateDisplay();
@@ -47,6 +50,9 @@ public class OrgContextMenu extends Activity implements OnClickListener
         Node thisNode = appInst.rootNode;
         Intent textIntent = new Intent();
         String displayBuffer = new String();
+        if (thisNode == null)
+            return;
+
         for (int idx = 0; idx < this.npath.size(); idx++) {
             thisNode = thisNode.subNodes.get(
                                              this.npath.get(idx));
@@ -72,23 +78,30 @@ public class OrgContextMenu extends Activity implements OnClickListener
             thisNode = thisNode.subNodes.get(
                                              this.npath.get(idx));
         }
-        displayBuffer = thisNode.nodeName + "\n"+ thisNode.nodePayload + "\n";
-        for (int idx = 0; idx < thisNode.subNodes.size(); idx++) {
-            displayBuffer += thisNode.subNodes.get(idx).nodeTitle +
-                "\n" + thisNode.subNodes.get(idx).nodePayload + "\n\n";
-        }
 
         if (v == this.docButton) {
             textIntent.setClassName("com.matburt.mobileorg",
                                     "com.matburt.mobileorg.SimpleTextDisplay");
         }
-        else if (v == this.docEditButton) {
+        else if (v == this.docEditTitleButton) {
             textIntent.setClassName("com.matburt.mobileorg",
                                     "com.matburt.mobileorg.Capture");
             if (thisNode.nodeId != null && thisNode.nodeId.length() > 0) {
                 textIntent.putExtra("nodeId", thisNode.nodeId);
             }
+            textIntent.putExtra("editType", "heading");
+            textIntent.putExtra("txtValue", thisNode.nodeName);
         }
+        else if (v == this.docEditBodyButton) {
+            textIntent.setClassName("com.matburt.mobileorg",
+                                    "com.matburt.mobileorg.Capture");
+            if (thisNode.nodeId != null && thisNode.nodeId.length() > 0) {
+                textIntent.putExtra("nodeId", thisNode.nodeId);
+            }
+            textIntent.putExtra("editType", "body");
+            textIntent.putExtra("txtValue", thisNode.nodePayload);
+        }
+
         else if (v == this.docTodoButton) {
             textIntent.setClassName("com.matburt.mobileorg",
                                     "com.matburt.mobileorg.EditDetailsActivity");
@@ -101,7 +114,7 @@ public class OrgContextMenu extends Activity implements OnClickListener
             textIntent.putExtra("nodePath", this.npath);
             textIntent.putExtra("editType", "priority");
         }
-        textIntent.putExtra("txtValue", displayBuffer);
+        textIntent.putExtra("nodeTitle", thisNode.nodeName);
         startActivity(textIntent);
     }
 }

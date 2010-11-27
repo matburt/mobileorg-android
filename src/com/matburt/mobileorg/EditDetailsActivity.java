@@ -179,6 +179,8 @@ public class EditDetailsActivity extends Activity implements OnClickListener
                 else if (this.editType.indexOf("priority") != -1) {
                     this.saveEditPriority(this.buttonList.get(idx).getText().toString());
                 }
+                
+                //triggers a refresh of the main display
                 this.appinst.rootNode = null;
                 this.finish();
             }

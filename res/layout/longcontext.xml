@@ -16,8 +16,15 @@
   <TableRow/>
   <TableRow>
     <Button
-       android:id="@+id/documentModeEdit"
-       android:text="Edit Document"
+       android:id="@+id/documentSetTitle"
+       android:text="Edit Title"
+       android:layout_width="fill_parent"
+       android:layout_height="fill_parent" />    
+  </TableRow>
+  <TableRow>
+    <Button
+       android:id="@+id/documentSetBody"
+       android:text="Edit Body"
        android:layout_width="fill_parent"
        android:layout_height="fill_parent" />    
   </TableRow>
