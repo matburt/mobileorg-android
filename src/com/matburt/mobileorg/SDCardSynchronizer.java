@@ -143,6 +143,12 @@ public class SDCardSynchronizer implements Synchronizer
         }
     }
 
+    public boolean checkReady() {
+        if (this.appSettings.getString("indexFilePath", "").equals(""))
+            return false;
+        return true;
+    }
+
     public void pull() throws NotFoundException, ReportableError {
         String indexFile = this.appSettings.getString("indexFilePath","");
         Log.d(LT, "Index file at: " + indexFile);

@@ -5,5 +5,6 @@ public interface Synchronizer
 {
     public void pull() throws NotFoundException, ReportableError;
     public void push() throws NotFoundException, ReportableError;
+    public boolean checkReady();
     public void close();
 }

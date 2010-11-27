@@ -135,6 +135,12 @@ public class WebDAVSynchronizer implements Synchronizer
         }
     }
 
+    public boolean checkReady() {
+        if (this.appSettings.getString("webUrl","").equals(""))
+            return false;
+        return true;
+    }
+
     public void pull() throws NotFoundException, ReportableError {
         Pattern checkUrl = Pattern.compile("http.*\\.(?:org|txt)$");
         String url = this.appSettings.getString("webUrl", "");

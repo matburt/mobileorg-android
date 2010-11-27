@@ -416,6 +416,12 @@ public class MobileOrgActivity extends ListActivity
             this.onShowSettings();
             return;
         }
+
+        if (!appSync.checkReady()) {
+            this.onShowSettings();
+            return;
+        }
+
         Thread syncThread = new Thread() {
                 public void run() {
                 	try {
