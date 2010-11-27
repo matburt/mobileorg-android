@@ -38,7 +38,8 @@
               android:label="OrgMenu">
     </activity>
     <activity android:name="Capture"
-              android:label="Org Capture">
+              android:label="Org Capture"
+              android:windowSoftInputMode="adjustResize">
     </activity>
     <activity android:name="WebDAVSettingsActivity"
               android:label="WebDAV Settings">
