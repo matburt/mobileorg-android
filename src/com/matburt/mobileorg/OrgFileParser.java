@@ -117,7 +117,8 @@ class OrgFileParser {
     public void addContent(long nodeId, String content) {
         ContentValues recValues = new ContentValues();
         recValues.put("content", content + "\n");
-        this.appdb.appdb.update("data", recValues, "id = ?", new String[] {Long.toString(nodeId)});
+        this.appdb.appdb.update("data", recValues, "id = ?",
+                                new String[] {Long.toString(nodeId)});
     }
 
     public String getNodePath(Node baseNode) {
@@ -178,7 +179,8 @@ class OrgFileParser {
                         try {
                             Node lastNode = nodeStack.peek();
                             newNode.setParentNode(lastNode);
-                            newNode.addProperty("ID", this.getNodePath(newNode));
+                            newNode.nodeId = this.getNodePath(newNode);
+                            newNode.addProperty("ID", newNode.nodeId);
                             lastNode.addChildNode(newNode);
                         } catch (EmptyStackException e) {
                         }
@@ -188,6 +190,9 @@ class OrgFileParser {
                     else if (numstars == nodeDepth) {
                         nodeStack.pop();
                         nodeStack.peek().addChildNode(newNode);
+                        newNode.setParentNode(nodeStack.peek());
+                        newNode.nodeId = this.getNodePath(newNode);
+                        newNode.addProperty("ID", newNode.nodeId);
                         nodeStack.push(newNode);
                     }
                     else if (numstars < nodeDepth) {
@@ -197,7 +202,8 @@ class OrgFileParser {
 
                         Node lastNode = nodeStack.peek();
                         newNode.setParentNode(lastNode);
-                        newNode.addProperty("ID", this.getNodePath(newNode));
+                        newNode.nodeId = this.getNodePath(newNode);
+                        newNode.addProperty("ID", newNode.nodeId);
                         lastNode.addChildNode(newNode);
                         nodeStack.push(newNode);
                         nodeDepth++;

@@ -94,7 +94,13 @@ public class MobileOrgActivity extends ListActivity
                 return thisEdits;
             for (int idx = 0 ; idx < this.edits.size(); idx++)
                 {
-                    if (this.edits.get(idx).nodeId.equals(nodeId)) {
+                    String compareS = "";
+                    if (nodeId.indexOf("olp:") == 0)
+                        compareS = "olp:" + this.edits.get(idx).nodeId;
+                    else
+                        compareS = this.edits.get(idx).nodeId;
+                    Log.d("MO", "Comparing: " + compareS + " to " + nodeId);
+                    if (compareS.equals(nodeId)) {
                         thisEdits.add(this.edits.get(idx));
                     }
                 }
