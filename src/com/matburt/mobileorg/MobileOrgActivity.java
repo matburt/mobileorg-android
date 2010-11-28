@@ -99,7 +99,6 @@ public class MobileOrgActivity extends ListActivity
                         compareS = "olp:" + this.edits.get(idx).nodeId;
                     else
                         compareS = this.edits.get(idx).nodeId;
-                    Log.d("MO", "Comparing: " + compareS + " to " + nodeId);
                     if (compareS.equals(nodeId)) {
                         thisEdits.add(this.edits.get(idx));
                     }
@@ -124,7 +123,6 @@ public class MobileOrgActivity extends ListActivity
             thisView.setText(this.thisNode.subNodes.get(position).nodeName);
 
             for (EditNode e : thisEdits) {
-                Log.d("MobileOrg", "thisedit is not null: " + e.editType);
                 if (e.editType.equals("todo"))
                     todo = e.newVal;
                 else if (e.editType.equals("priority"))

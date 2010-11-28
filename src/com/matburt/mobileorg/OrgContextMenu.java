@@ -33,6 +33,8 @@ public class OrgContextMenu extends Activity implements OnClickListener
         this.docButton = (Button)this.findViewById(R.id.documentMode);
         this.docEditTitleButton = (Button)this.findViewById(R.id.documentSetTitle);
         this.docEditBodyButton = (Button)this.findViewById(R.id.documentSetBody);
+        //NOTE: Remove when editing the body works
+        this.docEditBodyButton.setVisibility(View.GONE);
         this.docTodoButton = (Button)this.findViewById(R.id.documentSetTodo);
         this.docPriorityButton = (Button)this.findViewById(R.id.documentSetPriority);
         this.docButton.setOnClickListener(this);
