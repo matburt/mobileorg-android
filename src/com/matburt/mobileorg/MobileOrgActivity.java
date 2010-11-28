@@ -88,16 +88,17 @@ public class MobileOrgActivity extends ListActivity
             return position;
         }
 
-        public EditNode findEdit(String nodeId) {
+        public ArrayList<EditNode> findEdits(String nodeId) {
+            ArrayList<EditNode> thisEdits = new ArrayList<EditNode>();
             if (this.edits == null)
-                return null;
+                return thisEdits;
             for (int idx = 0 ; idx < this.edits.size(); idx++)
                 {
                     if (this.edits.get(idx).nodeId.equals(nodeId)) {
-                        return this.edits.get(idx);
+                        thisEdits.add(this.edits.get(idx));
                     }
                 }
-            return null;
+            return thisEdits;
         }
 
         public View getView(int position, View convertView, ViewGroup parent) {
@@ -109,19 +110,23 @@ public class MobileOrgActivity extends ListActivity
             TextView priorityView = (TextView)convertView.findViewById(R.id.priorityState);
             LinearLayout tagsLayout = (LinearLayout)convertView.findViewById(R.id.tagsLayout);
             TextView dateView = (TextView)convertView.findViewById(R.id.dateInfo);
-            EditNode thisEdit = this.findEdit(this.thisNode.subNodes.get(position).nodeId);
+            ArrayList<EditNode> thisEdits = this.findEdits(
+                                              this.thisNode.subNodes.get(position).nodeId);
             String todo = this.thisNode.subNodes.get(position).todo;
             String priority = this.thisNode.subNodes.get(position).priority;
             String dateInfo = "";
             thisView.setText(this.thisNode.subNodes.get(position).nodeName);
 
-            if (thisEdit != null) {
-                if (thisEdit.editType.equals("todo"))
-                    todo = thisEdit.newVal;
-                else if (thisEdit.editType.equals("priority"))
-                    priority = thisEdit.newVal;
-                else if (thisEdit.editType.equals("heading"))
-                    thisView.setText(thisEdit.newVal);
+            for (EditNode e : thisEdits) {
+                Log.d("MobileOrg", "thisedit is not null: " + e.editType);
+                if (e.editType.equals("todo"))
+                    todo = e.newVal;
+                else if (e.editType.equals("priority"))
+                    priority = e.newVal;
+                else if (e.editType.equals("heading")) {
+                    Log.d("MobileOrg", "new heading value: " + e.newVal);
+                    thisView.setText(e.newVal);
+                }
             }
 
             SimpleDateFormat formatter = new SimpleDateFormat("<yyyy-MM-dd EEE>");
