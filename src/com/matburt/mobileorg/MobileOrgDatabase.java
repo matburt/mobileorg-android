@@ -75,15 +75,16 @@ public class MobileOrgDatabase {
         }
     }
 
-    public ArrayList<String> getOrgFiles() {
+    public HashMap<String, String> getOrgFiles() {
         this.checkStorageMode();
-        ArrayList<String> allFiles = new ArrayList<String>();
-        Cursor result = this.appdb.rawQuery("SELECT file FROM files", null);
+        HashMap<String, String> allFiles = new HashMap<String, String>();
+        Cursor result = this.appdb.rawQuery("SELECT file, name FROM files", null);
         if (result != null) {
             if (result.getCount() > 0) {
                 result.moveToFirst();
                 do {
-                    allFiles.add(result.getString(0));
+                    allFiles.put(result.getString(0),
+                                 result.getString(1));
                 } while(result.moveToNext());
             }
         }

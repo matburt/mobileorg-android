@@ -2,6 +2,7 @@ package com.matburt.mobileorg;
 
 import java.util.Map;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Stack;
 import java.util.EmptyStackException;
 import java.util.Date;
@@ -30,7 +31,7 @@ class OrgFileParser {
 		ArrayList<String> tags = new ArrayList<String>();
 	}
 
-    ArrayList<String> orgPaths;
+    HashMap<String, String> orgPaths;
     ArrayList<Node> nodeList = new ArrayList<Node>();
     String storageMode = null;
     Pattern titlePattern = null;
@@ -39,7 +40,8 @@ class OrgFileParser {
     MobileOrgDatabase appdb;
     public static final String LT = "MobileOrg";
     public String orgDir = "/sdcard/mobileorg/";
-    OrgFileParser(ArrayList<String> orgpaths,
+
+    OrgFileParser(HashMap<String, String> orgpaths,
                   String storageMode,
                   MobileOrgDatabase appdb,
                   String orgBasePath) {
@@ -272,27 +274,30 @@ class OrgFileParser {
         Stack<Node> nodeStack = new Stack();
         nodeStack.push(this.rootNode);
 
-        for (int jdx = 0; jdx < this.orgPaths.size(); jdx++) {
-            Log.d(LT, "Parsing: " + orgPaths.get(jdx));
+        for (String key : this.orgPaths.keySet()) {
+            String altName = this.orgPaths.get(key);
+            Log.d(LT, "Parsing: " + key);
             //if file is encrypted just add a placeholder node to be parsed later
-            if(orgPaths.get(jdx).endsWith(".gpg") ||
-               orgPaths.get(jdx).endsWith(".pgp") ||
-               orgPaths.get(jdx).endsWith(".enc"))
+            if(key.endsWith(".gpg") ||
+               key.endsWith(".pgp") ||
+               key.endsWith(".enc"))
             {
-                Node nnode = new Node(orgPaths.get(jdx),
+                Node nnode = new Node(key,
                                       Node.HEADING,
                                       true);
+                nnode.altNodeTitle = altName;
                 nnode.setParentNode(nodeStack.peek());
                 nnode.addProperty("ID", this.getNodePath(nnode));
                 nodeStack.peek().addChildNode(nnode);
                 continue;
             }
 
-            Node fileNode = new Node(this.orgPaths.get(jdx),
+            Node fileNode = new Node(key,
                                      Node.HEADING,
                                      false);
             fileNode.setParentNode(nodeStack.peek());
             fileNode.addProperty("ID", this.getNodePath(fileNode));
+            fileNode.altNodeTitle = altName;
             nodeStack.peek().addChildNode(fileNode);
             nodeStack.push(fileNode);
             parse(fileNode, null);

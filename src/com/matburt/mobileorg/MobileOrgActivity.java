@@ -26,6 +26,7 @@ import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Log;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Date;
 import java.text.SimpleDateFormat;
 import java.lang.Runnable;
@@ -128,9 +129,12 @@ public class MobileOrgActivity extends ListActivity
                 else if (e.editType.equals("priority"))
                     priority = e.newVal;
                 else if (e.editType.equals("heading")) {
-                    Log.d("MobileOrg", "new heading value: " + e.newVal);
                     thisView.setText(e.newVal);
                 }
+            }
+
+            if (this.thisNode.subNodes.get(position).altNodeTitle != null) {
+                thisView.setText(this.thisNode.subNodes.get(position).altNodeTitle);
             }
 
             SimpleDateFormat formatter = new SimpleDateFormat("<yyyy-MM-dd EEE>");
@@ -230,7 +234,7 @@ public class MobileOrgActivity extends ListActivity
 
     public void runParser() {
         MobileOrgApplication appInst = (MobileOrgApplication)this.getApplication();
-        ArrayList<String> allOrgList = this.appdb.getOrgFiles();
+        HashMap<String, String> allOrgList = this.appdb.getOrgFiles();
         String storageMode = this.getStorageLocation();
         String userSynchro = this.appSettings.getString("syncSource","");
         String orgBasePath = "";

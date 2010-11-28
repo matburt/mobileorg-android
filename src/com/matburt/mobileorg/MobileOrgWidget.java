@@ -21,6 +21,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.io.File;
@@ -60,7 +61,7 @@ public class MobileOrgWidget extends AppWidgetProvider {
             RemoteViews updateViews = null;
             updateViews = new RemoteViews(context.getPackageName(),
                                           R.layout.widget_mobileorg);
-            ArrayList<String> allOrgList = this.appdb.getOrgFiles();
+            HashMap<String, String> allOrgList = this.appdb.getOrgFiles();
             String storageMode = this.getStorageLocation(context);
             String userSynchro = appPrefs.getString("syncSource","");
             String orgBasePath = "";

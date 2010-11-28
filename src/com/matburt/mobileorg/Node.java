@@ -32,6 +32,7 @@ class Node {
     int nodeType;
     String nodePayload = "";
     String nodeTitle = "";
+    String altNodeTitle = null;
     Date schedule = null;
     Date deadline = null;
     boolean encrypted = false;
