@@ -18,6 +18,8 @@ import android.widget.Toast;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageItemInfo;
 import android.util.Log;
+import android.graphics.PorterDuff;
+import android.graphics.Color;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -110,6 +112,13 @@ public class EditDetailsActivity extends Activity implements OnClickListener
                 Button aButton = new Button(this);
                 aButton.setText(key);
                 aButton.setOnClickListener(this);
+                if (group.get(key) > 0)
+                    aButton.getBackground().setColorFilter(0xFF00FF00,
+                                                           PorterDuff.Mode.MULTIPLY);
+                else
+                    aButton.getBackground().setColorFilter(0xFFFF0000,
+                                                           PorterDuff.Mode.MULTIPLY);
+                aButton.setTextColor(Color.WHITE);
                 aTr.addView(aButton);
                 mainLayout.addView(aTr);
                 this.buttonList.add(aButton);
