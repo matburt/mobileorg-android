@@ -160,7 +160,7 @@ public class WebDAVSynchronizer implements Synchronizer
             		null);
         }
         HashMap<String, String> masterList = this.getOrgFilesFromMaster(masterStr);
-        ArrayList<ArrayList<String>> todoLists = this.getTodos(masterStr);
+        ArrayList<HashMap<String, Boolean>> todoLists = this.getTodos(masterStr);
         ArrayList<ArrayList<String>> priorityLists = this.getPriorities(masterStr);
         this.appdb.setTodoList(todoLists);
         this.appdb.setPriorityList(priorityLists);
@@ -311,19 +311,24 @@ public class WebDAVSynchronizer implements Synchronizer
         return chksums;
     }
 
-    private ArrayList<ArrayList<String>> getTodos(String master) {
+    private ArrayList<HashMap<String, Boolean>> getTodos(String master) {
         Pattern getTodos = Pattern.compile("#\\+TODO:\\s+([\\s\\w-]*)(\\| ([\\s\\w-]*))*");
         Matcher m = getTodos.matcher(master);
-        ArrayList<ArrayList<String>> todoList = new ArrayList<ArrayList<String>>();
+        ArrayList<HashMap<String, Boolean>> todoList = new ArrayList<HashMap<String, Boolean>>();
         while (m.find()) {
-            ArrayList<String> holding = new ArrayList<String>();
+            HashMap<String, Boolean> holding = new HashMap<String, Boolean>();
+            Boolean isDone = false;
             for (int idx = 1; idx <= m.groupCount(); idx++) {
                 if (m.group(idx) != null &&
-                    m.group(idx).indexOf("|") == -1 &&
                     m.group(idx).length() > 0) {
+                    if (m.group(idx).indexOf("|") != -1) {
+                        isDone = true;
+                        continue;
+                    }
                     String[] grouping = m.group(idx).split("\\s+");
                     for (int jdx = 0; jdx < grouping.length; jdx++) {
-                        holding.add(grouping[jdx].trim());
+                        holding.put(grouping[jdx].trim(),
+                                    isDone);
                     }
                 }
             }

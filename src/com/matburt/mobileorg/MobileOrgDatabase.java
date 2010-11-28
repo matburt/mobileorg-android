@@ -196,15 +196,20 @@ public class MobileOrgDatabase {
         return allPriorities;
     }
 
-    public void setTodoList(ArrayList<ArrayList<String>> newList) {
+    public void setTodoList(ArrayList<HashMap<String, Boolean>> newList) {
         this.clearTodos();
-        for (int idx = 0; idx < newList.size(); idx++) {
-            for (int jdx = 0; jdx < newList.get(idx).size(); jdx++) {
+        int grouping = 0;
+        for (HashMap<String, Boolean> entry : newList) {
+            for (String key : entry.keySet()) {
+                String isDone = "0";
+                if (entry.get(key))
+                    isDone = "1";
                 this.appdb.execSQL("INSERT INTO todos (tdgroup, name, isdone) " +
-                                   "VALUES (" + Integer.toString(idx) + "," +
-                                   "        '" + newList.get(idx).get(jdx) + "'," +
-                                   "        0)");
+                                   "VALUES (" + grouping + "," +
+                                   "        '" + key + "'," +
+                                   "        " + isDone + ")");
             }
+            grouping++;
         }
     }
 
