@@ -19,6 +19,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageItemInfo;
 import android.util.Log;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class EditDetailsActivity extends Activity implements OnClickListener
 {
@@ -91,7 +92,7 @@ public class EditDetailsActivity extends Activity implements OnClickListener
     }
 
     private void editTodo() {
-        ArrayList<ArrayList<String>> allTodos = this.appdb.getTodos();
+        ArrayList<HashMap<String, Integer>> allTodos = this.appdb.getTodos();
         this.buttonList = new ArrayList<Button>();
         scrollableLayout = new ScrollView(this);
         mainLayout = new TableLayout(this);
@@ -99,15 +100,15 @@ public class EditDetailsActivity extends Activity implements OnClickListener
                      new TableLayout.LayoutParams(
                           LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
         mainLayout.setColumnStretchable(0, true);
-        for (int idx = 0; idx < allTodos.size(); idx++) {
-            for (int jdx = 0; jdx < allTodos.get(idx).size(); jdx++) {
+        for (HashMap<String, Integer> group : allTodos) {
+            for (String key : group.keySet()) {
                 TableRow aTr = new TableRow(this);
                 aTr.setLayoutParams(
                       new TableRow.LayoutParams(
                              TableRow.LayoutParams.FILL_PARENT,
                              TableRow.LayoutParams.FILL_PARENT));
                 Button aButton = new Button(this);
-                aButton.setText(allTodos.get(idx).get(jdx));
+                aButton.setText(key);
                 aButton.setOnClickListener(this);
                 aTr.addView(aButton);
                 mainLayout.addView(aTr);
