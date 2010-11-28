@@ -258,7 +258,7 @@ public class MobileOrgActivity extends ListActivity
         }
 
         Intent nodeIntent = getIntent();
-        appInst.nodeSelection = nodeIntent.getIntegerArrayListExtra("nodePath");
+        ArrayList<Integer> ns = nodeIntent.getIntegerArrayListExtra("nodePath");
         this.setListAdapter(new OrgViewAdapter(this,
                                                appInst.rootNode,
                                                appInst.nodeSelection,
@@ -281,7 +281,6 @@ public class MobileOrgActivity extends ListActivity
                                 "com.matburt.mobileorg.OrgContextMenu");
 
         appInst.pushSelection(pos);
-
         dispIntent.putIntegerArrayListExtra("nodePath", appInst.nodeSelection);
         startActivity(dispIntent);
     }

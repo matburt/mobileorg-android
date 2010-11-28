@@ -64,6 +64,7 @@ public class OrgContextMenu extends Activity implements OnClickListener
         if (thisNode.priority == null || thisNode.priority.length() < 1) {
             this.docPriorityButton.setVisibility(View.GONE);
         }
+        appInst.popSelection();
     }
 
     public void onClick(View v) {
@@ -76,12 +77,13 @@ public class OrgContextMenu extends Activity implements OnClickListener
 
         for (int idx = 0; idx < this.npath.size(); idx++) {
             thisNode = thisNode.subNodes.get(
-                                             this.npath.get(idx));
+                              this.npath.get(idx));
         }
 
         if (v == this.docButton) {
             textIntent.setClassName("com.matburt.mobileorg",
                                     "com.matburt.mobileorg.SimpleTextDisplay");
+            textIntent.putExtra("txtValue", thisNode.nodePayload);
         }
         else if (v == this.docEditTitleButton) {
             textIntent.setClassName("com.matburt.mobileorg",

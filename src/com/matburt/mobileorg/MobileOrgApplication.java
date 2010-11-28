@@ -3,6 +3,7 @@ package com.matburt.mobileorg;
 import android.app.Application;
 import java.util.ArrayList;
 import java.util.List;
+import java.lang.String;
 import java.io.File;
 import android.util.Log;
 import android.os.Environment;
@@ -27,7 +28,7 @@ public class MobileOrgApplication extends Application {
 
     public void popSelection()
     {
-        nodeSelection.remove(nodeSelection.size()-1);        
+        this.nodeSelection.remove(nodeSelection.size()-1);
     }
 
     public Node getSelectedNode()
