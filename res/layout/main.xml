@@ -18,6 +18,8 @@
 	    android:layout_width="wrap_content"
 	    android:layout_height="20sp"
         android:layout_below="@id/orgItem"
+        android:paddingLeft="5px"
+        android:paddingRight="5px"
 	    android:textColor="#FF0000"
 	    android:gravity="left"
 	     />
@@ -27,6 +29,8 @@
 	    android:layout_height="20sp"
         android:layout_below="@id/orgItem"
         android:layout_toRightOf="@id/todoState"
+        android:paddingLeft="5px"
+        android:paddingRight="5px"
 	    android:textColor="#FFFF00"
 	     />
 	<LinearLayout 

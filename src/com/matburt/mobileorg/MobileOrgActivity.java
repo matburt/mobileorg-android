@@ -46,18 +46,22 @@ public class MobileOrgActivity extends ListActivity
         public Node thisNode;
         public ArrayList<Integer> nodeSelection;
         public ArrayList<EditNode> edits = new ArrayList<EditNode>();
+        public ArrayList<HashMap<String, Integer>> allTodos = 
+                             new ArrayList<HashMap<String, Integer>>();
         private Context context;
         private LayoutInflater lInflator;
 
         public OrgViewAdapter(Context context, Node ndx,
                               ArrayList<Integer> selection,
-                              ArrayList<EditNode> edits) {
+                              ArrayList<EditNode> edits,
+                              ArrayList<HashMap<String, Integer>> allTodos) {
             this.topNode = ndx;
             this.thisNode = ndx;
             this.lInflator = LayoutInflater.from(context);
             this.nodeSelection = selection;
             this.edits = edits;
             this.context = context;
+            this.allTodos = allTodos;
             if (selection != null) {
                 for (int idx = 0; idx < selection.size(); idx++) {
                     try {
@@ -105,6 +109,16 @@ public class MobileOrgActivity extends ListActivity
                     }
                 }
             return thisEdits;
+        }
+
+        public Integer findTodoState(String todoItem) {
+            for (HashMap<String, Integer> group : this.allTodos) {
+                for (String key : group.keySet()) {
+                    if (key.equals(todoItem))
+                        return group.get(key);
+                }
+            }
+            return 0;
         }
 
         public View getView(int position, View convertView, ViewGroup parent) {
@@ -161,6 +175,12 @@ public class MobileOrgActivity extends ListActivity
             }
             else {
             	todoView.setText(todo);
+                Integer todoState = this.findTodoState(todo);
+                if (todoState > 0)
+                    todoView.setBackgroundColor(Color.GREEN);
+                else
+                    todoView.setBackgroundColor(Color.RED);
+                todoView.setTextColor(Color.WHITE);
             	todoView.setVisibility(View.VISIBLE);
             }
 
@@ -275,7 +295,8 @@ public class MobileOrgActivity extends ListActivity
         this.setListAdapter(new OrgViewAdapter(this,
                                                appInst.rootNode,
                                                appInst.nodeSelection,
-                                               appInst.edits));
+                                               appInst.edits,
+                                               this.appdb.getTodos()));
     }
 
     @Override
