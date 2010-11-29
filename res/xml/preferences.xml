@@ -28,6 +28,15 @@
         android:title="Widget Preferences"
         android:summary="Preferences for a Widget">
     </PreferenceScreen>
+    <PreferenceScreen android:title="Status Bar Notifications" android:key="Notifications">
+      <PreferenceCategory title="Status Bar Notifications">
+	    <CheckBoxPreference android:key="Deadline" android:title="Enable deadline alerts">
+		</CheckBoxPreference>
+	    <CheckBoxPreference android:key="Schedule" android:title="Enable schedule alerts">
+	    </CheckBoxPreference>
+	  	<EditTextPreference android:key="notification time" android:title="Notification Time" android:defaultValue="10" android:summary="Time to be notified before event (minutes)" android:dialogTitle="Enter time before notification (minutes)" android:numeric="integer"></EditTextPreference>
+	</PreferenceCategory>
+    </PreferenceScreen>
     <PreferenceScreen
         android:key="VersionDisp"
         android:title="Version"
