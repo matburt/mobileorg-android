@@ -23,7 +23,7 @@ import android.content.ContentValues;
 import android.database.sqlite.SQLiteDatabase;
 
 class OrgFileParser {
-	
+
 	class TitleComponents {
 		String title;
 		String todo = "";

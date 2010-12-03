@@ -39,7 +39,13 @@
     </activity>
     <activity android:name="Capture"
               android:label="Org Capture"
-              android:windowSoftInputMode="adjustResize">
+              android:windowSoftInputMode="adjustResize"
+              android:exported="true">
+      <intent-filter>
+        <action android:name="com.matburt.mobileorg.CAPTURE"/>
+        <action android:name="android.intent.action.MAIN" />
+        <category android:name="android.intent.category.DEFAULT" /> 
+      </intent-filter>
     </activity>
     <activity android:name="WebDAVSettingsActivity"
               android:label="WebDAV Settings">
