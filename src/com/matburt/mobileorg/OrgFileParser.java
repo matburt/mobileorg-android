@@ -13,25 +13,17 @@ import java.util.regex.Matcher;
 import java.io.FileInputStream;
 import java.io.File;
 import java.io.BufferedReader;
-import java.io.DataInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.InputStreamReader;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.EmptyStackException;
-import java.util.LinkedList;
-import java.util.Queue;
-import java.util.Stack;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import android.content.ContentValues;
+import java.io.DataInputStream;
+import java.io.IOException;
+import java.io.FileNotFoundException;
+import android.text.TextUtils;
 import android.util.Log;
+import android.content.ContentValues;
+import android.database.sqlite.SQLiteDatabase;
 
 class OrgFileParser {
-	Queue<Node> timeQueue = new LinkedList<Node>();
+	
 	class TitleComponents {
 		String title;
 		String todo = "";
@@ -240,43 +232,26 @@ class OrgFileParser {
                     }
                     else if (thisLine.indexOf("DEADLINE:") != -1 ||
                              thisLine.indexOf("SCHEDULED:") != -1) {
-                        Log.d(LT, "Schedule/Deadline detected"); 
-                    	Pattern deadlineP = Pattern.compile(
-                                              "^.*(DEADLINE: <(.+?)>)");
-                        Matcher deadlineM = deadlineP.matcher(thisLine);
-                        Pattern schedP = Pattern.compile(
-                                              "^.*(SCHEDULED: <(.+?)>)");
-                        Matcher schedM = schedP.matcher(thisLine);
-                        SimpleDateFormat dateFormatter = new SimpleDateFormat(
-                                                        "yyyy-MM-dd EEE");
-                        SimpleDateFormat datetimeFormatter = new SimpleDateFormat(
-                                                        "yyyy-MM-dd EEE HH:mm");
-
-                        if (deadlineM.find()) {
-                        	try { 
-                        		lastNode.deadline = dateFormatter.parse(deadlineM.group(2));
-                                timeQueue.add(lastNode);
-                        	} catch (java.text.ParseException e) {
-                            	try {
-                            		lastNode.deadline = datetimeFormatter.parse(deadlineM.group(2));
-                                    timeQueue.add(lastNode);
-                            	} catch (java.text.ParseException e2) {
-                            		Log.e(LT, "Could not parse deadline time with either format");
-                            	}
+                        try {
+                            Pattern deadlineP = Pattern.compile(
+                                                  "^.*(DEADLINE: <.+?>)");
+                            Matcher deadlineM = deadlineP.matcher(thisLine);
+                            Pattern schedP = Pattern.compile(
+                                                  "^.*(SCHEDULED: <.+?>)");
+                            Matcher schedM = schedP.matcher(thisLine);
+                            SimpleDateFormat dFormatter = new SimpleDateFormat(
+                                                            "'DEADLINE': <yyyy-MM-dd EEE>");
+                            SimpleDateFormat sFormatter = new SimpleDateFormat(
+                                                            "'SCHEDULED': <yyyy-MM-dd EEE>");
+                            if (deadlineM.find()) {
+                                lastNode.deadline = dFormatter.parse(deadlineM.group(1));
+                            }
+                            if (schedM.find()) {
+                                lastNode.schedule = sFormatter.parse(schedM.group(1));
                             }
                         }
-                        if (schedM.find()) {
-                        	try { 
-                        		lastNode.schedule = dateFormatter.parse(schedM.group(2));
-                                timeQueue.add(lastNode);
-                        	} catch (java.text.ParseException e) {
-                            	try {
-                            		lastNode.schedule = datetimeFormatter.parse(schedM.group(2));
-                                    timeQueue.add(lastNode);
-                            	} catch (java.text.ParseException e2) {
-                            		Log.e(LT, "Could not parse schedule time with either format");
-                            	}
-                            }
+                        catch (java.text.ParseException e) {
+                            Log.e(LT, "Could not parse deadline");
                         }
                         continue;
                     }

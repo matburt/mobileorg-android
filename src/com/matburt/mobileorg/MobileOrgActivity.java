@@ -1,39 +1,21 @@
 package com.matburt.mobileorg;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.StringReader;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.Timer;
-import java.util.TimerTask;
-
-import android.app.Activity;
 import android.app.ListActivity;
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
+import android.app.Application;
 import android.app.ProgressDialog;
-import android.content.Context;
-import android.content.Intent;
-import android.content.SharedPreferences;
-import android.graphics.Color;
+import android.app.AlertDialog;
+import android.app.Activity;
 import android.os.Bundle;
 import android.os.Handler;
-import android.preference.PreferenceManager;
-import android.text.TextUtils;
-import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.BaseAdapter;
+import android.view.LayoutInflater;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.BaseAdapter;
 import android.widget.TextView;
 import android.widget.AdapterView;
 import android.content.Intent;
@@ -68,7 +50,7 @@ public class MobileOrgActivity extends ListActivity
                              new ArrayList<HashMap<String, Integer>>();
         private Context context;
         private LayoutInflater lInflator;
-        
+
         public OrgViewAdapter(Context context, Node ndx,
                               ArrayList<Integer> selection,
                               ArrayList<EditNode> edits,
@@ -290,29 +272,10 @@ public class MobileOrgActivity extends ListActivity
                                               storageMode,
                                               this.appdb,
                                               orgBasePath);
-        // clear old timers
-        appInst.clearTimers();
         try {
         	ofp.parse();
         	appInst.rootNode = ofp.rootNode;
             appInst.edits = ofp.parseEdits();
-            int timeDelay = Integer.parseInt(this.appSettings.getString("notification time","10"));
-            Log.d("MobileOrg", "what is " + this.appSettings.getBoolean("Deadline",false));
-            boolean dl = this.appSettings.getBoolean("Deadline",false),
-                    sh = this.appSettings.getBoolean("Schedule",false);
-            while(!ofp.timeQueue.isEmpty()) {
-                Node n = ofp.timeQueue.poll();
-                if (dl && n.deadline != null) {
-                    Date mktm = n.deadline;
-                    mktm.setMinutes(mktm.getMinutes() + timeDelay);
-                    appInst.addTimer(scheduleNodeNotification(n, mktm));      
-                }
-                if (sh && n.schedule != null) {
-                    Date mktm = n.schedule;
-                    mktm.setMinutes(mktm.getMinutes() + timeDelay);
-                    appInst.addTimer(scheduleNodeNotification(n, mktm));
-                }
-            }
         }
         catch(Throwable e) {
         	ErrorReporter.displayError(this, "An error occurred during parsing: " + e.toString());
@@ -550,41 +513,5 @@ public class MobileOrgActivity extends ListActivity
 
     public String getStorageLocation() {
         return this.appSettings.getString("storageMode", "");
-    }
-    /*
-     *  Schedules a status bar notification for given node
-     *  TODO: Make it so clicking on the notification takes you to the node display
-     */
-    private Timer scheduleNodeNotification(Node n, Date time) {
-    	Log.d("MobileOrg", "scheduled " + n.nodeName);
-   	 	final String txt = n.nodeName;
-
-
-    	Timer timer = new Timer();
-	    TimerTask timerTask = new TimerTask()
-	    {
-	        @Override
-	        public void run()
-	        {
-	    	    Log.d("MobileOrg", Long.toString(this.scheduledExecutionTime()) + " time to run");
-	        	showNotification(txt);
-	        }
-	    };
-	    // Log.d("MOBILEORG", n.deadline.toString() + " scheduled");
-        if (time.getTime() >= System.currentTimeMillis())
-        	timer.schedule(timerTask, time);
-        return timer;
-    }
-    private int MOBILEORG_NOTIFICATIONS;
-    private void showNotification(String todoText) {
-    	NotificationManager mNM = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-    	Notification notification = new Notification(R.drawable.icon, todoText, System.currentTimeMillis());
-        notification.flags |= Notification.FLAG_AUTO_CANCEL;
-
-        PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
-                new Intent(this, MobileOrgActivity.class), 0);
-        notification.setLatestEventInfo(this, "MobileOrg", todoText, contentIntent);
-        
-        mNM.notify(MOBILEORG_NOTIFICATIONS, notification);
     }
 }
