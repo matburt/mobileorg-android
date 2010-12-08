@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.ArrayList;
+import java.lang.IllegalArgumentException;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
@@ -246,7 +247,15 @@ public class WebDAVSynchronizer implements Synchronizer
                                       this.appSettings.getString("webUser", ""),
                                       this.appSettings.getString("webPass", ""));
         InputStream mainFile;
-		mainFile = this.getUrlStream(orgUrl, httpC);
+        try {
+            mainFile = this.getUrlStream(orgUrl, httpC);
+        }
+        catch (IllegalArgumentException e) {
+            throw new ReportableError(
+                    r.getString(R.string.error_invalid_url, orgUrl),
+                    e);
+        }
+
         String masterStr = "";
         try {
             if (mainFile == null) {
