@@ -152,8 +152,14 @@ class OrgFileParser {
             while ((thisLine = breader.readLine()) != null) {
                 int numstars = 0;
 
-                if (thisLine.length() < 1 || thisLine.charAt(0) == '#') {
+                if (thisLine.length() < 1)
                     continue;
+
+                if (thisLine.charAt(0) == '#') {
+                    if (thisLine.indexOf("#+TITLE:") != -1) {
+                        fileNode.altNodeTitle = thisLine.substring(
+                                     thisLine.indexOf("#+TITLE: ") + 9);
+                    }
                 }
 
                 for (int idx = 0; idx < thisLine.length(); idx++) {

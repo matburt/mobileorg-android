@@ -175,7 +175,7 @@ public class SDCardSynchronizer implements Synchronizer
         }
         catch (java.io.FileNotFoundException e) {
             throw new ReportableError(
-                    r.getString(R.string.error_file_not_found, indexFile),
+                    r.getString(R.string.error_file_not_found, chkPath),
                     e);
         }
         HashMap<String, String> newChecksums = this.getChecksums(filebuffer);
