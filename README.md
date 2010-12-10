@@ -5,4 +5,4 @@ for installation instructions see the wiki page:
 [http://wiki.github.com/matburt/mobileorg-android/](http://wiki.github.com/matburt/mobileorg-android)
 
 Donate to support development: 
-[http://pledgie.com/campaigns/10553.png](http://www.pledgie.com/campaigns/10553)
+[(http://pledgie.com/campaigns/10553.png)](http://www.pledgie.com/campaigns/10553)
