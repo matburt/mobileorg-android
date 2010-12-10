@@ -30,6 +30,11 @@ import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.conn.ssl.SSLSocketFactory;
+import org.apache.http.conn.scheme.SchemeRegistry;
+import org.apache.http.conn.scheme.Scheme;
+import org.apache.http.conn.scheme.PlainSocketFactory;
+import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 
 import android.app.Activity;
 import android.content.Context;
@@ -366,14 +371,27 @@ public class WebDAVSynchronizer implements Synchronizer
 
     private DefaultHttpClient createConnection(String user, String password) {
         DefaultHttpClient httpClient = new DefaultHttpClient();
+        HttpParams params = httpClient.getParams();
+        SchemeRegistry schemeRegistry = new SchemeRegistry();
+        schemeRegistry.register (new Scheme ("http",
+                                             PlainSocketFactory.getSocketFactory (), 80));
+        SSLSocketFactory sslSocketFactory = SSLSocketFactory.getSocketFactory();
+        sslSocketFactory.setHostnameVerifier(SSLSocketFactory.BROWSER_COMPATIBLE_HOSTNAME_VERIFIER);
+        schemeRegistry.register (new Scheme ("https",
+                                             sslSocketFactory, 443));
+        ThreadSafeClientConnManager cm = new ThreadSafeClientConnManager (
+                                                  params, schemeRegistry);
+
         UsernamePasswordCredentials bCred = new UsernamePasswordCredentials(user, password);
         BasicCredentialsProvider cProvider = new BasicCredentialsProvider();
         cProvider.setCredentials(AuthScope.ANY, bCred);
-        httpClient.setCredentialsProvider(cProvider);
-        HttpParams params = httpClient.getParams();
+
         params.setBooleanParameter(CoreProtocolPNames.USE_EXPECT_CONTINUE, false);
         httpClient.setParams(params);
-        return httpClient;
+
+        DefaultHttpClient nHttpClient = new DefaultHttpClient(cm, params);
+        nHttpClient.setCredentialsProvider(cProvider);
+        return nHttpClient;
     }
 
     private InputStream getUrlStream(String url, DefaultHttpClient httpClient) throws NotFoundException, ReportableError {
