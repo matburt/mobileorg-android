@@ -1,14 +1,26 @@
-import android.view.View.OnClickListener;
+package com.matburt.mobileorg;
+
+import android.app.Activity;
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.widget.Button;
-import android.widget.EditText;
+import android.os.Bundle;
+import android.view.View;
 import android.widget.TextView;
+import android.widget.EditText;
+import android.view.View.OnClickListener;
 import android.widget.Toast;
+import android.util.Log;
+import android.preference.PreferenceManager;
+import android.os.AsyncTask;
+import android.content.res.Resources;
 
 import com.dropbox.client.DropboxAPI;
 import com.dropbox.client.DropboxAPI.Config;
 
 
-public class DropboxAuthActivity extends Activity {
+public class DropboxAuthActivity extends Activity implements OnClickListener {
     private static final String LT = "MobileOrg";
     private DropboxAPI api = new DropboxAPI();
 
@@ -16,6 +28,7 @@ public class DropboxAuthActivity extends Activity {
     private EditText dbLogin;
     private EditText dbPassword;
     private Button dbSubmit;
+    private Resources r;
 
     private boolean hasToken = false;
     private Config dbConfig;
@@ -30,6 +43,8 @@ public class DropboxAuthActivity extends Activity {
         dbPassword = (EditText)findViewById(R.id.dbAuthPassword);
         dbSubmit = (Button)findViewById(R.id.dbAuthSubmit);
         dbSubmit.setOnClickListener(this);
+        r = this.getResources();
+        this.populateInfo();
     }
 
     public void onClick(View v) {
@@ -39,7 +54,7 @@ public class DropboxAuthActivity extends Activity {
                 api.deauthenticate();
                 clearKeys();
                 setLoggedIn(false);
-                mText.setText("");
+                dbInfo.setText("Not logged in");
             } else {
                 // Try to log in
                 getAccountInfo();
@@ -51,10 +66,10 @@ public class DropboxAuthActivity extends Activity {
         String[] keys = getKeys();
         if (keys != null) {
         	setLoggedIn(true);
-        	Log.i(TAG, "Logged in already");
+        	Log.i(LT, "Logged in to Dropbox already");
         } else {
         	setLoggedIn(false);
-        	Log.i(TAG, "Not logged in");
+        	Log.i(LT, "Not logged in to Dropbox");
         }
         if (authenticate()) {
         	// We can query the account info already, since we have stored 
@@ -78,9 +93,9 @@ public class DropboxAuthActivity extends Activity {
     	this.dbLogin.setEnabled(!loggedIn);
     	this.dbPassword.setEnabled(!loggedIn);
     	if (loggedIn) {
-    		mSubmit.setText("Log Out of Dropbox");
+    		dbSubmit.setText("Log Out of Dropbox");
     	} else {
-    		mSubmit.setText("Log In to Dropbox");
+    		dbSubmit.setText("Log In to Dropbox");
     	}
     }
 
@@ -141,7 +156,7 @@ public class DropboxAuthActivity extends Activity {
     	}
     	String keys[] = getKeys();
     	if (keys != null) {
-	        dbConfig = api.authenticateToken(keys[0], keys[1], mConfig);
+	        dbConfig = api.authenticateToken(keys[0], keys[1], dbConfig);
 	        if (dbConfig != null) {
 	            return true;
 	        }
@@ -155,10 +170,8 @@ public class DropboxAuthActivity extends Activity {
     protected Config getConfig() {
     	if (dbConfig == null) {
 	    	dbConfig = api.getConfig(null, false);
-	    	// TODO On a production app which you distribute, your consumer
-	    	// key and secret should be obfuscated somehow.
-	    	dbConfig.consumerKey=R.string.dropbox_consumer_key;
-	    	dbConfig.consumerSecret=R.string.dropbox_consumer_secret;
+	    	dbConfig.consumerKey=r.getString(R.string.dropbox_consumer_key, "invalid");
+	    	dbConfig.consumerSecret=r.getString(R.string.dropbox_consumer_secret, "invalid");
 	    	dbConfig.server="api.dropbox.com";
 	    	dbConfig.contentServer="api-content.dropbox.com";
 	    	dbConfig.port=80;
@@ -178,7 +191,7 @@ public class DropboxAuthActivity extends Activity {
      * @return Array of [access_key, access_secret], or null if none stored
      */
     public String[] getKeys() {
-        SharedPreferences prefs = getDefaultSharedPreferences(getBaseContext());
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
         String key = prefs.getString("dbPrivKey", null);
         String secret = prefs.getString("dbPrivSecret", null);
         if (key != null && secret != null) {
@@ -198,7 +211,7 @@ public class DropboxAuthActivity extends Activity {
      */
     public void storeKeys(String key, String secret) {
         // Save the access key for later
-        SharedPreferences prefs = getDefaultSharedPreferences(getBaseContext());
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
         Editor edit = prefs.edit();
         edit.putString("dbPrivKey", key);
         edit.putString("dbPrivSecret", secret);
@@ -206,10 +219,82 @@ public class DropboxAuthActivity extends Activity {
     }
     
     public void clearKeys() {
-        SharedPreferences prefs = getDefaultSharedPreferences(getBaseContext());
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
         Editor edit = prefs.edit();
         edit.remove("dbPrivKey");
         edit.remove("dbPrivSecret");
         edit.commit();
     }    	
+}
+
+class LoginAsyncTask extends AsyncTask<Void, Void, Integer> {
+    private static final String TAG = "LoginAsyncTask";
+
+    String mUser;
+    String mPassword;
+    String mErrorMessage="";
+    DropboxAuthActivity mDropboxSample;
+    DropboxAPI.Config mConfig;
+    DropboxAPI.Account mAccount;
+    
+    // Will just log in
+    public LoginAsyncTask(DropboxAuthActivity act, String user, String password, DropboxAPI.Config config) {
+        super();
+
+        mDropboxSample = act;
+        mUser = user;
+        mPassword = password;
+        mConfig = config;
+    }
+
+    @Override
+    protected Integer doInBackground(Void... params) {
+        try {
+        	DropboxAPI api = mDropboxSample.getAPI();
+        	
+        	int success = DropboxAPI.STATUS_NONE;
+        	if (!api.isAuthenticated()) {
+	            mConfig = api.authenticate(mConfig, mUser, mPassword);
+	            mDropboxSample.setConfig(mConfig);
+            
+	            success = mConfig.authStatus;
+
+	            if (success != DropboxAPI.STATUS_SUCCESS) {
+	            	return success;
+	            }
+        	}
+        	mAccount = api.accountInfo();
+
+        	if (!mAccount.isError()) {
+        		return DropboxAPI.STATUS_SUCCESS;
+        	} else {
+        		Log.e(TAG, "Account info error: " + mAccount.httpCode + " " + mAccount.httpReason);
+        		return DropboxAPI.STATUS_FAILURE;
+        	}
+        } catch (Exception e) {
+            Log.e(TAG, "Error in logging in.", e);
+            return DropboxAPI.STATUS_NETWORK_ERROR;
+        }
+    }
+
+    @Override
+    protected void onPostExecute(Integer result) {
+        if (result == DropboxAPI.STATUS_SUCCESS) {
+        	if (mConfig != null && mConfig.authStatus == DropboxAPI.STATUS_SUCCESS) {
+            	mDropboxSample.storeKeys(mConfig.accessTokenKey, mConfig.accessTokenSecret);
+            	mDropboxSample.setLoggedIn(true);
+            	mDropboxSample.showToast("Logged into Dropbox");
+            }
+        	if (mAccount != null) {
+        		mDropboxSample.displayAccountInfo(mAccount);
+        	}
+        } else {
+        	if (result == DropboxAPI.STATUS_NETWORK_ERROR) {
+        		mDropboxSample.showToast("Network error: " + mConfig.authDetail);
+        	} else {
+        		mDropboxSample.showToast("Unsuccessful login.");
+        	}
+        }
+    }
+
 }
