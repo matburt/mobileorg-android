@@ -6,11 +6,14 @@
 		<Button android:id="@+id/parent"
 	android:layout_width="fill_parent"
 	android:drawableLeft="@android:drawable/ic_media_rew"
-	android:layout_span="2" />
+	android:layout_span="2"
+	android:gravity="center_vertical|clip_vertical|clip_horizontal" />
 		<Button android:layout_weight="1" android:id="@+id/previous_sibling"
-	android:text="@string/previous_sibling" android:layout_width="120px" />
-		<Button android:layout_weight="1" android:id="@+id/next_sibling"
-	android:text="@string/next_sibling" android:layout_width="120px" />
+	android:text="@string/previous_sibling" 
+	android:gravity="center_vertical" />
+		<Button android:layout_weight="1" 
+		android:gravity="center_vertical" android:id="@+id/next_sibling"
+	android:text="@string/next_sibling" />
 	</TableRow>
 	<TableRow>
 		<EditText android:id="@+id/title" android:layout_span="4"

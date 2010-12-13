@@ -59,9 +59,9 @@ public class Capture extends Activity implements OnClickListener
                                           this.orgEditDisplay.getText().toString());
             }
         }
-
-        //triggers a refresh of the main display
-        this.appinst.rootNode = null;
+        Intent result = new Intent();
+        result.putExtra("text", this.orgEditDisplay.getText().toString());
+        this.setResult(RESULT_OK, result);
         this.finish();
         return true;
     }

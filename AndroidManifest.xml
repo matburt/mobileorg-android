@@ -8,7 +8,7 @@
   <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
   <application android:name=".MobileOrgApplication"
                android:label="MobileOrg"
-               android:icon="@drawable/icon">
+               android:icon="@drawable/icon" android:debuggable="true">
     <receiver android:name=".MobileOrgWidget"
               android:label="MobileOrg Tasks">
       <intent-filter>
@@ -53,5 +53,6 @@
     <activity android:name="SDCardSettingsActivity"
               android:label="SDCard Settings">
     </activity>    
-  </application>
+  <activity android:name=".ViewNodeDetailsActivity" android:windowSoftInputMode="adjustPan"></activity>
+</application>
 </manifest>

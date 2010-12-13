@@ -27,4 +27,13 @@
 <string name="error_url_put">An error occurred while attempting to put the URL %s</string>
 <string name="apg_not_found">APG not found</string>
 <string name="apg_version_not_supported">APG version not supported</string>
+<string name="view_as_document">View as document</string>
+<string name="title">Title</string>
+<string name="body">Body</string>
+<string name="tags">Tags</string>
+<string name="priority">Priority</string>
+<string name="todo_state">Todo state</string>
+<string name="previous_sibling">Prev</string>
+<string name="next_sibling">Next</string>
+<string name="back">Back</string>
 </resources>
