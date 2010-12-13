@@ -16,8 +16,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.ArrayList;
 import java.lang.IllegalArgumentException;
 import android.app.Activity;
@@ -31,18 +29,14 @@ import android.util.Log;
 import android.text.TextUtils;
 import android.os.AsyncTask;
 import android.widget.Toast;
+import org.apache.http.HttpResponse;
 
 import com.dropbox.client.DropboxAPI;
 import com.dropbox.client.DropboxAPI.Config;
 import com.dropbox.client.DropboxAPI.FileDownload;
 
-public class DropboxSynchronizer implements Synchronizer {
-    private SharedPreferences appSettings;
-    private Activity rootActivity;
+public class DropboxSynchronizer extends Synchronizer {
     private MobileOrgDatabase appdb;
-    private Resources r;
-    private boolean pushedStageFile = false;
-    private static final String LT = "MobileOrg";
     private boolean hasToken = false;
 
     private DropboxAPI api = new DropboxAPI();
@@ -62,7 +56,28 @@ public class DropboxSynchronizer implements Synchronizer {
     }
 
     public void push() throws NotFoundException, ReportableError {
-        Log.i(LT, "Push is currently unsupported");
+        String fileActual = this.getRootPath() + "mobileorg.org";
+        String storageMode = this.appSettings.getString("storageMode", "");
+        String fileContents = "";
+
+        BufferedReader reader = this.getReadHandle("mobileorg.org");
+
+        if (reader == null) {
+            return;
+        }
+
+        String thisLine = "";
+        try {
+            while ((thisLine = reader.readLine()) != null) {
+                fileContents += thisLine + "\n";
+            }
+        }
+        catch (java.io.IOException e) {
+        	throw new ReportableError(
+            		r.getString(R.string.error_file_read, "mobileorg.org"),
+            		e);
+        }
+        this.appendDropboxFile("mobileorg.org", fileContents);
     }
 
     public boolean checkReady() {
@@ -192,71 +207,68 @@ public class DropboxSynchronizer implements Synchronizer {
         return fileContents;
     }
 
-    private HashMap<String, String> getOrgFilesFromMaster(String master) {
-        Pattern getOrgFiles = Pattern.compile("\\[file:(.*?\\.(?:org|pgp|gpg|enc))\\]\\[(.*?)\\]\\]");
-        Matcher m = getOrgFiles.matcher(master);
-        HashMap<String, String> allOrgFiles = new HashMap<String, String>();
-        while (m.find()) {
-            Log.i(LT, "Found org file: " + m.group(2));
-            allOrgFiles.put(m.group(2), m.group(1));
+    private void appendDropboxFile(String file, String content) throws ReportableError {
+        String originalContent = this.fetchOrgFile(file);
+        String pathActual = this.getRootPath();
+        String newContent = originalContent + "\n" + content;
+        String storageMode = this.appSettings.getString("storageMode", "");
+        BufferedWriter writer = this.getWriteHandle("mobileorg.org");
+
+        // Rewriting the mobileorg file with the contents on Dropbox is dangerous
+        // but the api sucks and automatically uses the File object's name when figuring
+        // out what to call the remote file
+        try {
+            writer.write(newContent);
+            writer.flush();
+            writer.close();
+        }
+        catch (java.io.IOException e) {
+            Log.e(LT, "IO Exception trying to write file mobileorg.org");
+            return;
         }
 
-        return allOrgFiles;
+        File uploadFile = this.getFile("mobileorg.org");
+        this.api.putFile("dropbox", pathActual, uploadFile);
+        this.appdb.removeFile("mobileorg.org");
+        this.rootActivity.deleteFile("mobileorg.org");
+        // NOTE: Will need to download and compare file since dropbox api sucks and won't
+        //       return the status code
+        // if (something) {
+        //     this.appdb.removeFile("mobileorg.org");
+        //     if (storageMode.equals("internal") || storageMode == null) {
+        //         this.rootActivity.deleteFile("mobileorg.org");
+        //     }
+        //     else if (storageMode.equals("sdcard")) {
+        //         File root = Environment.getExternalStorageDirectory();
+        //         File morgDir = new File(root, "mobileorg");
+        //         File morgFile = new File(morgDir, "mobileorg.org");
+        //         morgFile.delete();
+        //     }
+        // }
     }
 
-    private HashMap<String, String> getChecksums(String master) {
-        HashMap<String, String> chksums = new HashMap<String, String>();
-        for (String eachLine : master.split("[\\n\\r]+")) {
-            if (TextUtils.isEmpty(eachLine))
-                continue;
-            String[] chksTuple = eachLine.split("\\s+");
-            chksums.put(chksTuple[1], chksTuple[0]);
+    public File getFile(String fileName) throws ReportableError {
+        String storageMode = this.appSettings.getString("storageMode", "");
+        if (storageMode.equals("internal") || storageMode == null) {
+            FileInputStream fs;
+            File morgFile = new File("/data/data/com.matburt.mobileorg/files", fileName);
+            return morgFile;
         }
-        return chksums;
-    }
-
-    private ArrayList<HashMap<String, Boolean>> getTodos(String master) {
-        Pattern getTodos = Pattern.compile("#\\+TODO:\\s+([\\s\\w-]*)(\\| ([\\s\\w-]*))*");
-        Matcher m = getTodos.matcher(master);
-        ArrayList<HashMap<String, Boolean>> todoList = new ArrayList<HashMap<String, Boolean>>();
-        while (m.find()) {
-            HashMap<String, Boolean> holding = new HashMap<String, Boolean>();
-            Boolean isDone = false;
-            for (int idx = 1; idx <= m.groupCount(); idx++) {
-                if (m.group(idx) != null &&
-                    m.group(idx).length() > 0) {
-                    if (m.group(idx).indexOf("|") != -1) {
-                        isDone = true;
-                        continue;
-                    }
-                    String[] grouping = m.group(idx).split("\\s+");
-                    for (int jdx = 0; jdx < grouping.length; jdx++) {
-                        holding.put(grouping[jdx].trim(),
-                                    isDone);
-                    }
-                }
+        else if (storageMode.equals("sdcard")) {
+            File root = Environment.getExternalStorageDirectory();
+            File morgDir = new File(root, "mobileorg");
+            File morgFile = new File(morgDir, fileName);
+            if (!morgFile.exists()) {
+                Log.i(LT, "Did not find " + fileName + " file, not pushing.");
+                return null;
             }
-            todoList.add(holding);
+            return morgFile;
         }
-        return todoList;
-    }
-
-    private ArrayList<ArrayList<String>> getPriorities(String master) {
-        Pattern getPriorities = Pattern.compile("#\\+ALLPRIORITIES:\\s+([A-Z\\s]*)");
-        Matcher t = getPriorities.matcher(master);
-        ArrayList<ArrayList<String>> priorityList = new ArrayList<ArrayList<String>>();
-        while (t.find()) {
-            ArrayList<String> holding = new ArrayList<String>();
-            if (t.group(1) != null &&
-                t.group(1).length() > 0) {
-                String[] grouping = t.group(1).split("\\s+");
-                for (int jdx = 0; jdx < grouping.length; jdx++) {
-                    holding.add(grouping[jdx].trim());
-                }
-            }
-            priorityList.add(holding);
+        else {
+        	throw new ReportableError(
+        			r.getString(R.string.error_local_storage_method_unknown, storageMode),
+        			null);
         }
-        return priorityList;
     }
 
     public void connect() {

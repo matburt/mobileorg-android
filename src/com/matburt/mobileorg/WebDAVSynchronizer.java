@@ -48,14 +48,10 @@ import android.text.TextUtils;
 import org.apache.http.params.CoreProtocolPNames;
 import org.apache.http.params.HttpParams;
 
-public class WebDAVSynchronizer implements Synchronizer
+public class WebDAVSynchronizer extends Synchronizer
 {
-    private SharedPreferences appSettings;
-    private Activity rootActivity;
     private MobileOrgDatabase appdb;
-    private Resources r;
     private boolean pushedStageFile = false;
-    private static final String LT = "MobileOrg";
 
     WebDAVSynchronizer(Activity parentActivity) {
         this.rootActivity = parentActivity;
@@ -301,72 +297,6 @@ public class WebDAVSynchronizer implements Synchronizer
         }
         return manageUrl.getProtocol() + "://" +
             manageUrl.getAuthority() + directoryActual;
-    }
-
-    private HashMap<String, String> getOrgFilesFromMaster(String master) {
-        Pattern getOrgFiles = Pattern.compile("\\[file:(.*?\\.(?:org|pgp|gpg|enc))\\]\\[(.*?)\\]\\]");
-        Matcher m = getOrgFiles.matcher(master);
-        HashMap<String, String> allOrgFiles = new HashMap<String, String>();
-        while (m.find()) {
-            allOrgFiles.put(m.group(2), m.group(1));
-        }
-
-        return allOrgFiles;
-    }
-
-    private HashMap<String, String> getChecksums(String master) {
-        HashMap<String, String> chksums = new HashMap<String, String>();
-        for (String eachLine : master.split("[\\n\\r]+")) {
-            if (TextUtils.isEmpty(eachLine))
-                continue;
-            String[] chksTuple = eachLine.split("\\s+");
-            chksums.put(chksTuple[1], chksTuple[0]);
-        }
-        return chksums;
-    }
-
-    private ArrayList<HashMap<String, Boolean>> getTodos(String master) {
-        Pattern getTodos = Pattern.compile("#\\+TODO:\\s+([\\s\\w-]*)(\\| ([\\s\\w-]*))*");
-        Matcher m = getTodos.matcher(master);
-        ArrayList<HashMap<String, Boolean>> todoList = new ArrayList<HashMap<String, Boolean>>();
-        while (m.find()) {
-            HashMap<String, Boolean> holding = new HashMap<String, Boolean>();
-            Boolean isDone = false;
-            for (int idx = 1; idx <= m.groupCount(); idx++) {
-                if (m.group(idx) != null &&
-                    m.group(idx).length() > 0) {
-                    if (m.group(idx).indexOf("|") != -1) {
-                        isDone = true;
-                        continue;
-                    }
-                    String[] grouping = m.group(idx).split("\\s+");
-                    for (int jdx = 0; jdx < grouping.length; jdx++) {
-                        holding.put(grouping[jdx].trim(),
-                                    isDone);
-                    }
-                }
-            }
-            todoList.add(holding);
-        }
-        return todoList;
-    }
-
-    private ArrayList<ArrayList<String>> getPriorities(String master) {
-        Pattern getPriorities = Pattern.compile("#\\+ALLPRIORITIES:\\s+([A-Z\\s]*)");
-        Matcher t = getPriorities.matcher(master);
-        ArrayList<ArrayList<String>> priorityList = new ArrayList<ArrayList<String>>();
-        while (t.find()) {
-            ArrayList<String> holding = new ArrayList<String>();
-            if (t.group(1) != null &&
-                t.group(1).length() > 0) {
-                String[] grouping = t.group(1).split("\\s+");
-                for (int jdx = 0; jdx < grouping.length; jdx++) {
-                    holding.add(grouping[jdx].trim());
-                }
-            }
-            priorityList.add(holding);
-        }
-        return priorityList;
     }
 
     private DefaultHttpClient createConnection(String user, String password) {
