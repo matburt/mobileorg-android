@@ -228,20 +228,23 @@ public class DropboxAuthActivity extends Activity implements OnClickListener {
 }
 
 class LoginAsyncTask extends AsyncTask<Void, Void, Integer> {
-    private static final String TAG = "LoginAsyncTask";
+    private static final String LT = "LoginAsyncTask";
 
     String mUser;
     String mPassword;
     String mErrorMessage="";
-    DropboxAuthActivity mDropboxSample;
+    DropboxAuthActivity mDropboxAuth;
     DropboxAPI.Config mConfig;
     DropboxAPI.Account mAccount;
     
     // Will just log in
-    public LoginAsyncTask(DropboxAuthActivity act, String user, String password, DropboxAPI.Config config) {
+    public LoginAsyncTask(DropboxAuthActivity act,
+                          String user,
+                          String password,
+                          DropboxAPI.Config config) {
         super();
 
-        mDropboxSample = act;
+        mDropboxAuth = act;
         mUser = user;
         mPassword = password;
         mConfig = config;
@@ -250,12 +253,12 @@ class LoginAsyncTask extends AsyncTask<Void, Void, Integer> {
     @Override
     protected Integer doInBackground(Void... params) {
         try {
-        	DropboxAPI api = mDropboxSample.getAPI();
+        	DropboxAPI api = mDropboxAuth.getAPI();
         	
         	int success = DropboxAPI.STATUS_NONE;
         	if (!api.isAuthenticated()) {
 	            mConfig = api.authenticate(mConfig, mUser, mPassword);
-	            mDropboxSample.setConfig(mConfig);
+	            mDropboxAuth.setConfig(mConfig);
             
 	            success = mConfig.authStatus;
 
@@ -268,11 +271,11 @@ class LoginAsyncTask extends AsyncTask<Void, Void, Integer> {
         	if (!mAccount.isError()) {
         		return DropboxAPI.STATUS_SUCCESS;
         	} else {
-        		Log.e(TAG, "Account info error: " + mAccount.httpCode + " " + mAccount.httpReason);
+        		Log.e(LT, "Account info error: " + mAccount.httpCode + " " + mAccount.httpReason);
         		return DropboxAPI.STATUS_FAILURE;
         	}
         } catch (Exception e) {
-            Log.e(TAG, "Error in logging in.", e);
+            Log.e(LT, "Error in logging in.", e);
             return DropboxAPI.STATUS_NETWORK_ERROR;
         }
     }
@@ -281,18 +284,18 @@ class LoginAsyncTask extends AsyncTask<Void, Void, Integer> {
     protected void onPostExecute(Integer result) {
         if (result == DropboxAPI.STATUS_SUCCESS) {
         	if (mConfig != null && mConfig.authStatus == DropboxAPI.STATUS_SUCCESS) {
-            	mDropboxSample.storeKeys(mConfig.accessTokenKey, mConfig.accessTokenSecret);
-            	mDropboxSample.setLoggedIn(true);
-            	mDropboxSample.showToast("Logged into Dropbox");
+            	mDropboxAuth.storeKeys(mConfig.accessTokenKey, mConfig.accessTokenSecret);
+            	mDropboxAuth.setLoggedIn(true);
+            	mDropboxAuth.showToast("Logged into Dropbox");
             }
         	if (mAccount != null) {
-        		mDropboxSample.displayAccountInfo(mAccount);
+        		mDropboxAuth.displayAccountInfo(mAccount);
         	}
         } else {
         	if (result == DropboxAPI.STATUS_NETWORK_ERROR) {
-        		mDropboxSample.showToast("Network error: " + mConfig.authDetail);
+        		mDropboxAuth.showToast("Network error: " + mConfig.authDetail);
         	} else {
-        		mDropboxSample.showToast("Unsuccessful login.");
+        		mDropboxAuth.showToast("Unsuccessful login.");
         	}
         }
     }
