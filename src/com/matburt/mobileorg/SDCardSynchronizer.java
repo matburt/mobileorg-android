@@ -24,8 +24,6 @@ import java.io.FileWriter;
 
 public class SDCardSynchronizer extends Synchronizer
 {
-    private MobileOrgDatabase appdb;
-
     SDCardSynchronizer(Activity parentActivity) {
         this.rootActivity = parentActivity;
         this.r = this.rootActivity.getResources();
@@ -95,17 +93,7 @@ public class SDCardSynchronizer extends Synchronizer
         String basePath = fIndexFile.getParent();
         
         this.appendSDCardFile(basePath + "/mobileorg.org", fileContents);
-        this.appdb.removeFile("mobileorg.org");
-
-        if (storageMode.equals("internal") || storageMode == null) {
-            this.rootActivity.deleteFile("mobileorg.org");
-        }
-        else if (storageMode.equals("sdcard")) {
-            File root = Environment.getExternalStorageDirectory();
-            File morgDir = new File(root, "mobileorg");
-            File morgFile = new File(morgDir, "mobileorg.org");
-            morgFile.delete();
-        }
+        this.removeFile("mobileorg.org");
     }
 
     private void appendSDCardFile(String path,

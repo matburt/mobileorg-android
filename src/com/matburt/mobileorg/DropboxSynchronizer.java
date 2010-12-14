@@ -36,7 +36,6 @@ import com.dropbox.client.DropboxAPI.Config;
 import com.dropbox.client.DropboxAPI.FileDownload;
 
 public class DropboxSynchronizer extends Synchronizer {
-    private MobileOrgDatabase appdb;
     private boolean hasToken = false;
 
     private DropboxAPI api = new DropboxAPI();
@@ -208,10 +207,14 @@ public class DropboxSynchronizer extends Synchronizer {
     }
 
     private void appendDropboxFile(String file, String content) throws ReportableError {
-        String originalContent = this.fetchOrgFile(file);
         String pathActual = this.getRootPath();
-        String newContent = originalContent + "\n" + content;
-        String storageMode = this.appSettings.getString("storageMode", "");
+        String originalContent = this.fetchOrgFile(pathActual + file);
+        String newContent = "";
+        if (originalContent.indexOf("{\"error\":") == -1)
+            newContent = originalContent + "\n" + content;
+        else
+            newContent = content;
+        this.removeFile("mobileorg.org");
         BufferedWriter writer = this.getWriteHandle("mobileorg.org");
 
         // Rewriting the mobileorg file with the contents on Dropbox is dangerous
@@ -229,8 +232,7 @@ public class DropboxSynchronizer extends Synchronizer {
 
         File uploadFile = this.getFile("mobileorg.org");
         this.api.putFile("dropbox", pathActual, uploadFile);
-        this.appdb.removeFile("mobileorg.org");
-        this.rootActivity.deleteFile("mobileorg.org");
+        this.removeFile("mobileorg.org");
         // NOTE: Will need to download and compare file since dropbox api sucks and won't
         //       return the status code
         // if (something) {

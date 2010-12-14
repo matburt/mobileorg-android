@@ -24,6 +24,7 @@ import android.content.res.Resources.NotFoundException;
 
 abstract class Synchronizer
 {
+    public MobileOrgDatabase appdb = null;
     public SharedPreferences appSettings = null;
     public Activity rootActivity = null;
     public static final String LT = "MobileOrg";
@@ -114,6 +115,20 @@ abstract class Synchronizer
         			null);
         }
         return reader;
+    }
+
+    void removeFile(String filePath) {
+            this.appdb.removeFile(filePath);
+            String storageMode = this.appSettings.getString("storageMode", "");
+            if (storageMode.equals("internal") || storageMode == null) {
+                this.rootActivity.deleteFile(filePath);
+            }
+            else if (storageMode.equals("sdcard")) {
+                File root = Environment.getExternalStorageDirectory();
+                File morgDir = new File(root, "mobileorg");
+                File morgFile = new File(morgDir, filePath);
+                morgFile.delete();
+            }
     }
 
     HashMap<String, String> getOrgFilesFromMaster(String master) {

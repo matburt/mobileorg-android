@@ -50,7 +50,6 @@ import org.apache.http.params.HttpParams;
 
 public class WebDAVSynchronizer extends Synchronizer
 {
-    private MobileOrgDatabase appdb;
     private boolean pushedStageFile = false;
 
     WebDAVSynchronizer(Activity parentActivity) {
@@ -125,17 +124,7 @@ public class WebDAVSynchronizer extends Synchronizer
         this.appendUrlFile(urlActual, httpC, fileContents);
 
         if (this.pushedStageFile) {
-            this.appdb.removeFile("mobileorg.org");
-
-            if (storageMode.equals("internal") || storageMode == null) {
-                this.rootActivity.deleteFile("mobileorg.org");
-            }
-            else if (storageMode.equals("sdcard")) {
-                File root = Environment.getExternalStorageDirectory();
-                File morgDir = new File(root, "mobileorg");
-                File morgFile = new File(morgDir, "mobileorg.org");
-                morgFile.delete();
-            }
+            this.removeFile("mobileorg.org");
         }
     }
 
