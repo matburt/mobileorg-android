@@ -33,7 +33,11 @@ abstract class Synchronizer
     abstract void pull() throws NotFoundException, ReportableError;
     abstract void push() throws NotFoundException, ReportableError;
     abstract boolean checkReady();
-    abstract void close();
+
+    void close() {
+        if (this.appdb != null)
+            this.appdb.close();
+    }
 
     BufferedWriter getWriteHandle(String localRelPath) {
         String storageMode = this.appSettings.getString("storageMode", "");

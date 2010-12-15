@@ -50,10 +50,6 @@ public class DropboxSynchronizer extends Synchronizer {
         this.connect();
     }
 
-    public void close() {
-        this.appdb.close();
-    }
-
     public void push() throws NotFoundException, ReportableError {
         String fileActual = this.getRootPath() + "mobileorg.org";
         String storageMode = this.appSettings.getString("storageMode", "");

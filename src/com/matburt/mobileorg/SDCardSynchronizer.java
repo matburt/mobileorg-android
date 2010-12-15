@@ -32,10 +32,6 @@ public class SDCardSynchronizer extends Synchronizer
                                    parentActivity.getBaseContext());
     }
 
-    public void close() {
-        this.appdb.close();
-    }
-
     public void push() throws NotFoundException, ReportableError {
         String storageMode = this.appSettings.getString("storageMode", "");
         BufferedReader reader = null;
