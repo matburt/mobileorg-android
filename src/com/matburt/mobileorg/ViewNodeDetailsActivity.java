@@ -63,6 +63,13 @@ public class ViewNodeDetailsActivity extends Activity implements OnClickListener
     }
 
 	@Override
+	protected void onPause() {
+		// TODO Auto-generated method stub
+		super.onPause();
+		save();
+	}
+
+	@Override
 	public void onClick(View v) {
 		if (v.equals(mViewAsDocument)) {
 			Intent intent = new Intent(this, SimpleTextDisplay.class);
@@ -119,9 +126,28 @@ public class ViewNodeDetailsActivity extends Activity implements OnClickListener
 		}
 	}
 	
-	
+	/**
+	 * Call CreateEditNote's methods for any changed fields
+	 * @param oldNode
+	 * @param newNode
+	 */
 	public void save() {
-		
+		CreateEditNote creator = new CreateEditNote(this);
+		String newTitle = mTitle.getText().toString();
+		String newTodo = mTodoState.getText().toString();
+		String newPriority = mPriority.getText().toString();
+		if (!mNode.nodeName.equals(newTitle)) {
+        	creator.editNote("heading", mNode.nodeId, newTitle, mNode.nodeName, newTitle);
+        	mNode.nodeName = newTitle;
+		}
+        if (!mNode.todo.equals(newTodo)) {
+        	creator.editNote("todo", mNode.nodeId, newTitle, mNode.todo, newTodo);
+        	mNode.todo = newTodo;
+		}
+       if (!mNode.nodePayload.equals(mNode.nodePayload)) {
+        	creator.editNote("priority", mNode.nodeId, newTitle, mNode.priority, newPriority);
+        	mNode.todo = newPriority;
+		}
 	}
 	
 	@Override
@@ -133,5 +159,4 @@ public class ViewNodeDetailsActivity extends Activity implements OnClickListener
 		}
 	}
 	private static int EDIT_BODY = 1;
-	
 }

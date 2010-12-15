@@ -1,10 +1,11 @@
 package com.matburt.mobileorg;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.regex.Pattern;
-import java.util.regex.Matcher;
+
+import android.app.Activity;
 
 class EditNode {
     public String editType;
@@ -14,7 +15,7 @@ class EditNode {
     public String newVal = "";
 }
 
-class Node {
+class Node implements Cloneable {
 
     static int HEADER = 0;
     static int HEADING = 1;
@@ -91,4 +92,5 @@ class Node {
     boolean hasProperty(String key) {
         return this.properties.containsKey(key);
     }
+    
 }
