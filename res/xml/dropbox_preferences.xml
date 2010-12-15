@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+  <PreferenceCategory android:title="Dropbox">
+    <PreferenceScreen
+        android:name="Login"
+        android:summary="Login to retrieve an OAuth token"
+        android:title="Login"
+        android:key="dropboxLogin"/>
+    <EditTextPreference
+        android:name="Path"
+        android:summary="Dropbox path to index.org file"
+        android:title="Path"
+        android:key="dropboxPath"/>
+  </PreferenceCategory>
+</PreferenceScreen>

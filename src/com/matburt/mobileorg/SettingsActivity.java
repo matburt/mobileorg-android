@@ -63,6 +63,11 @@ public class SettingsActivity extends PreferenceActivity
                                    "com.matburt.mobileorg.SDCardSettingsActivity");
         SynchronizerPreferences.syncIntents.put("sdcard", synchroIntent);
 
+        synchroIntent = new Intent();
+        synchroIntent.setClassName("com.matburt.mobileorg",
+                                   "com.matburt.mobileorg.DropboxSettingsActivity");
+        SynchronizerPreferences.syncIntents.put("dropbox", synchroIntent);
+
         //populate the sync source list with updated data
         syncSource.setEntries(entries);
         syncSource.setEntryValues(values);

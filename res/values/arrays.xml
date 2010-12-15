@@ -10,10 +10,12 @@
   </string-array>
   <string-array name="fileSources">
     <item>WebDAV</item>
+    <item>Dropbox</item>
     <item>SDCard</item>
   </string-array>
   <string-array name="fileSourcesVals">
     <item>webdav</item>
+    <item>dropbox</item>
     <item>sdcard</item>
   </string-array>
 </resources>
