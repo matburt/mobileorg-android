@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TableLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_height="fill_parent"
+    android:layout_width="fill_parent"
+    android:stretchColumns="0">
+  <TableRow>
+  <TextView android:id="@+id/dbCurrentToken"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"/>
+  </TableRow>
+  <TableRow>
+  <EditText android:id="@+id/dbAuthLogin"
+            android:hint="email address"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"/>
+  </TableRow>
+  <TableRow>
+  <EditText android:id="@+id/dbAuthPassword"
+            android:hint="password"
+            android:password="true"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"/>
+  </TableRow>
+  <TableRow>
+  <Button android:id="@+id/dbAuthSubmit"
+          android:text="Save"
+          android:layout_width="fill_parent"
+          android:layout_height="fill_parent"/>
+  </TableRow>
+</TableLayout>

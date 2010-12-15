@@ -445,6 +445,9 @@ public class MobileOrgActivity extends ListActivity
         else if (userSynchro.equals("sdcard")) {
             appSync = new SDCardSynchronizer(this);
         }
+        else if (userSynchro.equals("dropbox")) {
+            appSync = new DropboxSynchronizer(this);
+        }
         else {
             this.onShowSettings();
             return;
