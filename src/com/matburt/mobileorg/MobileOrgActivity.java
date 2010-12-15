@@ -404,11 +404,15 @@ public class MobileOrgActivity extends ListActivity
             this.runParser();
         }
         else if (requestCode == VIEW_NODE_DETAILS) {
-        	ArrayList<Integer> newPath = data.getIntegerArrayListExtra("nodePath");
-        	if (newPath != null) {
-        	 	appInst.setSelection(newPath);
-            	populateDisplay();
+        	if (data != null) {
+        		ArrayList<Integer> newPath = data.getIntegerArrayListExtra("nodePath");
+        		if (newPath != null) {
+        			appInst.setSelection(newPath);
+        		}
+        	} else {
+        		appInst.popSelection();
         	}
+            populateDisplay();
         }
         else if(requestCode == Encryption.DECRYPT_MESSAGE)
         {

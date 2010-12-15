@@ -22,14 +22,17 @@
 	</TableRow>
 	<TableRow>
 		<TextView android:text="@string/todo_state" android:layout_width="wrap_content" android:layout_height="wrap_content" />
-		<EditText android:id="@+id/todo_state"
+		<Spinner android:id="@+id/todo_state"
 			android:layout_span="3"
-			android:layout_width="fill_parent" android:layout_height="wrap_content" />
+			android:prompt="@string/todo_state"
+			android:layout_width="fill_parent" 
+			android:layout_height="wrap_content" />
 	</TableRow>
 	<TableRow>
 		<TextView android:text="@string/priority" android:layout_width="wrap_content" android:layout_height="wrap_content" />
-		<EditText android:id="@+id/priority"
+		<Spinner android:id="@+id/priority"
 			android:layout_span="3"
+			android:prompt="@string/priority"
 			android:layout_width="fill_parent" android:layout_height="wrap_content" />
 	</TableRow>
 	<TableRow>
