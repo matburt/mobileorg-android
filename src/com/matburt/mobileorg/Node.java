@@ -13,7 +13,15 @@ class EditNode {
     public String title;
     public String oldVal = "";
     public String newVal = "";
-    public boolean applied = false;  // True if applied to in-memory copy of node
+    public EditNode() {
+    }
+    public EditNode(String editType, String nodeId, String title, String oldVal, String newVal) {
+    	this.editType = editType;
+    	this.nodeId = nodeId;
+    	this.title = title;
+    	this.oldVal = oldVal;
+    	this.newVal = newVal;
+    }
 }
 
 class Node implements Cloneable {
