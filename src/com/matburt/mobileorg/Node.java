@@ -13,6 +13,7 @@ class EditNode {
     public String title;
     public String oldVal = "";
     public String newVal = "";
+    public boolean applied = false;  // True if applied to in-memory copy of node
 }
 
 class Node implements Cloneable {
@@ -93,4 +94,22 @@ class Node implements Cloneable {
         return this.properties.containsKey(key);
     }
     
+    public void applyEdit(EditNode e) {
+    	if (e.editType.equals("todo"))
+    		todo = e.newVal;
+    	else if (e.editType.equals("priority"))
+    		priority = e.newVal;
+    	else if (e.editType.equals("heading")) 
+    		nodeName = e.newVal;
+    	else if (e.editType.equals("body"))
+    		nodePayload = e.newVal;
+    }
+    
+    public void applyEdits(ArrayList<EditNode> edits) {
+    	if (edits != null) {
+    		for (EditNode e : edits) {
+    			this.applyEdit(e);
+    		}
+    	}
+    }
 }

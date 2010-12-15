@@ -63,6 +63,7 @@ public class MobileOrgApplication extends Application {
     public Node getParent(ArrayList<Integer> path) {
     	return getNode(path, path.size() - 1);
 	}
+    
     public Node getNode(ArrayList<Integer> path, int count) {
     	Node thisNode = rootNode;
     	if (path != null) {
@@ -72,6 +73,25 @@ public class MobileOrgApplication extends Application {
     	}
     	return thisNode;
     }
+    
+    public ArrayList<EditNode> findEdits(String nodeId) {
+        ArrayList<EditNode> thisEdits = new ArrayList<EditNode>();
+        if (this.edits == null)
+            return thisEdits;
+        for (int idx = 0 ; idx < this.edits.size(); idx++)
+            {
+                String compareS = "";
+                if (nodeId.indexOf("olp:") == 0)
+                    compareS = "olp:" + this.edits.get(idx).nodeId;
+                else
+                    compareS = this.edits.get(idx).nodeId;
+                if (compareS.equals(nodeId)) {
+                    thisEdits.add(this.edits.get(idx));
+                }
+            }
+        return thisEdits;
+    }
+
     static String getStorageFolder()
     {
         File root = Environment.getExternalStorageDirectory();   

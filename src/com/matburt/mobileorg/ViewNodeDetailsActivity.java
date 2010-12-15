@@ -14,6 +14,11 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+/**
+ * 
+ * @author Sacha Chua (sacha@sachachua.com)
+ *
+ */
 public class ViewNodeDetailsActivity extends Activity implements OnClickListener {
 	protected ArrayList<Integer> mNodePath;
 	protected Button mParent;
@@ -80,6 +85,8 @@ public class ViewNodeDetailsActivity extends Activity implements OnClickListener
 	public void populateDisplay() {
 		MobileOrgApplication appInst = (MobileOrgApplication)this.getApplication();
         mNode = appInst.getNode(mNodePath);
+        mNode.applyEdits(appInst.findEdits(mNode.nodeId));
+        
         Node parent = appInst.getParent(mNodePath);
         mParent.setText(parent.nodeName);
         mTitle.setText(mNode.nodeName);
