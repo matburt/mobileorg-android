@@ -320,7 +320,9 @@ public class WebDAVSynchronizer extends Synchronizer
 
             if (status.getStatusCode() < 200 || status.getStatusCode() > 299) {
             	throw new ReportableError(
-            			r.getString(R.string.error_url_fetch_detail, url, status.getReasonPhrase()),
+            			r.getString(R.string.error_url_fetch_detail,
+                                    url,
+                                    status.getReasonPhrase()),
             			null);
             }
             
