@@ -1,9 +1,7 @@
 package com.matburt.mobileorg;
 
 import android.app.ListActivity;
-import android.app.Application;
 import android.app.ProgressDialog;
-import android.app.AlertDialog;
 import android.app.Activity;
 import android.os.Bundle;
 import android.os.Handler;
@@ -12,7 +10,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.LayoutInflater;
-import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.BaseAdapter;
@@ -20,22 +17,17 @@ import android.widget.TextView;
 import android.widget.AdapterView;
 import android.content.Intent;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.graphics.Color;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Log;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Date;
 import java.text.SimpleDateFormat;
 import java.lang.Runnable;
 import java.io.BufferedReader;
 import java.io.StringReader;
 import java.io.File;
-import android.database.Cursor;
-import android.database.SQLException;
-import android.database.sqlite.SQLiteDatabase;
 import android.content.SharedPreferences;
 
 public class MobileOrgActivity extends ListActivity
