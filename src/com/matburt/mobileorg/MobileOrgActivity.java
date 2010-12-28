@@ -115,13 +115,6 @@ public class MobileOrgActivity extends ListActivity
         }
 
         public View getView(int position, View convertView, ViewGroup parent) {
-			for(Node node : this.topNode.subNodes) {
-				Log.d("MobileOrg", node.nodeTitle);
-			}
-			Collections.sort(this.topNode.subNodes, Node.comparator);
-			for(Node node : this.topNode.subNodes) {
-				Log.d("MobileOrg", node.nodeTitle);
-			}
             if (convertView == null) {
                 convertView = this.lInflator.inflate(R.layout.main, null);
             }
