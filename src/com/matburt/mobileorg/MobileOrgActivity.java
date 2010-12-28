@@ -23,6 +23,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Collections;
 import java.text.SimpleDateFormat;
 import java.lang.Runnable;
 import java.io.BufferedReader;
@@ -114,6 +115,13 @@ public class MobileOrgActivity extends ListActivity
         }
 
         public View getView(int position, View convertView, ViewGroup parent) {
+			for(Node node : this.topNode.subNodes) {
+				Log.d("MobileOrg", node.nodeTitle);
+			}
+			Collections.sort(this.topNode.subNodes, Node.comparator);
+			for(Node node : this.topNode.subNodes) {
+				Log.d("MobileOrg", node.nodeTitle);
+			}
             if (convertView == null) {
                 convertView = this.lInflator.inflate(R.layout.main, null);
             }
@@ -268,6 +276,7 @@ public class MobileOrgActivity extends ListActivity
         	ofp.parse();
         	appInst.rootNode = ofp.rootNode;
             appInst.edits = ofp.parseEdits();
+			Collections.sort(appInst.rootNode.subNodes, Node.comparator);
         }
         catch(Throwable e) {
         	ErrorReporter.displayError(this, "An error occurred during parsing: " + e.toString());

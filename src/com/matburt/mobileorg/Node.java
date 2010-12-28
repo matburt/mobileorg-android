@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Date;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
+import java.util.Comparator;
 
 class EditNode {
     public String editType;
@@ -48,6 +49,13 @@ class Node {
         this.nodeType = ntype;
         this.encrypted = encrypted;
     }
+	
+	public static Comparator<Node> comparator = new Comparator<Node>() {
+		@Override
+		public int compare(Node node1, Node node2) {
+			return node1.nodeName.compareToIgnoreCase(node2.nodeName);
+		}
+	};
 
     void setFullTitle(String title) {
         this.nodeTitle = title;
