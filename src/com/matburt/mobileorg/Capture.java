@@ -75,6 +75,27 @@ public class Capture extends Activity implements OnClickListener
     public void populateDisplay() {
         Intent txtIntent = getIntent();
         this.srcText = txtIntent.getStringExtra("txtValue");
+		if((this.srcText == null || this.srcText.length() == 0) &&
+		   txtIntent != null) {
+			String subject = txtIntent.getStringExtra("android.intent.extra.SUBJECT");
+			String text = txtIntent.getStringExtra("android.intent.extra.TEXT");
+
+			if(subject == null) {
+				subject = "";
+			} else {
+				subject += "\n";
+			}
+
+			if(text == null) {
+				text = "";
+			}
+
+			if(text.startsWith("http")) {
+				this.srcText = "[["+text+"]["+subject+"]]";
+			} else {
+				this.srcText = subject + text;
+			}
+		}
         this.id = txtIntent.getStringExtra("nodeId");
         this.editType = txtIntent.getStringExtra("editType");
         this.orgEditDisplay.setText(this.srcText);
