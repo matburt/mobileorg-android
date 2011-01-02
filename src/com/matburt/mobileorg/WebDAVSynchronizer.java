@@ -52,12 +52,12 @@ public class WebDAVSynchronizer extends Synchronizer
 {
     private boolean pushedStageFile = false;
 
-    WebDAVSynchronizer(Activity parentActivity) {
-        this.rootActivity = parentActivity;
-        this.r = this.rootActivity.getResources();
-        this.appdb = new MobileOrgDatabase((Context)parentActivity);
+    WebDAVSynchronizer(Context parentContext) {
+        this.rootContext = parentContext;
+        this.r = this.rootContext.getResources();
+        this.appdb = new MobileOrgDatabase((Context)parentContext);
         this.appSettings = PreferenceManager.getDefaultSharedPreferences(
-                                   parentActivity.getBaseContext());
+                                   parentContext.getApplicationContext());
     }
 
     public void push() throws NotFoundException, ReportableError {
@@ -70,7 +70,7 @@ public class WebDAVSynchronizer extends Synchronizer
         if (storageMode.equals("internal") || storageMode == null) {
             FileInputStream fs;
             try {
-                fs = rootActivity.openFileInput("mobileorg.org");
+                fs = rootContext.openFileInput("mobileorg.org");
                 reader = new BufferedReader(new InputStreamReader(fs));
             }
             catch (java.io.FileNotFoundException e) {
@@ -175,7 +175,7 @@ public class WebDAVSynchronizer extends Synchronizer
                 FileOutputStream fs;
                 try {
                     String normalized = masterList.get(key).replace("/", "_");
-                    fs = rootActivity.openFileOutput(normalized, 0);
+                    fs = rootContext.openFileOutput(normalized, 0);
                     writer = new BufferedWriter(new OutputStreamWriter(fs));
                 }
                 catch (java.io.FileNotFoundException e) {

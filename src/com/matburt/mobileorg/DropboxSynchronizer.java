@@ -41,12 +41,12 @@ public class DropboxSynchronizer extends Synchronizer {
     private DropboxAPI api = new DropboxAPI();
     private Config dbConfig;
 
-    DropboxSynchronizer(Activity parentActivity) {
-        this.rootActivity = parentActivity;
-        this.r = this.rootActivity.getResources();
-        this.appdb = new MobileOrgDatabase((Context)parentActivity);
+    DropboxSynchronizer(Context parentContext) {
+        this.rootContext = parentContext;
+        this.r = this.rootContext.getResources();
+        this.appdb = new MobileOrgDatabase((Context)parentContext);
         this.appSettings = PreferenceManager.getDefaultSharedPreferences(
-                                      parentActivity.getBaseContext());
+                                      parentContext.getApplicationContext());
         this.connect();
     }
 
@@ -124,7 +124,7 @@ public class DropboxSynchronizer extends Synchronizer {
                 FileOutputStream fs;
                 try {
                     String normalized = masterList.get(key).replace("/", "_");
-                    fs = rootActivity.openFileOutput(normalized, 0);
+                    fs = rootContext.openFileOutput(normalized, 0);
                     writer = new BufferedWriter(new OutputStreamWriter(fs));
                 }
                 catch (java.io.FileNotFoundException e) {
@@ -234,7 +234,7 @@ public class DropboxSynchronizer extends Synchronizer {
         // if (something) {
         //     this.appdb.removeFile("mobileorg.org");
         //     if (storageMode.equals("internal") || storageMode == null) {
-        //         this.rootActivity.deleteFile("mobileorg.org");
+        //         this.rootContext.deleteFile("mobileorg.org");
         //     }
         //     else if (storageMode.equals("sdcard")) {
         //         File root = Environment.getExternalStorageDirectory();
@@ -285,7 +285,7 @@ public class DropboxSynchronizer extends Synchronizer {
     }
 
     public void showToast(String msg) {
-        Toast error = Toast.makeText(this.rootActivity, msg, Toast.LENGTH_LONG);
+        Toast error = Toast.makeText(this.rootContext, msg, Toast.LENGTH_LONG);
         error.show();
     }
 
@@ -335,7 +335,7 @@ public class DropboxSynchronizer extends Synchronizer {
      */
     public String[] getKeys() {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(
-                                          this.rootActivity.getBaseContext());
+                                          this.rootContext.getApplicationContext());
         String key = prefs.getString("dbPrivKey", null);
         String secret = prefs.getString("dbPrivSecret", null);
         if (key != null && secret != null) {

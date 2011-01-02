@@ -18,6 +18,17 @@
                  android:resource="@xml/widget_mobileorg" />
     </receiver>
     <service android:name=".MobileOrgWidget$MobileOrgWidgetService" />
+	<service android:name="MobileOrgSyncService">
+	  <intent-filter>
+		<action android:name="com.matburt.mobileorg.SYNC_SERVICE" />
+	  </intent-filter>
+	</service>
+	<receiver android:name="MobileOrgStartupIntentReceiver">
+	  <intent-filter>
+		<action android:name="android.intent.action.BOOT_COMPLETED" />
+		<category android:name="android.intent.category.HOME" />
+	  </intent-filter>
+	</receiver>
     <activity android:name="MobileOrgActivity"
               android:label="MobileOrg">
       <intent-filter>

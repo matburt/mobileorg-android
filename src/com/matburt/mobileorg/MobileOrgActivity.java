@@ -244,6 +244,11 @@ public class MobileOrgActivity extends ListActivity
              this.appSettings.getString("indexFilePath","").equals(""))) {
             this.onShowSettings();
         }
+		
+		//Start the background sync service (if it isn't already)
+		Intent serviceIntent = new Intent();
+		serviceIntent.setAction("com.matburt.mobileorg.SYNC_SERVICE");
+		this.startService(serviceIntent);
     }
 
     @Override
