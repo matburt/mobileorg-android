@@ -8,12 +8,16 @@ import android.os.IBinder;
 import android.util.Log;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
+import java.util.Date;
 
-public class MobileOrgSyncService extends Service {
+public class MobileOrgSyncService extends Service implements SharedPreferences.OnSharedPreferenceChangeListener{
 	private Timer timer = new Timer();
+	private Date lastSyncDate;
 	private Boolean timerScheduled = false;
 	private SharedPreferences appSettings;
 	private ReportableError syncError;
+	private static long kMinimalSyncInterval = 30000;
 	
 	@Override
 	public void onCreate() {
@@ -21,14 +25,12 @@ public class MobileOrgSyncService extends Service {
 		Log.d("MobileOrg", "Sync service created");
 		
 		this.appSettings = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+		this.appSettings.registerOnSharedPreferenceChangeListener(this);
 	}
 
 	@Override
 	public void onDestroy() {
-		if(this.timer != null) {
-			this.timer.cancel();
-			this.timerScheduled = false;
-		}
+		stopTimer();
 	}
 
 	@Override
@@ -38,24 +40,66 @@ public class MobileOrgSyncService extends Service {
 	
 	@Override
 	public void onStart(Intent intent, int startid) {
-		Log.d("MobileOrg", "Sync Service Scheduled");
+		startTimer();
+	}
+
+	public void startTimer() {
 		if(!this.timerScheduled) {
-			this.timerScheduled = true;
-			timer.scheduleAtFixedRate(new TimerTask() {
-					public void run() {
-						Log.d("MobileOrg", "Sync Service Fired");
-						try {
-							runSynchronizer();
-						} catch(Throwable e){ 
-							//Noop. When the service is first fired
-							//during startup some errors might be
-							//thrown, for instance if the MobileOrg db
-							//is stored on the sd card but the sd card
-							//isn't mounted yet.  Catch the error here
-							//so the service doesn't die
-						}
+			boolean doAutoSync = this.appSettings.getBoolean("doAutoSync", false);
+			if(doAutoSync) {
+				String intervalStr = this.appSettings.getString("autoSyncInterval", "1800000");
+				int interval = Integer.parseInt(intervalStr, 10);
+				
+				//Prevent sync from firing within 30 seconds of last sync
+				long delay = 0;
+				if(lastSyncDate != null) {
+					long difference = System.currentTimeMillis() - lastSyncDate.getTime();
+					if(difference < kMinimalSyncInterval) {
+						delay = kMinimalSyncInterval - difference;
 					}
-				}, 0, 30*60*1000); //Run every 30 minutes.  Hard setting this for now
+				}
+				
+				timer.scheduleAtFixedRate(new TimerTask() {
+						public void run() {
+							Log.d("MobileOrg", "Sync Service Fired");
+							try {
+								runSynchronizer();
+							} catch(Throwable e){ 
+								//Noop. When the service is first fired
+								//during startup some errors might be
+								//thrown, for instance if the MobileOrg db
+								//is stored on the sd card but the sd card
+								//isn't mounted yet.  Catch the error here
+								//so the service doesn't die
+							}
+						}
+					}, delay, interval);
+				this.timerScheduled = true;
+				Log.d("MobileOrg", "Sync Service Scheduled");
+			}
+		}
+	}
+
+	public void stopTimer() {
+		if(this.timer != null) {
+			this.timer.cancel();
+			this.timer = new Timer();
+			this.timerScheduled = false;
+		}
+		Log.d("MobileOrg", "Sync Service Unscheduled");
+	}
+
+	@Override
+	public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+		if(key.equals("doAutoSync")) {
+			if(sharedPreferences.getBoolean("doAutoSync", false) && !this.timerScheduled) {
+				startTimer();
+			} else if(!sharedPreferences.getBoolean("doAutoSync", false) && this.timerScheduled) {
+				stopTimer();
+			}
+		} else if(key.equals("autoSyncInterval")) {
+			stopTimer();
+			startTimer();
 		}
 	}
 
@@ -95,5 +139,6 @@ public class MobileOrgSyncService extends Service {
 				}
 			};
         syncThread.start();
+		this.lastSyncDate = new Date();
     }
 }

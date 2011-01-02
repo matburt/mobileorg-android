@@ -12,6 +12,17 @@
                 android:key="syncPref"
                 android:defaultValue="32"
                 android:title="Custom Preference" /> 
+	 <CheckBoxPreference
+		 android:key="doAutoSync"
+		 android:title="@string/title_do_auto_sync"
+		 android:summary="@string/summary_do_auto_sync" />
+	 <ListPreference
+		 android:key="autoSyncInterval"
+		 android:title="@string/title_auto_sync_interval"
+		 android:summary="@string/summary_auto_sync_interval"
+		 android:entries="@array/syncIntervals"
+		 android:entryValues="@array/syncIntervalsVals"
+		 android:dependency="doAutoSync" />
   </PreferenceCategory>
   <PreferenceCategory android:title="Storage">
     <ListPreference

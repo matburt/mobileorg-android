@@ -18,4 +18,26 @@
     <item>dropbox</item>
     <item>sdcard</item>
   </string-array>
+  <string-array name="syncIntervals">
+	<item>5 min</item>
+	<item>10 min</item>
+	<item>15 min</item>
+	<item>30 min</item>
+	<item>45 min</item>
+	<item>1 hour</item>
+	<item>3 hours</item>
+	<item>6 hours</item>
+	<item>12 hours</item>
+  </string-array>
+  <string-array name="syncIntervalsVals">
+	<item>300000</item>
+	<item>600000</item>
+	<item>900000</item>
+	<item>1800000</item>
+	<item>2700000</item>
+	<item>3600000</item>
+	<item>10800000</item>
+	<item>21600000</item>
+	<item>43200000</item>
+  </string-array>
 </resources>
