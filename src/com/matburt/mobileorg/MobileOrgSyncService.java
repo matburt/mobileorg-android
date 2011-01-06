@@ -10,6 +10,10 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import java.util.Date;
+import java.util.HashMap;
+import java.io.File;
+import java.util.Collections;
+import android.content.Context;
 
 public class MobileOrgSyncService extends Service implements SharedPreferences.OnSharedPreferenceChangeListener{
 	private Timer timer = new Timer();
@@ -136,9 +140,45 @@ public class MobileOrgSyncService extends Service implements SharedPreferences.O
                     finally {
                         appSync.close();
                     }
+					
+					runParser();
 				}
 			};
         syncThread.start();
 		this.lastSyncDate = new Date();
+    }
+
+	public void runParser() {
+        MobileOrgApplication appInst = (MobileOrgApplication)this.getApplication();
+		MobileOrgDatabase appdb = new MobileOrgDatabase((Context)this);
+        HashMap<String, String> allOrgList = appdb.getOrgFiles();
+        String storageMode = this.appSettings.getString("storageMode", "");
+        String userSynchro = this.appSettings.getString("syncSource","");
+        String orgBasePath = "";
+
+        if (userSynchro.equals("sdcard")) {
+            String indexFile = this.appSettings.getString("indexFilePath","");
+            File fIndexFile = new File(indexFile);
+            orgBasePath = fIndexFile.getParent() + "/";
+        }
+        else {
+            orgBasePath = "/sdcard/mobileorg/";
+        }
+
+        OrgFileParser ofp = new OrgFileParser(allOrgList,
+                                              storageMode,
+                                              appdb,
+                                              orgBasePath);
+        try {
+        	ofp.parse();
+        	appInst.rootNode = ofp.rootNode;
+            appInst.edits = ofp.parseEdits();
+			Collections.sort(appInst.rootNode.subNodes, Node.comparator);
+        }
+        catch(Throwable e) {
+        	ErrorReporter.displayError(this, "An error occurred during parsing: " + e.toString());
+        }
+
+		appdb.close();
     }
 }
