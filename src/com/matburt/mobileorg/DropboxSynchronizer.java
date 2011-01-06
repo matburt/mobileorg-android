@@ -80,6 +80,9 @@ public class DropboxSynchronizer extends Synchronizer {
 
     public void pull() throws NotFoundException, ReportableError {
         String indexFilePath = this.appSettings.getString("dropboxPath", "");
+		if(!indexFilePath.startsWith("/")) {
+			indexFilePath = "/" + indexFilePath;
+		}
         String masterStr = this.fetchOrgFile(indexFilePath);
         Log.i(LT, "Contents: " + masterStr);
         if (masterStr.equals("")) {
