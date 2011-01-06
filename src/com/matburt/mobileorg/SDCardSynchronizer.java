@@ -1,35 +1,31 @@
 package com.matburt.mobileorg;
-import android.app.Activity;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.HashMap;
+
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.content.res.Resources.NotFoundException;
 import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.util.Log;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.util.HashMap;
-import java.util.ArrayList;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
 
 public class SDCardSynchronizer extends Synchronizer
 {
-    SDCardSynchronizer(Activity parentActivity) {
-        this.rootActivity = parentActivity;
-        this.r = this.rootActivity.getResources();
-        this.appdb = new MobileOrgDatabase((Context)parentActivity);
+    SDCardSynchronizer(Context parentContext) {
+        this.rootContext = parentContext;
+        this.r = this.rootContext.getResources();
+        this.appdb = new MobileOrgDatabase((Context)parentContext);
         this.appSettings = PreferenceManager.getDefaultSharedPreferences(
-                                   parentActivity.getBaseContext());
+                                   parentContext.getApplicationContext());
     }
 
     public void push() throws NotFoundException, ReportableError {
@@ -40,7 +36,7 @@ public class SDCardSynchronizer extends Synchronizer
         if (storageMode.equals("internal") || storageMode == null) {
             FileInputStream fs;
             try {
-                fs = rootActivity.openFileInput("mobileorg.org");
+                fs = rootContext.openFileInput("mobileorg.org");
                 reader = new BufferedReader(new InputStreamReader(fs));
             }
             catch (java.io.FileNotFoundException e) {

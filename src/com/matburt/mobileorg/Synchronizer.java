@@ -2,31 +2,32 @@ package com.matburt.mobileorg;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.util.HashMap;
-import java.util.ArrayList;
-import android.content.SharedPreferences;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.FileInputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
-import android.content.Context;
-import android.app.Activity;
-import android.util.Log;
-import android.os.Environment;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import android.text.TextUtils;
+
+import android.app.Activity;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.content.res.Resources.NotFoundException;
+import android.os.Environment;
+import android.text.TextUtils;
+import android.util.Log;
 
 abstract class Synchronizer
 {
     public MobileOrgDatabase appdb = null;
     public SharedPreferences appSettings = null;
-    public Activity rootActivity = null;
+    public Context rootContext = null;
     public static final String LT = "MobileOrg";
     public Resources r;
 
@@ -45,7 +46,7 @@ abstract class Synchronizer
         if (storageMode.equals("internal") || storageMode == null) {
             FileOutputStream fs;
             try {
-                fs = this.rootActivity.openFileOutput(localRelPath, Context.MODE_APPEND);
+                fs = this.rootContext.openFileOutput(localRelPath, Context.MODE_APPEND);
                 writer = new BufferedWriter(new OutputStreamWriter(fs));
             }
             catch (java.io.FileNotFoundException e) {
@@ -87,7 +88,7 @@ abstract class Synchronizer
         if (storageMode.equals("internal") || storageMode == null) {
             FileInputStream fs;
             try {
-                fs = rootActivity.openFileInput(localRelPath);
+                fs = rootContext.openFileInput(localRelPath);
                 reader = new BufferedReader(new InputStreamReader(fs));
             }
             catch (java.io.FileNotFoundException e) {
@@ -125,7 +126,7 @@ abstract class Synchronizer
             this.appdb.removeFile(filePath);
             String storageMode = this.appSettings.getString("storageMode", "");
             if (storageMode.equals("internal") || storageMode == null) {
-                this.rootActivity.deleteFile(filePath);
+                this.rootContext.deleteFile(filePath);
             }
             else if (storageMode.equals("sdcard")) {
                 File root = Environment.getExternalStorageDirectory();
