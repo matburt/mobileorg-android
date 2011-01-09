@@ -13,14 +13,16 @@
   <EditText android:id="@+id/dbAuthLogin"
             android:hint="email address"
             android:layout_width="fill_parent"
-            android:layout_height="fill_parent"/>
+            android:layout_height="fill_parent"
+			android:inputType="textEmailAddress"/>
   </TableRow>
   <TableRow>
   <EditText android:id="@+id/dbAuthPassword"
             android:hint="password"
             android:password="true"
             android:layout_width="fill_parent"
-            android:layout_height="fill_parent"/>
+            android:layout_height="fill_parent"
+			android:inputType="textPassword"/>
   </TableRow>
   <TableRow>
   <Button android:id="@+id/dbAuthSubmit"
