@@ -25,7 +25,7 @@ import android.database.sqlite.SQLiteDatabase;
 class OrgFileParser {
 
 	class TitleComponents {
-		String title;
+		String title = "";
 		String todo = "";
         String priority = "";
 		ArrayList<String> tags = new ArrayList<String>();
@@ -38,6 +38,7 @@ class OrgFileParser {
     FileInputStream fstream;
     Node rootNode = new Node("", Node.HEADING);
     MobileOrgDatabase appdb;
+	ArrayList<HashMap<String, Integer>> todos = null;
     public static final String LT = "MobileOrg";
     public String orgDir = "/sdcard/mobileorg/";
 
@@ -49,7 +50,6 @@ class OrgFileParser {
         this.storageMode = storageMode;
         this.orgPaths = orgpaths;
         this.orgDir = orgBasePath;
-        
     }
     
     private Pattern prepareTitlePattern() {
@@ -63,6 +63,13 @@ class OrgFileParser {
     	}
 		return this.titlePattern;
     }
+	
+	private boolean isValidTodo(String todo) {
+		for(HashMap<String, Integer> aTodo : this.todos) {
+			if(aTodo.containsKey(todo)) return true;
+		}
+		return false;
+	}
 
     private TitleComponents parseTitle (String orgTitle) {
     	TitleComponents component = new TitleComponents();
@@ -70,15 +77,21 @@ class OrgFileParser {
     	Pattern pattern = prepareTitlePattern();
     	Matcher m = pattern.matcher(title);
     	if (m.find()) {
-    		if (m.group(1) != null)
-    			component.todo = m.group(1).trim();
+    		if (m.group(1) != null) {
+				String todo = m.group(1).trim();
+				if(todo.length() > 0 && isValidTodo(todo)) {
+					component.todo = todo;
+				} else {
+					component.title = todo + " ";
+				}
+			}
             if (m.group(2) != null) {
                 component.priority = m.group(2);
                 component.priority = component.priority.replace("#", "");
                 component.priority = component.priority.replace("[", "");
                 component.priority = component.priority.replace("]", "");
             }
-    		component.title = m.group(3);
+    		component.title += m.group(3);
     		String tags = m.group(4);
     		if (tags != null) {
     			for (String tag : tags.split(":")) {
@@ -139,6 +152,8 @@ class OrgFileParser {
     {
         try
         {
+			this.todos = appdb.getTodos();
+			
             String thisLine;
             Stack<Node> nodeStack = new Stack();
             Pattern propertiesLine = Pattern.compile("^\\s*:[A-Z]+:");
