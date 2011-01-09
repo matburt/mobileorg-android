@@ -5,7 +5,8 @@
         android:name="URL"
         android:summary="Full URL path to your index.org file"
         android:title="URL"
-        android:key="webUrl" />
+        android:key="webUrl"
+		android:inputType="textUri" />
     <EditTextPreference
         android:name="Username"
         android:summary="Username to login"
@@ -16,6 +17,7 @@
         android:summary="Password to login"
         android:password="true"
         android:title="Password"
-        android:key="webPass" />
+        android:key="webPass"
+		android:inputType="textPassword" />
   </PreferenceCategory>
 </PreferenceScreen>
