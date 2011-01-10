@@ -91,7 +91,7 @@ public class Capture extends Activity implements OnClickListener
 			}
 
 			if(text.startsWith("http")) {
-				this.srcText = "[["+text+"]["+subject+"]]";
+				this.srcText = "[["+text.trim()+"]["+subject.trim()+"]]";
 			} else {
 				this.srcText = subject + text;
 			}
