@@ -13,28 +13,19 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
+import java.io.BufferedInputStream;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.ArrayList;
 import java.lang.IllegalArgumentException;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.StatusLine;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.conn.ssl.SSLSocketFactory;
-import org.apache.http.conn.scheme.SchemeRegistry;
-import org.apache.http.conn.scheme.Scheme;
-import org.apache.http.conn.scheme.PlainSocketFactory;
-import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
+import java.net.HttpURLConnection;
+import java.net.URI;
+import java.net.URL;
+import java.net.Authenticator;
+import java.net.PasswordAuthentication;
 
 import android.app.Activity;
 import android.content.Context;
@@ -60,9 +51,20 @@ public class WebDAVSynchronizer extends Synchronizer
                                    parentContext.getApplicationContext());
     }
 
+    public void signOn(String mUser, String mPass) {
+        final String tUser = mUser;
+        final String tPass = mPass;
+        Authenticator.setDefault(new Authenticator() {
+                protected PasswordAuthentication getPasswordAuthentication() {
+                    return new PasswordAuthentication(tUser, tPass.toCharArray());
+                }});
+    }
+
     public void push() throws NotFoundException, ReportableError {
         String urlActual = this.getRootUrl() + "mobileorg.org";
         String storageMode = this.appSettings.getString("storageMode", "");
+        this.signOn(this.appSettings.getString("webUser", ""),
+                    this.appSettings.getString("webPass", ""));
         BufferedReader reader = null;
         String fileContents = "";
         this.pushedStageFile = false;
@@ -114,10 +116,7 @@ public class WebDAVSynchronizer extends Synchronizer
             		e);
         }
 
-        DefaultHttpClient httpC = this.createConnection(
-                                    this.appSettings.getString("webUser", ""),
-                                    this.appSettings.getString("webPass", ""));
-        this.appendUrlFile(urlActual, httpC, fileContents);
+        this.appendUrlFile(urlActual, fileContents);
 
         if (this.pushedStageFile) {
             this.removeFile("mobileorg.org");
@@ -133,6 +132,8 @@ public class WebDAVSynchronizer extends Synchronizer
     public void pull() throws NotFoundException, ReportableError {
         Pattern checkUrl = Pattern.compile("http.*\\.(?:org|txt)$");
         String url = this.appSettings.getString("webUrl", "");
+        this.signOn(this.appSettings.getString("webUser", ""),
+                    this.appSettings.getString("webPass", ""));
         if (!checkUrl.matcher(url).find()) {
         	throw new ReportableError(
             		r.getString(R.string.error_bad_url, url),
@@ -229,12 +230,9 @@ public class WebDAVSynchronizer extends Synchronizer
     }
 
     private String fetchOrgFile(String orgUrl) throws NotFoundException, ReportableError {
-        DefaultHttpClient httpC = this.createConnection(
-                                      this.appSettings.getString("webUser", ""),
-                                      this.appSettings.getString("webPass", ""));
         InputStream mainFile;
         try {
-            mainFile = this.getUrlStream(orgUrl, httpC);
+            mainFile = this.getUrlStream(orgUrl, true);
         }
         catch (IllegalArgumentException e) {
             throw new ReportableError(
@@ -284,91 +282,74 @@ public class WebDAVSynchronizer extends Synchronizer
             manageUrl.getAuthority() + directoryActual;
     }
 
-    private DefaultHttpClient createConnection(String user, String password) {
-        DefaultHttpClient httpClient = new DefaultHttpClient();
-        HttpParams params = httpClient.getParams();
-        SchemeRegistry schemeRegistry = new SchemeRegistry();
-        schemeRegistry.register (new Scheme ("http",
-                                             PlainSocketFactory.getSocketFactory (), 80));
-        SSLSocketFactory sslSocketFactory = SSLSocketFactory.getSocketFactory();
-        sslSocketFactory.setHostnameVerifier(SSLSocketFactory.BROWSER_COMPATIBLE_HOSTNAME_VERIFIER);
-        schemeRegistry.register (new Scheme ("https",
-                                             sslSocketFactory, 443));
-        ThreadSafeClientConnManager cm = new ThreadSafeClientConnManager (
-                                                  params, schemeRegistry);
-
-        UsernamePasswordCredentials bCred = new UsernamePasswordCredentials(user, password);
-        BasicCredentialsProvider cProvider = new BasicCredentialsProvider();
-        cProvider.setCredentials(AuthScope.ANY, bCred);
-
-        params.setBooleanParameter(CoreProtocolPNames.USE_EXPECT_CONTINUE, false);
-        httpClient.setParams(params);
-
-        DefaultHttpClient nHttpClient = new DefaultHttpClient(cm, params);
-        nHttpClient.setCredentialsProvider(cProvider);
-        return nHttpClient;
-    }
-
-    private InputStream getUrlStream(String url, DefaultHttpClient httpClient) throws NotFoundException, ReportableError {
+    private InputStream getUrlStream(String mUrl, boolean retryOnce) throws NotFoundException, ReportableError {
+        URL url;
         try {
-            HttpResponse res = httpClient.execute(new HttpGet(url));
-            
-            StatusLine status = res.getStatusLine();
-            if (status.getStatusCode() == 404) {
-                return null;
-            }
-
-            if (status.getStatusCode() < 200 || status.getStatusCode() > 299) {
-            	throw new ReportableError(
-            			r.getString(R.string.error_url_fetch_detail,
-                                    url,
-                                    status.getReasonPhrase()),
-            			null);
-            }
-            
-            return res.getEntity().getContent();
+            url = URI.create(mUrl).toURL();
+        } catch (Exception e) {
+            throw new ReportableError(r.getString(R.string.error_invalid_url, mUrl), e);
         }
-        catch (IOException e) {
-            Log.e(LT, e.toString());
-            Log.w(LT, "Failed to get URL");
-            return null; //handle exception
-        }
-    }
 
-    private void putUrlFile(String url,
-                           DefaultHttpClient httpClient,
-                           String content) throws NotFoundException, ReportableError {
+        HttpURLConnection.setFollowRedirects(true);
+        HttpURLConnection huc;
         try {
-            HttpPut httpPut = new HttpPut(url);
-            httpPut.setEntity(new StringEntity(content, "UTF-8"));
-            HttpResponse response = httpClient.execute(httpPut);
-            StatusLine statResp = response.getStatusLine();
-            if (statResp.getStatusCode() >= 400) {
-                this.pushedStageFile = false;
-            } else {
-                this.pushedStageFile = true;
-            }
+            huc = (HttpURLConnection) url.openConnection();
+        } catch (Exception e) {
+            throw new ReportableError(r.getString(R.string.error_url_fetch_detail,
+                                                  mUrl, e.getMessage()), e);
+        }
 
-            httpClient.getConnectionManager().shutdown();
-        }
-        catch (UnsupportedEncodingException e) {
-        	throw new ReportableError(
-        			r.getString(R.string.error_unsupported_encoding, "mobileorg.org"),
-        			e);
-        }
-        catch (IOException e) {
-        	throw new ReportableError(
-        			r.getString(R.string.error_url_put, url),
-        			e);
+        try {
+            huc.connect();
+
+            int status = huc.getResponseCode();
+            if (retryOnce && status == -1) {
+                return getUrlStream(mUrl, false);
+            }
+            if (status != 200) {
+                throw new ReportableError(r.getString(R.string.error_url_fetch_detail,
+                                                      mUrl, "Response code is: " + status), null);
+            }
+            return new BufferedInputStream(huc.getInputStream());
+        } catch (Exception e) {
+            throw new ReportableError(r.getString(R.string.error_url_fetch_detail,
+                                                  mUrl, e.getMessage()), e);
         }
     }
-    
+
+    private void putUrlFile(String mUrl, String content) throws NotFoundException, ReportableError {
+        URL url;
+
+        try {
+            url = URI.create(mUrl).toURL();
+        } catch (Exception e) {
+            throw new ReportableError(r.getString(R.string.error_invalid_url, mUrl), e);
+        }
+
+        HttpURLConnection huc;
+        try {
+            huc = (HttpURLConnection) url.openConnection();
+        } catch (Exception e) {
+            throw new ReportableError(r.getString(R.string.error_url_put_detail, mUrl, e.getMessage()), e);
+        }
+
+        huc.setDoOutput(true);
+        OutputStreamWriter out;
+        try {
+            huc.setRequestMethod("PUT");
+            out = new OutputStreamWriter(huc.getOutputStream());
+            out.write(content);
+            out.close();
+        } catch (Exception e) {
+            throw new ReportableError(r.getString(R.string.error_url_put_detail, mUrl, e.getMessage()), e);
+        }
+    }
+
     private void appendUrlFile(String url,
-    							DefaultHttpClient httpClient,
-    							String content) throws NotFoundException, ReportableError {
+                               String content) throws NotFoundException, ReportableError {
     	String originalContent = this.fetchOrgFile(url);
     	String newContent = originalContent + '\n' + content;
-    	this.putUrlFile(url, httpClient, newContent);
+    	this.putUrlFile(url, newContent);
     }
 
     private String ReadInputStream(InputStream in) throws IOException {
