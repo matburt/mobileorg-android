@@ -52,6 +52,7 @@ public class WebDAVSynchronizer extends Synchronizer
     }
 
     public void signOn(String mUser, String mPass) {
+        SSLHandler.gi().enable();
         final String tUser = mUser;
         final String tPass = mPass;
         Authenticator.setDefault(new Authenticator() {
@@ -333,15 +334,24 @@ public class WebDAVSynchronizer extends Synchronizer
             throw new ReportableError(r.getString(R.string.error_url_put_detail, mUrl, e.getMessage()), e);
         }
 
-        huc.setDoOutput(true);
+        Log.i(LT, "Writing content to " + mUrl + ": " + content);
         OutputStreamWriter out;
         try {
+            huc.setDoOutput(true);
             huc.setRequestMethod("PUT");
+            huc.connect();
             out = new OutputStreamWriter(huc.getOutputStream());
             out.write(content);
+            out.flush();
             out.close();
         } catch (Exception e) {
             throw new ReportableError(r.getString(R.string.error_url_put_detail, mUrl, e.getMessage()), e);
+        }
+        try {
+            Log.i(LT, "Code: " + huc.getResponseCode() + " " + huc.getResponseMessage());
+        }
+        catch (IOException e) {
+            Log.e(LT, "IO Exception attempting to put file");
         }
     }
 
