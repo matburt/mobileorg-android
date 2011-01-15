@@ -348,6 +348,13 @@ public class WebDAVSynchronizer extends Synchronizer
             throw new ReportableError(r.getString(R.string.error_url_put_detail, mUrl, e.getMessage()), e);
         }
         try {
+            int respCode = huc.getResponseCode();
+            if (respCode >= 400) {
+                this.pushedStageFile = false;
+            }
+            else {
+                this.pushedStageFile = true;
+            }
             Log.i(LT, "Code: " + huc.getResponseCode() + " " + huc.getResponseMessage());
         }
         catch (IOException e) {
