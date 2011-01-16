@@ -339,6 +339,7 @@ public class WebDAVSynchronizer extends Synchronizer
         try {
             huc.setDoOutput(true);
             huc.setRequestMethod("PUT");
+            huc.setRequestProperty("Expect", "100-Continue");
             huc.connect();
             out = new OutputStreamWriter(huc.getOutputStream());
             out.write(content);
