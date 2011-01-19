@@ -117,6 +117,7 @@ public class WebDAVSynchronizer extends Synchronizer
         DefaultHttpClient httpC = this.createConnection(
                                     this.appSettings.getString("webUser", ""),
                                     this.appSettings.getString("webPass", ""));
+
         this.appendUrlFile(urlActual, httpC, fileContents);
 
         if (this.pushedStageFile) {
@@ -230,8 +231,8 @@ public class WebDAVSynchronizer extends Synchronizer
 
     private String fetchOrgFile(String orgUrl) throws NotFoundException, ReportableError {
         DefaultHttpClient httpC = this.createConnection(
-                                      this.appSettings.getString("webUser", ""),
-                                      this.appSettings.getString("webPass", ""));
+                                    this.appSettings.getString("webUser", ""),
+                                    this.appSettings.getString("webPass", ""));
         InputStream mainFile;
         try {
             mainFile = this.getUrlStream(orgUrl, httpC);
@@ -291,7 +292,7 @@ public class WebDAVSynchronizer extends Synchronizer
         schemeRegistry.register (new Scheme ("http",
                                              PlainSocketFactory.getSocketFactory (), 80));
         SSLSocketFactory sslSocketFactory = SSLSocketFactory.getSocketFactory();
-        sslSocketFactory.setHostnameVerifier(SSLSocketFactory.BROWSER_COMPATIBLE_HOSTNAME_VERIFIER);
+        sslSocketFactory.setHostnameVerifier(SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
         schemeRegistry.register (new Scheme ("https",
                                              sslSocketFactory, 443));
         ThreadSafeClientConnManager cm = new ThreadSafeClientConnManager (
@@ -312,7 +313,6 @@ public class WebDAVSynchronizer extends Synchronizer
     private InputStream getUrlStream(String url, DefaultHttpClient httpClient) throws NotFoundException, ReportableError {
         try {
             HttpResponse res = httpClient.execute(new HttpGet(url));
-            
             StatusLine status = res.getStatusLine();
             if (status.getStatusCode() == 404) {
                 return null;
@@ -325,13 +325,15 @@ public class WebDAVSynchronizer extends Synchronizer
                                     status.getReasonPhrase()),
             			null);
             }
-            
             return res.getEntity().getContent();
         }
         catch (IOException e) {
             Log.e(LT, e.toString());
             Log.w(LT, "Failed to get URL");
-            return null; //handle exception
+            throw new ReportableError(r.getString(R.string.error_url_fetch_detail,
+                                                  url,
+                                                  e.getMessage()),
+                                      e);
         }
     }
 
@@ -343,8 +345,13 @@ public class WebDAVSynchronizer extends Synchronizer
             httpPut.setEntity(new StringEntity(content, "UTF-8"));
             HttpResponse response = httpClient.execute(httpPut);
             StatusLine statResp = response.getStatusLine();
-            if (statResp.getStatusCode() >= 400) {
+            int statCode = statResp.getStatusCode();
+            if (statCode >= 400) {
                 this.pushedStageFile = false;
+                throw new ReportableError(r.getString(R.string.error_url_put_detail,
+                                                      url,
+                                                      "Server returned code: " + Integer.toString(statCode)),
+                                          null);
             } else {
                 this.pushedStageFile = true;
             }
