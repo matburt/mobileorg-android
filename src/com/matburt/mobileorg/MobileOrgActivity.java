@@ -155,6 +155,7 @@ public class MobileOrgActivity extends ListActivity
                                 this.thisNode.subNodes.get(position).schedule) + " ";
             }
 
+            tagsLayout.removeAllViews();
             for (String tag : this.thisNode.subNodes.get(position).tags) {
 				TextView tagView = new TextView(this.context);
 				tagView.setText(tag);
