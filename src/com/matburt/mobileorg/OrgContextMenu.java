@@ -1,20 +1,13 @@
 package com.matburt.mobileorg;
 
-import android.app.Activity;
-import android.os.Bundle;
-import android.util.Log;
-import android.content.Intent;
-import android.widget.Button;
-import android.database.Cursor;
-import android.database.SQLException;
-import android.database.sqlite.SQLiteDatabase;
-import java.io.InputStream;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
+
+import android.app.Activity;
+import android.content.Intent;
+import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.Button;
 
 public class OrgContextMenu extends Activity implements OnClickListener
 {
@@ -71,17 +64,13 @@ public class OrgContextMenu extends Activity implements OnClickListener
 
     public void onClick(View v) {
         MobileOrgApplication appInst = (MobileOrgApplication)this.getApplication();
-        Node thisNode = appInst.rootNode;
+        Node thisNode = appInst.getNode(this.npath);
+        if (thisNode == null) {
+        	return;
+        }
+        
         Intent textIntent = new Intent();
         String displayBuffer = new String();
-        if (thisNode == null)
-            return; 
-
-        for (int idx = 0; idx < this.npath.size(); idx++) {
-            thisNode = thisNode.subNodes.get(
-                              this.npath.get(idx));
-        }
-
         if (v == this.docButton) {
             textIntent.setClassName("com.matburt.mobileorg",
                                     "com.matburt.mobileorg.SimpleTextDisplay");

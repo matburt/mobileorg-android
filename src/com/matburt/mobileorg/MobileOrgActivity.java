@@ -203,6 +203,10 @@ public class MobileOrgActivity extends ListActivity
     private static final int OP_MENU_SYNC = 2;
     private static final int OP_MENU_OUTLINE = 3;
     private static final int OP_MENU_CAPTURE = 4;
+    
+    private static final int RUN_PARSER = 3;
+    private static final int VIEW_NODE_DETAILS = 4;
+    
     private static final String LT = "MobileOrg";
     private ProgressDialog syncDialog;
     private MobileOrgDatabase appdb;
@@ -214,7 +218,9 @@ public class MobileOrgActivity extends ListActivity
             postSynchronize();
         }
     };
-
+    
+    protected ArrayList<Integer> mNodePath;
+    
     @Override
     public void onCreate(Bundle savedInstanceState)
     {
@@ -285,19 +291,23 @@ public class MobileOrgActivity extends ListActivity
     @Override
     public void onResume() {
         super.onResume();
-        MobileOrgApplication appInst = (MobileOrgApplication)this.getApplication();
+        Intent nodeIntent = getIntent();
+        mNodePath = nodeIntent.getIntegerArrayListExtra("nodePath");
+        populateDisplay();
+    }
+    
+    public void populateDisplay() {
+    	MobileOrgApplication appInst = (MobileOrgApplication) this.getApplication();
+    	// mNodePath contains a
         if (appInst.rootNode == null) {
             this.runParser();
         }
-
-        Intent nodeIntent = getIntent();
-        ArrayList<Integer> ns = nodeIntent.getIntegerArrayListExtra("nodePath");
         this.setListAdapter(new OrgViewAdapter(this,
-                                               appInst.rootNode,
-                                               appInst.nodeSelection,
-                                               appInst.edits,
-                                               this.appdb.getTodos()));
-    }
+    			appInst.rootNode,
+    			appInst.nodeSelection,
+    			appInst.edits,
+    			this.appdb.getTodos()));
+	}
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -369,31 +379,40 @@ public class MobileOrgActivity extends ListActivity
             else {
                 Intent dispIntent = new Intent();
                 dispIntent.setClassName("com.matburt.mobileorg",
-                                        "com.matburt.mobileorg.OrgContextMenu");
+                                        "com.matburt.mobileorg.ViewNodeDetailsActivity");
                 dispIntent.putIntegerArrayListExtra("nodePath", appInst.nodeSelection);
                 appInst.pushSelection(position);
-                startActivity(dispIntent);                
+                startActivityForResult(dispIntent, VIEW_NODE_DETAILS);                
             }
         }
         else {
             expandSelection(appInst.nodeSelection);
         }
     }
-
+        
     public void expandSelection(ArrayList<Integer> selection)
     {
-        Intent dispIntent = new Intent();
-        dispIntent.setClassName("com.matburt.mobileorg",
-                                "com.matburt.mobileorg.MobileOrgActivity");
-        dispIntent.putIntegerArrayListExtra("nodePath", selection);
-        startActivityForResult(dispIntent, 1);        
+    	MobileOrgApplication appInst = (MobileOrgApplication)this.getApplication();
+    	appInst.setSelection(selection);
+        populateDisplay();
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         MobileOrgApplication appInst = (MobileOrgApplication)this.getApplication();
-        if (requestCode == 3) {
+        if (requestCode == RUN_PARSER) {
             this.runParser();
+        }
+        else if (requestCode == VIEW_NODE_DETAILS) {
+        	if (data != null) {
+        		ArrayList<Integer> newPath = data.getIntegerArrayListExtra("nodePath");
+        		if (newPath != null) {
+        			appInst.setSelection(newPath);
+        		}
+        	} else {
+        		appInst.popSelection();
+        	}
+            populateDisplay();
         }
         else if(requestCode == Encryption.DECRYPT_MESSAGE)
         {

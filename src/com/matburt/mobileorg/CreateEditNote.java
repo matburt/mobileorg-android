@@ -47,6 +47,9 @@ public class CreateEditNote
                     String newValue) {
         this.writeNote(this.transformEditBuffer(edittype, nodeId,
                                                 nodeTitle, oldValue, newValue));
+     // Store it in the in-memory edit list, too
+        MobileOrgApplication appInst = (MobileOrgApplication) this.appactivity.getApplication();
+        appInst.edits.add(new EditNode(edittype, nodeId, nodeTitle, oldValue, newValue));
     }
 
     public boolean writeNote(String message) {

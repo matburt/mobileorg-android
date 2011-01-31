@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="match_parent" android:layout_height="match_parent"
+	android:stretchColumns="1">
+	<TableRow>
+		<Button android:id="@+id/parent"
+	android:layout_width="fill_parent"
+	android:drawableLeft="@android:drawable/ic_media_rew"
+	android:layout_span="2"
+	android:gravity="center_vertical|clip_vertical|clip_horizontal" />
+		<Button android:layout_weight="1" android:id="@+id/previous_sibling"
+	android:text="@string/previous_sibling" 
+	android:gravity="center_vertical" />
+		<Button android:layout_weight="1" 
+		android:gravity="center_vertical" android:id="@+id/next_sibling"
+	android:text="@string/next_sibling" />
+	</TableRow>
+	<TableRow>
+		<EditText android:id="@+id/title" android:layout_span="4"
+		android:hint="@string/title"
+			android:layout_width="fill_parent" android:layout_height="wrap_content" />
+	</TableRow>
+	<TableRow>
+		<TextView android:text="@string/todo_state" android:layout_width="wrap_content" android:layout_height="wrap_content" />
+		<Spinner android:id="@+id/todo_state"
+			android:layout_span="3"
+			android:prompt="@string/todo_state"
+			android:layout_width="fill_parent" 
+			android:layout_height="wrap_content" />
+	</TableRow>
+	<TableRow>
+		<TextView android:text="@string/priority" android:layout_width="wrap_content" android:layout_height="wrap_content" />
+		<Spinner android:id="@+id/priority"
+			android:layout_span="3"
+			android:prompt="@string/priority"
+			android:layout_width="fill_parent" android:layout_height="wrap_content" />
+	</TableRow>
+	<TableRow>
+		<TextView android:text="@string/tags" android:layout_width="wrap_content" android:layout_height="wrap_content" />
+		<EditText android:id="@+id/tags"
+			android:layout_span="3"
+			android:layout_width="fill_parent" android:layout_height="wrap_content" />
+	</TableRow>
+	<TableRow android:layout_weight="1">
+		<TextView android:id="@+id/body" android:layout_span="4"
+			android:hint="@string/body"
+			android:layout_width="fill_parent" 
+			android:layout_height="fill_parent"
+			android:gravity="top"
+		android:inputType="textMultiLine" />
+	</TableRow>
+	<TableRow>
+		<Button android:id="@+id/view_as_document" 
+		android:text="@string/view_as_document"
+		android:layout_span="4"
+		android:layout_width="fill_parent"
+		android:layout_height="fill_parent"
+		/>
+	</TableRow>
+</TableLayout>

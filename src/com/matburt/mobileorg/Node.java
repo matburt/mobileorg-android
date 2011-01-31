@@ -1,11 +1,12 @@
 package com.matburt.mobileorg;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import java.util.Comparator;
+import android.app.Activity;
 
 class EditNode {
     public String editType;
@@ -13,9 +14,18 @@ class EditNode {
     public String title;
     public String oldVal = "";
     public String newVal = "";
+    public EditNode() {
+    }
+    public EditNode(String editType, String nodeId, String title, String oldVal, String newVal) {
+    	this.editType = editType;
+    	this.nodeId = nodeId;
+    	this.title = title;
+    	this.oldVal = oldVal;
+    	this.newVal = newVal;
+    }
 }
 
-class Node {
+class Node implements Cloneable {
 
     static int HEADER = 0;
     static int HEADING = 1;
@@ -33,6 +43,7 @@ class Node {
     int nodeType;
     String nodePayload = "";
     String nodeTitle = "";
+    String tagString = "";
     String altNodeTitle = null;
     Date schedule = null;
     Date deadline = null;
@@ -97,5 +108,24 @@ class Node {
 
     boolean hasProperty(String key) {
         return this.properties.containsKey(key);
+    }
+    
+    public void applyEdit(EditNode e) {
+    	if (e.editType.equals("todo"))
+    		todo = e.newVal;
+    	else if (e.editType.equals("priority"))
+    		priority = e.newVal;
+    	else if (e.editType.equals("heading")) 
+    		nodeName = e.newVal;
+    	else if (e.editType.equals("body"))
+    		nodePayload = e.newVal;
+    }
+    
+    public void applyEdits(ArrayList<EditNode> edits) {
+    	if (edits != null) {
+    		for (EditNode e : edits) {
+    			this.applyEdit(e);
+    		}
+    	}
     }
 }
