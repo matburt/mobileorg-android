@@ -14,16 +14,8 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-/**
- * 
- * @author Sacha Chua (sacha@sachachua.com)
- *
- */
 public class ViewNodeDetailsActivity extends Activity implements OnClickListener {
 	protected ArrayList<Integer> mNodePath;
-	protected Button mParent;
-	protected Button mUp;
-	protected Button mDown;
 	protected EditText mTitle;
 	protected TextView mBody;
 	protected Spinner mPriority;
@@ -32,6 +24,7 @@ public class ViewNodeDetailsActivity extends Activity implements OnClickListener
 	protected Button mViewAsDocument;
 	protected Node mNode;
 	protected MobileOrgDatabase mOrgDb;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 	    super.onCreate(savedInstanceState);
@@ -44,17 +37,11 @@ public class ViewNodeDetailsActivity extends Activity implements OnClickListener
         this.mTodoState = (Spinner) this.findViewById(R.id.todo_state);
         this.mTags = (EditText) this.findViewById(R.id.tags);
         this.mViewAsDocument = (Button) this.findViewById(R.id.view_as_document);
-        this.mParent = (Button) this.findViewById(R.id.parent);
-        this.mUp = (Button) this.findViewById(R.id.previous_sibling);
-        this.mDown = (Button) this.findViewById(R.id.next_sibling);
         this.mOrgDb = new MobileOrgDatabase(this);
         this.populateDisplay();
         
         mViewAsDocument.setOnClickListener(this);
         mBody.setOnClickListener(this);
-        mParent.setOnClickListener(this);
-        mUp.setOnClickListener(this);
-        mDown.setOnClickListener(this);
     }
 	
 	public void setSpinner(Spinner view, ArrayList data, String selection) {
@@ -88,20 +75,16 @@ public class ViewNodeDetailsActivity extends Activity implements OnClickListener
         mNode.applyEdits(appInst.findEdits(mNode.nodeId));
         
         Node parent = appInst.getParent(mNodePath);
-        mParent.setText(parent.nodeName);
         mTitle.setText(mNode.nodeName);
         mBody.setText(mNode.nodePayload);
         mTags.setText(mNode.tagString);
         setSpinner(mTodoState, this.mOrgDb.getTodos(), mNode.todo);
         setSpinner(mPriority, this.mOrgDb.getPriorities(), mNode.priority);
-        mUp.setEnabled(mNodePath.get(mNodePath.size() - 1) > 0);
-        mDown.setEnabled((mNode.parentNode != null) && 
-        		mNode.parentNode.subNodes.size() - 1 > mNodePath.get(mNodePath.size() - 1));
+        appInst.popSelection();
     }
 
 	@Override
 	protected void onPause() {
-		// TODO Auto-generated method stub
 		super.onPause();
 		save();
 	}
@@ -112,43 +95,6 @@ public class ViewNodeDetailsActivity extends Activity implements OnClickListener
 			Intent intent = new Intent(this, SimpleTextDisplay.class);
 			intent.putExtra("txtValue", mNode.nodePayload);
 			this.startActivity(intent);
-		}
-		if (v.equals(mParent)) {
-			save();
-			// Finish the activity and return the path to the parent
-			Intent intent = new Intent();
-			ArrayList<Integer> newPath = 
-				(ArrayList<Integer>) mNodePath.clone();
-			newPath.remove(newPath.size()-1);
-			intent.putIntegerArrayListExtra("nodePath", newPath);
-			setResult(RESULT_OK, intent);
-			finish();
-		}
-		if (v.equals(mUp)) {
-			save();
-			// Finish the activity and return the path to the previous sibling
-			int newIndex = mNodePath.get(mNodePath.size() - 1) - 1;
-			if (newIndex >= 0) {
-				mNodePath.set(mNodePath.size() - 1, newIndex);
-				populateDisplay();
-				/*Intent intent = new Intent();
-				intent.putIntegerArrayListExtra("nodePath", newPath);
-				setResult(RESULT_OK, intent);
-				finish();*/
-			}
-		}
-		if (v.equals(mDown)) {
-			save();
-			// Finish the activity and return the path to the next sibling
-			int newIndex = mNodePath.get(mNodePath.size() - 1) + 1;
-			if (newIndex >= 0) {
-				mNodePath.set(mNodePath.size() - 1, newIndex);
-				populateDisplay();
-				/*Intent intent = new Intent();
-				intent.putIntegerArrayListExtra("nodePath", newPath);
-				setResult(RESULT_OK, intent);
-				finish();*/
-			}
 		}
 		if (v.equals(mBody)) {
 			save();
@@ -163,11 +109,6 @@ public class ViewNodeDetailsActivity extends Activity implements OnClickListener
 		}
 	}
 	
-	/**
-	 * Call CreateEditNote's methods for any changed fields
-	 * @param oldNode
-	 * @param newNode
-	 */
 	public void save() {
 		CreateEditNote creator = new CreateEditNote(this);
 		String newTitle = mTitle.getText().toString();

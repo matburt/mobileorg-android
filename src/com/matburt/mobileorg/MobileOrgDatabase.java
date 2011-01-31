@@ -149,7 +149,6 @@ public class MobileOrgDatabase {
     }
 
     public ArrayList<HashMap<String, Integer>> getTodos() {
-    	
         ArrayList<HashMap<String, Integer>> allTodos = new ArrayList<HashMap<String, Integer>>();
         Cursor result = this.appdb.rawQuery("SELECT tdgroup, name, isdone " +
                                             "FROM todos order by tdgroup",

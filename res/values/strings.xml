@@ -37,7 +37,5 @@
   <string name="tags">Tags</string>
   <string name="priority">Priority</string>
   <string name="todo_state">Todo state</string>
-  <string name="previous_sibling">Prev</string>
-  <string name="next_sibling">Next</string>
   <string name="back">Back</string>
 </resources>

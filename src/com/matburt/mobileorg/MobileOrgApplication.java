@@ -15,23 +15,19 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageItemInfo;
 import android.content.pm.ResolveInfo;
 
-/**
- * Provides functions for navigating the node tree
- * @author Owner
- *
- */
 public class MobileOrgApplication extends Application {
     public Node rootNode = null;
     public ArrayList<Integer> nodeSelection;
     public ArrayList<EditNode> edits;
     public static final String SYNCHRONIZER_PLUGIN_ACTION = "com.matburt.mobileorg.SYNCHRONIZE";
     protected Context mContext;
-    
+
     public void setSelection(ArrayList<Integer> selection) {
-    	nodeSelection = selection;
+        nodeSelection = selection;
     }
+
     public void setContext(Context context) {
-    	mContext = context;
+        mContext = context;
     }
     public void pushSelection(int selectedNode)
     {

@@ -203,9 +203,8 @@ public class MobileOrgActivity extends ListActivity
     private static final int OP_MENU_SYNC = 2;
     private static final int OP_MENU_OUTLINE = 3;
     private static final int OP_MENU_CAPTURE = 4;
-    
+
     private static final int RUN_PARSER = 3;
-    private static final int VIEW_NODE_DETAILS = 4;
     
     private static final String LT = "MobileOrg";
     private ProgressDialog syncDialog;
@@ -220,7 +219,7 @@ public class MobileOrgActivity extends ListActivity
     };
     
     protected ArrayList<Integer> mNodePath;
-    
+
     @Override
     public void onCreate(Bundle savedInstanceState)
     {
@@ -382,19 +381,21 @@ public class MobileOrgActivity extends ListActivity
                                         "com.matburt.mobileorg.ViewNodeDetailsActivity");
                 dispIntent.putIntegerArrayListExtra("nodePath", appInst.nodeSelection);
                 appInst.pushSelection(position);
-                startActivityForResult(dispIntent, VIEW_NODE_DETAILS);                
+                startActivity(dispIntent);
             }
         }
         else {
             expandSelection(appInst.nodeSelection);
         }
     }
-        
+
     public void expandSelection(ArrayList<Integer> selection)
     {
-    	MobileOrgApplication appInst = (MobileOrgApplication)this.getApplication();
-    	appInst.setSelection(selection);
-        populateDisplay();
+        Intent dispIntent = new Intent();
+        dispIntent.setClassName("com.matburt.mobileorg",
+                                "com.matburt.mobileorg.MobileOrgActivity");
+        dispIntent.putIntegerArrayListExtra("nodePath", selection);
+        startActivityForResult(dispIntent, 1);
     }
 
     @Override
@@ -402,17 +403,6 @@ public class MobileOrgActivity extends ListActivity
         MobileOrgApplication appInst = (MobileOrgApplication)this.getApplication();
         if (requestCode == RUN_PARSER) {
             this.runParser();
-        }
-        else if (requestCode == VIEW_NODE_DETAILS) {
-        	if (data != null) {
-        		ArrayList<Integer> newPath = data.getIntegerArrayListExtra("nodePath");
-        		if (newPath != null) {
-        			appInst.setSelection(newPath);
-        		}
-        	} else {
-        		appInst.popSelection();
-        	}
-            populateDisplay();
         }
         else if(requestCode == Encryption.DECRYPT_MESSAGE)
         {
