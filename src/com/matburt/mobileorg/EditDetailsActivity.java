@@ -192,6 +192,7 @@ public class EditDetailsActivity extends Activity implements OnClickListener
                 }
                 
                 //triggers a refresh of the main display
+                //doesn't seem to work
                 this.appinst.rootNode = null;
                 this.finish();
             }

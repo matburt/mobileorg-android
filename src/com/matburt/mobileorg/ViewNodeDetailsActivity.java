@@ -24,6 +24,7 @@ public class ViewNodeDetailsActivity extends Activity implements OnClickListener
 	protected Button mViewAsDocument;
 	protected Node mNode;
 	protected MobileOrgDatabase mOrgDb;
+    protected String actionMode;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -31,6 +32,7 @@ public class ViewNodeDetailsActivity extends Activity implements OnClickListener
         setContentView(R.layout.node_details);
         Intent txtIntent = getIntent();
         this.mNodePath = txtIntent.getIntegerArrayListExtra("nodePath");
+        this.actionMode = txtIntent.getStringExtra("actionMode");
         this.mTitle = (EditText) this.findViewById(R.id.title);
         this.mBody = (TextView) this.findViewById(R.id.body);
         this.mPriority = (Spinner) this.findViewById(R.id.priority);
@@ -71,16 +73,19 @@ public class ViewNodeDetailsActivity extends Activity implements OnClickListener
 	
 	public void populateDisplay() {
 		MobileOrgApplication appInst = (MobileOrgApplication)this.getApplication();
-        mNode = appInst.getNode(mNodePath);
-        mNode.applyEdits(appInst.findEdits(mNode.nodeId));
+        if (this.actionMode.equals("edit")) {
+                mNode = appInst.getNode(mNodePath);
+                mNode.applyEdits(appInst.findEdits(mNode.nodeId));
         
-        Node parent = appInst.getParent(mNodePath);
-        mTitle.setText(mNode.nodeName);
-        mBody.setText(mNode.nodePayload);
-        mTags.setText(mNode.tagString);
-        setSpinner(mTodoState, this.mOrgDb.getTodos(), mNode.todo);
-        setSpinner(mPriority, this.mOrgDb.getPriorities(), mNode.priority);
-        appInst.popSelection();
+                Node parent = appInst.getParent(mNodePath);
+                mTitle.setText(mNode.nodeName);
+                mBody.setText(mNode.nodePayload);
+                mTags.setText(mNode.tagString);
+                setSpinner(mTodoState, this.mOrgDb.getTodos(), mNode.todo);
+                setSpinner(mPriority, this.mOrgDb.getPriorities(),
+                           mNode.priority);
+                appInst.popSelection();
+        }
     }
 
 	@Override

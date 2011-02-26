@@ -379,6 +379,7 @@ public class MobileOrgActivity extends ListActivity
                 Intent dispIntent = new Intent();
                 dispIntent.setClassName("com.matburt.mobileorg",
                                         "com.matburt.mobileorg.ViewNodeDetailsActivity");
+                dispIntent.putExtra("actionMode", "edit");
                 dispIntent.putIntegerArrayListExtra("nodePath", appInst.nodeSelection);
                 appInst.pushSelection(position);
                 startActivity(dispIntent);
@@ -493,6 +494,11 @@ public class MobileOrgActivity extends ListActivity
         captureIntent.setClassName("com.matburt.mobileorg",
                                    "com.matburt.mobileorg.Capture");
         startActivityForResult(captureIntent, 3);
+        //Link to new Capture/Edit interface
+        // captureIntent.setClassName("com.matburt.mobileorg",
+        //                            "com.matburt.mobileorg.ViewNodeDetailsActivity");
+        // captureIntent.putExtra("actionMode", "create");
+        // startActivity(captureIntent);
         return true;
     }
 

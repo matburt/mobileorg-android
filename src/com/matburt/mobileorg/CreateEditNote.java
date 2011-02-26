@@ -95,7 +95,7 @@ public class CreateEditNote
 
         try {
             writer.write(message);
-            this.appdb.addOrUpdateFile("mobileorg.org", "MobileOrg","");
+            this.appdb.addOrUpdateFile("mobileorg.org", "New Notes","");
             writer.flush();
             writer.close();
         }

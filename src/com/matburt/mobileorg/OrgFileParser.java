@@ -150,6 +150,8 @@ class OrgFileParser {
 
     public void parse(Node fileNode, BufferedReader breader)
     {
+        Pattern editTitlePattern = 
+            Pattern.compile("F\\((edit:.*?)\\) \\[\\[(.*?)\\]\\[(.*?)\\]\\]");
         try
         {
 			this.todos = appdb.getTodos();
@@ -166,17 +168,15 @@ class OrgFileParser {
 
             while ((thisLine = breader.readLine()) != null) {
                 int numstars = 0;
-
-                if (thisLine.length() < 1)
+                Matcher editm = editTitlePattern.matcher(thisLine);
+                if (thisLine.length() < 1 || editm.find())
                     continue;
-
                 if (thisLine.charAt(0) == '#') {
                     if (thisLine.indexOf("#+TITLE:") != -1) {
                         fileNode.altNodeTitle = thisLine.substring(
                                      thisLine.indexOf("#+TITLE: ") + 9);
                     }
                 }
-
                 for (int idx = 0; idx < thisLine.length(); idx++) {
                     if (thisLine.charAt(idx) != '*') {
                         break;
