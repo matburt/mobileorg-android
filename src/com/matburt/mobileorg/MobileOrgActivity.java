@@ -474,6 +474,7 @@ public class MobileOrgActivity extends ListActivity
                 		syncError = null;
 	                    appSync.pull();
 	                    appSync.push();
+                        Log.d("MobileOrg", "Finished parsing...");
                 	}
                 	catch(ReportableError e) {
                 		syncError = e;

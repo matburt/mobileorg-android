@@ -170,60 +170,19 @@ public class WebDAVSynchronizer extends Synchronizer
             String fileContents = this.fetchOrgFile(urlActual +
                                                     masterList.get(key));
             String storageMode = this.appSettings.getString("storageMode", "");
-            BufferedWriter writer = new BufferedWriter(new StringWriter());
-
-            if (storageMode.equals("internal") || storageMode == null) {
-                FileOutputStream fs;
-                try {
-                    String normalized = masterList.get(key).replace("/", "_");
-                    fs = rootContext.openFileOutput(normalized, 0);
-                    writer = new BufferedWriter(new OutputStreamWriter(fs));
-                }
-                catch (java.io.FileNotFoundException e) {
-                	throw new ReportableError(
-                    		r.getString(R.string.error_file_not_found, key),
-                    		e);
-                }
-            }
-            else if (storageMode.equals("sdcard")) {
-
-                try {
-                    File root = Environment.getExternalStorageDirectory();
-                    File morgDir = new File(root, "mobileorg");
-                    morgDir.mkdir();
-                    if (morgDir.canWrite()){
-                        File orgFileCard = new File(morgDir, masterList.get(key));
-                        File orgDirCard = orgFileCard.getParentFile();
-                        orgDirCard.mkdirs();
-                        FileWriter orgFWriter = new FileWriter(orgFileCard);
-                        writer = new BufferedWriter(orgFWriter);
-                    }
-                    else {
-                        throw new ReportableError(
-                        		r.getString(R.string.error_file_permissions, morgDir.getAbsolutePath()),
-                        		null);
-                    }
-                } catch (java.io.IOException e) {
-                    throw new ReportableError(
-                    		"IO Exception initializing writer on sdcard file",
-                    		e);
-                }
-            }
-            else {
-                throw new ReportableError(
-                		r.getString(R.string.error_local_storage_method_unknown, storageMode),
-                		null);
-            }
-
+            BufferedWriter writer = this.getWriteHandle(masterList.get(key));
             try {
             	writer.write(fileContents);
-            	this.appdb.addOrUpdateFile(masterList.get(key), key, newChecksums.get(key));
+            	this.appdb.addOrUpdateFile(masterList.get(key),
+                                           key,
+                                           newChecksums.get(key));
                 writer.flush();
                 writer.close();
             }
             catch (java.io.IOException e) {
                 throw new ReportableError(
-                		r.getString(R.string.error_file_write, masterList.get(key)),
+                		r.getString(R.string.error_file_write,
+                                    masterList.get(key)),
                 		e);
             }
         }

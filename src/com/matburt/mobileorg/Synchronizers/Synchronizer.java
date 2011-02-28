@@ -40,20 +40,28 @@ abstract class Synchronizer
             this.appdb.close();
     }
 
-    BufferedWriter getWriteHandle(String localRelPath) {
+    BufferedWriter getWriteHandle(String localRelPath) throws ReportableError {
         String storageMode = this.appSettings.getString("storageMode", "");
         BufferedWriter writer = null;
         if (storageMode.equals("internal") || storageMode == null) {
             FileOutputStream fs;
             try {
-                fs = this.rootContext.openFileOutput(localRelPath, Context.MODE_APPEND);
+                String normalized = localRelPath.replace("/", "_");
+                fs = this.rootContext.openFileOutput(normalized, Context.MODE_APPEND);
                 writer = new BufferedWriter(new OutputStreamWriter(fs));
             }
             catch (java.io.FileNotFoundException e) {
                 Log.e(LT, "Caught FNFE trying to open file " + localRelPath);
+                throw new ReportableError(
+                        r.getString(R.string.error_file_not_found,
+                                    localRelPath),
+                        e);
             }
             catch (java.io.IOException e) {
                 Log.e(LT, "IO Exception initializing writer on file " + localRelPath);
+                throw new ReportableError(
+                        r.getString(R.string.error_file_not_found, localRelPath),
+                        e);
             }
         }
         else if (storageMode.equals("sdcard")) {
@@ -68,16 +76,24 @@ abstract class Synchronizer
                 }
                 else {
                     Log.e(LT, "Write permission denied on " + localRelPath);
-                    return null;
+                    throw new ReportableError(
+                            r.getString(R.string.error_file_permissions,
+                                        morgDir.getAbsolutePath()),
+                            null);
                 }
             } catch (java.io.IOException e) {
                 Log.e(LT, "IO Exception initializing writer on sdcard file: " + localRelPath);
-                return null;
+                throw new ReportableError(
+                        "IO Exception initializing writer on sdcard file",
+                        e);
             }
         }
         else {
             Log.e(LT, "Unknown storage mechanism " + storageMode);
-            return null;
+                throw new ReportableError(
+                		r.getString(R.string.error_local_storage_method_unknown,
+                                    storageMode),
+                		null);
         }
         return writer;
     }
