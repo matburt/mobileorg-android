@@ -30,6 +30,7 @@ abstract class Synchronizer
     public Context rootContext = null;
     public static final String LT = "MobileOrg";
     public Resources r;
+    final private int BUFFER_SIZE = 23 * 1024;
 
     abstract void pull() throws NotFoundException, ReportableError;
     abstract void push() throws NotFoundException, ReportableError;
@@ -38,6 +39,48 @@ abstract class Synchronizer
     void close() {
         if (this.appdb != null)
             this.appdb.close();
+    }
+
+    public BufferedReader fetchOrgFile(String orgPath) throws NotFoundException, ReportableError{
+        return null;
+    }
+
+    public void fetchAndSaveOrgFile(String orgPath, String destPath) throws ReportableError {
+        BufferedReader reader = this.fetchOrgFile(orgPath);
+        BufferedWriter writer = this.getWriteHandle(destPath);
+
+        char[] baf = new char[BUFFER_SIZE];
+        int actual = 0;
+        try {
+            while (actual != -1) {
+                writer.write(baf, 0, actual);
+                actual = reader.read(baf, 0, BUFFER_SIZE);
+            }
+        }
+        catch (java.io.IOException e) {
+            throw new ReportableError(
+                           r.getString(R.string.error_file_write,
+                                       orgPath),
+                           e);
+                    
+        }
+    }
+
+    public String fetchOrgFileString(String orgPath) throws ReportableError {
+        BufferedReader reader = this.fetchOrgFile(orgPath);
+        String fileContents = "";
+        String thisLine = "";
+        try {
+            while ((thisLine = reader.readLine()) != null) {
+                fileContents += thisLine + "\n";
+            }
+        }
+        catch (java.io.IOException e) {
+               throw new ReportableError(
+                       r.getString(R.string.error_file_read, orgPath),
+                       e);
+        }
+        return fileContents;
     }
 
     BufferedWriter getWriteHandle(String localRelPath) throws ReportableError {

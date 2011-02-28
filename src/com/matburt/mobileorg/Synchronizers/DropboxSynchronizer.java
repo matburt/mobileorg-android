@@ -31,7 +31,6 @@ public class DropboxSynchronizer extends Synchronizer {
 
     private DropboxAPI api = new DropboxAPI();
     private Config dbConfig;
-    final private int BUFFER_SIZE = 23 * 1024;
 
     DropboxSynchronizer(Context parentContext) {
         this.rootContext = parentContext;
@@ -84,7 +83,7 @@ public class DropboxSynchronizer extends Synchronizer {
 		if(!indexFilePath.startsWith("/")) {
 			indexFilePath = "/" + indexFilePath;
 		}
-        String masterStr = this.fetchOrgFile(indexFilePath);
+        String masterStr = this.fetchOrgFileString(indexFilePath);
         Log.i(LT, "Contents: " + masterStr);
         if (masterStr.equals("")) {
             throw new ReportableError(
@@ -98,7 +97,7 @@ public class DropboxSynchronizer extends Synchronizer {
         this.appdb.setPriorityList(priorityLists);
         String pathActual = this.getRootPath();
         //Get checksums file
-        masterStr = this.fetchOrgFile(pathActual + "checksums.dat");
+        masterStr = this.fetchOrgFileString(pathActual + "checksums.dat");
         HashMap<String, String> newChecksums = this.getChecksums(masterStr);
         HashMap<String, String> oldChecksums = this.appdb.getChecksums();
 
@@ -110,25 +109,11 @@ public class DropboxSynchronizer extends Synchronizer {
                 continue;
             Log.d(LT, "Fetching: " +
                   key + ": " + pathActual + masterList.get(key));
-            String fileContents = this.fetchOrgFile(pathActual +
-                                                    masterList.get(key));
-            BufferedWriter writer = this.getWriteHandle(masterList.get(key));
-            Log.d(LT, "Finished Fetching: " +
-                  key + ": " + pathActual + masterList.get(key));
-            try {
-            	writer.write(fileContents);
-            	this.appdb.addOrUpdateFile(masterList.get(key),
-                                           key,
-                                           newChecksums.get(key));
-                writer.flush();
-                writer.close();
-            }
-            catch (java.io.IOException e) {
-                throw new ReportableError(
-                		r.getString(R.string.error_file_write,
-                                    masterList.get(key)),
-                		e);
-            }
+            this.fetchAndSaveOrgFile(pathActual + masterList.get(key),
+                                     masterList.get(key));
+            this.appdb.addOrUpdateFile(masterList.get(key),
+                                       key,
+                                       newChecksums.get(key));
         }
     }
 
@@ -137,28 +122,17 @@ public class DropboxSynchronizer extends Synchronizer {
         return dbPath.substring(0, dbPath.lastIndexOf("/")+1);
     }
 
-    private String fetchOrgFile(String orgPath) throws ReportableError {
+    public BufferedReader fetchOrgFile(String orgPath) throws NotFoundException, ReportableError {
         Log.i(LT, "Downloading " + orgPath);
         FileDownload fd = api.getFileStream("dropbox", orgPath, null);
+        Log.i(LT, "Finished downloading");
         BufferedReader reader = new BufferedReader(new InputStreamReader(fd.is));
-        String fileContents = "";
-        String thisLine = "";
-        try {
-            while ((thisLine = reader.readLine()) != null) {
-                fileContents += thisLine + "\n";
-            }
-        }
-        catch (java.io.IOException e) {
-        	throw new ReportableError(
-            		r.getString(R.string.error_file_read, orgPath),
-            		e);
-        }
-        return fileContents;
+        return reader;
     }
 
     private void appendDropboxFile(String file, String content) throws ReportableError {
         String pathActual = this.getRootPath();
-        String originalContent = this.fetchOrgFile(pathActual + file);
+        String originalContent = this.fetchOrgFileString(pathActual + file);
         String newContent = "";
         if (originalContent.indexOf("{\"error\":") == -1)
             newContent = originalContent + "\n" + content;
