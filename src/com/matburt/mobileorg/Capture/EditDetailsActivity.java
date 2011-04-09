@@ -1,26 +1,19 @@
-package com.matburt.mobileorg;
+package com.matburt.mobileorg.Capture;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.widget.TableLayout;
-import android.widget.TableRow;
-import android.widget.TableRow.LayoutParams;
-import android.widget.Button;
+import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.TextView;
-import android.widget.ScrollView;
 import android.view.View.OnClickListener;
-import android.preference.Preference;
-import android.preference.ListPreference;
-import android.widget.Toast;
-import android.content.pm.PackageManager.NameNotFoundException;
-import android.content.pm.PackageItemInfo;
-import android.util.Log;
-import android.graphics.PorterDuff;
-import android.graphics.Color;
+import android.widget.*;
+import android.widget.TableRow.LayoutParams;
+import com.matburt.mobileorg.MobileOrgApplication;
+import com.matburt.mobileorg.MobileOrgDatabase;
+import com.matburt.mobileorg.Parsing.Node;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 

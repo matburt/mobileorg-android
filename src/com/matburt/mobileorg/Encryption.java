@@ -1,15 +1,12 @@
 package com.matburt.mobileorg;
 
-import android.util.Log;
 import android.app.Activity;
-import android.content.Context;
-import android.widget.Toast;
-
 import android.content.ActivityNotFoundException;
-
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.util.Log;
+import android.widget.Toast;
 
 
 class Encryption

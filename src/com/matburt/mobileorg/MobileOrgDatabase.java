@@ -1,20 +1,18 @@
 package com.matburt.mobileorg;
 
-import android.database.Cursor;
-import android.database.SQLException;
-import android.database.sqlite.SQLiteDatabase;
-import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
 import android.content.Context;
-import android.app.Application;
+import android.content.SharedPreferences;
+import android.content.res.Resources;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.os.Environment;
+import android.preference.PreferenceManager;
+import android.util.Log;
+import com.matburt.mobileorg.Error.ErrorReporter;
+
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
-import android.util.Log;
-import android.content.SharedPreferences;
-import java.io.File;
-import android.os.Environment;
-import android.content.res.Resources;
-import android.content.res.Resources.NotFoundException;
 
 public class MobileOrgDatabase {
     private Context appcontext;
@@ -48,7 +46,7 @@ public class MobileOrgDatabase {
         }
         else {
             ErrorReporter.displayError(this.appcontext,
-                                       r.getString(R.string.error_opening_database));
+                    r.getString(R.string.error_opening_database));
             return;
         }
         this.appdb.execSQL("CREATE TABLE IF NOT EXISTS files"

@@ -1,8 +1,8 @@
 package com.matburt.mobileorg;
 
 import android.content.BroadcastReceiver;
-import android.content.Intent;
 import android.content.Context;
+import android.content.Intent;
 
 public class MobileOrgStartupIntentReceiver extends BroadcastReceiver {
 	@Override

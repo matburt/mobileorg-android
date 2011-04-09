@@ -1,20 +1,5 @@
-package com.matburt.mobileorg;
+package com.matburt.mobileorg.Synchronizers;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
@@ -22,8 +7,17 @@ import android.content.res.Resources.NotFoundException;
 import android.os.Environment;
 import android.text.TextUtils;
 import android.util.Log;
+import com.matburt.mobileorg.Error.ReportableError;
+import com.matburt.mobileorg.MobileOrgDatabase;
+import com.matburt.mobileorg.R;
 
-abstract class Synchronizer
+import java.io.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+abstract public class Synchronizer
 {
     public MobileOrgDatabase appdb = null;
     public SharedPreferences appSettings = null;
@@ -32,11 +26,11 @@ abstract class Synchronizer
     public Resources r;
     final private int BUFFER_SIZE = 23 * 1024;
 
-    abstract void pull() throws NotFoundException, ReportableError;
-    abstract void push() throws NotFoundException, ReportableError;
-    abstract boolean checkReady();
+    public abstract void pull() throws NotFoundException, ReportableError;
+    public abstract void push() throws NotFoundException, ReportableError;
+    public abstract boolean checkReady();
 
-    void close() {
+    public void close() {
         if (this.appdb != null)
             this.appdb.close();
     }

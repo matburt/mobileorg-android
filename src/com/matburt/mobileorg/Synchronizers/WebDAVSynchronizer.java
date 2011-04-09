@@ -1,58 +1,41 @@
-package com.matburt.mobileorg;
+package com.matburt.mobileorg.Synchronizers;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.StringWriter;
-import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.HashMap;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.ArrayList;
-import java.lang.IllegalArgumentException;
-
+import android.content.Context;
+import android.content.res.Resources.NotFoundException;
+import android.preference.PreferenceManager;
+import android.util.Log;
+import com.matburt.mobileorg.Error.ReportableError;
+import com.matburt.mobileorg.MobileOrgDatabase;
+import com.matburt.mobileorg.R;
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPut;
+import org.apache.http.conn.scheme.PlainSocketFactory;
+import org.apache.http.conn.scheme.Scheme;
+import org.apache.http.conn.scheme.SchemeRegistry;
+import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.conn.ssl.SSLSocketFactory;
-import org.apache.http.conn.scheme.SchemeRegistry;
-import org.apache.http.conn.scheme.Scheme;
-import org.apache.http.conn.scheme.PlainSocketFactory;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
-
-import android.app.Activity;
-import android.content.Context;
-import android.content.SharedPreferences;
-import android.content.res.Resources;
-import android.content.res.Resources.NotFoundException;
-import android.os.Environment;
-import android.preference.PreferenceManager;
-import android.util.Log;
-import android.text.TextUtils;
 import org.apache.http.params.CoreProtocolPNames;
 import org.apache.http.params.HttpParams;
+
+import java.io.*;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.regex.Pattern;
 
 public class WebDAVSynchronizer extends Synchronizer
 {
     private boolean pushedStageFile = false;
 
-    WebDAVSynchronizer(Context parentContext) {
+    public WebDAVSynchronizer(Context parentContext) {
         this.rootContext = parentContext;
         this.r = this.rootContext.getResources();
         this.appdb = new MobileOrgDatabase((Context)parentContext);

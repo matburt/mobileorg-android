@@ -1,19 +1,15 @@
-package com.matburt.mobileorg;
+package com.matburt.mobileorg.Capture;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.content.Intent;
-import android.content.SharedPreferences;
-import android.widget.EditText;
-import android.widget.Button;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.database.Cursor;
-import android.database.SQLException;
-import android.database.sqlite.SQLiteDatabase;
-import android.preference.PreferenceManager;
-import android.content.Context;
+import android.widget.Button;
+import android.widget.EditText;
+import com.matburt.mobileorg.MobileOrgApplication;
+import com.matburt.mobileorg.R;
 
 public class Capture extends Activity implements OnClickListener
 {

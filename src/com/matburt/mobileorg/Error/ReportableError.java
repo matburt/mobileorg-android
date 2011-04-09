@@ -1,4 +1,4 @@
-package com.matburt.mobileorg;
+package com.matburt.mobileorg.Error;
 
 public class ReportableError extends Throwable {
 	private String message;

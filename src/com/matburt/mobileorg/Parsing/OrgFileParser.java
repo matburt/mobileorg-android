@@ -1,28 +1,19 @@
-package com.matburt.mobileorg;
+package com.matburt.mobileorg.Parsing;
 
-import java.util.Map;
+import android.content.ContentValues;
+import android.util.Log;
+import com.matburt.mobileorg.MobileOrgDatabase;
+
+import java.io.*;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.EmptyStackException;
 import java.util.HashMap;
 import java.util.Stack;
-import java.util.EmptyStackException;
-import java.util.Date;
-import java.text.SimpleDateFormat;
-import java.text.ParseException;
-import java.util.regex.Pattern;
 import java.util.regex.Matcher;
-import java.io.FileInputStream;
-import java.io.File;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.DataInputStream;
-import java.io.IOException;
-import java.io.FileNotFoundException;
-import android.text.TextUtils;
-import android.util.Log;
-import android.content.ContentValues;
-import android.database.sqlite.SQLiteDatabase;
+import java.util.regex.Pattern;
 
-class OrgFileParser {
+public class OrgFileParser {
 
 	class TitleComponents {
 		String title = "";
@@ -36,16 +27,16 @@ class OrgFileParser {
     String storageMode = null;
     Pattern titlePattern = null;
     FileInputStream fstream;
-    Node rootNode = new Node("", Node.HEADING);
+    public Node rootNode = new Node("", Node.HEADING);
     MobileOrgDatabase appdb;
 	ArrayList<HashMap<String, Integer>> todos = null;
     public static final String LT = "MobileOrg";
     public String orgDir = "/sdcard/mobileorg/";
 
-    OrgFileParser(HashMap<String, String> orgpaths,
-                  String storageMode,
-                  MobileOrgDatabase appdb,
-                  String orgBasePath) {
+    public OrgFileParser(HashMap<String, String> orgpaths,
+                         String storageMode,
+                         MobileOrgDatabase appdb,
+                         String orgBasePath) {
         this.appdb = appdb;
         this.storageMode = storageMode;
         this.orgPaths = orgpaths;

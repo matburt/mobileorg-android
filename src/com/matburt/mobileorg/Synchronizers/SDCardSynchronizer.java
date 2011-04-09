@@ -1,26 +1,21 @@
-package com.matburt.mobileorg;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.HashMap;
+package com.matburt.mobileorg.Synchronizers;
 
 import android.content.Context;
-import android.content.res.Resources;
 import android.content.res.Resources.NotFoundException;
 import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import com.matburt.mobileorg.Error.ReportableError;
+import com.matburt.mobileorg.MobileOrgDatabase;
+import com.matburt.mobileorg.R;
+
+import java.io.*;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public class SDCardSynchronizer extends Synchronizer
 {
-    SDCardSynchronizer(Context parentContext) {
+    public SDCardSynchronizer(Context parentContext) {
         this.rootContext = parentContext;
         this.r = this.rootContext.getResources();
         this.appdb = new MobileOrgDatabase((Context)parentContext);

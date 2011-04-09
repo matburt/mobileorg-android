@@ -1,17 +1,14 @@
-package com.matburt.mobileorg;
-import android.app.Activity;
-import android.content.Intent;
+package com.matburt.mobileorg.Settings;
+
 import android.content.Context;
-import android.content.SharedPreferences;
+import android.content.Intent;
+import android.content.pm.PackageItemInfo;
 import android.os.Bundle;
-import android.preference.Preference;
 import android.preference.ListPreference;
 import android.preference.PreferenceActivity;
-import android.preference.Preference.OnPreferenceClickListener;
-import android.widget.Toast;
-import android.content.pm.PackageManager.NameNotFoundException;
-import android.content.pm.PackageItemInfo;
-import android.util.Log;
+import com.matburt.mobileorg.MobileOrgApplication;
+import com.matburt.mobileorg.R;
+
 import java.util.List;
 
 public class SettingsActivity extends PreferenceActivity
@@ -21,14 +18,14 @@ public class SettingsActivity extends PreferenceActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Intent prefsIntent = getIntent();
-        int resourceID = prefsIntent.getIntExtra("prefs",R.xml.preferences);
+        int resourceID = prefsIntent.getIntExtra("prefs", R.xml.preferences);
         addPreferencesFromResource(resourceID);                
         populateSyncSources();
     }
 
     protected void populateSyncSources()
     {
-        List<PackageItemInfo> synchronizers = MobileOrgApplication.discoverSynchronizerPlugins((Context)this);
+        List<PackageItemInfo> synchronizers = MobileOrgApplication.discoverSynchronizerPlugins((Context) this);
 
         ListPreference syncSource = (ListPreference)findPreference("syncSource");
 
@@ -46,26 +43,19 @@ public class SettingsActivity extends PreferenceActivity
         {
             entries[offset] = info.nonLocalizedLabel;
             values[offset] = info.packageName;
-            Intent syncIntent = new Intent();
-            syncIntent.setClassName(info.packageName, info.packageName + ".SettingsActivity");
+            Intent syncIntent = new Intent(this, SettingsActivity.class);
             SynchronizerPreferences.syncIntents.put(info.packageName,syncIntent);
             offset++;
         }
 
         //fill in the Intents for built-in synchronizers
-        Intent synchroIntent = new Intent();
-        synchroIntent.setClassName("com.matburt.mobileorg",
-                                   "com.matburt.mobileorg.WebDAVSettingsActivity");
-         SynchronizerPreferences.syncIntents.put("webdav",synchroIntent);
+        Intent synchroIntent = new Intent(this, WebDAVSettingsActivity.class);
+        SynchronizerPreferences.syncIntents.put("webdav",synchroIntent);
             
-        synchroIntent = new Intent();
-        synchroIntent.setClassName("com.matburt.mobileorg",
-                                   "com.matburt.mobileorg.SDCardSettingsActivity");
+        synchroIntent = new Intent(this, SDCardSettingsActivity.class);
         SynchronizerPreferences.syncIntents.put("sdcard", synchroIntent);
 
-        synchroIntent = new Intent();
-        synchroIntent.setClassName("com.matburt.mobileorg",
-                                   "com.matburt.mobileorg.DropboxSettingsActivity");
+        synchroIntent = new Intent(this, DropboxSettingsActivity.class);
         SynchronizerPreferences.syncIntents.put("dropbox", synchroIntent);
 
         //populate the sync source list with updated data

@@ -8,7 +8,7 @@
         android:entries="@array/fileSources"
         android:entryValues="@array/fileSourcesVals"
         android:defaultValue="webdav" />
-     <com.matburt.mobileorg.SynchronizerPreferences
+     <com.matburt.mobileorg.Settings.SynchronizerPreferences
                 android:key="syncPref"
                 android:defaultValue="32"
                 android:title="Custom Preference" /> 

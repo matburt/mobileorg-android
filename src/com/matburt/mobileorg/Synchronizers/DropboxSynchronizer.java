@@ -1,30 +1,22 @@
-package com.matburt.mobileorg;
+package com.matburt.mobileorg.Synchronizers;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.StringWriter;
-import java.util.HashMap;
-import java.util.ArrayList;
-import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.content.res.Resources;
 import android.content.res.Resources.NotFoundException;
 import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
-
 import com.dropbox.client.DropboxAPI;
 import com.dropbox.client.DropboxAPI.Config;
 import com.dropbox.client.DropboxAPI.FileDownload;
+import com.matburt.mobileorg.Error.ReportableError;
+import com.matburt.mobileorg.MobileOrgDatabase;
+import com.matburt.mobileorg.R;
+
+import java.io.*;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public class DropboxSynchronizer extends Synchronizer {
     private boolean hasToken = false;
@@ -32,7 +24,7 @@ public class DropboxSynchronizer extends Synchronizer {
     private DropboxAPI api = new DropboxAPI();
     private Config dbConfig;
 
-    DropboxSynchronizer(Context parentContext) {
+    public DropboxSynchronizer(Context parentContext) {
         this.rootContext = parentContext;
         this.r = this.rootContext.getResources();
         this.appdb = new MobileOrgDatabase((Context)parentContext);
