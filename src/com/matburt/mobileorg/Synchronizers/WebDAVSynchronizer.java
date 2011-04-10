@@ -49,8 +49,12 @@ public class WebDAVSynchronizer extends Synchronizer
         BufferedReader reader = this.getReadHandle("mobileorg.org");
         String fileContents = "";
         this.pushedStageFile = false;
-
         String thisLine = "";
+
+        if (reader == null) {
+            return;
+        }
+
         try {
             while ((thisLine = reader.readLine()) != null) {
                 fileContents += thisLine + "\n";
