@@ -103,6 +103,10 @@ public class ViewNodeDetailsActivity extends Activity implements OnClickListener
 		}
 		if (v.equals(mBody)) {
 			save();
+            //Capture Change:
+            //Have it return the text from the capture to:
+            //Create the new note with the body OR
+            //Apply the body edit like the other elements
 			Intent intent = new Intent(this, Capture.class);
 			if (mNode.nodeId != null && mNode.nodeId.length() > 0) {
 				intent.putExtra("nodeId", mNode.nodeId);	

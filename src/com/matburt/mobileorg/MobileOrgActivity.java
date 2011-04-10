@@ -495,6 +495,7 @@ public class MobileOrgActivity extends ListActivity
         captureIntent.setClassName("com.matburt.mobileorg",
                                    "com.matburt.mobileorg.Capture");
         startActivityForResult(captureIntent, 3);
+        //Capture Change
         //Link to new Capture/Edit interface
         // captureIntent.setClassName("com.matburt.mobileorg",
         //                            "com.matburt.mobileorg.ViewNodeDetailsActivity");

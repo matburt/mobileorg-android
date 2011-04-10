@@ -50,6 +50,9 @@ public class Capture extends Activity implements OnClickListener
     public boolean onSave() {
         if (this.orgEditDisplay.getText().toString().length() > 0) {
             if (this.editType == null) {
+                //Capture Change:
+                //Return text to ViewNodeDetails instead of creating a new
+                //note.
                 this.noteCreator.writeNewNote(this.orgEditDisplay.getText().toString());
             } else {
                 this.noteCreator.editNote(this.editType,
