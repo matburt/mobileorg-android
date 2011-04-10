@@ -1,21 +1,17 @@
-package com.matburt.mobileorg;
+package com.matburt.mobileorg.Settings;
 import android.content.Context;
-import android.app.Activity;
-import android.content.SharedPreferences;
 import android.content.Intent;
-import android.os.Bundle;
+import android.content.SharedPreferences;
+import android.graphics.Typeface;
 import android.preference.Preference;
-import android.preference.PreferenceActivity;
-import android.preference.Preference.OnPreferenceClickListener;
 import android.preference.PreferenceManager;
-import android.widget.Toast;
 import android.util.AttributeSet;
-import android.view.ViewGroup;
+import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.view.Gravity;
-import android.graphics.Typeface;
+
 import java.util.HashMap;
 
 public class SynchronizerPreferences extends Preference {

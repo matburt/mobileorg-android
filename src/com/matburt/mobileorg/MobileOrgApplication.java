@@ -1,19 +1,18 @@
 package com.matburt.mobileorg;
 
 import android.app.Application;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.lang.String;
-import java.io.File;
-import android.util.Log;
-import android.os.Environment;
-import android.preference.PreferenceManager;
-import android.content.Intent;
 import android.content.Context;
-import android.content.SharedPreferences;
+import android.content.Intent;
 import android.content.pm.PackageItemInfo;
 import android.content.pm.ResolveInfo;
+import android.os.Environment;
+import android.util.Log;
+import com.matburt.mobileorg.Parsing.EditNode;
+import com.matburt.mobileorg.Parsing.Node;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MobileOrgApplication extends Application {
     public Node rootNode = null;
@@ -95,7 +94,7 @@ public class MobileOrgApplication extends Application {
         return morgDir.getAbsolutePath() + "/";
     }
 
-    static List<PackageItemInfo> discoverSynchronizerPlugins(Context context)
+    public static List<PackageItemInfo> discoverSynchronizerPlugins(Context context)
     {
         Intent discoverSynchro = new Intent(SYNCHRONIZER_PLUGIN_ACTION);
         List<ResolveInfo> packages = context.getPackageManager().queryIntentActivities(discoverSynchro,0);

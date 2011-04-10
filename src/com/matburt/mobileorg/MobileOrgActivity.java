@@ -1,35 +1,39 @@
 package com.matburt.mobileorg;
 
+import android.app.Activity;
 import android.app.ListActivity;
 import android.app.ProgressDialog;
-import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.LayoutInflater;
-import android.widget.LinearLayout;
-import android.widget.ListView;
-import android.widget.BaseAdapter;
-import android.widget.TextView;
-import android.widget.AdapterView;
-import android.content.Intent;
-import android.content.Context;
-import android.graphics.Color;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Log;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Collections;
-import java.text.SimpleDateFormat;
-import java.lang.Runnable;
+import android.view.*;
+import android.widget.*;
+import com.matburt.mobileorg.Capture.Capture;
+import com.matburt.mobileorg.Capture.ViewNodeDetailsActivity;
+import com.matburt.mobileorg.Error.ErrorReporter;
+import com.matburt.mobileorg.Error.ReportableError;
+import com.matburt.mobileorg.Parsing.EditNode;
+import com.matburt.mobileorg.Parsing.Node;
+import com.matburt.mobileorg.Parsing.OrgFileParser;
+import com.matburt.mobileorg.Settings.SettingsActivity;
+import com.matburt.mobileorg.Synchronizers.DropboxSynchronizer;
+import com.matburt.mobileorg.Synchronizers.SDCardSynchronizer;
+import com.matburt.mobileorg.Synchronizers.Synchronizer;
+import com.matburt.mobileorg.Synchronizers.WebDAVSynchronizer;
+
 import java.io.BufferedReader;
-import java.io.StringReader;
 import java.io.File;
-import android.content.SharedPreferences;
+import java.io.StringReader;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 
 public class MobileOrgActivity extends ListActivity
 {
@@ -318,10 +322,8 @@ public class MobileOrgActivity extends ListActivity
     }
 
     protected void onLongListItemClick(View av, int pos, long id) {
-        Intent dispIntent = new Intent();
+        Intent dispIntent = new Intent(this, OrgContextMenu.class);
         MobileOrgApplication appInst = (MobileOrgApplication)this.getApplication();
-        dispIntent.setClassName("com.matburt.mobileorg",
-                                "com.matburt.mobileorg.OrgContextMenu");
 
         appInst.pushSelection(pos);
         dispIntent.putIntegerArrayListExtra("nodePath", appInst.nodeSelection);
@@ -367,18 +369,16 @@ public class MobileOrgActivity extends ListActivity
             appInst.popSelection();
             if (thisNode.todo.equals("") &&
                 thisNode.priority.equals("")) {
-                Intent textIntent = new Intent();
+                Intent textIntent = new Intent(this, SimpleTextDisplay.class);
                 String docBuffer = thisNode.nodeName + "\n\n" +
                     thisNode.nodePayload;
-                textIntent.setClassName("com.matburt.mobileorg",
-                                        "com.matburt.mobileorg.SimpleTextDisplay");
+
                 textIntent.putExtra("txtValue", docBuffer);
                 startActivity(textIntent);
             }
             else {
-                Intent dispIntent = new Intent();
-                dispIntent.setClassName("com.matburt.mobileorg",
-                                        "com.matburt.mobileorg.ViewNodeDetailsActivity");
+                Intent dispIntent = new Intent(this, ViewNodeDetailsActivity.class);
+
                 dispIntent.putExtra("actionMode", "edit");
                 dispIntent.putIntegerArrayListExtra("nodePath", appInst.nodeSelection);
                 appInst.pushSelection(position);
@@ -392,9 +392,7 @@ public class MobileOrgActivity extends ListActivity
 
     public void expandSelection(ArrayList<Integer> selection)
     {
-        Intent dispIntent = new Intent();
-        dispIntent.setClassName("com.matburt.mobileorg",
-                                "com.matburt.mobileorg.MobileOrgActivity");
+        Intent dispIntent = new Intent(this, MobileOrgActivity.class);
         dispIntent.putIntegerArrayListExtra("nodePath", selection);
         startActivityForResult(dispIntent, 1);
     }
@@ -439,9 +437,7 @@ public class MobileOrgActivity extends ListActivity
     }
 
     public boolean onShowSettings() {
-        Intent settingsIntent = new Intent();
-        settingsIntent.setClassName("com.matburt.mobileorg",
-                                    "com.matburt.mobileorg.SettingsActivity");
+        Intent settingsIntent = new Intent(this, SettingsActivity.class);
         startActivity(settingsIntent);
         return true;
     }
@@ -491,9 +487,7 @@ public class MobileOrgActivity extends ListActivity
     }
 
     public boolean runCapture() {
-        Intent captureIntent = new Intent();
-        captureIntent.setClassName("com.matburt.mobileorg",
-                                   "com.matburt.mobileorg.Capture");
+        Intent captureIntent = new Intent(this, Capture.class);
         startActivityForResult(captureIntent, 3);
         //Capture Change
         //Link to new Capture/Edit interface

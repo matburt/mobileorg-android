@@ -1,54 +1,35 @@
-package com.matburt.mobileorg;
+package com.matburt.mobileorg.Parsing;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.regex.Pattern;
-import java.util.regex.Matcher;
-import java.util.Comparator;
-import android.app.Activity;
 
-class EditNode {
-    public String editType;
-    public String nodeId;
-    public String title;
-    public String oldVal = "";
-    public String newVal = "";
-    public EditNode() {
-    }
-    public EditNode(String editType, String nodeId, String title, String oldVal, String newVal) {
-    	this.editType = editType;
-    	this.nodeId = nodeId;
-    	this.title = title;
-    	this.oldVal = oldVal;
-    	this.newVal = newVal;
-    }
-}
-
-class Node implements Cloneable {
+public class Node implements Cloneable {
 
     static int HEADER = 0;
     static int HEADING = 1;
     static int COMMENT = 2;
     static int DATA = 3;
 
-    ArrayList<Node> subNodes = new ArrayList<Node>();
-    ArrayList<String> tags = new ArrayList<String>();
+    public ArrayList<Node> subNodes = new ArrayList<Node>();
+    public ArrayList<String> tags = new ArrayList<String>();
     HashMap<String, String> properties = new HashMap<String, String>();
 
-    String nodeName = "";
-    String todo = "";
-    String priority = "";
-    String nodeId = "";
+    public String nodeName = "";
+    public String todo = "";
+    public String priority = "";
+    public String nodeId = "";
     int nodeType;
-    String nodePayload = "";
-    String nodeTitle = "";
-    String tagString = "";
-    String altNodeTitle = null;
-    Date schedule = null;
-    Date deadline = null;
-    boolean encrypted = false;
-    boolean parsed = false;
+    public String nodePayload = "";
+    public String nodeTitle = "";
+    public String tagString = "";
+    public String altNodeTitle = null;
+    public Date schedule = null;
+    public Date deadline = null;
+    public boolean encrypted = false;
+    public boolean parsed = false;
     Node parentNode = null;
 
     Node(String heading, int ntype) {
@@ -72,7 +53,7 @@ class Node implements Cloneable {
         this.nodeTitle = title;
     }
 
-    Node findChildNode(String regex) {
+    public Node findChildNode(String regex) {
         Pattern findNodePattern = Pattern.compile(regex);
         for (int idx = 0; idx < this.subNodes.size(); idx++) {
             if (findNodePattern.matcher(this.subNodes.get(idx).nodeName).matches()) {

@@ -1,18 +1,19 @@
-package com.matburt.mobileorg;
-
-import java.util.ArrayList;
-import java.util.HashMap;
+package com.matburt.mobileorg.Capture;
 
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.Spinner;
-import android.widget.TextView;
+import android.widget.*;
+import com.matburt.mobileorg.MobileOrgApplication;
+import com.matburt.mobileorg.MobileOrgDatabase;
+import com.matburt.mobileorg.Parsing.Node;
+import com.matburt.mobileorg.R;
+import com.matburt.mobileorg.SimpleTextDisplay;
+
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public class ViewNodeDetailsActivity extends Activity implements OnClickListener {
 	protected ArrayList<Integer> mNodePath;

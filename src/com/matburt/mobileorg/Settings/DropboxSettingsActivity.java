@@ -1,13 +1,12 @@
-package com.matburt.mobileorg;
+package com.matburt.mobileorg.Settings;
 
-import android.app.Activity;
-import android.content.SharedPreferences;
+import android.content.Intent;
 import android.os.Bundle;
 import android.preference.Preference;
-import android.preference.PreferenceActivity;
 import android.preference.Preference.OnPreferenceClickListener;
-import android.widget.Toast;
-import android.content.Intent;
+import android.preference.PreferenceActivity;
+import com.matburt.mobileorg.R;
+import com.matburt.mobileorg.Synchronizers.DropboxAuthActivity;
 
 public class DropboxSettingsActivity extends PreferenceActivity implements OnPreferenceClickListener
 {
@@ -23,9 +22,7 @@ public class DropboxSettingsActivity extends PreferenceActivity implements OnPre
 
     public boolean onPreferenceClick(Preference p) {
         if (p == this.triggerLogin) {
-            Intent loginIntent = new Intent();
-            loginIntent.setClassName("com.matburt.mobileorg",
-                                     "com.matburt.mobileorg.DropboxAuthActivity");
+            Intent loginIntent = new Intent(this, DropboxAuthActivity.class);
             startActivity(loginIntent);
         }
         return true;

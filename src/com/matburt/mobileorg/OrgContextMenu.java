@@ -1,13 +1,16 @@
 package com.matburt.mobileorg;
 
-import java.util.ArrayList;
-
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import com.matburt.mobileorg.Capture.Capture;
+import com.matburt.mobileorg.Capture.EditDetailsActivity;
+import com.matburt.mobileorg.Parsing.Node;
+
+import java.util.ArrayList;
 
 public class OrgContextMenu extends Activity implements OnClickListener
 {
@@ -72,13 +75,13 @@ public class OrgContextMenu extends Activity implements OnClickListener
         Intent textIntent = new Intent();
         String displayBuffer = new String();
         if (v == this.docButton) {
-            textIntent.setClassName("com.matburt.mobileorg",
-                                    "com.matburt.mobileorg.SimpleTextDisplay");
+            textIntent.setClass(this,
+                    SimpleTextDisplay.class);
             textIntent.putExtra("txtValue", thisNode.nodePayload);
         }
         else if (v == this.docEditTitleButton) {
-            textIntent.setClassName("com.matburt.mobileorg",
-                                    "com.matburt.mobileorg.Capture");
+            textIntent.setClass(this,
+                    Capture.class);
             if (thisNode.nodeId != null && thisNode.nodeId.length() > 0) {
                 textIntent.putExtra("nodeId", thisNode.nodeId);
             }
@@ -86,8 +89,8 @@ public class OrgContextMenu extends Activity implements OnClickListener
             textIntent.putExtra("txtValue", thisNode.nodeName);
         }
         else if (v == this.docEditBodyButton) {
-            textIntent.setClassName("com.matburt.mobileorg",
-                                    "com.matburt.mobileorg.Capture");
+            textIntent.setClass(this,
+                    Capture.class);
             if (thisNode.nodeId != null && thisNode.nodeId.length() > 0) {
                 textIntent.putExtra("nodeId", thisNode.nodeId);
             }
@@ -96,14 +99,14 @@ public class OrgContextMenu extends Activity implements OnClickListener
         }
 
         else if (v == this.docTodoButton) {
-            textIntent.setClassName("com.matburt.mobileorg",
-                                    "com.matburt.mobileorg.EditDetailsActivity");
+            textIntent.setClass(this,
+                                    EditDetailsActivity.class);
             textIntent.putExtra("nodePath", this.npath);
             textIntent.putExtra("editType", "todo");
         }
         else if (v == this.docPriorityButton) {
-            textIntent.setClassName("com.matburt.mobileorg",
-                                    "com.matburt.mobileorg.EditDetailsActivity");
+            textIntent.setClass(this,
+                                    EditDetailsActivity.class);
             textIntent.putExtra("nodePath", this.npath);
             textIntent.putExtra("editType", "priority");
         }

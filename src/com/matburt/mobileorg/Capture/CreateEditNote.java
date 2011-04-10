@@ -1,22 +1,18 @@
-package com.matburt.mobileorg;
-import android.preference.PreferenceManager;
-import android.content.Context;
+package com.matburt.mobileorg.Capture;
+
 import android.app.Activity;
+import android.content.Context;
 import android.content.SharedPreferences;
-import java.io.OutputStreamWriter;
-import java.io.BufferedWriter;
-import java.io.StringWriter;
-import java.io.FileWriter;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.FileNotFoundException;
-import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
+import android.os.Environment;
+import android.preference.PreferenceManager;
+import android.util.Log;
+import com.matburt.mobileorg.MobileOrgApplication;
+import com.matburt.mobileorg.MobileOrgDatabase;
+import com.matburt.mobileorg.Parsing.EditNode;
+
+import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import android.util.Log;
-import android.os.Environment;
 
 public class CreateEditNote
 {
