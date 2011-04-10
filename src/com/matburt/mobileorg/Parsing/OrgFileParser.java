@@ -141,12 +141,12 @@ public class OrgFileParser {
 
     public void parse(Node fileNode, BufferedReader breader)
     {
-        Pattern editTitlePattern = 
+        Pattern editTitlePattern =
             Pattern.compile("F\\((edit:.*?)\\) \\[\\[(.*?)\\]\\[(.*?)\\]\\]");
         try
         {
 			this.todos = appdb.getTodos();
-			
+
             String thisLine;
             Stack<Node> nodeStack = new Stack();
             Pattern propertiesLine = Pattern.compile("^\\s*:[A-Z]+:");
@@ -165,7 +165,8 @@ public class OrgFileParser {
                 if (thisLine.charAt(0) == '#') {
                     if (thisLine.indexOf("#+TITLE:") != -1) {
                         fileNode.altNodeTitle = thisLine.substring(
-                                     thisLine.indexOf("#+TITLE: ") + 9);
+                             thisLine.indexOf("#+TITLE:") + 8).trim();
+
                     }
                 }
                 for (int idx = 0; idx < thisLine.length(); idx++) {
@@ -273,7 +274,7 @@ public class OrgFileParser {
             for (;nodeDepth > 0; nodeDepth--) {
                 nodeStack.pop();
             }
-            fileNode.parsed = true;        
+            fileNode.parsed = true;
             breader.close();
         }
         catch (IOException e) {

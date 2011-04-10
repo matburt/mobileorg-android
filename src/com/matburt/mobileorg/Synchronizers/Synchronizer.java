@@ -50,13 +50,14 @@ abstract public class Synchronizer
                 writer.write(baf, 0, actual);
                 actual = reader.read(baf, 0, BUFFER_SIZE);
             }
+            writer.close();
         }
         catch (java.io.IOException e) {
             throw new ReportableError(
                            r.getString(R.string.error_file_write,
                                        orgPath),
                            e);
-                    
+
         }
     }
 
