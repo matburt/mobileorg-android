@@ -63,6 +63,9 @@ abstract public class Synchronizer
 
     public String fetchOrgFileString(String orgPath) throws ReportableError {
         BufferedReader reader = this.fetchOrgFile(orgPath);
+        if (reader == null) {
+            return "";
+        }
         String fileContents = "";
         String thisLine = "";
         try {

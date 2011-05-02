@@ -142,6 +142,9 @@ public class WebDAVSynchronizer extends Synchronizer
                     r.getString(R.string.error_invalid_url, orgUrl),
                     e);
         }
+        if (mainFile == null) {
+            return null;
+        }
         return new BufferedReader(new InputStreamReader(mainFile));
     }
 
@@ -261,7 +264,7 @@ public class WebDAVSynchronizer extends Synchronizer
         			e);
         }
     }
-    
+
     private void appendUrlFile(String url,
     							DefaultHttpClient httpClient,
     							String content) throws NotFoundException, ReportableError {

@@ -298,7 +298,7 @@ public class MobileOrgActivity extends ListActivity
         mNodePath = nodeIntent.getIntegerArrayListExtra("nodePath");
         populateDisplay();
     }
-    
+
     public void populateDisplay() {
     	MobileOrgApplication appInst = (MobileOrgApplication) this.getApplication();
     	// mNodePath contains a
@@ -482,7 +482,7 @@ public class MobileOrgActivity extends ListActivity
             }
         };
         syncThread.start();
-        
+
         syncDialog = ProgressDialog.show(this, "",getString(R.string.sync_wait), true);
     }
 

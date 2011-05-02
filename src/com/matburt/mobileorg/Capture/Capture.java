@@ -50,12 +50,6 @@ public class Capture extends Activity implements OnClickListener
         if (this.orgEditDisplay.getText().toString().length() > 0) {
             if (this.editType == null) {
                 this.noteCreator.writeNewNote(this.orgEditDisplay.getText().toString());
-            } else {
-                this.noteCreator.editNote(this.editType,
-                                          this.id,
-                                          this.nodeTitle,
-                                          this.srcText,
-                                          this.orgEditDisplay.getText().toString());
             }
         }
         Intent result = new Intent();
