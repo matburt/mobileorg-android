@@ -116,7 +116,15 @@ public class DropboxSynchronizer extends Synchronizer {
 
     public BufferedReader fetchOrgFile(String orgPath) throws NotFoundException, ReportableError {
         Log.i(LT, "Downloading " + orgPath);
-        FileDownload fd = api.getFileStream("dropbox", orgPath, null);
+        FileDownload fd;
+        try {
+            fd = api.getFileStream("dropbox", orgPath, null);
+        }
+        catch (Exception e) {
+            throw new ReportableError(
+                                      r.getString(R.string.dropbox_fetch_error, orgPath, e.toString()),
+                                      null);
+        }
         Log.i(LT, "Finished downloading");
         BufferedReader reader = new BufferedReader(new InputStreamReader(fd.is));
         return reader;
