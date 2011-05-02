@@ -30,6 +30,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.regex.Pattern;
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLSession;
 
 public class WebDAVSynchronizer extends Synchronizer
 {
@@ -198,6 +200,12 @@ public class WebDAVSynchronizer extends Synchronizer
         try {
             HttpResponse res = httpClient.execute(new HttpGet(url));
             StatusLine status = res.getStatusLine();
+            if (status.getStatusCode() == 401) {
+                throw new ReportableError(r.getString(R.string.error_url_fetch_detail,
+                                                      url,
+                                                      "Invalid username or password"),
+                                          null);
+            }
             if (status.getStatusCode() == 404) {
                 return null;
             }

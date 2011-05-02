@@ -27,7 +27,7 @@ public class OrgFileParser {
     String storageMode = null;
     Pattern titlePattern = null;
     FileInputStream fstream;
-    public Node rootNode = new Node("", Node.HEADING);
+    public Node rootNode = new Node("");
     MobileOrgDatabase appdb;
 	ArrayList<HashMap<String, Integer>> todos = null;
     public static final String LT = "MobileOrg";
@@ -110,11 +110,9 @@ public class OrgFileParser {
         return newTitle;
     }
 
-    public long createEntry(String heading, int nodeType,
-                            String content, long parentId) {
-        ContentValues recValues = new ContentValues(); 
+    public long createEntry(String heading, String content, long parentId) {
+        ContentValues recValues = new ContentValues();
         recValues.put("heading", heading);
-        recValues.put("type", nodeType);
         recValues.put("content", content);
         recValues.put("parentid", parentId);
         return this.appdb.appdb.insert("data", null, recValues);
@@ -184,8 +182,7 @@ public class OrgFileParser {
                 if (numstars > 0) {
                     String title = thisLine.substring(numstars+1);
                     TitleComponents titleComp = parseTitle(this.stripTitle(title));
-                    Node newNode = new Node(titleComp.title,
-                                            Node.HEADING);
+                    Node newNode = new Node(titleComp.title);
                     newNode.setFullTitle(this.stripTitle(title));
                     newNode.todo = titleComp.todo;
                     newNode.priority = titleComp.priority;
@@ -295,9 +292,7 @@ public class OrgFileParser {
                key.endsWith(".pgp") ||
                key.endsWith(".enc"))
             {
-                Node nnode = new Node(key,
-                                      Node.HEADING,
-                                      true);
+                Node nnode = new Node(key, true);
                 nnode.altNodeTitle = altName;
                 nnode.setParentNode(nodeStack.peek());
                 nnode.addProperty("ID", this.getNodePath(nnode));
@@ -305,9 +300,7 @@ public class OrgFileParser {
                 continue;
             }
 
-            Node fileNode = new Node(key,
-                                     Node.HEADING,
-                                     false);
+            Node fileNode = new Node(key, false);
             fileNode.setParentNode(nodeStack.peek());
             fileNode.addProperty("ID", this.getNodePath(fileNode));
             fileNode.altNodeTitle = altName;

@@ -8,11 +8,6 @@ import java.util.regex.Pattern;
 
 public class Node implements Cloneable {
 
-    static int HEADER = 0;
-    static int HEADING = 1;
-    static int COMMENT = 2;
-    static int DATA = 3;
-
     public ArrayList<Node> subNodes = new ArrayList<Node>();
     public ArrayList<String> tags = new ArrayList<String>();
     HashMap<String, String> properties = new HashMap<String, String>();
@@ -21,7 +16,6 @@ public class Node implements Cloneable {
     public String todo = "";
     public String priority = "";
     public String nodeId = "";
-    int nodeType;
     public String nodePayload = "";
     public String nodeTitle = "";
     public String tagString = "";
@@ -32,16 +26,19 @@ public class Node implements Cloneable {
     public boolean parsed = false;
     Node parentNode = null;
 
-    Node(String heading, int ntype) {
-        this(heading, ntype, false);
+    public Node() {
+        this("", false);
     }
 
-    Node(String heading, int ntype, boolean encrypted) {
+    public Node(String heading) {
+        this(heading, false);
+    }
+
+    public Node(String heading, boolean encrypted) {
         this.nodeName = heading;
-        this.nodeType = ntype;
         this.encrypted = encrypted;
     }
-	
+
 	public static Comparator<Node> comparator = new Comparator<Node>() {
 		@Override
 		public int compare(Node node1, Node node2) {
@@ -90,7 +87,7 @@ public class Node implements Cloneable {
     boolean hasProperty(String key) {
         return this.properties.containsKey(key);
     }
-    
+
     public void applyEdit(EditNode e) {
     	if (e.editType.equals("todo"))
     		todo = e.newVal;
@@ -101,12 +98,25 @@ public class Node implements Cloneable {
     	else if (e.editType.equals("body"))
     		nodePayload = e.newVal;
     }
-    
+
     public void applyEdits(ArrayList<EditNode> edits) {
     	if (edits != null) {
     		for (EditNode e : edits) {
     			this.applyEdit(e);
     		}
     	}
+    }
+
+    public String generateNoteEntry() {
+        String noteStr = "* ";
+        if (todo != null && !todo.equals("")) {
+            noteStr += todo + " ";
+        }
+        if (priority != null && !priority.equals("")) {
+            noteStr += "[#" + priority + "] ";
+        }
+        noteStr += this.nodeName + "\n";
+        noteStr += this.nodePayload + "\n\n";
+        return noteStr;
     }
 }

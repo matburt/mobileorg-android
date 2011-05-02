@@ -10,10 +10,21 @@
             android:layout_weight="1"
             android:gravity="top"
 			android:inputType="text|textMultiLine|textAutoCorrect|textCapSentences"/>
-  <Button android:id="@+id/captureSave"
-          android:text="Save"
-          android:layout_width="fill_parent"
-          android:layout_height="fill_parent"
-          android:layout_weight="5"/>
+  <LinearLayout
+      android:orientation="horizontal"
+      android:layout_width="fill_parent"
+      android:layout_height="fill_parent"
+      android:layout_weight="6">
+    <Button android:id="@+id/captureAdvanced"
+            android:text="Advanced Capture"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="6"/>
+    <Button android:id="@+id/captureSave"
+            android:text="Save"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="6"/>
+  </LinearLayout>
 </LinearLayout>
 

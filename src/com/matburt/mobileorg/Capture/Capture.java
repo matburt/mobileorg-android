@@ -15,6 +15,7 @@ public class Capture extends Activity implements OnClickListener
 {
     private EditText orgEditDisplay;
     private Button saveButton;
+    private Button advancedButton;
     private boolean editMode = false;
     private String id = null;
     private String editType = null;
@@ -30,8 +31,10 @@ public class Capture extends Activity implements OnClickListener
         setContentView(R.layout.simpleedittext);
         this.noteCreator = new CreateEditNote(this);
         this.saveButton = (Button)this.findViewById(R.id.captureSave);
+        this.advancedButton = (Button)this.findViewById(R.id.captureAdvanced);
         this.orgEditDisplay = (EditText)this.findViewById(R.id.orgEditTxt);
         this.saveButton.setOnClickListener(this);
+        this.advancedButton.setOnClickListener(this);
         this.populateDisplay();
     }
 
@@ -46,9 +49,6 @@ public class Capture extends Activity implements OnClickListener
     public boolean onSave() {
         if (this.orgEditDisplay.getText().toString().length() > 0) {
             if (this.editType == null) {
-                //Capture Change:
-                //Return text to ViewNodeDetails instead of creating a new
-                //note.
                 this.noteCreator.writeNewNote(this.orgEditDisplay.getText().toString());
             } else {
                 this.noteCreator.editNote(this.editType,
@@ -66,13 +66,26 @@ public class Capture extends Activity implements OnClickListener
     }
 
     public void onClick(View v) {
-        if (!this.onSave()) {
-            Log.e(LT, "Failed to save file");
+        if (v == this.advancedButton) {
+            Log.i(LT, "Advanced");
+            Intent advancedIntent = new Intent(this, ViewNodeDetailsActivity.class);
+            advancedIntent.putExtra("actionMode", "create");
+            startActivity(advancedIntent);
+            this.finish();
+        }
+        else if (v == this.saveButton) {
+            if (!this.onSave()) {
+                Log.e(LT, "Failed to save file");
+            }
         }
     }
 
     public void populateDisplay() {
         Intent txtIntent = getIntent();
+        String actionMode =  txtIntent.getStringExtra("actionMode");
+        if (actionMode == null) {
+            this.advancedButton.setVisibility(View.GONE);
+        }
         this.srcText = txtIntent.getStringExtra("txtValue");
 		if((this.srcText == null || this.srcText.length() == 0) &&
 		   txtIntent != null) {

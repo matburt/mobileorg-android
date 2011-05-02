@@ -153,7 +153,7 @@ public class MobileOrgActivity extends ListActivity
                 dateInfo += "DEADLINE: " + formatter.format(
                                 this.thisNode.subNodes.get(position).deadline) + " ";
             }
-            
+
             if (this.thisNode.subNodes.get(position).schedule != null) {
                 dateInfo += "SCHEDULED: " + formatter.format(
                                 this.thisNode.subNodes.get(position).schedule) + " ";
@@ -410,7 +410,7 @@ public class MobileOrgActivity extends ListActivity
                 appInst.popSelection();
                 return;
             }
-            
+
             Node thisNode = appInst.getSelectedNode();
             String userSynchro = this.appSettings.getString("syncSource","");
             String orgBasePath = "";
@@ -488,13 +488,8 @@ public class MobileOrgActivity extends ListActivity
 
     public boolean runCapture() {
         Intent captureIntent = new Intent(this, Capture.class);
+        captureIntent.putExtra("actionMode", "create");
         startActivityForResult(captureIntent, 3);
-        //Capture Change
-        //Link to new Capture/Edit interface
-        // captureIntent.setClassName("com.matburt.mobileorg",
-        //                            "com.matburt.mobileorg.ViewNodeDetailsActivity");
-        // captureIntent.putExtra("actionMode", "create");
-        // startActivity(captureIntent);
         return true;
     }
 

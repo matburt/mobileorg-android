@@ -37,11 +37,15 @@
 		android:inputType="textMultiLine" />
 	</TableRow>
 	<TableRow>
-		<Button android:id="@+id/view_as_document" 
-		android:text="@string/view_as_document"
-		android:layout_span="4"
-		android:layout_width="fill_parent"
-		android:layout_height="fill_parent"
-		/>
+      <Button android:id="@+id/view_as_document" 
+              android:text="@string/view_as_document"
+              android:layout_width="fill_parent"
+              android:layout_height="fill_parent"
+              />
+      <Button android:id="@+id/save_node"
+              android:text="Save Note"
+              android:layout_width="fill_parent"
+              android:layout_height="fill_parent"
+              />
 	</TableRow>
 </TableLayout>

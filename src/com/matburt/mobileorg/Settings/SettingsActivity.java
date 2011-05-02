@@ -13,13 +13,13 @@ import java.util.List;
 
 public class SettingsActivity extends PreferenceActivity
 {
-    
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Intent prefsIntent = getIntent();
         int resourceID = prefsIntent.getIntExtra("prefs", R.xml.preferences);
-        addPreferencesFromResource(resourceID);                
+        addPreferencesFromResource(resourceID);
         populateSyncSources();
     }
 
@@ -51,7 +51,7 @@ public class SettingsActivity extends PreferenceActivity
         //fill in the Intents for built-in synchronizers
         Intent synchroIntent = new Intent(this, WebDAVSettingsActivity.class);
         SynchronizerPreferences.syncIntents.put("webdav",synchroIntent);
-            
+
         synchroIntent = new Intent(this, SDCardSettingsActivity.class);
         SynchronizerPreferences.syncIntents.put("sdcard", synchroIntent);
 
@@ -61,5 +61,5 @@ public class SettingsActivity extends PreferenceActivity
         //populate the sync source list with updated data
         syncSource.setEntries(entries);
         syncSource.setEntryValues(values);
-    }        
+    }
 }
