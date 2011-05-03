@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteDiskIOException;
 import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -49,21 +50,52 @@ public class MobileOrgDatabase {
                     r.getString(R.string.error_opening_database));
             return;
         }
-        this.appdb.execSQL("CREATE TABLE IF NOT EXISTS files"
+        this.wrapExecSQL("CREATE TABLE IF NOT EXISTS files"
                            + " (file VARCHAR, name VARCHAR,"
                            + " checksum VARCHAR);");
-        this.appdb.execSQL("CREATE TABLE IF NOT EXISTS todos"
+        this.wrapExecSQL("CREATE TABLE IF NOT EXISTS todos"
                            + " (tdgroup int, name VARCHAR,"
                            + " isdone INT)");
-        this.appdb.execSQL("CREATE TABLE IF NOT EXISTS priorities"
+        this.wrapExecSQL("CREATE TABLE IF NOT EXISTS priorities"
                            + " (tdgroup int, name VARCHAR,"
-                           + " isdone INT)");                           
+                           + " isdone INT)");
         this.lastStorageMode = storageMode;
     }
 
     public void close() {
         this.appdb.close();
     }
+
+    public void wrapExecSQL(String sqlText) {
+        try {
+            this.appdb.execSQL(sqlText);
+        }
+        catch (SQLiteDiskIOException e) {
+            ErrorReporter.displayError(this.appcontext,
+                    r.getString(R.string.error_sqlio));
+        }
+        catch (Exception e) {
+            ErrorReporter.displayError(this.appcontext,
+                                       r.getString(R.string.error_generic_database, e.toString()));
+        }
+    }
+
+    public Cursor wrapRawQuery(String sqlText) {
+        Cursor result = null;
+        try {
+            result = this.appdb.rawQuery(sqlText, null);
+        }
+        catch (SQLiteDiskIOException e) {
+            ErrorReporter.displayError(this.appcontext,
+                    r.getString(R.string.error_sqlio));
+        }
+        catch (Exception e) {
+            ErrorReporter.displayError(this.appcontext,
+                                       r.getString(R.string.error_generic_database, e.toString()));
+        }
+        return result;
+    }
+
 
     public void checkStorageMode() {
         String storageMode = this.appSettings.getString("storageMode", "");
@@ -76,7 +108,7 @@ public class MobileOrgDatabase {
     public HashMap<String, String> getOrgFiles() {
         this.checkStorageMode();
         HashMap<String, String> allFiles = new HashMap<String, String>();
-        Cursor result = this.appdb.rawQuery("SELECT file, name FROM files", null);
+        Cursor result = this.wrapRawQuery("SELECT file, name FROM files");
         if (result != null) {
             if (result.getCount() > 0) {
                 result.moveToFirst();
@@ -93,7 +125,7 @@ public class MobileOrgDatabase {
     public HashMap<String, String> getChecksums() {
         this.checkStorageMode();
         HashMap<String, String> fchecks = new HashMap<String, String>();
-        Cursor result = this.appdb.rawQuery("SELECT file, checksum FROM files", null);
+        Cursor result = this.wrapRawQuery("SELECT file, checksum FROM files");
         if (result != null) {
             if (result.getCount() > 0) {
                 result.moveToFirst();
@@ -109,37 +141,37 @@ public class MobileOrgDatabase {
 
     public void removeFile(String filename) {
         this.checkStorageMode();
-        this.appdb.execSQL("DELETE FROM files " +
+        this.wrapExecSQL("DELETE FROM files " +
                            "WHERE file = '"+filename+"'");
         Log.i(LT, "Finished deleting from files");
     }
 
     public void clearData() {
         this.checkStorageMode();
-        this.appdb.execSQL("DELETE FROM data");
+        this.wrapExecSQL("DELETE FROM data");
     }
 
     public void clearTodos() {
         this.checkStorageMode();
-        this.appdb.execSQL("DELETE from todos");
+        this.wrapExecSQL("DELETE from todos");
     }
 
     public void clearPriorities() {
         this.checkStorageMode();
-        this.appdb.execSQL("DELETE from priorities");
+        this.wrapExecSQL("DELETE from priorities");
     }
 
     public void addOrUpdateFile(String filename, String name, String checksum) {
         this.checkStorageMode();
-        Cursor result = this.appdb.rawQuery("SELECT * FROM files " +
-                                       "WHERE file = '"+filename+"'", null);
+        Cursor result = this.wrapRawQuery("SELECT * FROM files " +
+                                       "WHERE file = '"+filename+"'");
         if (result != null) {
             if (result.getCount() > 0) {
-                this.appdb.execSQL("UPDATE files set name = '"+name+"', "+
+                this.wrapExecSQL("UPDATE files set name = '"+name+"', "+
                               "checksum = '"+ checksum + "' where file = '"+filename+"'");
             }
             else {
-                this.appdb.execSQL("INSERT INTO files (file, name, checksum) " +
+                this.wrapExecSQL("INSERT INTO files (file, name, checksum) " +
                               "VALUES ('"+filename+"','"+name+"','"+checksum+"')");
             }
         }
@@ -148,9 +180,8 @@ public class MobileOrgDatabase {
 
     public ArrayList<HashMap<String, Integer>> getTodos() {
         ArrayList<HashMap<String, Integer>> allTodos = new ArrayList<HashMap<String, Integer>>();
-        Cursor result = this.appdb.rawQuery("SELECT tdgroup, name, isdone " +
-                                            "FROM todos order by tdgroup",
-                                            null);
+        Cursor result = this.wrapRawQuery("SELECT tdgroup, name, isdone " +
+                                            "FROM todos order by tdgroup");
         if (result != null) {
             HashMap<String, Integer> grouping = new HashMap<String, Integer>();
             int resultgroup = 0;
@@ -174,8 +205,7 @@ public class MobileOrgDatabase {
 
     public ArrayList<ArrayList<String>> getPriorities() {
         ArrayList<ArrayList<String>> allPriorities = new ArrayList<ArrayList<String>>();
-        Cursor result = this.appdb.rawQuery("SELECT tdgroup, name FROM priorities order by tdgroup",
-                                            null);
+        Cursor result = this.wrapRawQuery("SELECT tdgroup, name FROM priorities order by tdgroup");
         if (result != null) {
             ArrayList<String> grouping = new ArrayList();
             int resultgroup = 0;
@@ -204,7 +234,7 @@ public class MobileOrgDatabase {
                 String isDone = "0";
                 if (entry.get(key))
                     isDone = "1";
-                this.appdb.execSQL("INSERT INTO todos (tdgroup, name, isdone) " +
+                this.wrapExecSQL("INSERT INTO todos (tdgroup, name, isdone) " +
                                    "VALUES (" + grouping + "," +
                                    "        '" + key + "'," +
                                    "        " + isDone + ")");
@@ -217,7 +247,7 @@ public class MobileOrgDatabase {
         this.clearPriorities();
         for (int idx = 0; idx < newList.size(); idx++) {
             for (int jdx = 0; jdx < newList.get(idx).size(); jdx++) {
-                this.appdb.execSQL("INSERT INTO priorities (tdgroup, name, isdone) " +
+                this.wrapExecSQL("INSERT INTO priorities (tdgroup, name, isdone) " +
                                    "VALUES (" + Integer.toString(idx) + "," +
                                    "        '" + newList.get(idx).get(jdx) + "'," +
                                    "        0)");
