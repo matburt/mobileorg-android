@@ -34,7 +34,7 @@
   <string name="apg_version_not_supported">APG version not supported</string>
   <string name="view_as_document">View as document</string>
   <string name="title">Title</string>
-  <string name="body">Body</string>
+  <string name="body">Click here to set the body text</string>
   <string name="tags">Tags</string>
   <string name="priority">Priority</string>
   <string name="todo_state">Todo state</string>
