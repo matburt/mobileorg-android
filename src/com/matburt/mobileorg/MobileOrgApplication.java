@@ -38,7 +38,7 @@ public class MobileOrgApplication extends Application {
 
     public void popSelection()
     {
-        if (nodeSelection.size() > 0)
+        if (this.nodeSelection != null && this.nodeSelection.size() > 0)
             this.nodeSelection.remove(nodeSelection.size()-1);
     }
 

@@ -6,6 +6,7 @@ import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDiskIOException;
+import android.database.DatabaseUtils;
 import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -42,7 +43,13 @@ public class MobileOrgDatabase {
                 morgDir.mkdir();
             }
             File morgFile = new File(morgDir, "mobileorg.db");
-            this.appdb = SQLiteDatabase.openOrCreateDatabase(morgFile, null);
+            try {
+                this.appdb = SQLiteDatabase.openOrCreateDatabase(morgFile, null);
+            }
+            catch (Exception e) {
+                ErrorReporter.displayError(this.appcontext,
+                                           r.getString(R.string.error_opening_database));
+            }
             Log.d(LT, "Setting database path to " + morgFile.getAbsolutePath());
         }
         else {
@@ -68,7 +75,7 @@ public class MobileOrgDatabase {
 
     public void wrapExecSQL(String sqlText) {
         try {
-            this.appdb.execSQL(sqlText);
+            this.appdb.execSQL(DatabaseUtils.sqlEscapeString(sqlText));
         }
         catch (SQLiteDiskIOException e) {
             ErrorReporter.displayError(this.appcontext,
@@ -83,7 +90,7 @@ public class MobileOrgDatabase {
     public Cursor wrapRawQuery(String sqlText) {
         Cursor result = null;
         try {
-            result = this.appdb.rawQuery(sqlText, null);
+            result = this.appdb.rawQuery(DatabaseUtils.sqlEscapeString(sqlText), null);
         }
         catch (SQLiteDiskIOException e) {
             ErrorReporter.displayError(this.appcontext,
