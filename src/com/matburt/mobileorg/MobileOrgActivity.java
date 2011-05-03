@@ -263,6 +263,9 @@ public class MobileOrgActivity extends ListActivity
     public void runParser() {
         MobileOrgApplication appInst = (MobileOrgApplication)this.getApplication();
         HashMap<String, String> allOrgList = this.appdb.getOrgFiles();
+        if (allOrgList.isEmpty()) {
+            return;
+        }
         String storageMode = this.getStorageLocation();
         String userSynchro = this.appSettings.getString("syncSource","");
         String orgBasePath = "";
