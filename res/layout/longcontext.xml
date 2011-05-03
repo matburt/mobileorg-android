@@ -16,30 +16,9 @@
   <TableRow/>
   <TableRow>
     <Button
-       android:id="@+id/documentSetTitle"
-       android:text="Edit Title"
+       android:id="@+id/documentEdit"
+       android:text="Edit"
        android:layout_width="fill_parent"
-       android:layout_height="fill_parent" />    
-  </TableRow>
-  <TableRow>
-    <Button
-       android:id="@+id/documentSetBody"
-       android:text="Edit Body"
-       android:layout_width="fill_parent"
-       android:layout_height="fill_parent" />    
-  </TableRow>
-  <TableRow>
-    <Button
-        android:id="@+id/documentSetTodo"
-        android:text="...TODO..."
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent" />
-  </TableRow>
-  <TableRow>
-    <Button
-        android:id="@+id/documentSetPriority"
-        android:text="...PRIORITY..."
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent" />    
+       android:layout_height="fill_parent" />
   </TableRow>
 </TableLayout>
