@@ -59,7 +59,7 @@ public class MobileOrgDatabase {
         }
         this.wrapExecSQL("CREATE TABLE IF NOT EXISTS files"
                            + " (file VARCHAR, name VARCHAR,"
-                           + " checksum VARCHAR);");
+                           + " checksum VARCHAR)");
         this.wrapExecSQL("CREATE TABLE IF NOT EXISTS todos"
                            + " (tdgroup int, name VARCHAR,"
                            + " isdone INT)");
@@ -75,7 +75,7 @@ public class MobileOrgDatabase {
 
     public void wrapExecSQL(String sqlText) {
         try {
-            this.appdb.execSQL(DatabaseUtils.sqlEscapeString(sqlText));
+            this.appdb.execSQL(sqlText);
         }
         catch (SQLiteDiskIOException e) {
             ErrorReporter.displayError(this.appcontext,
@@ -90,7 +90,7 @@ public class MobileOrgDatabase {
     public Cursor wrapRawQuery(String sqlText) {
         Cursor result = null;
         try {
-            result = this.appdb.rawQuery(DatabaseUtils.sqlEscapeString(sqlText), null);
+            result = this.appdb.rawQuery(sqlText, null);
         }
         catch (SQLiteDiskIOException e) {
             ErrorReporter.displayError(this.appcontext,
@@ -124,8 +124,8 @@ public class MobileOrgDatabase {
                                  result.getString(1));
                 } while(result.moveToNext());
             }
+            result.close();
         }
-        result.close();
         return allFiles;
     }
 
@@ -141,8 +141,8 @@ public class MobileOrgDatabase {
                                 result.getString(1));
                 } while (result.moveToNext());
             }
+            result.close();
         }
-        result.close();
         return fchecks;
     }
 
@@ -181,8 +181,8 @@ public class MobileOrgDatabase {
                 this.wrapExecSQL("INSERT INTO files (file, name, checksum) " +
                               "VALUES ('"+filename+"','"+name+"','"+checksum+"')");
             }
+            result.close();
         }
-        result.close();
     }
 
     public ArrayList<HashMap<String, Integer>> getTodos() {
@@ -205,8 +205,8 @@ public class MobileOrgDatabase {
                 } while(result.moveToNext());
                 allTodos.add(grouping);
             }
+            result.close();
         }
-        result.close();
         return allTodos;
     }
 
@@ -228,8 +228,8 @@ public class MobileOrgDatabase {
                 } while(result.moveToNext());
                 allPriorities.add(grouping);
             }
+            result.close();
         }
-        result.close();
         return allPriorities;
     }
 
