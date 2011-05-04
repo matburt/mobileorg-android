@@ -53,6 +53,12 @@ public class ViewNodeDetailsActivity extends Activity implements OnClickListener
         mSaveNode.setOnClickListener(this);
     }
 
+    @Override
+    public void onDestroy() {
+        this.mOrgDb.close();
+        super.onDestroy();
+    }
+
 	public void setSpinner(Spinner view, ArrayList data, String selection) {
 		// I can't use a simple cursor here because the todos table does not store an _id yet.
 		// Instead, we'll retrieve the todos from the database, and we'll use an array adapter.
