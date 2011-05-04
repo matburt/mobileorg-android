@@ -175,6 +175,9 @@ public class ViewNodeDetailsActivity extends Activity implements OnClickListener
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == EDIT_BODY) {
+            if (data == null || data.getStringExtra("text") == null) {
+                return;
+            }
             String newBody = data.getStringExtra("text");
             mNode.nodePayload = newBody;
             mBody.setText(newBody);

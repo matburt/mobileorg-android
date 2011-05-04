@@ -126,6 +126,10 @@ public class DropboxSynchronizer extends Synchronizer {
                                       null);
         }
         Log.i(LT, "Finished downloading");
+        if (fd.is == null) {
+            throw new ReportableError(r.getString(R.string.dropbox_fetch_error, orgPath, "Error downloading file"),
+                                      null);
+        }
         BufferedReader reader = new BufferedReader(new InputStreamReader(fd.is));
         return reader;
     }
