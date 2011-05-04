@@ -88,7 +88,7 @@ abstract public class Synchronizer
             FileOutputStream fs;
             try {
                 String normalized = localRelPath.replace("/", "_");
-                fs = this.rootContext.openFileOutput(normalized, Context.MODE_APPEND);
+                fs = this.rootContext.openFileOutput(normalized, Context.MODE_PRIVATE);
                 writer = new BufferedWriter(new OutputStreamWriter(fs));
             }
             catch (java.io.FileNotFoundException e) {
