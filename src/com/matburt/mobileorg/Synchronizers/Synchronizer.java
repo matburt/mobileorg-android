@@ -194,7 +194,7 @@ abstract public class Synchronizer
     }
 
     HashMap<String, String> getOrgFilesFromMaster(String master) {
-        Pattern getOrgFiles = Pattern.compile("\\[file:(.*?\\.(?:org|pgp|gpg|enc))\\]\\[(.*?)\\]\\]");
+        Pattern getOrgFiles = Pattern.compile("\\[file:(.*?)\\]\\[(.*?)\\]\\]");
         Matcher m = getOrgFiles.matcher(master);
         HashMap<String, String> allOrgFiles = new HashMap<String, String>();
         while (m.find()) {
