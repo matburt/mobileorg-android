@@ -237,7 +237,7 @@ public class DropboxSynchronizer extends Synchronizer {
 	            return true;
 	        }
     	}
-    	showToast("Failed user authentication for stored login tokens.");
+    	showToast("Failed user authentication for stored login tokens.  Go to 'Configure Synchronizer Settings' and make sure you are logged in");
     	setLoggedIn(false);
     	return false;
     }

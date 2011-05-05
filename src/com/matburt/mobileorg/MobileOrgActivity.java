@@ -463,6 +463,8 @@ public class MobileOrgActivity extends ListActivity
         }
 
         if (!appSync.checkReady()) {
+            Toast error = Toast.makeText((Context)this, "You have not fully configured the synchronizer.  Make sure you visit the 'Configure Synchronizer Settings' in the Settings menu", Toast.LENGTH_LONG);
+            error.show();
             this.onShowSettings();
             return;
         }
@@ -485,7 +487,6 @@ public class MobileOrgActivity extends ListActivity
             }
         };
         syncThread.start();
-
         syncDialog = ProgressDialog.show(this, "",getString(R.string.sync_wait), true);
     }
 
