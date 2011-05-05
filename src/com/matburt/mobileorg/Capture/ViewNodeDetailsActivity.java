@@ -170,6 +170,7 @@ public class ViewNodeDetailsActivity extends Activity implements OnClickListener
             mNode.nodePayload = mBody.getText().toString();;
             creator.writeNote(mNode.generateNoteEntry());
         }
+        creator.close();
 	}
 
     @Override

@@ -78,9 +78,8 @@ public class SDCardSynchronizer extends Synchronizer
         String indexFile = this.appSettings.getString("indexFilePath", "");
         File fIndexFile = new File(indexFile);
         String basePath = fIndexFile.getParent();
-        
+
         this.appendSDCardFile(basePath + "/mobileorg.org", fileContents);
-        this.removeFile("mobileorg.org");
     }
 
     private void appendSDCardFile(String path,

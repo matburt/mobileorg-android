@@ -354,7 +354,7 @@ public class OrgFileParser {
                         awaitingNewVal = false;
                         edits.add(thisNode);
                     }
-                    
+
                     if (awaitingOldVal) {
                         thisNode.oldVal += thisLine;
                     }
@@ -375,7 +375,7 @@ public class OrgFileParser {
         try {
             if (this.storageMode == null || this.storageMode.equals("internal")) {
                 String normalized = filename.replace("/", "_");
-                this.fstream = new FileInputStream("/data/data/com.matburt.mobileorg/files/" + 
+                this.fstream = new FileInputStream("/data/data/com.matburt.mobileorg/files/" +
                                                    normalized);
             }
             else if (this.storageMode.equals("sdcard")) {
