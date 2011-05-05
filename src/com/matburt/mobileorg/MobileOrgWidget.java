@@ -69,12 +69,16 @@ public class MobileOrgWidget extends AppWidgetProvider {
                                                   this.appdb, orgBasePath);
             ofp.parse();
             Node agendaNode = ofp.rootNode.findChildNode("agendas.org");
-            Node todoNode = agendaNode.findChildNode("ToDo: ALL");
-            String widgetBuffer = "";
-            for (int idx = 0; idx < todoNode.subNodes.size(); idx++) {
-                widgetBuffer = widgetBuffer + todoNode.subNodes.get(idx).nodeName + "\n";
+            if (agendaNode != null) {
+                Node todoNode = agendaNode.findChildNode("ToDo: ALL");
+                if (todoNode != null) {
+                    String widgetBuffer = "";
+                    for (int idx = 0; idx < todoNode.subNodes.size(); idx++) {
+                        widgetBuffer = widgetBuffer + todoNode.subNodes.get(idx).nodeName + "\n";
+                    }
+                    updateViews.setTextViewText(R.id.message, widgetBuffer);
+                }
             }
-            updateViews.setTextViewText(R.id.message, widgetBuffer);
             return updateViews;
         }
 
