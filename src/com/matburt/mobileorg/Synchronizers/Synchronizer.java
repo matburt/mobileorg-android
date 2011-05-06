@@ -221,6 +221,7 @@ abstract public class Synchronizer
         Matcher m = getTodos.matcher(master);
         ArrayList<HashMap<String, Boolean>> todoList = new ArrayList<HashMap<String, Boolean>>();
         while (m.find()) {
+            String lastTodo = "";
             HashMap<String, Boolean> holding = new HashMap<String, Boolean>();
             Boolean isDone = false;
             for (int idx = 1; idx <= m.groupCount(); idx++) {
@@ -232,10 +233,14 @@ abstract public class Synchronizer
                     }
                     String[] grouping = m.group(idx).split("\\s+");
                     for (int jdx = 0; jdx < grouping.length; jdx++) {
+                        lastTodo = grouping[jdx].trim();
                         holding.put(grouping[jdx].trim(),
                                     isDone);
                     }
                 }
+            }
+            if (!isDone) {
+                holding.put(lastTodo, true);
             }
             todoList.add(holding);
         }
