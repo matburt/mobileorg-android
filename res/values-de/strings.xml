@@ -1,14 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">MobileOrgActivity</string>
-    <string name="menu_outline">Gliederung</string>
-    <string name="menu_capture">Erfassen</string>
-    <string name="menu_settings">Einstellungen</string>
-    <string name="menu_sync">Abgleichen</string>
-    <string name="sync_wait">Datenabgleich, bitte warten...</string>
-    <string name="sync_failed">Datenabgleich fehlgeschlagen, wiederholen?</string>
-    <string name="yes">Ja</string>
-    <string name="no">Nein</string>
+  <string name="app_name">MobileOrgActivity</string>
+  <string name="menu_outline">Gliederung</string>
+  <string name="menu_capture">Erfassen</string>
+  <string name="menu_settings">Einstellungen</string>
+  <string name="menu_sync">Synchronisieren</string>
+  <string name="sync_wait">Daten werden synchronisiert, bitte warten...</string>
+  <string name="sync_failed">Synchronisation fehlgeschlagen, wiederholen?</string>
+  <string name="yes">Ja</string>
+  <string name="no">Nein</string>
+  <string name="error_bad_url">Der URL %s ist fehlerhaft</string><string name="error_dialog_title">Problem</string>
+
+  <string name="title_do_auto_sync">Synchronisierung im Hintergrund</string>
+  <string name="summary_do_auto_sync">Automatisch die MobileOrg Daten im Hintergrund synchronisieren</string>
+  <string name="title_auto_sync_interval">Synchronisationsintervall</string>
+  <string name="summary_auto_sync_interval">Wie häufig im Hintergrund abgeglichen werden soll</string>
+
+  <string name="error_sqlio">Problem beim Lesen der Datenbank. Ist das Medium fehlerhaft oder die SD-Karte nicht verfügbar?</string>
+  <string name="error_generic_database">Allgemeiner Datenbankfehler: %s</string>
+  <string name="error_file_not_found">Die Datei %s wurde nicht gefunden</string>
+  <string name="error_file_permissions">Zugriffsrechtproblem mit Datei %s</string>
+  <string name="error_file_read">Beim Lesen von Datei %s trat ein Fehler auf</string>
+  <string name="error_file_write">Beim Schreiben von Datei %s trat ein Fehler auf</string>
+  <string name="error_invalid_url">URL beinhaltet nicht erlaubte Zeichen: %s</string>
+  <string name="error_synchronizer_type_unknown">Unbekannte Synchronisationsmethode %s"</string>
+  <string name="error_local_storage_method_unknown">Unbekannte lokale Speichermethode %s</string>
+  <string name="error_unsupported_encoding">Nicht unterstützte Kodierung in Datei %s</string>
+  <string name="error_url_fetch">Beim Laden des URLs %s tauchte ein allgemeiner Fehler auf</string>
+  <string name="error_url_fetch_detail">Fehler beim Herunterladen von URL %1$s: %2$s</string>
+  <string name="error_url_put_detail">Fehler beim Hochladen von URL %1$s: %2$s</string>
+  <string name="error_opening_database">Beim Anlegen der Datenbank passierte ein Fehler.  Prüfen Sie die Einstellung für den lokalen Speicherort und vergewissern Sie sich, dass die SD-Karte für das Schreiben verfügbar ist</string>
+  <string name="error_url_put">Beim Hochladen des URLs %s trat ein Fehler auf</string>
+  <string name="dropbox_fetch_error">Es gab ein Problem beim Lesen des Dropbox-Pfades %1$s: %2$s</string>
+  <string name="apg_not_found">Android Privacy Guard konnte nicht gefunden werden</string>
+  <string name="apg_version_not_supported">Diese Version von Android Privacy Guard wird nicht unterstützt</string>
+  <string name="view_as_document">Inhalt anzeigen</string>
+  <string name="title">Titel</string>
+  <string name="body">Hier klicken, um Text hinzuzufügen</string>
+  <string name="tags">Tags</string>
+  <string name="priority">Priorität</string>
+  <string name="todo_state">Status</string>
+  <string name="back">Zurück</string>
 </resources>
 
 
