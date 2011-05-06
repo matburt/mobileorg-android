@@ -187,7 +187,7 @@ public class OrgFileParser {
                     newNode.setFullTitle(this.stripTitle(title));
                     newNode.todo = titleComp.todo;
                     newNode.priority = titleComp.priority;
-                    newNode.tags.addAll(titleComp.tags);
+                    newNode.setTags(titleComp.tags);
                     if (numstars > starStack.peek()) {
                         try {
                             Node lastNode = nodeStack.peek();

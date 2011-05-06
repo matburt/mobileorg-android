@@ -60,6 +60,16 @@ public class Node implements Cloneable {
         return null;
     }
 
+    void setTags(ArrayList<String> todoList) {
+        this.tags.clear();
+        this.tagString = "";
+        this.tags.addAll(todoList);
+        for (String titem : todoList) {
+            this.tagString += titem + " ";
+        }
+        this.tagString = this.tagString.trim();
+    }
+
     void setParentNode(Node pnode) {
         this.parentNode = pnode;
     }
