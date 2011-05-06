@@ -290,7 +290,7 @@ public class MobileOrgActivity extends ListActivity
 			Collections.sort(appInst.rootNode.subNodes, Node.comparator);
         }
         catch(Throwable e) {
-        	ErrorReporter.displayError(this, "An error occurred during parsing: " + e.toString());
+        	ErrorReporter.displayError(this, "An error occurred during parsing, try re-syncing: " + e.toString());
         }
     }
 

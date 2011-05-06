@@ -89,7 +89,7 @@ public class ViewNodeDetailsActivity extends Activity implements OnClickListener
         if (this.actionMode.equals("edit")) {
                 mNode = appInst.getNode(mNodePath);
                 mNode.applyEdits(appInst.findEdits(mNode.nodeId));
-        
+
                 Node parent = appInst.getParent(mNodePath);
                 mTitle.setText(mNode.nodeName);
                 mBody.setText(mNode.nodePayload);

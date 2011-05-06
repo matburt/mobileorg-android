@@ -147,13 +147,14 @@ public class OrgFileParser {
 
             String thisLine;
             Stack<Node> nodeStack = new Stack();
+            Stack<Integer> starStack = new Stack();
             Pattern propertiesLine = Pattern.compile("^\\s*:[A-Z]+:");
             if(breader == null)
             {
                 breader = this.getHandle(fileNode.nodeName);
             }
             nodeStack.push(fileNode);
-            int nodeDepth = 0;
+            starStack.push(0);
 
             while ((thisLine = breader.readLine()) != null) {
                 int numstars = 0;
@@ -187,7 +188,7 @@ public class OrgFileParser {
                     newNode.todo = titleComp.todo;
                     newNode.priority = titleComp.priority;
                     newNode.tags.addAll(titleComp.tags);
-                    if (numstars > nodeDepth) {
+                    if (numstars > starStack.peek()) {
                         try {
                             Node lastNode = nodeStack.peek();
                             newNode.setParentNode(lastNode);
@@ -197,19 +198,22 @@ public class OrgFileParser {
                         } catch (EmptyStackException e) {
                         }
                         nodeStack.push(newNode);
-                        nodeDepth++;
+                        starStack.push(numstars);
                     }
-                    else if (numstars == nodeDepth) {
+                    else if (numstars == starStack.peek()) {
                         nodeStack.pop();
+                        starStack.pop();
                         nodeStack.peek().addChildNode(newNode);
                         newNode.setParentNode(nodeStack.peek());
                         newNode.nodeId = this.getNodePath(newNode);
                         newNode.addProperty("ID", newNode.nodeId);
                         nodeStack.push(newNode);
+                        starStack.push(numstars);
                     }
-                    else if (numstars < nodeDepth) {
-                        for (;numstars <= nodeDepth; nodeDepth--) {
+                    else if (numstars < starStack.peek()) {
+                        while (numstars <= starStack.peek()) {
                             nodeStack.pop();
+                            starStack.pop();
                         }
 
                         Node lastNode = nodeStack.peek();
@@ -218,7 +222,7 @@ public class OrgFileParser {
                         newNode.addProperty("ID", newNode.nodeId);
                         lastNode.addChildNode(newNode);
                         nodeStack.push(newNode);
-                        nodeDepth++;
+                        starStack.push(numstars);
                     }
                 }
                 //content
@@ -268,8 +272,9 @@ public class OrgFileParser {
                     lastNode.addPayload(thisLine);
                 }
             }
-            for (;nodeDepth > 0; nodeDepth--) {
+            while (starStack.peek() > 0) {
                 nodeStack.pop();
+                starStack.pop();
             }
             fileNode.parsed = true;
             breader.close();
