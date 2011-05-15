@@ -49,7 +49,11 @@ public class Node implements Cloneable {
     void setFullTitle(String title) {
         this.nodeTitle = title;
     }
-
+    
+    void setAltTitle(String title) {
+        this.altNodeTitle = title;
+    }
+    
     public Node findChildNode(String regex) {
         Pattern findNodePattern = Pattern.compile(regex);
         for (int idx = 0; idx < this.subNodes.size(); idx++) {

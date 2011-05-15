@@ -112,6 +112,7 @@ public class MobileOrgDatabase {
         }
     }
 
+    //keys are files ("agenda.org"), vals are names ("Agenda Views")
     public HashMap<String, String> getOrgFiles() {
         this.checkStorageMode();
         HashMap<String, String> allFiles = new HashMap<String, String>();

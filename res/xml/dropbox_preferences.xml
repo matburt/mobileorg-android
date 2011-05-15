@@ -5,11 +5,11 @@
         android:name="Login"
         android:summary="Login to retrieve an OAuth token"
         android:title="Login"
-        android:key="dropboxLogin"/>
+        android:key="dropboxLogin" android:defaultValue="leo.alekseyev@gmail.com"/>
     <EditTextPreference
         android:name="Path"
         android:summary="Dropbox path to index.org file"
         android:title="Path"
-        android:key="dropboxPath"/>
+        android:key="dropboxPath" android:defaultValue="/testmobile/index.org"/>
   </PreferenceCategory>
 </PreferenceScreen>
