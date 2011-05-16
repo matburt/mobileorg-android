@@ -9,6 +9,6 @@
 
       https://www.dropbox.com/developers
   -->
-  <string name="dropbox_consumer_key">xxxxxxxxxxxxxxx</string>
-  <string name="dropbox_consumer_secret">xxxxxxxxxxxxxxx</string>
+  <string name="dropbox_consumer_key">xxxxxxxxxxxxxxxx</string>
+  <string name="dropbox_consumer_secret">xxxxxxxxxxxxxx</string>
 </resources>

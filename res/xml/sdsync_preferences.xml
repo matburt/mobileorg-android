@@ -2,8 +2,9 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
   <PreferenceCategory android:title="SDCard">
     <EditTextPreference
+        android:name="sdcardIndex"
         android:summary="Full local path to your index.org file"
         android:title="Index Path"
-        android:key="indexFilePath" android:defaultValue="/sdcard/tmp/org/index.org" android:name="sdcardIndex"/>
+        android:key="indexFilePath" />
   </PreferenceCategory>
 </PreferenceScreen>
