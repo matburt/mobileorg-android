@@ -41,6 +41,12 @@ public class MobileOrgApplication extends Application {
         if (this.nodeSelection != null && this.nodeSelection.size() > 0)
             this.nodeSelection.remove(nodeSelection.size()-1);
     }
+    
+    public int lastIndex() {
+        if (this.nodeSelection != null && this.nodeSelection.size() > 0)
+            return this.nodeSelection.get(nodeSelection.size()-1);
+    	return 0;
+    }
 
     public Node getSelectedNode()
     {
