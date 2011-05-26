@@ -57,7 +57,8 @@ public class OrgContextMenu extends Activity implements OnClickListener
         if (v == this.docButton) {
             textIntent.setClass(this,
                     SimpleTextDisplay.class);
-            textIntent.putExtra("txtValue", thisNode.nodePayload);
+			String txtValue = thisNode.nodeTitle + "\n\n" + thisNode.nodePayload;
+			textIntent.putExtra("txtValue", txtValue );
             textIntent.putExtra("nodeTitle", thisNode.nodeName);
         }
         else if (v == this.docEditButton) {
