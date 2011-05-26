@@ -108,7 +108,8 @@ public class ViewNodeDetailsActivity extends Activity implements OnClickListener
 	public void onClick(View v) {
 		if (v.equals(mViewAsDocument)) {
 			Intent intent = new Intent(this, SimpleTextDisplay.class);
-			intent.putExtra("txtValue", mNode.nodePayload);
+			String txtValue = mNode.nodeTitle + "\n\n" + mNode.nodePayload;
+			intent.putExtra("txtValue", txtValue );
 			this.startActivity(intent);
 		}
 		if (v.equals(mBody)) {
