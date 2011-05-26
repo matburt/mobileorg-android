@@ -222,8 +222,6 @@ public class MobileOrgActivity extends ListActivity
         }
     };
     
-    protected ArrayList<Integer> mNodePath;
-
     @Override
     public void onCreate(Bundle savedInstanceState)
     {
@@ -298,7 +296,8 @@ public class MobileOrgActivity extends ListActivity
     public void onResume() {
         super.onResume();
         Intent nodeIntent = getIntent();
-        mNodePath = nodeIntent.getIntegerArrayListExtra("nodePath");
+    	MobileOrgApplication appInst = (MobileOrgApplication) this.getApplication();
+        appInst.nodeSelection = nodeIntent.getIntegerArrayListExtra("nodePath");
         populateDisplay();
     }
 
@@ -517,6 +516,9 @@ public class MobileOrgActivity extends ListActivity
         case MobileOrgActivity.OP_MENU_SETTINGS:
             return this.onShowSettings();
         case MobileOrgActivity.OP_MENU_OUTLINE:
+            Intent dispIntent = new Intent(this, MobileOrgActivity.class);
+            dispIntent.putIntegerArrayListExtra( "nodePath", new ArrayList<Integer>() );
+            startActivity(dispIntent);
             return true;
         case MobileOrgActivity.OP_MENU_CAPTURE:
             return this.runCapture();
