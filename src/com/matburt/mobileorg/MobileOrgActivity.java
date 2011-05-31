@@ -1,5 +1,13 @@
 package com.matburt.mobileorg;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.StringReader;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+
 import android.app.Activity;
 import android.app.ListActivity;
 import android.app.ProgressDialog;
@@ -12,8 +20,18 @@ import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.*;
-import android.widget.*;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.BaseAdapter;
+import android.widget.LinearLayout;
+import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.Toast;
+
 import com.matburt.mobileorg.Capture.Capture;
 import com.matburt.mobileorg.Capture.ViewNodeDetailsActivity;
 import com.matburt.mobileorg.Error.ErrorReporter;
@@ -26,14 +44,6 @@ import com.matburt.mobileorg.Synchronizers.DropboxSynchronizer;
 import com.matburt.mobileorg.Synchronizers.SDCardSynchronizer;
 import com.matburt.mobileorg.Synchronizers.Synchronizer;
 import com.matburt.mobileorg.Synchronizers.WebDAVSynchronizer;
-
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.StringReader;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 
 public class MobileOrgActivity extends ListActivity
 {
@@ -303,7 +313,6 @@ public class MobileOrgActivity extends ListActivity
 
     public void populateDisplay() {
     	MobileOrgApplication appInst = (MobileOrgApplication) this.getApplication();
-    	// mNodePath contains a
         if (appInst.rootNode == null) {
             this.runParser();
         }
@@ -312,6 +321,7 @@ public class MobileOrgActivity extends ListActivity
     			appInst.nodeSelection,
     			appInst.edits,
     			this.appdb.getTodos()));
+        getListView().setSelection( displayIndex );
 	}
 
     @Override
@@ -434,6 +444,7 @@ public class MobileOrgActivity extends ListActivity
             expandSelection(appInst.nodeSelection);
         }
         else {
+        	displayIndex = appInst.lastIndex();
             appInst.popSelection();
         }
     }
