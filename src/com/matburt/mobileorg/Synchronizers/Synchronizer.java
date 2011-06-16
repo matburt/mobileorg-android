@@ -112,7 +112,7 @@ abstract public class Synchronizer
                 morgDir.mkdir();
                 if (morgDir.canWrite()){
                     File orgFileCard = new File(morgDir, localRelPath);
-                    FileWriter orgFWriter = new FileWriter(orgFileCard, true);
+                    FileWriter orgFWriter = new FileWriter(orgFileCard, false);
                     writer = new BufferedWriter(orgFWriter);
                 }
                 else {
