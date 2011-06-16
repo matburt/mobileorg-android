@@ -141,14 +141,17 @@ public class OrgFileParser {
     {
         Pattern editTitlePattern =
             Pattern.compile("F\\((edit:.*?)\\) \\[\\[(.*?)\\]\\[(.*?)\\]\\]");
+        boolean insertDummyNode = true;
         try
         {
 			this.todos = appdb.getTodos();
 
             String thisLine;
+            int lineNum=0;
             Stack<Node> nodeStack = new Stack();
             Stack<Integer> starStack = new Stack();
             Pattern propertiesLine = Pattern.compile("^\\s*:[A-Z]+:");
+            String emacsModeSetRE = "^\\s*-\\*-.+-\\*-";
             if(breader == null)
             {
                 breader = this.getHandle(fileNode.nodeName);
@@ -157,6 +160,7 @@ public class OrgFileParser {
             starStack.push(0);
 
             while ((thisLine = breader.readLine()) != null) {
+            	lineNum++;
                 int numstars = 0;
                 Matcher editm = editTitlePattern.matcher(thisLine);
                 if (thisLine.length() < 1 || editm.find())
@@ -194,6 +198,20 @@ public class OrgFileParser {
                             newNode.setParentNode(lastNode);
                             newNode.nodeId = this.getNodePath(newNode);
                             newNode.addProperty("ID", newNode.nodeId);
+                            //lastNode.addChildNode(newNode);
+                            //DEBUG
+                            ////newNode.nodeName = "*" + newNode.nodeName;
+                            if (insertDummyNode && ! Pattern.matches("\\s*",lastNode.nodePayload)) {
+                            	String dnSfx = ": root contents";
+                            	Node dummyNode = new Node(lastNode.nodeName + dnSfx);
+                            	dummyNode.setFullTitle(lastNode.nodeTitle + dnSfx);
+                            	//dummyNode.setAltTitle(lastNode.nodeTitle + ": root contents");
+	                            dummyNode.addPayload(lastNode.nodePayload);
+	                            dummyNode.setParentNode(lastNode);
+	                            dummyNode.nodeId = this.getNodePath(dummyNode);
+	                            dummyNode.addProperty("ID", dummyNode.nodeId);
+	                            lastNode.addChildNode(dummyNode);
+                            }
                             lastNode.addChildNode(newNode);
                         } catch (EmptyStackException e) {
                         }
@@ -241,7 +259,7 @@ public class OrgFileParser {
                         lastNode.nodeId = trimmedLine;
                         continue;
                     }
-                    else if (propm.find()) {
+                    else if (propm.find() || (lineNum == 1 && Pattern.matches(emacsModeSetRE, thisLine))) {
                         continue;
                     }
                     else if (thisLine.indexOf("DEADLINE:") != -1 ||
@@ -383,7 +401,7 @@ public class OrgFileParser {
                 this.fstream = new FileInputStream("/data/data/com.matburt.mobileorg/files/" +
                                                    normalized);
             }
-            else if (this.storageMode.equals("sdcard")) {
+            else if (this.storageMode.equals("sdcard")) { 
                 String dirActual = "";
                 if (filename.equals("mobileorg.org")) {
                     dirActual = "/sdcard/mobileorg/";
