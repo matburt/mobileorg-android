@@ -17,6 +17,7 @@ import com.matburt.mobileorg.R;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 
 public class DropboxSynchronizer extends Synchronizer {
     private boolean hasToken = false;
@@ -106,6 +107,19 @@ public class DropboxSynchronizer extends Synchronizer {
             this.appdb.addOrUpdateFile(masterList.get(key),
                                        key,
                                        newChecksums.get(key));
+        }
+
+        // the key-value semantics is switched: in getOrgFiles(), the HashMap has filenames as keys
+        // while in masterList (getOrgFilesFromMaster) the file aliases are keys
+        HashSet<String> filesInDb = new HashSet<String>(this.appdb.getOrgFiles().keySet());
+        HashSet<String> filesInIndexFile = new HashSet<String>(masterList.values());
+        filesInDb.removeAll(filesInIndexFile); //now contains stale DB files
+        if (filesInDb.size() > 0) {
+            Object[] arrObj = filesInDb.toArray();
+            for (int i = 0; i < arrObj.length; i++) {
+                Log.i(LT, "Orphaned file: " + (String)arrObj[i]);
+                removeFile((String)arrObj[i]);
+            }
         }
     }
 

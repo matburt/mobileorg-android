@@ -219,8 +219,10 @@ public class MobileOrgActivity extends ListActivity
     private static final int OP_MENU_CAPTURE = 4;
 
     private static final int RUN_PARSER = 3;
-    
+
     private static final String LT = "MobileOrg";
+
+    private int displayIndex;
     private ProgressDialog syncDialog;
     private MobileOrgDatabase appdb;
     private ReportableError syncError;
@@ -231,7 +233,7 @@ public class MobileOrgActivity extends ListActivity
             postSynchronize();
         }
     };
-    
+
     @Override
     public void onCreate(Bundle savedInstanceState)
     {
