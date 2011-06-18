@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
       package="com.matburt.mobileorg"
-      android:versionCode="55"
+      android:versionCode="60"
       android:versionName="0.6.0">
   <uses-sdk android:minSdkVersion="3" android:targetSdkVersion="4"/>
 
