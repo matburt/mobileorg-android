@@ -1,6 +1,7 @@
 package com.matburt.mobileorg.Parsing;
 
 import android.content.ContentValues;
+import android.os.Environment;
 import android.util.Log;
 import com.matburt.mobileorg.MobileOrgDatabase;
 
@@ -25,20 +26,24 @@ public class OrgFileParser {
     HashMap<String, String> orgPaths;
     ArrayList<Node> nodeList = new ArrayList<Node>();
     String storageMode = null;
+    String userSynchro = null;
     Pattern titlePattern = null;
     FileInputStream fstream;
     public Node rootNode = new Node("");
     MobileOrgDatabase appdb;
 	ArrayList<HashMap<String, Integer>> todos = null;
     public static final String LT = "MobileOrg";
-    public String orgDir = "/sdcard/mobileorg/";
+    public String orgDir = Environment.getExternalStorageDirectory() +
+                           "/mobileorg/";
 
     public OrgFileParser(HashMap<String, String> orgpaths,
                          String storageMode,
+                         String userSynchro,
                          MobileOrgDatabase appdb,
                          String orgBasePath) {
         this.appdb = appdb;
         this.storageMode = storageMode;
+        this.userSynchro = userSynchro;
         this.orgPaths = orgpaths;
         this.orgDir = orgBasePath;
     }
@@ -378,20 +383,24 @@ public class OrgFileParser {
     public BufferedReader getHandle(String filename) {
         BufferedReader breader = null;
         try {
-            if (this.storageMode == null || this.storageMode.equals("internal")) {
-                String normalized = filename.replace("/", "_");
-                this.fstream = new FileInputStream("/data/data/com.matburt.mobileorg/files/" +
-                                                   normalized);
-            }
-            else if (this.storageMode.equals("sdcard")) {
+            // If user is sync'ing from the SDCard, read directly from that
+            // location, regardless of storage mode.
+            if ("sdcard".equals(this.userSynchro)
+                    || "sdcard".equals(this.storageMode)) {
                 String dirActual = "";
                 if (filename.equals("mobileorg.org")) {
-                    dirActual = "/sdcard/mobileorg/";
+                    dirActual = Environment.getExternalStorageDirectory().getAbsolutePath() +
+                                "/mobileorg/";
                 }
                 else {
                     dirActual = this.orgDir;
                 }
                 this.fstream = new FileInputStream(dirActual + filename);
+            }
+            else if (this.storageMode == null || this.storageMode.equals("internal")) {
+                String normalized = filename.replace("/", "_");
+                this.fstream = new FileInputStream("/data/data/com.matburt.mobileorg/files/" +
+                                                   normalized);
             }
             else {
                 Log.e(LT, "[Parse] Unknown storage mechanism: " + this.storageMode);
