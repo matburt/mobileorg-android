@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
+import android.os.Environment;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.widget.RemoteViews;
@@ -62,7 +63,8 @@ public class MobileOrgWidget extends AppWidgetProvider {
                 orgBasePath = fIndexFile.getParent() + "/";
             }
             else {
-                orgBasePath = "/sdcard/mobileorg/";
+                orgBasePath = Environment.getExternalStorageDirectory().getAbsolutePath() +
+                              "/mobileorg/";
             }
 
             OrgFileParser ofp = new OrgFileParser(allOrgList,

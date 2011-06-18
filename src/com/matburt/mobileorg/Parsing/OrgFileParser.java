@@ -1,6 +1,7 @@
 package com.matburt.mobileorg.Parsing;
 
 import android.content.ContentValues;
+import android.os.Environment;
 import android.util.Log;
 import com.matburt.mobileorg.MobileOrgDatabase;
 
@@ -32,7 +33,8 @@ public class OrgFileParser {
     MobileOrgDatabase appdb;
 	ArrayList<HashMap<String, Integer>> todos = null;
     public static final String LT = "MobileOrg";
-    public String orgDir = "/sdcard/mobileorg/";
+    public String orgDir = Environment.getExternalStorageDirectory() +
+                           "/mobileorg/";
 
     public OrgFileParser(HashMap<String, String> orgpaths,
                          String storageMode,
@@ -387,7 +389,8 @@ public class OrgFileParser {
                     || "sdcard".equals(this.storageMode)) {
                 String dirActual = "";
                 if (filename.equals("mobileorg.org")) {
-                    dirActual = "/sdcard/mobileorg/";
+                    dirActual = Environment.getExternalStorageDirectory().getAbsolutePath() +
+                                "/mobileorg/";
                 }
                 else {
                     dirActual = this.orgDir;
