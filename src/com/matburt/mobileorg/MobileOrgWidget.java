@@ -65,7 +65,8 @@ public class MobileOrgWidget extends AppWidgetProvider {
                 orgBasePath = "/sdcard/mobileorg/";
             }
 
-            OrgFileParser ofp = new OrgFileParser(allOrgList, storageMode,
+            OrgFileParser ofp = new OrgFileParser(allOrgList,
+                                                  storageMode, userSynchro,
                                                   this.appdb, orgBasePath);
             ofp.parse();
             Node agendaNode = ofp.rootNode.findChildNode("agendas.org");

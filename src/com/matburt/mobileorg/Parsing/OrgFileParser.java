@@ -25,6 +25,7 @@ public class OrgFileParser {
     HashMap<String, String> orgPaths;
     ArrayList<Node> nodeList = new ArrayList<Node>();
     String storageMode = null;
+    String userSynchro = null;
     Pattern titlePattern = null;
     FileInputStream fstream;
     public Node rootNode = new Node("");
@@ -35,10 +36,12 @@ public class OrgFileParser {
 
     public OrgFileParser(HashMap<String, String> orgpaths,
                          String storageMode,
+                         String userSynchro,
                          MobileOrgDatabase appdb,
                          String orgBasePath) {
         this.appdb = appdb;
         this.storageMode = storageMode;
+        this.userSynchro = userSynchro;
         this.orgPaths = orgpaths;
         this.orgDir = orgBasePath;
     }
@@ -378,12 +381,10 @@ public class OrgFileParser {
     public BufferedReader getHandle(String filename) {
         BufferedReader breader = null;
         try {
-            if (this.storageMode == null || this.storageMode.equals("internal")) {
-                String normalized = filename.replace("/", "_");
-                this.fstream = new FileInputStream("/data/data/com.matburt.mobileorg/files/" +
-                                                   normalized);
-            }
-            else if (this.storageMode.equals("sdcard")) {
+            // If user is sync'ing from the SDCard, read directly from that
+            // location, regardless of storage mode.
+            if ("sdcard".equals(this.userSynchro)
+                    || "sdcard".equals(this.storageMode)) {
                 String dirActual = "";
                 if (filename.equals("mobileorg.org")) {
                     dirActual = "/sdcard/mobileorg/";
@@ -392,6 +393,11 @@ public class OrgFileParser {
                     dirActual = this.orgDir;
                 }
                 this.fstream = new FileInputStream(dirActual + filename);
+            }
+            else if (this.storageMode == null || this.storageMode.equals("internal")) {
+                String normalized = filename.replace("/", "_");
+                this.fstream = new FileInputStream("/data/data/com.matburt.mobileorg/files/" +
+                                                   normalized);
             }
             else {
                 Log.e(LT, "[Parse] Unknown storage mechanism: " + this.storageMode);

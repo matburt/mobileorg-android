@@ -291,6 +291,7 @@ public class MobileOrgActivity extends ListActivity
 
         OrgFileParser ofp = new OrgFileParser(allOrgList,
                                               storageMode,
+                                              userSynchro,
                                               this.appdb,
                                               orgBasePath);
         try {
@@ -439,6 +440,7 @@ public class MobileOrgActivity extends ListActivity
             String decryptedData = data.getStringExtra(Encryption.EXTRA_DECRYPTED_MESSAGE);
             OrgFileParser ofp = new OrgFileParser(appdb.getOrgFiles(),
                                                   getStorageLocation(),
+                                                  userSynchro,
                                                   appdb,
                                                   orgBasePath);
 

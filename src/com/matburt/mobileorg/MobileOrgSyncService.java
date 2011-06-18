@@ -171,6 +171,7 @@ public class MobileOrgSyncService extends Service implements SharedPreferences.O
 
         OrgFileParser ofp = new OrgFileParser(allOrgList,
                                               storageMode,
+                                              userSynchro,
                                               appdb,
                                               orgBasePath);
         try {
