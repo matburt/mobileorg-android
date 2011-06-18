@@ -43,6 +43,19 @@ abstract public class Synchronizer
         BufferedReader reader = this.fetchOrgFile(orgPath);
         BufferedWriter writer = this.getWriteHandle(destPath);
 
+        if (writer == null) {
+            throw new ReportableError(
+                    r.getString(R.string.error_file_write, destPath),
+                    e);
+        }
+
+
+        if (reader == null) {
+            throw new ReportableError(
+                    r.getString(R.string.error_file_read, orgPath),
+                    e);
+        }
+
         char[] baf = new char[BUFFER_SIZE];
         int actual = 0;
         try {
