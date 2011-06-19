@@ -11,6 +11,7 @@ import java.util.HashMap;
 import android.app.Activity;
 import android.app.ListActivity;
 import android.app.ProgressDialog;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -20,18 +21,20 @@ import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.View.OnClickListener;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Gravity;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Button;
 import android.widget.Toast;
-
 import com.matburt.mobileorg.Capture.Capture;
 import com.matburt.mobileorg.Capture.ViewNodeDetailsActivity;
 import com.matburt.mobileorg.Error.ErrorReporter;
@@ -69,6 +72,7 @@ public class MobileOrgActivity extends ListActivity
             this.edits = edits;
             this.context = context;
             this.allTodos = allTodos;
+
             if (selection != null) {
                 for (int idx = 0; idx < selection.size(); idx++) {
                     try {
@@ -226,8 +230,12 @@ public class MobileOrgActivity extends ListActivity
     private ProgressDialog syncDialog;
     private MobileOrgDatabase appdb;
     private ReportableError syncError;
+    private ListView lv;
+    private Dialog newSetupDialog;
+    private boolean newSetupDialog_shown = false;
     public SharedPreferences appSettings;
     final Handler syncHandler = new Handler();
+
     final Runnable syncUpdateResults = new Runnable() {
         public void run() {
             postSynchronize();
@@ -238,7 +246,7 @@ public class MobileOrgActivity extends ListActivity
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        ListView lv = this.getListView();
+        lv = this.getListView();
         this.appdb = new MobileOrgDatabase((Context)this);
         appSettings = PreferenceManager.getDefaultSharedPreferences(
                                        getBaseContext());
@@ -257,7 +265,7 @@ public class MobileOrgActivity extends ListActivity
              this.appSettings.getString("indexFilePath","").equals(""))) {
             this.onShowSettings();
         }
-		
+
 		//Start the background sync service (if it isn't already)
 		Intent serviceIntent = new Intent();
 		serviceIntent.setAction("com.matburt.mobileorg.SYNC_SERVICE");
@@ -304,6 +312,27 @@ public class MobileOrgActivity extends ListActivity
         }
     }
 
+    public void showNewUserWindow() {
+        if (this.newSetupDialog_shown) {
+            this.newSetupDialog.cancel();
+        }
+        newSetupDialog = new Dialog(this);
+        newSetupDialog.setContentView(R.layout.empty_main);
+        Button syncButton = (Button)newSetupDialog.findViewById(R.id.dialog_run_sync);
+        syncButton.setOnClickListener(new OnClickListener(){
+                public void onClick(View v){
+                    runSynchronizer();
+                }});
+        Button settingsButton = (Button)newSetupDialog.findViewById(R.id.dialog_show_settings);
+        settingsButton.setOnClickListener(new OnClickListener(){
+                public void onClick(View v){
+                    onShowSettings();
+                }});
+        newSetupDialog.setTitle("Synchronize Org Files");
+        newSetupDialog.show();
+        this.newSetupDialog_shown = true;
+    }
+
     @Override
     public void onResume() {
         super.onResume();
@@ -318,6 +347,16 @@ public class MobileOrgActivity extends ListActivity
         if (appInst.rootNode == null) {
             this.runParser();
         }
+
+        HashMap<String, String> allOrgList = this.appdb.getOrgFiles();
+        if (allOrgList.isEmpty()) {
+            this.showNewUserWindow();
+        }
+        else if (this.newSetupDialog_shown) {
+            newSetupDialog_shown = false;
+            newSetupDialog.cancel();
+        }
+
         this.setListAdapter(new OrgViewAdapter(this,
     			appInst.rootNode,
     			appInst.nodeSelection,

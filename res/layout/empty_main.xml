@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent" android:orientation="vertical">
+  <TextView android:inputType="textMultiLine" android:layout_height="wrap_content" android:id="@+id/EmptyMainText" android:layout_width="wrap_content" android:layout_alignParentLeft="true" android:gravity="center" android:text="@string/empty_main">
+  </TextView>
+  <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent" android:orientation="horizontal">
+    <Button
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:layout_weight="1"
+        android:id="@+id/dialog_run_sync"
+        android:text="@string/menu_sync"/>
+    <Button
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:layout_weight="1"
+        android:id="@+id/dialog_show_settings"
+        android:text="@string/menu_settings"/>
+  </LinearLayout>
+</LinearLayout>

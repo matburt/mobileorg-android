@@ -9,13 +9,13 @@
   <string name="sync_failed">Synchronization failed, try again?</string>
   <string name="yes">Yes</string>
   <string name="no">No</string>
-  <string name="error_bad_url">The url %s is not properly formatted</string><string name="error_dialog_title">Error</string>
-
+  <string name="empty_main">You have not yet\nsynchronized your Org files</string>
+  <string name="error_bad_url">The url %s is not properly formatted</string>
+  <string name="error_dialog_title">Error</string>
   <string name="title_do_auto_sync">Background Sync</string>
   <string name="summary_do_auto_sync">Automatically synchronize MobileOrg database in the background</string>
   <string name="title_auto_sync_interval">Background Sync Interval</string>
   <string name="summary_auto_sync_interval">How often the background sync service should run</string>
-
   <string name="error_sqlio">There was a problem reading from the database, is your drive corrupted or is the SDCard mounted?</string>
   <string name="error_generic_database">Unhandled database error: %s</string>
   <string name="error_file_not_found">The file %s was not found</string>

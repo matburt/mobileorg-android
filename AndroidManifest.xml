@@ -75,7 +75,7 @@
     </activity>
     <activity android:name=".Settings.DropboxSettingsActivity"
               android:label="Dropbox Settings">
-    </activity>    
+    </activity>
   <activity android:name=".Capture.ViewNodeDetailsActivity" android:windowSoftInputMode="adjustPan"></activity>
 </application>
 </manifest>
