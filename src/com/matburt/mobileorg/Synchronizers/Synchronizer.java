@@ -46,14 +46,14 @@ abstract public class Synchronizer
         if (writer == null) {
             throw new ReportableError(
                     r.getString(R.string.error_file_write, destPath),
-                    e);
+                    null);
         }
 
 
         if (reader == null) {
             throw new ReportableError(
                     r.getString(R.string.error_file_read, orgPath),
-                    e);
+                    null);
         }
 
         char[] baf = new char[BUFFER_SIZE];
