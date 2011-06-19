@@ -17,6 +17,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
@@ -294,11 +295,13 @@ public class MobileOrgActivity extends ListActivity
             orgBasePath = fIndexFile.getParent() + "/";
         }
         else {
-            orgBasePath = "/sdcard/mobileorg/";
+            orgBasePath = Environment.getExternalStorageDirectory().getAbsolutePath() +
+                          "/mobileorg/";
         }
 
         OrgFileParser ofp = new OrgFileParser(allOrgList,
                                               storageMode,
+                                              userSynchro,
                                               this.appdb,
                                               orgBasePath);
         try {
@@ -404,7 +407,8 @@ public class MobileOrgActivity extends ListActivity
                     orgBasePath = fIndexFile.getParent() + "/";
                 }
                 else {
-                    orgBasePath = "/sdcard/mobileorg/";
+                    orgBasePath = Environment.getExternalStorageDirectory().getAbsolutePath() +
+                                  "/mobileorg/";
                 }
 
                 byte[] rawData = OrgFileParser.getRawFileData(orgBasePath, thisNode.nodeName);
@@ -473,11 +477,13 @@ public class MobileOrgActivity extends ListActivity
                 orgBasePath = fIndexFile.getParent() + "/";
             }
             else {
-                orgBasePath = "/sdcard/mobileorg/";
+                orgBasePath = Environment.getExternalStorageDirectory().getAbsolutePath() +
+                              "/mobileorg/";
             }
             String decryptedData = data.getStringExtra(Encryption.EXTRA_DECRYPTED_MESSAGE);
             OrgFileParser ofp = new OrgFileParser(appdb.getOrgFiles(),
                                                   getStorageLocation(),
+                                                  userSynchro,
                                                   appdb,
                                                   orgBasePath);
 
