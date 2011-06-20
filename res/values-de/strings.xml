@@ -9,7 +9,7 @@
   <string name="sync_failed">Synchronisation fehlgeschlagen, wiederholen?</string>
   <string name="yes">Ja</string>
   <string name="no">Nein</string>
-  <string name="empty_main">You have not yet\nsynchronized your Org files.\n\nPress: Menu -> Sync</string>
+  <string name="empty_main">You have not yet\nsynchronized your Org files</string>
   <string name="error_bad_url">Der URL %s ist fehlerhaft</string>
   <string name="error_dialog_title">Problem</string>
 

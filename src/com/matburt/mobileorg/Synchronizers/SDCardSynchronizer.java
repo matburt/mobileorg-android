@@ -168,6 +168,9 @@ public class SDCardSynchronizer extends Synchronizer
         if (filesInDb.size() > 0) {
             Object[] arrObj = filesInDb.toArray();
             for (int i = 0; i < arrObj.length; i++) {
+                if (((String)arrObj[i]).equals("mobileorg.org")) {
+                    continue;
+                }
                 Log.i(LT, "Orphaned file: " + (String)arrObj[i]);
                 removeFile((String)arrObj[i]);
             }
