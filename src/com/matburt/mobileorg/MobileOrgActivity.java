@@ -267,10 +267,12 @@ public class MobileOrgActivity extends ListActivity
             this.onShowSettings();
         }
 
-		//Start the background sync service (if it isn't already)
-		Intent serviceIntent = new Intent();
-		serviceIntent.setAction("com.matburt.mobileorg.SYNC_SERVICE");
-		this.startService(serviceIntent);
+		//Start the background sync service (if it isn't already) and if we have turned on background sync
+        if (this.appSettings.getBoolean("doAutoSync", false)) {
+            Intent serviceIntent = new Intent();
+            serviceIntent.setAction("com.matburt.mobileorg.SYNC_SERVICE");
+            this.startService(serviceIntent);
+        }
     }
 
     @Override
