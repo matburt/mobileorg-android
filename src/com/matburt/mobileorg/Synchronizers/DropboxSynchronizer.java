@@ -127,7 +127,7 @@ public class DropboxSynchronizer extends Synchronizer {
                                       null);
         }
         Log.i(LT, "Finished downloading");
-        if (fd.is == null) {
+        if (fd == null || fd.is == null) {
             throw new ReportableError(r.getString(R.string.dropbox_fetch_error, orgPath, "Error downloading file"),
                                       null);
         }
