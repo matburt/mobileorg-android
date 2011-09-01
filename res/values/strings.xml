@@ -41,4 +41,20 @@
   <string name="priority">Priority</string>
   <string name="todo_state">Todo state</string>
   <string name="back">Back</string>
+  <!-- begin of wizard strings -->
+  <string name="up_one_level">Up one level</string>
+  <string name="please_wait">Please wait...</string>
+  <string name="signing_in">Signing in</string>
+  <string name="pick_folder">Choose a folder to sync from:</string>
+  <string name="email">Email</string>
+  <string name="username">Username</string>
+  <string name="password">Password</string>
+  <string name="login">Log in</string>
+  <string name="i_want_to_sync_using">I want to sync using:</string>
+  <string name="wizard_webdav">a WebDAV server</string>
+  <string name="wizard_dropbox">a Dropbox account</string>
+  <string name="wizard_sdcard">my SD card</string>
+  <string name="log_in_to_dropbox">Log in to Dropbox</string>
+  <string name="log_in_to_webdav">Log in to your WebDAV server</string>
+  <string name="url">URL</string>
 </resources>

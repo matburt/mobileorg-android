@@ -44,6 +44,7 @@ import com.matburt.mobileorg.Parsing.EditNode;
 import com.matburt.mobileorg.Parsing.Node;
 import com.matburt.mobileorg.Parsing.OrgFileParser;
 import com.matburt.mobileorg.Settings.SettingsActivity;
+import com.matburt.mobileorg.Settings.WizardActivity;
 import com.matburt.mobileorg.Synchronizers.DropboxSynchronizer;
 import com.matburt.mobileorg.Synchronizers.SDCardSynchronizer;
 import com.matburt.mobileorg.Synchronizers.Synchronizer;
@@ -262,15 +263,16 @@ public class MobileOrgActivity extends ListActivity
                     return true;
                 }
             });
+	//If settings are empty, then app has been launched for the first time 
         if (this.appSettings.getString("syncSource","").equals("") ||
             (this.appSettings.getString("syncSource","").equals("webdav") &&
              this.appSettings.getString("webUrl","").equals("")) ||
             (this.appSettings.getString("syncSource","").equals("sdcard") &&
              this.appSettings.getString("indexFilePath","").equals(""))) {
-            this.onShowSettings();
+            this.showWizard();
         }
 
-		//Start the background sync service (if it isn't already) and if we have turned on background sync
+	//Start the background sync service (if it isn't already) and if we have turned on background sync
         if (this.appSettings.getBoolean("doAutoSync", false)) {
             Intent serviceIntent = new Intent();
             serviceIntent.setAction("com.matburt.mobileorg.SYNC_SERVICE");
@@ -558,6 +560,10 @@ public class MobileOrgActivity extends ListActivity
         Intent settingsIntent = new Intent(this, SettingsActivity.class);
         startActivity(settingsIntent);
         return true;
+    }
+
+    public void showWizard() {
+        startActivity(new Intent(this, WizardActivity.class));
     }
 
     public void runSynchronizer() {
