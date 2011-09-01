@@ -44,6 +44,7 @@ import com.matburt.mobileorg.Parsing.EditNode;
 import com.matburt.mobileorg.Parsing.Node;
 import com.matburt.mobileorg.Parsing.OrgFileParser;
 import com.matburt.mobileorg.Settings.SettingsActivity;
+import com.matburt.mobileorg.Settings.WizardActivity;
 import com.matburt.mobileorg.Synchronizers.DropboxSynchronizer;
 import com.matburt.mobileorg.Synchronizers.SDCardSynchronizer;
 import com.matburt.mobileorg.Synchronizers.Synchronizer;
@@ -563,7 +564,6 @@ public class MobileOrgActivity extends ListActivity
 
     public void showWizard() {
         startActivity(new Intent(this, WizardActivity.class));
-        return true;
     }
 
     public void runSynchronizer() {

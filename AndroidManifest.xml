@@ -40,6 +40,9 @@
     <activity android:name=".Settings.SettingsActivity"
               android:label="MobileOrg Settings">
     </activity>
+    <activity android:name=".Settings.WizardActivity"
+              android:label="MobileOrg Wizard">
+    </activity>
     <activity android:name=".Synchronizers.DropboxAuthActivity"
               android:label="Dropbox Authentication">
     </activity>
