@@ -262,12 +262,13 @@ public class MobileOrgActivity extends ListActivity
                     return true;
                 }
             });
+	//If settings are empty, then app has been launched for the first time 
         if (this.appSettings.getString("syncSource","").equals("") ||
             (this.appSettings.getString("syncSource","").equals("webdav") &&
              this.appSettings.getString("webUrl","").equals("")) ||
             (this.appSettings.getString("syncSource","").equals("sdcard") &&
              this.appSettings.getString("indexFilePath","").equals(""))) {
-            this.onShowSettings();
+            this.showWizard();
         }
 
 		//Start the background sync service (if it isn't already) and if we have turned on background sync
@@ -557,6 +558,11 @@ public class MobileOrgActivity extends ListActivity
     public boolean onShowSettings() {
         Intent settingsIntent = new Intent(this, SettingsActivity.class);
         startActivity(settingsIntent);
+        return true;
+    }
+
+    public void showWizard() {
+        startActivity(new Intent(this, WizardActivity.class));
         return true;
     }
 

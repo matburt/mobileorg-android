@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    >
+  <LinearLayout
+      android:orientation="horizontal"
+      android:layout_width="fill_parent"
+      android:layout_height="wrap_content">
+    <ImageView/>
+    <TextView
+	android:text="MobileOrg" />
+  </LinearLayout>
+  <TextView
+      android:text="I want to sync using:"/>
+  <RadioGroup>
+    <RadioButton
+	android:id="@+id/sync_option1"
+	android:layout_width="wrap_content"
+	android:layout_height="wrap_content"
+	android:text="a WebDAV server" />
+    <RadioButton
+	android:id="@+id/sync_option2"
+	android:layout_width="wrap_content"
+	android:layout_height="wrap_content"
+	android:text="a Dropbox account" />
+   <RadioButton
+       android:id="@+id/sync_option3"
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       android:text="my SD card" />
+  </RadioGroup>
+</RelativeLayout>
+<!-- Don't forget to enable scrolling! -->
