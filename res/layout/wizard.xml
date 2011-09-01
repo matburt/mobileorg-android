@@ -47,5 +47,5 @@
     </RadioGroup>
   </LinearLayout>
 </ScrollView>
-
+</Gallery>
 <!-- Don't forget to enable scrolling! -->

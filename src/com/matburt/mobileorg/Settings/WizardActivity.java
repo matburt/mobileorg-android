@@ -4,7 +4,9 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.content.Context;
 import android.preference.PreferenceManager;
+import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import com.matburt.mobileorg.R;
 
@@ -34,14 +36,14 @@ public class WizardActivity extends Activity
     @Override
 	public void onCheckedChanged(RadioGroup arg, int checkedId) {
 	SharedPreferences appSettings = 
-	    PreferenceManager.getDefaultSharedPreferences(getContext());
-	SharedPreferences.Editor editor = settings.edit();
-	switch (checkedId) {
-	case syncWebDav : editor.putString("syncSource", "webdav");
-	case syncDropBox : editor.putString("syncSource", "dropbox");
-	case syncSdCard : editor.putString("syncSource", "sdcard");
-	default: break;
-	}
+	    PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+	SharedPreferences.Editor editor = appSettings.edit();
+	if ( checkedId == syncWebDav )
+	    editor.putString("syncSource", "webdav");
+	else if ( checkedId == syncDropBox )
+	    editor.putString("syncSource", "dropbox");
+	else if ( checkedId == syncSdCard)
+	    editor.putString("syncSource", "sdcard");
 	editor.commit();
     }
 }
