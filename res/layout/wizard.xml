@@ -3,31 +3,36 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     >
   <LinearLayout
-      android:orientation="horizontal"
+      android:orientation="vertical"
       android:layout_width="fill_parent"
       android:layout_height="wrap_content">
-    <ImageView/>
-    <TextView
-	android:text="MobileOrg" />
+    <ImageView
+       android:src="@drawable/logo"
+       />
+    <RadioGroup>
+      <TextView
+	 android:text="I want to sync using:"
+	 android:textSize="20dp"/>
+        <RadioButton
+	 android:id="@+id/sync_option1"
+	 android:layout_width="wrap_content"
+	 android:layout_height="wrap_content"
+	 android:textSize="20dp"
+	 android:text="a WebDAV server" />
+      <RadioButton
+	 android:textSize="20dp"
+	 android:id="@+id/sync_option2"
+	 android:layout_width="wrap_content"
+	 android:layout_height="wrap_content"
+	 android:text="a Dropbox account" />
+      <RadioButton
+	 android:textSize="20dp"
+	 android:id="@+id/sync_option3"
+	 android:layout_width="wrap_content"
+	 android:layout_height="wrap_content"
+	 android:text="my SD card" />
+    </RadioGroup>
   </LinearLayout>
-  <TextView
-      android:text="I want to sync using:"/>
-  <RadioGroup>
-    <RadioButton
-	android:id="@+id/sync_option1"
-	android:layout_width="wrap_content"
-	android:layout_height="wrap_content"
-	android:text="a WebDAV server" />
-    <RadioButton
-	android:id="@+id/sync_option2"
-	android:layout_width="wrap_content"
-	android:layout_height="wrap_content"
-	android:text="a Dropbox account" />
-   <RadioButton
-       android:id="@+id/sync_option3"
-       android:layout_width="wrap_content"
-       android:layout_height="wrap_content"
-       android:text="my SD card" />
-  </RadioGroup>
+
 </RelativeLayout>
 <!-- Don't forget to enable scrolling! -->
