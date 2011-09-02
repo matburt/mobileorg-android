@@ -35,7 +35,7 @@ public class WizardActivity extends Activity
 	ScrollView wizardPage;
         for (int i=0; i<wizardLayout.getChildCount(); i++) {
 	    wizardPage = (ScrollView) wizardLayout.getChildAt(i);
-	    wizardPages.setLayoutParams(new LayoutParams(
+	    wizardPage.setLayoutParams(new LayoutParams(
 							 screenWidth, 
 							 screenHeight));
 	}
