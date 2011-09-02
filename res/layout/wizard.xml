@@ -10,7 +10,7 @@
       android:layout_height="fill_parent"
       android:orientation="horizontal">
     <ScrollView
-	android:layout_width="fill_parent"
+	android:layout_width="500dp"
 	android:layout_height="fill_parent"
 	android:fillViewport="true"
 	android:gravity="center">
@@ -62,4 +62,3 @@
 	android:text="Page 2"/>
   </LinearLayout>
 </HorizontalScrollView>
-<!-- Don't forget to enable scrolling! -->
