@@ -33,8 +33,8 @@ public class WizardActivity extends Activity
 	// syncGroup.setOnCheckedChangeListener(this);
     }
 
-    // @Override
-    // 	public void onCheckedChanged(RadioGroup arg, int checkedId) {
+    @Override
+    	public void onCheckedChanged(RadioGroup arg, int checkedId) {
     // 	SharedPreferences appSettings = 
     // 	    PreferenceManager.getDefaultSharedPreferences(getBaseContext());
     // 	SharedPreferences.Editor editor = appSettings.edit();
@@ -45,5 +45,5 @@ public class WizardActivity extends Activity
     // 	else if ( checkedId == syncSdCard)
     // 	    editor.putString("syncSource", "sdcard");
     // 	editor.commit();
-    // }
+    }
 }
