@@ -32,15 +32,15 @@ public class WizardActivity extends Activity
 	int screenWidth = display.getWidth();
 	int screenHeight = display.getHeight();
 	//set width of all setup screens
-	LinearLayout wizardLayout = (LinearLayout) findViewById(R.id.wizard_layout);
-	ScrollView wizardPage;
-        for (int i=0; i<wizardLayout.getChildCount(); i++) {
-	    wizardPage = (ScrollView) wizardLayout.getChildAt(i);
-	    wizardPage.setLayoutParams(new 
-				       ViewGroup.LayoutParams(
-							      screenWidth, 
-							      screenHeight));
-	}
+	// LinearLayout wizardLayout = (LinearLayout) findViewById(R.id.wizard_layout);
+	// ScrollView wizardPage;
+        // for (int i=0; i<wizardLayout.getChildCount(); i++) {
+	//     wizardPage = (ScrollView) wizardLayout.getChildAt(i);
+	//     wizardPage.setLayoutParams(new 
+	// 			       ViewGroup.LayoutParams(
+	// 						      screenWidth, 
+	// 						      screenHeight));
+	// }
 
 	//get ids and pointers to sync radio buttons
 	syncGroup = (RadioGroup) findViewById(R.id.sync_group);
