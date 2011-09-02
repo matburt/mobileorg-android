@@ -10,9 +10,7 @@
       android:layout_width="wrap_content"
       android:layout_height="fill_parent"
       android:orientation="horizontal">
-    <ScrollView
-	android:layout_width="wrap_content"
-	android:layout_height="fill_parent"
+    <com.matburt.mobileorg.Settings.WizardActivity.PageView
 	android:fillViewport="true"
 	android:gravity="center">
       <LinearLayout
@@ -56,14 +54,12 @@
 	      android:text="my SD card" />
 	</RadioGroup>
       </LinearLayout>
-    </ScrollView>
-    <ScrollView
-	android:layout_width="wrap_content"
-	android:layout_height="fill_parent">
+    </com.matburt.mobileorg.Settings.WizardActivity.PageView>
+    <com.matburt.mobileorg.Settings.WizardActivity.PageView>
       <TextView
 	  android:layout_width="fill_parent"
 	  android:layout_height="fill_parent"
 	  android:text="Page 2"/>
-    </ScrollView>
+    </com.matburt.mobileorg.Settings.WizardActivity.PageView>
   </LinearLayout>
 </HorizontalScrollView>
