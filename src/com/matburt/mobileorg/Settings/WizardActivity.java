@@ -13,6 +13,7 @@ import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
+import java.util.AttributeSet;
 import com.matburt.mobileorg.R;
 
 public class WizardActivity extends Activity
