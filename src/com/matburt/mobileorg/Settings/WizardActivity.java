@@ -9,6 +9,7 @@ import android.preference.PreferenceManager;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.view.Display;
+import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import com.matburt.mobileorg.R;
 
