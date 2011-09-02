@@ -58,7 +58,7 @@
       </LinearLayout>
     </ScrollView>
     <ScrollView
-	android:layout_width="500dp"
+	android:layout_width="wrap_content"
 	android:layout_height="fill_parent">
       <TextView
 	  android:layout_width="fill_parent"
