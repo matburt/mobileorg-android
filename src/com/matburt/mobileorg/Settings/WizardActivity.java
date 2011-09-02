@@ -50,7 +50,7 @@ public class WizardActivity extends Activity
 	syncGroup.setOnCheckedChangeListener(this);
     }
 
-    @override
+    @Override
     	public void onCheckedChanged(RadioGroup arg, int checkedId) {
     	SharedPreferences appSettings = 
     	    PreferenceManager.getDefaultSharedPreferences(getBaseContext());
