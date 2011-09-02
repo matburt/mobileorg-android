@@ -68,13 +68,13 @@ public class WizardActivity extends Activity
     	editor.commit();
     }
 
-    public class PageView extends View {
+    public class PageView extends ScrollView {
 
-	public LabelView(Context context) {
+	public PageView(Context context) {
 	    super(context);
 	}
 
-	public LabelView(Context context, AttributeSet attrs) {
+	public PageView(Context context, AttributeSet attrs) {
 	    super(context, attrs);
 	}
 
