@@ -35,9 +35,10 @@ public class WizardActivity extends Activity
 	ScrollView wizardPage;
         for (int i=0; i<wizardLayout.getChildCount(); i++) {
 	    wizardPage = (ScrollView) wizardLayout.getChildAt(i);
-	    wizardPage.setLayoutParams(new LayoutParams(
-							 screenWidth, 
-							 screenHeight));
+	    wizardPage.setLayoutParams(new 
+				       ViewGroup.LayoutParams(
+							      screenWidth, 
+							      screenHeight));
 	}
 
 	//get ids and pointers to sync radio buttons
