@@ -69,6 +69,6 @@ public class WizardActivity extends Activity
     }
 }
 
-public class TestMine {
+class TestMine {
     
 }
