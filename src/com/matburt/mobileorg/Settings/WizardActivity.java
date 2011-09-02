@@ -68,3 +68,7 @@ public class WizardActivity extends Activity
     	editor.commit();
     }
 }
+
+public class TestMine {
+    
+}
