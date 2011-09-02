@@ -11,6 +11,7 @@ import android.content.SharedPreferences.Editor;
 import android.view.Display;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
+import android.view.ViewGroup.LayoutParams;
 import com.matburt.mobileorg.R;
 
 public class WizardActivity extends Activity
