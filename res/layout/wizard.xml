@@ -10,12 +10,12 @@
       android:layout_width="wrap_content"
       android:layout_height="fill_parent"
       android:orientation="horizontal">
-    <com.matburt.mobileorg.WizardActivity.PageView
+    <com.matburt.mobileorg.Settings.WizardActivity.PageView
 	android:fillViewport="true"
 	android:gravity="center">
-    </com.matburt.mobileorg.WizardActivity.PageView>
-    <com.matburt.mobileorg.WizardActivity.PageView>
-    </com.matburt.mobileorg.WizardActivity.PageView>
+    </com.matburt.mobileorg.Settings.WizardActivity.PageView>
+    <com.matburt.mobileorg.Settings.WizardActivity.PageView>
+    </com.matburt.mobileorg.Settings.WizardActivity.PageView>
   </LinearLayout>
 </HorizontalScrollView>
 
