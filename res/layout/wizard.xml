@@ -18,3 +18,70 @@
     </com.matburt.mobileorg.Settings.PageView>
   </LinearLayout>
 </HorizontalScrollView>
+
+<?xml version="1.0" encoding="utf-8"?>
+<HorizontalScrollView
+   xmlns:android="http://schemas.android.com/apk/res/android"
+   android:id="@+id/details"
+   android:fillViewport="true"
+   android:layout_width="wrap_content" 
+   android:layout_height="fill_parent">  
+  <LinearLayout
+      android:id="@+id/wizard_layout"
+      android:layout_width="wrap_content"
+      android:layout_height="fill_parent"
+      android:orientation="horizontal">
+    <com.matburt.mobileorg.Settings.WizardActivity.PageView
+	android:fillViewport="true"
+	android:gravity="center">
+      <LinearLayout
+	  android:orientation="vertical"
+	  android:layout_width="fill_parent"
+	  android:layout_height="wrap_content"
+	  android:gravity="center">
+	<ImageView
+	    android:src="@drawable/logo"
+	    android:layout_width="wrap_content"
+	    android:layout_height="wrap_content"
+	    android:paddingBottom="20dp"
+	    />
+	<RadioGroup
+	    android:layout_width="wrap_content"
+	    android:layout_height="wrap_content"
+	    android:id="@+id/sync_group"
+	    >
+	  <TextView
+	      android:text="I want to sync using:"
+	      android:textStyle="bold"
+	      android:textSize="20dp"/>
+	  <RadioButton
+	      android:id="@+id/sync_webdav"
+	      android:layout_width="wrap_content"
+	      android:layout_height="wrap_content"
+	      android:textSize="18dp"
+	      android:text="a WebDAV server"
+	      android:checked="true"/>
+	  <RadioButton
+	      android:textSize="18dp"
+	      android:id="@+id/sync_dropbox"
+	      android:layout_width="wrap_content"
+	      android:layout_height="wrap_content"
+	      android:text="a Dropbox account" />
+	  <RadioButton
+	      android:textSize="18dp"
+	      android:id="@+id/sync_sdcard"
+	      android:layout_width="wrap_content"
+	      android:layout_height="wrap_content"
+	      android:text="my SD card" />
+	</RadioGroup>
+      </LinearLayout>
+    </com.matburt.mobileorg.Settings.WizardActivity.PageView>
+    <com.matburt.mobileorg.Settings.WizardActivity.PageView>
+      <TextView
+	  android:layout_width="fill_parent"
+	  android:layout_height="fill_parent"
+	  android:text="Page 2"/>
+    </com.matburt.mobileorg.Settings.WizardActivity.PageView>
+  </LinearLayout>
+</HorizontalScrollView>
+
