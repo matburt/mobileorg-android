@@ -39,7 +39,7 @@ public class PageFlipView extends HorizontalScrollView {
 	LayoutInflater inflater=
 	    (LayoutInflater) context
 	    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-	container=inflater.inflate(R.layout.wizard_container_row,null);
+	container=inflater.inflate(R.layout.wizard_container,null);
 	Log.d(TAG,"Container count: "+container.getChildCount());
 	//setup page flips
 	//see http://blog.velir.com/index.php/2010/11/17/android-snapping-horizontal-scroll/
