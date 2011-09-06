@@ -16,6 +16,7 @@ import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.View;
 import android.view.MotionEvent;
+import android.view.LayoutInflater;
 import com.matburt.mobileorg.R;
 
 public class PageFlipView extends HorizontalScrollView {
@@ -35,9 +36,11 @@ public class PageFlipView extends HorizontalScrollView {
     public PageFlipView(Context context, AttributeSet attrs) {
 	super(context, attrs);
 	//get number of pages
-	container = (LinearLayout) ((Activity) getContext())
-	    .findViewById(R.id.wizard_container);
-	//Log.d(TAG,"Container count: "+container.getChildCount());
+	LayoutInflater inflater=
+	    (LayoutInflater) context
+	    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+	container=inflater.inflate(R.layout.wizard_container_row,null);
+	Log.d(TAG,"Container count: "+container.getChildCount());
 	//setup page flips
 	//see http://blog.velir.com/index.php/2010/11/17/android-snapping-horizontal-scroll/
 	mGestureDetector = new GestureDetector(getContext(),
