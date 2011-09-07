@@ -30,34 +30,26 @@ public class PageView extends ScrollView {
 	super(context, attrs);
     }
 
-    @Override 
-	protected void onMeasure(int widthMeasureSpec, 
-				 int heightMeasureSpec){
-	int parentWidth = MeasureSpec.getSize(widthMeasureSpec);
-	int parentHeight = MeasureSpec.getSize(heightMeasureSpec);
-	Display display = ( (WindowManager)
-    			    getContext().getSystemService(Context.WINDOW_SERVICE) )
-    	    .getDefaultDisplay(); 
-        int screenWidth = display.getWidth();
-        int screenHeight = display.getHeight();
-	setMeasuredDimension(measureWidth(widthMeasureSpec),
-			     measureHeight(heightMeasureSpec));
-
-	//setMeasuredDimension(screenWidth,
-	//		     screenHeight);
-	setLayoutParams(new 
-			LinearLayout
-			.LayoutParams(
-				      measureWidth(widthMeasureSpec),
-				      measureHeight(heightMeasureSpec))
-			);
-	super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-    }
-    // @Override
-    //     protected void onMeasure(int widthMeasureSpec, 
-    // 				 int heightMeasureSpec) {
-    //     setMeasuredDimension(measureWidth(widthMeasureSpec),
+    // @Override 
+    // 	protected void onMeasure(int widthMeasureSpec, 
+    // 				 int heightMeasureSpec){
+    // 	int parentWidth = MeasureSpec.getSize(widthMeasureSpec);
+    // 	int parentHeight = MeasureSpec.getSize(heightMeasureSpec);
+    // 	Display display = ( (WindowManager)
+    // 			    getContext().getSystemService(Context.WINDOW_SERVICE) )
+    // 	    .getDefaultDisplay(); 
+    //     int screenWidth = display.getWidth();
+    //     int screenHeight = display.getHeight();
+    // 	setMeasuredDimension(measureWidth(widthMeasureSpec),
     // 			     measureHeight(heightMeasureSpec));
+
+    // 	setLayoutParams(new 
+    // 			LinearLayout
+    // 			.LayoutParams(
+    // 				      measureWidth(widthMeasureSpec),
+    // 				      measureHeight(heightMeasureSpec))
+    // 			);
+    // 	super.onMeasure(widthMeasureSpec, heightMeasureSpec);
     // }
 
     public int measureWidth(int measureSpec) {
