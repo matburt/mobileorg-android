@@ -4,16 +4,19 @@
    android:id="@+id/wizard_parent"
    android:fillViewport="true"
    android:layout_width="wrap_content" 
-   android:layout_height="fill_parent">  
+   android:layout_height="fill_parent"
+   android:gravity="center">  
   <LinearLayout
       android:id="@+id/wizard_container"
       android:layout_width="wrap_content"
       android:layout_height="fill_parent"
-      android:orientation="horizontal">
+      android:orientation="horizontal"
+      android:gravity="center">
     <com.matburt.mobileorg.Settings.PageView
 	android:id="@+id/wizard_page1"
 	android:layout_width="fill_parent"
-	android:layout_height="fill_parent">
+	android:layout_height="fill_parent"
+	android:gravity="center">
       <LinearLayout
 	  android:orientation="vertical"
 	  android:layout_width="fill_parent"
