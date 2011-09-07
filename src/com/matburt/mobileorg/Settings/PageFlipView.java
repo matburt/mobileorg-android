@@ -22,7 +22,7 @@ import com.matburt.mobileorg.R;
 public class PageFlipView extends HorizontalScrollView {
     static String TAG = "PageFlipView";
     static final int SWIPE_MIN_DISTANCE = 5;
-    static final int SWIPE_THRESHOLD_VELOCITY = 300;
+    static final int SWIPE_THRESHOLD_VELOCITY = 50;
  
     //private ArrayList<ArticleListItem> mItems = null;
     GestureDetector mGestureDetector;
@@ -36,11 +36,11 @@ public class PageFlipView extends HorizontalScrollView {
     public PageFlipView(Context context, AttributeSet attrs) {
 	super(context, attrs);
 	//get number of pages
-	LayoutInflater inflater=
-	    (LayoutInflater) context
-	    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-	container=(LinearLayout)inflater.inflate(R.layout.wizard,null);
-	Log.d(TAG,"Container count: "+container.getChildCount());
+	//LayoutInflater inflater=
+	//    (LayoutInflater) context
+	//    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+	//container=(LinearLayout)inflater.inflate(R.layout.wizard,null);
+	//Log.d(TAG,"Container count: "+container.getChildCount());
 	//setup page flips
 	//see http://blog.velir.com/index.php/2010/11/17/android-snapping-horizontal-scroll/
 	mGestureDetector = new GestureDetector(getContext(),
@@ -67,6 +67,12 @@ public class PageFlipView extends HorizontalScrollView {
                 }
             }
         });
+    }
+
+    @Override
+	public void onFinishInflate() {
+	container = (LinearLayout) findViewById(R.id.wizard_container);
+	Log.d(TAG,"Container count: "+container.getChildCount());
     }
 
     class MyGestureDetector extends SimpleOnGestureListener {
