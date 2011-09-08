@@ -8,13 +8,47 @@
    xmlns:svg="http://www.w3.org/2000/svg"
    xmlns="http://www.w3.org/2000/svg"
    xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    version="1.0"
    width="96"
    height="96"
-   id="svg2408">
+   id="svg2408"
+   inkscape:version="0.47pre4 r22446"
+   sodipodi:docname="go-next.svg"
+   style="display:inline"
+   inkscape:export-filename="/mnt/work2/mobileorg-android/src-img/go-next-selected.png"
+   inkscape:export-xdpi="43.125"
+   inkscape:export-ydpi="43.125">
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1056"
+     inkscape:window-height="825"
+     id="namedview93"
+     showgrid="false"
+     inkscape:zoom="2.5625"
+     inkscape:cx="57.815828"
+     inkscape:cy="0.9311227"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="layer8" />
   <defs
      id="defs2410">
+    <inkscape:perspective
+       sodipodi:type="inkscape:persp3d"
+       inkscape:vp_x="0 : 48 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_z="96 : 48 : 1"
+       inkscape:persp3d-origin="48 : 32 : 1"
+       id="perspective95" />
     <linearGradient
        id="linearGradient3637">
       <stop
@@ -303,7 +337,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title />
+        <dc:title></dc:title>
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -419,7 +453,8 @@
   </g>
   <g
      id="layer4"
-     style="display:inline">
+     style="display:inline"
+     inkscape:label="box">
     <rect
        width="84"
        height="84"
@@ -485,7 +520,8 @@
        y="48"
        id="text3907"
        xml:space="preserve"
-       style="font-size:4px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;font-family:Liberation Sans;-inkscape-font-specification:Liberation Sans"><tspan
+       style="font-size:4px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;font-family:Liberation Sans;-inkscape-font-specification:Liberation Sans"
+       sodipodi:linespacing="125%"><tspan
          x="104"
          y="48"
          id="tspan3909">Shadow opacity : 30, 15, 10, (8)</tspan></text>
@@ -502,7 +538,8 @@
        y="32"
        id="text3951"
        xml:space="preserve"
-       style="font-size:4px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;font-family:Liberation Sans;-inkscape-font-specification:Liberation Sans"><tspan
+       style="font-size:4px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;font-family:Liberation Sans;-inkscape-font-specification:Liberation Sans"
+       sodipodi:linespacing="125%"><tspan
          x="124"
          y="32"
          id="tspan3953">Bevel opacity : 30 / 10</tspan></text>
@@ -511,7 +548,8 @@
        y="8"
        id="text3955"
        xml:space="preserve"
-       style="font-size:4px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;font-family:Liberation Sans;-inkscape-font-specification:Liberation Sans"><tspan
+       style="font-size:4px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;font-family:Liberation Sans;-inkscape-font-specification:Liberation Sans"
+       sodipodi:linespacing="125%"><tspan
          x="124"
          y="8"
          id="tspan3957">Bevel opacity : 75 / 15</tspan></text>
@@ -530,5 +568,19 @@
        inkscape:connector-curvature="0"
        id="path3983"
        style="opacity:0.15;fill:#000000;fill-opacity:1;stroke:none;display:inline" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer8"
+     inkscape:label="mask"
+     style="opacity:0.37837842;display:inline">
+    <rect
+       style="fill:#ffffff;fill-opacity:1;stroke:none"
+       id="rect2905"
+       width="83.512184"
+       height="84.487823"
+       x="6.2439027"
+       y="6.2439022"
+       ry="5.326829" />
   </g>
 </svg>

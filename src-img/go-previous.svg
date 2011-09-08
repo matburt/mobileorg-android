@@ -8,13 +8,43 @@
    xmlns:svg="http://www.w3.org/2000/svg"
    xmlns="http://www.w3.org/2000/svg"
    xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    version="1.0"
    width="96"
    height="96"
-   id="svg2408">
+   id="svg2408"
+   inkscape:version="0.47pre4 r22446"
+   sodipodi:docname="go-previous.svg">
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="640"
+     inkscape:window-height="851"
+     id="namedview93"
+     showgrid="false"
+     inkscape:zoom="10.25"
+     inkscape:cx="34.2116"
+     inkscape:cy="19.767838"
+     inkscape:window-x="755"
+     inkscape:window-y="0"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="layer7" />
   <defs
      id="defs2410">
+    <inkscape:perspective
+       sodipodi:type="inkscape:persp3d"
+       inkscape:vp_x="0 : 48 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_z="96 : 48 : 1"
+       inkscape:persp3d-origin="48 : 32 : 1"
+       id="perspective95" />
     <linearGradient
        id="linearGradient3637">
       <stop
@@ -294,6 +324,13 @@
        xlink:href="#linearGradient3637"
        gradientUnits="userSpaceOnUse"
        gradientTransform="matrix(0,-2.7635381,3.2231205,0,16,80.659794)" />
+    <inkscape:perspective
+       id="perspective3090"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
   </defs>
   <metadata
      id="metadata2413">
@@ -530,5 +567,18 @@
        inkscape:connector-curvature="0"
        id="path3983"
        style="opacity:0.15;fill:#000000;fill-opacity:1;stroke:none;display:inline" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer7"
+     inkscape:label="mask">
+    <rect
+       style="opacity:0.37837842;fill:#ffffff;fill-opacity:1;stroke:none;display:inline"
+       id="rect2905"
+       width="83.512184"
+       height="84.487823"
+       x="6.2439041"
+       y="6.1463323"
+       ry="5.326829" />
   </g>
 </svg>
