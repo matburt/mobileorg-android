@@ -1,47 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
-    android:layout_height="fill_parent">
-  <com.matburt.mobileorg.Settings.PageFlipView
-      android:id="@+id/wizard_parent"
-      android:layout_width="wrap_content" 
-      android:layout_height="fill_parent"
-      android:fillViewport="true"
-      android:layout_alignParentTop="true">  
-    <LinearLayout
-	android:id="@+id/wizard_container"
-	android:layout_width="wrap_content"
-	android:layout_height="fill_parent"
-	android:orientation="horizontal">
-      <com.matburt.mobileorg.Settings.PageView
-	  android:id="@+id/wizard_page1"
-	  android:layout_width="wrap_content"
-	  android:layout_height="fill_parent">
-      </com.matburt.mobileorg.Settings.PageView>
-      <com.matburt.mobileorg.Settings.PageView
-	  android:id="@+id/wizard_page2"
-	  android:layout_width="wrap_content"
-	  android:layout_height="wrap_content">
-	<TextView	
-	    android:layout_width="wrap_content"
-	    android:layout_height="wrap_content"
-	    android:text="Page 2" />
-      </com.matburt.mobileorg.Settings.PageView>
-      <com.matburt.mobileorg.Settings.PageView
-	  android:id="@+id/wizard_page3"
-	  android:layout_width="wrap_content"
-	  android:layout_height="wrap_content">
-	<TextView	
-	    android:layout_width="wrap_content"
-	    android:layout_height="wrap_content"
-	    android:text="Page 3" />
-      </com.matburt.mobileorg.Settings.PageView>
-    </LinearLayout>
-  </com.matburt.mobileorg.Settings.PageFlipView>
-  <TextView
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_alignParentBottom="true"
-      android:text="Next"/>
-</RelativeLayout>
+<com.matburt.mobileorg.Settings.PageFlipView
+   xmlns:android="http://schemas.android.com/apk/res/android"
+   android:id="@+id/wizard_parent"
+   android:layout_width="wrap_content" 
+   android:layout_height="fill_parent"
+   android:fillViewport="true"
+   android:layout_alignParentTop="true">  
+  <LinearLayout
+     android:id="@+id/wizard_container"
+     android:layout_width="wrap_content"
+     android:layout_height="fill_parent"
+     android:orientation="horizontal">
+    <com.matburt.mobileorg.Settings.PageView
+       android:id="@+id/wizard_page1"
+       android:layout_width="wrap_content"
+       android:layout_height="fill_parent">
+    </com.matburt.mobileorg.Settings.PageView>
+    <com.matburt.mobileorg.Settings.PageView
+       android:id="@+id/wizard_page2"
+       android:layout_width="wrap_content"
+       android:layout_height="fill_parent">
+      <TextView	
+	 android:layout_width="wrap_content"
+	 android:layout_height="wrap_content"
+	 android:text="Page 2" />
+    </com.matburt.mobileorg.Settings.PageView>
+  </LinearLayout>
+</com.matburt.mobileorg.Settings.PageFlipView>
