@@ -14,6 +14,8 @@ import android.widget.ScrollView;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.util.AttributeSet;
+import android.view.LayoutInflater;
+import android.view.View;
 import com.matburt.mobileorg.R;
 
 public class WizardActivity extends Activity
@@ -27,32 +29,22 @@ public class WizardActivity extends Activity
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.wizard);
-
-	//setup horizontal scrollview
-	Display display = getWindowManager().getDefaultDisplay(); 
-	int screenWidth = display.getWidth();
-	int screenHeight = display.getHeight();
-	//set width of all setup screens
-	// LinearLayout wizardLayout = (LinearLayout) findViewById(R.id.wizard_layout);
-	// ScrollView wizardPage;
-        // for (int i=0; i<wizardLayout.getChildCount(); i++) {
-	//     wizardPage = (ScrollView) wizardLayout.getChildAt(i);
-	//     wizardPage.setLayoutParams(new 
-	// 			       ViewGroup.LayoutParams(
-	// 						      screenWidth, 
-	// 						      screenHeight));
-	// }
-
+	//setup page 1
+	PageView page1Container = (PageView) findViewById(R.id.wizard_page1);
+	LayoutInflater inflater=
+	    (LayoutInflater) getApplicationContext()
+	    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+	View page1=inflater.inflate(R.layout.wizard_page1,page1Container);
 	//get ids and pointers to sync radio buttons
-	// syncGroup = (RadioGroup) findViewById(R.id.sync_group);
-	// syncWebDav = ( (RadioButton) 
-	// 		findViewById(R.id.sync_webdav) ).getId();
-	// syncDropBox = ( (RadioButton) 
-	// 		findViewById(R.id.sync_dropbox) ).getId();
-	// syncSdCard = ( (RadioButton) 
-	// 		findViewById(R.id.sync_sdcard) ).getId();
-	// //setup click listener for sync radio group
-	// syncGroup.setOnCheckedChangeListener(this);
+	syncGroup = (RadioGroup) findViewById(R.id.sync_group);
+	syncWebDav = ( (RadioButton) 
+			findViewById(R.id.sync_webdav) ).getId();
+	syncDropBox = ( (RadioButton) 
+			findViewById(R.id.sync_dropbox) ).getId();
+	syncSdCard = ( (RadioButton) 
+			findViewById(R.id.sync_sdcard) ).getId();
+	//setup click listener for sync radio group
+	syncGroup.setOnCheckedChangeListener(this);
     }
 
     @Override
