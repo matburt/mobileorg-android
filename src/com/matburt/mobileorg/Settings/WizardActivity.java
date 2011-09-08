@@ -35,16 +35,16 @@ public class WizardActivity extends Activity
 	    (LayoutInflater) getApplicationContext()
 	    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 	View page1=inflater.inflate(R.layout.wizard_page1,page1Container);
-	//get ids and pointers to sync radio buttons
-	syncGroup = (RadioGroup) findViewById(R.id.sync_group);
-	syncWebDav = ( (RadioButton) 
-			findViewById(R.id.sync_webdav) ).getId();
-	syncDropBox = ( (RadioButton) 
-			findViewById(R.id.sync_dropbox) ).getId();
-	syncSdCard = ( (RadioButton) 
-			findViewById(R.id.sync_sdcard) ).getId();
-	//setup click listener for sync radio group
-	syncGroup.setOnCheckedChangeListener(this);
+	// //get ids and pointers to sync radio buttons
+	// syncGroup = (RadioGroup) findViewById(R.id.sync_group);
+	// syncWebDav = ( (RadioButton) 
+	// 		findViewById(R.id.sync_webdav) ).getId();
+	// syncDropBox = ( (RadioButton) 
+	// 		findViewById(R.id.sync_dropbox) ).getId();
+	// syncSdCard = ( (RadioButton) 
+	// 		findViewById(R.id.sync_sdcard) ).getId();
+	// //setup click listener for sync radio group
+	// syncGroup.setOnCheckedChangeListener(this);
     }
 
     @Override

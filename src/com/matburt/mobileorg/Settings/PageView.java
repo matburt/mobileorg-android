@@ -11,16 +11,20 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.view.Display;
 import android.widget.LinearLayout;
-import android.widget.ScrollView;
+import android.widget.RelativeLayout;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.view.ViewGroup.LayoutParams;
 import android.util.AttributeSet;
 import android.view.WindowManager;
 import android.graphics.Canvas;
+import android.view.LayoutInflater;
 import com.matburt.mobileorg.R;
 
-public class PageView extends ScrollView {
+public class PageView extends RelativeLayout {
     static String TAG = "PageView";
+    Button nextButton;
+    Context context;
 
     public PageView(Context context) {
 	super(context);
@@ -28,7 +32,20 @@ public class PageView extends ScrollView {
 
     public PageView(Context context, AttributeSet attrs) {
 	super(context, attrs);
+	this.context = context;
     }
+
+    @Override
+	public void onFinishInflate() {
+	LayoutInflater inflater=
+	    (LayoutInflater) context
+	    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+	nextButton=(Button)inflater.inflate(R.layout.wizard_next_button,this);
+	addView(nextButton);
+    }
+
+
+    public Button getNextButton() { return nextButton; }
 
     @Override 
     	protected void onMeasure(int widthMeasureSpec, 

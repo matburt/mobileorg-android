@@ -15,7 +15,10 @@
    height="96"
    id="svg2408"
    inkscape:version="0.47pre4 r22446"
-   sodipodi:docname="go-previous.svg">
+   sodipodi:docname="go-previous.svg"
+   inkscape:export-filename="/mnt/work2/mobileorg-android/src-img/go_previous.png"
+   inkscape:export-xdpi="90"
+   inkscape:export-ydpi="90">
   <sodipodi:namedview
      pagecolor="#ffffff"
      bordercolor="#666666"
@@ -29,10 +32,10 @@
      inkscape:window-height="851"
      id="namedview93"
      showgrid="false"
-     inkscape:zoom="10.25"
-     inkscape:cx="34.2116"
-     inkscape:cy="19.767838"
-     inkscape:window-x="755"
+     inkscape:zoom="1.28125"
+     inkscape:cx="54.237197"
+     inkscape:cy="69.903261"
+     inkscape:window-x="114"
      inkscape:window-y="0"
      inkscape:window-maximized="0"
      inkscape:current-layer="layer7" />
@@ -340,7 +343,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title />
+        <dc:title></dc:title>
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -571,7 +574,8 @@
   <g
      inkscape:groupmode="layer"
      id="layer7"
-     inkscape:label="mask">
+     inkscape:label="mask"
+     style="display:none">
     <rect
        style="opacity:0.37837842;fill:#ffffff;fill-opacity:1;stroke:none;display:inline"
        id="rect2905"

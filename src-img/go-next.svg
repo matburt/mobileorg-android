@@ -17,9 +17,9 @@
    inkscape:version="0.47pre4 r22446"
    sodipodi:docname="go-next.svg"
    style="display:inline"
-   inkscape:export-filename="/mnt/work2/mobileorg-android/src-img/go-next-selected.png"
-   inkscape:export-xdpi="43.125"
-   inkscape:export-ydpi="43.125">
+   inkscape:export-filename="/mnt/work2/mobileorg-android/src-img/go_next.png"
+   inkscape:export-xdpi="90"
+   inkscape:export-ydpi="90">
   <sodipodi:namedview
      pagecolor="#ffffff"
      bordercolor="#666666"
@@ -573,7 +573,7 @@
      inkscape:groupmode="layer"
      id="layer8"
      inkscape:label="mask"
-     style="opacity:0.37837842;display:inline">
+     style="opacity:0.37837842;display:none">
     <rect
        style="fill:#ffffff;fill-opacity:1;stroke:none"
        id="rect2905"
