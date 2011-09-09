@@ -24,7 +24,7 @@ import com.matburt.mobileorg.R;
 
 public class PageView extends RelativeLayout {
     static String TAG = "PageView";
-    Button nextButton;
+    Button nextButton, previousButton;
     Context context;
 
     public PageView(Context context) {
@@ -40,12 +40,17 @@ public class PageView extends RelativeLayout {
 	public void onFinishInflate() {
 	LayoutInflater inflater=
 	    (LayoutInflater) LayoutInflater.from(context);
-	//.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+	//Add next button
 	View button=inflater.inflate(R.layout.wizard_next_button,this);
 	nextButton = (Button) button.findViewById(R.id.wizard_next_button);
+	//Add previous button
+	button=inflater.inflate(R.layout.wizard_previous_button,this);
+	previousButton = (Button) button.findViewById(R.id.wizard_previous_button);
     }
 
     public Button getNextButton() { return nextButton; }
+
+    public Button getPreviousButton() { return previousButton; }
 
     @Override 
     	protected void onMeasure(int widthMeasureSpec, 
