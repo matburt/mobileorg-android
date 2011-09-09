@@ -35,30 +35,40 @@ public class WizardActivity extends Activity
 	    (LayoutInflater) getApplicationContext()
 	    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 	View page1=inflater.inflate(R.layout.wizard_page1,page1Container);
-	// //get ids and pointers to sync radio buttons
-	// syncGroup = (RadioGroup) findViewById(R.id.sync_group);
-	// syncWebDav = ( (RadioButton) 
-	// 		findViewById(R.id.sync_webdav) ).getId();
-	// syncDropBox = ( (RadioButton) 
-	// 		findViewById(R.id.sync_dropbox) ).getId();
-	// syncSdCard = ( (RadioButton) 
-	// 		findViewById(R.id.sync_sdcard) ).getId();
-	// //setup click listener for sync radio group
-	// syncGroup.setOnCheckedChangeListener(this);
+	//get ids and pointers to sync radio buttons
+	syncGroup = (RadioGroup) findViewById(R.id.sync_group);
+	syncWebDav = ( (RadioButton) 
+			findViewById(R.id.sync_webdav) ).getId();
+	syncDropBox = ( (RadioButton) 
+			findViewById(R.id.sync_dropbox) ).getId();
+	syncSdCard = ( (RadioButton) 
+			findViewById(R.id.sync_sdcard) ).getId();
+	//setup click listener for sync radio group
+	syncGroup.setOnCheckedChangeListener(this);
     }
 
     @Override
     	public void onCheckedChanged(RadioGroup arg, int checkedId) {
-    	// SharedPreferences appSettings = 
-    	//     PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-    	// SharedPreferences.Editor editor = appSettings.edit();
-    	// if ( checkedId == syncWebDav )
-    	//     editor.putString("syncSource", "webdav");
-    	// else if ( checkedId == syncDropBox )
-    	//     editor.putString("syncSource", "dropbox");
-    	// else if ( checkedId == syncSdCard)
-    	//     editor.putString("syncSource", "sdcard");
-    	// editor.commit();
+    	SharedPreferences appSettings = 
+    	    PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+    	SharedPreferences.Editor editor = appSettings.edit();
+    	if ( checkedId == syncWebDav )
+    	    editor.putString("syncSource", "webdav");
+    	else if ( checkedId == syncDropBox ) {
+    	    //editor.putString("syncSource", "dropbox");
+	    createDropboxLogin();
+	}
+    	else if ( checkedId == syncSdCard)
+    	    editor.putString("syncSource", "sdcard");
+    	editor.commit();
     }
     
+    void createDropboxLogin() {
+	PageView page2 = (PageView) findViewById(R.id.wizard_page2);
+	LayoutInflater inflater=
+	    (LayoutInflater) LayoutInflater.from(getApplicationContext());
+	View loginPage = inflater.inflate(R.layout.wizard_dropbox,page2);
+    }
+
+    /* TODO: Unfocus login textboxes on orientation change */
 }

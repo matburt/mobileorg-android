@@ -20,10 +20,6 @@
        android:id="@+id/wizard_page2"
        android:layout_width="wrap_content"
        android:layout_height="fill_parent">
-      <TextView	
-	 android:layout_width="wrap_content"
-	 android:layout_height="wrap_content"
-	 android:text="Page 2" />
     </com.matburt.mobileorg.Settings.PageView>
     <com.matburt.mobileorg.Settings.PageView
        android:id="@+id/wizard_page3"
