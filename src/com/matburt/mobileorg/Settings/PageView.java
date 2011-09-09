@@ -19,6 +19,7 @@ import android.util.AttributeSet;
 import android.view.WindowManager;
 import android.graphics.Canvas;
 import android.view.LayoutInflater;
+import android.view.View;
 import com.matburt.mobileorg.R;
 
 public class PageView extends RelativeLayout {
@@ -40,10 +41,9 @@ public class PageView extends RelativeLayout {
 	LayoutInflater inflater=
 	    (LayoutInflater) LayoutInflater.from(context);
 	//.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-	nextButton=(Button)inflater.inflate(R.layout.wizard_next_button,this);
-	addView(nextButton);
+	View button=inflater.inflate(R.layout.wizard_next_button,this);
+	nextButton = (Button) button.findViewById(R.id.wizard_next_button);
     }
-
 
     public Button getNextButton() { return nextButton; }
 
