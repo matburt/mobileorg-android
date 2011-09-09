@@ -38,8 +38,8 @@ public class PageView extends RelativeLayout {
     @Override
 	public void onFinishInflate() {
 	LayoutInflater inflater=
-	    (LayoutInflater) context
-	    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+	    (LayoutInflater) LayoutInflater.from(context);
+	//.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 	nextButton=(Button)inflater.inflate(R.layout.wizard_next_button,this);
 	addView(nextButton);
     }
