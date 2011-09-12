@@ -17,6 +17,8 @@ import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.View;
 import android.view.MotionEvent;
 import android.view.LayoutInflater;
+import android.preference.PreferenceManager;
+import android.content.SharedPreferences;
 import com.matburt.mobileorg.R;
 
 public class PageFlipView extends HorizontalScrollView 
@@ -27,7 +29,7 @@ public class PageFlipView extends HorizontalScrollView
     static final int SWIPE_THRESHOLD_VELOCITY = 50;
  
     GestureDetector mGestureDetector;
-    int mActiveFeature = 0;
+    int currentPage = 0;
     LinearLayout container;
     NextPageListener nextPageListener; // for handling next page
 				       // button clicks
@@ -83,8 +85,8 @@ public class PageFlipView extends HorizontalScrollView
 		|| event.getAction() == MotionEvent.ACTION_CANCEL ){
 	    int scrollX = getScrollX();
 	    int featureWidth = v.getMeasuredWidth();
-	    mActiveFeature = ((scrollX + (featureWidth/2))/featureWidth);
-	    int scrollTo = mActiveFeature*featureWidth;
+	    currentPage = ((scrollX + (featureWidth/2))/featureWidth);
+	    int scrollTo = currentPage*featureWidth;
 	    smoothScrollTo(scrollTo, 0);
 	    return true;
 	}
@@ -93,18 +95,37 @@ public class PageFlipView extends HorizontalScrollView
 	}
     }
 
+    public int getCurrentPage() { return currentPage; }
+
+    public void setCurrentPage(int i) { currentPage = i; }
+
+    public void restoreLastPage() {
+        SharedPreferences prefs = getPreferences(0); 
+        currentPage = editor.getInteger("currentPage", 0);
+	//scroll to last loaded page
+	int featureWidth = getMeasuredWidth();
+	smoothScrollTo(currentPage*featureWidth, 0);
+    }
+
+    public void saveCurrentPage() {
+        SharedPreferences.Editor editor = getPreferences(0).edit();
+	//save current page
+        editor.putInteger("currentPage", getCurrentPage());
+        editor.commit();
+    }
+
     void scrollRight() {
 	int featureWidth = getMeasuredWidth();
-	mActiveFeature = (mActiveFeature < (container.getChildCount() - 1)) ?
-	    mActiveFeature + 1 : container.getChildCount() -1;
-	smoothScrollTo(mActiveFeature*featureWidth, 0);
+	currentPage = (currentPage < (container.getChildCount() - 1)) ?
+	    currentPage + 1 : container.getChildCount() -1;
+	smoothScrollTo(currentPage*featureWidth, 0);
     }
 
     void scrollLeft() {
 	int featureWidth = getMeasuredWidth();
-	mActiveFeature = (mActiveFeature > 0) ? 
-	    mActiveFeature - 1 : 0;
-	smoothScrollTo(mActiveFeature*featureWidth, 0);
+	currentPage = (currentPage > 0) ? 
+	    currentPage - 1 : 0;
+	smoothScrollTo(currentPage*featureWidth, 0);
     }
 
     class NextPageListener implements View.OnClickListener {
@@ -126,7 +147,7 @@ public class PageFlipView extends HorizontalScrollView
 	    public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
             try {
 		Log.d(TAG,"velocity:"+String.valueOf(velocityX)+
-		      " activeFeature:"+String.valueOf(mActiveFeature)+
+		      " activeFeature:"+String.valueOf(currentPage)+
 		      " childCount:"+String.valueOf(container.getChildCount())+
 		      " featureWidth:"+String.valueOf(getMeasuredWidth()));
                 //right to left
