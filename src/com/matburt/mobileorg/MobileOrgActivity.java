@@ -1,12 +1,5 @@
 package com.matburt.mobileorg;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.ListActivity;
@@ -19,17 +12,9 @@ import android.os.Environment;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.util.Log;
-import android.view.ContextMenu;
-import android.view.ContextMenu.ContextMenuInfo;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
+import android.view.*;
 import android.view.View.OnClickListener;
-import android.widget.AdapterView.AdapterContextMenuInfo;
-import android.widget.Button;
-import android.widget.ListView;
-import android.widget.Toast;
-
+import android.widget.*;
 import com.matburt.mobileorg.Capture.Capture;
 import com.matburt.mobileorg.Capture.ViewNodeDetailsActivity;
 import com.matburt.mobileorg.Error.ErrorReporter;
@@ -43,8 +28,17 @@ import com.matburt.mobileorg.Synchronizers.SDCardSynchronizer;
 import com.matburt.mobileorg.Synchronizers.Synchronizer;
 import com.matburt.mobileorg.Synchronizers.WebDAVSynchronizer;
 
-public class MobileOrgActivity extends ListActivity {
-	private static final int RUN_PARSER = 3;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.StringReader;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+
+public class MobileOrgActivity extends ListActivity
+{
+    private static class OrgViewAdapter extends BaseAdapter {
 
 	@SuppressWarnings("unused")
 	private static final String LT = "MobileOrg";
@@ -304,25 +298,33 @@ public class MobileOrgActivity extends ListActivity {
 			textIntent.putExtra("nodeTitle", n.name);
 			break;
 
-		case OP_CMENU_EDIT:
-			textIntent.setClass(this, ViewNodeDetailsActivity.class);
-			textIntent.putExtra("actionMode", "edit");
+        if (first) {
+            this.setListAdapter(new OrgViewAdapter(this,
+                                                   appInst.rootNode,
+                                                   appInst.nodeSelection,
+                                                   appInst.edits,
+                                                   this.appdb.getTodos()));
+            if (appInst.nodeSelection != null) {
+                this.origSelection = copySelection(appInst.nodeSelection);
+            }
+            else {
+                this.origSelection = null;
+            }
+            Log.d("MobileOrg" + this, " first redisplay, origSelection=" + nodeSelectionStr(this.origSelection));
 
-			MobileOrgApplication appInst = (MobileOrgApplication) this
-					.getApplication();
-			appInst.pushSelection(info.position);
-			textIntent.putIntegerArrayListExtra("nodePath",
-					appInst.nodeSelection);
-			break;
-		}
-		startActivity(textIntent);
-		return false;
+            getListView().setSelection( displayIndex );
+            first = false;
+        }
 	}
 
-	@Override
-	public void onListItemClick(ListView l, View v, int position, long id) {
-		MobileOrgApplication appInst = (MobileOrgApplication) this
-				.getApplication();
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        menu.add(0, MobileOrgActivity.OP_MENU_OUTLINE, 0, R.string.menu_outline);
+        menu.add(0, MobileOrgActivity.OP_MENU_CAPTURE, 0, R.string.menu_capture);
+        menu.add(0, MobileOrgActivity.OP_MENU_SYNC, 0, R.string.menu_sync);
+        menu.add(0, MobileOrgActivity.OP_MENU_SETTINGS, 0, R.string.menu_settings);
+        return true;
+    }
 
 		appInst.pushSelection(position);
 		Node node = (Node) l.getItemAtPosition(position);
