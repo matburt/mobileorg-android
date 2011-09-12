@@ -1,5 +1,12 @@
 package com.matburt.mobileorg;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.ListActivity;
@@ -12,11 +19,16 @@ import android.os.Environment;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.util.Log;
-import android.view.*;
+import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.*;
 import android.widget.AdapterView.AdapterContextMenuInfo;
+import android.widget.Button;
+import android.widget.ListView;
+import android.widget.Toast;
 
 import com.matburt.mobileorg.Capture.Capture;
 import com.matburt.mobileorg.Capture.ViewNodeDetailsActivity;
@@ -30,13 +42,6 @@ import com.matburt.mobileorg.Synchronizers.SDCardSynchronizer;
 import com.matburt.mobileorg.Synchronizers.Synchronizer;
 import com.matburt.mobileorg.Synchronizers.WebDAVSynchronizer;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-
 public class MobileOrgActivity extends ListActivity
 {
     private static final int OP_MENU_SETTINGS = 1;
@@ -46,13 +51,13 @@ public class MobileOrgActivity extends ListActivity
 
     private static final int RUN_PARSER = 3;
 
-    private static final String LT = "MobileOrg";
+    @SuppressWarnings("unused")
+	private static final String LT = "MobileOrg";
 
     private int displayIndex;
     private ProgressDialog syncDialog;
     private MobileOrgDatabase appdb;
     private ReportableError syncError;
-    private ListView lv;
     private Dialog newSetupDialog;
     private boolean newSetupDialog_shown = false;
     public SharedPreferences appSettings;
@@ -70,12 +75,11 @@ public class MobileOrgActivity extends ListActivity
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        lv = this.getListView();
         this.appdb = new MobileOrgDatabase((Context)this);
         appSettings = PreferenceManager.getDefaultSharedPreferences(
                                        getBaseContext());
 
-        registerForContextMenu(lv);
+        registerForContextMenu(getListView());
         
         if (this.appSettings.getString("syncSource","").equals("") ||
             (this.appSettings.getString("syncSource","").equals("webdav") &&
@@ -129,7 +133,7 @@ public class MobileOrgActivity extends ListActivity
         	ofp.parse();
         	appInst.rootNode = ofp.rootNode;
             appInst.edits = ofp.parseEdits();
-			Collections.sort(appInst.rootNode.subNodes, Node.comparator);
+			Collections.sort(appInst.rootNode.children, Node.comparator);
         }
         catch(Throwable e) {
         	ErrorReporter.displayError(this, "An error occurred during parsing, try re-syncing: " + e.toString());
@@ -272,9 +276,9 @@ public class MobileOrgActivity extends ListActivity
 		if (item.getItemId() == 0) {
 			textIntent.setClass(this, SimpleTextDisplay.class);
 			String txtValue = n.nodeTitle + "\n\n"
-					+ n.nodePayload;
+					+ n.payload;
 			textIntent.putExtra("txtValue", txtValue);
-			textIntent.putExtra("nodeTitle", n.nodeName);
+			textIntent.putExtra("nodeTitle", n.name);
 		}
 		// else if (v == this.docEditButton) {
 		// textIntent.setClass(this, ViewNodeDetailsActivity.class);
@@ -290,7 +294,7 @@ public class MobileOrgActivity extends ListActivity
         if (selection == null)
             return null;
         else
-            return new ArrayList(selection);
+            return new ArrayList<Integer>(selection);
     }
 
     static String nodeSelectionStr(ArrayList<Integer> nodes)
@@ -335,7 +339,7 @@ public class MobileOrgActivity extends ListActivity
                                   "/mobileorg/";
                 }
 
-                byte[] rawData = OrgFileParser.getRawFileData(orgBasePath, thisNode.nodeName);
+                byte[] rawData = OrgFileParser.getRawFileData(orgBasePath, thisNode.name);
                 //and send it to APG for decryption
                 Encryption.decrypt(this, rawData);
             }
@@ -346,15 +350,15 @@ public class MobileOrgActivity extends ListActivity
             return;
         }
 
-        if (thisNode.subNodes.size() < 1) {
+        if (thisNode.children.size() < 1) {
                displayIndex = appInst.lastIndex();
             Log.d("MobileOrg"+this,  "no subnodes, popped selection, displayIndex="+displayIndex);
             appInst.popSelection();
             if (thisNode.todo.equals("") &&
                 thisNode.priority.equals("")) {
                 Intent textIntent = new Intent(this, SimpleTextDisplay.class);
-                String docBuffer = thisNode.nodeName + "\n\n" +
-                    thisNode.nodePayload;
+                String docBuffer = thisNode.name + "\n\n" +
+                    thisNode.payload;
 
                 textIntent.putExtra("txtValue", docBuffer);
                 startActivity(textIntent);

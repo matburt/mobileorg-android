@@ -1,5 +1,8 @@
 package com.matburt.mobileorg;
 
+import java.io.File;
+import java.util.HashMap;
+
 import android.app.Service;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
@@ -7,19 +10,17 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.res.Resources;
 import android.os.Environment;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.widget.RemoteViews;
+
 import com.matburt.mobileorg.Parsing.Node;
 import com.matburt.mobileorg.Parsing.OrgFileParser;
 
-import java.io.File;
-import java.util.HashMap;
-
 public class MobileOrgWidget extends AppWidgetProvider {
-    private static final String LT = "MobileOrgWidget";
+    @SuppressWarnings("unused")
+	private static final String LT = "MobileOrgWidget";
 
    @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager,
@@ -49,7 +50,6 @@ public class MobileOrgWidget extends AppWidgetProvider {
 
         public RemoteViews genUpdateDisplay(Context context) {
             SharedPreferences appPrefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-            Resources res = context.getResources();
             RemoteViews updateViews = null;
             updateViews = new RemoteViews(context.getPackageName(),
                                           R.layout.widget_mobileorg);
@@ -76,8 +76,8 @@ public class MobileOrgWidget extends AppWidgetProvider {
                 Node todoNode = agendaNode.findChildNode("ToDo: ALL");
                 if (todoNode != null) {
                     String widgetBuffer = "";
-                    for (int idx = 0; idx < todoNode.subNodes.size(); idx++) {
-                        widgetBuffer = widgetBuffer + todoNode.subNodes.get(idx).nodeName + "\n";
+                    for (int idx = 0; idx < todoNode.children.size(); idx++) {
+                        widgetBuffer = widgetBuffer + todoNode.children.get(idx).name + "\n";
                     }
                     updateViews.setTextViewText(R.id.message, widgetBuffer);
                 }

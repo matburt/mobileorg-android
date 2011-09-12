@@ -1,18 +1,24 @@
 package com.matburt.mobileorg.Capture;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.OutputStreamWriter;
+import java.io.StringWriter;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.util.Log;
+
 import com.matburt.mobileorg.MobileOrgApplication;
 import com.matburt.mobileorg.MobileOrgDatabase;
 import com.matburt.mobileorg.Parsing.EditNode;
-
-import java.io.*;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 public class CreateEditNote
 {

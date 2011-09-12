@@ -1,20 +1,20 @@
 package com.matburt.mobileorg;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
+
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDiskIOException;
-import android.database.DatabaseUtils;
 import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.util.Log;
-import com.matburt.mobileorg.Error.ErrorReporter;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
+import com.matburt.mobileorg.Error.ErrorReporter;
 
 public class MobileOrgDatabase {
     private Context appcontext;
@@ -214,14 +214,14 @@ public class MobileOrgDatabase {
         ArrayList<ArrayList<String>> allPriorities = new ArrayList<ArrayList<String>>();
         Cursor result = this.wrapRawQuery("SELECT tdgroup, name FROM priorities order by tdgroup");
         if (result != null) {
-            ArrayList<String> grouping = new ArrayList();
+            ArrayList<String> grouping = new ArrayList<String>();
             int resultgroup = 0;
             if (result.getCount() > 0) {
                 result.moveToFirst();
                 do {
                     if (result.getInt(0) != resultgroup) {
                         allPriorities.add(grouping);
-                        grouping = new ArrayList();
+                        grouping = new ArrayList<String>();
                         resultgroup = result.getInt(0);
                     }
                     grouping.add(result.getString(1));

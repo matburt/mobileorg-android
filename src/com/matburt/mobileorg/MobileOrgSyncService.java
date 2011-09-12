@@ -1,5 +1,12 @@
 package com.matburt.mobileorg;
 
+import java.io.File;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Timer;
+import java.util.TimerTask;
+
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -8,6 +15,7 @@ import android.os.Environment;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.util.Log;
+
 import com.matburt.mobileorg.Error.ErrorReporter;
 import com.matburt.mobileorg.Error.ReportableError;
 import com.matburt.mobileorg.Parsing.Node;
@@ -17,15 +25,11 @@ import com.matburt.mobileorg.Synchronizers.SDCardSynchronizer;
 import com.matburt.mobileorg.Synchronizers.Synchronizer;
 import com.matburt.mobileorg.Synchronizers.WebDAVSynchronizer;
 
-import java.io.File;
-import java.util.*;
-
 public class MobileOrgSyncService extends Service implements SharedPreferences.OnSharedPreferenceChangeListener{
 	private Timer timer = new Timer();
 	private Date lastSyncDate;
 	private Boolean timerScheduled = false;
 	private SharedPreferences appSettings;
-	private ReportableError syncError;
 	private static long kMinimalSyncInterval = 30000;
 	
 	@Override
@@ -135,12 +139,10 @@ public class MobileOrgSyncService extends Service implements SharedPreferences.O
         Thread syncThread = new Thread() {
                 public void run() {
                 	try {
-                		syncError = null;
-	                    appSync.pull();
+                		appSync.pull();
 	                    appSync.push();
                 	}
                 	catch(ReportableError e) {
-                		syncError = e;
                 	}
                     finally {
                         appSync.close();
@@ -180,7 +182,7 @@ public class MobileOrgSyncService extends Service implements SharedPreferences.O
         	ofp.parse();
         	appInst.rootNode = ofp.rootNode;
             appInst.edits = ofp.parseEdits();
-			Collections.sort(appInst.rootNode.subNodes, Node.comparator);
+			Collections.sort(appInst.rootNode.children, Node.comparator);
         }
         catch(Throwable e) {
         	ErrorReporter.displayError(this, "An error occurred during parsing: " + e.toString());

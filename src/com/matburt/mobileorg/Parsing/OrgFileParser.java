@@ -1,11 +1,11 @@
 package com.matburt.mobileorg.Parsing;
 
-import android.content.ContentValues;
-import android.os.Environment;
-import android.util.Log;
-import com.matburt.mobileorg.MobileOrgDatabase;
-
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.EmptyStackException;
@@ -13,6 +13,12 @@ import java.util.HashMap;
 import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import android.content.ContentValues;
+import android.os.Environment;
+import android.util.Log;
+
+import com.matburt.mobileorg.MobileOrgDatabase;
 
 public class OrgFileParser {
 
@@ -131,11 +137,11 @@ public class OrgFileParser {
     }
 
     public String getNodePath(Node baseNode) {
-        String npath = baseNode.nodeName;
+        String npath = baseNode.name;
         Node pnode = baseNode;
-        while ((pnode = pnode.parentNode) != null) {
-            if (pnode.nodeName.length() > 0) {
-                npath = pnode.nodeName + "/" + npath;
+        while ((pnode = pnode.parent) != null) {
+            if (pnode.name.length() > 0) {
+                npath = pnode.name + "/" + npath;
             }
         }
         npath = "olp:" + npath;
@@ -151,12 +157,12 @@ public class OrgFileParser {
 			this.todos = appdb.getTodos();
 
             String thisLine;
-            Stack<Node> nodeStack = new Stack();
-            Stack<Integer> starStack = new Stack();
+            Stack<Node> nodeStack = new Stack<Node>();
+            Stack<Integer> starStack = new Stack<Integer>();
             Pattern propertiesLine = Pattern.compile("^\\s*:[A-Z]+:");
             if(breader == null)
             {
-                breader = this.getHandle(fileNode.nodeName);
+                breader = this.getHandle(fileNode.name);
             }
             nodeStack.push(fileNode);
             starStack.push(0);
@@ -189,7 +195,7 @@ public class OrgFileParser {
                     String title = thisLine.substring(numstars+1);
                     TitleComponents titleComp = parseTitle(this.stripTitle(title));
                     Node newNode = new Node(titleComp.title);
-                    newNode.setFullTitle(this.stripTitle(title));
+                    newNode.setTitle(this.stripTitle(title));
                     newNode.todo = titleComp.todo;
                     newNode.priority = titleComp.priority;
                     newNode.setTags(titleComp.tags);
@@ -199,7 +205,7 @@ public class OrgFileParser {
                             newNode.setParentNode(lastNode);
                             newNode.nodeId = this.getNodePath(newNode);
                             newNode.addProperty("ID", newNode.nodeId);
-                            lastNode.addChildNode(newNode);
+                            lastNode.addChild(newNode);
                         } catch (EmptyStackException e) {
                         }
                         nodeStack.push(newNode);
@@ -208,7 +214,7 @@ public class OrgFileParser {
                     else if (numstars == starStack.peek()) {
                         nodeStack.pop();
                         starStack.pop();
-                        nodeStack.peek().addChildNode(newNode);
+                        nodeStack.peek().addChild(newNode);
                         newNode.setParentNode(nodeStack.peek());
                         newNode.nodeId = this.getNodePath(newNode);
                         newNode.addProperty("ID", newNode.nodeId);
@@ -225,7 +231,7 @@ public class OrgFileParser {
                         newNode.setParentNode(lastNode);
                         newNode.nodeId = this.getNodePath(newNode);
                         newNode.addProperty("ID", newNode.nodeId);
-                        lastNode.addChildNode(newNode);
+                        lastNode.addChild(newNode);
                         nodeStack.push(newNode);
                         starStack.push(numstars);
                     }
@@ -291,7 +297,7 @@ public class OrgFileParser {
     }
 
     public void parse() {
-        Stack<Node> nodeStack = new Stack();
+        Stack<Node> nodeStack = new Stack<Node>();
         nodeStack.push(this.rootNode);
 
         for (String key : this.orgPaths.keySet()) {
@@ -306,7 +312,7 @@ public class OrgFileParser {
                 nnode.altNodeTitle = altName;
                 nnode.setParentNode(nodeStack.peek());
                 nnode.addProperty("ID", this.getNodePath(nnode));
-                nodeStack.peek().addChildNode(nnode);
+                nodeStack.peek().addChild(nnode);
                 continue;
             }
 
@@ -314,7 +320,7 @@ public class OrgFileParser {
             fileNode.setParentNode(nodeStack.peek());
             fileNode.addProperty("ID", this.getNodePath(fileNode));
             fileNode.altNodeTitle = altName;
-            nodeStack.peek().addChildNode(fileNode);
+            nodeStack.peek().addChild(fileNode);
             nodeStack.push(fileNode);
             parse(fileNode, null);
             nodeStack.pop();
@@ -332,7 +338,6 @@ public class OrgFileParser {
         String thisLine;
         boolean awaitingOldVal = false;
         boolean awaitingNewVal = false;
-        boolean awaitingCaptureBody = false;
         EditNode thisNode = null;
 
         try {

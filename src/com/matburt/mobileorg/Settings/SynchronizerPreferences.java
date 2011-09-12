@@ -1,4 +1,6 @@
 package com.matburt.mobileorg.Settings;
+import java.util.HashMap;
+
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -11,8 +13,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
-import java.util.HashMap;
 
 public class SynchronizerPreferences extends Preference {
     

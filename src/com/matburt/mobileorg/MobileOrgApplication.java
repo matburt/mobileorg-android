@@ -1,5 +1,9 @@
 package com.matburt.mobileorg;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+
 import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
@@ -7,12 +11,9 @@ import android.content.pm.PackageItemInfo;
 import android.content.pm.ResolveInfo;
 import android.os.Environment;
 import android.util.Log;
+
 import com.matburt.mobileorg.Parsing.EditNode;
 import com.matburt.mobileorg.Parsing.Node;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 
 public class MobileOrgApplication extends Application {
     public Node rootNode = null;
@@ -69,7 +70,7 @@ public class MobileOrgApplication extends Application {
     	Node thisNode = rootNode;
     	if (path != null) {
     		for (int idx = 0; idx < count; idx++) {
-    			thisNode = thisNode.subNodes.get(path.get(idx));
+    			thisNode = thisNode.children.get(path.get(idx));
     		}
     	}
     	return thisNode;

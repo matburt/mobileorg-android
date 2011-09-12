@@ -1,20 +1,24 @@
 package com.matburt.mobileorg.Capture;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.*;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Spinner;
+import android.widget.TextView;
+
 import com.matburt.mobileorg.MobileOrgApplication;
 import com.matburt.mobileorg.MobileOrgDatabase;
-import com.matburt.mobileorg.Parsing.Node;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.SimpleTextDisplay;
-
-import java.lang.Object;
-import java.util.ArrayList;
-import java.util.HashMap;
+import com.matburt.mobileorg.Parsing.Node;
 
 public class ViewNodeDetailsActivity extends Activity implements OnClickListener {
 	protected ArrayList<Integer> mNodePath;
@@ -59,10 +63,10 @@ public class ViewNodeDetailsActivity extends Activity implements OnClickListener
         super.onDestroy();
     }
 
-	public void setSpinner(Spinner view, ArrayList data, String selection) {
+	public void setSpinner(Spinner view, ArrayList<?> data, String selection) {
 		// I can't use a simple cursor here because the todos table does not store an _id yet.
 		// Instead, we'll retrieve the todos from the database, and we'll use an array adapter.
-		ArrayList choices = new ArrayList();
+		ArrayList<String> choices = new ArrayList<String>();
 		choices.add("");
 		for (Object group : data) {
 			if (group instanceof HashMap) {
@@ -75,7 +79,7 @@ public class ViewNodeDetailsActivity extends Activity implements OnClickListener
 				}
 			}
 		}
-		ArrayAdapter adapter = new ArrayAdapter(this, android.R.layout.simple_spinner_item,
+		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item,
 				choices);
 		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		view.setAdapter(adapter);
@@ -90,10 +94,9 @@ public class ViewNodeDetailsActivity extends Activity implements OnClickListener
                 mNode = appInst.getNode(mNodePath);
                 mNode.applyEdits(appInst.findEdits(mNode.nodeId));
 
-                Node parent = appInst.getParent(mNodePath);
-                mTitle.setText(mNode.nodeName);
-                mBody.setText(mNode.nodePayload);
-                mTags.setText(mNode.tagString);
+                mTitle.setText(mNode.name);
+                mBody.setText(mNode.payload);
+                mTags.setText(mNode.getTagString());
                 appInst.popSelection();
         }
         if (this.actionMode.equals("create")) {
@@ -108,7 +111,7 @@ public class ViewNodeDetailsActivity extends Activity implements OnClickListener
 	public void onClick(View v) {
 		if (v.equals(mViewAsDocument)) {
 			Intent intent = new Intent(this, SimpleTextDisplay.class);
-			String txtValue = mNode.nodeTitle + "\n\n" + mNode.nodePayload;
+			String txtValue = mNode.nodeTitle + "\n\n" + mNode.payload;
 			intent.putExtra("txtValue", txtValue );
 			this.startActivity(intent);
 		}
@@ -118,7 +121,7 @@ public class ViewNodeDetailsActivity extends Activity implements OnClickListener
 				intent.putExtra("nodeId", mNode.nodeId);
 			}
 			intent.putExtra("editType", "body");
-			intent.putExtra("txtValue", mNode.nodePayload);
+			intent.putExtra("txtValue", mNode.payload);
 			intent.putExtra("nodeTitle", mNode.nodeTitle);
 			startActivityForResult(intent, EDIT_BODY);
 		}
@@ -133,7 +136,6 @@ public class ViewNodeDetailsActivity extends Activity implements OnClickListener
 		String newTitle = mTitle.getText().toString();
         String newTodo = null;
         String newPriority = null;
-        String newPayload = null;
 
         Object tdSelected = mTodoState.getSelectedItem();
         Object priSelected = mPriority.getSelectedItem();
@@ -147,9 +149,9 @@ public class ViewNodeDetailsActivity extends Activity implements OnClickListener
         }
 
         if (this.actionMode.equals("edit")) {
-            if (!mNode.nodeName.equals(newTitle)) {
-                creator.editNote("heading", mNode.nodeId, newTitle, mNode.nodeName, newTitle);
-                mNode.nodeName = newTitle;
+            if (!mNode.name.equals(newTitle)) {
+                creator.editNote("heading", mNode.nodeId, newTitle, mNode.name, newTitle);
+                mNode.name = newTitle;
             }
             if (newTodo != null && !mNode.todo.equals(newTodo)) {
                 creator.editNote("todo", mNode.nodeId, newTitle, mNode.todo, newTodo);
@@ -159,16 +161,16 @@ public class ViewNodeDetailsActivity extends Activity implements OnClickListener
                 creator.editNote("priority", mNode.nodeId, newTitle, mNode.priority, newPriority);
                 mNode.priority = newPriority;
             }
-            if (!mNode.nodePayload.equals(mBody.getText().toString())) {
-            	creator.editNote("body", mNode.nodeId, newTitle, mNode.nodePayload, mBody.getText().toString());
-            	mNode.nodePayload = mBody.getText().toString();
+            if (!mNode.payload.equals(mBody.getText().toString())) {
+            	creator.editNote("body", mNode.nodeId, newTitle, mNode.payload, mBody.getText().toString());
+            	mNode.payload = mBody.getText().toString();
             }
         }
         else if (this.actionMode.equals("create")) {
-            mNode.nodeName = newTitle;
+            mNode.name = newTitle;
             mNode.todo = newTodo;
             mNode.priority = newPriority;
-            mNode.nodePayload = mBody.getText().toString();;
+            mNode.payload = mBody.getText().toString();;
             creator.writeNote(mNode.generateNoteEntry());
         }
         creator.close();
@@ -181,7 +183,7 @@ public class ViewNodeDetailsActivity extends Activity implements OnClickListener
                 return;
             }
             String newBody = data.getStringExtra("text");
-            mNode.nodePayload = newBody;
+            mNode.payload = newBody;
             mBody.setText(newBody);
             populateDisplay();
         }

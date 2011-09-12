@@ -1,5 +1,8 @@
 package com.matburt.mobileorg.Capture;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -8,14 +11,16 @@ import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.*;
+import android.widget.Button;
+import android.widget.ScrollView;
+import android.widget.TableLayout;
+import android.widget.TableRow;
 import android.widget.TableRow.LayoutParams;
+import android.widget.TextView;
+
 import com.matburt.mobileorg.MobileOrgApplication;
 import com.matburt.mobileorg.MobileOrgDatabase;
 import com.matburt.mobileorg.Parsing.Node;
-
-import java.util.ArrayList;
-import java.util.HashMap;
 
 public class EditDetailsActivity extends Activity implements OnClickListener
 {
@@ -150,7 +155,7 @@ public class EditDetailsActivity extends Activity implements OnClickListener
     public void saveEditPriority(String newPriority) {
         this.noteEditor.editNote("priority",
                                  this.activeNode.nodeId,
-                                 this.activeNode.nodeName,
+                                 this.activeNode.name,
                                  this.activeNode.priority,
                                  newPriority);
     }
@@ -158,7 +163,7 @@ public class EditDetailsActivity extends Activity implements OnClickListener
     public void saveEditTodo(String newTodo) {
         this.noteEditor.editNote("todo",
                                  this.activeNode.nodeId,
-                                 this.activeNode.nodeName,
+                                 this.activeNode.name,
                                  this.activeNode.todo,
                                  newTodo);
     }
@@ -166,10 +171,8 @@ public class EditDetailsActivity extends Activity implements OnClickListener
     public void populateInfo() {
         this.appinst = (MobileOrgApplication)this.getApplication();
         Node thisNode = this.appinst.rootNode;
-        Intent textIntent = new Intent();
-        String displayBuffer = new String();
         for (int idx = 0; idx < this.npath.size(); idx++) {
-            thisNode = thisNode.subNodes.get(this.npath.get(idx));
+            thisNode = thisNode.children.get(this.npath.get(idx));
         }
         this.activeNode = thisNode;
     }

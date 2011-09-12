@@ -1,14 +1,16 @@
 package com.matburt.mobileorg;
 
+import java.util.ArrayList;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+
 import com.matburt.mobileorg.Capture.ViewNodeDetailsActivity;
 import com.matburt.mobileorg.Parsing.Node;
-import java.util.ArrayList;
 
 public class OrgContextMenu extends Activity implements OnClickListener
 {
@@ -33,13 +35,11 @@ public class OrgContextMenu extends Activity implements OnClickListener
         this.npath = txtIntent.getIntegerArrayListExtra("nodePath");
         MobileOrgApplication appInst = (MobileOrgApplication)this.getApplication();
         Node thisNode = appInst.rootNode;
-        Intent textIntent = new Intent();
-        String displayBuffer = new String();
         if (thisNode == null)
             return;
 
         for (int idx = 0; idx < this.npath.size(); idx++) {
-            thisNode = thisNode.subNodes.get(
+            thisNode = thisNode.children.get(
                                              this.npath.get(idx));
         }
         //If we need to do something special with the context menu based on the Node we'll do it here
@@ -53,13 +53,12 @@ public class OrgContextMenu extends Activity implements OnClickListener
         	return;
         }
         Intent textIntent = new Intent();
-        String displayBuffer = new String();
         if (v == this.docButton) {
             textIntent.setClass(this,
                     SimpleTextDisplay.class);
-			String txtValue = thisNode.nodeTitle + "\n\n" + thisNode.nodePayload;
+			String txtValue = thisNode.nodeTitle + "\n\n" + thisNode.payload;
 			textIntent.putExtra("txtValue", txtValue );
-            textIntent.putExtra("nodeTitle", thisNode.nodeName);
+            textIntent.putExtra("nodeTitle", thisNode.name);
         }
         else if (v == this.docEditButton) {
             textIntent.setClass(this, ViewNodeDetailsActivity.class);

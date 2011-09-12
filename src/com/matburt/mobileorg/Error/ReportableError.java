@@ -1,6 +1,7 @@
 package com.matburt.mobileorg.Error;
 
 public class ReportableError extends Throwable {
+	private static final long serialVersionUID = 1L;
 	private String message;
 	private Throwable originalError;
 	

@@ -8,7 +8,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
-import com.matburt.mobileorg.MobileOrgApplication;
+
 import com.matburt.mobileorg.R;
 
 public class Capture extends Activity implements OnClickListener
@@ -16,13 +16,9 @@ public class Capture extends Activity implements OnClickListener
     private EditText orgEditDisplay;
     private Button saveButton;
     private Button advancedButton;
-    private boolean editMode = false;
-    private String id = null;
     private String editType = null;
     private String srcText = null;
-    private String nodeTitle = null;
     private CreateEditNote noteCreator = null;
-    private MobileOrgApplication appinst;
     public static final String LT = "MobileOrg";
 
     @Override
@@ -102,10 +98,9 @@ public class Capture extends Activity implements OnClickListener
 				this.srcText = subject + text;
 			}
 		}
-        this.id = txtIntent.getStringExtra("nodeId");
+        txtIntent.getStringExtra("nodeId");
         this.editType = txtIntent.getStringExtra("editType");
         this.orgEditDisplay.setText(this.srcText);
-        this.nodeTitle = txtIntent.getStringExtra("nodeTitle");
-        this.appinst = (MobileOrgApplication)this.getApplication();
+        txtIntent.getStringExtra("nodeTitle");
     }
 }

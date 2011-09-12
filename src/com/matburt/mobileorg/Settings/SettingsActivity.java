@@ -1,15 +1,16 @@
 package com.matburt.mobileorg.Settings;
 
+import java.util.List;
+
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageItemInfo;
 import android.os.Bundle;
 import android.preference.ListPreference;
 import android.preference.PreferenceActivity;
+
 import com.matburt.mobileorg.MobileOrgApplication;
 import com.matburt.mobileorg.R;
-
-import java.util.List;
 
 public class SettingsActivity extends PreferenceActivity
 {
