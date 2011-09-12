@@ -1,17 +1,9 @@
 package com.matburt.mobileorg;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.StringReader;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-
 import android.app.Activity;
+import android.app.Dialog;
 import android.app.ListActivity;
 import android.app.ProgressDialog;
-import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -22,20 +14,9 @@ import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.*;
 import android.view.View.OnClickListener;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.Gravity;
-import android.widget.AdapterView;
-import android.widget.BaseAdapter;
-import android.widget.LinearLayout;
-import android.widget.ListView;
-import android.widget.TextView;
-import android.widget.Button;
-import android.widget.Toast;
+import android.widget.*;
 import com.matburt.mobileorg.Capture.Capture;
 import com.matburt.mobileorg.Capture.ViewNodeDetailsActivity;
 import com.matburt.mobileorg.Error.ErrorReporter;
@@ -48,6 +29,14 @@ import com.matburt.mobileorg.Synchronizers.DropboxSynchronizer;
 import com.matburt.mobileorg.Synchronizers.SDCardSynchronizer;
 import com.matburt.mobileorg.Synchronizers.Synchronizer;
 import com.matburt.mobileorg.Synchronizers.WebDAVSynchronizer;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.StringReader;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 
 public class MobileOrgActivity extends ListActivity
 {
@@ -389,12 +378,32 @@ public class MobileOrgActivity extends ListActivity
             else {
                 this.origSelection = null;
             }
-            Log.d("MobileOrg"+this,  " first redisplay, origSelection="+nodeSelectionStr(this.origSelection));
+            Log.d("MobileOrg" + this, " first redisplay, origSelection=" + nodeSelectionStr(this.origSelection));
 
             getListView().setSelection( displayIndex );
             first = false;
+
+            //setTitle(generateTitle());
+
         }
 	}
+
+
+    String generateTitle() {
+        MobileOrgApplication appInst = (MobileOrgApplication) this.getApplication();
+        String title = "";
+
+        if (appInst.nodeSelection != null) {
+            ArrayList<Integer> nodeSelectionBackup = new ArrayList<Integer>();
+            for(Integer item: appInst.nodeSelection) nodeSelectionBackup.add(item);
+
+            while(nodeSelectionBackup.size() > 0) {
+                title = appInst.getNode(nodeSelectionBackup).nodeTitle + "$" + title;
+                nodeSelectionBackup.remove(nodeSelectionBackup.size()-1);
+            }
+        }
+        return title;
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
