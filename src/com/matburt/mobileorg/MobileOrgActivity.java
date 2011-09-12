@@ -7,21 +7,21 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.preference.PreferenceManager;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.*;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.View.OnClickListener;
 import android.widget.*;
+import android.widget.AdapterView.AdapterContextMenuInfo;
+
 import com.matburt.mobileorg.Capture.Capture;
 import com.matburt.mobileorg.Capture.ViewNodeDetailsActivity;
 import com.matburt.mobileorg.Error.ErrorReporter;
 import com.matburt.mobileorg.Error.ReportableError;
-import com.matburt.mobileorg.Parsing.EditNode;
 import com.matburt.mobileorg.Parsing.Node;
 import com.matburt.mobileorg.Parsing.OrgFileParser;
 import com.matburt.mobileorg.Settings.SettingsActivity;
@@ -33,181 +33,12 @@ import com.matburt.mobileorg.Synchronizers.WebDAVSynchronizer;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.StringReader;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 
 public class MobileOrgActivity extends ListActivity
 {
-    private static class OrgViewAdapter extends BaseAdapter {
-
-        public Node topNode;
-        public Node thisNode;
-        public ArrayList<Integer> nodeSelection;
-        public ArrayList<EditNode> edits = new ArrayList<EditNode>();
-        public ArrayList<HashMap<String, Integer>> allTodos = 
-                             new ArrayList<HashMap<String, Integer>>();
-        private Context context;
-        private LayoutInflater lInflator;
-
-        public OrgViewAdapter(Context context, Node ndx,
-                              ArrayList<Integer> selection,
-                              ArrayList<EditNode> edits,
-                              ArrayList<HashMap<String, Integer>> allTodos) {
-            this.topNode = ndx;
-            this.thisNode = ndx;
-            this.lInflator = LayoutInflater.from(context);
-            this.nodeSelection = selection;
-            this.edits = edits;
-            this.context = context;
-            this.allTodos = allTodos;
-
-            Log.d("MobileOrg"+this,  "startup path="+nodeSelectionStr(selection));
-            if (selection != null) {
-                for (int idx = 0; idx < selection.size(); idx++) {
-                    try {
-                        this.thisNode = this.thisNode.subNodes.get(
-                                            selection.get(idx));
-                    }
-                    catch (IndexOutOfBoundsException e) {
-                        Log.d("MobileOrg"+this,  "IndexOutOfBounds on selection " +
-                              selection.get(idx).toString() + " in node " +
-                              this.thisNode.nodeName);
-                        return;
-                    }
-                }
-            }
-        }
-
-        public int getCount() {
-            if (this.thisNode == null ||
-                this.thisNode.subNodes == null)
-                return 0;
-            return this.thisNode.subNodes.size();
-        }
-
-        public Object getItem(int position) {
-            return position;
-        }
-
-        public long getItemId(int position) {
-            return position;
-        }
-
-        public ArrayList<EditNode> findEdits(String nodeId) {
-            ArrayList<EditNode> thisEdits = new ArrayList<EditNode>();
-            if (this.edits == null)
-                return thisEdits;
-            for (int idx = 0 ; idx < this.edits.size(); idx++)
-                {
-                    String compareS = "";
-                    if (nodeId.indexOf("olp:") == 0)
-                        compareS = "olp:" + this.edits.get(idx).nodeId;
-                    else
-                        compareS = this.edits.get(idx).nodeId;
-                    if (compareS.equals(nodeId)) {
-                        thisEdits.add(this.edits.get(idx));
-                    }
-                }
-            return thisEdits;
-        }
-
-        public Integer findTodoState(String todoItem) {
-            for (HashMap<String, Integer> group : this.allTodos) {
-                for (String key : group.keySet()) {
-                    if (key.equals(todoItem))
-                        return group.get(key);
-                }
-            }
-            return 0;
-        }
-
-        public View getView(int position, View convertView, ViewGroup parent) {
-            if (convertView == null) {
-                convertView = this.lInflator.inflate(R.layout.main, null);
-            }
-            TextView thisView = (TextView)convertView.findViewById(R.id.orgItem);
-            TextView todoView = (TextView)convertView.findViewById(R.id.todoState);
-            TextView priorityView = (TextView)convertView.findViewById(R.id.priorityState);
-            LinearLayout tagsLayout = (LinearLayout)convertView.findViewById(R.id.tagsLayout);
-            TextView dateView = (TextView)convertView.findViewById(R.id.dateInfo);
-            ArrayList<EditNode> thisEdits = this.findEdits(
-                                              this.thisNode.subNodes.get(position).nodeId);
-            String todo = this.thisNode.subNodes.get(position).todo;
-            String priority = this.thisNode.subNodes.get(position).priority;
-            String dateInfo = "";
-            thisView.setText(this.thisNode.subNodes.get(position).nodeName);
-
-            for (EditNode e : thisEdits) {
-                if (e.editType.equals("todo"))
-                    todo = e.newVal;
-                else if (e.editType.equals("priority"))
-                    priority = e.newVal;
-                else if (e.editType.equals("heading")) {
-                    thisView.setText(e.newVal);
-                }
-            }
-
-            if (this.thisNode.subNodes.get(position).altNodeTitle != null) {
-                thisView.setText(this.thisNode.subNodes.get(position).altNodeTitle);
-            }
-
-            SimpleDateFormat formatter = new SimpleDateFormat("<yyyy-MM-dd EEE>");
-            if (this.thisNode.subNodes.get(position).deadline != null) {
-                dateInfo += "DEADLINE: " + formatter.format(
-                                this.thisNode.subNodes.get(position).deadline) + " ";
-            }
-
-            if (this.thisNode.subNodes.get(position).schedule != null) {
-                dateInfo += "SCHEDULED: " + formatter.format(
-                                this.thisNode.subNodes.get(position).schedule) + " ";
-            }
-
-            tagsLayout.removeAllViews();
-            for (String tag : this.thisNode.subNodes.get(position).tags) {
-				TextView tagView = new TextView(this.context);
-				tagView.setText(tag);
-                tagView.setTextColor(Color.LTGRAY);
-				tagView.setPadding(0, 0, 5, 0);
-				tagsLayout.addView(tagView);
-			}
-
-            if (TextUtils.isEmpty(todo)) {
-            	todoView.setVisibility(View.GONE);
-            }
-            else {
-            	todoView.setText(todo);
-                Integer todoState = this.findTodoState(todo);
-                if (todoState > 0)
-                    todoView.setBackgroundColor(Color.GREEN);
-                else
-                    todoView.setBackgroundColor(Color.RED);
-                todoView.setTextColor(Color.WHITE);
-            	todoView.setVisibility(View.VISIBLE);
-            }
-
-            if (TextUtils.isEmpty(priority)) {
-                priorityView.setVisibility(View.GONE);
-            }
-            else {
-                priorityView.setText(priority);
-                priorityView.setVisibility(View.VISIBLE);
-            }
-
-            if (TextUtils.isEmpty(dateInfo)) {
-                dateView.setVisibility(View.GONE);
-            }
-            else {
-                dateView.setText(dateInfo);
-                dateView.setVisibility(View.VISIBLE);
-            }
-
-            convertView.setTag(thisView);
-            return convertView;
-        }
-    }
-
     private static final int OP_MENU_SETTINGS = 1;
     private static final int OP_MENU_SYNC = 2;
     private static final int OP_MENU_OUTLINE = 3;
@@ -243,14 +74,9 @@ public class MobileOrgActivity extends ListActivity
         this.appdb = new MobileOrgDatabase((Context)this);
         appSettings = PreferenceManager.getDefaultSharedPreferences(
                                        getBaseContext());
-        lv.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener
-                                      (){
-                    public boolean onItemLongClick(AdapterView<?> av, View v,
-                                                   int pos, long id) {
-                    onLongListItemClick(v,pos,id);
-                    return true;
-                }
-            });
+
+        registerForContextMenu(lv);
+        
         if (this.appSettings.getString("syncSource","").equals("") ||
             (this.appSettings.getString("syncSource","").equals("webdav") &&
              this.appSettings.getString("webUrl","").equals("")) ||
@@ -273,6 +99,7 @@ public class MobileOrgActivity extends ListActivity
         super.onDestroy();
     }
 
+    
     public void runParser() {
         MobileOrgApplication appInst = (MobileOrgApplication)this.getApplication();
         HashMap<String, String> allOrgList = this.appdb.getOrgFiles();
@@ -414,14 +241,49 @@ public class MobileOrgActivity extends ListActivity
         return true;
     }
 
-    protected void onLongListItemClick(View av, int pos, long id) {
-        Intent dispIntent = new Intent(this, OrgContextMenu.class);
-        MobileOrgApplication appInst = (MobileOrgApplication)this.getApplication();
+//    protected void onLongListItemClick(View av, int pos, long id) {
+//        Intent dispIntent = new Intent(this, OrgContextMenu.class);
+//        MobileOrgApplication appInst = (MobileOrgApplication)this.getApplication();
+//
+//        appInst.pushSelection(pos);
+//        dispIntent.putIntegerArrayListExtra("nodePath", appInst.nodeSelection);
+//        startActivity(dispIntent);
+//    }
+    
 
-        appInst.pushSelection(pos);
-        dispIntent.putIntegerArrayListExtra("nodePath", appInst.nodeSelection);
-        startActivity(dispIntent);
-    }
+	@Override
+	public void onCreateContextMenu(ContextMenu menu, View v,
+			ContextMenuInfo menuInfo) {
+		super.onCreateContextMenu(menu, v, menuInfo);
+		menu.add(0, 0, 0, "View Document");
+	}
+
+	@Override
+	public boolean onContextItemSelected(MenuItem item) {
+		AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
+		//MobileOrgApplication appInst = (MobileOrgApplication) this.getApplication();
+
+		//Node n = (Node) this.getListAdapter().getItem(info.id);
+		Node n = (Node) getListAdapter().getItem(info.position);
+
+		
+		Intent textIntent = new Intent();
+
+		if (item.getItemId() == 0) {
+			textIntent.setClass(this, SimpleTextDisplay.class);
+			String txtValue = n.nodeTitle + "\n\n"
+					+ n.nodePayload;
+			textIntent.putExtra("txtValue", txtValue);
+			textIntent.putExtra("nodeTitle", n.nodeName);
+		}
+		// else if (v == this.docEditButton) {
+		// textIntent.setClass(this, ViewNodeDetailsActivity.class);
+		// textIntent.putExtra("actionMode", "edit");
+		// textIntent.putIntegerArrayListExtra("nodePath", this.npath);
+		// }
+		startActivity(textIntent);
+		return false;
+	}
 
     static private ArrayList<Integer> copySelection(ArrayList<Integer> selection)
     {
@@ -431,7 +293,7 @@ public class MobileOrgActivity extends ListActivity
             return new ArrayList(selection);
     }
 
-    static private String nodeSelectionStr(ArrayList<Integer> nodes)
+    static String nodeSelectionStr(ArrayList<Integer> nodes)
     {
         if (nodes != null) {
             String tmp = "";
