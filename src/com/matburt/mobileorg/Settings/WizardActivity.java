@@ -16,14 +16,16 @@ import android.view.ViewGroup.LayoutParams;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
-import java.util.List;
+import java.util.ArrayList;
 import android.widget.EditText;
 import android.view.inputmethod.InputMethodManager;
+import android.util.Log;
 import com.matburt.mobileorg.R;
 
 public class WizardActivity extends Activity
     implements RadioGroup.OnCheckedChangeListener {
-
+    static String TAG="WizardActivity";
+    
     //container
     PageFlipView wizard;
     //page 1 variables
@@ -31,14 +33,14 @@ public class WizardActivity extends Activity
     RadioGroup syncGroup; 
     //page 2 variables
     View loginPage;
-    List<EditText> loginBoxes = new List<EditText>();
+    ArrayList<EditText> loginBoxes = new ArrayList<EditText>();
 
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.wizard);
-	wizard = findViewById(R.id.wizard_parent);
+	wizard = (PageFlipView) findViewById(R.id.wizard_parent);
 	//setup page 1
 	PageView page1Container = (PageView) findViewById(R.id.wizard_page1);
 	LayoutInflater inflater=
@@ -64,7 +66,17 @@ public class WizardActivity extends Activity
     @Override
     protected void onResume() {
         super.onResume();
+	Log.d(TAG,"onResume: loading... "+String.valueOf(wizard.getCurrentPage()));
 	wizard.restoreLastPage();
+	Log.d(TAG,"onResume: done... "+String.valueOf(wizard.getCurrentPage()));
+		//hide keyboard if showing
+	// InputMethodManager imm = (InputMethodManager) 
+	//     getSystemService(Context.INPUT_METHOD_SERVICE);
+	// imm.hideSoftInputFromWindow(wizard.getWindowToken(), 0);
+	// wizard.post(new Runnable() {
+	// 	@Override
+	// 	    public void run() { wizard.requestLayout(); }
+	//     });
     }
 
     /**
@@ -74,14 +86,17 @@ public class WizardActivity extends Activity
     @Override
     protected void onPause() {
         super.onPause();
+	Log.d(TAG,"saving state>>>>>>>>>>>>>>>>>>>>>");
+	Log.d(TAG,"onPause: "+String.valueOf(wizard.getCurrentPage()));
 	wizard.saveCurrentPage();
-	//unselect current login boxes
-	// for(EditText box : loginBoxes) 
-	//     box.clearFocus();
 	//hide keyboard if showing
 	InputMethodManager imm = (InputMethodManager) 
 	    getSystemService(INPUT_METHOD_SERVICE);
-	imm.hideSoftInputFromWindow(getWindowToken(), 0);
+	// for(EditText box : loginBoxes) {
+	// View selected = wizard.findFocus();
+	// if ( selected != null ) 
+	// imm.hideSoftInputFromWindow(selected.getWindowToken(), 0);
+	// // }
     }
 
     @Override
@@ -94,11 +109,6 @@ public class WizardActivity extends Activity
     	else if ( checkedId == syncDropBox ) {
     	    //editor.putString("syncSource", "dropbox");
 	    createDropboxLogin();
-	    //add login boxes to list ... for handling orientation
-	    //changes
-	    loginBoxes.clear();
-	    loginBoxes.add( loginPage.findViewById(R.id.wizard_dropbox_email) );
-	    loginBoxes.add( loginPage.findViewById(R.id.wizard_dropbox_password) );
 	}
     	else if ( checkedId == syncSdCard)
     	    editor.putString("syncSource", "sdcard");
@@ -110,6 +120,14 @@ public class WizardActivity extends Activity
 	LayoutInflater inflater=
 	    (LayoutInflater) LayoutInflater.from(getApplicationContext());
 	loginPage = inflater.inflate(R.layout.wizard_dropbox,page2);
+	//add login boxes to list ... for handling focus on page flips
+	//changes
+	loginBoxes.clear();
+	loginBoxes.add( (EditText) 
+			loginPage.findViewById(R.id.wizard_dropbox_email) );
+	loginBoxes.add( (EditText) 
+			loginPage.findViewById(R.id.wizard_dropbox_password) );
+	wizard.setEditBoxes( loginBoxes );
     }
 
     /* TODO: Unfocus login textboxes on orientation change */

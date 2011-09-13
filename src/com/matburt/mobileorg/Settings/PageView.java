@@ -62,6 +62,13 @@ public class PageView extends RelativeLayout {
     	    .getDefaultDisplay(); 
         int screenWidth = display.getWidth();
         int screenHeight = display.getHeight();
+    	// setMeasuredDimension(parentWidth, parentHeight);
+    	// setLayoutParams(new 
+    	// 		LinearLayout
+    	// 		.LayoutParams(parentWidth,
+	// 			      parentHeight)
+    	// 		);
+    	// super.onMeasure(parentWidth, parentHeight);
     	setMeasuredDimension(measureWidth(widthMeasureSpec),
     			     measureHeight(heightMeasureSpec));
 

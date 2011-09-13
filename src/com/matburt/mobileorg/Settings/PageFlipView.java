@@ -19,6 +19,10 @@ import android.view.MotionEvent;
 import android.view.LayoutInflater;
 import android.preference.PreferenceManager;
 import android.content.SharedPreferences;
+import android.widget.EditText;
+import java.util.ArrayList;
+import android.view.inputmethod.InputMethodManager;
+import android.graphics.Rect;
 import com.matburt.mobileorg.R;
 
 public class PageFlipView extends HorizontalScrollView 
@@ -36,6 +40,7 @@ public class PageFlipView extends HorizontalScrollView
     PreviousPageListener previousPageListener; // for handling
 					       // previous page button
 					       // clicks
+    ArrayList<EditText> editBoxes;
 
     public PageFlipView(Context context) {
 	super(context);
@@ -76,6 +81,13 @@ public class PageFlipView extends HorizontalScrollView
     }
 
     @Override
+	public void onFocusChanged(boolean gainFocus, 
+				   int direction, 
+				   Rect previouslyFocusedRect) {
+	if (gainFocus) requestLayout();
+    }
+
+    @Override
 	public boolean onTouch(View v, MotionEvent event) {
 	//If the user swipes
 	if (mGestureDetector.onTouchEvent(event)) {
@@ -95,22 +107,29 @@ public class PageFlipView extends HorizontalScrollView
 	}
     }
 
+    public void setEditBoxes(ArrayList e) { editBoxes = e; }
+
     public int getCurrentPage() { return currentPage; }
 
     public void setCurrentPage(int i) { currentPage = i; }
 
     public void restoreLastPage() {
-        SharedPreferences prefs = getPreferences(0); 
-        currentPage = editor.getInteger("currentPage", 0);
+        SharedPreferences prefs = ((Activity) getContext()).getPreferences(0); 
+        currentPage = prefs.getInt("currentPage", 0);
 	//scroll to last loaded page
-	int featureWidth = getMeasuredWidth();
-	smoothScrollTo(currentPage*featureWidth, 0);
+	post(new Runnable() {
+		@Override
+		    public void run() {
+		    scrollTo(currentPage*getMeasuredWidth(), 0);
+                }
+            });
     }
 
     public void saveCurrentPage() {
-        SharedPreferences.Editor editor = getPreferences(0).edit();
+        SharedPreferences prefs = ((Activity) getContext()).getPreferences(0); 
+    	SharedPreferences.Editor editor = prefs.edit();
 	//save current page
-        editor.putInteger("currentPage", getCurrentPage());
+        editor.putInt("currentPage", getCurrentPage());
         editor.commit();
     }
 
@@ -119,6 +138,9 @@ public class PageFlipView extends HorizontalScrollView
 	currentPage = (currentPage < (container.getChildCount() - 1)) ?
 	    currentPage + 1 : container.getChildCount() -1;
 	smoothScrollTo(currentPage*featureWidth, 0);
+	//unfocus login boxes
+	View selectedBox = findFocus();
+	if (selectedBox != null) selectedBox.clearFocus();
     }
 
     void scrollLeft() {
@@ -126,6 +148,12 @@ public class PageFlipView extends HorizontalScrollView
 	currentPage = (currentPage > 0) ? 
 	    currentPage - 1 : 0;
 	smoothScrollTo(currentPage*featureWidth, 0);
+	//unfocus login boxes
+	View selectedBox = findFocus();
+	if (selectedBox != null) selectedBox.clearFocus();
+	// if (editBoxes != null )
+	//     for(EditText box : editBoxes) 
+	// 	box.clearFocus();
     }
 
     class NextPageListener implements View.OnClickListener {
