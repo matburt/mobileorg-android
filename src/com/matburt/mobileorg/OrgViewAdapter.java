@@ -62,7 +62,8 @@ class OrgViewAdapter extends BaseAdapter {
 	}
 
 	public Object getItem(int position) {
-		return new Node();
+		//return new Node();
+		return this.topNode.children.get(position);
 	}
 
 	public long getItemId(int position) {
