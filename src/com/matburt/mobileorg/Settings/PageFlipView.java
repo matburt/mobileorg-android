@@ -134,6 +134,7 @@ public class PageFlipView extends HorizontalScrollView
     }
 
     void scrollRight() {
+	hideKeyboard();
 	int featureWidth = getMeasuredWidth();
 	currentPage = (currentPage < (container.getChildCount() - 1)) ?
 	    currentPage + 1 : container.getChildCount() -1;
@@ -141,9 +142,10 @@ public class PageFlipView extends HorizontalScrollView
 	//unfocus login boxes
 	View selectedBox = findFocus();
 	if (selectedBox != null) selectedBox.clearFocus();
-    }
+     }
 
     void scrollLeft() {
+	hideKeyboard();
 	int featureWidth = getMeasuredWidth();
 	currentPage = (currentPage > 0) ? 
 	    currentPage - 1 : 0;
@@ -151,9 +153,14 @@ public class PageFlipView extends HorizontalScrollView
 	//unfocus login boxes
 	View selectedBox = findFocus();
 	if (selectedBox != null) selectedBox.clearFocus();
-	// if (editBoxes != null )
-	//     for(EditText box : editBoxes) 
-	// 	box.clearFocus();
+    }
+
+    //hide keyboard if showing    
+    void hideKeyboard() {
+	InputMethodManager imm = (InputMethodManager) 
+	    ((Activity)getContext())
+	    .getSystemService(Context.INPUT_METHOD_SERVICE);
+	imm.hideSoftInputFromWindow(getWindowToken(), 0);
     }
 
     class NextPageListener implements View.OnClickListener {

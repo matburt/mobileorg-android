@@ -78,8 +78,8 @@ public class PageView extends RelativeLayout {
     				      measureWidth(widthMeasureSpec),
     				      measureHeight(heightMeasureSpec))
     			);
-    	super.onMeasure(measureWidth(widthMeasureSpec),
-    			     measureHeight(heightMeasureSpec));
+    	super.onMeasure(widthMeasureSpec,
+			measureHeight(heightMeasureSpec));
 	//widthMeasureSpec, heightMeasureSpec);
     }
 
