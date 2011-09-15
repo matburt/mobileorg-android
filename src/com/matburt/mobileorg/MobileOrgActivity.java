@@ -43,11 +43,6 @@ import com.matburt.mobileorg.Synchronizers.Synchronizer;
 import com.matburt.mobileorg.Synchronizers.WebDAVSynchronizer;
 
 public class MobileOrgActivity extends ListActivity {
-	private static final int OP_MENU_SETTINGS = 1;
-	private static final int OP_MENU_SYNC = 2;
-	private static final int OP_MENU_OUTLINE = 3;
-	private static final int OP_MENU_CAPTURE = 4;
-	
 	private static final int RUN_PARSER = 3;
 
 	@SuppressWarnings("unused")
@@ -244,14 +239,39 @@ public class MobileOrgActivity extends ListActivity {
 		return title;
 	}
 
+	private static final int OP_MENU_SETTINGS = 1;
+	private static final int OP_MENU_SYNC = 2;
+	private static final int OP_MENU_OUTLINE = 3;
+	private static final int OP_MENU_CAPTURE = 4;
+	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		menu.add(0, MobileOrgActivity.OP_MENU_OUTLINE, 0, R.string.menu_outline);
-		menu.add(0, MobileOrgActivity.OP_MENU_CAPTURE, 0, R.string.menu_capture);
-		menu.add(0, MobileOrgActivity.OP_MENU_SYNC, 0, R.string.menu_sync);
-		menu.add(0, MobileOrgActivity.OP_MENU_SETTINGS, 0,
+		menu.add(0, OP_MENU_OUTLINE, 0, R.string.menu_outline);
+		menu.add(0, OP_MENU_CAPTURE, 0, R.string.menu_capture);
+		menu.add(0, OP_MENU_SYNC, 0, R.string.menu_sync);
+		menu.add(0, OP_MENU_SETTINGS, 0,
 				R.string.menu_settings);
 		return true;
+	}
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case OP_MENU_SYNC:
+			this.runSynchronizer();
+			return true;
+		case OP_MENU_SETTINGS:
+			return this.onShowSettings();
+		case OP_MENU_OUTLINE:
+			Intent dispIntent = new Intent(this, MobileOrgActivity.class);
+			dispIntent.putIntegerArrayListExtra("nodePath",
+					new ArrayList<Integer>());
+			startActivity(dispIntent);
+			return true;
+		case OP_MENU_CAPTURE:
+			return this.runCapture();
+		}
+		return false;
 	}
 	
 	private static final int OP_CMENU_VIEW = 0;
@@ -262,7 +282,11 @@ public class MobileOrgActivity extends ListActivity {
 			ContextMenuInfo menuInfo) {
 		super.onCreateContextMenu(menu, v, menuInfo);
 		menu.add(0, OP_CMENU_VIEW, 0, "View Node");
-		menu.add(0, OP_CMENU_EDIT, 0, "Edit Node");
+		
+		MobileOrgApplication appInst = (MobileOrgApplication) this
+				.getApplication();
+		if(appInst.nodeSelection != null)
+			menu.add(0, OP_CMENU_EDIT, 0, "Edit Node");
 	}
 
 	@Override
@@ -497,26 +521,6 @@ public class MobileOrgActivity extends ListActivity {
 		}
 	}
 
-	/* Handles item selections */
-	public boolean onOptionsItemSelected(MenuItem item) {
-		Log.d("MobileOrg" + this, "onOptionsItemSelected");
-		switch (item.getItemId()) {
-		case MobileOrgActivity.OP_MENU_SYNC:
-			this.runSynchronizer();
-			return true;
-		case MobileOrgActivity.OP_MENU_SETTINGS:
-			return this.onShowSettings();
-		case MobileOrgActivity.OP_MENU_OUTLINE:
-			Intent dispIntent = new Intent(this, MobileOrgActivity.class);
-			dispIntent.putIntegerArrayListExtra("nodePath",
-					new ArrayList<Integer>());
-			startActivity(dispIntent);
-			return true;
-		case MobileOrgActivity.OP_MENU_CAPTURE:
-			return this.runCapture();
-		}
-		return false;
-	}
 
 	public String getStorageLocation() {
 		return this.appSettings.getString("storageMode", "");
