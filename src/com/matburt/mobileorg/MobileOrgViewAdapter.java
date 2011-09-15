@@ -18,7 +18,7 @@ import android.widget.TextView;
 import com.matburt.mobileorg.Parsing.EditNode;
 import com.matburt.mobileorg.Parsing.Node;
 
-class OrgViewAdapter extends BaseAdapter {
+class MobileOrgViewAdapter extends BaseAdapter {
 
 	public Node topNode;
 	public ArrayList<Integer> nodeSelection;
@@ -27,7 +27,7 @@ class OrgViewAdapter extends BaseAdapter {
 	private Context context;
 	private LayoutInflater lInflator;
 
-	public OrgViewAdapter(Context context, Node ndx,
+	public MobileOrgViewAdapter(Context context, Node ndx,
 			ArrayList<Integer> selection, ArrayList<EditNode> edits,
 			ArrayList<HashMap<String, Integer>> allTodos) {
 
@@ -39,7 +39,7 @@ class OrgViewAdapter extends BaseAdapter {
 		this.allTodos = allTodos;
 
 		Log.d("MobileOrg" + this,
-				"startup path=" + MobileOrgActivity.nodeSelectionStr(selection));
+				"startup path=" + MobileOrgApplication.nodeSelectionStr(selection));
 		if (selection != null) {
 			for (int idx = 0; idx < selection.size(); idx++) {
 				try {

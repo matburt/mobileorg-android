@@ -1,5 +1,6 @@
-package com.matburt.mobileorg;
+package com.matburt.mobileorg.Parsing;
 
+import com.matburt.mobileorg.R;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
@@ -9,7 +10,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 
-class Encryption
+public class Encryption
 {
     public static class Intent
     {

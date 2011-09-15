@@ -94,7 +94,21 @@ public class MobileOrgApplication extends Application {
         return thisEdits;
     }
 
-    static String getStorageFolder()
+    static String nodeSelectionStr(ArrayList<Integer> nodes) {
+		if (nodes != null) {
+			String tmp = "";
+	
+			for (Integer i : nodes) {
+				if (tmp.length() > 0)
+					tmp += ",";
+				tmp += i;
+			}
+			return tmp;
+		}
+		return "null";
+	}
+
+	static String getStorageFolder()
     {
         File root = Environment.getExternalStorageDirectory();   
         File morgDir = new File(root, "mobileorg");

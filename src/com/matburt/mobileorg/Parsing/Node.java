@@ -141,4 +141,19 @@ public class Node implements Cloneable {
 	public String getTagString() {
 		return this.tagString;
 	}
+	
+	public boolean hasChildren() {
+		if(children.size() > 0)
+			return true;
+		else
+			return false;
+	}
+	
+	public boolean isSimple() {
+		if (this.todo.equals("") && this.priority.equals(""))
+			return true;
+		else
+			return false;
+				
+	}
 }

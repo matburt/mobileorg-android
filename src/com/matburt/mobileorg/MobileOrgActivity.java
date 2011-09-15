@@ -34,6 +34,7 @@ import com.matburt.mobileorg.Capture.Capture;
 import com.matburt.mobileorg.Capture.ViewNodeDetailsActivity;
 import com.matburt.mobileorg.Error.ErrorReporter;
 import com.matburt.mobileorg.Error.ReportableError;
+import com.matburt.mobileorg.Parsing.Encryption;
 import com.matburt.mobileorg.Parsing.Node;
 import com.matburt.mobileorg.Parsing.OrgFileParser;
 import com.matburt.mobileorg.Settings.SettingsActivity;
@@ -81,11 +82,9 @@ public class MobileOrgActivity extends ListActivity {
 				|| (this.appSettings.getString("syncSource", "").equals(
 						"sdcard") && this.appSettings.getString(
 						"indexFilePath", "").equals(""))) {
-			this.onShowSettings();
+			this.showSettings();
 		}
 
-		// Start the background sync service (if it isn't already) and if we
-		// have turned on background sync
 		if (this.appSettings.getBoolean("doAutoSync", false)) {
 			Intent serviceIntent = new Intent();
 			serviceIntent.setAction("com.matburt.mobileorg.SYNC_SERVICE");
@@ -99,7 +98,7 @@ public class MobileOrgActivity extends ListActivity {
 		super.onDestroy();
 	}
 
-	public void runParser() {
+	private void runParser() {
 		MobileOrgApplication appInst = (MobileOrgApplication) this
 				.getApplication();
 		HashMap<String, String> allOrgList = this.appdb.getOrgFiles();
@@ -134,7 +133,7 @@ public class MobileOrgActivity extends ListActivity {
 		}
 	}
 
-	public void showNewUserWindow() {
+	private void showNewUserWindow() {
 		if (this.newSetupDialog_shown) {
 			this.newSetupDialog.cancel();
 		}
@@ -151,7 +150,7 @@ public class MobileOrgActivity extends ListActivity {
 				.findViewById(R.id.dialog_show_settings);
 		settingsButton.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
-				onShowSettings();
+				showSettings();
 			}
 		});
 		newSetupDialog.setTitle("Synchronize Org Files");
@@ -202,7 +201,7 @@ public class MobileOrgActivity extends ListActivity {
 		}
 
 		if (first) {
-			this.setListAdapter(new OrgViewAdapter(this, appInst.rootNode,
+			this.setListAdapter(new MobileOrgViewAdapter(this, appInst.rootNode,
 					appInst.nodeSelection, appInst.edits, this.appdb.getTodos()));
 			if (appInst.nodeSelection != null) {
 				this.origSelection = copySelection(appInst.nodeSelection);
@@ -220,7 +219,8 @@ public class MobileOrgActivity extends ListActivity {
 		}
 	}
 
-	String generateTitle() {
+	@SuppressWarnings("unused")
+	private String generateTitle() {
 		MobileOrgApplication appInst = (MobileOrgApplication) this
 				.getApplication();
 		String title = "";
@@ -243,17 +243,16 @@ public class MobileOrgActivity extends ListActivity {
 	private static final int OP_MENU_SYNC = 2;
 	private static final int OP_MENU_OUTLINE = 3;
 	private static final int OP_MENU_CAPTURE = 4;
-	
+
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		menu.add(0, OP_MENU_OUTLINE, 0, R.string.menu_outline);
 		menu.add(0, OP_MENU_CAPTURE, 0, R.string.menu_capture);
 		menu.add(0, OP_MENU_SYNC, 0, R.string.menu_sync);
-		menu.add(0, OP_MENU_SETTINGS, 0,
-				R.string.menu_settings);
+		menu.add(0, OP_MENU_SETTINGS, 0, R.string.menu_settings);
 		return true;
 	}
-	
+
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
@@ -261,7 +260,7 @@ public class MobileOrgActivity extends ListActivity {
 			this.runSynchronizer();
 			return true;
 		case OP_MENU_SETTINGS:
-			return this.onShowSettings();
+			return this.showSettings();
 		case OP_MENU_OUTLINE:
 			Intent dispIntent = new Intent(this, MobileOrgActivity.class);
 			dispIntent.putIntegerArrayListExtra("nodePath",
@@ -273,19 +272,19 @@ public class MobileOrgActivity extends ListActivity {
 		}
 		return false;
 	}
-	
+
 	private static final int OP_CMENU_VIEW = 0;
 	private static final int OP_CMENU_EDIT = 1;
-	
+
 	@Override
 	public void onCreateContextMenu(ContextMenu menu, View v,
 			ContextMenuInfo menuInfo) {
 		super.onCreateContextMenu(menu, v, menuInfo);
 		menu.add(0, OP_CMENU_VIEW, 0, "View Node");
-		
+
 		MobileOrgApplication appInst = (MobileOrgApplication) this
 				.getApplication();
-		if(appInst.nodeSelection != null)
+		if (appInst.nodeSelection != null)
 			menu.add(0, OP_CMENU_EDIT, 0, "Edit Node");
 	}
 
@@ -308,35 +307,15 @@ public class MobileOrgActivity extends ListActivity {
 		case OP_CMENU_EDIT:
 			textIntent.setClass(this, ViewNodeDetailsActivity.class);
 			textIntent.putExtra("actionMode", "edit");
-		
+
 			MobileOrgApplication appInst = (MobileOrgApplication) this
 					.getApplication();
-			textIntent.putIntegerArrayListExtra("nodePath", appInst.nodeSelection);
+			textIntent.putIntegerArrayListExtra("nodePath",
+					appInst.nodeSelection);
 			break;
 		}
 		startActivity(textIntent);
 		return false;
-	}
-
-	static private ArrayList<Integer> copySelection(ArrayList<Integer> selection) {
-		if (selection == null)
-			return null;
-		else
-			return new ArrayList<Integer>(selection);
-	}
-
-	static String nodeSelectionStr(ArrayList<Integer> nodes) {
-		if (nodes != null) {
-			String tmp = "";
-
-			for (Integer i : nodes) {
-				if (tmp.length() > 0)
-					tmp += ",";
-				tmp += i;
-			}
-			return tmp;
-		}
-		return "null";
 	}
 
 	@Override
@@ -344,12 +323,38 @@ public class MobileOrgActivity extends ListActivity {
 		MobileOrgApplication appInst = (MobileOrgApplication) this
 				.getApplication();
 
-		Log.d("MobileOrg" + this, "onListItemClick position=" + position);
 		appInst.pushSelection(position);
-		Node thisNode = appInst.getSelectedNode();
-		Log.d("MobileOrg" + this, "appInst.nodeSelection="
-				+ nodeSelectionStr(appInst.nodeSelection));
+		Node node = (Node) l.getItemAtPosition(position);
 
+		if (decryptNode(appInst, node))
+			return;
+
+		if (node.hasChildren()) {
+			expandSelection(appInst.nodeSelection);
+		} else {
+			displayIndex = appInst.lastIndex();
+			appInst.popSelection();
+
+			if (node.isSimple()) {
+				Intent textIntent = new Intent(this, SimpleTextDisplay.class);
+				String docBuffer = node.name + "\n\n" + node.payload;
+
+				textIntent.putExtra("txtValue", docBuffer);
+				startActivity(textIntent);
+			} else {
+				Intent dispIntent = new Intent(this,
+						ViewNodeDetailsActivity.class);
+
+				dispIntent.putExtra("actionMode", "edit");
+				dispIntent.putIntegerArrayListExtra("nodePath",
+						appInst.nodeSelection);
+				appInst.pushSelection(position);
+				startActivity(dispIntent);
+			}
+		}
+	}
+
+	private boolean decryptNode(MobileOrgApplication appInst, Node thisNode) {
 		if (thisNode.encrypted && !thisNode.parsed) {
 			// if suitable APG version is installed
 			if (Encryption.isAvailable((Context) this)) {
@@ -374,41 +379,33 @@ public class MobileOrgActivity extends ListActivity {
 			} else {
 				appInst.popSelection();
 			}
-			return;
+			return true;
 		}
-
-		if (thisNode.children.size() < 1) {
-			displayIndex = appInst.lastIndex();
-			Log.d("MobileOrg" + this,
-					"no subnodes, popped selection, displayIndex="
-							+ displayIndex);
-			appInst.popSelection();
-			if (thisNode.todo.equals("") && thisNode.priority.equals("")) {
-				Intent textIntent = new Intent(this, SimpleTextDisplay.class);
-				String docBuffer = thisNode.name + "\n\n" + thisNode.payload;
-
-				textIntent.putExtra("txtValue", docBuffer);
-				startActivity(textIntent);
-			} else {
-				Intent dispIntent = new Intent(this,
-						ViewNodeDetailsActivity.class);
-
-				dispIntent.putExtra("actionMode", "edit");
-				Log.d("MobileOrg" + this, "Before edit appInst.nodeSelection="
-						+ nodeSelectionStr(appInst.nodeSelection));
-				dispIntent.putIntegerArrayListExtra("nodePath",
-						appInst.nodeSelection);
-				Log.d("MobileOrg" + this, "After push appInst.nodeSelection="
-						+ nodeSelectionStr(appInst.nodeSelection));
-				appInst.pushSelection(position);
-				startActivity(dispIntent);
-			}
-		} else {
-			expandSelection(appInst.nodeSelection);
-		}
+		return false;
 	}
 
-	public void expandSelection(ArrayList<Integer> selection) {
+	static String nodeSelectionStr(ArrayList<Integer> nodes) {
+		if (nodes != null) {
+			String tmp = "";
+
+			for (Integer i : nodes) {
+				if (tmp.length() > 0)
+					tmp += ",";
+				tmp += i;
+			}
+			return tmp;
+		}
+		return "null";
+	}
+
+	static private ArrayList<Integer> copySelection(ArrayList<Integer> selection) {
+		if (selection == null)
+			return null;
+		else
+			return new ArrayList<Integer>(selection);
+	}
+
+	private void expandSelection(ArrayList<Integer> selection) {
 		Intent dispIntent = new Intent(this, MobileOrgActivity.class);
 		dispIntent.putIntegerArrayListExtra("nodePath", selection);
 		startActivityForResult(dispIntent, 1);
@@ -453,13 +450,13 @@ public class MobileOrgActivity extends ListActivity {
 		}
 	}
 
-	public boolean onShowSettings() {
+	private boolean showSettings() {
 		Intent settingsIntent = new Intent(this, SettingsActivity.class);
 		startActivity(settingsIntent);
 		return true;
 	}
 
-	public void runSynchronizer() {
+	private void runSynchronizer() {
 		String userSynchro = this.appSettings.getString("syncSource", "");
 		final Synchronizer appSync;
 		if (userSynchro.equals("webdav")) {
@@ -469,7 +466,7 @@ public class MobileOrgActivity extends ListActivity {
 		} else if (userSynchro.equals("dropbox")) {
 			appSync = new DropboxSynchronizer(this);
 		} else {
-			this.onShowSettings();
+			this.showSettings();
 			return;
 		}
 
@@ -480,7 +477,7 @@ public class MobileOrgActivity extends ListActivity {
 							"You have not fully configured the synchronizer.  Make sure you visit the 'Configure Synchronizer Settings' in the Settings menu",
 							Toast.LENGTH_LONG);
 			error.show();
-			this.onShowSettings();
+			this.showSettings();
 			return;
 		}
 
@@ -504,14 +501,14 @@ public class MobileOrgActivity extends ListActivity {
 				getString(R.string.sync_wait), true);
 	}
 
-	public boolean runCapture() {
+	private boolean runCapture() {
 		Intent captureIntent = new Intent(this, Capture.class);
 		captureIntent.putExtra("actionMode", "create");
 		startActivityForResult(captureIntent, 3);
 		return true;
 	}
 
-	public void postSynchronize() {
+	private void postSynchronize() {
 		syncDialog.dismiss();
 		if (this.syncError != null) {
 			ErrorReporter.displayError(this, this.syncError);
@@ -521,8 +518,7 @@ public class MobileOrgActivity extends ListActivity {
 		}
 	}
 
-
-	public String getStorageLocation() {
+	private String getStorageLocation() {
 		return this.appSettings.getString("storageMode", "");
 	}
 }
