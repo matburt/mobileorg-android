@@ -75,10 +75,10 @@ public class PageFlipView extends HorizontalScrollView
 	// Also tell screen width to our only child
 	container.measure(ws,hs);
 	// and its children
-	for(int i=0; i<container.getChildCount(); i++) {
-	    View page = (View) container.getChildAt(i);
-	    page.measure(ws,hs);
-	}
+	// for(int i=0; i<container.getChildCount(); i++) {
+	//     View page = (View) container.getChildAt(i);
+	//     page.measure(ws,hs);
+	// }
 	setMeasuredDimension(width,height);
     }
 

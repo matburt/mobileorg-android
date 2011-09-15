@@ -6,7 +6,7 @@
    android:layout_height="fill_parent"
    android:fillViewport="true"
    android:layout_alignParentTop="true">  
-  <LinearLayout
+  <com.matburt.mobileorg.Settings.WideLinearLayout
      android:id="@+id/wizard_container"
      android:layout_width="fill_parent"
      android:layout_height="fill_parent"
@@ -30,5 +30,5 @@
 	 android:layout_height="wrap_content"
 	 android:text="Page 3" />
     </com.matburt.mobileorg.Settings.PageView>
-  </LinearLayout>
+  </com.matburt.mobileorg.Settings.WideLinearLayout>
 </com.matburt.mobileorg.Settings.PageFlipView>

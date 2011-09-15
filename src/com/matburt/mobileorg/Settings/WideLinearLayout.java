@@ -32,24 +32,18 @@ public class WideLinearLayout extends LinearLayout {
         super(context, attrs);
     }
 
-    // @Override
-    // 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-    // 	super.onMeasure(w,h);
-    // 	int width = MeasureSpec.getSize(w);
-    // 	int height = MeasureSpec.getSize(h);
-    // 	// and its children
-    // 	for(int i=0; i<getChildCount(); i++) {
-    // 	    View page = (View) getChildAt(i);
-    // 	    container.measure(ws,hs);
-    // 	}
-	
-    // 	int total = getChildCount(); 
-    // 	for (int i=0; i < total; i++) {
-    // 	    View child = getChildAt(i);
-    // 	    ViewGroup.LayoutParams lp = child.getLayoutParams();
-    // 	    lp.width = mScreenWidth;
-    // 	}
-	
-    // 	setMeasuredDimension(width,height);
-    // }
+    @Override
+    	protected void onMeasure(int w, int h) {
+    	super.onMeasure(w,h);
+    	int width = MeasureSpec.getSize(w);
+    	int height = MeasureSpec.getSize(h);
+	int ws = MeasureSpec.makeMeasureSpec(width,MeasureSpec.EXACTLY);
+	int hs = MeasureSpec.makeMeasureSpec(height,MeasureSpec.EXACTLY);
+    	// and its children
+    	for(int i=0; i<getChildCount(); i++) {
+    	    View page = (View) getChildAt(i);
+    	    page.measure(ws,hs);
+    	}
+	setMeasuredDimension(width,height);
+    }
 }
