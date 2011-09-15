@@ -23,24 +23,27 @@ import android.widget.EditText;
 import java.util.ArrayList;
 import android.view.inputmethod.InputMethodManager;
 import android.graphics.Rect;
+import android.view.ViewGroup.LayoutParams;
 import com.matburt.mobileorg.R;
 
 public class PageFlipView extends HorizontalScrollView 
     implements View.OnTouchListener {
 
     static String TAG = "PageFlipView";
+    //for page flips, scrolling
     static final int SWIPE_MIN_DISTANCE = 5;
     static final int SWIPE_THRESHOLD_VELOCITY = 50;
- 
     GestureDetector mGestureDetector;
-    int currentPage = 0;
-    LinearLayout container;
+    LinearLayout container; // TODO do we need this?
     NextPageListener nextPageListener; // for handling next page
 				       // button clicks
     PreviousPageListener previousPageListener; // for handling
 					       // previous page button
 					       // clicks
-    ArrayList<EditText> editBoxes;
+    int currentPage = 0;
+    int screenWidth;
+
+    ArrayList<EditText> editBoxes; //TODO do we need this?
 
     public PageFlipView(Context context) {
 	super(context);
@@ -57,6 +60,28 @@ public class PageFlipView extends HorizontalScrollView
         setOnTouchListener(this);
     }
 
+
+    //This is the code for making the child views the same size as the
+    //screen
+    @Override
+	protected void onMeasure(int w, int h) {
+	super.onMeasure(w,h);
+	int width = MeasureSpec.getSize(w);
+	int height = MeasureSpec.getSize(h);
+	Log.d(TAG, "Setting screen width to " + width);
+	Log.d(TAG, "Setting screen height to " + height);
+	int ws = MeasureSpec.makeMeasureSpec(width,MeasureSpec.EXACTLY);
+	int hs = MeasureSpec.makeMeasureSpec(height,MeasureSpec.EXACTLY);
+	// Also tell screen width to our only child
+	container.measure(ws,hs);
+	// and its children
+	for(int i=0; i<container.getChildCount(); i++) {
+	    View page = (View) container.getChildAt(i);
+	    page.measure(ws,hs);
+	}
+	setMeasuredDimension(width,height);
+    }
+
     @Override
 	public void onFinishInflate() {
 	container = (LinearLayout) findViewById(R.id.wizard_container);
@@ -69,7 +94,8 @@ public class PageFlipView extends HorizontalScrollView
 		page.getNextButton().setOnClickListener(nextPageListener);
 	    //first page doesn't have a previous button
 	    if ( i != 0 )
-		page.getPreviousButton().setOnClickListener(previousPageListener);
+		page.getPreviousButton()
+		    .setOnClickListener(previousPageListener);
 	}
 	//remove previous button from first page
 	PageView page = (PageView) container.getChildAt(0);
@@ -78,33 +104,6 @@ public class PageFlipView extends HorizontalScrollView
 	page = (PageView) container
 	    .getChildAt( container.getChildCount() - 1 );
 	page.getNextButton().setVisibility(View.GONE);
-    }
-
-    @Override
-	public void onFocusChanged(boolean gainFocus, 
-				   int direction, 
-				   Rect previouslyFocusedRect) {
-	if (gainFocus) requestLayout();
-    }
-
-    @Override
-	public boolean onTouch(View v, MotionEvent event) {
-	//If the user swipes
-	if (mGestureDetector.onTouchEvent(event)) {
-	    return true;
-	}
-	else if(event.getAction() == MotionEvent.ACTION_UP
-		|| event.getAction() == MotionEvent.ACTION_CANCEL ){
-	    int scrollX = getScrollX();
-	    int featureWidth = v.getMeasuredWidth();
-	    currentPage = ((scrollX + (featureWidth/2))/featureWidth);
-	    int scrollTo = currentPage*featureWidth;
-	    smoothScrollTo(scrollTo, 0);
-	    return true;
-	}
-	else{
-	    return false;
-	}
     }
 
     public void setEditBoxes(ArrayList e) { editBoxes = e; }
@@ -131,6 +130,28 @@ public class PageFlipView extends HorizontalScrollView
 	//save current page
         editor.putInt("currentPage", getCurrentPage());
         editor.commit();
+    }
+
+    //Code for setting up the page swipes and scrolling
+    @Override
+	public boolean onTouch(View v, MotionEvent event) {
+	//If the user swipes
+	if (mGestureDetector.onTouchEvent(event)) {
+	    return true;
+	}
+	else if (event.getAction() == MotionEvent.ACTION_UP
+		|| event.getAction() == MotionEvent.ACTION_CANCEL ){
+	    int scrollX = getScrollX();
+	    int featureWidth = v.getMeasuredWidth();
+	    //TODO clean up this code
+	    currentPage = ((scrollX + (featureWidth/2))/featureWidth);
+	    int scrollTo = currentPage*featureWidth;
+	    smoothScrollTo(scrollTo, 0);
+	    return true;
+	}
+	else{
+	    return false;
+	}
     }
 
     void scrollRight() {

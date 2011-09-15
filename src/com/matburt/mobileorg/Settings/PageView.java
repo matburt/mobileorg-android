@@ -52,31 +52,31 @@ public class PageView extends RelativeLayout {
 
     public Button getPreviousButton() { return previousButton; }
 
-    @Override 
-    	protected void onMeasure(int widthMeasureSpec, 
-    				 int heightMeasureSpec){
-    	int parentWidth = MeasureSpec.getSize(widthMeasureSpec);
-    	int parentHeight = MeasureSpec.getSize(heightMeasureSpec);
-    	// setMeasuredDimension(parentWidth, parentHeight);
-    	// setLayoutParams(new 
-    	// 		LinearLayout
-    	// 		.LayoutParams(parentWidth,
-	// 			      parentHeight)
-    	// 		);
-    	// super.onMeasure(parentWidth, parentHeight);
-    	setMeasuredDimension(measureWidth(widthMeasureSpec),
-    			     measureHeight(heightMeasureSpec));
+    // @Override 
+    // 	protected void onMeasure(int widthMeasureSpec, 
+    // 				 int heightMeasureSpec){
+    // 	int parentWidth = MeasureSpec.getSize(widthMeasureSpec);
+    // 	int parentHeight = MeasureSpec.getSize(heightMeasureSpec);
+    // 	// setMeasuredDimension(parentWidth, parentHeight);
+    // 	// setLayoutParams(new 
+    // 	// 		LinearLayout
+    // 	// 		.LayoutParams(parentWidth,
+    // 	// 			      parentHeight)
+    // 	// 		);
+    // 	// super.onMeasure(parentWidth, parentHeight);
+    // 	setMeasuredDimension(measureWidth(widthMeasureSpec),
+    // 			     measureHeight(heightMeasureSpec));
 
-    	setLayoutParams(new 
-    			LinearLayout
-    			.LayoutParams(
-    				      measureWidth(widthMeasureSpec),
-    				      measureHeight(heightMeasureSpec))
-    			);
-    	super.onMeasure(widthMeasureSpec,
-	 		measureHeight(heightMeasureSpec));
-	//widthMeasureSpec, heightMeasureSpec);
-    }
+    // 	setLayoutParams(new 
+    // 			LinearLayout
+    // 			.LayoutParams(
+    // 				      measureWidth(widthMeasureSpec),
+    // 				      measureHeight(heightMeasureSpec))
+    // 			);
+    // 	super.onMeasure(widthMeasureSpec,
+    // 	 		measureHeight(heightMeasureSpec));
+    // 	//widthMeasureSpec, heightMeasureSpec);
+    // }
 
     public int measureWidth(int measureSpec) {
         int result = 0;
