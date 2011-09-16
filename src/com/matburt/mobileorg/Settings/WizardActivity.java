@@ -69,14 +69,6 @@ public class WizardActivity extends Activity
 	Log.d(TAG,"onResume: loading... "+String.valueOf(wizard.getCurrentPage()));
 	wizard.restoreLastPage();
 	Log.d(TAG,"onResume: done... "+String.valueOf(wizard.getCurrentPage()));
-		//hide keyboard if showing
-	// InputMethodManager imm = (InputMethodManager) 
-	//     getSystemService(Context.INPUT_METHOD_SERVICE);
-	// imm.hideSoftInputFromWindow(wizard.getWindowToken(), 0);
-	// wizard.post(new Runnable() {
-	// 	@Override
-	// 	    public void run() { wizard.requestLayout(); }
-	//     });
     }
 
     /**
@@ -89,14 +81,6 @@ public class WizardActivity extends Activity
 	Log.d(TAG,"saving state>>>>>>>>>>>>>>>>>>>>>");
 	Log.d(TAG,"onPause: "+String.valueOf(wizard.getCurrentPage()));
 	wizard.saveCurrentPage();
-	//hide keyboard if showing
-	InputMethodManager imm = (InputMethodManager) 
-	    getSystemService(INPUT_METHOD_SERVICE);
-	// for(EditText box : loginBoxes) {
-	// View selected = wizard.findFocus();
-	// if ( selected != null ) 
-	// imm.hideSoftInputFromWindow(selected.getWindowToken(), 0);
-	// // }
     }
 
     @Override
