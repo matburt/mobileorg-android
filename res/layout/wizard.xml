@@ -2,13 +2,13 @@
 <com.matburt.mobileorg.Settings.PageFlipView
    xmlns:android="http://schemas.android.com/apk/res/android"
    android:id="@+id/wizard_parent"
-   android:layout_width="fill_parent" 
+   android:layout_width="wrap_content" 
    android:layout_height="fill_parent"
    android:fillViewport="true"
    android:layout_alignParentTop="true">  
   <com.matburt.mobileorg.Settings.WideLinearLayout
      android:id="@+id/wizard_container"
-     android:layout_width="fill_parent"
+     android:layout_width="wrap_content"
      android:layout_height="fill_parent"
      android:orientation="horizontal">
     <com.matburt.mobileorg.Settings.PageView
@@ -18,12 +18,12 @@
     </com.matburt.mobileorg.Settings.PageView>
     <com.matburt.mobileorg.Settings.PageView
        android:id="@+id/wizard_page2"
-       android:layout_width="wrap_content"
+       android:layout_width="fill_parent"
        android:layout_height="fill_parent">
     </com.matburt.mobileorg.Settings.PageView>
     <com.matburt.mobileorg.Settings.PageView
        android:id="@+id/wizard_page3"
-       android:layout_width="wrap_content"
+       android:layout_width="fill_parent"
        android:layout_height="fill_parent">
       <TextView	
 	 android:layout_width="wrap_content"

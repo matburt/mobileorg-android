@@ -34,7 +34,7 @@ public class PageFlipView extends HorizontalScrollView
     static final int SWIPE_MIN_DISTANCE = 5;
     static final int SWIPE_THRESHOLD_VELOCITY = 50;
     GestureDetector mGestureDetector;
-    LinearLayout container; // TODO do we need this?
+    WideLinearLayout container; // TODO do we need this?
     NextPageListener nextPageListener; // for handling next page
 				       // button clicks
     PreviousPageListener previousPageListener; // for handling
@@ -65,7 +65,6 @@ public class PageFlipView extends HorizontalScrollView
     //screen
     @Override
 	protected void onMeasure(int w, int h) {
-	super.onMeasure(w,h);
 	int width = MeasureSpec.getSize(w);
 	int height = MeasureSpec.getSize(h);
 	Log.d(TAG, "Setting screen width to " + width);
@@ -73,18 +72,20 @@ public class PageFlipView extends HorizontalScrollView
 	int ws = MeasureSpec.makeMeasureSpec(width,MeasureSpec.EXACTLY);
 	int hs = MeasureSpec.makeMeasureSpec(height,MeasureSpec.EXACTLY);
 	// Also tell screen width to our only child
-	container.measure(ws,hs);
+	container.setWidth(width);
+	//container.measure(ws,hs);
 	// and its children
 	// for(int i=0; i<container.getChildCount(); i++) {
 	//     View page = (View) container.getChildAt(i);
 	//     page.measure(ws,hs);
 	// }
-	setMeasuredDimension(width,height);
+	//setMeasuredDimension(width,height);
+	super.onMeasure(w,h);
     }
 
     @Override
 	public void onFinishInflate() {
-	container = (LinearLayout) findViewById(R.id.wizard_container);
+	container = (WideLinearLayout) findViewById(R.id.wizard_container);
 	Log.d(TAG,"Container count: "+container.getChildCount());
 	//add onclick listeners for next/prev buttons
 	for(int i=0; i<container.getChildCount(); i++) {

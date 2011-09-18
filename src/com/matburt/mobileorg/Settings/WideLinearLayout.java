@@ -20,9 +20,12 @@ import android.view.WindowManager;
 import android.graphics.Canvas;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import com.matburt.mobileorg.R;
 
 public class WideLinearLayout extends LinearLayout {
+
+    int screenWidth;
 
     public WideLinearLayout(Context context) {
 	super(context);
@@ -32,18 +35,25 @@ public class WideLinearLayout extends LinearLayout {
         super(context, attrs);
     }
 
+    public void setWidth(int w) {
+	screenWidth = w;
+    }
+
     @Override
     	protected void onMeasure(int w, int h) {
-    	super.onMeasure(w,h);
-    	int width = MeasureSpec.getSize(w);
+    	int width = MeasureSpec.getSize(screenWidth);
     	int height = MeasureSpec.getSize(h);
 	int ws = MeasureSpec.makeMeasureSpec(width,MeasureSpec.EXACTLY);
 	int hs = MeasureSpec.makeMeasureSpec(height,MeasureSpec.EXACTLY);
     	// and its children
     	for(int i=0; i<getChildCount(); i++) {
     	    View page = (View) getChildAt(i);
-    	    page.measure(ws,hs);
+    	    //page.measure(screenWidth,hs);
+	    ViewGroup.LayoutParams lp = page.getLayoutParams();
+	    lp.width = screenWidth;
+			
     	}
-	setMeasuredDimension(width,height);
+	//setMeasuredDimension(width,height);
+    	super.onMeasure(w,h);
     }
 }
