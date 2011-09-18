@@ -14,14 +14,12 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
 import com.matburt.mobileorg.Parsing.EditNode;
 import com.matburt.mobileorg.Parsing.Node;
 
 class MobileOrgViewAdapter extends BaseAdapter {
 
 	public Node topNode;
-	public ArrayList<Integer> nodeSelection;
 	public ArrayList<EditNode> edits = new ArrayList<EditNode>();
 	public ArrayList<HashMap<String, Integer>> allTodos = new ArrayList<HashMap<String, Integer>>();
 	private Context context;
@@ -33,7 +31,6 @@ class MobileOrgViewAdapter extends BaseAdapter {
 
 		this.topNode = ndx;
 		this.lInflator = LayoutInflater.from(context);
-		this.nodeSelection = selection;
 		this.edits = edits;
 		this.context = context;
 		this.allTodos = allTodos;
@@ -101,91 +98,109 @@ class MobileOrgViewAdapter extends BaseAdapter {
 
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
+		ViewHolder holder;
 		
-		if (convertView == null) { //? Check if this is first adapter?
-			convertView = this.lInflator.inflate(R.layout.main, null);
+		if (convertView == null) {
+			convertView = this.lInflator.inflate(R.layout.outline, null);
+			
+			holder = new ViewHolder();
+			holder.orgItem = (TextView) convertView.findViewById(R.id.orgItem);
+			holder.todoState = (TextView) convertView.findViewById(R.id.todoState);
+			holder.priorityState = (TextView) convertView
+					.findViewById(R.id.priorityState);
+			holder.tagsLayout = (LinearLayout) convertView
+					.findViewById(R.id.tagsLayout);
+			holder.dateInfo = (TextView) convertView.findViewById(R.id.dateInfo);
+			
+			convertView.setTag(holder);
+		} else {
+			holder = (ViewHolder) convertView.getTag();
 		}
 		
-		// Initialize 
-		TextView thisView = (TextView) convertView.findViewById(R.id.orgItem);
-		TextView todoView = (TextView) convertView.findViewById(R.id.todoState);
-		TextView priorityView = (TextView) convertView
-				.findViewById(R.id.priorityState);
-		LinearLayout tagsLayout = (LinearLayout) convertView
-				.findViewById(R.id.tagsLayout);
-		TextView dateView = (TextView) convertView.findViewById(R.id.dateInfo);
-		
-		
-		ArrayList<EditNode> thisEdits = this.findEdits(this.topNode.children
-				.get(position).nodeId);
-		String todo = this.topNode.children.get(position).todo;
-		String priority = this.topNode.children.get(position).priority;
-		String dateInfo = "";
-		thisView.setText(this.topNode.children.get(position).name);
+		Node node = this.topNode.children.get(position);
 
-		
+		String name = node.name;
+		String todo = node.todo;
+		String priority = node.priority;
+		String dateInfo = node.formatDate();
+
+		// Apply all EditNodes
+		ArrayList<EditNode> thisEdits = this.findEdits(node.nodeId);
 		for (EditNode e : thisEdits) {
 			if (e.editType.equals("todo"))
 				todo = e.newVal;
 			else if (e.editType.equals("priority"))
 				priority = e.newVal;
 			else if (e.editType.equals("heading")) {
-				thisView.setText(e.newVal);
+				name = e.newVal;
 			}
 		}
 
-		SimpleDateFormat formatter = new SimpleDateFormat("<yyyy-MM-dd EEE>");
-		if (this.topNode.children.get(position).deadline != null) {
-			dateInfo += "DEADLINE: "
-					+ formatter
-							.format(this.topNode.children.get(position).deadline)
-					+ " ";
+		setupHolder(holder, node, name, todo, priority, dateInfo);
+
+		return convertView;
+	}
+	
+
+	
+	private void setupHolder(ViewHolder holder, Node node, String name, String todo,
+			String priority, String dateInfo) {
+		holder.orgItem.setText(node.name);
+		
+		// Setup todo state view
+		if (TextUtils.isEmpty(todo)) {
+			holder.todoState.setVisibility(View.GONE);
+		} else {
+			holder.todoState.setText(todo);
+			Integer todoState = this.findTodoState(todo);
+			if (todoState > 0)
+				holder.todoState.setBackgroundColor(Color.GREEN);
+			else
+				holder.todoState.setBackgroundColor(Color.RED);
+			holder.todoState.setTextColor(Color.WHITE);
+			holder.todoState.setVisibility(View.VISIBLE);
 		}
 
-		if (this.topNode.children.get(position).schedule != null) {
-			dateInfo += "SCHEDULED: "
-					+ formatter
-							.format(this.topNode.children.get(position).schedule)
-					+ " ";
+		// Setup priority view
+		if (TextUtils.isEmpty(priority)) {
+			holder.priorityState.setVisibility(View.GONE);
+		} else {
+			holder.priorityState.setText(priority);
+			holder.priorityState.setVisibility(View.VISIBLE);
 		}
 
-		tagsLayout.removeAllViews();
-		for (String tag : this.topNode.children.get(position).getTags()) {
+		// Setup date view
+		if (TextUtils.isEmpty(dateInfo)) {
+			holder.dateInfo.setVisibility(View.GONE);
+		} else {
+			holder.dateInfo.setText(dateInfo);
+			holder.dateInfo.setVisibility(View.VISIBLE);
+		}
+		
+		// Add tag view(s)
+		holder.tagsLayout.removeAllViews();
+		for (String tag : node.getTags()) {
 			TextView tagView = new TextView(this.context);
 			tagView.setText(tag);
 			tagView.setTextColor(Color.LTGRAY);
 			tagView.setPadding(0, 0, 5, 0);
-			tagsLayout.addView(tagView);
+			holder.tagsLayout.addView(tagView);
 		}
-
-		if (TextUtils.isEmpty(todo)) {
-			todoView.setVisibility(View.GONE);
-		} else {
-			todoView.setText(todo);
-			Integer todoState = this.findTodoState(todo);
-			if (todoState > 0)
-				todoView.setBackgroundColor(Color.GREEN);
-			else
-				todoView.setBackgroundColor(Color.RED);
-			todoView.setTextColor(Color.WHITE);
-			todoView.setVisibility(View.VISIBLE);
-		}
-
-		if (TextUtils.isEmpty(priority)) {
-			priorityView.setVisibility(View.GONE);
-		} else {
-			priorityView.setText(priority);
-			priorityView.setVisibility(View.VISIBLE);
-		}
-
-		if (TextUtils.isEmpty(dateInfo)) {
-			dateView.setVisibility(View.GONE);
-		} else {
-			dateView.setText(dateInfo);
-			dateView.setVisibility(View.VISIBLE);
-		}
-
-		convertView.setTag(thisView);
-		return convertView;
+	}
+	
+	/**
+	 * Used as part of the holding pattern.
+	 * 
+	 * The idea is to save the findViewById()'s into this container object to
+	 * speed up the list adapter. setTag() and getTag() are used to bind and
+	 * retrieve the container.
+	 * 
+	 */
+	static class ViewHolder {
+		TextView orgItem;
+		TextView todoState;
+		TextView priorityState;
+		LinearLayout tagsLayout;
+		TextView dateInfo;
 	}
 }

@@ -1,5 +1,6 @@
 package com.matburt.mobileorg.Parsing;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
@@ -99,6 +100,27 @@ public class Node implements Cloneable {
 		noteStr += this.name + "\n";
 		noteStr += this.payload + "\n\n";
 		return noteStr;
+	}
+	
+	public String formatDate() {
+		String dateInfo = "";
+		
+		// Format Deadline and scheduled
+		SimpleDateFormat formatter = new SimpleDateFormat("<yyyy-MM-dd EEE>");
+		if (this.deadline != null) {
+			dateInfo += "DEADLINE: "
+					+ formatter
+							.format(this.deadline)
+					+ " ";
+		}
+
+		if (this.schedule != null) {
+			dateInfo += "SCHEDULED: "
+					+ formatter
+							.format(this.schedule)
+					+ " ";
+		}	
+		return dateInfo;
 	}
 
 	public ArrayList<String> getTags() {
