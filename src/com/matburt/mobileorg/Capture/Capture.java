@@ -16,6 +16,7 @@ public class Capture extends Activity implements OnClickListener
     private EditText orgEditDisplay;
     private Button saveButton;
     private Button advancedButton;
+    
     private String editType = null;
     private String srcText = null;
     private CreateEditNote noteCreator = null;
@@ -34,51 +35,14 @@ public class Capture extends Activity implements OnClickListener
         this.populateDisplay();
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        if (this.noteCreator != null) {
-            this.noteCreator.close();
-        }
-    }
-
-    public boolean onSave() {
-        if (this.orgEditDisplay.getText().toString().length() > 0) {
-            if (this.editType == null) {
-                this.noteCreator.writeNewNote(this.orgEditDisplay.getText().toString());
-            }
-        }
-        Intent result = new Intent();
-        result.putExtra("text", this.orgEditDisplay.getText().toString());
-        this.setResult(RESULT_OK, result);
-        this.finish();
-        return true;
-    }
-
-    public void onClick(View v) {
-        if (v == this.advancedButton) {
-            Log.i(LT, "Advanced");
-            Intent advancedIntent = new Intent(this, ViewNodeDetailsActivity.class);
-            advancedIntent.putExtra("actionMode", "create");
-            startActivity(advancedIntent);
-            this.finish();
-        }
-        else if (v == this.saveButton) {
-            if (!this.onSave()) {
-                Log.e(LT, "Failed to save file");
-            }
-        }
-    }
-
-    public void populateDisplay() {
+    private void populateDisplay() {
         Intent txtIntent = getIntent();
         String actionMode =  txtIntent.getStringExtra("actionMode");
         if (actionMode == null) {
             this.advancedButton.setVisibility(View.GONE);
         }
         this.srcText = txtIntent.getStringExtra("txtValue");
-		if((this.srcText == null || this.srcText.length() == 0) &&
-		   txtIntent != null) {
+		if(this.srcText == null || this.srcText.length() == 0) {
 			String subject = txtIntent.getStringExtra("android.intent.extra.SUBJECT");
 			String text = txtIntent.getStringExtra("android.intent.extra.TEXT");
 
@@ -98,9 +62,47 @@ public class Capture extends Activity implements OnClickListener
 				this.srcText = subject + text;
 			}
 		}
-        txtIntent.getStringExtra("nodeId");
+        //txtIntent.getStringExtra("nodeId");
         this.editType = txtIntent.getStringExtra("editType");
         this.orgEditDisplay.setText(this.srcText);
-        txtIntent.getStringExtra("nodeTitle");
+        //txtIntent.getStringExtra("nodeTitle");
+    }
+    
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (this.noteCreator != null) {
+            this.noteCreator.close();
+        }
+    }
+
+    @Override
+    public void onClick(View v) {
+        if (v == this.advancedButton) {
+            Log.i(LT, "Advanced");
+            Intent advancedIntent = new Intent(this, ViewNodeDetailsActivity.class);
+            advancedIntent.putExtra("actionMode", "create");
+            startActivity(advancedIntent);
+            this.finish();
+        }
+        else if (v == this.saveButton) {
+            if (!this.onSave()) {
+                Log.e(LT, "Failed to save file");
+            }
+        }
+    }
+
+    
+    private boolean onSave() {
+        if (this.orgEditDisplay.getText().toString().length() > 0) {
+            if (this.editType == null) {
+                this.noteCreator.writeNewNote(this.orgEditDisplay.getText().toString());
+            }
+        }
+        Intent result = new Intent();
+        result.putExtra("text", this.orgEditDisplay.getText().toString());
+        this.setResult(RESULT_OK, result);
+        this.finish();
+        return true;
     }
 }

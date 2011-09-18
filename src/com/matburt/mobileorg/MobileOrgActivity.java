@@ -310,6 +310,7 @@ public class MobileOrgActivity extends ListActivity {
 
 			MobileOrgApplication appInst = (MobileOrgApplication) this
 					.getApplication();
+			appInst.pushSelection(info.position);
 			textIntent.putIntegerArrayListExtra("nodePath",
 					appInst.nodeSelection);
 			break;
