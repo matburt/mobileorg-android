@@ -1,4 +1,11 @@
-package com.matburt.mobileorg;
+package com.matburt.mobileorg.Gui;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 
 import android.app.Activity;
 import android.app.Dialog;
@@ -19,12 +26,19 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.*;
+import android.widget.AdapterView.AdapterContextMenuInfo;
+import android.widget.Button;
+import android.widget.ListView;
+import android.widget.Toast;
+
+import com.matburt.mobileorg.MobileOrgApplication;
+import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Capture.Capture;
 import com.matburt.mobileorg.Capture.ViewNodeDetailsActivity;
 import com.matburt.mobileorg.Error.ErrorReporter;
 import com.matburt.mobileorg.Error.ReportableError;
 import com.matburt.mobileorg.Parsing.Encryption;
+import com.matburt.mobileorg.Parsing.MobileOrgDatabase;
 import com.matburt.mobileorg.Parsing.Node;
 import com.matburt.mobileorg.Parsing.OrgFileParser;
 import com.matburt.mobileorg.Settings.SettingsActivity;
@@ -33,21 +47,12 @@ import com.matburt.mobileorg.Synchronizers.SDCardSynchronizer;
 import com.matburt.mobileorg.Synchronizers.Synchronizer;
 import com.matburt.mobileorg.Synchronizers.WebDAVSynchronizer;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.StringReader;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-
 public class MobileOrgActivity extends ListActivity
 {
-    private static class OrgViewAdapter extends BaseAdapter {
-
 	@SuppressWarnings("unused")
 	private static final String LT = "MobileOrg";
 
+	private static final int RUN_PARSER = 3;
 	private int displayIndex;
 	private ProgressDialog syncDialog;
 	private MobileOrgDatabase appdb;

@@ -19,7 +19,7 @@ import android.widget.TableRow.LayoutParams;
 import android.widget.TextView;
 
 import com.matburt.mobileorg.MobileOrgApplication;
-import com.matburt.mobileorg.MobileOrgDatabase;
+import com.matburt.mobileorg.Parsing.MobileOrgDatabase;
 import com.matburt.mobileorg.Parsing.Node;
 
 public class EditDetailsActivity extends Activity implements OnClickListener

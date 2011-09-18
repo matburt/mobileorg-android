@@ -15,9 +15,9 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.matburt.mobileorg.MobileOrgApplication;
-import com.matburt.mobileorg.MobileOrgDatabase;
 import com.matburt.mobileorg.R;
-import com.matburt.mobileorg.SimpleTextDisplay;
+import com.matburt.mobileorg.Gui.SimpleTextDisplay;
+import com.matburt.mobileorg.Parsing.MobileOrgDatabase;
 import com.matburt.mobileorg.Parsing.Node;
 
 public class ViewNodeDetailsActivity extends Activity implements OnClickListener {

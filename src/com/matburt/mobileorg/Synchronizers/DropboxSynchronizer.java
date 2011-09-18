@@ -18,9 +18,9 @@ import android.widget.Toast;
 import com.dropbox.client.DropboxAPI;
 import com.dropbox.client.DropboxAPI.Config;
 import com.dropbox.client.DropboxAPI.FileDownload;
-import com.matburt.mobileorg.MobileOrgDatabase;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Error.ReportableError;
+import com.matburt.mobileorg.Parsing.MobileOrgDatabase;
 
 public class DropboxSynchronizer extends Synchronizer {
     private DropboxAPI api = new DropboxAPI();

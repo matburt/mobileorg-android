@@ -1,4 +1,4 @@
-package com.matburt.mobileorg;
+package com.matburt.mobileorg.Gui;
 
 import java.io.File;
 import java.util.HashMap;
@@ -15,6 +15,8 @@ import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.widget.RemoteViews;
 
+import com.matburt.mobileorg.R;
+import com.matburt.mobileorg.Parsing.MobileOrgDatabase;
 import com.matburt.mobileorg.Parsing.Node;
 import com.matburt.mobileorg.Parsing.OrgFileParser;
 

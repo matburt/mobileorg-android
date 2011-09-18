@@ -1,4 +1,4 @@
-package com.matburt.mobileorg;
+package com.matburt.mobileorg.Synchronizers;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;

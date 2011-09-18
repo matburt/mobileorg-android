@@ -1,6 +1,5 @@
-package com.matburt.mobileorg;
+package com.matburt.mobileorg.Gui;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -14,6 +13,9 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import com.matburt.mobileorg.MobileOrgApplication;
+import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Parsing.EditNode;
 import com.matburt.mobileorg.Parsing.Node;
 

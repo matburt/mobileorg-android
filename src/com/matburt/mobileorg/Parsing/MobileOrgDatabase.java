@@ -1,4 +1,4 @@
-package com.matburt.mobileorg;
+package com.matburt.mobileorg.Parsing;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -14,6 +14,7 @@ import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Error.ErrorReporter;
 
 public class MobileOrgDatabase {

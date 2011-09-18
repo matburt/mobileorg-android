@@ -10,7 +10,7 @@
   <application android:name=".MobileOrgApplication"
                android:label="MobileOrg"
                android:icon="@drawable/icon" android:debuggable="true">
-    <receiver android:name=".MobileOrgWidget"
+    <receiver android:name=".Gui.MobileOrgWidget"
               android:label="MobileOrg Tasks">
       <intent-filter>
         <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
@@ -19,18 +19,18 @@
                  android:resource="@xml/widget_mobileorg" />
     </receiver>
     <service android:name=".MobileOrgWidget$MobileOrgWidgetService" />
-	<service android:name="MobileOrgSyncService">
+	<service android:name=".Synchronizers.MobileOrgSyncService">
 	  <intent-filter>
 		<action android:name="com.matburt.mobileorg.SYNC_SERVICE" />
 	  </intent-filter>
 	</service>
-	<receiver android:name="MobileOrgStartupIntentReceiver">
+	<receiver android:name=".Synchronizers.MobileOrgStartupIntentReceiver">
 	  <intent-filter>
 		<action android:name="android.intent.action.BOOT_COMPLETED" />
 		<category android:name="android.intent.category.HOME" />
 	  </intent-filter>
 	</receiver>
-    <activity android:name="MobileOrgActivity"
+    <activity android:name=".Gui.MobileOrgActivity"
               android:label="MobileOrg">
       <intent-filter>
         <action android:name="android.intent.action.MAIN" />
@@ -43,7 +43,7 @@
     <activity android:name=".Synchronizers.DropboxAuthActivity"
               android:label="Dropbox Authentication">
     </activity>
-    <activity android:name="SimpleTextDisplay"
+    <activity android:name=".Gui.SimpleTextDisplay"
               android:label="Org View">
     </activity>
     <activity android:name=".Capture.EditDetailsActivity"

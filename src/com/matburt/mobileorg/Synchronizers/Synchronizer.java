@@ -22,9 +22,9 @@ import android.os.Environment;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.matburt.mobileorg.MobileOrgDatabase;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Error.ReportableError;
+import com.matburt.mobileorg.Parsing.MobileOrgDatabase;
 
 abstract public class Synchronizer
 {

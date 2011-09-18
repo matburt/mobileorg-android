@@ -1,8 +1,8 @@
-.DS_Store
 *~
 gen
 bin
 local.properties
 matburt-key.keystore
 dbprivate.xml
-
+.classpath
+.project

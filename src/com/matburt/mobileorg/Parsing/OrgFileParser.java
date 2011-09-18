@@ -18,7 +18,6 @@ import android.content.ContentValues;
 import android.os.Environment;
 import android.util.Log;
 
-import com.matburt.mobileorg.MobileOrgDatabase;
 
 public class OrgFileParser {
 

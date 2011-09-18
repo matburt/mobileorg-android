@@ -1,9 +1,11 @@
-package com.matburt.mobileorg;
+package com.matburt.mobileorg.Gui;
 
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.TextView;
+
+import com.matburt.mobileorg.R;
 
 public class SimpleTextDisplay extends Activity
 {

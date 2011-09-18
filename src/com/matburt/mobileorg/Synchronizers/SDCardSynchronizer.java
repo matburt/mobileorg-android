@@ -16,9 +16,9 @@ import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
-import com.matburt.mobileorg.MobileOrgDatabase;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Error.ReportableError;
+import com.matburt.mobileorg.Parsing.MobileOrgDatabase;
 
 public class SDCardSynchronizer extends Synchronizer
 {

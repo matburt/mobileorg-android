@@ -94,7 +94,7 @@ public class MobileOrgApplication extends Application {
         return thisEdits;
     }
 
-    static String nodeSelectionStr(ArrayList<Integer> nodes) {
+    public static String nodeSelectionStr(ArrayList<Integer> nodes) {
 		if (nodes != null) {
 			String tmp = "";
 	
