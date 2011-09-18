@@ -12,7 +12,12 @@ import android.os.Environment;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.util.Log;
-import android.view.*;
+import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.*;
 import com.matburt.mobileorg.Capture.Capture;
@@ -53,6 +58,7 @@ public class MobileOrgActivity extends ListActivity
 	final Handler syncHandler = new Handler();
 	private ArrayList<Integer> origSelection = null;
 	private boolean first = true;
+	MobileOrgApplication appInst = null;
 
 	final Runnable syncUpdateResults = new Runnable() {
 		public void run() {
@@ -64,6 +70,8 @@ public class MobileOrgActivity extends ListActivity
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		this.appdb = new MobileOrgDatabase((Context) this);
+		this.appInst = (MobileOrgApplication) this
+				.getApplication();
 		appSettings = PreferenceManager
 				.getDefaultSharedPreferences(getBaseContext());
 
@@ -157,7 +165,7 @@ public class MobileOrgActivity extends ListActivity
 		Log.d("MobileOrg" + this, "onResume");
 		super.onResume();
 		Intent nodeIntent = getIntent();
-		MobileOrgApplication appInst = (MobileOrgApplication) this
+		this.appInst = (MobileOrgApplication) this
 				.getApplication();
 		ArrayList<Integer> intentNodePath = nodeIntent
 				.getIntegerArrayListExtra("nodePath");
@@ -180,9 +188,7 @@ public class MobileOrgActivity extends ListActivity
 	}
 
 	public void populateDisplay() {
-		MobileOrgApplication appInst = (MobileOrgApplication) this
-				.getApplication();
-		if (appInst.rootNode == null) {
+		if (this.appInst.rootNode == null) {
 			this.runParser();
 		}
 
@@ -195,10 +201,10 @@ public class MobileOrgActivity extends ListActivity
 		}
 
 		if (first) {
-			this.setListAdapter(new MobileOrgViewAdapter(this, appInst.rootNode,
-					appInst.nodeSelection, appInst.edits, this.appdb.getTodos()));
-			if (appInst.nodeSelection != null) {
-				this.origSelection = copySelection(appInst.nodeSelection);
+			this.setListAdapter(new MobileOrgViewAdapter(this, this.appInst.rootNode,
+					this.appInst.nodeSelection, this.appInst.edits, this.appdb.getTodos()));
+			if (this.appInst.nodeSelection != null) {
+				this.origSelection = copySelection(this.appInst.nodeSelection);
 			} else {
 				this.origSelection = null;
 			}
@@ -215,17 +221,15 @@ public class MobileOrgActivity extends ListActivity
 
 	@SuppressWarnings("unused")
 	private String generateTitle() {
-		MobileOrgApplication appInst = (MobileOrgApplication) this
-				.getApplication();
 		String title = "";
 
-		if (appInst.nodeSelection != null) {
+		if (this.appInst.nodeSelection != null) {
 			ArrayList<Integer> nodeSelectionBackup = new ArrayList<Integer>();
-			for (Integer item : appInst.nodeSelection)
+			for (Integer item : this.appInst.nodeSelection)
 				nodeSelectionBackup.add(item);
 
 			while (nodeSelectionBackup.size() > 0) {
-				title = appInst.getNode(nodeSelectionBackup).nodeTitle + "$"
+				title = this.appInst.getNode(nodeSelectionBackup).nodeTitle + "$"
 						+ title;
 				nodeSelectionBackup.remove(nodeSelectionBackup.size() - 1);
 			}
@@ -233,53 +237,42 @@ public class MobileOrgActivity extends ListActivity
 		return title;
 	}
 
-	private static final int OP_MENU_SETTINGS = 1;
-	private static final int OP_MENU_SYNC = 2;
-	private static final int OP_MENU_OUTLINE = 3;
-	private static final int OP_MENU_CAPTURE = 4;
-
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		menu.add(0, OP_MENU_OUTLINE, 0, R.string.menu_outline);
-		menu.add(0, OP_MENU_CAPTURE, 0, R.string.menu_capture);
-		menu.add(0, OP_MENU_SYNC, 0, R.string.menu_sync);
-		menu.add(0, OP_MENU_SETTINGS, 0, R.string.menu_settings);
+		MenuInflater inflater = getMenuInflater();
+	    inflater.inflate(R.menu.activity_menu, menu);
 		return true;
 	}
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
-		case OP_MENU_SYNC:
+		case R.id.menu_sync:
 			this.runSynchronizer();
 			return true;
-		case OP_MENU_SETTINGS:
+		case R.id.menu_settings:
 			return this.showSettings();
-		case OP_MENU_OUTLINE:
+		case R.id.menu_outline:
 			Intent dispIntent = new Intent(this, MobileOrgActivity.class);
 			dispIntent.putIntegerArrayListExtra("nodePath",
 					new ArrayList<Integer>());
 			startActivity(dispIntent);
 			return true;
-		case OP_MENU_CAPTURE:
+		case R.id.menu_capture:
 			return this.runCapture();
 		}
 		return false;
 	}
 
-	private static final int OP_CMENU_VIEW = 0;
-	private static final int OP_CMENU_EDIT = 1;
-
 	@Override
 	public void onCreateContextMenu(ContextMenu menu, View v,
 			ContextMenuInfo menuInfo) {
 		super.onCreateContextMenu(menu, v, menuInfo);
-		menu.add(0, OP_CMENU_VIEW, 0, "View Node");
-
-		MobileOrgApplication appInst = (MobileOrgApplication) this
-				.getApplication();
-		if (appInst.nodeSelection != null)
-			menu.add(0, OP_CMENU_EDIT, 0, "Edit Node");
+		MenuInflater inflater = getMenuInflater();
+	    inflater.inflate(R.menu.activity_contextmenu, menu);
+	    
+		if (this.appInst.nodeSelection == null)
+	    menu.findItem(R.id.contextmenu_edit).setVisible(false);
 	}
 
 	@Override
@@ -291,30 +284,24 @@ public class MobileOrgActivity extends ListActivity
 		Intent textIntent = new Intent();
 
 		switch (item.getItemId()) {
-		case OP_CMENU_VIEW:
+		case R.id.contextmenu_view:
 			textIntent.setClass(this, SimpleTextDisplay.class);
 			String txtValue = n.nodeTitle + "\n\n" + n.payload;
 			textIntent.putExtra("txtValue", txtValue);
 			textIntent.putExtra("nodeTitle", n.name);
 			break;
 
-        if (first) {
-            this.setListAdapter(new OrgViewAdapter(this,
-                                                   appInst.rootNode,
-                                                   appInst.nodeSelection,
-                                                   appInst.edits,
-                                                   this.appdb.getTodos()));
-            if (appInst.nodeSelection != null) {
-                this.origSelection = copySelection(appInst.nodeSelection);
-            }
-            else {
-                this.origSelection = null;
-            }
-            Log.d("MobileOrg" + this, " first redisplay, origSelection=" + nodeSelectionStr(this.origSelection));
+		case R.id.contextmenu_edit:
+			textIntent.setClass(this, ViewNodeDetailsActivity.class);
+			textIntent.putExtra("actionMode", "edit");
 
-            getListView().setSelection( displayIndex );
-            first = false;
-        }
+			this.appInst.pushSelection(info.position);
+			textIntent.putIntegerArrayListExtra("nodePath",
+					this.appInst.nodeSelection);
+			break;
+		}
+		startActivity(textIntent);
+		return false;
 	}
 
     @Override

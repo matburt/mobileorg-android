@@ -5,6 +5,8 @@
   <string name="menu_capture">Capture</string>
   <string name="menu_settings">Settings</string>
   <string name="menu_sync">Sync</string>
+  <string name="contextmenu_edit">Edit Node</string>
+  <string name="contextmenu_view">View Node</string>
   <string name="sync_wait">Synchronizing, please wait...</string>
   <string name="sync_failed">Synchronization failed, try again?</string>
   <string name="yes">Yes</string>
