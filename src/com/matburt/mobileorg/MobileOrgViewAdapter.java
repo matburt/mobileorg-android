@@ -55,17 +55,19 @@ class MobileOrgViewAdapter extends BaseAdapter {
 		}
 	}
 
+	@Override
 	public int getCount() {
 		if (this.topNode == null || this.topNode.children == null)
 			return 0;
 		return this.topNode.children.size();
 	}
 
+	@Override
 	public Object getItem(int position) {
-		//return new Node();
 		return this.topNode.children.get(position);
 	}
 
+	@Override
 	public long getItemId(int position) {
 		return position;
 	}
@@ -97,10 +99,14 @@ class MobileOrgViewAdapter extends BaseAdapter {
 		return 0;
 	}
 
+	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
-		if (convertView == null) {
+		
+		if (convertView == null) { //? Check if this is first adapter?
 			convertView = this.lInflator.inflate(R.layout.main, null);
 		}
+		
+		// Initialize 
 		TextView thisView = (TextView) convertView.findViewById(R.id.orgItem);
 		TextView todoView = (TextView) convertView.findViewById(R.id.todoState);
 		TextView priorityView = (TextView) convertView
@@ -108,6 +114,8 @@ class MobileOrgViewAdapter extends BaseAdapter {
 		LinearLayout tagsLayout = (LinearLayout) convertView
 				.findViewById(R.id.tagsLayout);
 		TextView dateView = (TextView) convertView.findViewById(R.id.dateInfo);
+		
+		
 		ArrayList<EditNode> thisEdits = this.findEdits(this.topNode.children
 				.get(position).nodeId);
 		String todo = this.topNode.children.get(position).todo;
@@ -115,6 +123,7 @@ class MobileOrgViewAdapter extends BaseAdapter {
 		String dateInfo = "";
 		thisView.setText(this.topNode.children.get(position).name);
 
+		
 		for (EditNode e : thisEdits) {
 			if (e.editType.equals("todo"))
 				todo = e.newVal;

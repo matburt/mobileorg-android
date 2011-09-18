@@ -72,7 +72,7 @@ public class MobileOrgActivity extends ListActivity
 		this.appdb = new MobileOrgDatabase((Context) this);
 		this.appInst = (MobileOrgApplication) this
 				.getApplication();
-		appSettings = PreferenceManager
+		this.appSettings = PreferenceManager
 				.getDefaultSharedPreferences(getBaseContext());
 
 		registerForContextMenu(getListView());
@@ -93,6 +93,24 @@ public class MobileOrgActivity extends ListActivity
 			this.startService(serviceIntent);
 		}
 	}
+	
+	@Override
+	public void onResume() {
+		super.onResume();
+		Intent nodeIntent = getIntent();
+		this.appInst = (MobileOrgApplication) this
+				.getApplication(); // Is this really necessary or is it enough in onCreate() ?
+		ArrayList<Integer> intentNodePath = nodeIntent
+				.getIntegerArrayListExtra("nodePath");
+		if (intentNodePath != null) {
+			appInst.nodeSelection = copySelection(intentNodePath);
+			nodeIntent.putIntegerArrayListExtra("nodePath", null);
+		} else {
+			appInst.nodeSelection = copySelection(this.origSelection);
+		}
+		
+		populateDisplay();
+	}
 
 	@Override
 	public void onDestroy() {
@@ -101,8 +119,6 @@ public class MobileOrgActivity extends ListActivity
 	}
 
 	private void runParser() {
-		MobileOrgApplication appInst = (MobileOrgApplication) this
-				.getApplication();
 		HashMap<String, String> allOrgList = this.appdb.getOrgFiles();
 		if (allOrgList.isEmpty()) {
 			return;
@@ -124,9 +140,9 @@ public class MobileOrgActivity extends ListActivity
 				userSynchro, this.appdb, orgBasePath);
 		try {
 			ofp.parse();
-			appInst.rootNode = ofp.rootNode;
-			appInst.edits = ofp.parseEdits();
-			Collections.sort(appInst.rootNode.children, Node.comparator);
+			this.appInst.rootNode = ofp.rootNode;
+			this.appInst.edits = ofp.parseEdits();
+			Collections.sort(this.appInst.rootNode.children, Node.comparator);
 		} catch (Throwable e) {
 			ErrorReporter.displayError(
 					this,
@@ -160,32 +176,7 @@ public class MobileOrgActivity extends ListActivity
 		this.newSetupDialog_shown = true;
 	}
 
-	@Override
-	public void onResume() {
-		Log.d("MobileOrg" + this, "onResume");
-		super.onResume();
-		Intent nodeIntent = getIntent();
-		this.appInst = (MobileOrgApplication) this
-				.getApplication();
-		ArrayList<Integer> intentNodePath = nodeIntent
-				.getIntegerArrayListExtra("nodePath");
-		if (intentNodePath != null) {
-			appInst.nodeSelection = copySelection(intentNodePath);
-			nodeIntent.putIntegerArrayListExtra("nodePath", null);
-			Log.d("MobileOrg" + this, "resume first=" + first
-					+ " had nodePath="
-					+ nodeSelectionStr(appInst.nodeSelection));
-		} else {
-			Log.d("MobileOrg" + this, "resume first=" + first
-					+ " restoring original selection"
-					+ nodeSelectionStr(this.origSelection));
-			appInst.nodeSelection = copySelection(this.origSelection);
-		}
-		Log.d("MobileOrg" + this, "afteResume appInst.nodeSelection="
-				+ nodeSelectionStr(appInst.nodeSelection));
 
-		populateDisplay();
-	}
 
 	public void populateDisplay() {
 		if (this.appInst.rootNode == null) {
@@ -215,7 +206,6 @@ public class MobileOrgActivity extends ListActivity
 			first = false;
 
 			// setTitle(generateTitle());
-
 		}
 	}
 
@@ -304,26 +294,20 @@ public class MobileOrgActivity extends ListActivity
 		return false;
 	}
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        menu.add(0, MobileOrgActivity.OP_MENU_OUTLINE, 0, R.string.menu_outline);
-        menu.add(0, MobileOrgActivity.OP_MENU_CAPTURE, 0, R.string.menu_capture);
-        menu.add(0, MobileOrgActivity.OP_MENU_SYNC, 0, R.string.menu_sync);
-        menu.add(0, MobileOrgActivity.OP_MENU_SETTINGS, 0, R.string.menu_settings);
-        return true;
-    }
+	@Override
+	public void onListItemClick(ListView l, View v, int position, long id) {
 
-		appInst.pushSelection(position);
+		this.appInst.pushSelection(position);
 		Node node = (Node) l.getItemAtPosition(position);
 
-		if (decryptNode(appInst, node))
+		if (decryptNode(node))
 			return;
 
 		if (node.hasChildren()) {
-			expandSelection(appInst.nodeSelection);
+			expandSelection(this.appInst.nodeSelection);
 		} else {
-			displayIndex = appInst.lastIndex();
-			appInst.popSelection();
+			displayIndex = this.appInst.lastIndex();
+			this.appInst.popSelection();
 
 			if (node.isSimple()) {
 				Intent textIntent = new Intent(this, SimpleTextDisplay.class);
@@ -337,14 +321,14 @@ public class MobileOrgActivity extends ListActivity
 
 				dispIntent.putExtra("actionMode", "edit");
 				dispIntent.putIntegerArrayListExtra("nodePath",
-						appInst.nodeSelection);
-				appInst.pushSelection(position);
+						this.appInst.nodeSelection);
+				this.appInst.pushSelection(position);
 				startActivity(dispIntent);
 			}
 		}
 	}
 
-	private boolean decryptNode(MobileOrgApplication appInst, Node thisNode) {
+	private boolean decryptNode(Node thisNode) {
 		if (thisNode.encrypted && !thisNode.parsed) {
 			// if suitable APG version is installed
 			if (Encryption.isAvailable((Context) this)) {
@@ -367,7 +351,7 @@ public class MobileOrgActivity extends ListActivity
 				// and send it to APG for decryption
 				Encryption.decrypt(this, rawData);
 			} else {
-				appInst.popSelection();
+				this.appInst.popSelection();
 			}
 			return true;
 		}
@@ -404,17 +388,15 @@ public class MobileOrgActivity extends ListActivity
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		Log.d("MobileOrg" + this, "onActivityResult");
-		MobileOrgApplication appInst = (MobileOrgApplication) this
-				.getApplication();
 		if (requestCode == RUN_PARSER) {
 			this.runParser();
 		} else if (requestCode == Encryption.DECRYPT_MESSAGE) {
 			if (resultCode != Activity.RESULT_OK || data == null) {
-				appInst.popSelection();
+				this.appInst.popSelection();
 				return;
 			}
 
-			Node thisNode = appInst.getSelectedNode();
+			Node thisNode = this.appInst.getSelectedNode();
 			String userSynchro = this.appSettings.getString("syncSource", "");
 			String orgBasePath = "";
 			if (userSynchro.equals("sdcard")) {
@@ -433,10 +415,10 @@ public class MobileOrgActivity extends ListActivity
 
 			ofp.parse(thisNode, new BufferedReader(new StringReader(
 					decryptedData)));
-			expandSelection(appInst.nodeSelection);
+			expandSelection(this.appInst.nodeSelection);
 		} else {
-			displayIndex = appInst.lastIndex();
-			appInst.popSelection();
+			displayIndex = this.appInst.lastIndex();
+			this.appInst.popSelection();
 		}
 	}
 
