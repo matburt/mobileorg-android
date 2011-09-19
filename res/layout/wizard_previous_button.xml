@@ -4,7 +4,9 @@
    android:id="@+id/wizard_previous_button"
    android:layout_width="wrap_content"
    android:layout_height="wrap_content"
-   android:padding="10dp"
    android:background="@drawable/wizard_previous_button"
    android:layout_gravity="left"
+   android:layout_marginLeft="10dp"
+   android:layout_marginBottom="10dp"
+   android:layout_marginTop="10dp"
    />

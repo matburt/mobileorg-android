@@ -56,6 +56,7 @@ public class WizardActivity extends Activity
 			findViewById(R.id.sync_dropbox) ).getId();
 	syncSdCard = ( (RadioButton) 
 			findViewById(R.id.sync_sdcard) ).getId();
+	syncGroup.clearCheck();
 	//setup click listener for sync radio group
 	syncGroup.setOnCheckedChangeListener(this);
     }

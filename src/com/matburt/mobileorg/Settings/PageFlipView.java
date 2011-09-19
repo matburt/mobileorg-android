@@ -34,16 +34,15 @@ public class PageFlipView extends HorizontalScrollView
     static final int SWIPE_MIN_DISTANCE = 5;
     static final int SWIPE_THRESHOLD_VELOCITY = 50;
     GestureDetector mGestureDetector;
-    WideLinearLayout container; // TODO do we need this?
+    WideLinearLayout container;
     NextPageListener nextPageListener; // for handling next page
 				       // button clicks
     PreviousPageListener previousPageListener; // for handling
 					       // previous page button
 					       // clicks
+    boolean[] rightFlipEnabled;
     int currentPage = 0;
     int screenWidth;
-
-    ArrayList<EditText> editBoxes; //TODO do we need this?
 
     public PageFlipView(Context context) {
 	super(context);
@@ -96,20 +95,49 @@ public class PageFlipView extends HorizontalScrollView
 		pageContainer.findViewById(R.id.wizard_next_button)
 		    .setOnClickListener(nextPageListener);
 	    //first page doesn't have a previous button
-	    if ( i != 0 )
+	    if ( i != 0 ) 
 		pageContainer.findViewById(R.id.wizard_previous_button)
 		    .setOnClickListener(previousPageListener);
 	}
-	// //remove previous button from first page
-	// PageView page = (PageView) container.getChildAt(0);
-	// page.getPreviousButton().setVisibility(View.GONE);
-	// //remove next button from last page
-	// page = (PageView) container
-	//     .getChildAt( container.getChildCount() - 1 );
-	// page.getNextButton().setVisibility(View.GONE);
+	rightFlipEnabled = new boolean[getNumberOfPages()];
     }
 
-    public void setEditBoxes(ArrayList e) { editBoxes = e; }
+    public void disableAllNavButtons() {
+	if ( container != null ) {
+	    for(int i=0; i<container.getChildCount(); i++) {
+		//get the pageview container
+		View pageContainer = (View) container.getChildAt(i);
+		//last page doesn't have a next button
+		if ( i != container.getChildCount() - 1 )
+		    pageContainer.findViewById(R.id.wizard_next_button)
+			.setEnabled(false);
+		//first page doesn't have a previous button
+		if ( i != 0 )
+		    pageContainer.findViewById(R.id.wizard_previous_button)
+			.setEnabled(false);
+	    }
+	    for(int i=0; i<getNumberOfPages(); i++)
+		rightFlipEnabled[i] = false;
+	}
+    }
+
+    public void setNavButton(boolean state, int page) { 
+	//get the pageview container
+	View pageContainer = (View) container.getChildAt(page);
+	//last page doesn't have a next button
+	if ( page != container.getChildCount() - 1 )
+	    pageContainer.findViewById(R.id.wizard_next_button)
+		.setEnabled(state);
+	//first page doesn't have a previous button
+	if ( page != 0 )
+	    pageContainer.findViewById(R.id.wizard_previous_button)
+		.setEnabled(state);
+	rightFlipEnabled[ page ] = state;
+    }
+	
+    public int getNumberOfPages() { return container.getChildCount(); }
+
+    //public void setEditBoxes(ArrayList e) { editBoxes = e; }
 
     public int getCurrentPage() { return currentPage; }
 
@@ -158,6 +186,7 @@ public class PageFlipView extends HorizontalScrollView
     }
 
     void scrollRight() {
+	if ( !rightFlipEnabled[ currentPage ] ) return;
 	hideKeyboard();
 	int featureWidth = getMeasuredWidth();
 	currentPage = (currentPage < (container.getChildCount() - 1)) ?
