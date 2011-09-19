@@ -86,18 +86,20 @@ public class PageFlipView extends HorizontalScrollView
     @Override
 	public void onFinishInflate() {
 	container = (WideLinearLayout) findViewById(R.id.wizard_container);
-	// Log.d(TAG,"Container count: "+container.getChildCount());
-	// //add onclick listeners for next/prev buttons
-	// for(int i=0; i<container.getChildCount(); i++) {
-	//     PageView page = (PageView) container.getChildAt(i);
-	//     //last page doesn't have a next button
-	//     if ( i != container.getChildCount() - 1 )
-	// 	page.getNextButton().setOnClickListener(nextPageListener);
-	//     //first page doesn't have a previous button
-	//     if ( i != 0 )
-	// 	page.getPreviousButton()
-	// 	    .setOnClickListener(previousPageListener);
-	// }
+	Log.d(TAG,"Container count: "+container.getChildCount());
+	//add onclick listeners for next/prev buttons
+	for(int i=0; i<container.getChildCount(); i++) {
+	    //get the pageview container
+	    View pageContainer = (View) container.getChildAt(i);
+	    //last page doesn't have a next button
+	    if ( i != container.getChildCount() - 1 )
+		pageContainer.findViewById(R.id.wizard_next_button)
+		    .setOnClickListener(nextPageListener);
+	    //first page doesn't have a previous button
+	    if ( i != 0 )
+		pageContainer.findViewById(R.id.wizard_previous_button)
+		    .setOnClickListener(previousPageListener);
+	}
 	// //remove previous button from first page
 	// PageView page = (PageView) container.getChildAt(0);
 	// page.getPreviousButton().setVisibility(View.GONE);

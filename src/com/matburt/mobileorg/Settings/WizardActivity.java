@@ -34,6 +34,7 @@ public class WizardActivity extends Activity
     //page 2 variables
     View loginPage;
     ArrayList<EditText> loginBoxes = new ArrayList<EditText>();
+    boolean loginAdded=false;
 
     /** Called when the activity is first created. */
     @Override
@@ -100,18 +101,16 @@ public class WizardActivity extends Activity
     }
     
     void createDropboxLogin() {
-	PageView page2 = (PageView) findViewById(R.id.wizard_page2);
+	ViewGroup page2 = (ViewGroup) 
+	    findViewById(R.id.wizard_page2_container); //parent scrollview
+	page2 = (ViewGroup) page2.getChildAt(0); //linearlayout
 	LayoutInflater inflater=
 	    (LayoutInflater) LayoutInflater.from(getApplicationContext());
-	loginPage = inflater.inflate(R.layout.wizard_dropbox,page2);
-	//add login boxes to list ... for handling focus on page flips
-	//changes
-	loginBoxes.clear();
-	loginBoxes.add( (EditText) 
-			loginPage.findViewById(R.id.wizard_dropbox_email) );
-	loginBoxes.add( (EditText) 
-			loginPage.findViewById(R.id.wizard_dropbox_password) );
-	wizard.setEditBoxes( loginBoxes );
+	loginPage = inflater.inflate(R.layout.wizard_dropbox,
+				     null);
+	if ( loginAdded ) page2.removeViewAt(0);
+	page2.addView(loginPage, 0);
+	loginAdded = true;
     }
 
     /* TODO: Unfocus login textboxes on orientation change */
