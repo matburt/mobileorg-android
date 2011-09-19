@@ -17,10 +17,15 @@
        android:layout_height="fill_parent">
       <include 
 	  android:layout_alignParentTop="true"
+	  android:layout_width="fill_parent"
+	  android:layout_height="wrap_content"
 	  android:id="@+id/wizard_page1_content" 
 	  layout="@layout/wizard_page1" />
       <include 
-	  android:layout_below="@+id/wizard_page_1_content"
+	  android:layout_alignParentRight="true"
+	  android:layout_width="wrap_content"
+	  android:layout_height="wrap_content"
+	  android:layout_below="@id/wizard_page1_content"
 	  layout="@layout/wizard_next_button" />
     </com.matburt.mobileorg.Settings.PageView>
     <com.matburt.mobileorg.Settings.PageView
@@ -32,10 +37,10 @@
 	  android:id="@+id/wizard_page2_content" 
 	  layout="@layout/wizard_page1" />
       <include 
-	  android:layout_below="@+id/wizard_page_2_content"
+	  android:layout_below="@id/wizard_page2_content"
 	  layout="@layout/wizard_previous_button" />
       <include 
-	  android:layout_below="@+id/wizard_page_2_content"
+	  android:layout_below="@id/wizard_page2_content"
 	  layout="@layout/wizard_next_button" />
     </com.matburt.mobileorg.Settings.PageView>
     <com.matburt.mobileorg.Settings.PageView
