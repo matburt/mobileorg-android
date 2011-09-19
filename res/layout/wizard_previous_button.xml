@@ -6,6 +6,5 @@
    android:layout_height="wrap_content"
    android:padding="10dp"
    android:background="@drawable/wizard_previous_button"
-   android:layout_alignParentBottom="true"
    android:layout_alignParentLeft="true"
    />

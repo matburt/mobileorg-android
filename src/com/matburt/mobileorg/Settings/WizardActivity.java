@@ -42,11 +42,11 @@ public class WizardActivity extends Activity
         setContentView(R.layout.wizard);
 	wizard = (PageFlipView) findViewById(R.id.wizard_parent);
 	//setup page 1
-	PageView page1Container = (PageView) findViewById(R.id.wizard_page1);
-	LayoutInflater inflater=
-	    (LayoutInflater) getApplicationContext()
-	    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-	View page1=inflater.inflate(R.layout.wizard_page1,page1Container);
+	// PageView page1Container = (PageView) findViewById(R.id.wizard_page1);
+	// LayoutInflater inflater=
+	//     (LayoutInflater) getApplicationContext()
+	//     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+	// View page1=inflater.inflate(R.layout.wizard_page1,page1Container);
 	//get ids and pointers to sync radio buttons
 	syncGroup = (RadioGroup) findViewById(R.id.sync_group);
 	syncWebDav = ( (RadioButton) 

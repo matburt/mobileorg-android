@@ -15,15 +15,28 @@
        android:id="@+id/wizard_page1"
        android:layout_width="fill_parent"
        android:layout_height="fill_parent">
-      <include layout="@layout/wizard_page1" />
-      <include layout="@layout/wizard_next_button" />
+      <include 
+	  android:layout_alignParentTop="true"
+	  android:id="@+id/wizard_page1_content" 
+	  layout="@layout/wizard_page1" />
+      <include 
+	  android:layout_below="@+id/wizard_page_1_content"
+	  layout="@layout/wizard_next_button" />
     </com.matburt.mobileorg.Settings.PageView>
     <com.matburt.mobileorg.Settings.PageView
        android:id="@+id/wizard_page2"
        android:layout_width="fill_parent"
        android:layout_height="fill_parent">
-      <include layout="@layout/wizard_previous_button" />
-      <include layout="@layout/wizard_next_button" />
+      <include 
+	  android:layout_alignParentTop="true"
+	  android:id="@+id/wizard_page2_content" 
+	  layout="@layout/wizard_page1" />
+      <include 
+	  android:layout_below="@+id/wizard_page_2_content"
+	  layout="@layout/wizard_previous_button" />
+      <include 
+	  android:layout_below="@+id/wizard_page_2_content"
+	  layout="@layout/wizard_next_button" />
     </com.matburt.mobileorg.Settings.PageView>
     <com.matburt.mobileorg.Settings.PageView
        android:id="@+id/wizard_page3"
