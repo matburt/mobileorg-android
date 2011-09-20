@@ -1,29 +1,38 @@
 package com.matburt.mobileorg.Settings;
 
 import android.app.Activity;
-import android.os.Bundle;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
+import android.app.ProgressDialog;
 import android.content.Context;
-import android.preference.PreferenceManager;
-import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.content.SharedPreferences.Editor;
-import android.view.Display;
-import android.widget.LinearLayout;
-import android.widget.ScrollView;
-import android.view.ViewGroup;
-import android.view.ViewGroup.LayoutParams;
+import android.content.SharedPreferences;
+import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.AttributeSet;
+import android.util.Log;
+import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
-import java.util.ArrayList;
-import android.widget.EditText;
+import android.view.View.OnClickListener;
+import android.view.ViewGroup.LayoutParams;
+import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
-import android.util.Log;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
+import android.widget.ScrollView;
+import android.widget.Toast;
+import com.matburt.mobileorg.Dropbox.*;
 import com.matburt.mobileorg.R;
+import com.dropbox.client.DropboxAPI;
+import java.util.ArrayList;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 
-public class WizardActivity extends Activity
-    implements RadioGroup.OnCheckedChangeListener {
+public class WizardActivity extends Activity {
     static String TAG="WizardActivity";
     
     //container
@@ -33,8 +42,14 @@ public class WizardActivity extends Activity
     RadioGroup syncGroup; 
     //page 2 variables
     View loginPage;
-    ArrayList<EditText> loginBoxes = new ArrayList<EditText>();
     boolean loginAdded=false;
+    Button loginButton;
+    ProgressDialog progress;
+    //dropbox variables
+    Dropbox dropbox;
+    EditText dropboxEmail;
+    EditText dropboxPass;
+    boolean isLoggedIn=false;
 
     /** Called when the activity is first created. */
     @Override
@@ -58,7 +73,18 @@ public class WizardActivity extends Activity
 			findViewById(R.id.sync_sdcard) ).getId();
 	syncGroup.clearCheck();
 	//setup click listener for sync radio group
-	syncGroup.setOnCheckedChangeListener(this);
+	syncGroup.setOnCheckedChangeListener(new Page1Listener());
+	//setup dropbox
+	Resources r = getResources();
+	String key=r.getString(R.string.dropbox_consumer_key, "invalid");
+	String secret=r.getString(R.string.dropbox_consumer_secret, "invalid");
+	dropbox = new Dropbox(this, key, secret);
+	//setup progress dialog
+	progress = new ProgressDialog(this);
+        progress.setMessage("Please wait...");
+        progress.setTitle("Signing in");
+	//disable all page swypes
+	wizard.disableAllNavButtons();
     }
 
     /**
@@ -85,20 +111,25 @@ public class WizardActivity extends Activity
 	wizard.saveCurrentPage();
     }
 
-    @Override
-    	public void onCheckedChanged(RadioGroup arg, int checkedId) {
-    	SharedPreferences appSettings = 
-    	    PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-    	SharedPreferences.Editor editor = appSettings.edit();
-    	if ( checkedId == syncWebDav )
-    	    editor.putString("syncSource", "webdav");
-    	else if ( checkedId == syncDropBox ) {
-    	    //editor.putString("syncSource", "dropbox");
-	    createDropboxLogin();
+    class Page1Listener implements RadioGroup.OnCheckedChangeListener {
+
+	@Override
+	    public void onCheckedChanged(RadioGroup arg, int checkedId) {
+	    SharedPreferences appSettings = 
+		PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+	    SharedPreferences.Editor editor = appSettings.edit();
+	    if ( checkedId == syncWebDav )
+		editor.putString("syncSource", "webdav");
+	    else if ( checkedId == syncDropBox ) {
+		//editor.putString("syncSource", "dropbox");
+		createDropboxLogin();
+	    }
+	    else if ( checkedId == syncSdCard)
+		editor.putString("syncSource", "sdcard");
+	    editor.commit();
+	    //unfreeze first page
+	    wizard.setNavButtonState( true, 0 );
 	}
-    	else if ( checkedId == syncSdCard)
-    	    editor.putString("syncSource", "sdcard");
-    	editor.commit();
     }
     
     void createDropboxLogin() {
@@ -109,10 +140,94 @@ public class WizardActivity extends Activity
 	    (LayoutInflater) LayoutInflater.from(getApplicationContext());
 	loginPage = inflater.inflate(R.layout.wizard_dropbox,
 				     null);
+	//remove current page 2 and re-add dropbox login screen
 	if ( loginAdded ) page2.removeViewAt(0);
 	page2.addView(loginPage, 0);
 	loginAdded = true;
+	//get references to login forms
+	dropboxEmail = (EditText) page2
+	    .findViewById(R.id.wizard_dropbox_email);
+	dropboxPass = (EditText) page2
+	    .findViewById(R.id.wizard_dropbox_password);
+	//setup listener for buttons
+	loginButton = (Button) page2
+	    .findViewById(R.id.wizard_dropbox_login_button);
+	loginButton.setOnClickListener(new OnClickListener() {
+            @Override
+		public void onClick(View v) {
+            	if (isLoggedIn) {
+		    // We're going to log out
+		    dropbox.deauthenticate();
+		    //setLoggedIn(false);
+		    //mText.setText("");
+            	} else {
+		    // Try to log in
+		    loginDropbox();
+            	}
+            }
+	    });
+	//debug
+	dropboxEmail.setText("uri@frankandrobot.com");
     }
 
-    /* TODO: Unfocus login textboxes on orientation change */
+    void loginDropbox() {
+	if (dropbox.isAuthenticated()) {
+	    // If we're already authenticated, we don't need to get
+	    // the login info
+	    progress.show();
+	    dropbox.login(dropboxListener);
+    	} 
+	else {
+	    String email = dropboxEmail.getText().toString();
+	    if (email.length() < 5 
+		|| email.indexOf("@") < 0 
+		|| email.indexOf(".") < 0) {
+		showToast("Error, invalid e-mail");
+		return;
+	    }
+	    String password = dropboxPass.getText().toString();
+	    if (password.length() < 6) {
+		showToast("Error, password too short");
+		return;
+	    }
+	    // It's good to do Dropbox API (and any web API) calls
+	    // in a separate thread, so we don't get a force-close
+	    // due to the UI thread stalling.
+	    progress.show();
+	    dropbox.login(dropboxListener, email, password);
+	}
+    }
+
+    void showToast(String msg) {
+        Toast error = Toast.makeText(this, msg, Toast.LENGTH_LONG);
+        error.show();
+    }
+
+    /**
+     * Notifies our Activity when a login process succeeded or failed.
+     */
+    DropboxLoginListener dropboxListener = new DropboxLoginListener() {
+
+		@Override
+		public void loginFailed(String message) {
+			progress.dismiss();
+			showToast("Login failed: "+message);
+			//shake buttons
+			Animation shake = AnimationUtils
+			    .loadAnimation(this, R.anim.shake);
+			dropboxEmail.startAnimation(shake);
+			dropboxPass.startAnimation(shake);
+			//setLoggedIn(false);
+		}
+
+		@Override
+		public void loginSuccessfull() {
+			progress.dismiss();
+			showToast("Logged in!");
+			loginButton.setEnabled(false);
+			//setLoggedIn(true);		
+			//displayAccountInfo(mDropbox.accountInfo());
+		}
+    	
+    };
 }
