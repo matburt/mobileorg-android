@@ -66,19 +66,13 @@ public class PageFlipView extends HorizontalScrollView
 	protected void onMeasure(int w, int h) {
 	int width = MeasureSpec.getSize(w);
 	int height = MeasureSpec.getSize(h);
-	Log.d(TAG, "Setting screen width to " + width);
-	Log.d(TAG, "Setting screen height to " + height);
+	//Log.d(TAG, "Setting screen width to " + width);
+	//Log.d(TAG, "Setting screen height to " + height);
 	int ws = MeasureSpec.makeMeasureSpec(width,MeasureSpec.EXACTLY);
 	int hs = MeasureSpec.makeMeasureSpec(height,MeasureSpec.EXACTLY);
 	// Also tell screen width to our only child
 	container.setWidth(width);
-	//container.measure(ws,hs);
-	// and its children
-	// for(int i=0; i<container.getChildCount(); i++) {
-	//     View page = (View) container.getChildAt(i);
-	//     page.measure(ws,hs);
-	// }
-	//setMeasuredDimension(width,height);
+	//default to w and h given in XML
 	super.onMeasure(w,h);
     }
 
@@ -170,14 +164,21 @@ public class PageFlipView extends HorizontalScrollView
 	if (mGestureDetector.onTouchEvent(event)) {
 	    return true;
 	}
+	else if (event.getAction() == MotionEvent.ACTION_MOVE) {
+	    //check for page swiping disabled
+	    Log.d(TAG,"scrollx: "+getScrollX());
+	    return false;
+	}
 	else if (event.getAction() == MotionEvent.ACTION_UP
 		|| event.getAction() == MotionEvent.ACTION_CANCEL ){
+	    if ( !rightFlipEnabled[ currentPage ] ) {
+		Log.d(TAG,"Page swype disabled");
+		return true;
+	    }
 	    int scrollX = getScrollX();
 	    int featureWidth = v.getMeasuredWidth();
 	    //TODO clean up this code
 	    int newPage = ((scrollX + (featureWidth/2))/featureWidth);
-	    if ( newPage > currentPage 
-		 && !rightFlipEnabled[ currentPage ] ) return true;
 	    currentPage = newPage;
 	    int scrollTo = currentPage*featureWidth;
 	    smoothScrollTo(scrollTo, 0);
@@ -189,7 +190,6 @@ public class PageFlipView extends HorizontalScrollView
     }
 
     void scrollRight() {
-	if ( !rightFlipEnabled[ currentPage ] ) return;
 	hideKeyboard();
 	int featureWidth = getMeasuredWidth();
 	currentPage = (currentPage < (container.getChildCount() - 1)) ?
@@ -244,6 +244,10 @@ public class PageFlipView extends HorizontalScrollView
                 //right to left
                 if(e1.getX() - e2.getX() > SWIPE_MIN_DISTANCE
 		   && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
+		    if ( !rightFlipEnabled[ currentPage ] ) {
+			Log.d(TAG,"Page swype disabled");
+			return true;
+		    }
                     scrollRight();
 		    return true;
                 }

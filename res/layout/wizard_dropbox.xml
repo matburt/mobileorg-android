@@ -49,9 +49,9 @@
 	 android:textSize="20dp"
 	 android:inputType="textPassword"
 	 android:password="true"
-	 android:singleLine="true"/>
+	 android:singleLine="true"
+	 android:paddingBottom="10dp"/>
       <Button
-	 android:paddingTop="10dp"
 	 android:id="@+id/wizard_dropbox_login_button"
 	 android:layout_width="wrap_content"
 	 android:layout_height="wrap_content"

@@ -94,9 +94,9 @@ public class WizardActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
-	Log.d(TAG,"onResume: loading... "+String.valueOf(wizard.getCurrentPage()));
+	//Log.d(TAG,"onResume: loading... "+String.valueOf(wizard.getCurrentPage()));
 	wizard.restoreLastPage();
-	Log.d(TAG,"onResume: done... "+String.valueOf(wizard.getCurrentPage()));
+	//Log.d(TAG,"onResume: done... "+String.valueOf(wizard.getCurrentPage()));
     }
 
     /**
@@ -106,8 +106,8 @@ public class WizardActivity extends Activity {
     @Override
     protected void onPause() {
         super.onPause();
-	Log.d(TAG,"saving state>>>>>>>>>>>>>>>>>>>>>");
-	Log.d(TAG,"onPause: "+String.valueOf(wizard.getCurrentPage()));
+	//Log.d(TAG,"saving state>>>>>>>>>>>>>>>>>>>>>");
+	//Log.d(TAG,"onPause: "+String.valueOf(wizard.getCurrentPage()));
 	wizard.saveCurrentPage();
     }
 
@@ -182,12 +182,16 @@ public class WizardActivity extends Activity {
 	    if (email.length() < 5 
 		|| email.indexOf("@") < 0 
 		|| email.indexOf(".") < 0) {
-		showToast("Error, invalid e-mail");
+		shake(dropboxEmail);
+		dropboxEmail.requestFocus();
+		showToast("Invalid e-mail");
 		return;
 	    }
 	    String password = dropboxPass.getText().toString();
 	    if (password.length() < 6) {
-		showToast("Error, password too short");
+		shake(dropboxPass);
+		dropboxPass.requestFocus();
+		showToast("Password too short");
 		return;
 	    }
 	    // It's good to do Dropbox API (and any web API) calls
@@ -203,6 +207,12 @@ public class WizardActivity extends Activity {
         error.show();
     }
 
+    void shake(View b) {
+	Animation shake = AnimationUtils
+	    .loadAnimation(this, R.anim.shake);
+	b.startAnimation(shake);
+    }
+
     /**
      * Notifies our Activity when a login process succeeded or failed.
      */
@@ -213,10 +223,8 @@ public class WizardActivity extends Activity {
 			progress.dismiss();
 			showToast("Login failed: "+message);
 			//shake buttons
-			Animation shake = AnimationUtils
-			    .loadAnimation(this, R.anim.shake);
-			dropboxEmail.startAnimation(shake);
-			dropboxPass.startAnimation(shake);
+			shake(dropboxPass);
+			shake(dropboxEmail);
 			//setLoggedIn(false);
 		}
 
