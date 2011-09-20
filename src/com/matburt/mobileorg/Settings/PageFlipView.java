@@ -121,7 +121,7 @@ public class PageFlipView extends HorizontalScrollView
 	}
     }
 
-    public void setNavButton(boolean state, int page) { 
+    public void setNavButtonState(boolean state, int page) { 
 	//get the pageview container
 	View pageContainer = (View) container.getChildAt(page);
 	//last page doesn't have a next button
@@ -175,7 +175,10 @@ public class PageFlipView extends HorizontalScrollView
 	    int scrollX = getScrollX();
 	    int featureWidth = v.getMeasuredWidth();
 	    //TODO clean up this code
-	    currentPage = ((scrollX + (featureWidth/2))/featureWidth);
+	    int newPage = ((scrollX + (featureWidth/2))/featureWidth);
+	    if ( newPage > currentPage 
+		 && !rightFlipEnabled[ currentPage ] ) return true;
+	    currentPage = newPage;
 	    int scrollTo = currentPage*featureWidth;
 	    smoothScrollTo(scrollTo, 0);
 	    return true;
