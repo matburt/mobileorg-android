@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="font_size">16sp</dimen>
+    <dimen name="outline_item">32sp</dimen>
+    <dimen name="outline_todostate">18sp</dimen>
+    
+</resources>

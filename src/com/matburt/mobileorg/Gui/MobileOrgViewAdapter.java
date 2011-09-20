@@ -103,7 +103,7 @@ class MobileOrgViewAdapter extends BaseAdapter {
 		ViewHolder holder;
 		
 		if (convertView == null) {
-			convertView = this.lInflator.inflate(R.layout.outline, null);
+			convertView = this.lInflator.inflate(R.layout.outline_new, null);
 			
 			holder = new ViewHolder();
 			holder.orgItem = (TextView) convertView.findViewById(R.id.orgItem);
@@ -172,12 +172,12 @@ class MobileOrgViewAdapter extends BaseAdapter {
 		}
 
 		// Setup date view
-		if (TextUtils.isEmpty(dateInfo)) {
+		//if (TextUtils.isEmpty(dateInfo)) {
 			holder.dateInfo.setVisibility(View.GONE);
-		} else {
-			holder.dateInfo.setText(dateInfo);
-			holder.dateInfo.setVisibility(View.VISIBLE);
-		}
+//		} else {
+//			holder.dateInfo.setText(dateInfo);
+//			holder.dateInfo.setVisibility(View.VISIBLE);
+//		}
 		
 		// Add tag view(s)
 		holder.tagsLayout.removeAllViews();
