@@ -54,8 +54,8 @@ public class PageFlipView extends HorizontalScrollView
 	nextPageListener = new NextPageListener();
 	previousPageListener = new PreviousPageListener();
 	//see http://blog.velir.com/index.php/2010/11/17/android-snapping-horizontal-scroll/
-	mGestureDetector = new GestureDetector(getContext(),
-					       new PageSwipeDetector());
+	//mGestureDetector = new GestureDetector(getContext(),
+	//					       new PageSwipeDetector());
         setOnTouchListener(this);
     }
 
@@ -157,7 +157,7 @@ public class PageFlipView extends HorizontalScrollView
         editor.commit();
     }
 
-    int oldPos;
+    float oldPos;
     boolean DRAG = false;
 
     //Code for setting up the page swipes and scrolling
@@ -168,30 +168,37 @@ public class PageFlipView extends HorizontalScrollView
 	//     return true;
 	// }
 	//else 
-	switch (event.getAction() & MotionEvent.ACTION_MASK) {
-	case MotionEvent.ACTION_DOWN:
-	    oldPos = (int) event.getX();
-	    Log.d(TAG, "DRAG=true" );
-	    DRAG = true;
-	    return true;
+	switch (event.getAction()) {
+	// case MotionEvent.ACTION_DOWN:
+	// case MotionEvent.ACTION_POINTER_DOWN:
+	//     oldPos = (int) event.getX();
+	//     Log.d(TAG, "DRAG=true" );
+	//     DRAG = true;
+	//     break;
 	case MotionEvent.ACTION_MOVE:
 	    if (DRAG) {
-		if ( event.getX() - oldPos > 0 ) { // right scroll
-		    if ( !rightFlipEnabled[ currentPage ] ) {
-			Log.d(TAG,"Page swype disabled");
-			 	return true;
-		    }
-		}		
+	    // 	if ( event.getX() - oldPos > 0 ) { // right scroll
+	    // 	    if ( !rightFlipEnabled[ currentPage ] ) {
+	    // 		Log.d(TAG,"ActionMove: Page swype disabled");
+	    // 		 	return true;
+	    // 	    }
+	    // 	}		
+	    // } else {
+	    // 	oldPos = event.getX();
+	    // 	Log.d(TAG, "DRAG=true" );
+	    // 	DRAG = true;
+	    // 	return true;
 	    }
-	    return false;
+	    break;
 	case MotionEvent.ACTION_UP:
 	case MotionEvent.ACTION_POINTER_UP:
 	case MotionEvent.ACTION_CANCEL:
-	    if ( !rightFlipEnabled[ currentPage ] ) {
-		Log.d(TAG,"Page swype disabled");
-	 	return true;
-	    }
-	    return false;
+	    DRAG=false;
+	    // if ( !rightFlipEnabled[ currentPage ] ) {
+	    // 	Log.d(TAG,"Page swype disabled");
+	    // 	return true;
+	    // }
+	    break;
 	//     int scrollX = getScrollX();
 	//     int featureWidth = v.getMeasuredWidth();
 	//     //TODO clean up this code
@@ -225,6 +232,19 @@ public class PageFlipView extends HorizontalScrollView
 	//unfocus login boxes
 	View selectedBox = findFocus();
 	if (selectedBox != null) selectedBox.clearFocus();
+    }
+
+    @Override
+	public void onScrollChanged (int l, int t, int oldl, int oldt) {
+	Log.d(TAG,"scroll: "+l+", "+oldl);
+	//if page flipping for current page is enabled, then scroll
+	if ( rightFlipEnabled[currentPage] )
+	    super.onScrollChanged(l,t,oldl,oldt);
+	//otherwise
+	else if ( l > oldl ) 
+	    if ( !rightFlipEnabled[ currentPage ] ) 
+		scrollTo(oldl,0);
+	else super.onScrollChanged(l,t,oldl,oldt);
     }
 
     //hide keyboard if showing    

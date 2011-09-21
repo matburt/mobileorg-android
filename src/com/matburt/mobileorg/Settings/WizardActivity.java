@@ -94,9 +94,7 @@ public class WizardActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
-	//Log.d(TAG,"onResume: loading... "+String.valueOf(wizard.getCurrentPage()));
 	wizard.restoreLastPage();
-	//Log.d(TAG,"onResume: done... "+String.valueOf(wizard.getCurrentPage()));
     }
 
     /**
@@ -106,8 +104,6 @@ public class WizardActivity extends Activity {
     @Override
     protected void onPause() {
         super.onPause();
-	//Log.d(TAG,"saving state>>>>>>>>>>>>>>>>>>>>>");
-	//Log.d(TAG,"onPause: "+String.valueOf(wizard.getCurrentPage()));
 	wizard.saveCurrentPage();
     }
 
