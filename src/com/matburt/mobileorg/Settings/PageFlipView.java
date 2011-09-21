@@ -157,36 +157,52 @@ public class PageFlipView extends HorizontalScrollView
         editor.commit();
     }
 
+    int oldPos;
+    boolean DRAG = false;
+
     //Code for setting up the page swipes and scrolling
     @Override
 	public boolean onTouch(View v, MotionEvent event) {
 	//If the user swipes
-	if (mGestureDetector.onTouchEvent(event)) {
+	// if (mGestureDetector.onTouchEvent(event)) {
+	//     return true;
+	// }
+	//else 
+	switch (event.getAction() & MotionEvent.ACTION_MASK) {
+	case MotionEvent.ACTION_DOWN:
+	    oldPos = (int) event.getX();
+	    Log.d(TAG, "DRAG=true" );
+	    DRAG = true;
 	    return true;
-	}
-	else if (event.getAction() == MotionEvent.ACTION_MOVE) {
-	    //check for page swiping disabled
-	    Log.d(TAG,"scrollx: "+getScrollX());
+	case MotionEvent.ACTION_MOVE:
+	    if (DRAG) {
+		if ( event.getX() - oldPos > 0 ) { // right scroll
+		    if ( !rightFlipEnabled[ currentPage ] ) {
+			Log.d(TAG,"Page swype disabled");
+			 	return true;
+		    }
+		}		
+	    }
 	    return false;
-	}
-	else if (event.getAction() == MotionEvent.ACTION_UP
-		|| event.getAction() == MotionEvent.ACTION_CANCEL ){
+	case MotionEvent.ACTION_UP:
+	case MotionEvent.ACTION_POINTER_UP:
+	case MotionEvent.ACTION_CANCEL:
 	    if ( !rightFlipEnabled[ currentPage ] ) {
 		Log.d(TAG,"Page swype disabled");
-		return true;
+	 	return true;
 	    }
-	    int scrollX = getScrollX();
-	    int featureWidth = v.getMeasuredWidth();
-	    //TODO clean up this code
-	    int newPage = ((scrollX + (featureWidth/2))/featureWidth);
-	    currentPage = newPage;
-	    int scrollTo = currentPage*featureWidth;
-	    smoothScrollTo(scrollTo, 0);
-	    return true;
-	}
-	else{
 	    return false;
+	//     int scrollX = getScrollX();
+	//     int featureWidth = v.getMeasuredWidth();
+	//     //TODO clean up this code
+	//     int newPage = ((scrollX + (featureWidth/2))/featureWidth);
+	//     currentPage = newPage;
+	//     int scrollTo = currentPage*featureWidth;
+	//     smoothScrollTo(scrollTo, 0);
+	//     return true;
+	// }
 	}
+	return false;
     }
 
     void scrollRight() {
