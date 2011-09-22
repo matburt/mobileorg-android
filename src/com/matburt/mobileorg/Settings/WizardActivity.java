@@ -29,6 +29,7 @@ import com.matburt.mobileorg.Dropbox.*;
 import com.matburt.mobileorg.R;
 import com.dropbox.client.DropboxAPI;
 import java.util.ArrayList;
+//import java.util.Map.Entry;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 
@@ -198,11 +199,13 @@ public class WizardActivity extends Activity {
 	}
     }
 
+    //convience function
     void showToast(String msg) {
         Toast error = Toast.makeText(this, msg, Toast.LENGTH_LONG);
         error.show();
     }
 
+    //ditto
     void shake(View b) {
 	Animation shake = AnimationUtils
 	    .loadAnimation(this, R.anim.shake);
@@ -229,6 +232,14 @@ public class WizardActivity extends Activity {
 			progress.dismiss();
 			showToast("Logged in!");
 			loginButton.setEnabled(false);
+			ArrayList<DropboxAPI.Entry> contents 
+			    = dropbox.listDirectory("/");
+			String tmp="";
+			for (DropboxAPI.Entry ent:contents) {
+			    if ( ent.is_dir )
+			    tmp += ent.fileName() + " ";
+			}
+			showToast(tmp);
 			//setLoggedIn(true);		
 			//displayAccountInfo(mDropbox.accountInfo());
 		}
