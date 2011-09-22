@@ -5,8 +5,6 @@
    android:layout_height="wrap_content"
    android:orientation="horizontal">
   <include 
-     android:layout_width="wrap_content"
-     android:layout_height="wrap_content"
      layout="@layout/wizard_previous_button"/>
   <View 
      android:layout_width="wrap_content"
