@@ -39,7 +39,6 @@ public class PageFlipView extends HorizontalScrollView
 						   // next page button
 						   // clicks
     PreviousPageButtonListener previousPageButtonListener; // ditto
-    boolean[] rightFlipEnabled;
     int maxScrollX;
     int maxEnabledPage = -1;
     int currentPage = 0;
@@ -56,11 +55,10 @@ public class PageFlipView extends HorizontalScrollView
 	previousPageButtonListener = new PreviousPageButtonListener();
 	//see http://blog.velir.com/index.php/2010/11/17/android-snapping-horizontal-scroll/
 	//setup page swiping
-	//mGestureDetector = new GestureDetector(getContext(),
-	//					       new PageSwipeDetector());
+	mGestureDetector = new GestureDetector(getContext(),
+					       new PageSwipeDetector());
         setOnTouchListener(this);
     }
-
 
     //Make the child views the same size as the screen
     @Override
@@ -79,7 +77,6 @@ public class PageFlipView extends HorizontalScrollView
 	Log.d(TAG,"Container count: "+container.getChildCount());
 	//add onclick listeners for next/prev buttons
 	for(int i=0; i<container.getChildCount(); i++) {
-	    //get the pageview container
 	    View pageContainer = (View) container.getChildAt(i);
 	    //last page doesn't have a next button
 	    if ( i != container.getChildCount() - 1 )
@@ -89,28 +86,6 @@ public class PageFlipView extends HorizontalScrollView
 	    if ( i != 0 ) 
 		pageContainer.findViewById(R.id.wizard_previous_button)
 		    .setOnClickListener(previousPageButtonListener);
-	}
-	rightFlipEnabled = new boolean[getNumberOfPages()];
-    }
-
-    //disable next/prev buttons
-    public void disableAllNavButtons() {
-	if ( container != null ) {
-	    for(int i=0; i<container.getChildCount(); i++) {
-		//get the pageview container
-		View pageContainer = (View) container.getChildAt(i);
-		//last page doesn't have a next button
-		if ( i != container.getChildCount() - 1 )
-		    pageContainer.findViewById(R.id.wizard_next_button)
-			.setEnabled(false);
-		//first page doesn't have a previous button
-		if ( i != 0 )
-		    pageContainer.findViewById(R.id.wizard_previous_button)
-			.setEnabled(false);
-	    }
-	    for(int i=0; i<getNumberOfPages(); i++)
-		rightFlipEnabled[i] = false;
-	    maxScrollX = 0;
 	}
     }
 
@@ -127,7 +102,7 @@ public class PageFlipView extends HorizontalScrollView
 		    pageContainer.findViewById(R.id.wizard_next_button)
 			.setEnabled(false);
 	    }	    
-	//then user can't scroll past current page
+	//user can't scroll past current page
 	maxScrollX = page * getMeasuredWidth();
     }
 
@@ -143,12 +118,16 @@ public class PageFlipView extends HorizontalScrollView
 	if ( page != 0 )
 	    pageContainer.findViewById(R.id.wizard_previous_button)
 		.setEnabled(state);
-	rightFlipEnabled[ page ] = state;
     }
 
     //enable prev/next buttons for give page and allow scrolling
     //to next page
     public void enablePage(int page) {
+	if ( page == -1 ) { 
+	    maxScrollX = 0;
+	    maxEnabledPage = -1;
+	    return;
+	}
 	setNavButtonState(true, page);
 	maxScrollX = (page+1) * getMeasuredWidth();
 	maxEnabledPage = ( page > maxEnabledPage ) ?
@@ -170,12 +149,13 @@ public class PageFlipView extends HorizontalScrollView
 	post(new Runnable() {
 		@Override
 		    public void run() {
-		    enablePage(currentPage);
+		    enablePage(maxEnabledPage);
 		    scrollTo(currentPage*getMeasuredWidth(), 0);
 		}
             });
     }
 
+    //ditto
     public void saveCurrentPage() {
         SharedPreferences prefs = ((Activity) getContext()).getPreferences(0); 
     	SharedPreferences.Editor editor = prefs.edit();
@@ -184,88 +164,41 @@ public class PageFlipView extends HorizontalScrollView
 	editor.putInt("maxEnabledPage", maxEnabledPage);
         editor.commit();
     }
-
-    float oldPos;
-    boolean DRAG = false;
-
-    //Code for setting up the page swipes and scrolling
+    
+    //if scroll more than %25 of screen width, then automagically
+    //scroll to next page
     @Override
-	public boolean onTouch(View v, MotionEvent event) {
-	return false;
-	//If the user swipes
-	// if (mGestureDetector.onTouchEvent(event)) {
-	//     return true;
-	// }
-	//else 
-	// switch (event.getAction()) {
-	// // case MotionEvent.ACTION_DOWN:
-	// // case MotionEvent.ACTION_POINTER_DOWN:
-	// //     oldPos = (int) event.getX();
-	// //     Log.d(TAG, "DRAG=true" );
-	// //     DRAG = true;
-	// //     break;
-	// case MotionEvent.ACTION_MOVE:
-	//     if (DRAG) {
-	//     // 	if ( event.getX() - oldPos > 0 ) { // right scroll
-	//     // 	    if ( !rightFlipEnabled[ currentPage ] ) {
-	//     // 		Log.d(TAG,"ActionMove: Page swype disabled");
-	//     // 		 	return true;
-	//     // 	    }
-	//     // 	}		
-	//     // } else {
-	//     // 	oldPos = event.getX();
-	//     // 	Log.d(TAG, "DRAG=true" );
-	//     // 	DRAG = true;
-	//     // 	return true;
-	//     }
-	//     break;
-	// case MotionEvent.ACTION_UP:
-	// case MotionEvent.ACTION_POINTER_UP:
-	// case MotionEvent.ACTION_CANCEL:
-	//     DRAG=false;
-	//     // if ( !rightFlipEnabled[ currentPage ] ) {
-	//     // 	Log.d(TAG,"Page swype disabled");
-	//     // 	return true;
-	//     // }
-	//     break;
-	// //     int scrollX = getScrollX();
-	// //     int featureWidth = v.getMeasuredWidth();
-	// //     //TODO clean up this code
-	// //     int newPage = ((scrollX + (featureWidth/2))/featureWidth);
-	// //     currentPage = newPage;
-	// //     int scrollTo = currentPage*featureWidth;
-	// //     smoothScrollTo(scrollTo, 0);
-	// //     return true;
-	// // }
-	// }
-	// return false;
+    	public boolean onTouch(View v, MotionEvent event) {
+	boolean actionUp=false;
+    	//If the user swipes
+    	if (mGestureDetector.onTouchEvent(event)) return true;
+	//else
+    	switch (event.getAction()) {
+    	case MotionEvent.ACTION_UP:
+    	case MotionEvent.ACTION_POINTER_UP:
+    	case MotionEvent.ACTION_CANCEL:
+    	    int scrollX = getScrollX();
+    	    int featureWidth = getMeasuredWidth();
+    	    //if scroll more than %25 of width, then go to next page
+    	    currentPage = ((scrollX + (featureWidth/4*3))/featureWidth);
+    	    Log.d(TAG,"scrollX: "+scrollX+" featureWidth: "+(featureWidth/4*3)
+    	     	  +" page: "+currentPage);
+    	    int scrollTo = currentPage*featureWidth;
+    	    smoothScrollTo(scrollTo, 0);
+	    //if you don't return true, a child view will interfere
+	    //with the scrolling
+	    actionUp=true;
+    	    break;
+    	default: break;
+    	}
+        return actionUp;
     }
 
-    void scrollRight() {
-	hideKeyboard();
-	int featureWidth = getMeasuredWidth();
-	currentPage = (currentPage < (container.getChildCount() - 1)) ?
-	    currentPage + 1 : container.getChildCount() -1;
-	smoothScrollTo(currentPage*featureWidth, 0);
-	//unfocus login boxes
-	View selectedBox = findFocus();
-	if (selectedBox != null) selectedBox.clearFocus();
-     }
-
-    void scrollLeft() {
-	hideKeyboard();
-	int featureWidth = getMeasuredWidth();
-	currentPage = (currentPage > 0) ? 
-	    currentPage - 1 : 0;
-	smoothScrollTo(currentPage*featureWidth, 0);
-	//unfocus login boxes
-	View selectedBox = findFocus();
-	if (selectedBox != null) selectedBox.clearFocus();
-    }
-
+    //Basically, keep HorizontalScrollView from scrolling past current
+    //page, until it's OK to do so (ex: user puts password)
     @Override
-	public void onScrollChanged (int l, int t, int oldl, int oldt) {
-	Log.d(TAG,"scroll: "+l+", "+oldl+" maxscroll: "+maxScrollX);
+	public void onScrollChanged(int l, int t, int oldl, int oldt) {
+	//Log.d(TAG,"scroll: "+l+", "+oldl+" maxscroll: "+maxScrollX);
 	if ( l > maxScrollX ) { 
 	    //if trying to scroll past maximum allowed, then snap back
 	    scrollTo(oldl,0);
@@ -274,14 +207,6 @@ public class PageFlipView extends HorizontalScrollView
 		--currentPage : currentPage;
 	}
 	else super.onScrollChanged(l,t,oldl,oldt);
-    }
-
-    //hide keyboard if showing    
-    void hideKeyboard() {
-	InputMethodManager imm = (InputMethodManager) 
-	    ((Activity)getContext())
-	    .getSystemService(Context.INPUT_METHOD_SERVICE);
-	imm.hideSoftInputFromWindow(getWindowToken(), 0);
     }
 
     class NextPageButtonListener implements View.OnClickListener {
@@ -298,33 +223,64 @@ public class PageFlipView extends HorizontalScrollView
 	}
     }
 
+    //hide keyboard if showing    
+    void hideKeyboard() {
+	InputMethodManager imm = (InputMethodManager) 
+	    ((Activity)getContext())
+	    .getSystemService(Context.INPUT_METHOD_SERVICE);
+	imm.hideSoftInputFromWindow(getWindowToken(), 0);
+    }
+
+    void scrollRight() {
+	hideKeyboard();
+	//unfocus login boxes
+	View selectedBox = findFocus();
+	if (selectedBox != null) selectedBox.clearFocus();
+	//scroll
+	int featureWidth = getMeasuredWidth();
+	currentPage = (currentPage < (container.getChildCount() - 1)) ?
+	    currentPage + 1 : container.getChildCount() - 1;
+	smoothScrollTo(currentPage*featureWidth, 0);
+
+     }
+
+    void scrollLeft() {
+	hideKeyboard();
+	//unfocus login boxes
+	View selectedBox = findFocus();
+	if (selectedBox != null) selectedBox.clearFocus();
+	//scroll
+	int featureWidth = getMeasuredWidth();
+	currentPage = (currentPage > 0) ? 
+	    currentPage - 1 : 0;
+	smoothScrollTo(currentPage*featureWidth, 0);
+    }
+
     class PageSwipeDetector extends SimpleOnGestureListener {
         @Override
 	    public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-            try {
-		Log.d(TAG,"velocity:"+String.valueOf(velocityX)+
-		      " activeFeature:"+String.valueOf(currentPage)+
-		      " childCount:"+String.valueOf(container.getChildCount())+
-		      " featureWidth:"+String.valueOf(getMeasuredWidth()));
+            //try {
+		// Log.d(TAG,"velocity:"+String.valueOf(velocityX)+
+		//       " activeFeature:"+String.valueOf(currentPage)+
+		//       " childCount:"+String.valueOf(container.getChildCount())+
+		//       " featureWidth:"+String.valueOf(getMeasuredWidth()));
                 //right to left
-                if(e1.getX() - e2.getX() > SWIPE_MIN_DISTANCE
+                //if(e1.getX() - e2.getX() > SWIPE_MIN_DISTANCE
+		if( velocityX < 0
 		   && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
-		    if ( !rightFlipEnabled[ currentPage ] ) {
-			Log.d(TAG,"Page swype disabled");
-			return true;
-		    }
                     scrollRight();
 		    return true;
                 }
                 //left to right
-                else if (e2.getX() - e1.getX() > SWIPE_MIN_DISTANCE 
-			 && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
+		//else if (e2.getX() - e1.getX() > SWIPE_MIN_DISTANCE 
+		else if ( velocityX > 0
+			  && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
 		    scrollLeft();
                     return true;
                 }
-            } catch (Exception e) {
-		Log.e(TAG, "There was an error processing the Fling event:" + e.getMessage());
-            }
+            // } catch (Exception e) {
+	    // 	Log.e(TAG, "There was an error processing the Fling event:" + e.getMessage());
+            // }
             return false;
         }
 
