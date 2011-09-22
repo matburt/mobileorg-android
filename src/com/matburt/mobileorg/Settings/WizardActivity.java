@@ -83,8 +83,8 @@ public class WizardActivity extends Activity {
 	progress = new ProgressDialog(this);
         progress.setMessage("Please wait...");
         progress.setTitle("Signing in");
-	//disable all page swypes
-	wizard.disableAllNavButtons();
+	//when wizard first starts can't go to next page
+	wizard.disableAllNextActions(0);
     }
 
     /**
@@ -123,8 +123,8 @@ public class WizardActivity extends Activity {
 	    else if ( checkedId == syncSdCard)
 		editor.putString("syncSource", "sdcard");
 	    editor.commit();
-	    //unfreeze first page
-	    wizard.setNavButtonState( true, 0 );
+	    //allow scrolling to next page
+	    wizard.enablePage( 0 );
 	}
     }
     

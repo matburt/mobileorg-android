@@ -35,12 +35,13 @@ public class PageFlipView extends HorizontalScrollView
     static final int SWIPE_THRESHOLD_VELOCITY = 50;
     GestureDetector mGestureDetector;
     WideLinearLayout container;
-    NextPageListener nextPageListener; // for handling next page
-				       // button clicks
-    PreviousPageListener previousPageListener; // for handling
-					       // previous page button
-					       // clicks
+    NextPageButtonListener nextPageButtonListener; // for handling
+						   // next page button
+						   // clicks
+    PreviousPageButtonListener previousPageButtonListener; // ditto
     boolean[] rightFlipEnabled;
+    int maxScrollX;
+    int maxEnabledPage = -1;
     int currentPage = 0;
     int screenWidth;
 
@@ -50,32 +51,28 @@ public class PageFlipView extends HorizontalScrollView
 
     public PageFlipView(Context context, AttributeSet attrs) {
 	super(context, attrs);
-	//setup page flips
-	nextPageListener = new NextPageListener();
-	previousPageListener = new PreviousPageListener();
+	//setup page flips for next/prev buttons
+	nextPageButtonListener = new NextPageButtonListener();
+	previousPageButtonListener = new PreviousPageButtonListener();
 	//see http://blog.velir.com/index.php/2010/11/17/android-snapping-horizontal-scroll/
+	//setup page swiping
 	//mGestureDetector = new GestureDetector(getContext(),
 	//					       new PageSwipeDetector());
         setOnTouchListener(this);
     }
 
 
-    //This is the code for making the child views the same size as the
-    //screen
+    //Make the child views the same size as the screen
     @Override
 	protected void onMeasure(int w, int h) {
 	int width = MeasureSpec.getSize(w);
-	int height = MeasureSpec.getSize(h);
-	//Log.d(TAG, "Setting screen width to " + width);
-	//Log.d(TAG, "Setting screen height to " + height);
-	int ws = MeasureSpec.makeMeasureSpec(width,MeasureSpec.EXACTLY);
-	int hs = MeasureSpec.makeMeasureSpec(height,MeasureSpec.EXACTLY);
-	// Also tell screen width to our only child
+	// Tell screen width to our only child
 	container.setWidth(width);
 	//default to w and h given in XML
 	super.onMeasure(w,h);
     }
 
+    //stuff we can do only after view is constructed
     @Override
 	public void onFinishInflate() {
 	container = (WideLinearLayout) findViewById(R.id.wizard_container);
@@ -87,15 +84,16 @@ public class PageFlipView extends HorizontalScrollView
 	    //last page doesn't have a next button
 	    if ( i != container.getChildCount() - 1 )
 		pageContainer.findViewById(R.id.wizard_next_button)
-		    .setOnClickListener(nextPageListener);
+		    .setOnClickListener(nextPageButtonListener);
 	    //first page doesn't have a previous button
 	    if ( i != 0 ) 
 		pageContainer.findViewById(R.id.wizard_previous_button)
-		    .setOnClickListener(previousPageListener);
+		    .setOnClickListener(previousPageButtonListener);
 	}
 	rightFlipEnabled = new boolean[getNumberOfPages()];
     }
 
+    //disable next/prev buttons
     public void disableAllNavButtons() {
 	if ( container != null ) {
 	    for(int i=0; i<container.getChildCount(); i++) {
@@ -112,9 +110,28 @@ public class PageFlipView extends HorizontalScrollView
 	    }
 	    for(int i=0; i<getNumberOfPages(); i++)
 		rightFlipEnabled[i] = false;
+	    maxScrollX = 0;
 	}
     }
 
+    //starting from given page, disable all next buttons, and disable
+    //swiping to the right.
+    public void disableAllNextActions(int page) {
+	//first disable next buttons
+	if ( container != null )
+	    for(int i=page; i<container.getChildCount(); i++) {
+		//get the pageview container
+		View pageContainer = (View) container.getChildAt(i);
+		//last page doesn't have a next button
+		if ( i != container.getChildCount() - 1 )
+		    pageContainer.findViewById(R.id.wizard_next_button)
+			.setEnabled(false);
+	    }	    
+	//then user can't scroll past current page
+	maxScrollX = page * getMeasuredWidth();
+    }
+
+    //disable/enable all buttons for given page
     public void setNavButtonState(boolean state, int page) { 
 	//get the pageview container
 	View pageContainer = (View) container.getChildAt(page);
@@ -128,24 +145,34 @@ public class PageFlipView extends HorizontalScrollView
 		.setEnabled(state);
 	rightFlipEnabled[ page ] = state;
     }
-	
-    public int getNumberOfPages() { return container.getChildCount(); }
 
-    //public void setEditBoxes(ArrayList e) { editBoxes = e; }
+    //enable prev/next buttons for give page and allow scrolling
+    //to next page
+    public void enablePage(int page) {
+	setNavButtonState(true, page);
+	maxScrollX = (page+1) * getMeasuredWidth();
+	maxEnabledPage = ( page > maxEnabledPage ) ?
+	    page : maxEnabledPage;
+    }
+
+    public int getNumberOfPages() { return container.getChildCount(); }
 
     public int getCurrentPage() { return currentPage; }
 
     public void setCurrentPage(int i) { currentPage = i; }
 
+    //used for orientation change
     public void restoreLastPage() {
         SharedPreferences prefs = ((Activity) getContext()).getPreferences(0); 
         currentPage = prefs.getInt("currentPage", 0);
+	maxEnabledPage = prefs.getInt("maxEnabledPage", -1);
 	//scroll to last loaded page
 	post(new Runnable() {
 		@Override
 		    public void run() {
+		    enablePage(currentPage);
 		    scrollTo(currentPage*getMeasuredWidth(), 0);
-                }
+		}
             });
     }
 
@@ -154,6 +181,7 @@ public class PageFlipView extends HorizontalScrollView
     	SharedPreferences.Editor editor = prefs.edit();
 	//save current page
         editor.putInt("currentPage", getCurrentPage());
+	editor.putInt("maxEnabledPage", maxEnabledPage);
         editor.commit();
     }
 
@@ -163,53 +191,54 @@ public class PageFlipView extends HorizontalScrollView
     //Code for setting up the page swipes and scrolling
     @Override
 	public boolean onTouch(View v, MotionEvent event) {
+	return false;
 	//If the user swipes
 	// if (mGestureDetector.onTouchEvent(event)) {
 	//     return true;
 	// }
 	//else 
-	switch (event.getAction()) {
-	// case MotionEvent.ACTION_DOWN:
-	// case MotionEvent.ACTION_POINTER_DOWN:
-	//     oldPos = (int) event.getX();
-	//     Log.d(TAG, "DRAG=true" );
-	//     DRAG = true;
+	// switch (event.getAction()) {
+	// // case MotionEvent.ACTION_DOWN:
+	// // case MotionEvent.ACTION_POINTER_DOWN:
+	// //     oldPos = (int) event.getX();
+	// //     Log.d(TAG, "DRAG=true" );
+	// //     DRAG = true;
+	// //     break;
+	// case MotionEvent.ACTION_MOVE:
+	//     if (DRAG) {
+	//     // 	if ( event.getX() - oldPos > 0 ) { // right scroll
+	//     // 	    if ( !rightFlipEnabled[ currentPage ] ) {
+	//     // 		Log.d(TAG,"ActionMove: Page swype disabled");
+	//     // 		 	return true;
+	//     // 	    }
+	//     // 	}		
+	//     // } else {
+	//     // 	oldPos = event.getX();
+	//     // 	Log.d(TAG, "DRAG=true" );
+	//     // 	DRAG = true;
+	//     // 	return true;
+	//     }
 	//     break;
-	case MotionEvent.ACTION_MOVE:
-	    if (DRAG) {
-	    // 	if ( event.getX() - oldPos > 0 ) { // right scroll
-	    // 	    if ( !rightFlipEnabled[ currentPage ] ) {
-	    // 		Log.d(TAG,"ActionMove: Page swype disabled");
-	    // 		 	return true;
-	    // 	    }
-	    // 	}		
-	    // } else {
-	    // 	oldPos = event.getX();
-	    // 	Log.d(TAG, "DRAG=true" );
-	    // 	DRAG = true;
-	    // 	return true;
-	    }
-	    break;
-	case MotionEvent.ACTION_UP:
-	case MotionEvent.ACTION_POINTER_UP:
-	case MotionEvent.ACTION_CANCEL:
-	    DRAG=false;
-	    // if ( !rightFlipEnabled[ currentPage ] ) {
-	    // 	Log.d(TAG,"Page swype disabled");
-	    // 	return true;
-	    // }
-	    break;
-	//     int scrollX = getScrollX();
-	//     int featureWidth = v.getMeasuredWidth();
-	//     //TODO clean up this code
-	//     int newPage = ((scrollX + (featureWidth/2))/featureWidth);
-	//     currentPage = newPage;
-	//     int scrollTo = currentPage*featureWidth;
-	//     smoothScrollTo(scrollTo, 0);
-	//     return true;
+	// case MotionEvent.ACTION_UP:
+	// case MotionEvent.ACTION_POINTER_UP:
+	// case MotionEvent.ACTION_CANCEL:
+	//     DRAG=false;
+	//     // if ( !rightFlipEnabled[ currentPage ] ) {
+	//     // 	Log.d(TAG,"Page swype disabled");
+	//     // 	return true;
+	//     // }
+	//     break;
+	// //     int scrollX = getScrollX();
+	// //     int featureWidth = v.getMeasuredWidth();
+	// //     //TODO clean up this code
+	// //     int newPage = ((scrollX + (featureWidth/2))/featureWidth);
+	// //     currentPage = newPage;
+	// //     int scrollTo = currentPage*featureWidth;
+	// //     smoothScrollTo(scrollTo, 0);
+	// //     return true;
+	// // }
 	// }
-	}
-	return false;
+	// return false;
     }
 
     void scrollRight() {
@@ -236,14 +265,14 @@ public class PageFlipView extends HorizontalScrollView
 
     @Override
 	public void onScrollChanged (int l, int t, int oldl, int oldt) {
-	Log.d(TAG,"scroll: "+l+", "+oldl);
-	//if page flipping for current page is enabled, then scroll
-	if ( rightFlipEnabled[currentPage] )
-	    super.onScrollChanged(l,t,oldl,oldt);
-	//otherwise
-	else if ( l > oldl ) 
-	    if ( !rightFlipEnabled[ currentPage ] ) 
-		scrollTo(oldl,0);
+	Log.d(TAG,"scroll: "+l+", "+oldl+" maxscroll: "+maxScrollX);
+	if ( l > maxScrollX ) { 
+	    //if trying to scroll past maximum allowed, then snap back
+	    scrollTo(oldl,0);
+	    //recalculate current page if necessary
+	    currentPage = ( currentPage * getMeasuredWidth() == maxScrollX ) ?
+		--currentPage : currentPage;
+	}
 	else super.onScrollChanged(l,t,oldl,oldt);
     }
 
@@ -255,14 +284,14 @@ public class PageFlipView extends HorizontalScrollView
 	imm.hideSoftInputFromWindow(getWindowToken(), 0);
     }
 
-    class NextPageListener implements View.OnClickListener {
+    class NextPageButtonListener implements View.OnClickListener {
 	@Override
 	    public void onClick(View v) {
 	    scrollRight();
 	}
     }
 
-    class PreviousPageListener implements View.OnClickListener {
+    class PreviousPageButtonListener implements View.OnClickListener {
 	@Override
 	    public void onClick(View v) {
 	    scrollLeft();
