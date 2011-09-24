@@ -30,7 +30,7 @@
 		<category android:name="android.intent.category.HOME" />
 	  </intent-filter>
 	</receiver>
-    <activity android:name=".Gui.MobileOrgActivity"
+    <activity android:name=".Gui.OutlineActivity"
               android:label="MobileOrg">
       <intent-filter>
         <action android:name="android.intent.action.MAIN" />

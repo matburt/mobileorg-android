@@ -7,11 +7,14 @@ import java.util.List;
 import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageItemInfo;
 import android.content.pm.ResolveInfo;
 import android.os.Environment;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
+import com.matburt.mobileorg.Gui.OutlineActivity;
 import com.matburt.mobileorg.Parsing.EditNode;
 import com.matburt.mobileorg.Parsing.Node;
 
@@ -94,7 +97,30 @@ public class MobileOrgApplication extends Application {
         return thisEdits;
     }
 
-    public static String nodeSelectionStr(ArrayList<Integer> nodes) {
+    public boolean isSynchConfigured() {
+    	SharedPreferences appSettings = PreferenceManager
+		.getDefaultSharedPreferences(getBaseContext());
+    	
+		if (appSettings.getString("syncSource", "").equals("")
+				|| (appSettings.getString("syncSource", "").equals(
+						"webdav") && appSettings.getString("webUrl", "")
+						.equals(""))
+				|| (appSettings.getString("syncSource", "").equals(
+						"sdcard") && appSettings.getString(
+						"indexFilePath", "").equals("")))
+			return false;
+		else
+			return true;
+	}
+
+	public static ArrayList<Integer> copySelection(ArrayList<Integer> selection) {
+		if (selection == null)
+			return null;
+		else
+			return new ArrayList<Integer>(selection);
+	}
+
+	public static String nodeSelectionStr(ArrayList<Integer> nodes) {
 		if (nodes != null) {
 			String tmp = "";
 	
