@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 
 import android.app.Activity;
@@ -124,30 +123,9 @@ public class MobileOrgActivity extends ListActivity
 	}
 
 	private void runParser() {
-		HashMap<String, String> allOrgList = this.appdb.getOrgFiles();
-		if (allOrgList.isEmpty()) {
-			return;
-		}
-		String storageMode = this.getStorageLocation();
-		String userSynchro = this.appSettings.getString("syncSource", "");
-		String orgBasePath = "";
-
-		if (userSynchro.equals("sdcard")) {
-			String indexFile = this.appSettings.getString("indexFilePath", "");
-			File fIndexFile = new File(indexFile);
-			orgBasePath = fIndexFile.getParent() + "/";
-		} else {
-			orgBasePath = Environment.getExternalStorageDirectory()
-					.getAbsolutePath() + "/mobileorg/";
-		}
-
-		OrgFileParser ofp = new OrgFileParser(allOrgList, storageMode,
-				userSynchro, this.appdb, orgBasePath);
 		try {
-			ofp.parse();
-			this.appInst.rootNode = ofp.rootNode;
-			this.appInst.edits = ofp.parseEdits();
-			Collections.sort(this.appInst.rootNode.children, Node.comparator);
+			OrgFileParser ofp = new OrgFileParser(appSettings, appInst, appdb);
+			ofp.runParser(appSettings, appInst);
 		} catch (Throwable e) {
 			ErrorReporter.displayError(
 					this,
@@ -398,7 +376,8 @@ public class MobileOrgActivity extends ListActivity
 			
 			this.setListAdapter(new MobileOrgViewAdapter(this, this.appInst.rootNode,
 					this.appInst.nodeSelection, this.appInst.edits, this.appdb.getTodos()));
-		} else if (requestCode == Encryption.DECRYPT_MESSAGE) {
+		} 
+		else if (requestCode == Encryption.DECRYPT_MESSAGE) {
 			if (resultCode != Activity.RESULT_OK || data == null) {
 				this.appInst.popSelection();
 				return;
@@ -419,7 +398,7 @@ public class MobileOrgActivity extends ListActivity
 			String decryptedData = data
 					.getStringExtra(Encryption.EXTRA_DECRYPTED_MESSAGE);
 			OrgFileParser ofp = new OrgFileParser(appdb.getOrgFiles(),
-					getStorageLocation(), userSynchro, appdb, orgBasePath);
+					appSettings.getString("storageMode", ""), userSynchro, appdb, orgBasePath);
 
 			ofp.parse(thisNode, new BufferedReader(new StringReader(
 					decryptedData)));
@@ -498,7 +477,4 @@ public class MobileOrgActivity extends ListActivity
 		}
 	}
 
-	private String getStorageLocation() {
-		return this.appSettings.getString("storageMode", "");
-	}
 }

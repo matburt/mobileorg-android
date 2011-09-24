@@ -8,13 +8,16 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.EmptyStackException;
 import java.util.HashMap;
 import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.matburt.mobileorg.MobileOrgApplication;
 import android.content.ContentValues;
+import android.content.SharedPreferences;
 import android.os.Environment;
 import android.util.Log;
 
@@ -46,12 +49,47 @@ public class OrgFileParser {
                          String userSynchro,
                          MobileOrgDatabase appdb,
                          String orgBasePath) {
+    	this.orgPaths = orgpaths;
         this.appdb = appdb;
         this.storageMode = storageMode;
         this.userSynchro = userSynchro;
-        this.orgPaths = orgpaths;
         this.orgDir = orgBasePath;
     }
+    
+	public OrgFileParser(SharedPreferences appSettings,
+			MobileOrgApplication appInst, MobileOrgDatabase appdb) {
+		this.appdb = appdb;
+
+		HashMap<String, String> allOrgList = this.appdb.getOrgFiles();
+		if (allOrgList.isEmpty())
+			return;
+		this.orgPaths = allOrgList;
+
+		this.storageMode = appSettings.getString("storageMode", "");
+		this.userSynchro = appSettings.getString("syncSource", "");
+
+		String orgBasePath = "";
+
+		if (userSynchro.equals("sdcard")) {
+			String indexFile = appSettings.getString("indexFilePath", "");
+			File fIndexFile = new File(indexFile);
+			orgBasePath = fIndexFile.getParent() + "/";
+		} else {
+			orgBasePath = Environment.getExternalStorageDirectory()
+					.getAbsolutePath() + "/mobileorg/";
+		}
+
+		this.orgDir = orgBasePath;
+
+	}
+    
+	public void runParser(SharedPreferences appSettings,
+			MobileOrgApplication appInst) {
+		parse();
+		appInst.rootNode = rootNode;
+		appInst.edits = parseEdits();
+		Collections.sort(appInst.rootNode.children, Node.comparator);
+	}
     
     private Pattern prepareTitlePattern() {
     	if (this.titlePattern == null) {
@@ -443,4 +481,5 @@ public class OrgFileParser {
             return null;
         }
     }
+
 }
