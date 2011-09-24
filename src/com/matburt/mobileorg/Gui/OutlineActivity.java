@@ -51,7 +51,8 @@ public class OutlineActivity extends ListActivity
 	@SuppressWarnings("unused")
 	private static final String LT = "MobileOrg";
 
-	private static final int RUN_PARSER = 3;
+	private static final int RUNFOR_EXPAND = 1;
+	private static final int RUNFOR_PARSER = 3;
 	private int displayIndex;
 	private ProgressDialog syncDialog;
 	private MobileOrgDatabase appdb;
@@ -74,7 +75,7 @@ public class OutlineActivity extends ListActivity
 		registerForContextMenu(getListView());
 
 		if (!appInst.isSynchConfigured())
-			this.showSettings();
+			this.runShowSettings();
 
 		if (this.appSettings.getBoolean("doAutoSync", false)) {
 			Intent serviceIntent = new Intent();
@@ -154,25 +155,6 @@ public class OutlineActivity extends ListActivity
 		super.onDestroy();
 	}
 
-
-	@SuppressWarnings("unused")
-	private String generateTitle() {
-		String title = "";
-
-		if (this.appInst.nodeSelection != null) {
-			ArrayList<Integer> nodeSelectionBackup = new ArrayList<Integer>();
-			for (Integer item : this.appInst.nodeSelection)
-				nodeSelectionBackup.add(item);
-
-			while (nodeSelectionBackup.size() > 0) {
-				title = this.appInst.getNode(nodeSelectionBackup).nodeTitle + "$"
-						+ title;
-				nodeSelectionBackup.remove(nodeSelectionBackup.size() - 1);
-			}
-		}
-		return title;
-	}
-
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		MenuInflater inflater = getMenuInflater();
@@ -184,18 +166,18 @@ public class OutlineActivity extends ListActivity
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.menu_sync:
-			this.runSynchronizer();
+			runSynchronizer();
 			return true;
+		
 		case R.id.menu_settings:
-			return this.showSettings();
+			return runShowSettings();
+		
 		case R.id.menu_outline:
-			Intent dispIntent = new Intent(this, OutlineActivity.class);
-			dispIntent.putIntegerArrayListExtra("nodePath",
-					new ArrayList<Integer>());
-			startActivity(dispIntent);
+			runExpandSelection(new ArrayList<Integer>());
 			return true;
+		
 		case R.id.menu_capture:
-			return this.runCapture();
+			return runCapture();
 		}
 		return false;
 	}
@@ -205,88 +187,87 @@ public class OutlineActivity extends ListActivity
 			ContextMenuInfo menuInfo) {
 		super.onCreateContextMenu(menu, v, menuInfo);
 		MenuInflater inflater = getMenuInflater();
-	    inflater.inflate(R.menu.outline_contextmenu, menu);
-	    
+		inflater.inflate(R.menu.outline_contextmenu, menu);
+
+		// Prevents editing of file nodes.
 		if (this.appInst.nodeSelection == null)
-	    menu.findItem(R.id.contextmenu_edit).setVisible(false);
+			menu.findItem(R.id.contextmenu_edit).setVisible(false);
 	}
 
 	@Override
 	public boolean onContextItemSelected(MenuItem item) {
 		AdapterContextMenuInfo info = (AdapterContextMenuInfo) item
 				.getMenuInfo();
-		Node n = (Node) getListAdapter().getItem(info.position);
-
-		Intent intent = new Intent();
+		Node node = (Node) getListAdapter().getItem(info.position);
 
 		switch (item.getItemId()) {
 		case R.id.contextmenu_view:
-			intent.setClass(this, SimpleTextDisplay.class);
-			String txtValue = n.nodeTitle + "\n\n" + n.payload;
-			intent.putExtra("txtValue", txtValue);
-			intent.putExtra("nodeTitle", n.name);
+			runSimpleNodeDisplay(node);
 			break;
 
 		case R.id.contextmenu_edit:
-			intent.setClass(this, ViewNodeDetailsActivity.class);
-			intent.putExtra("actionMode", "edit");
-
-			this.appInst.pushSelection(info.position);
-			intent.putIntegerArrayListExtra("nodePath",
-					this.appInst.nodeSelection);
+			runViewNodeDetails(node, info.position);
 			break;
 		}
-		startActivity(intent);
+
 		return false;
 	}
 
 	@Override
 	public void onListItemClick(ListView l, View v, int position, long id) {
-
 		this.appInst.pushSelection(position);
 		Node node = (Node) l.getItemAtPosition(position);
 
-		if (this.decryptNode(node))
+		if (node.encrypted && !node.parsed) {
+			decryptNode(node);
 			return;
-
+		}
+		
 		if (node.hasChildren()) {
-			expandSelection(this.appInst.nodeSelection);
+			runExpandSelection(this.appInst.nodeSelection);
 		} else {
-			displayIndex = this.appInst.lastIndex();
+			this.displayIndex = this.appInst.lastIndex();
 			this.appInst.popSelection();
 
 			if (node.isSimple()) {
-				Intent textIntent = new Intent(this, SimpleTextDisplay.class);
-				String docBuffer = node.name + "\n\n" + node.payload;
-
-				textIntent.putExtra("txtValue", docBuffer);
-				startActivity(textIntent);
+				runSimpleNodeDisplay(node);
 			} else {
-				Intent dispIntent = new Intent(this,
-						ViewNodeDetailsActivity.class);
-
-				dispIntent.putExtra("actionMode", "edit");
-				dispIntent.putIntegerArrayListExtra("nodePath",
-						this.appInst.nodeSelection);
-				this.appInst.pushSelection(position);
-				startActivity(dispIntent);
+				runViewNodeDetails(node, position);
 			}
 		}
 	}
-	private void expandSelection(ArrayList<Integer> selection) {
+	
+	private void runSimpleNodeDisplay(Node node) {
+		Intent textIntent = new Intent(this, SimpleTextDisplay.class);
+		String docBuffer = node.name + "\n\n" + node.payload;
+		textIntent.putExtra("txtValue", docBuffer);
+		startActivity(textIntent);
+	}
+	
+	private void runViewNodeDetails(Node node, int position) {
+		Intent dispIntent = new Intent(this,
+				ViewNodeDetailsActivity.class);
+		dispIntent.putExtra("actionMode", "edit");
+		dispIntent.putIntegerArrayListExtra("nodePath",
+				this.appInst.nodeSelection);
+		this.appInst.pushSelection(position);
+		startActivity(dispIntent);
+	}
+	
+	private void runExpandSelection(ArrayList<Integer> selection) {
 		Intent dispIntent = new Intent(this, OutlineActivity.class);
 		dispIntent.putIntegerArrayListExtra("nodePath", selection);
-		startActivityForResult(dispIntent, 1);
+		startActivityForResult(dispIntent, RUNFOR_EXPAND);
 	}
 	
 	private boolean runCapture() {
 		Intent captureIntent = new Intent(this, Capture.class);
 		captureIntent.putExtra("actionMode", "create");
-		startActivityForResult(captureIntent, RUN_PARSER);
+		startActivityForResult(captureIntent, RUNFOR_PARSER);
 		return true;
 	}
 	
-	private boolean showSettings() {
+	private boolean runShowSettings() {
 		Intent settingsIntent = new Intent(this, SettingsActivity.class);
 		startActivity(settingsIntent);
 		return true;
@@ -294,39 +275,75 @@ public class OutlineActivity extends ListActivity
 
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
-		if (requestCode == RUN_PARSER) {
+
+		switch (requestCode) {
+		case RUNFOR_PARSER:
 			this.runParser();
-		} 
-		else if (requestCode == Encryption.DECRYPT_MESSAGE) {
+			break;
+
+		case Encryption.DECRYPT_MESSAGE:
 			if (resultCode != Activity.RESULT_OK || data == null) {
 				this.appInst.popSelection();
 				return;
 			}
 
-			Node thisNode = this.appInst.getSelectedNode();
-			String userSynchro = this.appSettings.getString("syncSource", "");
-			String orgBasePath = "";
-			if (userSynchro.equals("sdcard")) {
-				String indexFile = this.appSettings.getString("indexFilePath",
-						"");
-				File fIndexFile = new File(indexFile);
-				orgBasePath = fIndexFile.getParent() + "/";
-			} else {
-				orgBasePath = Environment.getExternalStorageDirectory()
-						.getAbsolutePath() + "/mobileorg/";
-			}
-			String decryptedData = data
-					.getStringExtra(Encryption.EXTRA_DECRYPTED_MESSAGE);
-			OrgFileParser ofp = new OrgFileParser(appdb.getOrgFiles(),
-					appSettings.getString("storageMode", ""), userSynchro, appdb, orgBasePath);
+			parseEncryptedNode(data);
+			runExpandSelection(this.appInst.nodeSelection);
+			break;
 
-			ofp.parse(thisNode, new BufferedReader(new StringReader(
-					decryptedData)));
-			expandSelection(this.appInst.nodeSelection);
-		} else {
+		default:
 			displayIndex = this.appInst.lastIndex();
 			this.appInst.popSelection();
+			break;
 		}
+	}
+
+	private void parseEncryptedNode(Intent data) {
+		Node thisNode = this.appInst.getSelectedNode();
+		String userSynchro = this.appSettings.getString("syncSource", "");
+		String orgBasePath = "";
+		if (userSynchro.equals("sdcard")) {
+			String indexFile = this.appSettings.getString("indexFilePath",
+					"");
+			File fIndexFile = new File(indexFile);
+			orgBasePath = fIndexFile.getParent() + "/";
+		} else {
+			orgBasePath = Environment.getExternalStorageDirectory()
+					.getAbsolutePath() + "/mobileorg/";
+		}
+		String decryptedData = data
+				.getStringExtra(Encryption.EXTRA_DECRYPTED_MESSAGE);
+		OrgFileParser ofp = new OrgFileParser(appdb.getOrgFiles(),
+				appSettings.getString("storageMode", ""), userSynchro, appdb, orgBasePath);
+
+		ofp.parse(thisNode, new BufferedReader(new StringReader(
+				decryptedData)));
+	}
+	
+	private void decryptNode(Node thisNode) {
+			// if suitable APG version is installed
+			if (Encryption.isAvailable((Context) this)) {
+				// retrieve the encrypted file data
+				String userSynchro = this.appSettings.getString("syncSource",
+						"");
+				String orgBasePath = "";
+				if (userSynchro.equals("sdcard")) {
+					String indexFile = this.appSettings.getString(
+							"indexFilePath", "");
+					File fIndexFile = new File(indexFile);
+					orgBasePath = fIndexFile.getParent() + "/";
+				} else {
+					orgBasePath = Environment.getExternalStorageDirectory()
+							.getAbsolutePath() + "/mobileorg/";
+				}
+
+				byte[] rawData = OrgFileParser.getRawFileData(orgBasePath,
+						thisNode.name);
+				// and send it to APG for decryption
+				Encryption.decrypt(this, rawData);
+			} else {
+				this.appInst.popSelection();
+			}
 	}
 
 	private void showNewUserWindow() {
@@ -346,7 +363,7 @@ public class OutlineActivity extends ListActivity
 				.findViewById(R.id.dialog_show_settings);
 		settingsButton.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
-				showSettings();
+				runShowSettings();
 			}
 		});
 		newSetupDialog.setTitle("Synchronize Org Files");
@@ -372,7 +389,7 @@ public class OutlineActivity extends ListActivity
 		} else if (userSynchro.equals("dropbox")) {
 			appSync = new DropboxSynchronizer(this);
 		} else {
-			this.showSettings();
+			this.runShowSettings();
 			return;
 		}
 
@@ -383,7 +400,7 @@ public class OutlineActivity extends ListActivity
 							"You have not fully configured the synchronizer.  Make sure you visit the 'Configure Synchronizer Settings' in the Settings menu",
 							Toast.LENGTH_LONG);
 			error.show();
-			this.showSettings();
+			this.runShowSettings();
 			return;
 		}
 
@@ -416,38 +433,4 @@ public class OutlineActivity extends ListActivity
 			this.onResume();
 		}
 	}
-	
-
-	private boolean decryptNode(Node thisNode) {
-		if (thisNode.encrypted && !thisNode.parsed) {
-			// if suitable APG version is installed
-			if (Encryption.isAvailable((Context) this)) {
-				// retrieve the encrypted file data
-				String userSynchro = this.appSettings.getString("syncSource",
-						"");
-				String orgBasePath = "";
-				if (userSynchro.equals("sdcard")) {
-					String indexFile = this.appSettings.getString(
-							"indexFilePath", "");
-					File fIndexFile = new File(indexFile);
-					orgBasePath = fIndexFile.getParent() + "/";
-				} else {
-					orgBasePath = Environment.getExternalStorageDirectory()
-							.getAbsolutePath() + "/mobileorg/";
-				}
-
-				byte[] rawData = OrgFileParser.getRawFileData(orgBasePath,
-						thisNode.name);
-				// and send it to APG for decryption
-				Encryption.decrypt(this, rawData);
-			} else {
-				this.appInst.popSelection();
-			}
-			return true;
-		}
-		return false;
-	}
-
-
-
 }
