@@ -395,6 +395,9 @@ public class MobileOrgActivity extends ListActivity
 		Log.d("MobileOrg" + this, "onActivityResult");
 		if (requestCode == RUN_PARSER) {
 			this.runParser();
+			
+			this.setListAdapter(new MobileOrgViewAdapter(this, this.appInst.rootNode,
+					this.appInst.nodeSelection, this.appInst.edits, this.appdb.getTodos()));
 		} else if (requestCode == Encryption.DECRYPT_MESSAGE) {
 			if (resultCode != Activity.RESULT_OK || data == null) {
 				this.appInst.popSelection();
@@ -481,7 +484,7 @@ public class MobileOrgActivity extends ListActivity
 	private boolean runCapture() {
 		Intent captureIntent = new Intent(this, Capture.class);
 		captureIntent.putExtra("actionMode", "create");
-		startActivityForResult(captureIntent, 3);
+		startActivityForResult(captureIntent, RUN_PARSER);
 		return true;
 	}
 
