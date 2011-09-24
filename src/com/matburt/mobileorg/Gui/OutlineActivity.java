@@ -49,16 +49,19 @@ public class OutlineActivity extends ListActivity
 	private static final int RUNFOR_EXPAND = 1;
 	private static final int RUNFOR_PARSER = 3;
 
-	private int displayIndex;
-	private ProgressDialog syncDialog;
+	MobileOrgApplication appInst;
 	private MobileOrgDatabase appdb;
-	private ReportableError syncError;
+	private SharedPreferences appSettings;
+
+	private int displayIndex;
+	private ArrayList<Integer> origSelection = null;
+	
 	private Dialog newSetupDialog;
 	private boolean newSetupDialog_shown = false;
-	public SharedPreferences appSettings;
+
 	final Handler syncHandler = new Handler();
-	private ArrayList<Integer> origSelection = null;
-	MobileOrgApplication appInst = null;
+	private ReportableError syncError;
+	private ProgressDialog syncDialog;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -353,15 +356,8 @@ public class OutlineActivity extends ListActivity
 		newSetupDialog.show();
 		this.newSetupDialog_shown = true;
 	}
-
 	
 
-	final Runnable syncUpdateResults = new Runnable() {
-		public void run() {
-			postSynchronize();
-		}
-	};
-	
 	private void runSynchronizer() {
 		String userSynchro = this.appSettings.getString("syncSource", "");
 		final Synchronizer appSync;
@@ -377,11 +373,9 @@ public class OutlineActivity extends ListActivity
 		}
 
 		if (!appSync.checkReady()) {
-			Toast error = Toast
-					.makeText(
-							(Context) this,
-							"You have not fully configured the synchronizer.  Make sure you visit the 'Configure Synchronizer Settings' in the Settings menu",
-							Toast.LENGTH_LONG);
+			Toast error = Toast.makeText((Context) this,
+					getString(R.string.error_synchronizer_not_configured),
+					Toast.LENGTH_LONG);
 			error.show();
 			this.runShowSettings();
 			return;
@@ -406,7 +400,13 @@ public class OutlineActivity extends ListActivity
 		syncDialog = ProgressDialog.show(this, "",
 				getString(R.string.sync_wait), true);
 	}
-
+	
+	final Runnable syncUpdateResults = new Runnable() {
+		public void run() {
+			postSynchronize();
+		}
+	};
+	
 	private void postSynchronize() {
 		syncDialog.dismiss();
 		if (this.syncError != null) {
