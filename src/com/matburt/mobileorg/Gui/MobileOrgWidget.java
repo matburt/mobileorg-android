@@ -1,8 +1,5 @@
 package com.matburt.mobileorg.Gui;
 
-import java.io.File;
-import java.util.HashMap;
-
 import android.app.Service;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
@@ -10,11 +7,11 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.Environment;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.widget.RemoteViews;
 
+import com.matburt.mobileorg.MobileOrgApplication;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Parsing.MobileOrgDatabase;
 import com.matburt.mobileorg.Parsing.Node;
@@ -51,27 +48,13 @@ public class MobileOrgWidget extends AppWidgetProvider {
         }
 
         public RemoteViews genUpdateDisplay(Context context) {
-            SharedPreferences appPrefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
             RemoteViews updateViews = null;
             updateViews = new RemoteViews(context.getPackageName(),
                                           R.layout.widget_mobileorg);
-            HashMap<String, String> allOrgList = this.appdb.getOrgFiles();
-            String storageMode = this.getStorageLocation(context);
-            String userSynchro = appPrefs.getString("syncSource","");
-            String orgBasePath = "";
-            if (userSynchro.equals("sdcard")) {
-                String indexFile = appPrefs.getString("indexFilePath","");
-                File fIndexFile = new File(indexFile);
-                orgBasePath = fIndexFile.getParent() + "/";
-            }
-            else {
-                orgBasePath = Environment.getExternalStorageDirectory().getAbsolutePath() +
-                              "/mobileorg/";
-            }
 
-            OrgFileParser ofp = new OrgFileParser(allOrgList,
-                                                  storageMode, userSynchro,
-                                                  this.appdb, orgBasePath);
+            MobileOrgApplication appInst = (MobileOrgApplication)this.getApplication();
+            OrgFileParser ofp = new OrgFileParser(getBaseContext(), appInst);
+
             ofp.parse();
             Node agendaNode = ofp.rootNode.findChildNode("agendas.org");
             if (agendaNode != null) {

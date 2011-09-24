@@ -17,8 +17,10 @@ import java.util.regex.Pattern;
 
 import com.matburt.mobileorg.MobileOrgApplication;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Environment;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 
@@ -43,22 +45,11 @@ public class OrgFileParser {
     public static final String LT = "MobileOrg";
     public String orgDir = Environment.getExternalStorageDirectory() +
                            "/mobileorg/";
-
-    public OrgFileParser(HashMap<String, String> orgpaths,
-                         String storageMode,
-                         String userSynchro,
-                         MobileOrgDatabase appdb,
-                         String orgBasePath) {
-    	this.orgPaths = orgpaths;
-        this.appdb = appdb;
-        this.storageMode = storageMode;
-        this.userSynchro = userSynchro;
-        this.orgDir = orgBasePath;
-    }
     
-	public OrgFileParser(SharedPreferences appSettings,
-			MobileOrgApplication appInst, MobileOrgDatabase appdb) {
-		this.appdb = appdb;
+	public OrgFileParser(Context context, MobileOrgApplication appInst) {
+		this.appdb = new MobileOrgDatabase(context);;
+		SharedPreferences appSettings = PreferenceManager
+				.getDefaultSharedPreferences(context);
 
 		HashMap<String, String> allOrgList = this.appdb.getOrgFiles();
 		if (allOrgList.isEmpty())

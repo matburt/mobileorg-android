@@ -48,11 +48,9 @@ import com.matburt.mobileorg.Synchronizers.WebDAVSynchronizer;
 
 public class OutlineActivity extends ListActivity
 {
-	@SuppressWarnings("unused")
-	private static final String LT = "MobileOrg";
-
 	private static final int RUNFOR_EXPAND = 1;
 	private static final int RUNFOR_PARSER = 3;
+
 	private int displayIndex;
 	private ProgressDialog syncDialog;
 	private MobileOrgDatabase appdb;
@@ -130,7 +128,7 @@ public class OutlineActivity extends ListActivity
 	 */
 	private void runParser() {
 		try {
-			OrgFileParser ofp = new OrgFileParser(appSettings, appInst, appdb);
+			OrgFileParser ofp = new OrgFileParser(getBaseContext(), appInst);
 			ofp.runParser(appSettings, appInst);
 		} catch (Throwable e) {
 			ErrorReporter.displayError(
@@ -299,22 +297,11 @@ public class OutlineActivity extends ListActivity
 	}
 
 	private void parseEncryptedNode(Intent data) {
-		Node thisNode = this.appInst.getSelectedNode();
-		String userSynchro = this.appSettings.getString("syncSource", "");
-		String orgBasePath = "";
-		if (userSynchro.equals("sdcard")) {
-			String indexFile = this.appSettings.getString("indexFilePath",
-					"");
-			File fIndexFile = new File(indexFile);
-			orgBasePath = fIndexFile.getParent() + "/";
-		} else {
-			orgBasePath = Environment.getExternalStorageDirectory()
-					.getAbsolutePath() + "/mobileorg/";
-		}
+		OrgFileParser ofp = new OrgFileParser(getBaseContext(), appInst);
+
 		String decryptedData = data
 				.getStringExtra(Encryption.EXTRA_DECRYPTED_MESSAGE);
-		OrgFileParser ofp = new OrgFileParser(appdb.getOrgFiles(),
-				appSettings.getString("storageMode", ""), userSynchro, appdb, orgBasePath);
+		Node thisNode = this.appInst.getSelectedNode();
 
 		ofp.parse(thisNode, new BufferedReader(new StringReader(
 				decryptedData)));

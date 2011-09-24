@@ -14,7 +14,6 @@ import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
-import com.matburt.mobileorg.Gui.OutlineActivity;
 import com.matburt.mobileorg.Parsing.EditNode;
 import com.matburt.mobileorg.Parsing.Node;
 

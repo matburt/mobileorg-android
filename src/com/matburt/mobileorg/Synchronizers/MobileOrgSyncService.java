@@ -1,17 +1,13 @@
 package com.matburt.mobileorg.Synchronizers;
 
-import java.io.File;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.Environment;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -19,7 +15,6 @@ import android.util.Log;
 import com.matburt.mobileorg.MobileOrgApplication;
 import com.matburt.mobileorg.Error.ErrorReporter;
 import com.matburt.mobileorg.Error.ReportableError;
-import com.matburt.mobileorg.Parsing.MobileOrgDatabase;
 import com.matburt.mobileorg.Parsing.Node;
 import com.matburt.mobileorg.Parsing.OrgFileParser;
 
@@ -155,27 +150,8 @@ public class MobileOrgSyncService extends Service implements SharedPreferences.O
 
 	public void runParser() {
         MobileOrgApplication appInst = (MobileOrgApplication)this.getApplication();
-		MobileOrgDatabase appdb = new MobileOrgDatabase((Context)this);
-        HashMap<String, String> allOrgList = appdb.getOrgFiles();
-        String storageMode = this.appSettings.getString("storageMode", "");
-        String userSynchro = this.appSettings.getString("syncSource","");
-        String orgBasePath = "";
 
-        if (userSynchro.equals("sdcard")) {
-            String indexFile = this.appSettings.getString("indexFilePath","");
-            File fIndexFile = new File(indexFile);
-            orgBasePath = fIndexFile.getParent() + "/";
-        }
-        else {
-            orgBasePath = Environment.getExternalStorageDirectory().getAbsolutePath() +
-                          "/mobileorg/";
-        }
-
-        OrgFileParser ofp = new OrgFileParser(allOrgList,
-                                              storageMode,
-                                              userSynchro,
-                                              appdb,
-                                              orgBasePath);
+        OrgFileParser ofp = new OrgFileParser(getBaseContext(), appInst);
         try {
         	ofp.parse();
         	appInst.rootNode = ofp.rootNode;
@@ -185,7 +161,5 @@ public class MobileOrgSyncService extends Service implements SharedPreferences.O
         catch(Throwable e) {
         	ErrorReporter.displayError(this, "An error occurred during parsing: " + e.toString());
         }
-
-		appdb.close();
     }
 }
