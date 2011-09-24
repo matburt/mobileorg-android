@@ -299,10 +299,9 @@ public class OutlineActivity extends ListActivity
 	}
 
 	/**
-	 * This calls startActivityForResult() with
-	 * {@link Encryption.DECRYPT_MESSAGE}. The result is handled by
-	 * onActivityResult() in this class, which calls a function to parse the
-	 * resulting plain text file.
+	 * This calls startActivityForResult() with Encryption.DECRYPT_MESSAGE. The
+	 * result is handled by onActivityResult() in this class, which calls a
+	 * function to parse the resulting plain text file.
 	 */
 	private void decryptNode(Node node) {
 		// if suitable APG version is installed

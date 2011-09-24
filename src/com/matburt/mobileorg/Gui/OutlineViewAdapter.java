@@ -27,11 +27,11 @@ class OutlineViewAdapter extends BaseAdapter {
 	private Context context;
 	private LayoutInflater lInflator;
 
-	public OutlineViewAdapter(Context context, Node ndx,
+	public OutlineViewAdapter(Context context, Node node,
 			ArrayList<Integer> selection, ArrayList<EditNode> edits,
 			ArrayList<HashMap<String, Integer>> allTodos) {
 
-		this.topNode = ndx;
+		this.topNode = node;
 		this.lInflator = LayoutInflater.from(context);
 		this.edits = edits;
 		this.context = context;

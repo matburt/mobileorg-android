@@ -110,43 +110,38 @@ public class MobileOrgSyncService extends Service implements SharedPreferences.O
 	}
 
 	public void runSynchronizer() {
-        String userSynchro = this.appSettings.getString("syncSource","");
-        final Synchronizer appSync;
-        if (userSynchro.equals("webdav")) {
-            appSync = new WebDAVSynchronizer(this);
-        }
-        else if (userSynchro.equals("sdcard")) {
-            appSync = new SDCardSynchronizer(this);
-        }
-        else if (userSynchro.equals("dropbox")) {
-            appSync = new DropboxSynchronizer(this);
-        }
-        else {
-            return;
-        }
+		String userSynchro = this.appSettings.getString("syncSource", "");
+		final Synchronizer appSync;
+		if (userSynchro.equals("webdav")) {
+			appSync = new WebDAVSynchronizer(this);
+		} else if (userSynchro.equals("sdcard")) {
+			appSync = new SDCardSynchronizer(this);
+		} else if (userSynchro.equals("dropbox")) {
+			appSync = new DropboxSynchronizer(this);
+		} else {
+			return;
+		}
 
-        if (!appSync.checkReady()) {
-            return;
-        }
+		if (!appSync.checkReady()) {
+			return;
+		}
 
-        Thread syncThread = new Thread() {
-                public void run() {
-                	try {
-                		appSync.pull();
-	                    appSync.push();
-                	}
-                	catch(ReportableError e) {
-                	}
-                    finally {
-                        appSync.close();
-                    }
-					
-					runParser();
+		Thread syncThread = new Thread() {
+			public void run() {
+				try {
+					appSync.pull();
+					appSync.push();
+				} catch (ReportableError e) {
+				} finally {
+					appSync.close();
 				}
-			};
-        syncThread.start();
+
+				runParser();
+			}
+		};
+		syncThread.start();
 		this.lastSyncDate = new Date();
-    }
+	}
 
 	public void runParser() {
         MobileOrgApplication appInst = (MobileOrgApplication)this.getApplication();
