@@ -1,7 +1,6 @@
 package com.matburt.mobileorg.Gui;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,7 +13,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -108,7 +106,7 @@ public class OutlineActivity extends ListActivity
 		}
 	}
 		
-	/*
+	/**
 	 * Refreshes the outline display. Should be called when the underlying 
 	 * data has been updated.
 	 */
@@ -122,7 +120,7 @@ public class OutlineActivity extends ListActivity
 		getListView().setSelection(displayIndex);
 	}
 	
-	/*
+	/**
 	 * Runs the parser and refreshes outline by calling refreshDisplay().
 	 * If parsing didn't result in any files, display a newSetup dialog.
 	 */
@@ -272,66 +270,64 @@ public class OutlineActivity extends ListActivity
 	}
 
 	@Override
-	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+	public void onActivityResult(int requestCode, int resultCode, Intent intent) {
 
 		switch (requestCode) {
+
+		case RUNFOR_EXPAND:
+			displayIndex = this.appInst.lastIndex();
+			this.appInst.popSelection();
+			break;
+
 		case RUNFOR_PARSER:
 			this.runParser();
 			break;
 
 		case Encryption.DECRYPT_MESSAGE:
-			if (resultCode != Activity.RESULT_OK || data == null) {
+			if (resultCode != Activity.RESULT_OK || intent == null) {
 				this.appInst.popSelection();
 				return;
 			}
 
-			parseEncryptedNode(data);
+			parseEncryptedNode(intent);
 			runExpandSelection(this.appInst.nodeSelection);
-			break;
-
-		default:
-			displayIndex = this.appInst.lastIndex();
-			this.appInst.popSelection();
 			break;
 		}
 	}
 
+	/**
+	 * This calls startActivityForResult() with
+	 * {@link Encryption.DECRYPT_MESSAGE}. The result is handled by
+	 * onActivityResult() in this class, which calls a function to parse the
+	 * resulting plain text file.
+	 */
+	private void decryptNode(Node node) {
+		// if suitable APG version is installed
+		if (Encryption.isAvailable((Context) this)) {
+			// retrieve the encrypted file data
+			OrgFileParser ofp = new OrgFileParser(getBaseContext(), appInst);
+			byte[] rawData = ofp.getRawFileData(node.name);
+			// and send it to APG for decryption
+			Encryption.decrypt(this, rawData);
+		} else {
+			this.appInst.popSelection();
+		}
+	}
+	
+	/**
+	 * This function is called with the results of {@link #decryptNode}.
+	 */
 	private void parseEncryptedNode(Intent data) {
 		OrgFileParser ofp = new OrgFileParser(getBaseContext(), appInst);
+		Node node = this.appInst.getSelectedNode();
 
 		String decryptedData = data
 				.getStringExtra(Encryption.EXTRA_DECRYPTED_MESSAGE);
-		Node thisNode = this.appInst.getSelectedNode();
 
-		ofp.parse(thisNode, new BufferedReader(new StringReader(
+		ofp.parse(node, new BufferedReader(new StringReader(
 				decryptedData)));
 	}
-	
-	private void decryptNode(Node thisNode) {
-			// if suitable APG version is installed
-			if (Encryption.isAvailable((Context) this)) {
-				// retrieve the encrypted file data
-				String userSynchro = this.appSettings.getString("syncSource",
-						"");
-				String orgBasePath = "";
-				if (userSynchro.equals("sdcard")) {
-					String indexFile = this.appSettings.getString(
-							"indexFilePath", "");
-					File fIndexFile = new File(indexFile);
-					orgBasePath = fIndexFile.getParent() + "/";
-				} else {
-					orgBasePath = Environment.getExternalStorageDirectory()
-							.getAbsolutePath() + "/mobileorg/";
-				}
 
-				byte[] rawData = OrgFileParser.getRawFileData(orgBasePath,
-						thisNode.name);
-				// and send it to APG for decryption
-				Encryption.decrypt(this, rawData);
-			} else {
-				this.appInst.popSelection();
-			}
-	}
 
 	private void showNewUserWindow() {
 		if (this.newSetupDialog_shown) {

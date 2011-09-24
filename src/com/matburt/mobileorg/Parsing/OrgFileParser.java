@@ -448,10 +448,10 @@ public class OrgFileParser {
         return breader;
     }
 
-    public static byte[] getRawFileData(String baseDir, String filename)
+    public byte[] getRawFileData(String filename)
     {
         try {
-            File file = new File(baseDir + filename);
+            File file = new File(this.orgDir + filename);
             FileInputStream is = new FileInputStream(file);
             byte[] buffer = new byte[(int)file.length()];
             int offset = 0;
