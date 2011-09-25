@@ -38,24 +38,24 @@ public class EditNodeActivity extends Activity {
 		setContentView(R.layout.editnode);
 
 		this.mTitle = (EditText) this.findViewById(R.id.title);
-		this.mBody = (TextView) this.findViewById(R.id.body);
 		this.mPriority = (Spinner) this.findViewById(R.id.priority);
 		this.mTodoState = (Spinner) this.findViewById(R.id.todo_state);
 		this.mTags = (EditText) this.findViewById(R.id.tags);
 
+		this.mBody = (TextView) this.findViewById(R.id.body);
+		mBody.setOnClickListener(editBodyListener);
+		
 		Intent txtIntent = getIntent();
 		this.mNodePath = txtIntent.getIntegerArrayListExtra("nodePath");
 		this.actionMode = txtIntent.getStringExtra("actionMode");
 			
 		this.mOrgDb = new MobileOrgDatabase(this);
-		this.populateDisplay();
+		populateDisplay();
 		
-		Button button = (Button) this
-				.findViewById(R.id.cancel);
+		Button button = (Button) this.findViewById(R.id.cancel);
 		button.setOnClickListener(cancelListener);
 		button = (Button) this.findViewById(R.id.save);
 		button.setOnClickListener(saveNodeListener);		
-		mBody.setOnClickListener(editBodyListener);
 	}
 
 	private void populateDisplay() {
