@@ -11,7 +11,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 
-public class Encryption
+public class NodeEncryption
 {
     public static final String DECRYPT_AND_RETURN = "org.thialfihar.android.apg.intent.DECRYPT_AND_RETURN";
     public static final int DECRYPT_MESSAGE = 0x21070001;
@@ -30,7 +30,7 @@ public class Encryption
 		
 		Intent intent = new Intent(DECRYPT_AND_RETURN);
 		intent.setType("text/plain");
-		intent.putExtra(Encryption.EXTRA_DATA, data);
+		intent.putExtra(NodeEncryption.EXTRA_DATA, data);
 
 		try {
 			activity.startActivityForResult(intent, DECRYPT_MESSAGE);

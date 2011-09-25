@@ -79,18 +79,22 @@ public class MobileOrgApplication extends Application {
     }
     
     public ArrayList<EditNode> findEdits(String nodeId) {
+    	return findEdits(nodeId, this.edits);
+    }
+    
+    public static ArrayList<EditNode> findEdits(String nodeId, ArrayList<EditNode> edits) {
         ArrayList<EditNode> thisEdits = new ArrayList<EditNode>();
-        if (this.edits == null)
+        if (edits == null)
             return thisEdits;
-        for (int idx = 0 ; idx < this.edits.size(); idx++)
+        for (int idx = 0 ; idx < edits.size(); idx++)
             {
                 String compareS = "";
                 if (nodeId.indexOf("olp:") == 0)
-                    compareS = "olp:" + this.edits.get(idx).nodeId;
+                    compareS = "olp:" + edits.get(idx).nodeId;
                 else
-                    compareS = this.edits.get(idx).nodeId;
+                    compareS = edits.get(idx).nodeId;
                 if (compareS.equals(nodeId)) {
-                    thisEdits.add(this.edits.get(idx));
+                    thisEdits.add(edits.get(idx));
                 }
             }
         return thisEdits;

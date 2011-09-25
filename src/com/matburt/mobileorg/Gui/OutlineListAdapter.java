@@ -71,23 +71,6 @@ class OutlineListAdapter extends BaseAdapter {
 		return position;
 	}
 
-	public ArrayList<EditNode> findEdits(String nodeId) {
-		ArrayList<EditNode> thisEdits = new ArrayList<EditNode>();
-		if (this.edits == null)
-			return thisEdits;
-		for (int idx = 0; idx < this.edits.size(); idx++) {
-			String compareS = "";
-			if (nodeId.indexOf("olp:") == 0)
-				compareS = "olp:" + this.edits.get(idx).nodeId;
-			else
-				compareS = this.edits.get(idx).nodeId;
-			if (compareS.equals(nodeId)) {
-				thisEdits.add(this.edits.get(idx));
-			}
-		}
-		return thisEdits;
-	}
-
 	public Integer findTodoState(String todoItem) {
 		for (HashMap<String, Integer> group : this.allTodos) {
 			for (String key : group.keySet()) {
@@ -127,7 +110,8 @@ class OutlineListAdapter extends BaseAdapter {
 		String dateInfo = node.formatDate();
 
 		// Apply all EditNodes
-		ArrayList<EditNode> thisEdits = this.findEdits(node.nodeId);
+		ArrayList<EditNode> thisEdits = MobileOrgApplication.findEdits(
+				node.nodeId, this.edits);
 		for (EditNode e : thisEdits) {
 			if (e.editType.equals("todo"))
 				todo = e.newVal;

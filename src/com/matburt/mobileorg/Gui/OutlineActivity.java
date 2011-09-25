@@ -31,7 +31,7 @@ import com.matburt.mobileorg.MobileOrgApplication;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Error.ErrorReporter;
 import com.matburt.mobileorg.Error.ReportableError;
-import com.matburt.mobileorg.Parsing.Encryption;
+import com.matburt.mobileorg.Parsing.NodeEncryption;
 import com.matburt.mobileorg.Parsing.MobileOrgDatabase;
 import com.matburt.mobileorg.Parsing.Node;
 import com.matburt.mobileorg.Parsing.OrgFileParser;
@@ -286,7 +286,7 @@ public class OutlineActivity extends ListActivity
 			}
 			break;
 
-		case Encryption.DECRYPT_MESSAGE:
+		case NodeEncryption.DECRYPT_MESSAGE:
 			if (resultCode != RESULT_OK || intent == null) {
 				this.appInst.popSelection();
 				return;
@@ -305,12 +305,12 @@ public class OutlineActivity extends ListActivity
 	 */
 	private void decryptNode(Node node) {
 		// if suitable APG version is installed
-		if (Encryption.isAvailable((Context) this)) {
+		if (NodeEncryption.isAvailable((Context) this)) {
 			// retrieve the encrypted file data
 			OrgFileParser ofp = new OrgFileParser(getBaseContext(), appInst);
 			byte[] rawData = ofp.getRawFileData(node.name);
 			// and send it to APG for decryption
-			Encryption.decrypt(this, rawData);
+			NodeEncryption.decrypt(this, rawData);
 		} else {
 			this.appInst.popSelection();
 		}
@@ -324,7 +324,7 @@ public class OutlineActivity extends ListActivity
 		Node node = this.appInst.getSelectedNode();
 
 		String decryptedData = data
-				.getStringExtra(Encryption.EXTRA_DECRYPTED_MESSAGE);
+				.getStringExtra(NodeEncryption.EXTRA_DECRYPTED_MESSAGE);
 
 		ofp.parse(node, new BufferedReader(new StringReader(
 				decryptedData)));

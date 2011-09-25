@@ -30,4 +30,24 @@ public class EditNode {
 		return TYPE.PAYLOAD;
     return null;
     }
+    
+	// edittype = heading || body || tags || todo || priority
+	//
+	// * F(edit:edittype) [[id:yyy][Title of node]
+	// ** Old value
+	// Old value goes here
+	// ** New value
+	// New value goes here
+	// ** End of edit
+	public String transformEditBuffer() {
+		if (nodeId.indexOf("olp:") != 0)
+			nodeId = "id:" + nodeId;
+		
+		String result = "* F(edit:" + this.editType + ") [[" + nodeId + "]["
+				+ this.title.trim() + "]]\n";
+		result += "** Old value\n" + this.oldVal.trim() + "\n";
+		result += "** New value\n" + this.newVal.trim() + "\n";
+		result += "** End of edit" + "\n";
+		return result;
+	}
 }
