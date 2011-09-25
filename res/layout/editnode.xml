@@ -36,13 +36,13 @@
 			android:gravity="top"
 		android:inputType="textMultiLine" />
 	</TableRow>
-	<TableRow android:stretchColumns="1">
-		<Button android:layout_height="wrap_content"
-			 android:id="@+id/save_node"
-			android:text="@string/save"
-			></Button>
-		<Button android:layout_height="wrap_content"
-			 android:id="@+id/cancel"
-			android:text="@string/cancel"></Button>
-	</TableRow>
+	<LinearLayout android:orientation="horizontal"
+		android:layout_width="wrap_content" android:layout_height="52dp">
+		<Button android:id="@+id/cancel" android:text="@string/cancel"
+			android:layout_width="fill_parent" android:layout_height="fill_parent"
+			android:layout_weight="6" />
+		<Button android:id="@+id/save" android:text="@string/save"
+			android:layout_width="fill_parent" android:layout_height="fill_parent"
+			android:layout_weight="6" />
+	</LinearLayout>
 </TableLayout>

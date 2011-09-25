@@ -53,7 +53,7 @@ public class EditNodeActivity extends Activity {
 		Button button = (Button) this
 				.findViewById(R.id.cancel);
 		button.setOnClickListener(cancelListener);
-		button = (Button) this.findViewById(R.id.save_node);
+		button = (Button) this.findViewById(R.id.save);
 		button.setOnClickListener(saveNodeListener);		
 		mBody.setOnClickListener(editBodyListener);
 	}
