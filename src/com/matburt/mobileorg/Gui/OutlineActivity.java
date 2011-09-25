@@ -113,7 +113,7 @@ public class OutlineActivity extends ListActivity
 	private void refreshDisplay() {
 		this.setListAdapter(new OutlineListAdapter(this,
 				this.appInst.rootNode, this.appInst.nodeSelection,
-				this.appInst.edits, this.appdb.getTodos()));
+				this.appInst.edits, this.appdb.getGroupedTodods()));
 
 		this.origSelection = MobileOrgApplication.copySelection(this.appInst.nodeSelection);
 
