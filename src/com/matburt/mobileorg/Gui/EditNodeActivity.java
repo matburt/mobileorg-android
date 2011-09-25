@@ -27,7 +27,6 @@ public class EditNodeActivity extends Activity {
 	private Spinner mTodoState;
 	private EditText mTags;
 	private Node node;
-	private MobileOrgDatabase mOrgDb;
 	private String actionMode;
 
 	private static int EDIT_BODY = 1;
@@ -49,8 +48,8 @@ public class EditNodeActivity extends Activity {
 		this.mNodePath = txtIntent.getIntegerArrayListExtra("nodePath");
 		this.actionMode = txtIntent.getStringExtra("actionMode");
 			
-		this.mOrgDb = new MobileOrgDatabase(this);
-		populateDisplay();
+		
+		initDisplay();
 		
 		Button button = (Button) this.findViewById(R.id.cancel);
 		button.setOnClickListener(cancelListener);
@@ -58,7 +57,7 @@ public class EditNodeActivity extends Activity {
 		button.setOnClickListener(saveNodeListener);		
 	}
 
-	private void populateDisplay() {
+	private void initDisplay() {
 		MobileOrgApplication appInst = (MobileOrgApplication) this
 				.getApplication();
 		if (this.actionMode.equals("edit")) {
@@ -73,9 +72,42 @@ public class EditNodeActivity extends Activity {
 		if (this.actionMode.equals("create")) {
 			node = new Node();
 		}
-		setSpinner(mTodoState, this.mOrgDb.getTodos(), node.todo);
-		setSpinner(mPriority, this.mOrgDb.getPriorities(), node.priority);
+		
+		MobileOrgDatabase mOrgDb = new MobileOrgDatabase(this);
+		setSpinner(mTodoState, mOrgDb.getTodos(), node.todo);
+		setSpinner(mPriority, mOrgDb.getPriorities(), node.priority);
+		mOrgDb.close();
 	}
+	
+	private void setSpinner(Spinner view, ArrayList<?> data, String selection) {
+		// I can't use a simple cursor here because the todos table does not
+		// store an _id yet.
+		// Instead, we'll retrieve the todos from the database, and we'll use an
+		// array adapter.
+		ArrayList<String> choices = new ArrayList<String>();
+		choices.add("");
+		for (Object group : data) {
+			if (group instanceof HashMap) {
+				for (String key : ((HashMap<String, Integer>) group).keySet()) {
+					choices.add(key);
+				}
+			} else if (group instanceof ArrayList) {
+				for (String key : (ArrayList<String>) group) {
+					choices.add(key);
+				}
+			}
+		}
+		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
+				android.R.layout.simple_spinner_item, choices);
+		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		view.setAdapter(adapter);
+		int pos = choices.indexOf(selection);
+		if (pos < 0) {
+			pos = 0;
+		}
+		view.setSelection(pos);
+	}
+
 
 	View.OnClickListener saveNodeListener = new View.OnClickListener() {
 		public void onClick(View v) {
@@ -108,38 +140,8 @@ public class EditNodeActivity extends Activity {
 						.getStringExtra(EditNodeBodyActivity.RESULT_STRING);
 				node.payload = result;
 				mBody.setText(result);
-				populateDisplay();
 			}
 		}
-	}
-
-	private void setSpinner(Spinner view, ArrayList<?> data, String selection) {
-		// I can't use a simple cursor here because the todos table does not
-		// store an _id yet.
-		// Instead, we'll retrieve the todos from the database, and we'll use an
-		// array adapter.
-		ArrayList<String> choices = new ArrayList<String>();
-		choices.add("");
-		for (Object group : data) {
-			if (group instanceof HashMap) {
-				for (String key : ((HashMap<String, Integer>) group).keySet()) {
-					choices.add(key);
-				}
-			} else if (group instanceof ArrayList) {
-				for (String key : (ArrayList<String>) group) {
-					choices.add(key);
-				}
-			}
-		}
-		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
-				android.R.layout.simple_spinner_item, choices);
-		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-		view.setAdapter(adapter);
-		int pos = choices.indexOf(selection);
-		if (pos < 0) {
-			pos = 0;
-		}
-		view.setSelection(pos);
 	}
 
 	private void save() {
@@ -190,11 +192,4 @@ public class EditNodeActivity extends Activity {
 		}
 		creator.close();
 	}
-
-	@Override
-	public void onDestroy() {
-		this.mOrgDb.close();
-		super.onDestroy();
-	}
-
 }
