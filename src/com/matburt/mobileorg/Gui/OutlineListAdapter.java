@@ -19,7 +19,7 @@ import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Parsing.EditNode;
 import com.matburt.mobileorg.Parsing.Node;
 
-class OutlineViewAdapter extends BaseAdapter {
+class OutlineListAdapter extends BaseAdapter {
 
 	public Node topNode;
 	public ArrayList<EditNode> edits = new ArrayList<EditNode>();
@@ -27,7 +27,7 @@ class OutlineViewAdapter extends BaseAdapter {
 	private Context context;
 	private LayoutInflater lInflator;
 
-	public OutlineViewAdapter(Context context, Node node,
+	public OutlineListAdapter(Context context, Node node,
 			ArrayList<Integer> selection, ArrayList<EditNode> edits,
 			ArrayList<HashMap<String, Integer>> allTodos) {
 

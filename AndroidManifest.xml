@@ -10,7 +10,7 @@
   <application android:name=".MobileOrgApplication"
                android:label="MobileOrg"
                android:icon="@drawable/icon" android:debuggable="true">
-    <receiver android:name=".Gui.MobileOrgWidget"
+    <receiver android:name=".MobileOrgWidget"
               android:label="MobileOrg Tasks">
       <intent-filter>
         <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
@@ -24,7 +24,7 @@
 		<action android:name="com.matburt.mobileorg.SYNC_SERVICE" />
 	  </intent-filter>
 	</service>
-	<receiver android:name=".Synchronizers.MobileOrgStartupIntentReceiver">
+	<receiver android:name=".MobileOrgStartupIntentReceiver">
 	  <intent-filter>
 		<action android:name="android.intent.action.BOOT_COMPLETED" />
 		<category android:name="android.intent.category.HOME" />
@@ -43,7 +43,7 @@
     <activity android:name=".Synchronizers.DropboxAuthActivity"
               android:label="Dropbox Authentication">
     </activity>
-    <activity android:name=".Gui.SimpleTextDisplay"
+    <activity android:name=".Gui.ViewNodeActivity"
               android:label="Org View">
     </activity>
     <activity android:name=".Capture.EditDetailsActivity"
@@ -52,7 +52,7 @@
     <activity android:name="OrgContextMenu"
               android:label="OrgMenu">
     </activity>
-    <activity android:name=".Capture.Capture"
+    <activity android:name=".Gui.EditNodeBodyActivity"
               android:label="Org Capture"
               android:windowSoftInputMode="adjustResize"
               android:exported="true">
@@ -76,6 +76,6 @@
     <activity android:name=".Settings.DropboxSettingsActivity"
               android:label="Dropbox Settings">
     </activity>
-  <activity android:name=".Capture.ViewNodeDetailsActivity" android:windowSoftInputMode="adjustPan"></activity>
+  <activity android:name=".Gui.EditNodeActivity" android:windowSoftInputMode="adjustPan"></activity>
 </application>
 </manifest>

@@ -1,4 +1,4 @@
-package com.matburt.mobileorg.Gui;
+package com.matburt.mobileorg;
 
 import android.app.Service;
 import android.appwidget.AppWidgetManager;
@@ -11,7 +11,6 @@ import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.widget.RemoteViews;
 
-import com.matburt.mobileorg.MobileOrgApplication;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Parsing.MobileOrgDatabase;
 import com.matburt.mobileorg.Parsing.Node;

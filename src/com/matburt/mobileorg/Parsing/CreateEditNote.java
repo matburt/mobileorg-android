@@ -1,4 +1,4 @@
-package com.matburt.mobileorg.Capture;
+package com.matburt.mobileorg.Parsing;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -17,8 +17,6 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.matburt.mobileorg.MobileOrgApplication;
-import com.matburt.mobileorg.Parsing.EditNode;
-import com.matburt.mobileorg.Parsing.MobileOrgDatabase;
 
 public class CreateEditNote
 {
@@ -27,7 +25,7 @@ public class CreateEditNote
     private Activity appactivity;
     public static final String LT = "MobileOrg";
 
-    CreateEditNote(Activity parentActivity) {
+    public CreateEditNote(Activity parentActivity) {
         this.appactivity = parentActivity;
         this.appSettings = PreferenceManager.getDefaultSharedPreferences(
                                     parentActivity.getBaseContext());

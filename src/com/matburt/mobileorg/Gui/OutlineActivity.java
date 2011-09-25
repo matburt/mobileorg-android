@@ -30,8 +30,6 @@ import android.widget.Toast;
 
 import com.matburt.mobileorg.MobileOrgApplication;
 import com.matburt.mobileorg.R;
-import com.matburt.mobileorg.Capture.Capture;
-import com.matburt.mobileorg.Capture.ViewNodeDetailsActivity;
 import com.matburt.mobileorg.Error.ErrorReporter;
 import com.matburt.mobileorg.Error.ReportableError;
 import com.matburt.mobileorg.Parsing.Encryption;
@@ -114,7 +112,7 @@ public class OutlineActivity extends ListActivity
 	 * data has been updated.
 	 */
 	private void refreshDisplay() {
-		this.setListAdapter(new OutlineViewAdapter(this,
+		this.setListAdapter(new OutlineListAdapter(this,
 				this.appInst.rootNode, this.appInst.nodeSelection,
 				this.appInst.edits, this.appdb.getTodos()));
 
@@ -201,7 +199,7 @@ public class OutlineActivity extends ListActivity
 
 		switch (item.getItemId()) {
 		case R.id.contextmenu_view:
-			runSimpleNodeDisplay(node);
+			runViewNodeActivity(node);
 			break;
 
 		case R.id.contextmenu_edit:
@@ -229,46 +227,47 @@ public class OutlineActivity extends ListActivity
 			this.appInst.popSelection();
 
 			if (node.isSimple()) {
-				runSimpleNodeDisplay(node);
+				runViewNodeActivity(node);
 			} else {
 				runViewNodeDetails(node, position);
 			}
 		}
 	}
 	
-	private void runSimpleNodeDisplay(Node node) {
-		Intent textIntent = new Intent(this, SimpleTextDisplay.class);
+	private void runViewNodeActivity(Node node) {
+		Intent intent = new Intent(this, ViewNodeActivity.class);
 		String docBuffer = node.name + "\n\n" + node.payload;
-		textIntent.putExtra("txtValue", docBuffer);
-		startActivity(textIntent);
+		intent.putExtra("txtValue", docBuffer);
+		startActivity(intent);
 	}
 	
 	private void runViewNodeDetails(Node node, int position) {
-		Intent dispIntent = new Intent(this,
-				ViewNodeDetailsActivity.class);
-		dispIntent.putExtra("actionMode", "edit");
-		dispIntent.putIntegerArrayListExtra("nodePath",
+		Intent intent = new Intent(this,
+				EditNodeActivity.class);
+		intent.putExtra("actionMode", "edit");
+		intent.putIntegerArrayListExtra("nodePath",
 				this.appInst.nodeSelection);
 		this.appInst.pushSelection(position);
-		startActivity(dispIntent);
-	}
-	
-	private void runExpandSelection(ArrayList<Integer> selection) {
-		Intent dispIntent = new Intent(this, OutlineActivity.class);
-		dispIntent.putIntegerArrayListExtra("nodePath", selection);
-		startActivityForResult(dispIntent, RUNFOR_EXPAND);
+		startActivity(intent);
 	}
 	
 	private boolean runCapture() {
-		Intent captureIntent = new Intent(this, Capture.class);
-		captureIntent.putExtra("actionMode", "create");
-		startActivityForResult(captureIntent, RUNFOR_PARSER);
+		Intent intent = new Intent(this, EditNodeActivity.class);
+		intent.putExtra("actionMode", "create");
+		startActivityForResult(intent, RUNFOR_PARSER);
 		return true;
 	}
 	
+	private void runExpandSelection(ArrayList<Integer> selection) {
+		Intent intent = new Intent(this, OutlineActivity.class);
+		intent.putIntegerArrayListExtra("nodePath", selection);
+		startActivityForResult(intent, RUNFOR_EXPAND);
+	}
+
+	
 	private boolean runShowSettings() {
-		Intent settingsIntent = new Intent(this, SettingsActivity.class);
-		startActivity(settingsIntent);
+		Intent intent = new Intent(this, SettingsActivity.class);
+		startActivity(intent);
 		return true;
 	}
 

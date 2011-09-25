@@ -7,7 +7,7 @@ import android.widget.TextView;
 
 import com.matburt.mobileorg.R;
 
-public class SimpleTextDisplay extends Activity
+public class ViewNodeActivity extends Activity
 {
     private TextView orgDisplay;
     public static final String LT = "MobileOrg";

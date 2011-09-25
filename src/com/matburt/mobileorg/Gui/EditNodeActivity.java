@@ -1,4 +1,4 @@
-package com.matburt.mobileorg.Capture;
+package com.matburt.mobileorg.Gui;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -16,11 +16,11 @@ import android.widget.TextView;
 
 import com.matburt.mobileorg.MobileOrgApplication;
 import com.matburt.mobileorg.R;
-import com.matburt.mobileorg.Gui.SimpleTextDisplay;
+import com.matburt.mobileorg.Parsing.CreateEditNote;
 import com.matburt.mobileorg.Parsing.MobileOrgDatabase;
 import com.matburt.mobileorg.Parsing.Node;
 
-public class ViewNodeDetailsActivity extends Activity implements OnClickListener {
+public class EditNodeActivity extends Activity implements OnClickListener {
 	protected ArrayList<Integer> mNodePath;
 	protected EditText mTitle;
 	protected TextView mBody;
@@ -110,13 +110,13 @@ public class ViewNodeDetailsActivity extends Activity implements OnClickListener
 	@Override
 	public void onClick(View v) {
 		if (v.equals(mViewAsDocument)) {
-			Intent intent = new Intent(this, SimpleTextDisplay.class);
+			Intent intent = new Intent(this, ViewNodeActivity.class);
 			String txtValue = mNode.nodeTitle + "\n\n" + mNode.payload;
 			intent.putExtra("txtValue", txtValue );
 			this.startActivity(intent);
 		}
 		if (v.equals(mBody)) {
-			Intent intent = new Intent(this, Capture.class);
+			Intent intent = new Intent(this, EditNodeBodyActivity.class);
 			if (mNode.nodeId != null && mNode.nodeId.length() > 0) {
 				intent.putExtra("nodeId", mNode.nodeId);
 			}

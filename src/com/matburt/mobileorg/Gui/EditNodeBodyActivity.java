@@ -1,4 +1,4 @@
-package com.matburt.mobileorg.Capture;
+package com.matburt.mobileorg.Gui;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -10,8 +10,9 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import com.matburt.mobileorg.R;
+import com.matburt.mobileorg.Parsing.CreateEditNote;
 
-public class Capture extends Activity implements OnClickListener
+public class EditNodeBodyActivity extends Activity implements OnClickListener
 {
     private EditText orgEditDisplay;
     private Button saveButton;
@@ -80,7 +81,7 @@ public class Capture extends Activity implements OnClickListener
     public void onClick(View v) {
         if (v == this.advancedButton) {
             Log.i(LT, "Advanced");
-            Intent advancedIntent = new Intent(this, ViewNodeDetailsActivity.class);
+            Intent advancedIntent = new Intent(this, EditNodeActivity.class);
             advancedIntent.putExtra("actionMode", "create");
             startActivity(advancedIntent);
             this.finish();
