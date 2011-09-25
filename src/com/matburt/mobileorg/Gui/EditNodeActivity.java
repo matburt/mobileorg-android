@@ -7,7 +7,6 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -20,52 +19,111 @@ import com.matburt.mobileorg.Parsing.CreateEditNote;
 import com.matburt.mobileorg.Parsing.MobileOrgDatabase;
 import com.matburt.mobileorg.Parsing.Node;
 
-public class EditNodeActivity extends Activity implements OnClickListener {
-	protected ArrayList<Integer> mNodePath;
-	protected EditText mTitle;
-	protected TextView mBody;
-	protected Spinner mPriority;
-	protected Spinner mTodoState;
-	protected EditText mTags;
-	protected Button mViewAsDocument;
-    protected Button mSaveNode;
-	protected Node mNode;
-	protected MobileOrgDatabase mOrgDb;
-    protected String actionMode;
+public class EditNodeActivity extends Activity {
+	private ArrayList<Integer> mNodePath;
+	private EditText mTitle;
+	private TextView mBody;
+	private Spinner mPriority;
+	private Spinner mTodoState;
+	private EditText mTags;
+	private Node mNode;
+	private MobileOrgDatabase mOrgDb;
+	private String actionMode;
 
-    private static int EDIT_BODY = 1;
+	private static int EDIT_BODY = 1;
 
 	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-	    super.onCreate(savedInstanceState);
-        setContentView(R.layout.node_details);
-        Intent txtIntent = getIntent();
-        this.mNodePath = txtIntent.getIntegerArrayListExtra("nodePath");
-        this.actionMode = txtIntent.getStringExtra("actionMode");
-        this.mTitle = (EditText) this.findViewById(R.id.title);
-        this.mBody = (TextView) this.findViewById(R.id.body);
-        this.mPriority = (Spinner) this.findViewById(R.id.priority);
-        this.mTodoState = (Spinner) this.findViewById(R.id.todo_state);
-        this.mTags = (EditText) this.findViewById(R.id.tags);
-        this.mViewAsDocument = (Button) this.findViewById(R.id.view_as_document);
-        this.mSaveNode = (Button) this.findViewById(R.id.save_node);
-        this.mOrgDb = new MobileOrgDatabase(this);
-        this.populateDisplay();
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.editnode);
 
-        mViewAsDocument.setOnClickListener(this);
-        mBody.setOnClickListener(this);
-        mSaveNode.setOnClickListener(this);
-    }
+		this.mTitle = (EditText) this.findViewById(R.id.title);
+		this.mBody = (TextView) this.findViewById(R.id.body);
+		this.mPriority = (Spinner) this.findViewById(R.id.priority);
+		this.mTodoState = (Spinner) this.findViewById(R.id.todo_state);
+		this.mTags = (EditText) this.findViewById(R.id.tags);
 
-    @Override
-    public void onDestroy() {
-        this.mOrgDb.close();
-        super.onDestroy();
-    }
+		Intent txtIntent = getIntent();
+		this.mNodePath = txtIntent.getIntegerArrayListExtra("nodePath");
+		this.actionMode = txtIntent.getStringExtra("actionMode");
+			
+		this.mOrgDb = new MobileOrgDatabase(this);
+		this.populateDisplay();
+		
+		Button button = (Button) this
+				.findViewById(R.id.cancel);
+		button.setOnClickListener(cancelListener);
+		button = (Button) this.findViewById(R.id.save_node);
+		button.setOnClickListener(saveNodeListener);		
+		mBody.setOnClickListener(editBodyListener);
+	}
 
-	public void setSpinner(Spinner view, ArrayList<?> data, String selection) {
-		// I can't use a simple cursor here because the todos table does not store an _id yet.
-		// Instead, we'll retrieve the todos from the database, and we'll use an array adapter.
+	private void populateDisplay() {
+		MobileOrgApplication appInst = (MobileOrgApplication) this
+				.getApplication();
+		if (this.actionMode.equals("edit")) {
+			mNode = appInst.getNode(mNodePath);
+			mNode.applyEdits(appInst.findEdits(mNode.nodeId));
+
+			mTitle.setText(mNode.name);
+			mBody.setText(mNode.payload);
+			mTags.setText(mNode.getTagString());
+			appInst.popSelection();
+		}
+		if (this.actionMode.equals("create")) {
+			mNode = new Node();
+		}
+		setSpinner(mTodoState, this.mOrgDb.getTodos(), mNode.todo);
+		setSpinner(mPriority, this.mOrgDb.getPriorities(), mNode.priority);
+	}
+
+	View.OnClickListener saveNodeListener = new View.OnClickListener() {
+		public void onClick(View v) {
+			save();
+			setResult(RESULT_OK);
+			finish();
+		}
+	};
+	
+	View.OnClickListener cancelListener = new View.OnClickListener() {
+	    public void onClick(View v) {
+	    	setResult(RESULT_CANCELED);
+	    	finish();
+	    }
+	  };
+	
+	View.OnClickListener editBodyListener = new View.OnClickListener() {
+		public void onClick(View v) {
+			Intent intent = new Intent(v.getContext(), EditNodeBodyActivity.class);
+			if (mNode.nodeId != null && mNode.nodeId.length() > 0) {
+				intent.putExtra("nodeId", mNode.nodeId);
+			}
+			intent.putExtra("editType", "body");
+			intent.putExtra("txtValue", mNode.payload);
+			intent.putExtra("nodeTitle", mNode.nodeTitle);
+			startActivityForResult(intent, EDIT_BODY);
+		}
+	};
+
+
+	@Override
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		if (requestCode == EDIT_BODY) {
+			if (data == null || data.getStringExtra("text") == null) {
+				return;
+			}
+			String newBody = data.getStringExtra("text");
+			mNode.payload = newBody;
+			mBody.setText(newBody);
+			populateDisplay();
+		}
+	}
+
+	private void setSpinner(Spinner view, ArrayList<?> data, String selection) {
+		// I can't use a simple cursor here because the todos table does not
+		// store an _id yet.
+		// Instead, we'll retrieve the todos from the database, and we'll use an
+		// array adapter.
 		ArrayList<String> choices = new ArrayList<String>();
 		choices.add("");
 		for (Object group : data) {
@@ -79,113 +137,70 @@ public class EditNodeActivity extends Activity implements OnClickListener {
 				}
 			}
 		}
-		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item,
-				choices);
+		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
+				android.R.layout.simple_spinner_item, choices);
 		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		view.setAdapter(adapter);
 		int pos = choices.indexOf(selection);
-		if (pos < 0) { pos = 0; }
+		if (pos < 0) {
+			pos = 0;
+		}
 		view.setSelection(pos);
 	}
 
-	public void populateDisplay() {
-		MobileOrgApplication appInst = (MobileOrgApplication)this.getApplication();
-        if (this.actionMode.equals("edit")) {
-                mNode = appInst.getNode(mNodePath);
-                mNode.applyEdits(appInst.findEdits(mNode.nodeId));
-
-                mTitle.setText(mNode.name);
-                mBody.setText(mNode.payload);
-                mTags.setText(mNode.getTagString());
-                appInst.popSelection();
-        }
-        if (this.actionMode.equals("create")) {
-            mNode = new Node();
-        }
-        setSpinner(mTodoState, this.mOrgDb.getTodos(), mNode.todo);
-        setSpinner(mPriority, this.mOrgDb.getPriorities(),
-                   mNode.priority);
-    }
-
-	@Override
-	public void onClick(View v) {
-		if (v.equals(mViewAsDocument)) {
-			Intent intent = new Intent(this, ViewNodeActivity.class);
-			String txtValue = mNode.nodeTitle + "\n\n" + mNode.payload;
-			intent.putExtra("txtValue", txtValue );
-			this.startActivity(intent);
-		}
-		if (v.equals(mBody)) {
-			Intent intent = new Intent(this, EditNodeBodyActivity.class);
-			if (mNode.nodeId != null && mNode.nodeId.length() > 0) {
-				intent.putExtra("nodeId", mNode.nodeId);
-			}
-			intent.putExtra("editType", "body");
-			intent.putExtra("txtValue", mNode.payload);
-			intent.putExtra("nodeTitle", mNode.nodeTitle);
-			startActivityForResult(intent, EDIT_BODY);
-		}
-        if (v.equals(mSaveNode)) {
-            this.save();
-            this.finish();
-        }
-	}
-
-	public void save() {
+	private void save() {
 		CreateEditNote creator = new CreateEditNote(this);
 		String newTitle = mTitle.getText().toString();
-        String newTodo = null;
-        String newPriority = null;
+		String newTodo = null;
+		String newPriority = null;
 
-        Object tdSelected = mTodoState.getSelectedItem();
-        Object priSelected = mPriority.getSelectedItem();
+		Object tdSelected = mTodoState.getSelectedItem();
+		Object priSelected = mPriority.getSelectedItem();
 
-        if (tdSelected != null) {
-            newTodo = tdSelected.toString();
-        }
+		if (tdSelected != null) {
+			newTodo = tdSelected.toString();
+		}
 
-        if (priSelected != null) {
-            newPriority = priSelected.toString();
-        }
+		if (priSelected != null) {
+			newPriority = priSelected.toString();
+		}
 
-        if (this.actionMode.equals("edit")) {
-            if (!mNode.name.equals(newTitle)) {
-                creator.editNote("heading", mNode.nodeId, newTitle, mNode.name, newTitle);
-                mNode.name = newTitle;
-            }
-            if (newTodo != null && !mNode.todo.equals(newTodo)) {
-                creator.editNote("todo", mNode.nodeId, newTitle, mNode.todo, newTodo);
-                mNode.todo = newTodo;
-            }
-            if (newPriority != null && !mNode.priority.equals(newPriority)) {
-                creator.editNote("priority", mNode.nodeId, newTitle, mNode.priority, newPriority);
-                mNode.priority = newPriority;
-            }
-            if (!mNode.payload.equals(mBody.getText().toString())) {
-            	creator.editNote("body", mNode.nodeId, newTitle, mNode.payload, mBody.getText().toString());
-            	mNode.payload = mBody.getText().toString();
-            }
-        }
-        else if (this.actionMode.equals("create")) {
-            mNode.name = newTitle;
-            mNode.todo = newTodo;
-            mNode.priority = newPriority;
-            mNode.payload = mBody.getText().toString();;
-            creator.writeNote(mNode.generateNoteEntry());
-        }
-        creator.close();
+		if (this.actionMode.equals("edit")) {
+			if (!mNode.name.equals(newTitle)) {
+				creator.editNote("heading", mNode.nodeId, newTitle, mNode.name,
+						newTitle);
+				mNode.name = newTitle;
+			}
+			if (newTodo != null && !mNode.todo.equals(newTodo)) {
+				creator.editNote("todo", mNode.nodeId, newTitle, mNode.todo,
+						newTodo);
+				mNode.todo = newTodo;
+			}
+			if (newPriority != null && !mNode.priority.equals(newPriority)) {
+				creator.editNote("priority", mNode.nodeId, newTitle,
+						mNode.priority, newPriority);
+				mNode.priority = newPriority;
+			}
+			if (!mNode.payload.equals(mBody.getText().toString())) {
+				creator.editNote("body", mNode.nodeId, newTitle, mNode.payload,
+						mBody.getText().toString());
+				mNode.payload = mBody.getText().toString();
+			}
+		} else if (this.actionMode.equals("create")) {
+			mNode.name = newTitle;
+			mNode.todo = newTodo;
+			mNode.priority = newPriority;
+			mNode.payload = mBody.getText().toString();
+			
+			creator.writeNote(mNode.generateNoteEntry());
+		}
+		creator.close();
 	}
 
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == EDIT_BODY) {
-            if (data == null || data.getStringExtra("text") == null) {
-                return;
-            }
-            String newBody = data.getStringExtra("text");
-            mNode.payload = newBody;
-            mBody.setText(newBody);
-            populateDisplay();
-        }
-    }
+	@Override
+	public void onDestroy() {
+		this.mOrgDb.close();
+		super.onDestroy();
+	}
+
 }

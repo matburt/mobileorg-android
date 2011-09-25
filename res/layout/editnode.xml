@@ -36,16 +36,13 @@
 			android:gravity="top"
 		android:inputType="textMultiLine" />
 	</TableRow>
-	<TableRow>
-      <Button android:id="@+id/view_as_document" 
-              android:text="@string/view_as_document"
-              android:layout_width="fill_parent"
-              android:layout_height="fill_parent"
-              />
-      <Button android:id="@+id/save_node"
-              android:text="Save Note"
-              android:layout_width="fill_parent"
-              android:layout_height="fill_parent"
-              />
+	<TableRow android:stretchColumns="1">
+		<Button android:layout_height="wrap_content"
+			 android:id="@+id/save_node"
+			android:text="@string/save"
+			></Button>
+		<Button android:layout_height="wrap_content"
+			 android:id="@+id/cancel"
+			android:text="@string/cancel"></Button>
 	</TableRow>
 </TableLayout>

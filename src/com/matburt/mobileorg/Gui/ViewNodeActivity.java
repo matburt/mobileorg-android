@@ -15,7 +15,7 @@ public class ViewNodeActivity extends Activity
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.simpletext);
+        setContentView(R.layout.viewnode);
         this.orgDisplay = (TextView)this.findViewById(R.id.orgTxt);
         this.poplateDisplay();
     }

@@ -26,7 +26,7 @@ public class EditNodeBodyActivity extends Activity implements OnClickListener
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.simpleedittext);
+        setContentView(R.layout.editnode_body);
         this.noteCreator = new CreateEditNote(this);
         this.saveButton = (Button)this.findViewById(R.id.captureSave);
         this.advancedButton = (Button)this.findViewById(R.id.captureAdvanced);

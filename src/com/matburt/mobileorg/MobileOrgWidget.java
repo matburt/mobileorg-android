@@ -49,7 +49,7 @@ public class MobileOrgWidget extends AppWidgetProvider {
         public RemoteViews genUpdateDisplay(Context context) {
             RemoteViews updateViews = null;
             updateViews = new RemoteViews(context.getPackageName(),
-                                          R.layout.widget_mobileorg);
+                                          R.layout.widget);
 
             MobileOrgApplication appInst = (MobileOrgApplication)this.getApplication();
             OrgFileParser ofp = new OrgFileParser(getBaseContext(), appInst);

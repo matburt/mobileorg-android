@@ -45,7 +45,7 @@ import com.matburt.mobileorg.Synchronizers.WebDAVSynchronizer;
 public class OutlineActivity extends ListActivity
 {
 	private static final int RUNFOR_EXPAND = 1;
-	private static final int RUNFOR_PARSER = 3;
+	private static final int RUNFOR_NEWNODE = 3;
 
 	MobileOrgApplication appInst;
 	private MobileOrgDatabase appdb;
@@ -174,7 +174,7 @@ public class OutlineActivity extends ListActivity
 			return true;
 		
 		case R.id.menu_capture:
-			return runCapture();
+			return runEditNewNodeActivity();
 		}
 		return false;
 	}
@@ -203,7 +203,7 @@ public class OutlineActivity extends ListActivity
 			break;
 
 		case R.id.contextmenu_edit:
-			runViewNodeDetails(node, info.position);
+			runEditNodeActivity(node, info.position);
 			break;
 		}
 
@@ -229,19 +229,19 @@ public class OutlineActivity extends ListActivity
 			if (node.isSimple()) {
 				runViewNodeActivity(node);
 			} else {
-				runViewNodeDetails(node, position);
+				runEditNodeActivity(node, position);
 			}
 		}
 	}
 	
-	private void runViewNodeActivity(Node node) {
-		Intent intent = new Intent(this, ViewNodeActivity.class);
-		String docBuffer = node.name + "\n\n" + node.payload;
-		intent.putExtra("txtValue", docBuffer);
-		startActivity(intent);
+	private boolean runEditNewNodeActivity() {
+		Intent intent = new Intent(this, EditNodeActivity.class);
+		intent.putExtra("actionMode", "create");
+		startActivityForResult(intent, RUNFOR_NEWNODE);
+		return true;
 	}
 	
-	private void runViewNodeDetails(Node node, int position) {
+	private void runEditNodeActivity(Node node, int position) {
 		Intent intent = new Intent(this,
 				EditNodeActivity.class);
 		intent.putExtra("actionMode", "edit");
@@ -250,14 +250,14 @@ public class OutlineActivity extends ListActivity
 		this.appInst.pushSelection(position);
 		startActivity(intent);
 	}
-	
-	private boolean runCapture() {
-		Intent intent = new Intent(this, EditNodeActivity.class);
-		intent.putExtra("actionMode", "create");
-		startActivityForResult(intent, RUNFOR_PARSER);
-		return true;
+
+	private void runViewNodeActivity(Node node) {
+		Intent intent = new Intent(this, ViewNodeActivity.class);
+		String docBuffer = node.name + "\n\n" + node.payload;
+		intent.putExtra("txtValue", docBuffer);
+		startActivity(intent);
 	}
-	
+
 	private void runExpandSelection(ArrayList<Integer> selection) {
 		Intent intent = new Intent(this, OutlineActivity.class);
 		intent.putIntegerArrayListExtra("nodePath", selection);
@@ -281,12 +281,14 @@ public class OutlineActivity extends ListActivity
 			this.appInst.popSelection();
 			break;
 
-		case RUNFOR_PARSER:
-			this.runParser();
+		case RUNFOR_NEWNODE:
+			if(resultCode == RESULT_OK) {
+				this.runParser();
+			}
 			break;
 
 		case Encryption.DECRYPT_MESSAGE:
-			if (resultCode != Activity.RESULT_OK || intent == null) {
+			if (resultCode != RESULT_OK || intent == null) {
 				this.appInst.popSelection();
 				return;
 			}
@@ -335,7 +337,7 @@ public class OutlineActivity extends ListActivity
 			this.newSetupDialog.cancel();
 		}
 		newSetupDialog = new Dialog(this);
-		newSetupDialog.setContentView(R.layout.empty_main);
+		newSetupDialog.setContentView(R.layout.outline_unconfigured);
 		Button syncButton = (Button) newSetupDialog
 				.findViewById(R.id.dialog_run_sync);
 		syncButton.setOnClickListener(new OnClickListener() {

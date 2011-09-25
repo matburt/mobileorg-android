@@ -44,4 +44,6 @@
   <string name="priority">Priority</string>
   <string name="todo_state">Todo state</string>
   <string name="back">Back</string>
+  <string name="cancel">Cancel</string>
+  <string name="save">Save</string>  
 </resources>
