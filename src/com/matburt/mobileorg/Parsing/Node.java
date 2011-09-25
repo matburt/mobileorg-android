@@ -50,15 +50,15 @@ public class Node implements Cloneable {
 
 	public Node findChildNode(String regex) {
 		Pattern findNodePattern = Pattern.compile(regex);
-		for (int idx = 0; idx < this.children.size(); idx++) {
-			if (findNodePattern.matcher(this.children.get(idx).name).matches()) {
-				return this.children.get(idx);
+		for (Node child: children) {
+			if (findNodePattern.matcher(child.name).matches()) {
+				return child;
 			}
 		}
 		return null;
 	}
 
-	void setTags(ArrayList<String> todoList) {
+	public void setTags(ArrayList<String> todoList) {
 		this.tags.clear();
 		this.tagString = "";
 		this.tags.addAll(todoList);
@@ -67,66 +67,88 @@ public class Node implements Cloneable {
 		}
 		this.tagString = this.tagString.trim();
 	}
-
+	
+	/**
+	 * This applies an edit to the Node, modifying the data structure and
+	 * removing the applied edits from the list.
+	 */
 	public void applyEdits(ArrayList<EditNode> edits) {
-		if (edits != null) {
-			for (EditNode e : edits) {
-				switch (e.getType()) {
-				case TODO:
-					this.todo = e.newVal;
-					break;
-				case PRIORITY:
-					this.priority = e.newVal;
-					break;
-				case NAME:
-					this.name = e.newVal;
-					break;
-				case PAYLOAD:
-					this.payload = e.newVal;
-					break;
-				}
+		if(edits != null) {
+			if (edits.size() == 0)
+				return;
+		}
+		
+		ArrayList<EditNode> nodeEdits = findEdits(edits);
+
+		for (EditNode e : nodeEdits) {
+			switch (e.getType()) {
+			case TODO:
+				this.todo = e.newVal;
+				break;
+			case PRIORITY:
+				this.priority = e.newVal;
+				break;
+			case NAME:
+				this.name = e.newVal;
+				break;
+			case PAYLOAD:
+				this.payload = e.newVal;
+				break;
 			}
 		}
 	}
+    
+	private ArrayList<EditNode> findEdits(ArrayList<EditNode> edits) {
+		ArrayList<EditNode> thisEdits = new ArrayList<EditNode>();
+		
+		for (EditNode editNode: edits) {		
+			if (editNode.getNodeId().equals(this.nodeId)) {
+				thisEdits.add(editNode);
+				edits.remove(editNode);
+			}
+		}
+		return thisEdits;
+	}
 
+
+	/**
+	 * Generates string which can be used to write node to file.
+	 */
 	public String generateNoteEntry() {
 		String noteStr = "* ";
-		if (todo != null && !todo.equals("")) {
+		
+		if (!todo.equals(""))
 			noteStr += todo + " ";
-		}
-		if (priority != null && !priority.equals("")) {
+		
+		if (!priority.equals(""))
 			noteStr += "[#" + priority + "] ";
-		}
+		
 		noteStr += this.name + "\n";
-		noteStr += this.payload + "\n\n";
+
+		if (this.payload.length() > 0)
+			noteStr += this.payload + "\n";
+
+		noteStr += "\n";
 		return noteStr;
 	}
 	
 	public String formatDate() {
 		String dateInfo = "";
-		
+
 		// Format Deadline and scheduled
 		SimpleDateFormat formatter = new SimpleDateFormat("<yyyy-MM-dd EEE>");
-		if (this.deadline != null) {
-			dateInfo += "DEADLINE: "
-					+ formatter
-							.format(this.deadline)
-					+ " ";
-		}
+		if (this.deadline != null)
+			dateInfo += "DEADLINE: " + formatter.format(this.deadline) + " ";
 
-		if (this.schedule != null) {
-			dateInfo += "SCHEDULED: "
-					+ formatter
-							.format(this.schedule)
-					+ " ";
-		}	
+		if (this.schedule != null)
+			dateInfo += "SCHEDULED: " + formatter.format(this.schedule) + " ";
+
 		return dateInfo;
 	}
 
 	public ArrayList<String> getTags() {
 		return tags;
 	}
-	
 
 	void setParentNode(Node pnode) {
 		this.parent = pnode;

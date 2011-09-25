@@ -31,15 +31,15 @@ public class EditNode {
     return null;
     }
     
-	// edittype = heading || body || tags || todo || priority
-	//
-	// * F(edit:edittype) [[id:yyy][Title of node]
-	// ** Old value
-	// Old value goes here
-	// ** New value
-	// New value goes here
-	// ** End of edit
-	public String transformEditBuffer() {
+	
+	public String getNodeId() {
+		if (this.nodeId.indexOf("olp:") == 0)
+			return "olp:" + this.nodeId;
+		else
+			return this.nodeId;
+	}
+    
+	public String toString() {
 		if (nodeId.indexOf("olp:") != 0)
 			nodeId = "id:" + nodeId;
 		

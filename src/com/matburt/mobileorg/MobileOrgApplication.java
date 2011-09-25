@@ -78,28 +78,6 @@ public class MobileOrgApplication extends Application {
     	return thisNode;
     }
     
-    public ArrayList<EditNode> findEdits(String nodeId) {
-    	return findEdits(nodeId, this.edits);
-    }
-    
-    public static ArrayList<EditNode> findEdits(String nodeId, ArrayList<EditNode> edits) {
-        ArrayList<EditNode> thisEdits = new ArrayList<EditNode>();
-        if (edits == null)
-            return thisEdits;
-        for (int idx = 0 ; idx < edits.size(); idx++)
-            {
-                String compareS = "";
-                if (nodeId.indexOf("olp:") == 0)
-                    compareS = "olp:" + edits.get(idx).nodeId;
-                else
-                    compareS = edits.get(idx).nodeId;
-                if (compareS.equals(nodeId)) {
-                    thisEdits.add(edits.get(idx));
-                }
-            }
-        return thisEdits;
-    }
-
     public boolean isSynchConfigured() {
     	SharedPreferences appSettings = PreferenceManager
 		.getDefaultSharedPreferences(getBaseContext());
@@ -159,6 +137,4 @@ public class MobileOrgApplication extends Application {
         }
         return out;
     }
-
-	
 }

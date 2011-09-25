@@ -103,24 +103,12 @@ class OutlineListAdapter extends BaseAdapter {
 		}
 		
 		Node node = this.topNode.children.get(position);
-
+		node.applyEdits(this.edits);
+		
 		String name = node.name;
 		String todo = node.todo;
 		String priority = node.priority;
 		String dateInfo = node.formatDate();
-
-		// Apply all EditNodes
-		ArrayList<EditNode> thisEdits = MobileOrgApplication.findEdits(
-				node.nodeId, this.edits);
-		for (EditNode e : thisEdits) {
-			if (e.editType.equals("todo"))
-				todo = e.newVal;
-			else if (e.editType.equals("priority"))
-				priority = e.newVal;
-			else if (e.editType.equals("heading")) {
-				name = e.newVal;
-			}
-		}
 
 		setupHolder(holder, node, name, todo, priority, dateInfo);
 

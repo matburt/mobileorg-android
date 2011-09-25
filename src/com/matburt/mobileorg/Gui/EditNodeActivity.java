@@ -1,5 +1,6 @@
 package com.matburt.mobileorg.Gui;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import android.app.Activity;
 import android.content.Intent;
@@ -65,11 +66,10 @@ public class EditNodeActivity extends Activity {
 			node = new Node();
 		} else if (this.actionMode.equals(ACTIONMODE_EDIT)) {
 			node = appInst.getNode(mNodePath);
-			node.applyEdits(appInst.findEdits(node.nodeId));
-
 			titleView.setText(node.name);
 			payloadView.setText(node.payload);
 			tagsView.setText(node.getTagString());
+			
 			appInst.popSelection();
 		}
 
@@ -144,28 +144,11 @@ public class EditNodeActivity extends Activity {
 			node.priority = newPriority;
 			node.payload = newPayload;
 
-			writer.write(node);
+			try { writer.write(node); }
+			catch (IOException e) {}
 		} else if (this.actionMode.equals(ACTIONMODE_EDIT)) {
-			if (!node.name.equals(newTitle)) {
-				writer.editNote("heading", node.nodeId, newTitle, node.name,
-						newTitle);
-				node.name = newTitle;
-			}
-			if (newTodo != null && !node.todo.equals(newTodo)) {
-				writer.editNote("todo", node.nodeId, newTitle, node.todo,
-						newTodo);
-				node.todo = newTodo;
-			}
-			if (newPriority != null && !node.priority.equals(newPriority)) {
-				writer.editNote("priority", node.nodeId, newTitle,
-						node.priority, newPriority);
-				node.priority = newPriority;
-			}
-			if (!node.payload.equals(newPayload)) {
-				writer.editNote("body", node.nodeId, newTitle, node.payload,
-						newPayload);
-				node.payload = newPayload;
-			}
+			try { writer.editNode(node, newTitle, newTodo, newPriority, newPayload); }
+			catch (IOException e) {}
 		}
 		writer.close();
 	}
