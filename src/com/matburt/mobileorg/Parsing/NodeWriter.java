@@ -18,7 +18,7 @@ import com.matburt.mobileorg.MobileOrgApplication;
 
 public class NodeWriter {
 	private SharedPreferences appSettings;
-	private MobileOrgDatabase appdb;
+	private OrgDatabase appdb;
 	private Activity appActivity;
 	public static final String LT = "MobileOrg";
 
@@ -26,7 +26,7 @@ public class NodeWriter {
 		this.appActivity = parentActivity;
 		this.appSettings = PreferenceManager
 				.getDefaultSharedPreferences(parentActivity.getBaseContext());
-		this.appdb = new MobileOrgDatabase((Context) parentActivity);
+		this.appdb = new OrgDatabase((Context) parentActivity);
 	}
 	
 	public void write(Node node) {

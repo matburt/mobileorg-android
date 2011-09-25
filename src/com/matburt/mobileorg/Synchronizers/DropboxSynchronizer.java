@@ -20,7 +20,7 @@ import com.dropbox.client.DropboxAPI.Config;
 import com.dropbox.client.DropboxAPI.FileDownload;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Error.ReportableError;
-import com.matburt.mobileorg.Parsing.MobileOrgDatabase;
+import com.matburt.mobileorg.Parsing.OrgDatabase;
 
 public class DropboxSynchronizer extends Synchronizer {
     private DropboxAPI api = new DropboxAPI();
@@ -29,7 +29,7 @@ public class DropboxSynchronizer extends Synchronizer {
     public DropboxSynchronizer(Context parentContext) {
         this.rootContext = parentContext;
         this.r = this.rootContext.getResources();
-        this.appdb = new MobileOrgDatabase((Context)parentContext);
+        this.appdb = new OrgDatabase((Context)parentContext);
         this.appSettings = PreferenceManager.getDefaultSharedPreferences(
                                       parentContext.getApplicationContext());
         this.connect();

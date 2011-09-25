@@ -17,7 +17,7 @@ import android.util.Log;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Error.ErrorReporter;
 
-public class MobileOrgDatabase {
+public class OrgDatabase {
 	private Context appcontext;
 	private String lastStorageMode = "";
 	private Resources r;
@@ -25,7 +25,7 @@ public class MobileOrgDatabase {
 	public SharedPreferences appSettings;
 	public static final String LT = "MobileOrg";
 
-	public MobileOrgDatabase(Context appctxt) {
+	public OrgDatabase(Context appctxt) {
 		this.appcontext = appctxt;
 		this.appSettings = PreferenceManager
 				.getDefaultSharedPreferences(appctxt);

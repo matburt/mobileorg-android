@@ -40,14 +40,14 @@ public class OrgFileParser {
     Pattern titlePattern = null;
     FileInputStream fstream;
     public Node rootNode = new Node("");
-    MobileOrgDatabase appdb;
+    OrgDatabase appdb;
 	ArrayList<HashMap<String, Integer>> todos = null;
     public static final String LT = "MobileOrg";
     public String orgDir = Environment.getExternalStorageDirectory() +
                            "/mobileorg/";
     
 	public OrgFileParser(Context context, MobileOrgApplication appInst) {
-		this.appdb = new MobileOrgDatabase(context);;
+		this.appdb = new OrgDatabase(context);;
 		SharedPreferences appSettings = PreferenceManager
 				.getDefaultSharedPreferences(context);
 

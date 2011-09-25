@@ -14,7 +14,7 @@ import android.widget.TextView;
 import com.matburt.mobileorg.MobileOrgApplication;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Parsing.NodeWriter;
-import com.matburt.mobileorg.Parsing.MobileOrgDatabase;
+import com.matburt.mobileorg.Parsing.OrgDatabase;
 import com.matburt.mobileorg.Parsing.Node;
 
 public class EditNodeActivity extends Activity {
@@ -73,7 +73,7 @@ public class EditNodeActivity extends Activity {
 			appInst.popSelection();
 		}
 
-		MobileOrgDatabase appdb = new MobileOrgDatabase(this);
+		OrgDatabase appdb = new OrgDatabase(this);
 		setSpinner(todoStateView, appdb.getTodods(), node.todo);
 		setSpinner(priorityView, appdb.getPriorities(), node.priority);
 		appdb.close();

@@ -32,7 +32,7 @@ import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Error.ErrorReporter;
 import com.matburt.mobileorg.Error.ReportableError;
 import com.matburt.mobileorg.Parsing.NodeEncryption;
-import com.matburt.mobileorg.Parsing.MobileOrgDatabase;
+import com.matburt.mobileorg.Parsing.OrgDatabase;
 import com.matburt.mobileorg.Parsing.Node;
 import com.matburt.mobileorg.Parsing.OrgFileParser;
 import com.matburt.mobileorg.Settings.SettingsActivity;
@@ -47,7 +47,7 @@ public class OutlineActivity extends ListActivity
 	private static final int RUNFOR_NEWNODE = 3;
 
 	MobileOrgApplication appInst;
-	private MobileOrgDatabase appdb;
+	private OrgDatabase appdb;
 	private SharedPreferences appSettings;
 
 	private int displayIndex;
@@ -63,7 +63,7 @@ public class OutlineActivity extends ListActivity
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		this.appdb = new MobileOrgDatabase((Context) this);
+		this.appdb = new OrgDatabase((Context) this);
 		this.appInst = (MobileOrgApplication) this.getApplication();
 		this.appSettings = PreferenceManager
 				.getDefaultSharedPreferences(getBaseContext());

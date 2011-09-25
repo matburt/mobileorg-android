@@ -12,7 +12,7 @@ import android.preference.PreferenceManager;
 import android.widget.RemoteViews;
 
 import com.matburt.mobileorg.R;
-import com.matburt.mobileorg.Parsing.MobileOrgDatabase;
+import com.matburt.mobileorg.Parsing.OrgDatabase;
 import com.matburt.mobileorg.Parsing.Node;
 import com.matburt.mobileorg.Parsing.OrgFileParser;
 
@@ -29,10 +29,10 @@ public class MobileOrgWidget extends AppWidgetProvider {
     }
 
     public static class MobileOrgWidgetService extends Service {
-        private MobileOrgDatabase appdb;
+        private OrgDatabase appdb;
         @Override
         public void onStart(Intent intent, int startId) {
-            this.appdb = new MobileOrgDatabase((Context)this);
+            this.appdb = new OrgDatabase((Context)this);
             RemoteViews updateViews = this.genUpdateDisplay(this);
             ComponentName thisWidget = new ComponentName(this,
                                                          MobileOrgWidget.class);

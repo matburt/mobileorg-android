@@ -24,11 +24,11 @@ import android.util.Log;
 
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Error.ReportableError;
-import com.matburt.mobileorg.Parsing.MobileOrgDatabase;
+import com.matburt.mobileorg.Parsing.OrgDatabase;
 
 abstract public class Synchronizer
 {
-    public MobileOrgDatabase appdb = null;
+    public OrgDatabase appdb = null;
     public SharedPreferences appSettings = null;
     public Context rootContext = null;
     public static final String LT = "MobileOrg";
