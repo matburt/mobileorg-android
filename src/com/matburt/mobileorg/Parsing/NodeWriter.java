@@ -18,7 +18,6 @@ public class NodeWriter {
 	private SharedPreferences appSettings;
 	private OrgDatabase appdb;
 	private Activity appActivity;
-	public static final String LT = "MobileOrg";
 	public static final String ORGFILE = "mobileorg.org";
 
 	public NodeWriter(Activity parentActivity) {

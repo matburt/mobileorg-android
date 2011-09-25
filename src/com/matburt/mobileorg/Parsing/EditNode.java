@@ -47,7 +47,7 @@ public class EditNode {
 				+ this.title.trim() + "]]\n";
 		result += "** Old value\n" + this.oldVal.trim() + "\n";
 		result += "** New value\n" + this.newVal.trim() + "\n";
-		result += "** End of edit" + "\n";
+		result += "** End of edit" + "\n\n";
 		return result;
 	}
 }
