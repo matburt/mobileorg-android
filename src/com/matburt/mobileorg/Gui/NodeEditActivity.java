@@ -18,7 +18,7 @@ import com.matburt.mobileorg.Parsing.NodeWriter;
 import com.matburt.mobileorg.Parsing.OrgDatabase;
 import com.matburt.mobileorg.Parsing.Node;
 
-public class EditNodeActivity extends Activity {
+public class NodeEditActivity extends Activity {
 	public final static String ACTIONMODE_CREATE = "create";
 	public final static String ACTIONMODE_EDIT = "edit";
 
@@ -112,8 +112,8 @@ public class EditNodeActivity extends Activity {
 	View.OnClickListener editBodyListener = new View.OnClickListener() {
 		public void onClick(View v) {
 			Intent intent = new Intent(v.getContext(),
-					EditNodeBodyActivity.class);
-			intent.putExtra(EditNodeBodyActivity.DISPLAY_STRING, node.payload);
+					NodeEditBodyActivity.class);
+			intent.putExtra(NodeEditBodyActivity.DISPLAY_STRING, node.payload);
 			startActivityForResult(intent, EDIT_BODY);
 		}
 	};
@@ -123,7 +123,7 @@ public class EditNodeActivity extends Activity {
 		if (requestCode == EDIT_BODY) {
 			if (resultCode == RESULT_OK) {
 				String result = data
-						.getStringExtra(EditNodeBodyActivity.RESULT_STRING);
+						.getStringExtra(NodeEditBodyActivity.RESULT_STRING);
 				node.payload = result;
 				payloadView.setText(result);
 			}
@@ -144,11 +144,16 @@ public class EditNodeActivity extends Activity {
 			node.priority = newPriority;
 			node.payload = newPayload;
 
-			try { writer.write(node); }
-			catch (IOException e) {}
+			try {
+				writer.write(node);		
+			} catch (IOException e) {
+			}
 		} else if (this.actionMode.equals(ACTIONMODE_EDIT)) {
-			try { writer.editNode(node, newTitle, newTodo, newPriority, newPayload); }
-			catch (IOException e) {}
+			try {
+				writer.editNode(node, newTitle, newTodo, newPriority,
+						newPayload);
+			} catch (IOException e) {
+			}
 		}
 		writer.close();
 	}

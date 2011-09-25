@@ -359,7 +359,7 @@ public class OrgFileParser {
         Pattern editTitlePattern = Pattern.compile("F\\((edit:.*?)\\) \\[\\[(.*?)\\]\\[(.*?)\\]\\]");
         Pattern createTitlePattern = Pattern.compile("^\\*\\s+(.*)");
         ArrayList<EditNode> edits = new ArrayList<EditNode>();
-        BufferedReader breader = this.getHandle("mobileorg.org");
+        BufferedReader breader = this.getHandle(NodeWriter.ORGFILE);
         if (breader == null)
             return edits;
 

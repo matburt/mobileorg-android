@@ -9,7 +9,7 @@ import android.widget.EditText;
 
 import com.matburt.mobileorg.R;
 
-public class EditNodeBodyActivity extends Activity
+public class NodeEditBodyActivity extends Activity
 {
 	public static final String DISPLAY_STRING = "text";
 	public static final String RESULT_STRING = "text";

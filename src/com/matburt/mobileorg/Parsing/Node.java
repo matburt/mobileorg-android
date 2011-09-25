@@ -146,24 +146,26 @@ public class Node implements Cloneable {
 		return dateInfo;
 	}
 
-	public ArrayList<String> getTags() {
-		return tags;
-	}
 
 	void setParentNode(Node pnode) {
 		this.parent = pnode;
 	}
-
-	void addPayload(String npayload) {
-		this.payload += npayload + "\n";
-	}
-
-	void addChild(Node childNode) {
+	
+	public void addChild(Node childNode) {
 		this.children.add(childNode);
+		childNode.parent = this;
 	}
 
 	void clearChildren() {
 		this.children.clear();
+	}
+
+	public ArrayList<String> getTags() {
+		return tags;
+	}
+	
+	void addPayload(String npayload) {
+		this.payload += npayload + "\n";
 	}
 
 	void addProperty(String key, String val) {

@@ -14,14 +14,12 @@ import android.content.SharedPreferences;
 import android.os.Environment;
 import android.preference.PreferenceManager;
 
-import com.matburt.mobileorg.MobileOrgApplication;
-
 public class NodeWriter {
 	private SharedPreferences appSettings;
 	private OrgDatabase appdb;
 	private Activity appActivity;
 	public static final String LT = "MobileOrg";
-	private final String ORGFILE = "mobileorg.org";
+	public static final String ORGFILE = "mobileorg.org";
 
 	public NodeWriter(Activity parentActivity) {
 		this.appActivity = parentActivity;
@@ -67,11 +65,6 @@ public class NodeWriter {
 				newValue);
 		
 		writeNode(editNode.toString());
-
-		// EditNodes are stored and applied on-the-fly by OutlineListAdapter
-		MobileOrgApplication appInst = (MobileOrgApplication) this.appActivity
-				.getApplication();
-		appInst.edits.add(editNode);
 	}
 
 	private void writeNode(String message) throws IOException {
@@ -94,6 +87,7 @@ public class NodeWriter {
 		
 		writer.write(message);
 		this.appdb.addOrUpdateFile(ORGFILE, "New Notes", "");
+		// TODO Parse ORGFILE to update data structures.
 		writer.close();
 	}
 

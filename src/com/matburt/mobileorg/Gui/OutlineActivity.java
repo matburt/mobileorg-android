@@ -234,16 +234,16 @@ public class OutlineActivity extends ListActivity
 	}
 	
 	private boolean runEditNewNodeActivity() {
-		Intent intent = new Intent(this, EditNodeActivity.class);
-		intent.putExtra("actionMode", EditNodeActivity.ACTIONMODE_CREATE);
+		Intent intent = new Intent(this, NodeEditActivity.class);
+		intent.putExtra("actionMode", NodeEditActivity.ACTIONMODE_CREATE);
 		startActivityForResult(intent, RUNFOR_NEWNODE);
 		return true;
 	}
 	
 	private void runEditNodeActivity(Node node, int position) {
 		Intent intent = new Intent(this,
-				EditNodeActivity.class);
-		intent.putExtra("actionMode", EditNodeActivity.ACTIONMODE_EDIT);
+				NodeEditActivity.class);
+		intent.putExtra("actionMode", NodeEditActivity.ACTIONMODE_EDIT);
 		intent.putIntegerArrayListExtra("nodePath",
 				this.appInst.nodeSelection);
 		this.appInst.pushSelection(position);
@@ -251,7 +251,7 @@ public class OutlineActivity extends ListActivity
 	}
 
 	private void runViewNodeActivity(Node node) {
-		Intent intent = new Intent(this, ViewNodeActivity.class);
+		Intent intent = new Intent(this, NodeViewActivity.class);
 		String docBuffer = node.name + "\n\n" + node.payload;
 		intent.putExtra("txtValue", docBuffer);
 		startActivity(intent);
