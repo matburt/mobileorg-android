@@ -18,6 +18,9 @@ import com.matburt.mobileorg.Parsing.MobileOrgDatabase;
 import com.matburt.mobileorg.Parsing.Node;
 
 public class EditNodeActivity extends Activity {
+	public final static String ACTIONMODE_CREATE = "create";
+	public final static String ACTIONMODE_EDIT = "edit";
+	
 	private ArrayList<Integer> mNodePath;
 	private EditText titleView;
 	private TextView payloadView;
@@ -58,9 +61,9 @@ public class EditNodeActivity extends Activity {
 		MobileOrgApplication appInst = (MobileOrgApplication) this
 				.getApplication();
 
-		if (this.actionMode.equals("create")) {
+		if (this.actionMode.equals(ACTIONMODE_CREATE)) {
 			node = new Node();
-		} else if (this.actionMode.equals("edit")) {
+		} else if (this.actionMode.equals(ACTIONMODE_EDIT)) {
 			node = appInst.getNode(mNodePath);
 			node.applyEdits(appInst.findEdits(node.nodeId));
 
@@ -143,7 +146,7 @@ public class EditNodeActivity extends Activity {
 			newPriority = priSelected.toString();
 		}
 
-		if (this.actionMode.equals("edit")) {
+		if (this.actionMode.equals(ACTIONMODE_EDIT)) {
 			if (!node.name.equals(newTitle)) {
 				creator.editNote("heading", node.nodeId, newTitle, node.name,
 						newTitle);
@@ -164,7 +167,7 @@ public class EditNodeActivity extends Activity {
 						payloadView.getText().toString());
 				node.payload = payloadView.getText().toString();
 			}
-		} else if (this.actionMode.equals("create")) {
+		} else if (this.actionMode.equals(ACTIONMODE_CREATE)) {
 			node.name = newTitle;
 			node.todo = newTodo;
 			node.priority = newPriority;

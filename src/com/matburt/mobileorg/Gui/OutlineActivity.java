@@ -121,7 +121,7 @@ public class OutlineActivity extends ListActivity
 	}
 	
 	/**
-	 * Runs the parser and refreshes outline by calling refreshDisplay().
+	 * Runs the parser and refreshes outline by calling {@link #refreshDisplay}.
 	 * If parsing didn't result in any files, display a newSetup dialog.
 	 */
 	private void runParser() {
@@ -235,7 +235,7 @@ public class OutlineActivity extends ListActivity
 	
 	private boolean runEditNewNodeActivity() {
 		Intent intent = new Intent(this, EditNodeActivity.class);
-		intent.putExtra("actionMode", "create");
+		intent.putExtra("actionMode", EditNodeActivity.ACTIONMODE_CREATE);
 		startActivityForResult(intent, RUNFOR_NEWNODE);
 		return true;
 	}
@@ -243,7 +243,7 @@ public class OutlineActivity extends ListActivity
 	private void runEditNodeActivity(Node node, int position) {
 		Intent intent = new Intent(this,
 				EditNodeActivity.class);
-		intent.putExtra("actionMode", "edit");
+		intent.putExtra("actionMode", EditNodeActivity.ACTIONMODE_EDIT);
 		intent.putIntegerArrayListExtra("nodePath",
 				this.appInst.nodeSelection);
 		this.appInst.pushSelection(position);
