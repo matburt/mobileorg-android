@@ -4,7 +4,7 @@
    android:orientation="vertical"
    android:layout_height="fill_parent"
    android:layout_width="fill_parent">
-  <EditText android:id="@+id/orgEditTxt"
+  <EditText android:id="@+id/textDisplay"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:layout_weight="1"

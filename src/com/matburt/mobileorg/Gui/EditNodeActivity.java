@@ -26,7 +26,7 @@ public class EditNodeActivity extends Activity {
 	private Spinner mPriority;
 	private Spinner mTodoState;
 	private EditText mTags;
-	private Node mNode;
+	private Node node;
 	private MobileOrgDatabase mOrgDb;
 	private String actionMode;
 
@@ -62,19 +62,19 @@ public class EditNodeActivity extends Activity {
 		MobileOrgApplication appInst = (MobileOrgApplication) this
 				.getApplication();
 		if (this.actionMode.equals("edit")) {
-			mNode = appInst.getNode(mNodePath);
-			mNode.applyEdits(appInst.findEdits(mNode.nodeId));
+			node = appInst.getNode(mNodePath);
+			node.applyEdits(appInst.findEdits(node.nodeId));
 
-			mTitle.setText(mNode.name);
-			mBody.setText(mNode.payload);
-			mTags.setText(mNode.getTagString());
+			mTitle.setText(node.name);
+			mBody.setText(node.payload);
+			mTags.setText(node.getTagString());
 			appInst.popSelection();
 		}
 		if (this.actionMode.equals("create")) {
-			mNode = new Node();
+			node = new Node();
 		}
-		setSpinner(mTodoState, this.mOrgDb.getTodos(), mNode.todo);
-		setSpinner(mPriority, this.mOrgDb.getPriorities(), mNode.priority);
+		setSpinner(mTodoState, this.mOrgDb.getTodos(), node.todo);
+		setSpinner(mPriority, this.mOrgDb.getPriorities(), node.priority);
 	}
 
 	View.OnClickListener saveNodeListener = new View.OnClickListener() {
@@ -95,27 +95,21 @@ public class EditNodeActivity extends Activity {
 	View.OnClickListener editBodyListener = new View.OnClickListener() {
 		public void onClick(View v) {
 			Intent intent = new Intent(v.getContext(), EditNodeBodyActivity.class);
-			if (mNode.nodeId != null && mNode.nodeId.length() > 0) {
-				intent.putExtra("nodeId", mNode.nodeId);
-			}
-			intent.putExtra("editType", "body");
-			intent.putExtra("txtValue", mNode.payload);
-			intent.putExtra("nodeTitle", mNode.nodeTitle);
+			intent.putExtra(EditNodeBodyActivity.DISPLAY_STRING, node.payload);
 			startActivityForResult(intent, EDIT_BODY);
 		}
 	};
 
-
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if (requestCode == EDIT_BODY) {
-			if (data == null || data.getStringExtra("text") == null) {
-				return;
+			if (resultCode == RESULT_OK) {
+				String result = data
+						.getStringExtra(EditNodeBodyActivity.RESULT_STRING);
+				node.payload = result;
+				mBody.setText(result);
+				populateDisplay();
 			}
-			String newBody = data.getStringExtra("text");
-			mNode.payload = newBody;
-			mBody.setText(newBody);
-			populateDisplay();
 		}
 	}
 
@@ -166,33 +160,33 @@ public class EditNodeActivity extends Activity {
 		}
 
 		if (this.actionMode.equals("edit")) {
-			if (!mNode.name.equals(newTitle)) {
-				creator.editNote("heading", mNode.nodeId, newTitle, mNode.name,
+			if (!node.name.equals(newTitle)) {
+				creator.editNote("heading", node.nodeId, newTitle, node.name,
 						newTitle);
-				mNode.name = newTitle;
+				node.name = newTitle;
 			}
-			if (newTodo != null && !mNode.todo.equals(newTodo)) {
-				creator.editNote("todo", mNode.nodeId, newTitle, mNode.todo,
+			if (newTodo != null && !node.todo.equals(newTodo)) {
+				creator.editNote("todo", node.nodeId, newTitle, node.todo,
 						newTodo);
-				mNode.todo = newTodo;
+				node.todo = newTodo;
 			}
-			if (newPriority != null && !mNode.priority.equals(newPriority)) {
-				creator.editNote("priority", mNode.nodeId, newTitle,
-						mNode.priority, newPriority);
-				mNode.priority = newPriority;
+			if (newPriority != null && !node.priority.equals(newPriority)) {
+				creator.editNote("priority", node.nodeId, newTitle,
+						node.priority, newPriority);
+				node.priority = newPriority;
 			}
-			if (!mNode.payload.equals(mBody.getText().toString())) {
-				creator.editNote("body", mNode.nodeId, newTitle, mNode.payload,
+			if (!node.payload.equals(mBody.getText().toString())) {
+				creator.editNote("body", node.nodeId, newTitle, node.payload,
 						mBody.getText().toString());
-				mNode.payload = mBody.getText().toString();
+				node.payload = mBody.getText().toString();
 			}
 		} else if (this.actionMode.equals("create")) {
-			mNode.name = newTitle;
-			mNode.todo = newTodo;
-			mNode.priority = newPriority;
-			mNode.payload = mBody.getText().toString();
+			node.name = newTitle;
+			node.todo = newTodo;
+			node.priority = newPriority;
+			node.payload = mBody.getText().toString();
 			
-			creator.writeNote(mNode.generateNoteEntry());
+			creator.writeNote(node.generateNoteEntry());
 		}
 		creator.close();
 	}
