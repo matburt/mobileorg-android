@@ -56,7 +56,7 @@ public class PageFlipView extends HorizontalScrollView
 	//see http://blog.velir.com/index.php/2010/11/17/android-snapping-horizontal-scroll/
 	//setup page swiping
 	mGestureDetector = new GestureDetector(getContext(),
-					       new PageSwipeDetector());
+	 				       new PageSwipeDetector());
         setOnTouchListener(this);
     }
 

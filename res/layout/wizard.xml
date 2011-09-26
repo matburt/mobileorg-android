@@ -11,6 +11,7 @@
      android:layout_width="wrap_content"
      android:layout_height="fill_parent"
      android:orientation="horizontal">
+    <!-- page 1 -->
     <ScrollView
        android:id="@+id/wizard_page1_container"
        android:layout_width="fill_parent"
@@ -21,7 +22,7 @@
          android:layout_height="fill_parent"
          android:orientation="vertical">
 	<include 
-	   android:gravity="center_vertical"
+	   android:layout_gravity="center_vertical"
 	   android:layout_marginTop="10dp"
            android:layout_width="fill_parent"
            android:layout_height="wrap_content"
@@ -32,6 +33,7 @@
 	   layout="@layout/wizard_next_button" />
       </LinearLayout>
     </ScrollView>
+    <!-- page 2 -->
     <ScrollView
        android:id="@+id/wizard_page2_container"
        android:layout_width="fill_parent"
@@ -39,27 +41,22 @@
        android:fillViewport="true">
       <LinearLayout
          android:layout_width="fill_parent"
-         android:layout_height="wrap_content"
+         android:layout_height="fill_parent"
          android:orientation="vertical">
 	<include layout="@layout/wizard_navbar" />
       </LinearLayout>
     </ScrollView>
-    <ScrollView
+    <LinearLayout
        android:id="@+id/wizard_page3_container"
        android:layout_width="fill_parent"
-       android:layout_height="fill_parent"
-       android:fillViewport="true">
+       android:layout_height="fill_parent">
       <LinearLayout
-         android:layout_width="fill_parent"
-         android:layout_height="wrap_content"
-         android:orientation="vertical">
-	<TextView	
-	   android:layout_width="wrap_content"
-	   android:layout_height="wrap_content"
-	   android:text="Page 3" />
+	 android:layout_width="fill_parent"
+	 android:layout_height="wrap_content"
+	 android:orientation="vertical">
 	<include layout="@layout/wizard_navbar" />
       </LinearLayout>
-    </ScrollView>
+    </LinearLayout>
   </com.matburt.mobileorg.Settings.WideLinearLayout>
 </com.matburt.mobileorg.Settings.PageFlipView>
 

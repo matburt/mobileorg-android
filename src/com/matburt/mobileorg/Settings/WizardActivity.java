@@ -15,16 +15,21 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup.LayoutParams;
+import android.view.MotionEvent;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.ScrollView;
 import android.widget.Toast;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemSelectedListener;
 import com.matburt.mobileorg.Dropbox.*;
 import com.matburt.mobileorg.R;
 import com.dropbox.client.DropboxAPI;
@@ -51,6 +56,9 @@ public class WizardActivity extends Activity {
     EditText dropboxEmail;
     EditText dropboxPass;
     boolean isLoggedIn=false;
+    ArrayAdapter<String> dropboxFolders;
+    //page 3 variables
+    View folderPage;
 
     /** Called when the activity is first created. */
     @Override
@@ -95,7 +103,10 @@ public class WizardActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
-	wizard.restoreLastPage();
+	//debug
+	//wizard.restoreLastPage();
+	//wizard.enablePage(0);
+	//wizard.enablePage(1);
     }
 
     /**
@@ -126,45 +137,48 @@ public class WizardActivity extends Activity {
 	    editor.commit();
 	    //allow scrolling to next page
 	    wizard.enablePage( 0 );
+	    //debug
+	    createDropboxList();
+	    wizard.enablePage(1);
 	}
     }
     
     void createDropboxLogin() {
-	ViewGroup page2 = (ViewGroup) 
-	    findViewById(R.id.wizard_page2_container); //parent scrollview
-	page2 = (ViewGroup) page2.getChildAt(0); //linearlayout
-	LayoutInflater inflater=
-	    (LayoutInflater) LayoutInflater.from(getApplicationContext());
-	loginPage = inflater.inflate(R.layout.wizard_dropbox,
-				     null);
-	//remove current page 2 and re-add dropbox login screen
-	if ( loginAdded ) page2.removeViewAt(0);
-	page2.addView(loginPage, 0);
-	loginAdded = true;
-	//get references to login forms
-	dropboxEmail = (EditText) page2
-	    .findViewById(R.id.wizard_dropbox_email);
-	dropboxPass = (EditText) page2
-	    .findViewById(R.id.wizard_dropbox_password);
-	//setup listener for buttons
-	loginButton = (Button) page2
-	    .findViewById(R.id.wizard_dropbox_login_button);
-	loginButton.setOnClickListener(new OnClickListener() {
+    	ViewGroup page2 = (ViewGroup) 
+    	    findViewById(R.id.wizard_page2_container); //parent scrollview
+    	page2 = (ViewGroup) page2.getChildAt(0); //linearlayout
+    	LayoutInflater inflater=
+    	    (LayoutInflater) LayoutInflater.from(getApplicationContext());
+    	loginPage = inflater.inflate(R.layout.wizard_dropbox,
+    				     null);
+    	//remove current page 2 and re-add dropbox login screen
+    	if ( loginAdded ) page2.removeViewAt(0);
+    	page2.addView(loginPage, 0);
+    	loginAdded = true;
+    	//get references to login forms
+    	dropboxEmail = (EditText) page2
+    	    .findViewById(R.id.wizard_dropbox_email);
+    	dropboxPass = (EditText) page2
+    	    .findViewById(R.id.wizard_dropbox_password);
+    	//setup listener for buttons
+    	loginButton = (Button) page2
+    	    .findViewById(R.id.wizard_dropbox_login_button);
+    	loginButton.setOnClickListener(new OnClickListener() {
             @Override
-		public void onClick(View v) {
+    		public void onClick(View v) {
             	if (isLoggedIn) {
-		    // We're going to log out
-		    dropbox.deauthenticate();
-		    //setLoggedIn(false);
-		    //mText.setText("");
+    		    // We're going to log out
+    		    dropbox.deauthenticate();
+    		    //setLoggedIn(false);
+    		    //mText.setText("");
             	} else {
-		    // Try to log in
-		    loginDropbox();
+    		    // Try to log in
+    		    loginDropbox();
             	}
             }
-	    });
-	//debug
-	dropboxEmail.setText("uri@frankandrobot.com");
+    	    });
+    	//debug
+    	dropboxEmail.setText("uri@frankandrobot.com");
     }
 
     void loginDropbox() {
@@ -231,18 +245,72 @@ public class WizardActivity extends Activity {
 		public void loginSuccessfull() {
 			progress.dismiss();
 			showToast("Logged in!");
-			loginButton.setEnabled(false);
-			ArrayList<DropboxAPI.Entry> contents 
-			    = dropbox.listDirectory("/");
-			String tmp="";
-			for (DropboxAPI.Entry ent:contents) {
-			    if ( ent.is_dir )
-			    tmp += ent.fileName() + " ";
-			}
-			showToast(tmp);
+			createDropboxList();
+			//allow scrolling to next page
+			wizard.enablePage( 1 );
 			//setLoggedIn(true);		
 			//displayAccountInfo(mDropbox.accountInfo());
 		}
     	
     };
+
+    void createDropboxList() {
+	//debug
+	//loginButton.setEnabled(false);
+        //TODO Technically, this should be an async task app may crash
+	//when list of root items is very long and network connection
+	//is slow
+	// ArrayList<DropboxAPI.Entry> contents 
+	//     = dropbox.listDirectory("/");
+	// ArrayList<String> folders = new ArrayList<String>();
+	// for (DropboxAPI.Entry ent:contents) 
+	//     if ( ent.is_dir )
+	// 	folders.add( ent.fileName() );
+	ArrayList<String> folders = new ArrayList<String>();
+	folders.add("Home");
+	folders.add("Public");
+	folders.add("Private");
+	folders.add("MobileOrg");
+	// folders.add("MobileOrg");
+	// folders.add("MobileOrg");
+	// folders.add("MobileOrg");
+	// folders.add("MobileOrg");
+	// folders.add("MobileOrg");
+	// folders.add("MobileOrg");
+	// folders.add("MobileOrg");
+	// folders.add("MobileOrg");
+	// folders.add("MobileOrg");
+	//create ArrayAdapter of Dropbox folders
+	dropboxFolders =
+	    new ArrayAdapter<String>(getApplicationContext(),
+				     //R.layout.simple_list_item_1,
+				     android.R.layout.simple_list_item_single_choice,
+				     folders);
+						  
+	ViewGroup page3 = (ViewGroup) 
+	    findViewById(R.id.wizard_page3_container); //parent scrollview
+	page3 = (ViewGroup) page3.getChildAt(0); //linearlayout
+	LayoutInflater inflater=
+	    (LayoutInflater) LayoutInflater.from(getApplicationContext());
+	loginPage = inflater.inflate(R.layout.wizard_dropbox_list,
+				     null);
+	ListView folderView = (ListView) loginPage
+	    .findViewById(R.id.wizard_dropbox_list);
+	folderView.setAdapter( dropboxFolders );
+	folderView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+	page3.addView(loginPage, 0);
+	folderView.setOnItemSelectedListener(new FolderListListener());
+    }
+
+    class FolderListListener 
+	implements AdapterView.OnItemSelectedListener {
+	@Override
+	    public void onItemSelected(AdapterView<?> parent,
+				       View v, int position, long id) {
+	    // ...
+	}
+
+	@Override
+	    public void onNothingSelected(AdapterView<?> parent) {}
+    }
 }
