@@ -133,6 +133,7 @@ public class OutlineActivity extends ListActivity
 			newSetupDialog.cancel();
 		}
 		
+		appInst.refreshNodestack();
 		refreshDisplay();
 	}
 

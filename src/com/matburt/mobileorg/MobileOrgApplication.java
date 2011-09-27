@@ -56,8 +56,47 @@ public class MobileOrgApplication extends Application {
     }
 
 
+	/**
+	 * Updates the {@link nodestack} with new nodes. When the parser has run, it
+	 * will replace all nodes in {@link #rootNode} with new versions. This
+	 * function tries to find the way back to the active node in the new tree,
+	 * by finding nodes that have the same id as the ones on the current stack.
+	 */
 	public void refreshNodestack() {
+		ArrayList<Node> newNodestack = new ArrayList<Node>();
+		
+		newNodestack.add(this.rootNode);
 
+		if(this.nodestack.size() < 2) {
+			this.nodestack = newNodestack;
+			return;
+		}
+		
+		this.nodestack.remove(0);		
+		
+		Node newNode = this.rootNode;
+		for(Node node : this.nodestack) {
+			newNode = hasNode(node, newNode);
+			if(newNode == null) {
+				this.nodestack = newNodestack;
+				return;
+			}
+			else
+				newNodestack.add(newNode);
+		}
+		
+		this.nodestack = newNodestack;
+	}
+	
+	private Node hasNode(Node childNode, Node parentNode) {
+		if(parentNode.children == null)
+			return null;
+		
+		for(Node newChild: parentNode.children) {
+			if(newChild.name.equals(childNode.name))
+				return newChild;
+		}
+		return null;
 	}
     
     public boolean isSynchConfigured() {
