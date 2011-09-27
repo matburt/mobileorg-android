@@ -47,7 +47,7 @@ public class WizardActivity extends Activity {
     int syncWebDav, syncDropBox, syncSdCard;
     RadioGroup syncGroup; 
     //page 2 variables
-    View loginPage;
+    View loginPage, folderList;
     boolean loginAdded=false;
     Button loginButton;
     ProgressDialog progress;
@@ -94,6 +94,8 @@ public class WizardActivity extends Activity {
         progress.setTitle("Signing in");
 	//when wizard first starts can't go to next page
 	wizard.disableAllNextActions(0);
+	//hide the required XML nav buttons for folder list page
+	wizard.hideNavButtons(2); //page 2
     }
 
     /**
@@ -245,6 +247,7 @@ public class WizardActivity extends Activity {
 		public void loginSuccessfull() {
 			progress.dismiss();
 			showToast("Logged in!");
+			loginButton.setEnabled(false);
 			createDropboxList();
 			//allow scrolling to next page
 			wizard.enablePage( 1 );
@@ -255,8 +258,6 @@ public class WizardActivity extends Activity {
     };
 
     void createDropboxList() {
-	//debug
-	//loginButton.setEnabled(false);
         //TODO Technically, this should be an async task app may crash
 	//when list of root items is very long and network connection
 	//is slow
@@ -271,35 +272,46 @@ public class WizardActivity extends Activity {
 	folders.add("Public");
 	folders.add("Private");
 	folders.add("MobileOrg");
-	// folders.add("MobileOrg");
-	// folders.add("MobileOrg");
-	// folders.add("MobileOrg");
-	// folders.add("MobileOrg");
-	// folders.add("MobileOrg");
-	// folders.add("MobileOrg");
-	// folders.add("MobileOrg");
-	// folders.add("MobileOrg");
-	// folders.add("MobileOrg");
+	folders.add( "MobileOrg");
+	folders.add("MobileOrg");
+	folders.add("MobileOrg");
+	folders.add("MobileOrg");
+	folders.add("MobileOrg");
+	folders.add("MobileOrg");
+	folders.add("MobileOrg");
+	folders.add("MobileOrg");
+	folders.add("MobileOrg");
 	//create ArrayAdapter of Dropbox folders
 	dropboxFolders =
 	    new ArrayAdapter<String>(getApplicationContext(),
 				     //R.layout.simple_list_item_1,
 				     android.R.layout.simple_list_item_single_choice,
 				     folders);
-						  
+	//inflate dropbox list
+	LayoutInflater inflater=
+	    (LayoutInflater) LayoutInflater.from(getApplicationContext());
+	folderList = inflater.inflate(R.layout.wizard_dropbox_list,
+				     null);
+	ListView folderView = (ListView) folderList
+	    .findViewById(R.id.wizard_dropbox_list);
+	//disable XML nav buttons
+	wizard.hideNavButtons(2); 
+	//add nav button as footer to ListView otherwise scrolling
+	//won't work
+	Button previousButton = (Button) 
+	    inflater.inflate(R.layout.wizard_previous_button,null);
+	wizard.enableBackButton( previousButton );
+	//as per docs, this has to be called before setAdapter(). 
+	folderView.addFooterView( previousButton );
+	folderView.setAdapter( dropboxFolders );
+	folderView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+	folderView.setOnItemSelectedListener(new FolderListListener());
+	//actually add folder list to wizard
 	ViewGroup page3 = (ViewGroup) 
 	    findViewById(R.id.wizard_page3_container); //parent scrollview
 	page3 = (ViewGroup) page3.getChildAt(0); //linearlayout
-	LayoutInflater inflater=
-	    (LayoutInflater) LayoutInflater.from(getApplicationContext());
-	loginPage = inflater.inflate(R.layout.wizard_dropbox_list,
-				     null);
-	ListView folderView = (ListView) loginPage
-	    .findViewById(R.id.wizard_dropbox_list);
-	folderView.setAdapter( dropboxFolders );
-	folderView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
-	page3.addView(loginPage, 0);
-	folderView.setOnItemSelectedListener(new FolderListListener());
+
+	page3.addView(folderList, 0);
     }
 
     class FolderListListener 
@@ -307,7 +319,7 @@ public class WizardActivity extends Activity {
 	@Override
 	    public void onItemSelected(AdapterView<?> parent,
 				       View v, int position, long id) {
-	    // ...
+	    //showToast(.
 	}
 
 	@Override

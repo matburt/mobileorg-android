@@ -20,9 +20,9 @@
       <LinearLayout
          android:layout_width="fill_parent"
          android:layout_height="fill_parent"
+	 android:gravity="center_vertical"
          android:orientation="vertical">
 	<include 
-	   android:layout_gravity="center_vertical"
 	   android:layout_marginTop="10dp"
            android:layout_width="fill_parent"
            android:layout_height="wrap_content"
@@ -43,6 +43,10 @@
          android:layout_width="fill_parent"
          android:layout_height="fill_parent"
          android:orientation="vertical">
+	<View
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	    android:layout_weight="1.0"/>
 	<include layout="@layout/wizard_navbar" />
       </LinearLayout>
     </ScrollView>
@@ -54,7 +58,8 @@
 	 android:layout_width="fill_parent"
 	 android:layout_height="wrap_content"
 	 android:orientation="vertical">
-	<include layout="@layout/wizard_navbar" />
+	<include layout="@layout/wizard_previous_button" />
+	<!-- navbar added again in code -->
       </LinearLayout>
     </LinearLayout>
   </com.matburt.mobileorg.Settings.WideLinearLayout>

@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.content.Context;
 import android.view.Display;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.HorizontalScrollView;
 import android.view.ViewGroup;
@@ -89,6 +90,16 @@ public class PageFlipView extends HorizontalScrollView
 	}
     }
 
+    public void enableBackButton(Button b) {
+	b.setOnClickListener(previousPageButtonListener);
+	b.setEnabled( true );
+    }
+
+    public void enableNextButton(Button b) {
+	b.setOnClickListener(nextPageButtonListener);
+	b.setEnabled( true );
+    }
+
     //starting from given page, disable all next buttons, and disable
     //swiping to the right.
     public void disableAllNextActions(int page) {
@@ -118,6 +129,19 @@ public class PageFlipView extends HorizontalScrollView
 	if ( page != 0 )
 	    pageContainer.findViewById(R.id.wizard_previous_button)
 		.setEnabled(state);
+    }
+
+    public void hideNavButtons(int page) {
+	View pageContainer = (View) container.getChildAt(page);
+	//last page doesn't have a next button
+	if ( page != container.getChildCount() - 1 )
+	    pageContainer.findViewById(R.id.wizard_next_button)
+		.setVisibility(View.GONE);
+	//first page doesn't have a previous button
+	if ( page != 0 )
+	    pageContainer.findViewById(R.id.wizard_previous_button)
+		.setVisibility(View.GONE);
+
     }
 
     //enable prev/next buttons for give page and allow scrolling
