@@ -6,7 +6,6 @@ import java.util.HashMap;
 import android.content.Context;
 import android.graphics.Color;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,51 +18,35 @@ import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Parsing.EditNode;
 import com.matburt.mobileorg.Parsing.Node;
 
-class OutlineListAdapter extends BaseAdapter {
-
-	public Node topNode;
-	public ArrayList<EditNode> edits = new ArrayList<EditNode>();
-	public ArrayList<HashMap<String, Integer>> allTodos = new ArrayList<HashMap<String, Integer>>();
+class OutlineListAdapter extends BaseAdapter 
+{
+	private Node node;
+	private  ArrayList<EditNode> edits;
+	private ArrayList<HashMap<String, Integer>> allTodos;
 	private Context context;
 	private LayoutInflater lInflator;
 
-	public OutlineListAdapter(Context context, Node node,
-			ArrayList<Integer> selection, ArrayList<EditNode> edits,
-			ArrayList<HashMap<String, Integer>> allTodos) {
-
-		this.topNode = node;
-		this.lInflator = LayoutInflater.from(context);
-		this.edits = edits;
+	public OutlineListAdapter(Context context, Node node) {
 		this.context = context;
-		this.allTodos = allTodos;
 
-		Log.d("MobileOrg" + this,
-				"startup path=" + MobileOrgApplication.nodeSelectionStr(selection));
-		if (selection != null) {
-			for (int idx = 0; idx < selection.size(); idx++) {
-				try {
-					this.topNode = this.topNode.children.get(selection
-							.get(idx));
-				} catch (IndexOutOfBoundsException e) {
-					Log.d("MobileOrg" + this, "IndexOutOfBounds on selection "
-							+ selection.get(idx).toString() + " in node "
-							+ this.topNode.name);
-					return;
-				}
-			}
-		}
+		MobileOrgApplication appInst = (MobileOrgApplication) context.getApplicationContext();
+		this.edits = appInst.edits;
+		
+		this.node = node;
+		this.lInflator = LayoutInflater.from(context);
+		this.allTodos = appInst.getGroupedTodods();
 	}
 
 	@Override
 	public int getCount() {
-		if (this.topNode == null || this.topNode.children == null)
+		if (this.node == null || this.node.children == null)
 			return 0;
-		return this.topNode.children.size();
+		return this.node.children.size();
 	}
 
 	@Override
 	public Object getItem(int position) {
-		return this.topNode.children.get(position);
+		return this.node.children.get(position);
 	}
 
 	@Override
@@ -102,7 +85,7 @@ class OutlineListAdapter extends BaseAdapter {
 			holder = (ViewHolder) convertView.getTag();
 		}
 		
-		Node node = this.topNode.children.get(position);
+		Node node = this.node.children.get(position);
 		node.applyEdits(this.edits);
 		
 		String name = node.name;

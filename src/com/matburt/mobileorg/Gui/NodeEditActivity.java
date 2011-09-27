@@ -15,14 +15,12 @@ import android.widget.TextView;
 import com.matburt.mobileorg.MobileOrgApplication;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Parsing.NodeWriter;
-import com.matburt.mobileorg.Parsing.OrgDatabase;
 import com.matburt.mobileorg.Parsing.Node;
 
 public class NodeEditActivity extends Activity {
 	public final static String ACTIONMODE_CREATE = "create";
 	public final static String ACTIONMODE_EDIT = "edit";
 
-	private ArrayList<Integer> mNodePath;
 	private EditText titleView;
 	private TextView payloadView;
 	private Spinner priorityView;
@@ -47,7 +45,6 @@ public class NodeEditActivity extends Activity {
 		payloadView.setOnClickListener(editBodyListener);
 
 		Intent intent = getIntent();
-		this.mNodePath = intent.getIntegerArrayListExtra("nodePath");
 		this.actionMode = intent.getStringExtra("actionMode");
 
 		initDisplay();
@@ -65,18 +62,14 @@ public class NodeEditActivity extends Activity {
 		if (this.actionMode.equals(ACTIONMODE_CREATE)) {
 			node = new Node();
 		} else if (this.actionMode.equals(ACTIONMODE_EDIT)) {
-			node = appInst.getNode(mNodePath);
+			node = appInst.nodestackTop();
 			titleView.setText(node.name);
 			payloadView.setText(node.payload);
 			tagsView.setText(node.getTagString());
-			
-			appInst.popSelection();
 		}
 
-		OrgDatabase appdb = new OrgDatabase(this);
-		setSpinner(todoStateView, appdb.getTodods(), node.todo);
-		setSpinner(priorityView, appdb.getPriorities(), node.priority);
-		appdb.close();
+		setSpinner(todoStateView, appInst.getTodods(), node.todo);
+		setSpinner(priorityView, appInst.getPriorities(), node.priority);
 	}
 
 	private void setSpinner(Spinner view, ArrayList<String> data,
@@ -155,6 +148,5 @@ public class NodeEditActivity extends Activity {
 			} catch (IOException e) {
 			}
 		}
-		writer.close();
 	}
 }

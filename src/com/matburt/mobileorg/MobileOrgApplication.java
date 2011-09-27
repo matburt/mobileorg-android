@@ -2,6 +2,7 @@ package com.matburt.mobileorg;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import android.app.Application;
@@ -16,67 +17,48 @@ import android.util.Log;
 
 import com.matburt.mobileorg.Parsing.EditNode;
 import com.matburt.mobileorg.Parsing.Node;
+import com.matburt.mobileorg.Parsing.OrgDatabase;
 
 public class MobileOrgApplication extends Application {
     public Node rootNode = null;
-    public ArrayList<Integer> nodeSelection;
+    private ArrayList<Node> nodestack = new ArrayList<Node>();
+    
     public ArrayList<EditNode> edits;
-    public static final String SYNCHRONIZER_PLUGIN_ACTION = "com.matburt.mobileorg.SYNCHRONIZE";
-    protected Context mContext;
-
-    public void setSelection(ArrayList<Integer> selection) {
-        nodeSelection = selection;
-    }
-
-    public void setContext(Context context) {
-        mContext = context;
-    }
-    public void pushSelection(int selectedNode)
-    {
-        if (nodeSelection == null) {
-            nodeSelection = new ArrayList<Integer>();
-        }
-        nodeSelection.add(new Integer(selectedNode));
-    }
-
-    public void popSelection()
-    {
-        if (this.nodeSelection != null && this.nodeSelection.size() > 0)
-            this.nodeSelection.remove(nodeSelection.size()-1);
+    private OrgDatabase appdb;
+    
+    @Override
+    public void onCreate() {
+    	this.appdb = new OrgDatabase(this);
     }
     
-    public int lastIndex() {
-        if (this.nodeSelection != null && this.nodeSelection.size() > 0)
-            return this.nodeSelection.get(nodeSelection.size()-1);
-    	return 0;
+    public void pushNodestack(Node node) {
+        nodestack.add(node);
     }
 
-    public Node getSelectedNode()
-    {
-    	return getNode(this.nodeSelection);
+    public void popNodestack() {
+        if (this.nodestack.size() > 0)
+            this.nodestack.remove(nodestack.size()-1);
     }
-
-    /**
-     * Convenience function for retrieving a node based on a path from the root node.
-     * @param path ArrayList of integers representing the indexes
-     * @return node
-     */
-    public Node getNode(ArrayList<Integer> path) {
-    	return getNode(path, path.size());
-    }
-    public Node getParent(ArrayList<Integer> path) {
-    	return getNode(path, path.size() - 1);
+       
+	public void clearNodestack() {
+		this.nodestack.clear();
+		this.nodestack.add(this.rootNode);
 	}
     
-    public Node getNode(ArrayList<Integer> path, int count) {
-    	Node thisNode = rootNode;
-    	if (path != null) {
-    		for (int idx = 0; idx < count; idx++) {
-    			thisNode = thisNode.children.get(path.get(idx));
-    		}
-    	}
-    	return thisNode;
+    public Node nodestackTop() {
+        if (this.nodestack.size() > 0)
+            return this.nodestack.get(nodestack.size()-1);
+    	return null;
     }
+    
+    public int nodestackSize() {
+    	return this.nodestack.size();
+    }
+
+
+	public void refreshNodestack() {
+
+	}
     
     public boolean isSynchConfigured() {
     	SharedPreferences appSettings = PreferenceManager
@@ -94,13 +76,7 @@ public class MobileOrgApplication extends Application {
 			return true;
 	}
 
-	public static ArrayList<Integer> copySelection(ArrayList<Integer> selection) {
-		if (selection == null)
-			return null;
-		else
-			return new ArrayList<Integer>(selection);
-	}
-
+    //TODO Should do something else
 	public static String nodeSelectionStr(ArrayList<Integer> nodes) {
 		if (nodes != null) {
 			String tmp = "";
@@ -122,6 +98,8 @@ public class MobileOrgApplication extends Application {
         return morgDir.getAbsolutePath() + "/";
     }
 
+    public static final String SYNCHRONIZER_PLUGIN_ACTION = "com.matburt.mobileorg.SYNCHRONIZE";
+	
     public static List<PackageItemInfo> discoverSynchronizerPlugins(Context context)
     {
         Intent discoverSynchro = new Intent(SYNCHRONIZER_PLUGIN_ACTION);
@@ -136,5 +114,25 @@ public class MobileOrgApplication extends Application {
             Log.d("MobileOrg","Found synchronizer plugin: "+info.activityInfo.packageName);            
         }
         return out;
+    }
+    
+    public HashMap<String, String> getOrgFiles() {
+    	return appdb.getOrgFiles();
+    }
+    
+    public ArrayList<String> getPriorities() {
+    	return appdb.getPriorities();
+    }
+    
+    public ArrayList<HashMap<String, Integer>> getGroupedTodods() {
+    	return appdb.getGroupedTodods();
+    }
+    
+    public ArrayList<String> getTodods() {
+    	return appdb.getTodods();
+    }
+    
+    public void addOrUpdateFile(String filename, String name, String checksum) {
+    	appdb.addOrUpdateFile(filename, name, checksum);
     }
 }

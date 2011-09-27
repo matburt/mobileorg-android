@@ -2,9 +2,6 @@ package com.matburt.mobileorg.Gui;
 
 import java.io.BufferedReader;
 import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.HashMap;
-
 import android.app.Dialog;
 import android.app.ListActivity;
 import android.app.ProgressDialog;
@@ -31,9 +28,8 @@ import com.matburt.mobileorg.MobileOrgApplication;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Error.ErrorReporter;
 import com.matburt.mobileorg.Error.ReportableError;
-import com.matburt.mobileorg.Parsing.NodeEncryption;
-import com.matburt.mobileorg.Parsing.OrgDatabase;
 import com.matburt.mobileorg.Parsing.Node;
+import com.matburt.mobileorg.Parsing.NodeEncryption;
 import com.matburt.mobileorg.Parsing.OrgFileParser;
 import com.matburt.mobileorg.Settings.SettingsActivity;
 import com.matburt.mobileorg.Synchronizers.DropboxSynchronizer;
@@ -43,15 +39,16 @@ import com.matburt.mobileorg.Synchronizers.WebDAVSynchronizer;
 
 public class OutlineActivity extends ListActivity
 {
+	private static final int RESULT_DONTPOP = 1337;
+	
 	private static final int RUNFOR_EXPAND = 1;
+	private static final int RUNFOR_EDITNODE = 2;
 	private static final int RUNFOR_NEWNODE = 3;
 
-	MobileOrgApplication appInst;
-	private OrgDatabase appdb;
+	private MobileOrgApplication appInst;
 	private SharedPreferences appSettings;
 
-	private int displayIndex;
-	private ArrayList<Integer> origSelection = null;
+	private int depth;
 	
 	private Dialog newSetupDialog;
 	private boolean newSetupDialog_shown = false;
@@ -63,47 +60,36 @@ public class OutlineActivity extends ListActivity
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		this.appdb = new OrgDatabase((Context) this);
+		
 		this.appInst = (MobileOrgApplication) this.getApplication();
 		this.appSettings = PreferenceManager
 				.getDefaultSharedPreferences(getBaseContext());
-
-		registerForContextMenu(getListView());
+		
+		Intent intent = getIntent();
+		this.depth = intent.getIntExtra("depth", 1);
 
 		if (!appInst.isSynchConfigured())
 			this.runShowSettings();
-
-		if (this.appSettings.getBoolean("doAutoSync", false)) {
-			Intent serviceIntent = new Intent();
-			serviceIntent.setAction("com.matburt.mobileorg.SYNC_SERVICE");
-			this.startService(serviceIntent);
-		}
 		
-		if (this.appInst.rootNode == null)
+		if (this.appInst.rootNode == null) {
 			this.runParser();
+			appInst.pushNodestack(appInst.rootNode);
+		}
+
+		registerForContextMenu(getListView());
 	}
 	
 	@Override
 	public void onResume() {
 		super.onResume();
-		
-		noClueWhatThisDoes();
-		this.refreshDisplay();
-	}
-	
-	private void noClueWhatThisDoes() {
-		Intent nodeIntent = getIntent();
-		ArrayList<Integer> intentNodePath = nodeIntent
-				.getIntegerArrayListExtra("nodePath");
-		
-		if (intentNodePath != null) {
-			appInst.nodeSelection = MobileOrgApplication.copySelection(intentNodePath);
-			
-			// Why would you put something into the intent again?!
-			nodeIntent.putIntegerArrayListExtra("nodePath", null);
-		} else {
-			appInst.nodeSelection = MobileOrgApplication.copySelection(this.origSelection);
+
+		// If this is the case the parser has invalidated node
+		if (this.depth > this.appInst.nodestackSize()) {
+			this.setResult(RESULT_DONTPOP);
+			finish();
 		}
+		
+		refreshDisplay();
 	}
 		
 	/**
@@ -111,13 +97,10 @@ public class OutlineActivity extends ListActivity
 	 * data has been updated.
 	 */
 	private void refreshDisplay() {
-		this.setListAdapter(new OutlineListAdapter(this,
-				this.appInst.rootNode, this.appInst.nodeSelection,
-				this.appInst.edits, this.appdb.getGroupedTodods()));
+		this.setListAdapter(new OutlineListAdapter(this, appInst.nodestackTop()));
 
-		this.origSelection = MobileOrgApplication.copySelection(this.appInst.nodeSelection);
-
-		getListView().setSelection(displayIndex);
+		// TODO Fix this
+		// getListView().setSelection(depth);
 	}
 	
 	/**
@@ -133,22 +116,15 @@ public class OutlineActivity extends ListActivity
 					this, "An error occurred during parsing, try re-syncing: "
 							+ e.toString());
 		}
-		
-		HashMap<String, String> allOrgList = this.appdb.getOrgFiles();
-		if (allOrgList.isEmpty()) {
+
+		if (this.appInst.getOrgFiles().isEmpty()) {
 			this.showNewUserWindow();
 		} else if (this.newSetupDialog_shown) {
 			newSetupDialog_shown = false;
 			newSetupDialog.cancel();
 		}
 
-		this.refreshDisplay();
-	}
-	
-	@Override
-	public void onDestroy() {
-		this.appdb.close();
-		super.onDestroy();
+		refreshDisplay();
 	}
 
 	@Override
@@ -169,7 +145,8 @@ public class OutlineActivity extends ListActivity
 			return runShowSettings();
 		
 		case R.id.menu_outline:
-			runExpandSelection(new ArrayList<Integer>());
+			appInst.clearNodestack();
+			onResume();
 			return true;
 		
 		case R.id.menu_capture:
@@ -186,7 +163,7 @@ public class OutlineActivity extends ListActivity
 		inflater.inflate(R.menu.outline_contextmenu, menu);
 
 		// Prevents editing of file nodes.
-		if (this.appInst.nodeSelection == null)
+		if (this.appInst.nodestackSize() < 2)
 			menu.findItem(R.id.contextmenu_edit).setVisible(false);
 	}
 
@@ -202,7 +179,7 @@ public class OutlineActivity extends ListActivity
 			break;
 
 		case R.id.contextmenu_edit:
-			runEditNodeActivity(node, info.position);
+			runEditNodeActivity(node);
 			break;
 		}
 
@@ -211,7 +188,6 @@ public class OutlineActivity extends ListActivity
 
 	@Override
 	public void onListItemClick(ListView l, View v, int position, long id) {
-		this.appInst.pushSelection(position);
 		Node node = (Node) l.getItemAtPosition(position);
 
 		if (node.encrypted && !node.parsed) {
@@ -220,15 +196,13 @@ public class OutlineActivity extends ListActivity
 		}
 		
 		if (node.hasChildren()) {
-			runExpandSelection(this.appInst.nodeSelection);
+			runExpandSelection(node);
 		} else {
-			this.displayIndex = this.appInst.lastIndex();
-			this.appInst.popSelection();
 
 			if (node.isSimple()) {
 				runViewNodeActivity(node);
 			} else {
-				runEditNodeActivity(node, position);
+				runEditNodeActivity(node);
 			}
 		}
 	}
@@ -240,13 +214,12 @@ public class OutlineActivity extends ListActivity
 		return true;
 	}
 	
-	private void runEditNodeActivity(Node node, int position) {
+	private void runEditNodeActivity(Node node) {
 		Intent intent = new Intent(this,
 				NodeEditActivity.class);
 		intent.putExtra("actionMode", NodeEditActivity.ACTIONMODE_EDIT);
-		intent.putIntegerArrayListExtra("nodePath",
-				this.appInst.nodeSelection);
-		this.appInst.pushSelection(position);
+
+		this.appInst.pushNodestack(node);
 		startActivity(intent);
 	}
 
@@ -257,9 +230,12 @@ public class OutlineActivity extends ListActivity
 		startActivity(intent);
 	}
 
-	private void runExpandSelection(ArrayList<Integer> selection) {
+	private void runExpandSelection(Node node) {
+		appInst.pushNodestack(node);
 		Intent intent = new Intent(this, OutlineActivity.class);
-		intent.putIntegerArrayListExtra("nodePath", selection);
+		
+		int childDepth = this.depth + 1;
+		intent.putExtra("depth", childDepth);
 		startActivityForResult(intent, RUNFOR_EXPAND);
 	}
 
@@ -276,10 +252,14 @@ public class OutlineActivity extends ListActivity
 		switch (requestCode) {
 
 		case RUNFOR_EXPAND:
-			displayIndex = this.appInst.lastIndex();
-			this.appInst.popSelection();
+			if(resultCode != RESULT_DONTPOP)
+				this.appInst.popNodestack();
 			break;
 
+		case RUNFOR_EDITNODE:		
+			appInst.popNodestack();
+			break;
+			
 		case RUNFOR_NEWNODE:
 			if(resultCode == RESULT_OK) {
 				this.runParser();
@@ -288,12 +268,12 @@ public class OutlineActivity extends ListActivity
 
 		case NodeEncryption.DECRYPT_MESSAGE:
 			if (resultCode != RESULT_OK || intent == null) {
-				this.appInst.popSelection();
+				this.appInst.popNodestack();
 				return;
 			}
 
 			parseEncryptedNode(intent);
-			runExpandSelection(this.appInst.nodeSelection);
+			runExpandSelection(this.appInst.nodestackTop());
 			break;
 		}
 	}
@@ -312,7 +292,7 @@ public class OutlineActivity extends ListActivity
 			// and send it to APG for decryption
 			NodeEncryption.decrypt(this, rawData);
 		} else {
-			this.appInst.popSelection();
+			this.appInst.popNodestack();
 		}
 	}
 	
@@ -321,7 +301,7 @@ public class OutlineActivity extends ListActivity
 	 */
 	private void parseEncryptedNode(Intent data) {
 		OrgFileParser ofp = new OrgFileParser(getBaseContext(), appInst);
-		Node node = this.appInst.getSelectedNode();
+		Node node = this.appInst.nodestackTop();
 
 		String decryptedData = data
 				.getStringExtra(NodeEncryption.EXTRA_DECRYPTED_MESSAGE);

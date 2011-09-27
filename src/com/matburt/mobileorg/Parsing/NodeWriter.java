@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.StringWriter;
 
+import com.matburt.mobileorg.MobileOrgApplication;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -16,7 +18,6 @@ import android.preference.PreferenceManager;
 
 public class NodeWriter {
 	private SharedPreferences appSettings;
-	private OrgDatabase appdb;
 	private Activity appActivity;
 	public static final String ORGFILE = "mobileorg.org";
 
@@ -24,7 +25,6 @@ public class NodeWriter {
 		this.appActivity = parentActivity;
 		this.appSettings = PreferenceManager
 				.getDefaultSharedPreferences(parentActivity.getBaseContext());
-		this.appdb = new OrgDatabase((Context) parentActivity);
 	}
 	
 	public void write(Node node) throws IOException {
@@ -83,14 +83,13 @@ public class NodeWriter {
 			FileWriter orgFWriter = new FileWriter(orgFileCard, true);
 			writer = new BufferedWriter(orgFWriter);
 		}
-		
 		writer.write(message);
-		this.appdb.addOrUpdateFile(ORGFILE, "New Notes", "");
+		
+		
+		MobileOrgApplication appInst = (MobileOrgApplication) 
+				this.appActivity.getApplication();
+		appInst.addOrUpdateFile(ORGFILE, "New Notes", "");
 		// TODO Parse ORGFILE to update data structures.
 		writer.close();
-	}
-
-	public void close() {
-		this.appdb.close();
 	}
 }
