@@ -63,6 +63,7 @@ public class NodeEditActivity extends Activity {
 			node = new Node();
 		} else if (this.actionMode.equals(ACTIONMODE_EDIT)) {
 			node = appInst.nodestackTop();
+			appInst.popNodestack();
 			titleView.setText(node.name);
 			payloadView.setText(node.payload);
 			tagsView.setText(node.getTagString());

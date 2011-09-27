@@ -48,7 +48,19 @@ public class OutlineActivity extends ListActivity
 	private MobileOrgApplication appInst;
 	private SharedPreferences appSettings;
 
+	/**
+	 * Keeps track of the depth of the tree. This is used to recursively finish
+	 * OutlineActivities, updating the display properly on changes to the
+	 * underlying data structure.
+	 */
 	private int depth;
+	
+	/**
+	 * Keeps track of the last selected item chosen from the outline. When the
+	 * outline resumes it will remember what node was selected. Purely cosmetic
+	 * feature.
+	 */
+	private int lastSelection = 0;
 	
 	private Dialog newSetupDialog;
 	private boolean newSetupDialog_shown = false;
@@ -83,12 +95,11 @@ public class OutlineActivity extends ListActivity
 	public void onResume() {
 		super.onResume();
 
-		// If this is the case the parser has invalidated node
+		// If this is the case, the parser has invalidated nodes
 		if (this.depth > this.appInst.nodestackSize()) {
 			this.setResult(RESULT_DONTPOP);
 			finish();
-		}
-		
+		}		
 		refreshDisplay();
 	}
 		
@@ -98,9 +109,7 @@ public class OutlineActivity extends ListActivity
 	 */
 	private void refreshDisplay() {
 		this.setListAdapter(new OutlineListAdapter(this, appInst.nodestackTop()));
-
-		// TODO Fix this
-		// getListView().setSelection(depth);
+		getListView().setSelection(lastSelection);
 	}
 	
 	/**
@@ -123,7 +132,7 @@ public class OutlineActivity extends ListActivity
 			newSetupDialog_shown = false;
 			newSetupDialog.cancel();
 		}
-
+		
 		refreshDisplay();
 	}
 
@@ -189,6 +198,7 @@ public class OutlineActivity extends ListActivity
 	@Override
 	public void onListItemClick(ListView l, View v, int position, long id) {
 		Node node = (Node) l.getItemAtPosition(position);
+		this.lastSelection = position;
 
 		if (node.encrypted && !node.parsed) {
 			decryptNode(node);
@@ -214,12 +224,16 @@ public class OutlineActivity extends ListActivity
 		return true;
 	}
 	
+
 	private void runEditNodeActivity(Node node) {
+		/* Pushes the given Node to the nodestack, to give it as argument to
+		 * NodeEditActivity, which pops the node after use. We probably wan't to
+		 * find a more elegant solution. */
+		this.appInst.pushNodestack(node);
+		
 		Intent intent = new Intent(this,
 				NodeEditActivity.class);
 		intent.putExtra("actionMode", NodeEditActivity.ACTIONMODE_EDIT);
-
-		this.appInst.pushNodestack(node);
 		startActivity(intent);
 	}
 
@@ -232,8 +246,8 @@ public class OutlineActivity extends ListActivity
 
 	private void runExpandSelection(Node node) {
 		appInst.pushNodestack(node);
+
 		Intent intent = new Intent(this, OutlineActivity.class);
-		
 		int childDepth = this.depth + 1;
 		intent.putExtra("depth", childDepth);
 		startActivityForResult(intent, RUNFOR_EXPAND);
@@ -256,8 +270,7 @@ public class OutlineActivity extends ListActivity
 				this.appInst.popNodestack();
 			break;
 
-		case RUNFOR_EDITNODE:		
-			appInst.popNodestack();
+		case RUNFOR_EDITNODE:
 			break;
 			
 		case RUNFOR_NEWNODE:
