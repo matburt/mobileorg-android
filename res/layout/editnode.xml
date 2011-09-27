@@ -5,7 +5,8 @@
 	<TableRow>
 		<EditText android:id="@+id/title" android:layout_span="4"
 		android:hint="@string/title"
-			android:layout_width="fill_parent" android:layout_height="wrap_content" />
+			android:layout_width="fill_parent" android:layout_height="wrap_content" 
+			android:inputType="text|textMultiLine|textAutoCorrect|textCapSentences" />
 	</TableRow>
 	<TableRow>
 		<TextView android:text="@string/todo_state" android:layout_width="wrap_content" android:layout_height="wrap_content" />
