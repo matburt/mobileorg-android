@@ -30,6 +30,7 @@ import android.widget.RadioGroup;
 import android.widget.ScrollView;
 import android.widget.Toast;
 import android.widget.AdapterView;
+import com.matburt.mobileorg.Views.*;
 import com.matburt.mobileorg.Dropbox.*;
 import com.matburt.mobileorg.R;
 import com.dropbox.client.DropboxAPI;

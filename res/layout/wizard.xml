@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.matburt.mobileorg.Settings.PageFlipView
+<com.matburt.mobileorg.Views.PageFlipView
    xmlns:android="http://schemas.android.com/apk/res/android"
    android:id="@+id/wizard_parent"
    android:layout_width="wrap_content" 
    android:layout_height="fill_parent"
    android:fillViewport="true"
    android:layout_alignParentTop="true">  
-  <com.matburt.mobileorg.Settings.WideLinearLayout
+  <com.matburt.mobileorg.Views.WideLinearLayout
      android:id="@+id/wizard_container"
      android:layout_width="wrap_content"
      android:layout_height="fill_parent"
@@ -63,6 +63,6 @@
 	   layout="@layout/wizard_navbar_last" />
       </LinearLayout>
     </RelativeLayout>
-  </com.matburt.mobileorg.Settings.WideLinearLayout>
-</com.matburt.mobileorg.Settings.PageFlipView>
+  </com.matburt.mobileorg.Views.WideLinearLayout>
+</com.matburt.mobileorg.Views.PageFlipView>
 

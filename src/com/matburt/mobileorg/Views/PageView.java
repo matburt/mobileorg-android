@@ -1,4 +1,4 @@
-package com.matburt.mobileorg.Settings;
+package com.matburt.mobileorg.Views;
 
 import android.util.Log;
 import android.app.Activity;
