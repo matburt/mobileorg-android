@@ -12,6 +12,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Display;
 import android.view.LayoutInflater;
+import android.widget.AdapterView;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup.LayoutParams;
@@ -29,7 +30,6 @@ import android.widget.RadioGroup;
 import android.widget.ScrollView;
 import android.widget.Toast;
 import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemSelectedListener;
 import com.matburt.mobileorg.Dropbox.*;
 import com.matburt.mobileorg.R;
 import com.dropbox.client.DropboxAPI;
@@ -44,10 +44,11 @@ public class WizardActivity extends Activity {
     //container
     PageFlipView wizard;
     //page 1 variables
+    String syncSource;
     int syncWebDav, syncDropBox, syncSdCard;
     RadioGroup syncGroup; 
     //page 2 variables
-    View loginPage, folderList;
+    View loginPage;
     boolean loginAdded=false;
     Button loginButton;
     ProgressDialog progress;
@@ -58,7 +59,10 @@ public class WizardActivity extends Activity {
     boolean isLoggedIn=false;
     ArrayAdapter<String> dropboxFolders;
     //page 3 variables
-    View folderPage;
+    ListView folderList;
+    ArrayList<String> folders;
+    Button doneButton;
+    String dropboxPath;
 
     /** Called when the activity is first created. */
     @Override
@@ -94,8 +98,6 @@ public class WizardActivity extends Activity {
         progress.setTitle("Signing in");
 	//when wizard first starts can't go to next page
 	wizard.disableAllNextActions(0);
-	//hide the required XML nav buttons for folder list page
-	wizard.hideNavButtons(2); //page 2
     }
 
     /**
@@ -105,10 +107,7 @@ public class WizardActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
-	//debug
-	//wizard.restoreLastPage();
-	//wizard.enablePage(0);
-	//wizard.enablePage(1);
+	wizard.restoreLastPage();
     }
 
     /**
@@ -125,23 +124,21 @@ public class WizardActivity extends Activity {
 
 	@Override
 	    public void onCheckedChanged(RadioGroup arg, int checkedId) {
-	    SharedPreferences appSettings = 
-		PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-	    SharedPreferences.Editor editor = appSettings.edit();
 	    if ( checkedId == syncWebDav )
-		editor.putString("syncSource", "webdav");
+		syncSource = "webdav";
 	    else if ( checkedId == syncDropBox ) {
+		syncSource = "dropbox";
 		//editor.putString("syncSource", "dropbox");
 		createDropboxLogin();
 	    }
 	    else if ( checkedId == syncSdCard)
-		editor.putString("syncSource", "sdcard");
-	    editor.commit();
+		syncSource = "sdcard";
+		//editor.putString("syncSource", "sdcard");
 	    //allow scrolling to next page
 	    wizard.enablePage( 0 );
 	    //debug
-	    createDropboxList();
-	    wizard.enablePage(1);
+	    //createDropboxList();
+	    //wizard.enablePage(1);
 	}
     }
     
@@ -152,8 +149,7 @@ public class WizardActivity extends Activity {
     	LayoutInflater inflater=
     	    (LayoutInflater) LayoutInflater.from(getApplicationContext());
     	loginPage = inflater.inflate(R.layout.wizard_dropbox,
-    				     null);
-    	//remove current page 2 and re-add dropbox login screen
+				     null);    	//remove current page 2 and re-add dropbox login screen
     	if ( loginAdded ) page2.removeViewAt(0);
     	page2.addView(loginPage, 0);
     	loginAdded = true;
@@ -248,6 +244,8 @@ public class WizardActivity extends Activity {
 			progress.dismiss();
 			showToast("Logged in!");
 			loginButton.setEnabled(false);
+			storeKeys(dropbox.getConfig().accessTokenKey, 
+				  dropbox.getConfig().accessTokenSecret);
 			createDropboxList();
 			//allow scrolling to next page
 			wizard.enablePage( 1 );
@@ -257,30 +255,39 @@ public class WizardActivity extends Activity {
     	
     };
 
+    void storeKeys(String key, String secret) {
+        // Save the access key for later
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+        Editor edit = prefs.edit();
+        edit.putString("dbPrivKey", key);
+        edit.putString("dbPrivSecret", secret);
+        edit.commit();
+    }
+
     void createDropboxList() {
         //TODO Technically, this should be an async task app may crash
 	//when list of root items is very long and network connection
 	//is slow
-	// ArrayList<DropboxAPI.Entry> contents 
-	//     = dropbox.listDirectory("/");
-	// ArrayList<String> folders = new ArrayList<String>();
-	// for (DropboxAPI.Entry ent:contents) 
-	//     if ( ent.is_dir )
-	// 	folders.add( ent.fileName() );
-	ArrayList<String> folders = new ArrayList<String>();
-	folders.add("Home");
-	folders.add("Public");
-	folders.add("Private");
-	folders.add("MobileOrg");
-	folders.add( "MobileOrg");
-	folders.add("MobileOrg");
-	folders.add("MobileOrg");
-	folders.add("MobileOrg");
-	folders.add("MobileOrg");
-	folders.add("MobileOrg");
-	folders.add("MobileOrg");
-	folders.add("MobileOrg");
-	folders.add("MobileOrg");
+	ArrayList<DropboxAPI.Entry> contents 
+	     = dropbox.listDirectory("/");
+	folders = new ArrayList<String>();
+	for (DropboxAPI.Entry ent:contents) 
+	    if ( ent.is_dir )
+	 	folders.add( ent.fileName() );
+	// folders = new ArrayList<String>();
+	// folders.add("Home");
+	// folders.add("Public");
+	// folders.add("Private");
+	// folders.add("MobileOrg");
+	// folders.add("MobileOrg1");
+	// folders.add("MobileOrg2");
+	// folders.add("MobileOrg3");
+	// folders.add("MobileOrg4");
+	// folders.add("MobileOrg5");
+	// folders.add("MobileOrg6");
+	// folders.add("MobileOrg7");
+	// folders.add("MobileOrg8");
+	// folders.add("MobileOrg9");
 	//create ArrayAdapter of Dropbox folders
 	dropboxFolders =
 	    new ArrayAdapter<String>(getApplicationContext(),
@@ -288,41 +295,59 @@ public class WizardActivity extends Activity {
 				     android.R.layout.simple_list_item_single_choice,
 				     folders);
 	//inflate dropbox list
-	LayoutInflater inflater=
-	    (LayoutInflater) LayoutInflater.from(getApplicationContext());
-	folderList = inflater.inflate(R.layout.wizard_dropbox_list,
-				     null);
-	ListView folderView = (ListView) folderList
-	    .findViewById(R.id.wizard_dropbox_list);
-	//disable XML nav buttons
-	wizard.hideNavButtons(2); 
-	//add nav button as footer to ListView otherwise scrolling
-	//won't work
-	Button previousButton = (Button) 
-	    inflater.inflate(R.layout.wizard_previous_button,null);
-	wizard.enableBackButton( previousButton );
-	//as per docs, this has to be called before setAdapter(). 
-	folderView.addFooterView( previousButton );
-	folderView.setAdapter( dropboxFolders );
-	folderView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
-	folderView.setOnItemSelectedListener(new FolderListListener());
-	//actually add folder list to wizard
 	ViewGroup page3 = (ViewGroup) 
 	    findViewById(R.id.wizard_page3_container); //parent scrollview
 	page3 = (ViewGroup) page3.getChildAt(0); //linearlayout
-
+	LayoutInflater inflater=
+	    (LayoutInflater) LayoutInflater.from(getApplicationContext());
+	folderList = (ListView) inflater.inflate(R.layout.wizard_dropbox_list,
+						 null);
+	//disable XML nav buttons
+	View tmp = page3.findViewById(R.id.wizard_navbar_last);
+	tmp.setVisibility(View.GONE);
+	//add nav button as footer to ListView otherwise scrolling
+	//won't work
+	View previousButton = (View) 
+	   inflater.inflate(R.layout.wizard_navbar_last,null);
+	wizard.enableBackButton( (Button) 
+				 previousButton
+				 .findViewById(R.id.wizard_previous_button) );
+	doneButton = (Button) previousButton
+	    .findViewById(R.id.wizard_finish);
+	doneButton.setOnClickListener(new FinishWizardButtonListener());
+	doneButton.setEnabled(false);
+	//as per docs, this has to be called before setAdapter(). 
+	folderList.addFooterView( previousButton );
+	folderList.setOnItemClickListener(new FolderListListener());
+	folderList.setAdapter( dropboxFolders );
+	folderList.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+	//actually add folder list to wizard
 	page3.addView(folderList, 0);
     }
 
     class FolderListListener 
-	implements AdapterView.OnItemSelectedListener {
+	implements AdapterView.OnItemClickListener {
 	@Override
-	    public void onItemSelected(AdapterView<?> parent,
+	    public void onItemClick(AdapterView<?> parent,
 				       View v, int position, long id) {
-	    //showToast(.
+	    //showToast(position+" "+folders.get(position));
+	    dropboxPath = folders.get(position);
+	    doneButton.setEnabled(true);
 	}
+    }
 
+    class FinishWizardButtonListener implements View.OnClickListener {
 	@Override
-	    public void onNothingSelected(AdapterView<?> parent) {}
+	    public void onClick(View v) {
+	    //end wizard
+	    SharedPreferences appSettings = 
+		PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+	    SharedPreferences.Editor editor = appSettings.edit();
+	    editor.putString("syncSource", syncSource);
+	    editor.putString("dropboxPath", "/"+dropboxPath);
+	    editor.putString("storageMode", "sdcard");
+	    editor.commit();
+	    finish();
+	}
     }
 }

@@ -39,8 +39,8 @@ public class LoginAsyncTask extends AsyncTask<Void, Void, Integer> {
 
     
     final static public String ACCOUNT_PREFS_NAME = "dropbox_account_prefs";
-    final static public String ACCESS_KEY_NAME = "ACCESS_KEY";
-    final static public String ACCESS_SECRET_NAME = "ACCESS_SECRET";
+    final static public String ACCESS_KEY_NAME = "dbPrivKey";
+    final static public String ACCESS_SECRET_NAME = "dbPrivSecret";
     
     String mUser;
     String mPassword;

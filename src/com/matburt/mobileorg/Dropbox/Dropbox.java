@@ -134,7 +134,7 @@ public class Dropbox extends DropboxAPI {
 	}
 
 
-	protected Config getConfig() {
+         public Config getConfig() {
 		if (mConfig==null) {
 			
 			mConfig  = super.getConfig(null, false);

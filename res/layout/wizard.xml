@@ -43,25 +43,26 @@
          android:layout_width="fill_parent"
          android:layout_height="fill_parent"
          android:orientation="vertical">
-	<View
-	    android:layout_width="fill_parent"
-	    android:layout_height="wrap_content"
-	    android:layout_weight="1.0"/>
 	<include layout="@layout/wizard_navbar" />
       </LinearLayout>
     </ScrollView>
-    <LinearLayout
+    <!-- page 3 -->
+    <RelativeLayout
        android:id="@+id/wizard_page3_container"
        android:layout_width="fill_parent"
-       android:layout_height="fill_parent">
+       android:layout_height="fill_parent"
+       android:orientation="vertical">
       <LinearLayout
 	 android:layout_width="fill_parent"
 	 android:layout_height="wrap_content"
 	 android:orientation="vertical">
-	<include layout="@layout/wizard_previous_button" />
 	<!-- navbar added again in code -->
+	<include 
+	   android:layout_width="wrap_content"
+	   android:layout_height="wrap_content"
+	   layout="@layout/wizard_navbar_last" />
       </LinearLayout>
-    </LinearLayout>
+    </RelativeLayout>
   </com.matburt.mobileorg.Settings.WideLinearLayout>
 </com.matburt.mobileorg.Settings.PageFlipView>
 
