@@ -4,9 +4,11 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
@@ -17,13 +19,10 @@ import java.util.regex.Pattern;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
-import android.content.res.Resources.NotFoundException;
 import android.os.Environment;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.matburt.mobileorg.R;
-import com.matburt.mobileorg.Error.ReportableError;
 import com.matburt.mobileorg.Parsing.OrgDatabase;
 
 abstract public class Synchronizer
@@ -35,8 +34,8 @@ abstract public class Synchronizer
     public Resources r;
     final private int BUFFER_SIZE = 23 * 1024;
 
-    public abstract void pull() throws NotFoundException, ReportableError;
-    public abstract void push() throws NotFoundException, ReportableError;
+    public abstract void pull() throws IOException;
+    public abstract void push() throws IOException;
     public abstract boolean checkReady();
 
     public void close() {
@@ -44,162 +43,90 @@ abstract public class Synchronizer
             this.appdb.close();
     }
 
-    public BufferedReader fetchOrgFile(String orgPath) throws NotFoundException, ReportableError{
+    public BufferedReader fetchOrgFile(String orgPath)  throws IOException {
         return null;
     }
 
-    public void fetchAndSaveOrgFile(String orgPath, String destPath) throws ReportableError {
-        BufferedReader reader = this.fetchOrgFile(orgPath);
-        BufferedWriter writer = this.getWriteHandle(destPath);
+	public void fetchAndSaveOrgFile(String orgPath, String destPath)
+			throws IOException {
+		BufferedReader reader = this.fetchOrgFile(orgPath);
+		BufferedWriter writer = this.getWriteHandle(destPath);
 
-        if (writer == null) {
-            throw new ReportableError(
-                    r.getString(R.string.error_file_write, destPath),
-                    null);
-        }
+		char[] baf = new char[BUFFER_SIZE];
+		int actual = 0;
 
+		while (actual != -1) {
+			writer.write(baf, 0, actual);
+			actual = reader.read(baf, 0, BUFFER_SIZE);
+		}
+		writer.close();
+	}
 
-        if (reader == null) {
-            throw new ReportableError(
-                    r.getString(R.string.error_file_read, orgPath),
-                    null);
-        }
+	public String fetchOrgFileString(String orgPath) throws IOException {
+		BufferedReader reader = this.fetchOrgFile(orgPath);
+		if (reader == null) {
+			return "";
+		}
+		String fileContents = "";
+		String thisLine = "";
+		while ((thisLine = reader.readLine()) != null) {
+			fileContents += thisLine + "\n";
+		}
 
-        char[] baf = new char[BUFFER_SIZE];
-        int actual = 0;
-        try {
-            while (actual != -1) {
-                writer.write(baf, 0, actual);
-                actual = reader.read(baf, 0, BUFFER_SIZE);
-            }
-            writer.close();
-        }
-        catch (java.io.IOException e) {
-            throw new ReportableError(
-                           r.getString(R.string.error_file_write,
-                                       orgPath),
-                           e);
+		return fileContents;
+	}
 
-        }
-    }
+	BufferedWriter getWriteHandle(String localRelPath) throws IOException {
+		String storageMode = this.appSettings.getString("storageMode", "");
+		BufferedWriter writer = null;
 
-    public String fetchOrgFileString(String orgPath) throws ReportableError {
-        BufferedReader reader = this.fetchOrgFile(orgPath);
-        if (reader == null) {
-            return "";
-        }
-        String fileContents = "";
-        String thisLine = "";
-        try {
-            while ((thisLine = reader.readLine()) != null) {
-                fileContents += thisLine + "\n";
-            }
-        }
-        catch (java.io.IOException e) {
-               throw new ReportableError(
-                       r.getString(R.string.error_file_read, orgPath),
-                       e);
-        }
-        return fileContents;
-    }
+		if (storageMode.equals("internal") || storageMode == null) {
+			FileOutputStream fs;
+			String normalized = localRelPath.replace("/", "_");
+			fs = this.rootContext.openFileOutput(normalized,
+					Context.MODE_PRIVATE);
+			writer = new BufferedWriter(new OutputStreamWriter(fs));
 
-    BufferedWriter getWriteHandle(String localRelPath) throws ReportableError {
-        String storageMode = this.appSettings.getString("storageMode", "");
-        BufferedWriter writer = null;
-        if (storageMode.equals("internal") || storageMode == null) {
-            FileOutputStream fs;
-            try {
-                String normalized = localRelPath.replace("/", "_");
-                fs = this.rootContext.openFileOutput(normalized, Context.MODE_PRIVATE);
-                writer = new BufferedWriter(new OutputStreamWriter(fs));
-            }
-            catch (java.io.FileNotFoundException e) {
-                Log.e(LT, "Caught FNFE trying to open file " + localRelPath);
-                throw new ReportableError(
-                        r.getString(R.string.error_file_not_found,
-                                    localRelPath),
-                        e);
-            }
-            catch (java.io.IOException e) {
-                Log.e(LT, "IO Exception initializing writer on file " + localRelPath);
-                throw new ReportableError(
-                        r.getString(R.string.error_file_not_found, localRelPath),
-                        e);
-            }
-        }
-        else if (storageMode.equals("sdcard")) {
-            try {
-                File root = Environment.getExternalStorageDirectory();
-                File morgDir = new File(root, "mobileorg");
-                morgDir.mkdir();
-                if (morgDir.canWrite()){
-                    File orgFileCard = new File(morgDir, localRelPath);
-                    FileWriter orgFWriter = new FileWriter(orgFileCard, false);
-                    writer = new BufferedWriter(orgFWriter);
-                }
-                else {
-                    Log.e(LT, "Write permission denied on " + localRelPath);
-                    throw new ReportableError(
-                            r.getString(R.string.error_file_permissions,
-                                        morgDir.getAbsolutePath()),
-                            null);
-                }
-            } catch (java.io.IOException e) {
-                Log.e(LT, "IO Exception initializing writer on sdcard file: " + localRelPath);
-                throw new ReportableError(
-                        "IO Exception initializing writer on sdcard file",
-                        e);
-            }
-        }
-        else {
-            Log.e(LT, "Unknown storage mechanism " + storageMode);
-                throw new ReportableError(
-                		r.getString(R.string.error_local_storage_method_unknown,
-                                    storageMode),
-                		null);
-        }
-        return writer;
-    }
+		} else if (storageMode.equals("sdcard")) {
+			File root = Environment.getExternalStorageDirectory();
+			File morgDir = new File(root, "mobileorg");
+			morgDir.mkdir();
+			if (morgDir.canWrite()) {
+				File orgFileCard = new File(morgDir, localRelPath);
+				FileWriter orgFWriter = new FileWriter(orgFileCard, false);
+				writer = new BufferedWriter(orgFWriter);
+			}
+		}
 
-    BufferedReader getReadHandle(String localRelPath) throws ReportableError {
-        String storageMode = this.appSettings.getString("storageMode", "");
-        BufferedReader reader;
-        if (storageMode.equals("internal") || storageMode == null) {
-            FileInputStream fs;
-            try {
-                fs = rootContext.openFileInput(localRelPath);
-                reader = new BufferedReader(new InputStreamReader(fs));
-            }
-            catch (java.io.FileNotFoundException e) {
-            	Log.i(LT, "Did not find " + localRelPath + " file, not pushing.");
-                return null;
-            }
-        }
-        else if (storageMode.equals("sdcard")) {
-            try {
-                File root = Environment.getExternalStorageDirectory();
-                File morgDir = new File(root, "mobileorg");
-                File morgFile = new File(morgDir, localRelPath);
-                if (!morgFile.exists()) {
-                    Log.i(LT, "Did not find " + localRelPath + " file, not pushing.");
-                    return null;
-                }
-                FileReader orgFReader = new FileReader(morgFile);
-                reader = new BufferedReader(orgFReader);
-            }
-            catch (java.io.IOException e) {
-                throw new ReportableError(
-                		r.getString(R.string.error_file_read, localRelPath),
-                		e);
-            }
-        }
-        else {
-        	throw new ReportableError(
-        			r.getString(R.string.error_local_storage_method_unknown, storageMode),
-        			null);
-        }
-        return reader;
-    }
+		return writer;
+	}
+
+	BufferedReader getReadHandle(String localRelPath) throws FileNotFoundException {
+		String storageMode = this.appSettings.getString("storageMode", "");
+		BufferedReader reader;
+		if (storageMode.equals("internal") || storageMode == null) {
+			FileInputStream fs;
+			try {
+				fs = rootContext.openFileInput(localRelPath);
+				reader = new BufferedReader(new InputStreamReader(fs));
+			} catch (java.io.FileNotFoundException e) {
+				return null;
+			}
+		} else if (storageMode.equals("sdcard")) {
+				File root = Environment.getExternalStorageDirectory();
+				File morgDir = new File(root, "mobileorg");
+				File morgFile = new File(morgDir, localRelPath);
+				if (!morgFile.exists()) {
+					return null;
+				}
+				FileReader orgFReader = new FileReader(morgFile);
+				reader = new BufferedReader(orgFReader);
+
+		} else {
+			return null;
+		}
+		return reader;
+	}
 
     void removeFile(String filePath) {
             this.appdb.removeFile(filePath);

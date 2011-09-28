@@ -1,5 +1,6 @@
 package com.matburt.mobileorg.Synchronizers;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Timer;
@@ -14,7 +15,6 @@ import android.util.Log;
 
 import com.matburt.mobileorg.MobileOrgApplication;
 import com.matburt.mobileorg.Error.ErrorReporter;
-import com.matburt.mobileorg.Error.ReportableError;
 import com.matburt.mobileorg.Parsing.Node;
 import com.matburt.mobileorg.Parsing.OrgFileParser;
 
@@ -131,7 +131,7 @@ public class MobileOrgSyncService extends Service implements SharedPreferences.O
 				try {
 					appSync.pull();
 					appSync.push();
-				} catch (ReportableError e) {
+				} catch (IOException e) {
 				} finally {
 					appSync.close();
 				}

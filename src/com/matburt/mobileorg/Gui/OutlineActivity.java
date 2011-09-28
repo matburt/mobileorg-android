@@ -1,6 +1,7 @@
 package com.matburt.mobileorg.Gui;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.StringReader;
 import android.app.Dialog;
 import android.app.ListActivity;
@@ -27,7 +28,6 @@ import android.widget.Toast;
 import com.matburt.mobileorg.MobileOrgApplication;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Error.ErrorReporter;
-import com.matburt.mobileorg.Error.ReportableError;
 import com.matburt.mobileorg.Parsing.Node;
 import com.matburt.mobileorg.Parsing.NodeEncryption;
 import com.matburt.mobileorg.Parsing.OrgFileParser;
@@ -66,7 +66,7 @@ public class OutlineActivity extends ListActivity
 	private boolean newSetupDialog_shown = false;
 
 	final Handler syncHandler = new Handler();
-	private ReportableError syncError;
+	private IOException syncError;
 	private ProgressDialog syncDialog;
 
 	@Override
@@ -381,7 +381,7 @@ public class OutlineActivity extends ListActivity
 					appSync.pull();
 					appSync.push();
 					Log.d("MobileOrg" + this, "Finished parsing...");
-				} catch (ReportableError e) {
+				} catch (IOException e) {
 					syncError = e;
 				} finally {
 					appSync.close();
@@ -403,7 +403,7 @@ public class OutlineActivity extends ListActivity
 	private void postSynchronize() {
 		syncDialog.dismiss();
 		if (this.syncError != null) {
-			ErrorReporter.displayError(this, this.syncError);
+			ErrorReporter.displayError(this, this.syncError.getMessage());
 		} else {
 			this.runParser();
 			this.onResume();

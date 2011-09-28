@@ -6,18 +6,16 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 import android.content.Context;
-import android.content.res.Resources.NotFoundException;
 import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
-import com.matburt.mobileorg.R;
-import com.matburt.mobileorg.Error.ReportableError;
 import com.matburt.mobileorg.Parsing.OrgDatabase;
 
 public class SDCardSynchronizer extends Synchronizer
@@ -30,11 +28,11 @@ public class SDCardSynchronizer extends Synchronizer
                                    parentContext.getApplicationContext());
     }
 
-    public void push() throws NotFoundException, ReportableError {
+    public void push() throws IOException {
         String storageMode = this.appSettings.getString("storageMode", "");
         BufferedReader reader = null;
         String fileContents = "";
-
+        
         if (storageMode.equals("internal") || storageMode == null) {
             FileInputStream fs;
             try {
@@ -47,7 +45,6 @@ public class SDCardSynchronizer extends Synchronizer
             }
         }
         else if (storageMode.equals("sdcard")) {
-            try {
                 File root = Environment.getExternalStorageDirectory();
                 File morgDir = new File(root, "mobileorg");
                 File morgFile = new File(morgDir, "mobileorg.org");
@@ -58,29 +55,13 @@ public class SDCardSynchronizer extends Synchronizer
                 FileReader orgFReader = new FileReader(morgFile);
                 reader = new BufferedReader(orgFReader);
             }
-            catch (java.io.IOException e) {
-                throw new ReportableError(
-                		r.getString(R.string.error_file_read, "mobileorg.org"),
-                		e);
-            }
-        }
-        else {
-        	throw new ReportableError(
-        			r.getString(R.string.error_local_storage_method_unknown, storageMode),
-        			null);
-        }
+        
 
         String thisLine = "";
-        try {
             while ((thisLine = reader.readLine()) != null) {
                 fileContents += thisLine + "\n";
             }
-        }
-        catch (java.io.IOException e) {
-        	throw new ReportableError(
-            		r.getString(R.string.error_file_read, "mobileorg.org"),
-            		e);
-        }
+        
 
         String indexFile = this.appSettings.getString("indexFilePath", "");
         File fIndexFile = new File(indexFile);
@@ -90,7 +71,7 @@ public class SDCardSynchronizer extends Synchronizer
     }
 
     private void appendSDCardFile(String path,
-                                  String content) throws NotFoundException, ReportableError {
+                                  String content) throws IOException {
         String originalContent = "";
         try {
             originalContent = this.readFile(path) + "\n";
@@ -101,23 +82,15 @@ public class SDCardSynchronizer extends Synchronizer
     }
 
     private void putFile(String path,
-                         String content) throws NotFoundException, ReportableError {
+                         String content) throws IOException {
         Log.d(LT, "Writing to mobileorg.org file at: " + path);
         BufferedWriter fWriter;
-        try {
+
             File fMobileOrgFile = new File(path);
             FileWriter orgFWriter = new FileWriter(fMobileOrgFile, true);
             fWriter = new BufferedWriter(orgFWriter);
             fWriter.write(content);
-            fWriter.flush();
             fWriter.close();
-        }
-        catch (java.io.IOException e) {
-            throw new ReportableError(
-                    r.getString(R.string.error_file_write, path),
-                    e);                  
-
-        }
     }
 
     public boolean checkReady() {
@@ -126,35 +99,26 @@ public class SDCardSynchronizer extends Synchronizer
         return true;
     }
 
-    public void pull() throws NotFoundException, ReportableError {
+    public void pull() throws IOException {
         String indexFile = this.appSettings.getString("indexFilePath","");
         Log.d(LT, "Index file at: " + indexFile);
         File fIndexFile = new File(indexFile);
         String basePath = fIndexFile.getParent();
         String chkPath = basePath + "/checksums.dat";
         String filebuffer = "";
-        try {
+
             filebuffer = this.readFile(indexFile);
-        }
-        catch (java.io.FileNotFoundException e) {
-            throw new ReportableError(
-                    r.getString(R.string.error_file_not_found, indexFile),
-                    e);
-        }
+
+
         HashMap<String, String> masterList = this.getOrgFilesFromMaster(filebuffer);
         ArrayList<HashMap<String, Boolean>> todoLists = this.getTodos(filebuffer);
         ArrayList<ArrayList<String>> priorityLists = this.getPriorities(filebuffer);
         this.appdb.setTodoList(todoLists);
         this.appdb.setPriorityList(priorityLists);
 
-        try {
             filebuffer = this.readFile(chkPath);
-        }
-        catch (java.io.FileNotFoundException e) {
-            throw new ReportableError(
-                    r.getString(R.string.error_file_not_found, chkPath),
-                    e);
-        }
+
+
         HashMap<String, String> newChecksums = this.getChecksums(filebuffer);
         HashMap<String, String> oldChecksums = this.appdb.getChecksums();
         for (String key : masterList.keySet()) { 
@@ -167,8 +131,7 @@ public class SDCardSynchronizer extends Synchronizer
         }
     }
 
-    private String readFile(String filePath) throws ReportableError,
-                                                    java.io.FileNotFoundException {
+    private String readFile(String filePath) throws IOException {
         FileInputStream readerIS;
         BufferedReader fReader;
         File inpfile = new File(filePath);
@@ -182,16 +145,10 @@ public class SDCardSynchronizer extends Synchronizer
         }
         String fileBuffer = "";
         String fileLine = "";
-        try {
             while ((fileLine = fReader.readLine()) != null) {
                 fileBuffer += fileLine + "\n";
             }
-        }
-        catch (java.io.IOException e) {
-            throw new ReportableError(
-                    r.getString(R.string.error_file_read, filePath),
-                    e);                  
-        }
+        
         return fileBuffer;
     }
 }

@@ -3,13 +3,13 @@ package com.matburt.mobileorg.Synchronizers;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.content.res.Resources.NotFoundException;
 import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -19,7 +19,6 @@ import com.dropbox.client.DropboxAPI;
 import com.dropbox.client.DropboxAPI.Config;
 import com.dropbox.client.DropboxAPI.FileDownload;
 import com.matburt.mobileorg.R;
-import com.matburt.mobileorg.Error.ReportableError;
 import com.matburt.mobileorg.Parsing.OrgDatabase;
 
 public class DropboxSynchronizer extends Synchronizer {
@@ -35,7 +34,7 @@ public class DropboxSynchronizer extends Synchronizer {
         this.connect();
     }
 
-    public void push() throws NotFoundException, ReportableError {
+    public void push() throws IOException {
         this.appSettings.getString("storageMode", "");
         String fileContents = "";
 
@@ -46,16 +45,10 @@ public class DropboxSynchronizer extends Synchronizer {
         }
 
         String thisLine = "";
-        try {
             while ((thisLine = reader.readLine()) != null) {
                 fileContents += thisLine + "\n";
             }
-        }
-        catch (java.io.IOException e) {
-        	throw new ReportableError(
-            		r.getString(R.string.error_file_read, "mobileorg.org"),
-            		e);
-        }
+
         this.appendDropboxFile("mobileorg.org", fileContents);
     }
 
@@ -70,18 +63,20 @@ public class DropboxSynchronizer extends Synchronizer {
     public void setLoggedIn(boolean loggedIn) {
     }
 
-    public void pull() throws NotFoundException, ReportableError {
+    public void pull() throws IOException {
         String indexFilePath = this.appSettings.getString("dropboxPath", "");
 		if(!indexFilePath.startsWith("/")) {
 			indexFilePath = "/" + indexFilePath;
 		}
         String masterStr = this.fetchOrgFileString(indexFilePath);
         Log.i(LT, "Contents: " + masterStr);
-        if (masterStr.equals("")) {
-            throw new ReportableError(
-                            r.getString(R.string.error_file_not_found, indexFilePath),
-                            null);
-        }
+
+//        if (masterStr.equals("")) {
+//            throw new ReportableError(
+//                            r.getString(R.string.error_file_not_found, indexFilePath),
+//                            null);
+//        }
+        
         HashMap<String, String> masterList = this.getOrgFilesFromMaster(masterStr);
         ArrayList<HashMap<String, Boolean>> todoLists = this.getTodos(masterStr);
         ArrayList<ArrayList<String>> priorityLists = this.getPriorities(masterStr);
@@ -109,32 +104,28 @@ public class DropboxSynchronizer extends Synchronizer {
         }
     }
 
-    private String getRootPath() throws ReportableError {
+    private String getRootPath() {
         String dbPath = this.appSettings.getString("dropboxPath","");
         return dbPath.substring(0, dbPath.lastIndexOf("/")+1);
     }
 
-    public BufferedReader fetchOrgFile(String orgPath) throws NotFoundException, ReportableError {
+    public BufferedReader fetchOrgFile(String orgPath) {
         Log.i(LT, "Downloading " + orgPath);
         FileDownload fd;
-        try {
+
             fd = api.getFileStream("dropbox", orgPath, null);
-        }
-        catch (Exception e) {
-            throw new ReportableError(
-                                      r.getString(R.string.dropbox_fetch_error, orgPath, e.toString()),
-                                      null);
-        }
-        Log.i(LT, "Finished downloading");
-        if (fd == null || fd.is == null) {
-            throw new ReportableError(r.getString(R.string.dropbox_fetch_error, orgPath, "Error downloading file"),
-                                      null);
-        }
+  
+
+//        if (fd == null || fd.is == null) {
+//            throw new ReportableError(r.getString(R.string.dropbox_fetch_error, orgPath, "Error downloading file"),
+//                                      null);
+//        }
+        
         BufferedReader reader = new BufferedReader(new InputStreamReader(fd.is));
         return reader;
     }
 
-    private void appendDropboxFile(String file, String content) throws ReportableError {
+    private void appendDropboxFile(String file, String content) throws IOException {
         String pathActual = this.getRootPath();
         String originalContent = this.fetchOrgFileString(pathActual + file);
         String newContent = "";
@@ -177,7 +168,7 @@ public class DropboxSynchronizer extends Synchronizer {
         // }
     }
 
-    public File getFile(String fileName) throws ReportableError {
+    public File getFile(String fileName) {
         String storageMode = this.appSettings.getString("storageMode", "");
         if (storageMode.equals("internal") || storageMode == null) {
             File morgFile = new File("/data/data/com.matburt.mobileorg/files", fileName);
@@ -193,11 +184,8 @@ public class DropboxSynchronizer extends Synchronizer {
             }
             return morgFile;
         }
-        else {
-        	throw new ReportableError(
-        			r.getString(R.string.error_local_storage_method_unknown, storageMode),
-        			null);
-        }
+        
+        return null;
     }
 
     public void connect() {
