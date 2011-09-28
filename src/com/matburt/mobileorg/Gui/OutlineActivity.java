@@ -365,7 +365,7 @@ public class OutlineActivity extends ListActivity
 			return;
 		}
 
-		if (!appSync.checkReady()) {
+		if (!appSync.isConfigured()) {
 			Toast error = Toast.makeText((Context) this,
 					getString(R.string.error_synchronizer_not_configured),
 					Toast.LENGTH_LONG);
@@ -378,8 +378,7 @@ public class OutlineActivity extends ListActivity
 			public void run() {
 				try {
 					syncError = null;
-					appSync.pull();
-					appSync.push();
+					appSync.synch();
 					Log.d("MobileOrg" + this, "Finished parsing...");
 				} catch (IOException e) {
 					syncError = e;

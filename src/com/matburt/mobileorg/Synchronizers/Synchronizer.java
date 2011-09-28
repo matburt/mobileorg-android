@@ -20,32 +20,51 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.os.Environment;
+import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Log;
 
 import com.matburt.mobileorg.Parsing.OrgDatabase;
 
-abstract public class Synchronizer
-{
-    public OrgDatabase appdb = null;
-    public SharedPreferences appSettings = null;
-    public Context rootContext = null;
-    public static final String LT = "MobileOrg";
-    public Resources r;
-    final private int BUFFER_SIZE = 23 * 1024;
+abstract public class Synchronizer {
+	public OrgDatabase appdb = null;
+	public SharedPreferences appSettings = null;
+	public Context rootContext = null;
+	public static final String LT = "MobileOrg";
+	public Resources r;
+	final private int BUFFER_SIZE = 23 * 1024;
 
-    public abstract void pull() throws IOException;
-    public abstract void push() throws IOException;
-    public abstract boolean checkReady();
+	public Synchronizer(Context parentContext) {
+        this.rootContext = parentContext;
+        this.r = this.rootContext.getResources();
+        this.appdb = new OrgDatabase((Context)parentContext);
+        this.appSettings = PreferenceManager.getDefaultSharedPreferences(
+                                   parentContext.getApplicationContext());
+	}
 
-    public void close() {
-        if (this.appdb != null)
-            this.appdb.close();
-    }
+	public abstract boolean isConfigured();
+	public abstract void pull() throws IOException;
+	public abstract void push() throws IOException;
+	
+	public boolean synch() throws IOException {
+		if (!isConfigured())
+			return false;
 
-    public BufferedReader fetchOrgFile(String orgPath)  throws IOException {
-        return null;
-    }
+		pull();
+		push();
+		return true;
+	}
+	
+	public void close() {
+		if (this.appdb != null)
+			this.appdb.close();
+	}
+
+	
+	
+	public BufferedReader fetchOrgFile(String orgPath) throws IOException {
+		return null;
+	}
 
 	public void fetchAndSaveOrgFile(String orgPath, String destPath)
 			throws IOException {
@@ -67,22 +86,27 @@ abstract public class Synchronizer
 		if (reader == null) {
 			return "";
 		}
-		String fileContents = "";
-		String thisLine = "";
-		while ((thisLine = reader.readLine()) != null) {
-			fileContents += thisLine + "\n";
+		
+		StringBuilder fileContents = new StringBuilder();
+		String line;
+		
+		while ((line = reader.readLine()) != null) {
+		    fileContents.append(line);
+		    fileContents.append("\n");
 		}
 
-		return fileContents;
+		return fileContents.toString();
 	}
 
-	BufferedWriter getWriteHandle(String localRelPath) throws IOException {
+	
+	
+	BufferedWriter getWriteHandle(String filename) throws IOException {
 		String storageMode = this.appSettings.getString("storageMode", "");
 		BufferedWriter writer = null;
 
-		if (storageMode.equals("internal") || storageMode == null) {
+		if (storageMode.equals("internal") || storageMode.equals("")) {
 			FileOutputStream fs;
-			String normalized = localRelPath.replace("/", "_");
+			String normalized = filename.replace("/", "_");
 			fs = this.rootContext.openFileOutput(normalized,
 					Context.MODE_PRIVATE);
 			writer = new BufferedWriter(new OutputStreamWriter(fs));
@@ -92,125 +116,123 @@ abstract public class Synchronizer
 			File morgDir = new File(root, "mobileorg");
 			morgDir.mkdir();
 			if (morgDir.canWrite()) {
-				File orgFileCard = new File(morgDir, localRelPath);
+				File orgFileCard = new File(morgDir, filename);
 				FileWriter orgFWriter = new FileWriter(orgFileCard, false);
 				writer = new BufferedWriter(orgFWriter);
 			}
 		}
-
+		
 		return writer;
 	}
 
-	BufferedReader getReadHandle(String localRelPath) throws FileNotFoundException {
+	BufferedReader getReadHandle(String filename) throws FileNotFoundException {
 		String storageMode = this.appSettings.getString("storageMode", "");
-		BufferedReader reader;
-		if (storageMode.equals("internal") || storageMode == null) {
+		BufferedReader reader = null;
+		
+		if (storageMode.equals("internal") || storageMode.equals("")) {
 			FileInputStream fs;
-			try {
-				fs = rootContext.openFileInput(localRelPath);
-				reader = new BufferedReader(new InputStreamReader(fs));
-			} catch (java.io.FileNotFoundException e) {
+			fs = rootContext.openFileInput(filename);
+			reader = new BufferedReader(new InputStreamReader(fs));
+
+		} else if (storageMode.equals("sdcard")) {
+			File root = Environment.getExternalStorageDirectory();
+			File morgDir = new File(root, "mobileorg");
+			File morgFile = new File(morgDir, filename);
+			if (!morgFile.exists()) {
 				return null;
 			}
-		} else if (storageMode.equals("sdcard")) {
-				File root = Environment.getExternalStorageDirectory();
-				File morgDir = new File(root, "mobileorg");
-				File morgFile = new File(morgDir, localRelPath);
-				if (!morgFile.exists()) {
-					return null;
-				}
-				FileReader orgFReader = new FileReader(morgFile);
-				reader = new BufferedReader(orgFReader);
-
-		} else {
-			return null;
+			FileReader orgFReader = new FileReader(morgFile);
+			reader = new BufferedReader(orgFReader);
 		}
+		
 		return reader;
 	}
 
-    void removeFile(String filePath) {
-            this.appdb.removeFile(filePath);
-            String storageMode = this.appSettings.getString("storageMode", "");
-            if (storageMode.equals("internal") || storageMode == null) {
-                this.rootContext.deleteFile(filePath);
-            }
-            else if (storageMode.equals("sdcard")) {
-                File root = Environment.getExternalStorageDirectory();
-                File morgDir = new File(root, "mobileorg");
-                File morgFile = new File(morgDir, filePath);
-                morgFile.delete();
-            }
-    }
+	void removeFile(String filePath) {
+		this.appdb.removeFile(filePath);
+		String storageMode = this.appSettings.getString("storageMode", "");
+		if (storageMode.equals("internal") || storageMode.equals("")) {
+			this.rootContext.deleteFile(filePath);
+		} else if (storageMode.equals("sdcard")) {
+			File root = Environment.getExternalStorageDirectory();
+			File morgDir = new File(root, "mobileorg");
+			File morgFile = new File(morgDir, filePath);
+			morgFile.delete();
+		}
+	}
 
-    HashMap<String, String> getOrgFilesFromMaster(String master) {
-        Pattern getOrgFiles = Pattern.compile("\\[file:(.*?)\\]\\[(.*?)\\]\\]");
-        Matcher m = getOrgFiles.matcher(master);
-        HashMap<String, String> allOrgFiles = new HashMap<String, String>();
-        while (m.find()) {
-            Log.i(LT, "Found org file: " + m.group(2));
-            allOrgFiles.put(m.group(2), m.group(1));
-        }
+	
+	
+	HashMap<String, String> getOrgFilesFromMaster(String master) {
+		Pattern getOrgFiles = Pattern.compile("\\[file:(.*?)\\]\\[(.*?)\\]\\]");
+		Matcher m = getOrgFiles.matcher(master);
+		HashMap<String, String> allOrgFiles = new HashMap<String, String>();
+		while (m.find()) {
+			Log.i(LT, "Found org file: " + m.group(2));
+			allOrgFiles.put(m.group(2), m.group(1));
+		}
 
-        return allOrgFiles;
-    }
+		return allOrgFiles;
+	}
 
-    HashMap<String, String> getChecksums(String master) {
-        HashMap<String, String> chksums = new HashMap<String, String>();
-        for (String eachLine : master.split("[\\n\\r]+")) {
-            if (TextUtils.isEmpty(eachLine))
-                continue;
-            String[] chksTuple = eachLine.split("\\s+");
-            chksums.put(chksTuple[1], chksTuple[0]);
-        }
-        return chksums;
-    }
+	HashMap<String, String> getChecksums(String master) {
+		HashMap<String, String> chksums = new HashMap<String, String>();
+		for (String eachLine : master.split("[\\n\\r]+")) {
+			if (TextUtils.isEmpty(eachLine))
+				continue;
+			String[] chksTuple = eachLine.split("\\s+");
+			chksums.put(chksTuple[1], chksTuple[0]);
+		}
+		return chksums;
+	}
 
-    ArrayList<HashMap<String, Boolean>> getTodos(String master) {
-        Pattern getTodos = Pattern.compile("#\\+TODO:\\s+([\\s\\w-]*)(\\| ([\\s\\w-]*))*");
-        Matcher m = getTodos.matcher(master);
-        ArrayList<HashMap<String, Boolean>> todoList = new ArrayList<HashMap<String, Boolean>>();
-        while (m.find()) {
-            String lastTodo = "";
-            HashMap<String, Boolean> holding = new HashMap<String, Boolean>();
-            Boolean isDone = false;
-            for (int idx = 1; idx <= m.groupCount(); idx++) {
-                if (m.group(idx) != null &&
-                    m.group(idx).length() > 0) {
-                    if (m.group(idx).indexOf("|") != -1) {
-                        isDone = true;
-                        continue;
-                    }
-                    String[] grouping = m.group(idx).split("\\s+");
-                    for (int jdx = 0; jdx < grouping.length; jdx++) {
-                        lastTodo = grouping[jdx].trim();
-                        holding.put(grouping[jdx].trim(),
-                                    isDone);
-                    }
-                }
-            }
-            if (!isDone) {
-                holding.put(lastTodo, true);
-            }
-            todoList.add(holding);
-        }
-        return todoList;
-    }
+	ArrayList<HashMap<String, Boolean>> getTodos(String master) {
+		Pattern getTodos = Pattern
+				.compile("#\\+TODO:\\s+([\\s\\w-]*)(\\| ([\\s\\w-]*))*");
+		Matcher m = getTodos.matcher(master);
+		ArrayList<HashMap<String, Boolean>> todoList = new ArrayList<HashMap<String, Boolean>>();
+		while (m.find()) {
+			String lastTodo = "";
+			HashMap<String, Boolean> holding = new HashMap<String, Boolean>();
+			Boolean isDone = false;
+			for (int idx = 1; idx <= m.groupCount(); idx++) {
+				if (m.group(idx) != null && m.group(idx).length() > 0) {
+					if (m.group(idx).indexOf("|") != -1) {
+						isDone = true;
+						continue;
+					}
+					String[] grouping = m.group(idx).split("\\s+");
+					for (int jdx = 0; jdx < grouping.length; jdx++) {
+						lastTodo = grouping[jdx].trim();
+						holding.put(grouping[jdx].trim(), isDone);
+					}
+				}
+			}
+			if (!isDone) {
+				holding.put(lastTodo, true);
+			}
+			todoList.add(holding);
+		}
+		return todoList;
+	}
 
-    ArrayList<ArrayList<String>> getPriorities(String master) {
-        Pattern getPriorities = Pattern.compile("#\\+ALLPRIORITIES:\\s+([A-Z\\s]*)");
-        Matcher t = getPriorities.matcher(master);
-        ArrayList<ArrayList<String>> priorityList = new ArrayList<ArrayList<String>>();
-        while (t.find()) {
-            ArrayList<String> holding = new ArrayList<String>();
-            if (t.group(1) != null &&
-                t.group(1).length() > 0) {
-                String[] grouping = t.group(1).split("\\s+");
-                for (int jdx = 0; jdx < grouping.length; jdx++) {
-                    holding.add(grouping[jdx].trim());
-                }
-            }
-            priorityList.add(holding);
-        }
-        return priorityList;
-    }
+	ArrayList<ArrayList<String>> getPriorities(String master) {
+		Pattern getPriorities = Pattern
+				.compile("#\\+ALLPRIORITIES:\\s+([A-Z\\s]*)");
+		Matcher t = getPriorities.matcher(master);
+		
+		ArrayList<ArrayList<String>> priorityList = new ArrayList<ArrayList<String>>();
+		
+		while (t.find()) {
+			ArrayList<String> holding = new ArrayList<String>();
+			if (t.group(1) != null && t.group(1).length() > 0) {
+				String[] grouping = t.group(1).split("\\s+");
+				for (int jdx = 0; jdx < grouping.length; jdx++) {
+					holding.add(grouping[jdx].trim());
+				}
+			}
+			priorityList.add(holding);
+		}
+		return priorityList;
+	}
 }

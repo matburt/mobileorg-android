@@ -29,21 +29,20 @@ import org.apache.http.params.CoreProtocolPNames;
 import org.apache.http.params.HttpParams;
 
 import android.content.Context;
-import android.preference.PreferenceManager;
 import android.util.Log;
-
-import com.matburt.mobileorg.Parsing.OrgDatabase;
 
 public class WebDAVSynchronizer extends Synchronizer
 {
     private boolean pushedStageFile = false;
 
     public WebDAVSynchronizer(Context parentContext) {
-        this.rootContext = parentContext;
-        this.r = this.rootContext.getResources();
-        this.appdb = new OrgDatabase((Context)parentContext);
-        this.appSettings = PreferenceManager.getDefaultSharedPreferences(
-                                   parentContext.getApplicationContext());
+    	super(parentContext);
+    }
+    
+    public boolean isConfigured() {
+        if (this.appSettings.getString("webUrl","").equals(""))
+            return false;
+        return true;
     }
 
     public void push() throws IOException  {
@@ -70,12 +69,6 @@ public class WebDAVSynchronizer extends Synchronizer
         if (this.pushedStageFile) {
             this.removeFile("mobileorg.org");
         }
-    }
-
-    public boolean checkReady() {
-        if (this.appSettings.getString("webUrl","").equals(""))
-            return false;
-        return true;
     }
 
     public void pull() throws IOException {

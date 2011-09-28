@@ -13,19 +13,19 @@ import java.util.HashMap;
 
 import android.content.Context;
 import android.os.Environment;
-import android.preference.PreferenceManager;
 import android.util.Log;
-
-import com.matburt.mobileorg.Parsing.OrgDatabase;
 
 public class SDCardSynchronizer extends Synchronizer
 {
     public SDCardSynchronizer(Context parentContext) {
-        this.rootContext = parentContext;
-        this.r = this.rootContext.getResources();
-        this.appdb = new OrgDatabase((Context)parentContext);
-        this.appSettings = PreferenceManager.getDefaultSharedPreferences(
-                                   parentContext.getApplicationContext());
+    	super(parentContext);
+    }
+    
+
+    public boolean isConfigured() {
+        if (this.appSettings.getString("indexFilePath", "").equals(""))
+            return false;
+        return true;
     }
 
     public void push() throws IOException {
@@ -93,11 +93,6 @@ public class SDCardSynchronizer extends Synchronizer
             fWriter.close();
     }
 
-    public boolean checkReady() {
-        if (this.appSettings.getString("indexFilePath", "").equals(""))
-            return false;
-        return true;
-    }
 
     public void pull() throws IOException {
         String indexFile = this.appSettings.getString("indexFilePath","");

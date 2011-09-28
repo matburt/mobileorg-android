@@ -122,7 +122,7 @@ public class MobileOrgSyncService extends Service implements SharedPreferences.O
 			return;
 		}
 
-		if (!appSync.checkReady()) {
+		if (!appSync.isConfigured()) {
 			return;
 		}
 
