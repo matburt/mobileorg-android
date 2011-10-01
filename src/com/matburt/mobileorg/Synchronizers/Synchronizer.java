@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -12,6 +13,7 @@ import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.matburt.mobileorg.Parsing.NodeWriter;
 import com.matburt.mobileorg.Parsing.OrgDatabase;
@@ -54,35 +56,46 @@ abstract public class Synchronizer {
 
 
 	protected void pull() throws IOException {
-		String masterStr = OrgFile.read(getRemoteFile(this.remoteIndexPath));
+        Log.d(LT, "Pull() started");
+
+		String remoteIndexContents = OrgFile.read(getRemoteFile("index.org"));
         
-        ArrayList<HashMap<String, Boolean>> todoLists = getTodos(masterStr);
+        ArrayList<HashMap<String, Boolean>> todoLists = getTodos(remoteIndexContents);
         this.appdb.setTodoList(todoLists);
 
-        ArrayList<ArrayList<String>> priorityLists = getPriorities(masterStr);
+        ArrayList<ArrayList<String>> priorityLists = getPriorities(remoteIndexContents);
         this.appdb.setPriorityList(priorityLists);
         
-		// Get checksums file
-        masterStr = OrgFile.read(getRemoteFile("checksums.dat"));
+        String remoteChecksumContents = OrgFile.read(getRemoteFile("checksums.dat"));
 
-		HashMap<String, String> newChecksums = getChecksums(masterStr);
-		HashMap<String, String> oldChecksums = this.appdb.getChecksums();
+		HashMap<String, String> remoteChecksums = getChecksums(remoteChecksumContents);
+		HashMap<String, String> localChecksums = this.appdb.getChecksums();
 		
-		// Get other org files
-		HashMap<String, String> masterList = getOrgFilesFromMaster(masterStr);
-		for (String key : masterList.keySet()) {
-			if (oldChecksums.containsKey(key) && newChecksums.containsKey(key)
-					&& oldChecksums.get(key).equals(newChecksums.get(key)))
-				continue;
-			
-			new OrgFile(masterList.get(key), context)
-					.fetch(getRemoteFile(this.remotePath + masterList.get(key)));
-			
-			this.appdb.addOrUpdateFile(masterList.get(key), key,
-					newChecksums.get(key));
+		HashMap<String, String> fileChecksumMap = getOrgFilesFromMaster(remoteIndexContents);
+
+		for (Map.Entry<String, String> item : fileChecksumMap.entrySet()) {
+			String key = item.getKey();
+			Log.d(LT, "Processing " + key);
+
+			if (!remoteChecksums.containsKey(key) || !localChecksums.get(key)
+							.equals(remoteChecksums.get(key))) {
+				Log.d(LT, "  Key: " + key + " : " + fileChecksumMap.get(key));
+
+				OrgFile orgfile = new OrgFile(key, context);
+				orgfile.fetch(getRemoteFile(this.remotePath + key));
+
+				this.appdb.addOrUpdateFile(key, fileChecksumMap.get(key),
+						remoteChecksums.get(key));
+			}
 		}
+		Log.d(LT, "Pull() done ");
 	}
 	
+	/**
+	 * Returns
+	 * @param master String that contains the contents of a checksums.dat file
+	 * @return HashMap with <Filename, Checksum>
+	 */
 	private HashMap<String, String> getOrgFilesFromMaster(String master) {
 		Pattern getOrgFiles = Pattern.compile("\\[file:(.*?)\\]\\[(.*?)\\]\\]");
 		Matcher m = getOrgFiles.matcher(master);

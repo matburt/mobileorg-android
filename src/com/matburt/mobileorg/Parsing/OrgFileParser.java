@@ -304,7 +304,7 @@ public class OrgFileParser {
                             }
                         }
                         catch (java.text.ParseException e) {
-                            Log.e(LT, "Could not parse deadline");
+                           // Log.e(LT, "Could not parse deadline");
                         }
                         continue;
                     }
