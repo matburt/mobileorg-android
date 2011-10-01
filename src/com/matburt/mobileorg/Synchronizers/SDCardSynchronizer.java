@@ -11,6 +11,8 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import com.matburt.mobileorg.Parsing.OrgFile;
+
 import android.content.Context;
 import android.os.Environment;
 import android.util.Log;
@@ -105,16 +107,16 @@ public class SDCardSynchronizer extends Synchronizer
             filebuffer = this.readFile(indexFile);
 
 
-        HashMap<String, String> masterList = this.getOrgFilesFromMaster(filebuffer);
-        ArrayList<HashMap<String, Boolean>> todoLists = this.getTodos(filebuffer);
-        ArrayList<ArrayList<String>> priorityLists = this.getPriorities(filebuffer);
+        HashMap<String, String> masterList = OrgFile.getOrgFilesFromMaster(filebuffer);
+        ArrayList<HashMap<String, Boolean>> todoLists = OrgFile.getTodos(filebuffer);
+        ArrayList<ArrayList<String>> priorityLists = OrgFile.getPriorities(filebuffer);
         this.appdb.setTodoList(todoLists);
         this.appdb.setPriorityList(priorityLists);
 
             filebuffer = this.readFile(chkPath);
 
 
-        HashMap<String, String> newChecksums = this.getChecksums(filebuffer);
+        HashMap<String, String> newChecksums = OrgFile.getChecksums(filebuffer);
         HashMap<String, String> oldChecksums = this.appdb.getChecksums();
         for (String key : masterList.keySet()) { 
             if (oldChecksums.containsKey(key) &&

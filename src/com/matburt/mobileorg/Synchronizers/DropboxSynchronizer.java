@@ -20,6 +20,7 @@ import com.dropbox.client.DropboxAPI.Config;
 import com.dropbox.client.DropboxAPI.FileDownload;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Parsing.NodeWriter;
+import com.matburt.mobileorg.Parsing.OrgFile;
 
 public class DropboxSynchronizer extends Synchronizer {
     private DropboxAPI dropboxAPI = new DropboxAPI();
@@ -37,7 +38,7 @@ public class DropboxSynchronizer extends Synchronizer {
     }
     
     public void push() throws IOException {
-        BufferedReader reader = this.getReadHandle(NodeWriter.ORGFILE);
+        BufferedReader reader = OrgFile.getReadHandle(NodeWriter.ORGFILE, rootContext);
 		StringBuilder fileContents = new StringBuilder();
 		String line;
 		
@@ -54,7 +55,7 @@ public class DropboxSynchronizer extends Synchronizer {
 		if(!indexFilePath.startsWith("/")) {
 			indexFilePath = "/" + indexFilePath;
 		}
-        String masterStr = this.fetchOrgFileString(indexFilePath);
+        String masterStr = OrgFile.fetchOrgFileString(indexFilePath);
         Log.i(LT, "Contents: " + masterStr);
 
 		if (masterStr.equals("")) {
@@ -62,16 +63,16 @@ public class DropboxSynchronizer extends Synchronizer {
 					indexFilePath), null);
 		}
         
-        HashMap<String, String> masterList = this.getOrgFilesFromMaster(masterStr);
-        ArrayList<HashMap<String, Boolean>> todoLists = this.getTodos(masterStr);
-        ArrayList<ArrayList<String>> priorityLists = this.getPriorities(masterStr);
+        HashMap<String, String> masterList = OrgFile.getOrgFilesFromMaster(masterStr);
+        ArrayList<HashMap<String, Boolean>> todoLists = OrgFile.getTodos(masterStr);
+        ArrayList<ArrayList<String>> priorityLists = OrgFile.getPriorities(masterStr);
         this.appdb.setTodoList(todoLists);
         this.appdb.setPriorityList(priorityLists);
         String pathActual = this.getRootPath();
  
         //Get checksums file
-        masterStr = this.fetchOrgFileString(pathActual + "checksums.dat");
-        HashMap<String, String> newChecksums = this.getChecksums(masterStr);
+        masterStr = OrgFile.fetchOrgFileString(pathActual + "checksums.dat");
+        HashMap<String, String> newChecksums = OrgFile.getChecksums(masterStr);
         HashMap<String, String> oldChecksums = this.appdb.getChecksums();
 
         //Get other org files
@@ -82,8 +83,8 @@ public class DropboxSynchronizer extends Synchronizer {
                 continue;
             Log.d(LT, "Fetching: " +
                   key + ": " + pathActual + masterList.get(key));
-            this.fetchAndSaveOrgFile(pathActual + masterList.get(key),
-                                     masterList.get(key));
+            OrgFile.fetchAndSaveOrgFile(pathActual + masterList.get(key),
+                                     masterList.get(key), rootContext);
             this.appdb.addOrUpdateFile(masterList.get(key),
                                        key,
                                        newChecksums.get(key));
@@ -109,7 +110,7 @@ public class DropboxSynchronizer extends Synchronizer {
 
     private void appendDropboxFile(String file, String content) throws IOException {
         String pathActual = getRootPath();
-        String originalContent = fetchOrgFileString(pathActual + file);
+        String originalContent = OrgFile.fetchOrgFileString(pathActual + file);
         String newContent = "";
  
         if (originalContent.indexOf("{\"error\":") == -1)
@@ -117,8 +118,8 @@ public class DropboxSynchronizer extends Synchronizer {
         else
             newContent = content;
 
-        this.removeFile(NodeWriter.ORGFILE);
-        BufferedWriter writer = this.getWriteHandle(NodeWriter.ORGFILE);
+        OrgFile.removeFile(NodeWriter.ORGFILE, rootContext, appdb);
+        BufferedWriter writer = OrgFile.getWriteHandle(NodeWriter.ORGFILE, rootContext);
 
         // Rewriting the mobileorg file with the contents on Dropbox is dangerous
         // but the api sucks and automatically uses the File object's name when figuring
@@ -128,7 +129,7 @@ public class DropboxSynchronizer extends Synchronizer {
 
         File uploadFile = this.getFile(NodeWriter.ORGFILE);
         this.dropboxAPI.putFile("dropbox", pathActual, uploadFile);
-        this.removeFile(NodeWriter.ORGFILE);
+        OrgFile.removeFile(NodeWriter.ORGFILE, rootContext, appdb);
         // NOTE: Will need to download and compare file since dropbox api sucks and won't
         //       return the status code
         // if (something) {

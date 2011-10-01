@@ -28,6 +28,8 @@ import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.params.CoreProtocolPNames;
 import org.apache.http.params.HttpParams;
 
+import com.matburt.mobileorg.Parsing.OrgFile;
+
 import android.content.Context;
 import android.util.Log;
 
@@ -47,7 +49,7 @@ public class WebDAVSynchronizer extends Synchronizer
 
     public void push() throws IOException  {
         String urlActual = this.getRootUrl() + "mobileorg.org";
-        BufferedReader reader = this.getReadHandle("mobileorg.org");
+        BufferedReader reader = OrgFile.getReadHandle("mobileorg.org", rootContext);
         String fileContents = "";
         this.pushedStageFile = false;
         String thisLine = "";
@@ -67,7 +69,7 @@ public class WebDAVSynchronizer extends Synchronizer
         this.appendUrlFile(urlActual, httpC, fileContents);
 
         if (this.pushedStageFile) {
-            this.removeFile("mobileorg.org");
+            OrgFile.removeFile("mobileorg.org", rootContext, appdb);
         }
     }
 
@@ -81,22 +83,22 @@ public class WebDAVSynchronizer extends Synchronizer
         }
 
         //Get the index org file
-        String masterStr = this.fetchOrgFileString(url);
+        String masterStr = OrgFile.fetchOrgFileString(url);
         if (masterStr.equals("")) {
 //            throw new ReportableError(
 //            		r.getString(R.string.error_file_not_found, url),
 //            		null);
         }
-        HashMap<String, String> masterList = this.getOrgFilesFromMaster(masterStr);
-        ArrayList<HashMap<String, Boolean>> todoLists = this.getTodos(masterStr);
-        ArrayList<ArrayList<String>> priorityLists = this.getPriorities(masterStr);
+        HashMap<String, String> masterList = OrgFile.getOrgFilesFromMaster(masterStr);
+        ArrayList<HashMap<String, Boolean>> todoLists = OrgFile.getTodos(masterStr);
+        ArrayList<ArrayList<String>> priorityLists = OrgFile.getPriorities(masterStr);
         this.appdb.setTodoList(todoLists);
         this.appdb.setPriorityList(priorityLists);
         String urlActual = this.getRootUrl();
 
         //Get checksums file
-        masterStr = this.fetchOrgFileString(urlActual + "checksums.dat");
-        HashMap<String, String> newChecksums = this.getChecksums(masterStr);
+        masterStr = OrgFile.fetchOrgFileString(urlActual + "checksums.dat");
+        HashMap<String, String> newChecksums = OrgFile.getChecksums(masterStr);
         HashMap<String, String> oldChecksums = this.appdb.getChecksums();
 
         //Get other org files
@@ -107,8 +109,8 @@ public class WebDAVSynchronizer extends Synchronizer
                 continue;
             Log.d(LT, "Fetching: " +
                   key + ": " + urlActual + masterList.get(key));
-            this.fetchAndSaveOrgFile(urlActual + masterList.get(key),
-                                     masterList.get(key));
+            OrgFile.fetchAndSaveOrgFile(urlActual + masterList.get(key),
+                                     masterList.get(key), rootContext);
             this.appdb.addOrUpdateFile(masterList.get(key),
                                        key,
                                        newChecksums.get(key));
@@ -238,7 +240,7 @@ public class WebDAVSynchronizer extends Synchronizer
     private void appendUrlFile(String url,
     							DefaultHttpClient httpClient,
     							String content) throws IOException {
-    	String originalContent = this.fetchOrgFileString(url);
+    	String originalContent = OrgFile.fetchOrgFileString(url);
     	String newContent = originalContent + '\n' + content;
     	this.putUrlFile(url, httpClient, newContent);
     }
