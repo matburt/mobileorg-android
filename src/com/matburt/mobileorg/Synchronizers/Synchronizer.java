@@ -13,6 +13,7 @@ import android.content.res.Resources;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
 
+import com.matburt.mobileorg.Parsing.NodeWriter;
 import com.matburt.mobileorg.Parsing.OrgDatabase;
 import com.matburt.mobileorg.Parsing.OrgFile;
 
@@ -32,16 +33,17 @@ abstract public class Synchronizer {
 	}
 
 	public abstract boolean isConfigured();
-	public abstract void pull() throws IOException;
-	public abstract void push() throws IOException;
-	protected abstract BufferedReader getFile(String filePath) throws IOException;
+	protected abstract void push(String filename) throws IOException;
+	protected abstract BufferedReader getRemoteFile(String filename) throws IOException;
+    protected String remoteIndexPath;
+	protected String remotePath;
 	
 	public boolean synch() throws IOException {
 		if (!isConfigured())
 			return false;
 
 		pull();
-		push();
+		push(NodeWriter.ORGFILE);
 		return true;
 	}
 	
@@ -51,8 +53,8 @@ abstract public class Synchronizer {
 	}
 
 
-	protected void updateFiles (String remoteIndex, String actualPath) throws IOException {
-		String masterStr = OrgFile.fileToString(getFile(remoteIndex));
+	protected void pull() throws IOException {
+		String masterStr = OrgFile.read(getRemoteFile(this.remoteIndexPath));
         
         ArrayList<HashMap<String, Boolean>> todoLists = getTodos(masterStr);
         this.appdb.setTodoList(todoLists);
@@ -60,30 +62,28 @@ abstract public class Synchronizer {
         ArrayList<ArrayList<String>> priorityLists = getPriorities(masterStr);
         this.appdb.setPriorityList(priorityLists);
         
-        String urlActual = actualPath;
-
 		// Get checksums file
-		masterStr = OrgFile.fileToString(urlActual + "checksums.dat", context);
+        masterStr = OrgFile.read(getRemoteFile("checksums.dat"));
+
 		HashMap<String, String> newChecksums = getChecksums(masterStr);
 		HashMap<String, String> oldChecksums = this.appdb.getChecksums();
-
-
-		
-		HashMap<String, String> masterList = getOrgFilesFromMaster(masterStr);
 		
 		// Get other org files
+		HashMap<String, String> masterList = getOrgFilesFromMaster(masterStr);
 		for (String key : masterList.keySet()) {
 			if (oldChecksums.containsKey(key) && newChecksums.containsKey(key)
 					&& oldChecksums.get(key).equals(newChecksums.get(key)))
 				continue;
-			OrgFile.fetchAndSaveOrgFile(getFile(urlActual + masterList.get(key)),
-					masterList.get(key), context);
+			
+			new OrgFile(masterList.get(key), context)
+					.fetch(getRemoteFile(this.remotePath + masterList.get(key)));
+			
 			this.appdb.addOrUpdateFile(masterList.get(key), key,
 					newChecksums.get(key));
 		}
 	}
 	
-	private static HashMap<String, String> getOrgFilesFromMaster(String master) {
+	private HashMap<String, String> getOrgFilesFromMaster(String master) {
 		Pattern getOrgFiles = Pattern.compile("\\[file:(.*?)\\]\\[(.*?)\\]\\]");
 		Matcher m = getOrgFiles.matcher(master);
 		HashMap<String, String> allOrgFiles = new HashMap<String, String>();
@@ -94,7 +94,7 @@ abstract public class Synchronizer {
 		return allOrgFiles;
 	}
 
-	private static HashMap<String, String> getChecksums(String master) {
+	private HashMap<String, String> getChecksums(String master) {
 		HashMap<String, String> chksums = new HashMap<String, String>();
 		for (String eachLine : master.split("[\\n\\r]+")) {
 			if (TextUtils.isEmpty(eachLine))
@@ -105,7 +105,7 @@ abstract public class Synchronizer {
 		return chksums;
 	}
 
-	private static ArrayList<HashMap<String, Boolean>> getTodos(String master) {
+	private ArrayList<HashMap<String, Boolean>> getTodos(String master) {
 		Pattern getTodos = Pattern
 				.compile("#\\+TODO:\\s+([\\s\\w-]*)(\\| ([\\s\\w-]*))*");
 		Matcher m = getTodos.matcher(master);
@@ -121,9 +121,9 @@ abstract public class Synchronizer {
 						continue;
 					}
 					String[] grouping = m.group(idx).split("\\s+");
-					for (int jdx = 0; jdx < grouping.length; jdx++) {
-						lastTodo = grouping[jdx].trim();
-						holding.put(grouping[jdx].trim(), isDone);
+					for (String group : grouping) {
+						lastTodo = group.trim();
+						holding.put(group.trim(), isDone);
 					}
 				}
 			}
@@ -135,7 +135,7 @@ abstract public class Synchronizer {
 		return todoList;
 	}
 
-	private static ArrayList<ArrayList<String>> getPriorities(String master) {
+	private ArrayList<ArrayList<String>> getPriorities(String master) {
 		Pattern getPriorities = Pattern
 				.compile("#\\+ALLPRIORITIES:\\s+([A-Z\\s]*)");
 		Matcher t = getPriorities.matcher(master);
@@ -146,8 +146,8 @@ abstract public class Synchronizer {
 			ArrayList<String> holding = new ArrayList<String>();
 			if (t.group(1) != null && t.group(1).length() > 0) {
 				String[] grouping = t.group(1).split("\\s+");
-				for (int jdx = 0; jdx < grouping.length; jdx++) {
-					holding.add(grouping[jdx].trim());
+				for (String group : grouping) {
+					holding.add(group.trim());
 				}
 			}
 			priorityList.add(holding);

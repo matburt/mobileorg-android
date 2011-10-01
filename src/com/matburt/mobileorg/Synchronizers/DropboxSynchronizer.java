@@ -15,15 +15,11 @@ import com.dropbox.client.DropboxAPI;
 import com.dropbox.client.DropboxAPI.Config;
 import com.dropbox.client.DropboxAPI.FileDownload;
 import com.matburt.mobileorg.R;
-import com.matburt.mobileorg.Parsing.NodeWriter;
 import com.matburt.mobileorg.Parsing.OrgFile;
 
 public class DropboxSynchronizer extends Synchronizer {
     private DropboxAPI dropboxAPI = new DropboxAPI();
     private com.dropbox.client.DropboxAPI.Config dropboxConfig;
-
-    private String indexFilePath;
-    private String rootPath;
     
     public DropboxSynchronizer(Context context) {
     	super(context);
@@ -31,60 +27,52 @@ public class DropboxSynchronizer extends Synchronizer {
 		SharedPreferences sharedPreferences = PreferenceManager
 				.getDefaultSharedPreferences(context);
     	
-		this.indexFilePath = sharedPreferences.getString("dropboxPath", "");
-		if (!this.indexFilePath.startsWith("/")) {
-			this.indexFilePath = "/" + this.indexFilePath;
+		this.remoteIndexPath = sharedPreferences.getString("dropboxPath", "");
+		if (!this.remoteIndexPath.startsWith("/")) {
+			this.remoteIndexPath = "/" + this.remoteIndexPath;
 		}
 
 		String dbPath = sharedPreferences.getString("dropboxPath","");
-		rootPath = dbPath.substring(0, dbPath.lastIndexOf("/")+1);
+		this.remotePath = dbPath.substring(0, dbPath.lastIndexOf("/")+1);
     	
         connect();
     }
 
 
     public boolean isConfigured() {
-        if (this.appSettings.getString("dropboxPath", null) == null)
+        if (this.remoteIndexPath.equals(""))
             return false;
         return true;
     }
+
     
-    public void push() throws IOException {
-    	String fileContents = OrgFile.fileToString(NodeWriter.ORGFILE, context);
+    protected void push(String filename) throws IOException {
+    	OrgFile orgFile = new OrgFile(filename, context);
 
-        String pathActual = this.rootPath;
-        String originalContent = OrgFile.fileToString(getFile(pathActual + NodeWriter.ORGFILE));
-
-        String newContent = "";
+    	String localContents = orgFile.read();
+        String remoteContent = OrgFile.read(getRemoteFile(filename));
  
-        if (originalContent.indexOf("{\"error\":") == -1)
-            newContent = originalContent + "\n" + fileContents;
-        else
-            newContent = fileContents;
+        if (remoteContent.indexOf("{\"error\":") == -1)
+            localContents = remoteContent + "\n" + localContents;
 
-        OrgFile.removeFile(NodeWriter.ORGFILE, context, appdb);
-        BufferedWriter writer = OrgFile.getWriteHandle(NodeWriter.ORGFILE, context);
-
-        writer.write(newContent);
+        orgFile.remove(appdb);
+       
+        BufferedWriter writer =  orgFile.getWriteHandle();
+        writer.write(localContents);
         writer.close();
-
-        File uploadFile = OrgFile.getFile(NodeWriter.ORGFILE, context);
-        this.dropboxAPI.putFile("dropbox", pathActual, uploadFile);
-        OrgFile.removeFile(NodeWriter.ORGFILE, context, appdb);
-
+    
+        File uploadFile = orgFile.getFile();
+        this.dropboxAPI.putFile("dropbox", this.remotePath, uploadFile);
+        orgFile.remove(appdb);
     }
 
-
-    public void pull() throws IOException {
-        updateFiles(this.indexFilePath, this.rootPath);
-    }
-
-	protected BufferedReader getFile(String orgPath) throws IOException {
-		FileDownload fd = dropboxAPI.getFileStream("dropbox", orgPath, null);
+	protected BufferedReader getRemoteFile(String filename) throws IOException {
+		String filePath = this.remotePath + filename;
+		FileDownload fd = dropboxAPI.getFileStream("dropbox", filePath, null);
 
 		if (fd == null || fd.is == null) {
 			throw new IOException(r.getString(R.string.dropbox_fetch_error,
-					orgPath, "Error downloading file"), null);
+					filePath, "Error downloading file"), null);
 		}
 
 		return new BufferedReader(new InputStreamReader(fd.is));

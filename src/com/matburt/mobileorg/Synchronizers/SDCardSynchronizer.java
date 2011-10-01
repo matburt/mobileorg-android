@@ -10,55 +10,45 @@ import java.io.InputStreamReader;
 import android.content.Context;
 import android.preference.PreferenceManager;
 
-import com.matburt.mobileorg.Parsing.NodeWriter;
 import com.matburt.mobileorg.Parsing.OrgFile;
 
 public class SDCardSynchronizer extends Synchronizer
-{
-	private String indexFilePath;
-	private String outfile;
-	private String basePath;
-	
+{	
     public SDCardSynchronizer(Context context) {
     	super(context);
-		this.indexFilePath = PreferenceManager.getDefaultSharedPreferences(
+		this.remoteIndexPath = PreferenceManager.getDefaultSharedPreferences(
 				context).getString("indexFilePath", "");
 		
-		String indexFileDirectory = new File(indexFilePath).getParent();
-		this.outfile = indexFileDirectory + "/" + NodeWriter.ORGFILE;
-		
-		File fIndexFile = new File(indexFilePath);
-		this.basePath = fIndexFile.getParent();
+		this.remotePath = new File(remoteIndexPath).getParent();
 	}
     
 
     public boolean isConfigured() {
-        if (indexFilePath.equals(""))
+        if (remoteIndexPath.equals(""))
             return false;
         return true;
     }
 
-	public void push() throws IOException {
-		String fileContents = OrgFile.fileToString(NodeWriter.ORGFILE, context);
-		String originalContent = OrgFile.fileToString(getFile(this.outfile));
-		originalContent += "\n";
+	protected void push(String filename) throws IOException {
+		OrgFile orgFile = new OrgFile(filename, context);
+		String localContents = orgFile.read();
 
-		String newContent = originalContent + fileContents;
-		OrgFile.putFile(this.outfile, newContent);
+		String indexFileDirectory = new File(remoteIndexPath).getParent();
+		String outfilePath = indexFileDirectory + "/" + filename;
+				
+		String remoteContent = OrgFile.read(getRemoteFile(filename));
+		remoteContent += "\n";
+
+		String newContent = remoteContent + localContents;
+		
+		OrgFile orgf2 = new OrgFile(outfilePath, context);
+		orgf2.write(outfilePath, newContent);
 	}
 
-	public void pull() throws IOException {
-		updateFiles(indexFilePath, basePath);
-    }
-
-	protected BufferedReader getFile(String filePath) throws FileNotFoundException {
-		FileInputStream readerIS;
-		BufferedReader fReader;
-		File inpfile = new File(filePath);
-
-		readerIS = new FileInputStream(inpfile);
-		fReader = new BufferedReader(new InputStreamReader(readerIS));
-		
-		return fReader;
+	protected BufferedReader getRemoteFile(String filename) throws FileNotFoundException {
+		String filePath = this.remotePath + filename;
+		File file = new File(filePath);
+		FileInputStream fileIS = new FileInputStream(file);
+		return new BufferedReader(new InputStreamReader(fileIS));
 	}
 }

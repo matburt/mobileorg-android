@@ -20,99 +20,90 @@ public class OrgFile {
 
 	final private static int BUFFER_SIZE = 23 * 1024;
 
-	String filePath;
-	
-	public OrgFile(String filePath) {
-		this.filePath = filePath;
-	}
-	
+	private Context context;
+	private String fileName;
 
-	public static String fileToString (String filename, Context context) throws IOException {
-		BufferedReader reader = getReadHandle(filename, context);	
-		return fileToString(reader);
+	public OrgFile(String file, Context context) {
+		this.context = context;
+		this.fileName = file;
 	}
-	
-	public static String fileToString(BufferedReader reader) throws IOException {
+
+	public String read() throws IOException {
+		return read(getBufferedReader());
+	}
+
+	public static String read(BufferedReader reader) throws IOException {
 		if (reader == null) {
 			return "";
 		}
-		
+
 		StringBuilder fileContents = new StringBuilder();
 		String line;
-		
+
 		while ((line = reader.readLine()) != null) {
-		    fileContents.append(line);
-		    fileContents.append("\n");
+			fileContents.append(line);
+			fileContents.append("\n");
 		}
 
 		return fileContents.toString();
 	}
-	
 
-	private static BufferedReader getReadHandle(String filename, Context context) throws FileNotFoundException {
-		String storageMode = getStorageMode(context);
+	public void write(String filePath, String content) throws IOException {
+		File file = new File(filePath);
+		BufferedWriter writer = new BufferedWriter(new FileWriter(file, true));
+		writer.write(content);
+		writer.close();
+	}
+
+	private BufferedReader getBufferedReader() throws FileNotFoundException {
+		String storageMode = getStorageMode();
 		BufferedReader reader = null;
-		
+
 		if (storageMode.equals("internal") || storageMode.equals("")) {
 			FileInputStream fs;
-			fs = context.openFileInput(filename);
+			fs = context.openFileInput(fileName);
 			reader = new BufferedReader(new InputStreamReader(fs));
 
 		} else if (storageMode.equals("sdcard")) {
 			File root = Environment.getExternalStorageDirectory();
 			File morgDir = new File(root, "mobileorg");
-			File morgFile = new File(morgDir, filename);
+			File morgFile = new File(morgDir, fileName);
 			if (!morgFile.exists()) {
 				return null;
 			}
-			FileReader orgFReader = new FileReader(morgFile);
-			reader = new BufferedReader(orgFReader);
+			reader = new BufferedReader(new FileReader(morgFile));
 		}
-		
+
 		return reader;
 	}
 
-	public static void putFile(String path,
-                         String content) throws IOException {
-        BufferedWriter fWriter;
+	public File getFile() {
+		String storageMode = getStorageMode();
+		if (storageMode.equals("internal") || storageMode == null) {
+			File morgFile = new File("/data/data/com.matburt.mobileorg/files",
+					fileName);
+			return morgFile;
+		} else if (storageMode.equals("sdcard")) {
+			File root = Environment.getExternalStorageDirectory();
+			File morgDir = new File(root, "mobileorg");
+			File morgFile = new File(morgDir, fileName);
+			if (!morgFile.exists()) {
+				return null;
+			}
+			return morgFile;
+		}
 
-            File fMobileOrgFile = new File(path);
-            FileWriter orgFWriter = new FileWriter(fMobileOrgFile, true);
-            fWriter = new BufferedWriter(orgFWriter);
-            fWriter.write(content);
-            fWriter.close();
-    }
+		return null;
+	}
 
-
-    public static File getFile(String fileName, Context context) {
-        String storageMode = getStorageMode(context);
-        if (storageMode.equals("internal") || storageMode == null) {
-            File morgFile = new File("/data/data/com.matburt.mobileorg/files", fileName);
-            return morgFile;
-        }
-        else if (storageMode.equals("sdcard")) {
-            File root = Environment.getExternalStorageDirectory();
-            File morgDir = new File(root, "mobileorg");
-            File morgFile = new File(morgDir, fileName);
-            if (!morgFile.exists()) {
-                return null;
-            }
-            return morgFile;
-        }
-        
-        return null;
-    }
-
-
-	public static BufferedWriter getWriteHandle(String filename, Context context) throws IOException {
-		String storageMode = getStorageMode(context);
+	public BufferedWriter getWriteHandle() throws IOException {
+		String storageMode = getStorageMode();
 		BufferedWriter writer = null;
 
 		if (storageMode.equals("internal") || storageMode.equals("")) {
 			FileOutputStream fs;
-			String normalized = filename.replace("/", "_");
-			fs = context.openFileOutput(normalized,
-					Context.MODE_PRIVATE);
+			String normalized = fileName.replace("/", "_");
+			fs = context.openFileOutput(normalized, Context.MODE_PRIVATE);
 			writer = new BufferedWriter(new OutputStreamWriter(fs));
 
 		} else if (storageMode.equals("sdcard")) {
@@ -120,18 +111,17 @@ public class OrgFile {
 			File morgDir = new File(root, "mobileorg");
 			morgDir.mkdir();
 			if (morgDir.canWrite()) {
-				File orgFileCard = new File(morgDir, filename);
+				File orgFileCard = new File(morgDir, fileName);
 				FileWriter orgFWriter = new FileWriter(orgFileCard, false);
 				writer = new BufferedWriter(orgFWriter);
 			}
 		}
-		
+
 		return writer;
 	}
 
-	public static void fetchAndSaveOrgFile(BufferedReader reader, String destPath, Context context)
-			throws IOException {
-		BufferedWriter writer = getWriteHandle(destPath, context);
+	public void fetch(BufferedReader reader) throws IOException {
+		BufferedWriter writer = getWriteHandle();
 
 		char[] baf = new char[BUFFER_SIZE];
 		int actual = 0;
@@ -142,23 +132,22 @@ public class OrgFile {
 		}
 		writer.close();
 	}
-	
-	public static void removeFile(String filePath, Context context, OrgDatabase appdb) {
-		
-		appdb.removeFile(filePath);
-		String storageMode = getStorageMode(context);
+
+	public void remove(OrgDatabase appdb) {
+		appdb.removeFile(fileName);
+		String storageMode = getStorageMode();
 		if (storageMode.equals("internal") || storageMode.equals("")) {
-			context.deleteFile(filePath);
+			context.deleteFile(fileName);
 		} else if (storageMode.equals("sdcard")) {
 			File root = Environment.getExternalStorageDirectory();
 			File morgDir = new File(root, "mobileorg");
-			File morgFile = new File(morgDir, filePath);
+			File morgFile = new File(morgDir, fileName);
 			morgFile.delete();
 		}
 	}
-	
-	
-	private static String getStorageMode(Context context) {
-		return PreferenceManager.getDefaultSharedPreferences(context).getString("storageMode", "");
+
+	private String getStorageMode() {
+		return PreferenceManager.getDefaultSharedPreferences(context)
+				.getString("storageMode", "");
 	}
 }

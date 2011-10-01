@@ -129,8 +129,7 @@ public class MobileOrgSyncService extends Service implements SharedPreferences.O
 		Thread syncThread = new Thread() {
 			public void run() {
 				try {
-					appSync.pull();
-					appSync.push();
+					appSync.synch();
 				} catch (IOException e) {
 				} finally {
 					appSync.close();

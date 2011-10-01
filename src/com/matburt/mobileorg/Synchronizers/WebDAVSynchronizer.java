@@ -28,6 +28,7 @@ import org.apache.http.params.CoreProtocolPNames;
 import org.apache.http.params.HttpParams;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
 import com.matburt.mobileorg.R;
@@ -35,56 +36,55 @@ import com.matburt.mobileorg.Parsing.NodeWriter;
 import com.matburt.mobileorg.Parsing.OrgFile;
 
 public class WebDAVSynchronizer extends Synchronizer {
-	private boolean pushedStageFile = false;
 
-	private String url;
+	private String username;
+	private String password;
 
 	public WebDAVSynchronizer(Context parentContext) {
 		super(parentContext);
 
-		this.url = PreferenceManager.getDefaultSharedPreferences(context)
-				.getString("webUrl", "");
+		SharedPreferences sharedPreferences = PreferenceManager
+				.getDefaultSharedPreferences(context);
+
+		this.remoteIndexPath = sharedPreferences.getString("webUrl", "");
+		this.remotePath = getRootUrl();
+
+		this.username = sharedPreferences.getString("webUser", "");
+		this.password = sharedPreferences.getString("webPass", "");
 	}
 
 	public boolean isConfigured() {
-		if (this.url.equals(""))
+		if (this.remoteIndexPath.equals(""))
 			return false;
 
 		Pattern checkUrl = Pattern.compile("http.*\\.(?:org|txt)$");
-		if (!checkUrl.matcher(this.url).find()) {
+		if (!checkUrl.matcher(this.remoteIndexPath).find()) {
 			return false;
 		}
 
 		return true;
 	}
 
-	public void push() throws IOException {
-		String urlActual = this.getRootUrl() + "mobileorg.org";
-		this.pushedStageFile = false;
+	protected void push(String filename) throws IOException {
+		String urlActual = this.getRootUrl() + filename;
 
-		String fileContents = OrgFile.fileToString(NodeWriter.ORGFILE, context);
+		OrgFile orgf2 = new OrgFile(filename, context);
+		String fileContents = orgf2.read();
 
-		DefaultHttpClient httpC = this.createConnection(
-				this.appSettings.getString("webUser", ""),
-				this.appSettings.getString("webPass", ""));
+		DefaultHttpClient httpC = this.createConnection();
 
-		this.appendUrlFile(urlActual, httpC, fileContents);
+		String originalContent = OrgFile.read(getRemoteFile(filename));
+		String newContent = originalContent + '\n' + fileContents;
+		putUrlFile(urlActual, httpC, newContent);
 
-		if (this.pushedStageFile) {
-			OrgFile.removeFile("mobileorg.org", context, appdb);
-		}
+		OrgFile orgf = new OrgFile(filename, context);
+		orgf.remove(appdb);
 	}
 
-	public void pull() throws IOException {
-		updateFiles(this.url, getRootUrl());
-	}
-
-	protected BufferedReader getFile(String orgUrl) throws IOException {
-		DefaultHttpClient httpC = this.createConnection(
-				this.appSettings.getString("webUser", ""),
-				this.appSettings.getString("webPass", ""));
-		InputStream mainFile;
-		mainFile = this.getUrlStream(orgUrl, httpC);
+	protected BufferedReader getRemoteFile(String filename) throws IOException {
+		String orgUrl = this.remotePath + filename;
+		DefaultHttpClient httpC = this.createConnection();
+		InputStream mainFile = this.getUrlStream(orgUrl, httpC);
 
 		if (mainFile == null) {
 			return null;
@@ -92,31 +92,7 @@ public class WebDAVSynchronizer extends Synchronizer {
 		return new BufferedReader(new InputStreamReader(mainFile));
 	}
 
-	private String getRootUrl() throws IOException {
-		URL manageUrl = null;
-		try {
-			manageUrl = new URL(this.appSettings.getString("webUrl", ""));
-		} catch (MalformedURLException e) {
-			String url = r.getString(R.string.error_bad_url,
-					(manageUrl == null) ? "" : manageUrl.toString());
-			throw new FileNotFoundException(url);
-		}
-
-		String urlPath = manageUrl.getPath();
-		String[] pathElements = urlPath.split("/");
-		String directoryActual = "/";
-		if (pathElements.length > 1) {
-			for (int idx = 0; idx < pathElements.length - 1; idx++) {
-				if (pathElements[idx].length() > 0) {
-					directoryActual += pathElements[idx] + "/";
-				}
-			}
-		}
-		return manageUrl.getProtocol() + "://" + manageUrl.getAuthority()
-				+ directoryActual;
-	}
-
-	private DefaultHttpClient createConnection(String user, String password) {
+	private DefaultHttpClient createConnection() {
 		DefaultHttpClient httpClient = new DefaultHttpClient();
 		HttpParams params = httpClient.getParams();
 		SchemeRegistry schemeRegistry = new SchemeRegistry();
@@ -130,7 +106,7 @@ public class WebDAVSynchronizer extends Synchronizer {
 				params, schemeRegistry);
 
 		UsernamePasswordCredentials bCred = new UsernamePasswordCredentials(
-				user, password);
+				username, password);
 		BasicCredentialsProvider cProvider = new BasicCredentialsProvider();
 		cProvider.setCredentials(AuthScope.ANY, bCred);
 
@@ -148,22 +124,17 @@ public class WebDAVSynchronizer extends Synchronizer {
 		HttpResponse res = httpClient.execute(new HttpGet(url));
 		StatusLine status = res.getStatusLine();
 		if (status.getStatusCode() == 401) {
-			// throw new
-			// ReportableError(r.getString(R.string.error_url_fetch_detail,
-			// url,
-			// "Invalid username or password"),
-			// null);
+			throw new FileNotFoundException(r.getString(
+					R.string.error_url_fetch_detail, url,
+					"Invalid username or password"));
 		}
 		if (status.getStatusCode() == 404) {
 			return null;
 		}
 
 		if (status.getStatusCode() < 200 || status.getStatusCode() > 299) {
-			// throw new ReportableError(
-			// r.getString(R.string.error_url_fetch_detail,
-			// url,
-			// status.getReasonPhrase()),
-			// null);
+			throw new IOException(r.getString(R.string.error_url_fetch_detail,
+					url, status.getReasonPhrase()), null);
 		}
 		return res.getEntity().getContent();
 	}
@@ -177,29 +148,38 @@ public class WebDAVSynchronizer extends Synchronizer {
 			StatusLine statResp = response.getStatusLine();
 			int statCode = statResp.getStatusCode();
 			if (statCode >= 400) {
-				this.pushedStageFile = false;
-				// throw new
-				// ReportableError(r.getString(R.string.error_url_put_detail,
-				// url,
-				// "Server returned code: " + Integer.toString(statCode)),
-				// null);
-			} else {
-				this.pushedStageFile = true;
+				throw new IOException(r.getString(
+						R.string.error_url_put_detail, url,
+						"Server returned code: " + Integer.toString(statCode)),
+						null);
 			}
-
 			httpClient.getConnectionManager().shutdown();
 		} catch (UnsupportedEncodingException e) {
-			// throw new ReportableError(
-			// r.getString(R.string.error_unsupported_encoding,
-			// "mobileorg.org"),
-			// e);
+			throw new IOException(r.getString(
+					R.string.error_unsupported_encoding, NodeWriter.ORGFILE), e);
 		}
 	}
 
-	private void appendUrlFile(String url, DefaultHttpClient httpClient,
-			String content) throws IOException {
-		String originalContent = OrgFile.fileToString(getFile(url));
-		String newContent = originalContent + '\n' + content;
-		this.putUrlFile(url, httpClient, newContent);
+	private String getRootUrl() {
+		URL manageUrl;
+		try {
+			manageUrl = new URL(this.remoteIndexPath);
+		} catch (MalformedURLException e) {
+			return "";
+		}
+
+		String urlPath = manageUrl.getPath();
+		String[] pathElements = urlPath.split("/");
+		String directoryActual = "/";
+
+		if (pathElements.length > 1) {
+			for (String pathElement : pathElements) {
+				if (pathElement.length() > 0) {
+					directoryActual += pathElement + "/";
+				}
+			}
+		}
+		return manageUrl.getProtocol() + "://" + manageUrl.getAuthority()
+				+ directoryActual;
 	}
 }
