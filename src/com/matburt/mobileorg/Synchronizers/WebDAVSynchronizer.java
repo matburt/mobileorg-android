@@ -1,14 +1,13 @@
 package com.matburt.mobileorg.Synchronizers;
 
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.regex.Pattern;
 
 import org.apache.http.HttpResponse;
@@ -28,221 +27,179 @@ import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.params.CoreProtocolPNames;
 import org.apache.http.params.HttpParams;
 
+import android.content.Context;
+import android.preference.PreferenceManager;
+
+import com.matburt.mobileorg.R;
+import com.matburt.mobileorg.Parsing.NodeWriter;
 import com.matburt.mobileorg.Parsing.OrgFile;
 
-import android.content.Context;
-import android.util.Log;
+public class WebDAVSynchronizer extends Synchronizer {
+	private boolean pushedStageFile = false;
 
-public class WebDAVSynchronizer extends Synchronizer
-{
-    private boolean pushedStageFile = false;
+	private String url;
 
-    public WebDAVSynchronizer(Context parentContext) {
-    	super(parentContext);
-    }
-    
-    public boolean isConfigured() {
-        if (this.appSettings.getString("webUrl","").equals(""))
-            return false;
-        return true;
-    }
+	public WebDAVSynchronizer(Context parentContext) {
+		super(parentContext);
 
-    public void push() throws IOException  {
-        String urlActual = this.getRootUrl() + "mobileorg.org";
-        BufferedReader reader = OrgFile.getReadHandle("mobileorg.org", rootContext);
-        String fileContents = "";
-        this.pushedStageFile = false;
-        String thisLine = "";
+		this.url = PreferenceManager.getDefaultSharedPreferences(context)
+				.getString("webUrl", "");
+	}
 
-        if (reader == null) {
-            return;
-        }
-            while ((thisLine = reader.readLine()) != null) {
-                fileContents += thisLine + "\n";
-            }
-     
+	public boolean isConfigured() {
+		if (this.url.equals(""))
+			return false;
 
-        DefaultHttpClient httpC = this.createConnection(
-                                    this.appSettings.getString("webUser", ""),
-                                    this.appSettings.getString("webPass", ""));
+		Pattern checkUrl = Pattern.compile("http.*\\.(?:org|txt)$");
+		if (!checkUrl.matcher(this.url).find()) {
+			return false;
+		}
 
-        this.appendUrlFile(urlActual, httpC, fileContents);
+		return true;
+	}
 
-        if (this.pushedStageFile) {
-            OrgFile.removeFile("mobileorg.org", rootContext, appdb);
-        }
-    }
+	public void push() throws IOException {
+		String urlActual = this.getRootUrl() + "mobileorg.org";
+		this.pushedStageFile = false;
 
-    public void pull() throws IOException {
-        Pattern checkUrl = Pattern.compile("http.*\\.(?:org|txt)$");
-        String url = this.appSettings.getString("webUrl", "");
-        if (!checkUrl.matcher(url).find()) {
-//        	throw new ReportableError(
-//            		r.getString(R.string.error_bad_url, url),
-//            		null);
-        }
+		String fileContents = OrgFile.fileToString(NodeWriter.ORGFILE, context);
 
-        //Get the index org file
-        String masterStr = OrgFile.fetchOrgFileString(url);
-        if (masterStr.equals("")) {
-//            throw new ReportableError(
-//            		r.getString(R.string.error_file_not_found, url),
-//            		null);
-        }
-        HashMap<String, String> masterList = OrgFile.getOrgFilesFromMaster(masterStr);
-        ArrayList<HashMap<String, Boolean>> todoLists = OrgFile.getTodos(masterStr);
-        ArrayList<ArrayList<String>> priorityLists = OrgFile.getPriorities(masterStr);
-        this.appdb.setTodoList(todoLists);
-        this.appdb.setPriorityList(priorityLists);
-        String urlActual = this.getRootUrl();
+		DefaultHttpClient httpC = this.createConnection(
+				this.appSettings.getString("webUser", ""),
+				this.appSettings.getString("webPass", ""));
 
-        //Get checksums file
-        masterStr = OrgFile.fetchOrgFileString(urlActual + "checksums.dat");
-        HashMap<String, String> newChecksums = OrgFile.getChecksums(masterStr);
-        HashMap<String, String> oldChecksums = this.appdb.getChecksums();
+		this.appendUrlFile(urlActual, httpC, fileContents);
 
-        //Get other org files
-        for (String key : masterList.keySet()) {
-            if (oldChecksums.containsKey(key) &&
-                newChecksums.containsKey(key) &&
-                oldChecksums.get(key).equals(newChecksums.get(key)))
-                continue;
-            Log.d(LT, "Fetching: " +
-                  key + ": " + urlActual + masterList.get(key));
-            OrgFile.fetchAndSaveOrgFile(urlActual + masterList.get(key),
-                                     masterList.get(key), rootContext);
-            this.appdb.addOrUpdateFile(masterList.get(key),
-                                       key,
-                                       newChecksums.get(key));
-        }
-    }
+		if (this.pushedStageFile) {
+			OrgFile.removeFile("mobileorg.org", context, appdb);
+		}
+	}
 
-    public BufferedReader fetchOrgFile(String orgUrl) throws IOException {
-        DefaultHttpClient httpC = this.createConnection(
-                                    this.appSettings.getString("webUser", ""),
-                                    this.appSettings.getString("webPass", ""));
-        InputStream mainFile;
-            mainFile = this.getUrlStream(orgUrl, httpC);
+	public void pull() throws IOException {
+		updateFiles(this.url, getRootUrl());
+	}
 
-        if (mainFile == null) {
-            return null;
-        }
-        return new BufferedReader(new InputStreamReader(mainFile));
-    }
+	protected BufferedReader getFile(String orgUrl) throws IOException {
+		DefaultHttpClient httpC = this.createConnection(
+				this.appSettings.getString("webUser", ""),
+				this.appSettings.getString("webPass", ""));
+		InputStream mainFile;
+		mainFile = this.getUrlStream(orgUrl, httpC);
 
-    private String getRootUrl() {
-        URL manageUrl = null;
-        try {
-            manageUrl = new URL(this.appSettings.getString("webUrl", ""));
-        }
-        catch (MalformedURLException e) {
-//            throw new ReportableError(
-//            		r.getString(R.string.error_bad_url,
-//            				(manageUrl == null) ? "" : manageUrl.toString()),
-//            		e);
-        }
+		if (mainFile == null) {
+			return null;
+		}
+		return new BufferedReader(new InputStreamReader(mainFile));
+	}
 
-        String urlPath =  manageUrl.getPath();
-        String[] pathElements = urlPath.split("/");
-        String directoryActual = "/";
-        if (pathElements.length > 1) {
-            for (int idx = 0; idx < pathElements.length - 1; idx++) {
-                if (pathElements[idx].length() > 0) {
-                    directoryActual += pathElements[idx] + "/";
-                }
-            }
-        }
-        return manageUrl.getProtocol() + "://" +
-            manageUrl.getAuthority() + directoryActual;
-    }
+	private String getRootUrl() throws IOException {
+		URL manageUrl = null;
+		try {
+			manageUrl = new URL(this.appSettings.getString("webUrl", ""));
+		} catch (MalformedURLException e) {
+			String url = r.getString(R.string.error_bad_url,
+					(manageUrl == null) ? "" : manageUrl.toString());
+			throw new FileNotFoundException(url);
+		}
 
-    private DefaultHttpClient createConnection(String user, String password) {
-        DefaultHttpClient httpClient = new DefaultHttpClient();
-        HttpParams params = httpClient.getParams();
-        SchemeRegistry schemeRegistry = new SchemeRegistry();
-        schemeRegistry.register (new Scheme ("http",
-                                             PlainSocketFactory.getSocketFactory (), 80));
-        SSLSocketFactory sslSocketFactory = SSLSocketFactory.getSocketFactory();
-        sslSocketFactory.setHostnameVerifier(SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
-        schemeRegistry.register (new Scheme ("https",
-                                             sslSocketFactory, 443));
-        ThreadSafeClientConnManager cm = new ThreadSafeClientConnManager (
-                                                  params, schemeRegistry);
+		String urlPath = manageUrl.getPath();
+		String[] pathElements = urlPath.split("/");
+		String directoryActual = "/";
+		if (pathElements.length > 1) {
+			for (int idx = 0; idx < pathElements.length - 1; idx++) {
+				if (pathElements[idx].length() > 0) {
+					directoryActual += pathElements[idx] + "/";
+				}
+			}
+		}
+		return manageUrl.getProtocol() + "://" + manageUrl.getAuthority()
+				+ directoryActual;
+	}
 
-        UsernamePasswordCredentials bCred = new UsernamePasswordCredentials(user, password);
-        BasicCredentialsProvider cProvider = new BasicCredentialsProvider();
-        cProvider.setCredentials(AuthScope.ANY, bCred);
+	private DefaultHttpClient createConnection(String user, String password) {
+		DefaultHttpClient httpClient = new DefaultHttpClient();
+		HttpParams params = httpClient.getParams();
+		SchemeRegistry schemeRegistry = new SchemeRegistry();
+		schemeRegistry.register(new Scheme("http", PlainSocketFactory
+				.getSocketFactory(), 80));
+		SSLSocketFactory sslSocketFactory = SSLSocketFactory.getSocketFactory();
+		sslSocketFactory
+				.setHostnameVerifier(SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
+		schemeRegistry.register(new Scheme("https", sslSocketFactory, 443));
+		ThreadSafeClientConnManager cm = new ThreadSafeClientConnManager(
+				params, schemeRegistry);
 
-        params.setBooleanParameter(CoreProtocolPNames.USE_EXPECT_CONTINUE, false);
-        httpClient.setParams(params);
+		UsernamePasswordCredentials bCred = new UsernamePasswordCredentials(
+				user, password);
+		BasicCredentialsProvider cProvider = new BasicCredentialsProvider();
+		cProvider.setCredentials(AuthScope.ANY, bCred);
 
-        DefaultHttpClient nHttpClient = new DefaultHttpClient(cm, params);
-        nHttpClient.setCredentialsProvider(cProvider);
-        return nHttpClient;
-    }
+		params.setBooleanParameter(CoreProtocolPNames.USE_EXPECT_CONTINUE,
+				false);
+		httpClient.setParams(params);
 
-    private InputStream getUrlStream(String url, DefaultHttpClient httpClient) throws IOException {
-            HttpResponse res = httpClient.execute(new HttpGet(url));
-            StatusLine status = res.getStatusLine();
-            if (status.getStatusCode() == 401) {
-//                throw new ReportableError(r.getString(R.string.error_url_fetch_detail,
-//                                                      url,
-//                                                      "Invalid username or password"),
-//                                          null);
-            }
-            if (status.getStatusCode() == 404) {
-                return null;
-            }
+		DefaultHttpClient nHttpClient = new DefaultHttpClient(cm, params);
+		nHttpClient.setCredentialsProvider(cProvider);
+		return nHttpClient;
+	}
 
-            if (status.getStatusCode() < 200 || status.getStatusCode() > 299) {
-//            	throw new ReportableError(
-//            			r.getString(R.string.error_url_fetch_detail,
-//                                    url,
-//                                    status.getReasonPhrase()),
-//            			null);
-            }
-            return res.getEntity().getContent();
-    }
+	private InputStream getUrlStream(String url, DefaultHttpClient httpClient)
+			throws IOException {
+		HttpResponse res = httpClient.execute(new HttpGet(url));
+		StatusLine status = res.getStatusLine();
+		if (status.getStatusCode() == 401) {
+			// throw new
+			// ReportableError(r.getString(R.string.error_url_fetch_detail,
+			// url,
+			// "Invalid username or password"),
+			// null);
+		}
+		if (status.getStatusCode() == 404) {
+			return null;
+		}
 
-    private void putUrlFile(String url,
-                           DefaultHttpClient httpClient,
-                           String content) {
-        try {
-            HttpPut httpPut = new HttpPut(url);
-            httpPut.setEntity(new StringEntity(content, "UTF-8"));
-            HttpResponse response = httpClient.execute(httpPut);
-            StatusLine statResp = response.getStatusLine();
-            int statCode = statResp.getStatusCode();
-            if (statCode >= 400) {
-                this.pushedStageFile = false;
-//                throw new ReportableError(r.getString(R.string.error_url_put_detail,
-//                                                      url,
-//                                                      "Server returned code: " + Integer.toString(statCode)),
-//                                          null);
-            } else {
-                this.pushedStageFile = true;
-            }
+		if (status.getStatusCode() < 200 || status.getStatusCode() > 299) {
+			// throw new ReportableError(
+			// r.getString(R.string.error_url_fetch_detail,
+			// url,
+			// status.getReasonPhrase()),
+			// null);
+		}
+		return res.getEntity().getContent();
+	}
 
-            httpClient.getConnectionManager().shutdown();
-        }
-        catch (UnsupportedEncodingException e) {
-//        	throw new ReportableError(
-//        			r.getString(R.string.error_unsupported_encoding, "mobileorg.org"),
-//        			e);
-        }
-        catch (IOException e) {
-//        	throw new ReportableError(
-//        			r.getString(R.string.error_url_put, url),
-//        			e);
-        }
-    }
+	private void putUrlFile(String url, DefaultHttpClient httpClient,
+			String content) throws IOException {
+		try {
+			HttpPut httpPut = new HttpPut(url);
+			httpPut.setEntity(new StringEntity(content, "UTF-8"));
+			HttpResponse response = httpClient.execute(httpPut);
+			StatusLine statResp = response.getStatusLine();
+			int statCode = statResp.getStatusCode();
+			if (statCode >= 400) {
+				this.pushedStageFile = false;
+				// throw new
+				// ReportableError(r.getString(R.string.error_url_put_detail,
+				// url,
+				// "Server returned code: " + Integer.toString(statCode)),
+				// null);
+			} else {
+				this.pushedStageFile = true;
+			}
 
-    private void appendUrlFile(String url,
-    							DefaultHttpClient httpClient,
-    							String content) throws IOException {
-    	String originalContent = OrgFile.fetchOrgFileString(url);
-    	String newContent = originalContent + '\n' + content;
-    	this.putUrlFile(url, httpClient, newContent);
-    }
+			httpClient.getConnectionManager().shutdown();
+		} catch (UnsupportedEncodingException e) {
+			// throw new ReportableError(
+			// r.getString(R.string.error_unsupported_encoding,
+			// "mobileorg.org"),
+			// e);
+		}
+	}
+
+	private void appendUrlFile(String url, DefaultHttpClient httpClient,
+			String content) throws IOException {
+		String originalContent = OrgFile.fileToString(getFile(url));
+		String newContent = originalContent + '\n' + content;
+		this.putUrlFile(url, httpClient, newContent);
+	}
 }
-

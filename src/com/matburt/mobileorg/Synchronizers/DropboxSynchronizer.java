@@ -5,14 +5,10 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.HashMap;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.os.Environment;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.widget.Toast;
 
 import com.dropbox.client.DropboxAPI;
@@ -26,10 +22,26 @@ public class DropboxSynchronizer extends Synchronizer {
     private DropboxAPI dropboxAPI = new DropboxAPI();
     private com.dropbox.client.DropboxAPI.Config dropboxConfig;
 
-    public DropboxSynchronizer(Context parentContext) {
-    	super(parentContext);
+    private String indexFilePath;
+    private String rootPath;
+    
+    public DropboxSynchronizer(Context context) {
+    	super(context);
+
+		SharedPreferences sharedPreferences = PreferenceManager
+				.getDefaultSharedPreferences(context);
+    	
+		this.indexFilePath = sharedPreferences.getString("dropboxPath", "");
+		if (!this.indexFilePath.startsWith("/")) {
+			this.indexFilePath = "/" + this.indexFilePath;
+		}
+
+		String dbPath = sharedPreferences.getString("dropboxPath","");
+		rootPath = dbPath.substring(0, dbPath.lastIndexOf("/")+1);
+    	
         connect();
     }
+
 
     public boolean isConfigured() {
         if (this.appSettings.getString("dropboxPath", null) == null)
@@ -38,60 +50,36 @@ public class DropboxSynchronizer extends Synchronizer {
     }
     
     public void push() throws IOException {
-        BufferedReader reader = OrgFile.getReadHandle(NodeWriter.ORGFILE, rootContext);
-		StringBuilder fileContents = new StringBuilder();
-		String line;
-		
-		while ((line = reader.readLine()) != null) {
-		    fileContents.append(line);
-		    fileContents.append("\n");
-		}
-		
-		this.appendDropboxFile(NodeWriter.ORGFILE, fileContents.toString());
+    	String fileContents = OrgFile.fileToString(NodeWriter.ORGFILE, context);
+
+        String pathActual = this.rootPath;
+        String originalContent = OrgFile.fileToString(getFile(pathActual + NodeWriter.ORGFILE));
+
+        String newContent = "";
+ 
+        if (originalContent.indexOf("{\"error\":") == -1)
+            newContent = originalContent + "\n" + fileContents;
+        else
+            newContent = fileContents;
+
+        OrgFile.removeFile(NodeWriter.ORGFILE, context, appdb);
+        BufferedWriter writer = OrgFile.getWriteHandle(NodeWriter.ORGFILE, context);
+
+        writer.write(newContent);
+        writer.close();
+
+        File uploadFile = OrgFile.getFile(NodeWriter.ORGFILE, context);
+        this.dropboxAPI.putFile("dropbox", pathActual, uploadFile);
+        OrgFile.removeFile(NodeWriter.ORGFILE, context, appdb);
+
     }
+
 
     public void pull() throws IOException {
-        String indexFilePath = this.appSettings.getString("dropboxPath", "");
-		if(!indexFilePath.startsWith("/")) {
-			indexFilePath = "/" + indexFilePath;
-		}
-        String masterStr = OrgFile.fetchOrgFileString(indexFilePath);
-        Log.i(LT, "Contents: " + masterStr);
-
-		if (masterStr.equals("")) {
-			throw new IOException(r.getString(R.string.error_file_not_found,
-					indexFilePath), null);
-		}
-        
-        HashMap<String, String> masterList = OrgFile.getOrgFilesFromMaster(masterStr);
-        ArrayList<HashMap<String, Boolean>> todoLists = OrgFile.getTodos(masterStr);
-        ArrayList<ArrayList<String>> priorityLists = OrgFile.getPriorities(masterStr);
-        this.appdb.setTodoList(todoLists);
-        this.appdb.setPriorityList(priorityLists);
-        String pathActual = this.getRootPath();
- 
-        //Get checksums file
-        masterStr = OrgFile.fetchOrgFileString(pathActual + "checksums.dat");
-        HashMap<String, String> newChecksums = OrgFile.getChecksums(masterStr);
-        HashMap<String, String> oldChecksums = this.appdb.getChecksums();
-
-        //Get other org files
-        for (String key : masterList.keySet()) {
-            if (oldChecksums.containsKey(key) &&
-                newChecksums.containsKey(key) &&
-                oldChecksums.get(key).equals(newChecksums.get(key)))
-                continue;
-            Log.d(LT, "Fetching: " +
-                  key + ": " + pathActual + masterList.get(key));
-            OrgFile.fetchAndSaveOrgFile(pathActual + masterList.get(key),
-                                     masterList.get(key), rootContext);
-            this.appdb.addOrUpdateFile(masterList.get(key),
-                                       key,
-                                       newChecksums.get(key));
-        }
+        updateFiles(this.indexFilePath, this.rootPath);
     }
 
-	public BufferedReader fetchOrgFile(String orgPath) throws IOException {
+	protected BufferedReader getFile(String orgPath) throws IOException {
 		FileDownload fd = dropboxAPI.getFileStream("dropbox", orgPath, null);
 
 		if (fd == null || fd.is == null) {
@@ -101,70 +89,6 @@ public class DropboxSynchronizer extends Synchronizer {
 
 		return new BufferedReader(new InputStreamReader(fd.is));
 	}
-
-    
-    private String getRootPath() {
-        String dbPath = this.appSettings.getString("dropboxPath","");
-        return dbPath.substring(0, dbPath.lastIndexOf("/")+1);
-    }
-
-    private void appendDropboxFile(String file, String content) throws IOException {
-        String pathActual = getRootPath();
-        String originalContent = OrgFile.fetchOrgFileString(pathActual + file);
-        String newContent = "";
- 
-        if (originalContent.indexOf("{\"error\":") == -1)
-            newContent = originalContent + "\n" + content;
-        else
-            newContent = content;
-
-        OrgFile.removeFile(NodeWriter.ORGFILE, rootContext, appdb);
-        BufferedWriter writer = OrgFile.getWriteHandle(NodeWriter.ORGFILE, rootContext);
-
-        // Rewriting the mobileorg file with the contents on Dropbox is dangerous
-        // but the api sucks and automatically uses the File object's name when figuring
-        // out what to call the remote file
-        writer.write(newContent);
-        writer.close();
-
-        File uploadFile = this.getFile(NodeWriter.ORGFILE);
-        this.dropboxAPI.putFile("dropbox", pathActual, uploadFile);
-        OrgFile.removeFile(NodeWriter.ORGFILE, rootContext, appdb);
-        // NOTE: Will need to download and compare file since dropbox api sucks and won't
-        //       return the status code
-        // if (something) {
-        //     this.appdb.removeFile("mobileorg.org");
-        //     if (storageMode.equals("internal") || storageMode == null) {
-        //         this.rootContext.deleteFile("mobileorg.org");
-        //     }
-        //     else if (storageMode.equals("sdcard")) {
-        //         File root = Environment.getExternalStorageDirectory();
-        //         File morgDir = new File(root, "mobileorg");
-        //         File morgFile = new File(morgDir, "mobileorg.org");
-        //         morgFile.delete();
-        //     }
-        // }
-    }
-
-    private File getFile(String fileName) {
-        String storageMode = this.appSettings.getString("storageMode", null);
-        if (storageMode.equals("internal") || storageMode == null) {
-            File morgFile = new File("/data/data/com.matburt.mobileorg/files", fileName);
-            return morgFile;
-        }
-        else if (storageMode.equals("sdcard")) {
-            File root = Environment.getExternalStorageDirectory();
-            File morgDir = new File(root, "mobileorg");
-            File morgFile = new File(morgDir, fileName);
-            if (!morgFile.exists()) {
-                Log.i(LT, "Did not find " + fileName + " file, not pushing.");
-                return null;
-            }
-            return morgFile;
-        }
-        
-        return null;
-    }
 
     
     /**
@@ -208,7 +132,7 @@ public class DropboxSynchronizer extends Synchronizer {
      */
     private String[] getKeys() {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(
-                                          this.rootContext.getApplicationContext());
+                                          this.context.getApplicationContext());
         String key = prefs.getString("dbPrivKey", null);
         String secret = prefs.getString("dbPrivSecret", null);
         if (key != null && secret != null) {
@@ -222,7 +146,7 @@ public class DropboxSynchronizer extends Synchronizer {
     }
 
     private void showToast(String msg) {
-        Toast error = Toast.makeText(this.rootContext, msg, Toast.LENGTH_LONG);
+        Toast error = Toast.makeText(this.context, msg, Toast.LENGTH_LONG);
         error.show();
     }
 }
