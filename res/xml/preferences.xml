@@ -42,7 +42,7 @@
     <PreferenceScreen
         android:key="VersionDisp"
         android:title="Version"
-        android:summary="0.6.1">
+        android:summary="0.6.2">
     </PreferenceScreen>
   </PreferenceCategory>
 </PreferenceScreen>
