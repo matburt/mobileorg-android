@@ -4,10 +4,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
@@ -40,13 +40,9 @@ abstract public class Synchronizer {
     protected String remoteIndexPath;
 	protected String remotePath;
 	
-	public boolean synch() throws IOException {
-		if (!isConfigured())
-			return false;
-
+	public void sync(ProgressDialog progressDialog) throws IOException {
 		pull();
 		push(NodeWriter.ORGFILE);
-		return true;
 	}
 	
 	public void close() {
@@ -73,21 +69,22 @@ abstract public class Synchronizer {
 		
 		HashMap<String, String> fileChecksumMap = getOrgFilesFromMaster(remoteIndexContents);
 
-		for (Map.Entry<String, String> item : fileChecksumMap.entrySet()) {
-			String key = item.getKey();
-			Log.d(LT, "Processing " + key);
+        for (String key : fileChecksumMap.keySet()) {
+            if (localChecksums.containsKey(key) &&
+                remoteChecksums.containsKey(key) &&
+                localChecksums.get(key).equals(remoteChecksums.get(key)))
+                continue;
+            Log.d(LT, "Fetching: " +
+                  key + ": " + this.remotePath + fileChecksumMap.get(key));
+          
+            OrgFile orgfile = new OrgFile(fileChecksumMap.get(key), context);
+            orgfile.fetch(getRemoteFile(fileChecksumMap.get(key)));
+  
+            this.appdb.addOrUpdateFile(fileChecksumMap.get(key),
+                                       key,
+                                       fileChecksumMap.get(key));
+        }
 
-			if (!remoteChecksums.containsKey(key) || !localChecksums.get(key)
-							.equals(remoteChecksums.get(key))) {
-				Log.d(LT, "  Key: " + key + " : " + fileChecksumMap.get(key));
-
-				OrgFile orgfile = new OrgFile(key, context);
-				orgfile.fetch(getRemoteFile(this.remotePath + key));
-
-				this.appdb.addOrUpdateFile(key, fileChecksumMap.get(key),
-						remoteChecksums.get(key));
-			}
-		}
 		Log.d(LT, "Pull() done ");
 	}
 	

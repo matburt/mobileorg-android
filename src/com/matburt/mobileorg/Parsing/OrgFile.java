@@ -29,7 +29,7 @@ public class OrgFile {
 	}
 
 	public String read() throws IOException {
-		return read(getBufferedReader());
+		return read(getReader());
 	}
 
 	public static String read(BufferedReader reader) throws IOException {
@@ -55,48 +55,33 @@ public class OrgFile {
 		writer.close();
 	}
 
-	private BufferedReader getBufferedReader() throws FileNotFoundException {
+	private BufferedReader getReader() throws FileNotFoundException {
 		String storageMode = getStorageMode();
 		BufferedReader reader = null;
 
-		if (storageMode.equals("internal") || storageMode.equals("")) {
-			FileInputStream fs;
-			fs = context.openFileInput(fileName);
-			reader = new BufferedReader(new InputStreamReader(fs));
+		try {
+			if (storageMode.equals("internal") || storageMode.equals("")) {
+				FileInputStream fs;
+				fs = context.openFileInput(fileName);
+				reader = new BufferedReader(new InputStreamReader(fs));
 
-		} else if (storageMode.equals("sdcard")) {
-			File root = Environment.getExternalStorageDirectory();
-			File morgDir = new File(root, "mobileorg");
-			File morgFile = new File(morgDir, fileName);
-			if (!morgFile.exists()) {
-				return null;
+			} else if (storageMode.equals("sdcard")) {
+				File root = Environment.getExternalStorageDirectory();
+				File morgDir = new File(root, "mobileorg");
+				File morgFile = new File(morgDir, fileName);
+				if (!morgFile.exists()) {
+					return null;
+				}
+				reader = new BufferedReader(new FileReader(morgFile));
 			}
-			reader = new BufferedReader(new FileReader(morgFile));
+		} catch (FileNotFoundException e) {
+			return null;
 		}
 
 		return reader;
 	}
-
-	public File getFile() {
-		String storageMode = getStorageMode();
-		if (storageMode.equals("internal") || storageMode == null) {
-			File morgFile = new File("/data/data/com.matburt.mobileorg/files",
-					fileName);
-			return morgFile;
-		} else if (storageMode.equals("sdcard")) {
-			File root = Environment.getExternalStorageDirectory();
-			File morgDir = new File(root, "mobileorg");
-			File morgFile = new File(morgDir, fileName);
-			if (!morgFile.exists()) {
-				return null;
-			}
-			return morgFile;
-		}
-
-		return null;
-	}
-
-	public BufferedWriter getWriteHandle() throws IOException {
+	
+	public BufferedWriter getWriter() throws IOException {
 		String storageMode = getStorageMode();
 		BufferedWriter writer = null;
 
@@ -120,8 +105,30 @@ public class OrgFile {
 		return writer;
 	}
 
+	public File getFile() {
+		String storageMode = getStorageMode();
+		if (storageMode.equals("internal") || storageMode == null) {
+			File morgFile = new File("/data/data/com.matburt.mobileorg/files",
+					fileName);
+			return morgFile;
+		} else if (storageMode.equals("sdcard")) {
+			File root = Environment.getExternalStorageDirectory();
+			File morgDir = new File(root, "mobileorg");
+			File morgFile = new File(morgDir, fileName);
+			if (!morgFile.exists()) {
+				return null;
+			}
+			return morgFile;
+		}
+
+		return null;
+	}
+
+	/**
+	 * Read everything from the given reader and write to it {@link #fileName}
+	 */
 	public void fetch(BufferedReader reader) throws IOException {
-		BufferedWriter writer = getWriteHandle();
+		BufferedWriter writer = getWriter();
 
 		char[] baf = new char[BUFFER_SIZE];
 		int actual = 0;

@@ -52,12 +52,15 @@ public class DropboxSynchronizer extends Synchronizer {
     	String localContents = orgFile.read();
         String remoteContent = OrgFile.read(getRemoteFile(filename));
  
+        if(localContents.equals(""))
+        	return;
+        
         if (remoteContent.indexOf("{\"error\":") == -1)
             localContents = remoteContent + "\n" + localContents;
 
         orgFile.remove(appdb);
        
-        BufferedWriter writer =  orgFile.getWriteHandle();
+        BufferedWriter writer =  orgFile.getWriter();
         writer.write(localContents);
         writer.close();
     

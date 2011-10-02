@@ -34,6 +34,7 @@ import com.matburt.mobileorg.Parsing.OrgFileParser;
 import com.matburt.mobileorg.Settings.SettingsActivity;
 import com.matburt.mobileorg.Synchronizers.DropboxSynchronizer;
 import com.matburt.mobileorg.Synchronizers.SDCardSynchronizer;
+import com.matburt.mobileorg.Synchronizers.SynchManager;
 import com.matburt.mobileorg.Synchronizers.Synchronizer;
 import com.matburt.mobileorg.Synchronizers.WebDAVSynchronizer;
 
@@ -352,20 +353,14 @@ public class OutlineActivity extends ListActivity
 	
 
 	private void runSynchronizer() {
-		String userSynchro = this.appSettings.getString("syncSource", "");
-		final Synchronizer appSync;
-		if (userSynchro.equals("webdav")) {
-			appSync = new WebDAVSynchronizer(this);
-		} else if (userSynchro.equals("sdcard")) {
-			appSync = new SDCardSynchronizer(this);
-		} else if (userSynchro.equals("dropbox")) {
-			appSync = new DropboxSynchronizer(this);
-		} else {
+		final SynchManager synchman = new SynchManager(this);
+
+		if(synchman == null) {
 			this.runShowSettings();
-			return;
+			return; 
 		}
 
-		if (!appSync.isConfigured()) {
+		if (!synchman.isConfigured()) {
 			Toast error = Toast.makeText((Context) this,
 					getString(R.string.error_synchronizer_not_configured),
 					Toast.LENGTH_LONG);
@@ -378,12 +373,11 @@ public class OutlineActivity extends ListActivity
 			public void run() {
 				try {
 					syncError = null;
-					appSync.synch();
-					Log.d("MobileOrg" + this, "Finished parsing...");
+					synchman.sync(syncDialog);
 				} catch (IOException e) {
 					syncError = e;
 				} finally {
-					appSync.close();
+					synchman.close();
 				}
 				syncHandler.post(syncUpdateResults);
 			}
