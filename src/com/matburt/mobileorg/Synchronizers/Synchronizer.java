@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
@@ -26,7 +25,7 @@ abstract public class Synchronizer {
 	public static final String LT = "MobileOrg";
 	public Resources r;
 
-	public Synchronizer(Context context) {
+	Synchronizer(Context context) {
         this.context = context;
         this.r = this.context.getResources();
         this.appdb = new OrgDatabase((Context)context);
@@ -35,22 +34,35 @@ abstract public class Synchronizer {
 	}
 
 	public abstract boolean isConfigured();
-	protected abstract void push(String filename) throws IOException;
+	protected abstract void putRemoteFile(String filename, String contents) throws IOException;
 	protected abstract BufferedReader getRemoteFile(String filename) throws IOException;
-    protected String remoteIndexPath;
+
+	protected String remoteIndexPath;
 	protected String remotePath;
 	
-	public void sync(ProgressDialog progressDialog) throws IOException {
+	public void sync() throws IOException {
 		pull();
 		push(NodeWriter.ORGFILE);
 	}
-	
-	public void close() {
-		if (this.appdb != null)
-			this.appdb.close();
+
+	protected void push(String filename) throws IOException {
+    	OrgFile orgFile = new OrgFile(filename, context);
+    	String localContents = orgFile.read();
+
+    	String remoteContent = OrgFile.read(getRemoteFile(filename));
+ 
+        if(localContents.equals(""))
+        	return;
+        
+        if (remoteContent.indexOf("{\"error\":") == -1)
+            localContents = remoteContent + "\n" + localContents;
+		
+		putRemoteFile(filename, localContents);
+		
+		OrgFile orgfile = new OrgFile(filename, context);
+		orgfile.remove(appdb);
 	}
-
-
+	
 	protected void pull() throws IOException {
         Log.d(LT, "Pull() started");
 
@@ -163,5 +175,10 @@ abstract public class Synchronizer {
 			priorityList.add(holding);
 		}
 		return priorityList;
+	}
+		
+	public void close() {
+		if (this.appdb != null)
+			this.appdb.close();
 	}
 }

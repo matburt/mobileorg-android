@@ -110,29 +110,19 @@ public class MobileOrgSyncService extends Service implements SharedPreferences.O
 	}
 
 	public void runSynchronizer() {
-		String userSynchro = this.appSettings.getString("syncSource", "");
-		final Synchronizer appSync;
-		if (userSynchro.equals("webdav")) {
-			appSync = new WebDAVSynchronizer(this);
-		} else if (userSynchro.equals("sdcard")) {
-			appSync = new SDCardSynchronizer(this);
-		} else if (userSynchro.equals("dropbox")) {
-			appSync = new DropboxSynchronizer(this);
-		} else {
-			return;
-		}
+		final SynchManager syncman = new SynchManager(this);
 
-		if (!appSync.isConfigured()) {
+		if (!syncman.isConfigured()) {
 			return;
 		}
 
 		Thread syncThread = new Thread() {
 			public void run() {
 				try {
-					appSync.sync(null);
+					syncman.sync();
 				} catch (IOException e) {
 				} finally {
-					appSync.close();
+					syncman.close();
 				}
 
 				runParser();

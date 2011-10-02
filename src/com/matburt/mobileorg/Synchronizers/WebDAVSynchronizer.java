@@ -33,14 +33,13 @@ import android.preference.PreferenceManager;
 
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Parsing.NodeWriter;
-import com.matburt.mobileorg.Parsing.OrgFile;
 
 public class WebDAVSynchronizer extends Synchronizer {
 
 	private String username;
 	private String password;
 
-	public WebDAVSynchronizer(Context parentContext) {
+	WebDAVSynchronizer(Context parentContext) {
 		super(parentContext);
 
 		SharedPreferences sharedPreferences = PreferenceManager
@@ -65,20 +64,10 @@ public class WebDAVSynchronizer extends Synchronizer {
 		return true;
 	}
 
-	protected void push(String filename) throws IOException {
-		String urlActual = this.getRootUrl() + filename;
-
-		OrgFile orgf2 = new OrgFile(filename, context);
-		String fileContents = orgf2.read();
-
+	protected void putRemoteFile(String filename, String contents) throws IOException {
 		DefaultHttpClient httpC = this.createConnection();
-
-		String originalContent = OrgFile.read(getRemoteFile(filename));
-		String newContent = originalContent + '\n' + fileContents;
-		putUrlFile(urlActual, httpC, newContent);
-
-		OrgFile orgf = new OrgFile(filename, context);
-		orgf.remove(appdb);
+		String urlActual = this.getRootUrl() + filename;
+		putUrlFile(urlActual, httpC, contents);
 	}
 
 	protected BufferedReader getRemoteFile(String filename) throws IOException {

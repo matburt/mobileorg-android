@@ -2,7 +2,6 @@ package com.matburt.mobileorg.Synchronizers;
 
 import java.io.IOException;
 
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.preference.PreferenceManager;
 
@@ -22,14 +21,17 @@ public class SynchManager {
 	}
 	
 	public boolean isConfigured() {
+		if(appSync == null)
+			return false;
+		
 		return appSync.isConfigured();
 	}
 	
-	public boolean sync(ProgressDialog progressDialog) throws IOException {
+	public boolean sync() throws IOException {
 		if (!isConfigured())
 			return false;
 		
-		appSync.sync(progressDialog);
+		appSync.sync();
 		return true;
 	}
 	

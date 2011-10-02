@@ -3,6 +3,7 @@ package com.matburt.mobileorg.Gui;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
+
 import android.app.Dialog;
 import android.app.ListActivity;
 import android.app.ProgressDialog;
@@ -12,7 +13,6 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Menu;
@@ -32,11 +32,7 @@ import com.matburt.mobileorg.Parsing.Node;
 import com.matburt.mobileorg.Parsing.NodeEncryption;
 import com.matburt.mobileorg.Parsing.OrgFileParser;
 import com.matburt.mobileorg.Settings.SettingsActivity;
-import com.matburt.mobileorg.Synchronizers.DropboxSynchronizer;
-import com.matburt.mobileorg.Synchronizers.SDCardSynchronizer;
 import com.matburt.mobileorg.Synchronizers.SynchManager;
-import com.matburt.mobileorg.Synchronizers.Synchronizer;
-import com.matburt.mobileorg.Synchronizers.WebDAVSynchronizer;
 
 public class OutlineActivity extends ListActivity
 {
@@ -355,11 +351,6 @@ public class OutlineActivity extends ListActivity
 	private void runSynchronizer() {
 		final SynchManager synchman = new SynchManager(this);
 
-		if(synchman == null) {
-			this.runShowSettings();
-			return; 
-		}
-
 		if (!synchman.isConfigured()) {
 			Toast error = Toast.makeText((Context) this,
 					getString(R.string.error_synchronizer_not_configured),
@@ -373,7 +364,7 @@ public class OutlineActivity extends ListActivity
 			public void run() {
 				try {
 					syncError = null;
-					synchman.sync(syncDialog);
+					synchman.sync();
 				} catch (IOException e) {
 					syncError = e;
 				} finally {
@@ -387,7 +378,7 @@ public class OutlineActivity extends ListActivity
 				getString(R.string.sync_wait), true);
 	}
 	
-	final Runnable syncUpdateResults = new Runnable() {
+	private final Runnable syncUpdateResults = new Runnable() {
 		public void run() {
 			postSynchronize();
 		}

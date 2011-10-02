@@ -21,7 +21,7 @@ public class DropboxSynchronizer extends Synchronizer {
     private DropboxAPI dropboxAPI = new DropboxAPI();
     private com.dropbox.client.DropboxAPI.Config dropboxConfig;
     
-    public DropboxSynchronizer(Context context) {
+    DropboxSynchronizer(Context context) {
     	super(context);
 
 		SharedPreferences sharedPreferences = PreferenceManager
@@ -46,27 +46,16 @@ public class DropboxSynchronizer extends Synchronizer {
     }
 
     
-    protected void push(String filename) throws IOException {
+    protected void putRemoteFile(String filename, String contents) throws IOException {
     	OrgFile orgFile = new OrgFile(filename, context);
-
-    	String localContents = orgFile.read();
-        String remoteContent = OrgFile.read(getRemoteFile(filename));
- 
-        if(localContents.equals(""))
-        	return;
-        
-        if (remoteContent.indexOf("{\"error\":") == -1)
-            localContents = remoteContent + "\n" + localContents;
-
         orgFile.remove(appdb);
        
         BufferedWriter writer =  orgFile.getWriter();
-        writer.write(localContents);
+        writer.write(contents);
         writer.close();
     
         File uploadFile = orgFile.getFile();
         this.dropboxAPI.putFile("dropbox", this.remotePath, uploadFile);
-        orgFile.remove(appdb);
     }
 
 	protected BufferedReader getRemoteFile(String filename) throws IOException {

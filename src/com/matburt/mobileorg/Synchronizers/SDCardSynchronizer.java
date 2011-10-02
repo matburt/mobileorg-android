@@ -14,12 +14,12 @@ import com.matburt.mobileorg.Parsing.OrgFile;
 
 public class SDCardSynchronizer extends Synchronizer
 {	
-    public SDCardSynchronizer(Context context) {
+    SDCardSynchronizer(Context context) {
     	super(context);
 		this.remoteIndexPath = PreferenceManager.getDefaultSharedPreferences(
 				context).getString("indexFilePath", "");
 		
-		this.remotePath = new File(remoteIndexPath).getParent();
+		this.remotePath = new File(remoteIndexPath).getParent() + "/";
 	}
     
 
@@ -29,20 +29,11 @@ public class SDCardSynchronizer extends Synchronizer
         return true;
     }
 
-	protected void push(String filename) throws IOException {
-		OrgFile orgFile = new OrgFile(filename, context);
-		String localContents = orgFile.read();
-
-		String indexFileDirectory = new File(remoteIndexPath).getParent();
-		String outfilePath = indexFileDirectory + "/" + filename;
-				
-		String remoteContent = OrgFile.read(getRemoteFile(filename));
-		remoteContent += "\n";
-
-		String newContent = remoteContent + localContents;
+	protected void putRemoteFile(String filename, String contents) throws IOException {
+		String outfilePath = this.remotePath + filename;
 		
-		OrgFile orgf2 = new OrgFile(outfilePath, context);
-		orgf2.write(outfilePath, newContent);
+		OrgFile orgfileOut = new OrgFile(outfilePath, context);
+		orgfileOut.write(outfilePath, contents);
 	}
 
 	protected BufferedReader getRemoteFile(String filename) throws FileNotFoundException {
