@@ -397,7 +397,9 @@ public class MobileOrgActivity extends ListActivity
         else {
         	/* we came back, refresh */
         	OrgViewAdapter adapter = (OrgViewAdapter)getListView().getAdapter();
-        	adapter.notifyDataSetChanged();
+            if (adapter != null) {
+                adapter.notifyDataSetChanged();
+            }
         	this.getListView().invalidate();
         }
 	}
