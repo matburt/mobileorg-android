@@ -12,18 +12,42 @@ import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
-import android.util.Log;
-
 import com.matburt.mobileorg.Parsing.NodeWriter;
 import com.matburt.mobileorg.Parsing.OrgDatabase;
 import com.matburt.mobileorg.Parsing.OrgFile;
 
+/**
+ * This class implements many of the operations that need to be done on
+ * synching. Instead of using it directly, create a {@link SyncManager}.
+ * 
+ * When implementing a new synchronizer, the methods {@link #isConfigured()},
+ * {@link #putRemoteFile(String, String)} and {@link #getRemoteFile(String)} are
+ * needed.
+ */
 abstract public class Synchronizer {
-	public OrgDatabase appdb = null;
-	public SharedPreferences appSettings = null;
-	public Context context = null;
-	public static final String LT = "MobileOrg";
-	public Resources r;
+	/**
+	 * Called before running the synchronizer to ensure that it's configuration
+	 * is in a valid state.
+	 */
+	public abstract boolean isConfigured();
+	
+	/**
+	 * Replaces the file on the remote end with the given content.
+	 * @param filename Name of the file, without path
+	 * @param contents Content of the new file
+	 */
+	protected abstract void putRemoteFile(String filename, String contents) throws IOException;
+
+	/**
+	 * Returns a BufferedReader to the remote file.
+	 * @param filename Name of the file, without path
+	 */
+	protected abstract BufferedReader getRemoteFile(String filename) throws IOException;
+
+	protected OrgDatabase appdb = null;
+	protected SharedPreferences appSettings = null;
+	protected Context context = null;
+	protected Resources r;
 
 	Synchronizer(Context context) {
         this.context = context;
@@ -33,18 +57,15 @@ abstract public class Synchronizer {
                                    context.getApplicationContext());
 	}
 
-	public abstract boolean isConfigured();
-	protected abstract void putRemoteFile(String filename, String contents) throws IOException;
-	protected abstract BufferedReader getRemoteFile(String filename) throws IOException;
-
-	protected String remoteIndexPath;
-	protected String remotePath;
-	
 	public void sync() throws IOException {
-		pull();
 		push(NodeWriter.ORGFILE);
+		pull();
 	}
 
+	/**
+	 * This method will fetch the local and the remote version of a file and
+	 * combine their content. This combined version is transfered to the remote.
+	 */
 	protected void push(String filename) throws IOException {
     	OrgFile orgFile = new OrgFile(filename, context);
     	String localContents = orgFile.read();
@@ -63,9 +84,12 @@ abstract public class Synchronizer {
 		orgfile.remove(appdb);
 	}
 	
+	/**
+	 * This method will download index.org and checksums.dat from the remote
+	 * host. Using those files, it determines the other files that need updating
+	 * and downloads them.
+	 */
 	protected void pull() throws IOException {
-        Log.d(LT, "Pull() started");
-
 		String remoteIndexContents = OrgFile.read(getRemoteFile("index.org"));
         
         ArrayList<HashMap<String, Boolean>> todoLists = getTodos(remoteIndexContents);
@@ -86,8 +110,6 @@ abstract public class Synchronizer {
                 remoteChecksums.containsKey(key) &&
                 localChecksums.get(key).equals(remoteChecksums.get(key)))
                 continue;
-            Log.d(LT, "Fetching: " +
-                  key + ": " + this.remotePath + fileChecksumMap.get(key));
           
             OrgFile orgfile = new OrgFile(fileChecksumMap.get(key), context);
             orgfile.fetch(getRemoteFile(fileChecksumMap.get(key)));
@@ -96,15 +118,8 @@ abstract public class Synchronizer {
                                        key,
                                        fileChecksumMap.get(key));
         }
-
-		Log.d(LT, "Pull() done ");
 	}
 	
-	/**
-	 * Returns
-	 * @param master String that contains the contents of a checksums.dat file
-	 * @return HashMap with <Filename, Checksum>
-	 */
 	private HashMap<String, String> getOrgFilesFromMaster(String master) {
 		Pattern getOrgFiles = Pattern.compile("\\[file:(.*?)\\]\\[(.*?)\\]\\]");
 		Matcher m = getOrgFiles.matcher(master);

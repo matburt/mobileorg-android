@@ -36,6 +36,9 @@ import com.matburt.mobileorg.Parsing.NodeWriter;
 
 public class WebDAVSynchronizer extends Synchronizer {
 
+	private String remoteIndexPath;
+	private String remotePath;
+	
 	private String username;
 	private String password;
 
@@ -123,7 +126,7 @@ public class WebDAVSynchronizer extends Synchronizer {
 
 		if (status.getStatusCode() < 200 || status.getStatusCode() > 299) {
 			throw new IOException(r.getString(R.string.error_url_fetch_detail,
-					url, status.getReasonPhrase()), null);
+					url, status.getReasonPhrase()));
 		}
 		return res.getEntity().getContent();
 	}
@@ -139,13 +142,12 @@ public class WebDAVSynchronizer extends Synchronizer {
 			if (statCode >= 400) {
 				throw new IOException(r.getString(
 						R.string.error_url_put_detail, url,
-						"Server returned code: " + Integer.toString(statCode)),
-						null);
+						"Server returned code: " + Integer.toString(statCode)));
 			}
 			httpClient.getConnectionManager().shutdown();
 		} catch (UnsupportedEncodingException e) {
 			throw new IOException(r.getString(
-					R.string.error_unsupported_encoding, NodeWriter.ORGFILE), e);
+					R.string.error_unsupported_encoding, NodeWriter.ORGFILE));
 		}
 	}
 

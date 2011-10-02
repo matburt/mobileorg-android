@@ -12,8 +12,11 @@ import android.preference.PreferenceManager;
 
 import com.matburt.mobileorg.Parsing.OrgFile;
 
-public class SDCardSynchronizer extends Synchronizer
-{	
+public class SDCardSynchronizer extends Synchronizer {	
+
+	private String remoteIndexPath;
+	private String remotePath;
+
     SDCardSynchronizer(Context context) {
     	super(context);
 		this.remoteIndexPath = PreferenceManager.getDefaultSharedPreferences(

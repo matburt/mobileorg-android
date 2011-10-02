@@ -32,7 +32,7 @@ import com.matburt.mobileorg.Parsing.Node;
 import com.matburt.mobileorg.Parsing.NodeEncryption;
 import com.matburt.mobileorg.Parsing.OrgFileParser;
 import com.matburt.mobileorg.Settings.SettingsActivity;
-import com.matburt.mobileorg.Synchronizers.SynchManager;
+import com.matburt.mobileorg.Synchronizers.SyncManager;
 
 public class OutlineActivity extends ListActivity
 {
@@ -349,7 +349,7 @@ public class OutlineActivity extends ListActivity
 	
 
 	private void runSynchronizer() {
-		final SynchManager synchman = new SynchManager(this);
+		final SyncManager synchman = new SyncManager(this);
 
 		if (!synchman.isConfigured()) {
 			Toast error = Toast.makeText((Context) this,

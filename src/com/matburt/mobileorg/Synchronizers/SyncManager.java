@@ -5,37 +5,41 @@ import java.io.IOException;
 import android.content.Context;
 import android.preference.PreferenceManager;
 
-public class SynchManager {
-	final Synchronizer appSync;
+/**
+ * This is a wrapper class for {@link Synchronizer}. It should be used instead of
+ * creating instances of {@link Synchronizer} directly.
+ */
+public class SyncManager {
+	final Synchronizer synchronizer;
 
-	public SynchManager(Context context) {
+	public SyncManager(Context context) {
 		String userSynchro = PreferenceManager.getDefaultSharedPreferences(context).getString("syncSource", "");
 		if (userSynchro.equals("webdav")) {
-			appSync = new WebDAVSynchronizer(context);
+			synchronizer = new WebDAVSynchronizer(context);
 		} else if (userSynchro.equals("sdcard")) {
-			appSync = new SDCardSynchronizer(context);
+			synchronizer = new SDCardSynchronizer(context);
 		} else if (userSynchro.equals("dropbox")) {
-			appSync = new DropboxSynchronizer(context);
+			synchronizer = new DropboxSynchronizer(context);
 		} else
-			appSync = null;
+			synchronizer = null;
 	}
 	
 	public boolean isConfigured() {
-		if(appSync == null)
+		if(synchronizer == null)
 			return false;
 		
-		return appSync.isConfigured();
+		return synchronizer.isConfigured();
 	}
 	
 	public boolean sync() throws IOException {
 		if (!isConfigured())
 			return false;
 		
-		appSync.sync();
+		synchronizer.sync();
 		return true;
 	}
 	
 	public void close() {
-		appSync.close();
+		synchronizer.close();
 	}
 }

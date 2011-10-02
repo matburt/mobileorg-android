@@ -110,7 +110,7 @@ public class MobileOrgSyncService extends Service implements SharedPreferences.O
 	}
 
 	public void runSynchronizer() {
-		final SynchManager syncman = new SynchManager(this);
+		final SyncManager syncman = new SyncManager(this);
 
 		if (!syncman.isConfigured()) {
 			return;

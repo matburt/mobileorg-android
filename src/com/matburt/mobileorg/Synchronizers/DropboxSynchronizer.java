@@ -18,7 +18,11 @@ import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Parsing.OrgFile;
 
 public class DropboxSynchronizer extends Synchronizer {
-    private DropboxAPI dropboxAPI = new DropboxAPI();
+
+	private String remoteIndexPath;
+	private String remotePath;
+	 
+	private DropboxAPI dropboxAPI = new DropboxAPI();
     private com.dropbox.client.DropboxAPI.Config dropboxConfig;
     
     DropboxSynchronizer(Context context) {
@@ -64,7 +68,7 @@ public class DropboxSynchronizer extends Synchronizer {
 
 		if (fd == null || fd.is == null) {
 			throw new IOException(r.getString(R.string.dropbox_fetch_error,
-					filePath, "Error downloading file"), null);
+					filePath, "Error downloading file"));
 		}
 
 		return new BufferedReader(new InputStreamReader(fd.is));
