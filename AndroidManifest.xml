@@ -2,7 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
       package="com.matburt.mobileorg"
       android:versionCode="62"
-      android:versionName="0.6.2">
+      android:versionName="0.6.2"
+      android:installLocation="auto">
   <uses-sdk android:minSdkVersion="3" android:targetSdkVersion="4"/>
 
   <uses-permission android:name="android.permission.INTERNET"/>
