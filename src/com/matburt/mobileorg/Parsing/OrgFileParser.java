@@ -48,13 +48,18 @@ public class OrgFileParser {
     
 	public OrgFileParser(Context context, MobileOrgApplication appInst) {
 		this.appdb = new OrgDatabase(context);;
-		SharedPreferences appSettings = PreferenceManager
-				.getDefaultSharedPreferences(context);
-
+		
 		HashMap<String, String> allOrgList = this.appdb.getOrgFiles();
 		if (allOrgList.isEmpty())
 			return;
 		this.orgPaths = allOrgList;
+
+		getBasePath(context);
+	}
+	
+	private void getBasePath(Context context) {
+		SharedPreferences appSettings = PreferenceManager
+				.getDefaultSharedPreferences(context);
 
 		this.storageMode = appSettings.getString("storageMode", "");
 		this.userSynchro = appSettings.getString("syncSource", "");
@@ -71,7 +76,6 @@ public class OrgFileParser {
 		}
 
 		this.orgDir = orgBasePath;
-
 	}
     
 	public void runParser(SharedPreferences appSettings,
