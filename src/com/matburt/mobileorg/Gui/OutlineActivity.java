@@ -170,10 +170,13 @@ public class OutlineActivity extends ListActivity
 		inflater.inflate(R.menu.outline_contextmenu, menu);
 
 		// Prevents editing of file nodes.
-		if (this.appInst.nodestackSize() < 2)
+		if (this.depth == 1) {
 			menu.findItem(R.id.contextmenu_edit).setVisible(false);
+		} else {
+			menu.findItem(R.id.contextmenu_delete).setVisible(false);
+		}
 	}
-
+	
 	@Override
 	public boolean onContextItemSelected(MenuItem item) {
 		AdapterContextMenuInfo info = (AdapterContextMenuInfo) item
@@ -187,6 +190,10 @@ public class OutlineActivity extends ListActivity
 
 		case R.id.contextmenu_edit:
 			runEditNodeActivity(node);
+			break;
+			
+		case R.id.contextmenu_delete:
+			runDeleteNode(node);
 			break;
 		}
 
@@ -225,7 +232,7 @@ public class OutlineActivity extends ListActivity
 
 	private void runEditNodeActivity(Node node) {
 		/* Pushes the given Node to the nodestack, to give it as argument to
-		 * NodeEditActivity, which pops the node after use. We probably wan't to
+		 * NodeEditActivity, which pops the node after use. We probably want to
 		 * find a more elegant solution. */
 		this.appInst.pushNodestack(node);
 		
@@ -249,6 +256,12 @@ public class OutlineActivity extends ListActivity
 		int childDepth = this.depth + 1;
 		intent.putExtra("depth", childDepth);
 		startActivityForResult(intent, RUNFOR_EXPAND);
+	}
+	
+	private void runDeleteNode(Node node) {
+		// TODO Maybe prompt with a yes-no dialog
+		appInst.deleteFile(node.name);
+		refreshDisplay();
 	}
 
 	

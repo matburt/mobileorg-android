@@ -137,7 +137,7 @@ public class OrgDatabase {
 		this.checkStorageMode();
 		this.wrapExecSQL("DELETE FROM files " + "WHERE file = '" + filename
 				+ "'");
-		Log.i(LT, "Finished deleting from files");
+		Log.i(LT, "Finished deleting files " + filename);
 	}
 
 	public void addOrUpdateFile(String filename, String name, String checksum) {
