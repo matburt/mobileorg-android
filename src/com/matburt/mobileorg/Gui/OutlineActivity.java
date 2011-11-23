@@ -77,9 +77,6 @@ public class OutlineActivity extends ListActivity
 		Intent intent = getIntent();
 		this.depth = intent.getIntExtra("depth", 1);
 
-		if (!appInst.isSynchConfigured())
-			this.runShowSettings();
-		
 		if (this.appInst.rootNode == null) {
 			this.runParser();
 			appInst.pushNodestack(appInst.rootNode);
@@ -108,28 +105,30 @@ public class OutlineActivity extends ListActivity
 		this.setListAdapter(new OutlineListAdapter(this, appInst.nodestackTop()));
 		getListView().setSelection(lastSelection);
 	}
-	
+
 	/**
 	 * Runs the parser and refreshes outline by calling {@link #refreshDisplay}.
 	 * If parsing didn't result in any files, display a newSetup dialog.
 	 */
 	private void runParser() {
+		if (this.appInst.getOrgFiles().isEmpty()) {
+			this.showNewUserWindow();
+			return;
+		}
+
 		try {
 			OrgFileParser ofp = new OrgFileParser(getBaseContext(), appInst);
 			ofp.runParser(appSettings, appInst);
 		} catch (Throwable e) {
-			ErrorReporter.displayError(
-					this, "An error occurred during parsing, try re-syncing: "
-							+ e.toString());
+			ErrorReporter.displayError(this,
+					"An error occurred during parsing: " + e.toString());
 		}
 
-		if (this.appInst.getOrgFiles().isEmpty()) {
-			this.showNewUserWindow();
-		} else if (this.newSetupDialog_shown) {
+		if (this.newSetupDialog_shown) {
 			newSetupDialog_shown = false;
 			newSetupDialog.cancel();
 		}
-		
+
 		appInst.refreshNodestack();
 		refreshDisplay();
 	}
@@ -345,7 +344,10 @@ public class OutlineActivity extends ListActivity
 				.findViewById(R.id.dialog_run_sync);
 		syncButton.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
-				runSynchronizer();
+				if (!appInst.isSynchConfigured())
+					runShowSettings();
+				else
+					runSynchronizer();
 			}
 		});
 		Button settingsButton = (Button) newSetupDialog
