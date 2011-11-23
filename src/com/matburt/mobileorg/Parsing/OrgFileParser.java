@@ -1,11 +1,9 @@
 package com.matburt.mobileorg.Parsing;
 
 import java.io.BufferedReader;
-import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -15,13 +13,15 @@ import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.matburt.mobileorg.MobileOrgApplication;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.util.Log;
+
+import com.matburt.mobileorg.MobileOrgApplication;
+import com.matburt.mobileorg.Error.ErrorReporter;
 
 
 public class OrgFileParser {
@@ -33,26 +33,28 @@ public class OrgFileParser {
 		ArrayList<String> tags = new ArrayList<String>();
 	}
 
-    HashMap<String, String> orgPaths;
-    ArrayList<Node> nodeList = new ArrayList<Node>();
-    String storageMode = null;
-    String userSynchro = null;
-    Pattern titlePattern = null;
-    FileInputStream fstream;
+    private HashMap<String, String> orgPathFileMap;
+    private ArrayList<Node> nodeList = new ArrayList<Node>();
+    private String storageMode = null;
+    private String userSynchro = null;
+    private Context context;
+    private Pattern titlePattern = null;
+    private FileInputStream fstream;
     public Node rootNode = new Node("");
-    OrgDatabase appdb;
-	ArrayList<HashMap<String, Integer>> todos = null;
+    private OrgDatabase appdb;
+	private ArrayList<HashMap<String, Integer>> todos = null;
     public static final String LT = "MobileOrg";
-    public String orgDir = Environment.getExternalStorageDirectory() +
+    private String orgDir = Environment.getExternalStorageDirectory() +
                            "/mobileorg/";
     
 	public OrgFileParser(Context context, MobileOrgApplication appInst) {
-		this.appdb = new OrgDatabase(context);;
+		this.appdb = new OrgDatabase(context);
+		this.context = context;
 		
-		HashMap<String, String> allOrgList = this.appdb.getOrgFiles();
-		if (allOrgList.isEmpty())
+		HashMap<String, String> orgPathFileMap = this.appdb.getOrgFiles();
+		if (orgPathFileMap.isEmpty())
 			return;
-		this.orgPaths = allOrgList;
+		this.orgPathFileMap = orgPathFileMap;
 
 		getBasePath(context);
 	}
@@ -60,22 +62,12 @@ public class OrgFileParser {
 	private void getBasePath(Context context) {
 		SharedPreferences appSettings = PreferenceManager
 				.getDefaultSharedPreferences(context);
-
 		this.storageMode = appSettings.getString("storageMode", "");
 		this.userSynchro = appSettings.getString("syncSource", "");
-
-		String orgBasePath = "";
-
-		if (userSynchro.equals("sdcard")) {
-			String indexFile = appSettings.getString("indexFilePath", "");
-			File fIndexFile = new File(indexFile);
-			orgBasePath = fIndexFile.getParent() + "/";
-		} else {
-			orgBasePath = Environment.getExternalStorageDirectory()
-					.getAbsolutePath() + "/mobileorg/";
-		}
-
-		this.orgDir = orgBasePath;
+	
+		
+		OrgFile orgfile = new OrgFile("", context);
+		this.orgDir = orgfile.getBasePath();
 	}
     
 	public void runParser(SharedPreferences appSettings,
@@ -194,7 +186,12 @@ public class OrgFileParser {
             Pattern propertiesLine = Pattern.compile("^\\s*:[A-Z]+:");
             if(breader == null)
             {
-                breader = this.getHandle(fileNode.name);
+            	OrgFile orgfile = new OrgFile(fileNode.name, context);
+                breader = orgfile.getReader();
+                
+                if(breader == null) {
+                	ErrorReporter.displayError(context, new Exception("breader == null!"));
+                }
             }
             nodeStack.push(fileNode);
             starStack.push(0);
@@ -332,8 +329,8 @@ public class OrgFileParser {
         Stack<Node> nodeStack = new Stack<Node>();
         nodeStack.push(this.rootNode);
 
-        for (String key : this.orgPaths.keySet()) {
-            String altName = this.orgPaths.get(key);
+        for (String key : this.orgPathFileMap.keySet()) {
+            String altName = this.orgPathFileMap.get(key);
             Log.d(LT, "Parsing: " + key);
             //if file is encrypted just add a placeholder node to be parsed later
             if(key.endsWith(".gpg") ||
@@ -363,7 +360,8 @@ public class OrgFileParser {
         Pattern editTitlePattern = Pattern.compile("F\\((edit:.*?)\\) \\[\\[(.*?)\\]\\[(.*?)\\]\\]");
         Pattern createTitlePattern = Pattern.compile("^\\*\\s+(.*)");
         ArrayList<EditNode> edits = new ArrayList<EditNode>();
-        BufferedReader breader = this.getHandle(NodeWriter.ORGFILE);
+        OrgFile orgfile = new OrgFile(NodeWriter.ORGFILE, context);
+        BufferedReader breader = orgfile.getReader();
         if (breader == null)
             return edits;
 
@@ -417,41 +415,7 @@ public class OrgFileParser {
         return edits;
     }
 
-    public BufferedReader getHandle(String filename) {
-        BufferedReader breader = null;
-        try {
-            // If user is sync'ing from the SDCard, read directly from that
-            // location, regardless of storage mode.
-            if ("sdcard".equals(this.userSynchro)
-                    || "sdcard".equals(this.storageMode)) {
-                String dirActual = "";
-                if (filename.equals("mobileorg.org")) {
-                    dirActual = Environment.getExternalStorageDirectory().getAbsolutePath() +
-                                "/mobileorg/";
-                }
-                else {
-                    dirActual = this.orgDir;
-                }
-                this.fstream = new FileInputStream(dirActual + filename);
-            }
-            else if (this.storageMode == null || this.storageMode.equals("internal")) {
-                String normalized = filename.replace("/", "_");
-                this.fstream = new FileInputStream("/data/data/com.matburt.mobileorg/files/" +
-                                                   normalized);
-            }
-            else {
-                Log.e(LT, "[Parse] Unknown storage mechanism: " + this.storageMode);
-                this.fstream = null;
-            }
-            DataInputStream in = new DataInputStream(this.fstream);
-            breader = new BufferedReader(new InputStreamReader(in));
-        }
-        catch (Exception e) {
-            Log.e(LT, "Error: " + e.getMessage() + " in file " + filename);
-        }
-        return breader;
-    }
-
+    // Used by encryption
     public byte[] getRawFileData(String filename)
     {
         try {
