@@ -1,8 +1,6 @@
 package com.matburt.mobileorg.Parsing;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -16,8 +14,6 @@ import java.util.regex.Pattern;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.os.Environment;
-import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.matburt.mobileorg.MobileOrgApplication;
@@ -34,19 +30,13 @@ public class OrgFileParser {
 	}
 
     private HashMap<String, String> orgPathFileMap;
-    private ArrayList<Node> nodeList = new ArrayList<Node>();
-    private String storageMode = null;
-    private String userSynchro = null;
     private Context context;
     private Pattern titlePattern = null;
-    private FileInputStream fstream;
     public Node rootNode = new Node("");
     private OrgDatabase appdb;
 	private ArrayList<HashMap<String, Integer>> todos = null;
-    public static final String LT = "MobileOrg";
-    private String orgDir = Environment.getExternalStorageDirectory() +
-                           "/mobileorg/";
-    
+    private static final String LT = "MobileOrg";
+
 	public OrgFileParser(Context context, MobileOrgApplication appInst) {
 		this.appdb = new OrgDatabase(context);
 		this.context = context;
@@ -55,21 +45,8 @@ public class OrgFileParser {
 		if (orgPathFileMap.isEmpty())
 			return;
 		this.orgPathFileMap = orgPathFileMap;
+	}
 
-		getBasePath(context);
-	}
-	
-	private void getBasePath(Context context) {
-		SharedPreferences appSettings = PreferenceManager
-				.getDefaultSharedPreferences(context);
-		this.storageMode = appSettings.getString("storageMode", "");
-		this.userSynchro = appSettings.getString("syncSource", "");
-	
-		
-		OrgFile orgfile = new OrgFile("", context);
-		this.orgDir = orgfile.getBasePath();
-	}
-    
 	public void runParser(SharedPreferences appSettings,
 			MobileOrgApplication appInst) {
 		parse();
@@ -77,7 +54,7 @@ public class OrgFileParser {
 		appInst.edits = parseEdits();
 		Collections.sort(appInst.rootNode.children, Node.comparator);
 	}
-    
+
     private Pattern prepareTitlePattern() {
     	if (this.titlePattern == null) {
     		StringBuffer pattern = new StringBuffer();
@@ -410,35 +387,9 @@ public class OrgFileParser {
             }
         }
         catch (java.io.IOException e) {
-            Log.e(LT, "IO Exception caught trying to read edits file");
-        }
-        return edits;
-    }
-
-    // Used by encryption
-    public byte[] getRawFileData(String filename)
-    {
-        try {
-            File file = new File(this.orgDir + filename);
-            FileInputStream is = new FileInputStream(file);
-            byte[] buffer = new byte[(int)file.length()];
-            int offset = 0;
-            int numRead = 0;
-            while (offset < buffer.length
-                   && (numRead=is.read(buffer, offset, buffer.length-offset)) >= 0) 
-            {
-                offset += numRead;
-            }
-            is.close();
-            if (offset < buffer.length) {
-                throw new IOException("Could not completely read file "+file.getName());
-            }
-            return buffer;
-        }
-        catch (Exception e) {
-            Log.e(LT, "Error: " + e.getMessage() + " in file " + filename);
             return null;
         }
+        return edits;
     }
 
 }
