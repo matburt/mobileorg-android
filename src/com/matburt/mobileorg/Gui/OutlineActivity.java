@@ -330,7 +330,7 @@ public class OutlineActivity extends ListActivity
 		String decryptedData = data
 				.getStringExtra(NodeEncryption.EXTRA_DECRYPTED_MESSAGE);
 
-		ofp.parse(node, new BufferedReader(new StringReader(
+		ofp.parseFile(node, new BufferedReader(new StringReader(
 				decryptedData)));
 	}
 

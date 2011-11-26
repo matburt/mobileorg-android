@@ -11,9 +11,9 @@ import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Debug;
 import android.util.Log;
 
 import com.matburt.mobileorg.MobileOrgApplication;
@@ -29,10 +29,10 @@ public class OrgFileParser {
 		ArrayList<String> tags = new ArrayList<String>();
 	}
 
+    public Node rootNode = new Node("");
     private HashMap<String, String> orgPathFileMap;
     private Context context;
     private Pattern titlePattern = null;
-    public Node rootNode = new Node("");
     private OrgDatabase appdb;
 	private ArrayList<HashMap<String, Integer>> todos = null;
     private static final String LT = "MobileOrg";
@@ -49,107 +49,49 @@ public class OrgFileParser {
 
 	public void runParser(SharedPreferences appSettings,
 			MobileOrgApplication appInst) {
-		parse();
+		Debug.startMethodTracing("org");
+		parseAllFiles();
 		appInst.rootNode = rootNode;
 		appInst.edits = parseEdits();
 		Collections.sort(appInst.rootNode.children, Node.comparator);
+		Debug.stopMethodTracing();
 	}
-
-    private Pattern prepareTitlePattern() {
-    	if (this.titlePattern == null) {
-    		StringBuffer pattern = new StringBuffer();
-    		pattern.append("^(?:([A-Z]{2,}:?\\s+");
-    		pattern.append(")\\s*)?");
-    		pattern.append("(\\[\\#.*\\])?(.*?)");
-    		pattern.append("\\s*(?::([^\\s]+):)?$");
-    		this.titlePattern = Pattern.compile(pattern.toString());
-    	}
-		return this.titlePattern;
-    }
 	
-	private boolean isValidTodo(String todo) {
-		for(HashMap<String, Integer> aTodo : this.todos) {
-			if(aTodo.containsKey(todo)) return true;
-		}
-		return false;
-	}
+    public void parseAllFiles() {
+        Stack<Node> nodeStack = new Stack<Node>();
+        nodeStack.push(this.rootNode);
 
-    private TitleComponents parseTitle (String orgTitle) {
-    	TitleComponents component = new TitleComponents();
-    	String title = orgTitle.trim();
-    	Pattern pattern = prepareTitlePattern();
-    	Matcher m = pattern.matcher(title);
-    	if (m.find()) {
-    		if (m.group(1) != null) {
-				String todo = m.group(1).trim();
-				if(todo.length() > 0 && isValidTodo(todo)) {
-					component.todo = todo;
-				} else {
-					component.title = todo + " ";
-				}
-			}
-            if (m.group(2) != null) {
-                component.priority = m.group(2);
-                component.priority = component.priority.replace("#", "");
-                component.priority = component.priority.replace("[", "");
-                component.priority = component.priority.replace("]", "");
+        for (String key : this.orgPathFileMap.keySet()) {
+            String altName = this.orgPathFileMap.get(key);
+            Log.d(LT, "Parsing: " + key);
+            //if file is encrypted just add a placeholder node to be parsed later
+            if(key.endsWith(".gpg") ||
+               key.endsWith(".pgp") ||
+               key.endsWith(".enc"))
+            {
+                Node nnode = new Node(key, true);
+                nnode.altNodeTitle = altName;
+                nnode.setParentNode(nodeStack.peek());
+                nnode.addProperty("ID", this.getNodePath(nnode));
+                nodeStack.peek().addChild(nnode);
+                continue;
             }
-    		component.title += m.group(3);
-    		String tags = m.group(4);
-    		if (tags != null) {
-    			for (String tag : tags.split(":")) {
-    				component.tags.add(tag);
-				}
-    		}
-    	} else {
-    		Log.w(LT, "Title not matched: " + title);
-    		component.title = title;
-    	}
-    	return component;
-    }
 
-    private String stripTitle(String orgTitle) {
-        Pattern titlePattern = Pattern.compile("<before.*</before>|<after.*</after>");
-        Matcher titleMatcher = titlePattern.matcher(orgTitle);
-        String newTitle = "";
-        if (titleMatcher.find()) {
-            newTitle += orgTitle.substring(0, titleMatcher.start());
-            newTitle += orgTitle.substring(titleMatcher.end(), orgTitle.length());
+            Node fileNode = new Node(key, false);
+            fileNode.setParentNode(nodeStack.peek());
+            fileNode.addProperty("ID", this.getNodePath(fileNode));
+            fileNode.altNodeTitle = altName;
+            nodeStack.peek().addChild(fileNode);
+            nodeStack.push(fileNode);
+            
+            parseFile(fileNode, null);
+            
+            nodeStack.pop();
         }
-        else {
-            newTitle = orgTitle;
-        }
-        return newTitle;
     }
 
-    public long createEntry(String heading, String content, long parentId) {
-        ContentValues recValues = new ContentValues();
-        recValues.put("heading", heading);
-        recValues.put("content", content);
-        recValues.put("parentid", parentId);
-        return this.appdb.appdb.insert("data", null, recValues);
-    }
 
-    public void addContent(long nodeId, String content) {
-        ContentValues recValues = new ContentValues();
-        recValues.put("content", content + "\n");
-        this.appdb.appdb.update("data", recValues, "id = ?",
-                                new String[] {Long.toString(nodeId)});
-    }
-
-    public String getNodePath(Node baseNode) {
-        String npath = baseNode.name;
-        Node pnode = baseNode;
-        while ((pnode = pnode.parent) != null) {
-            if (pnode.name.length() > 0) {
-                npath = pnode.name + "/" + npath;
-            }
-        }
-        npath = "olp:" + npath;
-        return npath;
-    }
-
-    public void parse(Node fileNode, BufferedReader breader)
+    public void parseFile(Node fileNode, BufferedReader breader)
     {
         Pattern editTitlePattern =
             Pattern.compile("F\\((edit:.*?)\\) \\[\\[(.*?)\\]\\[(.*?)\\]\\]");
@@ -302,40 +244,92 @@ public class OrgFileParser {
 
     }
 
-    public void parse() {
-        Stack<Node> nodeStack = new Stack<Node>();
-        nodeStack.push(this.rootNode);
 
-        for (String key : this.orgPathFileMap.keySet()) {
-            String altName = this.orgPathFileMap.get(key);
-            Log.d(LT, "Parsing: " + key);
-            //if file is encrypted just add a placeholder node to be parsed later
-            if(key.endsWith(".gpg") ||
-               key.endsWith(".pgp") ||
-               key.endsWith(".enc"))
-            {
-                Node nnode = new Node(key, true);
-                nnode.altNodeTitle = altName;
-                nnode.setParentNode(nodeStack.peek());
-                nnode.addProperty("ID", this.getNodePath(nnode));
-                nodeStack.peek().addChild(nnode);
-                continue;
+    private Pattern prepareTitlePattern() {
+    	if (this.titlePattern == null) {
+    		StringBuffer pattern = new StringBuffer();
+    		pattern.append("^(?:([A-Z]{2,}:?\\s+");
+    		pattern.append(")\\s*)?");
+    		pattern.append("(\\[\\#.*\\])?(.*?)");
+    		pattern.append("\\s*(?::([^\\s]+):)?$");
+    		this.titlePattern = Pattern.compile(pattern.toString());
+    	}
+		return this.titlePattern;
+    }
+	
+	private boolean isValidTodo(String todo) {
+		for(HashMap<String, Integer> aTodo : this.todos) {
+			if(aTodo.containsKey(todo)) return true;
+		}
+		return false;
+	}
+
+    private TitleComponents parseTitle (String orgTitle) {
+    	TitleComponents component = new TitleComponents();
+    	String title = orgTitle.trim();
+    	Pattern pattern = prepareTitlePattern();
+    	Matcher m = pattern.matcher(title);
+    	if (m.find()) {
+    		if (m.group(1) != null) {
+				String todo = m.group(1).trim();
+				if(todo.length() > 0 && isValidTodo(todo)) {
+					component.todo = todo;
+				} else {
+					component.title = todo + " ";
+				}
+			}
+            if (m.group(2) != null) {
+                component.priority = m.group(2);
+                component.priority = component.priority.replace("#", "");
+                component.priority = component.priority.replace("[", "");
+                component.priority = component.priority.replace("]", "");
             }
+    		component.title += m.group(3);
+    		String tags = m.group(4);
+    		if (tags != null) {
+    			for (String tag : tags.split(":")) {
+    				component.tags.add(tag);
+				}
+    		}
+    	} else {
+    		Log.w(LT, "Title not matched: " + title);
+    		component.title = title;
+    	}
+    	return component;
+    }
 
-            Node fileNode = new Node(key, false);
-            fileNode.setParentNode(nodeStack.peek());
-            fileNode.addProperty("ID", this.getNodePath(fileNode));
-            fileNode.altNodeTitle = altName;
-            nodeStack.peek().addChild(fileNode);
-            nodeStack.push(fileNode);
-            parse(fileNode, null);
-            nodeStack.pop();
+    
+    
+    private String stripTitle(String orgTitle) {
+        Pattern titlePattern = Pattern.compile("<before.*</before>|<after.*</after>");
+        Matcher titleMatcher = titlePattern.matcher(orgTitle);
+        String newTitle = "";
+        if (titleMatcher.find()) {
+            newTitle += orgTitle.substring(0, titleMatcher.start());
+            newTitle += orgTitle.substring(titleMatcher.end(), orgTitle.length());
         }
+        else {
+            newTitle = orgTitle;
+        }
+        return newTitle;
+    }
+    
+    private String getNodePath(Node baseNode) {
+        String npath = baseNode.name;
+        Node pnode = baseNode;
+        while ((pnode = pnode.parent) != null) {
+            if (pnode.name.length() > 0) {
+                npath = pnode.name + "/" + npath;
+            }
+        }
+        npath = "olp:" + npath;
+        return npath;
     }
 
     public ArrayList<EditNode> parseEdits() {
         Pattern editTitlePattern = Pattern.compile("F\\((edit:.*?)\\) \\[\\[(.*?)\\]\\[(.*?)\\]\\]");
         Pattern createTitlePattern = Pattern.compile("^\\*\\s+(.*)");
+ 
         ArrayList<EditNode> edits = new ArrayList<EditNode>();
         OrgFile orgfile = new OrgFile(NodeWriter.ORGFILE, context);
         BufferedReader breader = orgfile.getReader();

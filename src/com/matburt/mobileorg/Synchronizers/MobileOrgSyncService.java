@@ -1,7 +1,6 @@
 package com.matburt.mobileorg.Synchronizers;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -15,7 +14,6 @@ import android.util.Log;
 
 import com.matburt.mobileorg.MobileOrgApplication;
 import com.matburt.mobileorg.Error.ErrorReporter;
-import com.matburt.mobileorg.Parsing.Node;
 import com.matburt.mobileorg.Parsing.OrgFileParser;
 
 public class MobileOrgSyncService extends Service implements SharedPreferences.OnSharedPreferenceChangeListener{
@@ -137,10 +135,7 @@ public class MobileOrgSyncService extends Service implements SharedPreferences.O
 
         OrgFileParser ofp = new OrgFileParser(getBaseContext(), appInst);
         try {
-        	ofp.parse();
-        	appInst.rootNode = ofp.rootNode;
-            appInst.edits = ofp.parseEdits();
-			Collections.sort(appInst.rootNode.children, Node.comparator);
+        	ofp.runParser(appSettings, appInst);
         }
         catch(Throwable e) {
         	ErrorReporter.displayError(this, "An error occurred during parsing: " + e.toString());

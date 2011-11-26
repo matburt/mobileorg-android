@@ -1,29 +1,21 @@
 package com.matburt.mobileorg.Parsing;
 
 import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.os.Environment;
-import android.preference.PreferenceManager;
 
 import com.matburt.mobileorg.MobileOrgApplication;
 
 public class NodeWriter {
-	private SharedPreferences appSettings;
 	private Activity appActivity;
+	private Context context;
 	public static final String ORGFILE = "mobileorg.org";
 
 	public NodeWriter(Activity parentActivity) {
 		this.appActivity = parentActivity;
-		this.appSettings = PreferenceManager
-				.getDefaultSharedPreferences(parentActivity.getBaseContext());
+		this.context = parentActivity.getBaseContext();
 	}
 	
 	public void write(Node node) throws IOException {
@@ -64,30 +56,10 @@ public class NodeWriter {
 		
 		writeNode(editNode.toString());
 	}
-
-	private BufferedWriter getBufferedWriter(String filename) throws IOException {
-		String storageMode = this.appSettings.getString("storageMode", "");
-		BufferedWriter writer = null;
-
-		if (storageMode.equals("internal") || storageMode.equals("")) {
-			FileOutputStream fs = this.appActivity.openFileOutput(filename,
-					Context.MODE_APPEND);
-			writer = new BufferedWriter(new OutputStreamWriter(fs));
-		} else if (storageMode.equals("sdcard")) {
-			File root = Environment.getExternalStorageDirectory();
-			File morgDir = new File(root, "mobileorg");
-			morgDir.mkdir();
-
-			File orgFileCard = new File(morgDir, filename);
-			FileWriter orgFWriter = new FileWriter(orgFileCard, true);
-			writer = new BufferedWriter(orgFWriter);
-		}
-		
-		return writer;
-	}
 	
 	private void writeNode(String message) throws IOException {
-		BufferedWriter writer = getBufferedWriter(ORGFILE);
+		OrgFile orgfile = new OrgFile(ORGFILE, context);
+		BufferedWriter writer = orgfile.getWriter();
 		writer.write(message);
 	
 		MobileOrgApplication appInst = (MobileOrgApplication) 
