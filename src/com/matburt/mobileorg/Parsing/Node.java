@@ -16,7 +16,7 @@ public class Node implements Cloneable {
 	public String altNodeTitle = null;
 	public String todo = "";
 	public String priority = "";
-	public String nodeId = "";
+	private String nodeId = "";
 	public String payload = "";
 
 	public Date schedule = null;
@@ -145,7 +145,26 @@ public class Node implements Cloneable {
 
 		return dateInfo;
 	}
+	
+	public String getNodeId() {
+		if(this.nodeId.length() < 0) {
+	        String npath = this.name;
+	        Node pnode = this;
+	        while ((pnode = pnode.parent) != null) {
+	            if (pnode.name.length() > 0) {
+	                npath = pnode.name + "/" + npath;
+	            }
+	        }
+	        npath = "olp:" + npath;
+	        return npath;
+		} else {
+			return this.nodeId;
+		}
+	}
 
+	public void setNodeId(String nodeId) {
+		this.nodeId = nodeId;
+	}
 
 	void setParentNode(Node pnode) {
 		this.parent = pnode;

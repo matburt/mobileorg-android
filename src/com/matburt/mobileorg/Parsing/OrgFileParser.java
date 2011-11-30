@@ -13,7 +13,6 @@ import java.util.regex.Pattern;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.os.Debug;
 import android.util.Log;
 
 import com.matburt.mobileorg.MobileOrgApplication;
@@ -22,7 +21,7 @@ import com.matburt.mobileorg.Error.ErrorReporter;
 
 public class OrgFileParser {
 
-	class TitleComponents {
+	private class TitleComponents {
 		String title = "";
 		String todo = "";
         String priority = "";
@@ -32,7 +31,6 @@ public class OrgFileParser {
     public Node rootNode = new Node("");
     private HashMap<String, String> orgPathFileMap;
     private Context context;
-    private Pattern titlePattern = null;
     private OrgDatabase appdb;
 	private ArrayList<HashMap<String, Integer>> todos = null;
     private static final String LT = "MobileOrg";
@@ -49,12 +47,10 @@ public class OrgFileParser {
 
 	public void runParser(SharedPreferences appSettings,
 			MobileOrgApplication appInst) {
-		Debug.startMethodTracing("org");
 		parseAllFiles();
 		appInst.rootNode = rootNode;
 		appInst.edits = parseEdits();
 		Collections.sort(appInst.rootNode.children, Node.comparator);
-		Debug.stopMethodTracing();
 	}
 	
     public void parseAllFiles() {
@@ -72,179 +68,207 @@ public class OrgFileParser {
                 Node nnode = new Node(key, true);
                 nnode.altNodeTitle = altName;
                 nnode.setParentNode(nodeStack.peek());
-                nnode.addProperty("ID", this.getNodePath(nnode));
                 nodeStack.peek().addChild(nnode);
                 continue;
             }
 
             Node fileNode = new Node(key, false);
             fileNode.setParentNode(nodeStack.peek());
-            fileNode.addProperty("ID", this.getNodePath(fileNode));
             fileNode.altNodeTitle = altName;
             nodeStack.peek().addChild(fileNode);
             nodeStack.push(fileNode);
             
-            parseFile(fileNode, null);
+        	OrgFile orgfile = new OrgFile(fileNode.name, context);
+            BufferedReader breader = orgfile.getReader();
+            
+            if(breader == null) {
+            	ErrorReporter.displayError(context, new Exception("breader == null!"));
+            }
+            
+            parseFile(fileNode, breader);
+            try {
+				breader.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
             
             nodeStack.pop();
         }
     }
 
+    private Pattern titlePattern = null;
+    private Stack<Node> nodeStack = new Stack<Node>();
+    private Stack<Integer> starStack = new Stack<Integer>();
 
-    public void parseFile(Node fileNode, BufferedReader breader)
-    {
-        Pattern editTitlePattern =
-            Pattern.compile("F\\((edit:.*?)\\) \\[\\[(.*?)\\]\\[(.*?)\\]\\]");
-        try
-        {
-			this.todos = appdb.getGroupedTodods();
-
-            String thisLine;
-            Stack<Node> nodeStack = new Stack<Node>();
-            Stack<Integer> starStack = new Stack<Integer>();
-            Pattern propertiesLine = Pattern.compile("^\\s*:[A-Z]+:");
-            if(breader == null)
-            {
-            	OrgFile orgfile = new OrgFile(fileNode.name, context);
-                breader = orgfile.getReader();
-                
-                if(breader == null) {
-                	ErrorReporter.displayError(context, new Exception("breader == null!"));
-                }
+    private static int numberOfStars(String thisLine) {
+        int numstars = 0;
+    	
+        for (int idx = 0; idx < thisLine.length(); idx++) {
+            if (thisLine.charAt(idx) != '*') {
+                break;
             }
-            nodeStack.push(fileNode);
-            starStack.push(0);
+            numstars++;
+        }
 
-            while ((thisLine = breader.readLine()) != null) {
-                int numstars = 0;
-                Matcher editm = editTitlePattern.matcher(thisLine);
-                if (thisLine.length() < 1 || editm.find())
-                    continue;
-                if (thisLine.charAt(0) == '#') {
-                    if (thisLine.indexOf("#+TITLE:") != -1) {
-                        fileNode.altNodeTitle = thisLine.substring(
-                             thisLine.indexOf("#+TITLE:") + 8).trim();
+        if (numstars >= thisLine.length() || thisLine.charAt(numstars) != ' ')
+            numstars = 0;
+        
+        return numstars;
+    }
+    
+	
+	Pattern editTitlePattern = Pattern
+			.compile("F\\((edit:.*?)\\) \\[\\[(.*?)\\]\\[(.*?)\\]\\]");
 
-                    }
-                }
-                for (int idx = 0; idx < thisLine.length(); idx++) {
-                    if (thisLine.charAt(idx) != '*') {
-                        break;
-                    }
-                    numstars++;
-                }
+	public void parseFile(Node fileNode, BufferedReader breader) {
+		this.todos = appdb.getGroupedTodods();
 
-                if (numstars >= thisLine.length() || thisLine.charAt(numstars) != ' ') {
-                    numstars = 0;
-                }
+		nodeStack.push(fileNode);
+		starStack.push(0);
 
-                //headings
-                if (numstars > 0) {
-                    String title = thisLine.substring(numstars+1);
-                    TitleComponents titleComp = parseTitle(this.stripTitle(title));
-                    Node newNode = new Node(titleComp.title);
-                    newNode.setTitle(this.stripTitle(title));
-                    newNode.todo = titleComp.todo;
-                    newNode.priority = titleComp.priority;
-                    newNode.setTags(titleComp.tags);
-                    if (numstars > starStack.peek()) {
-                        try {
-                            Node lastNode = nodeStack.peek();
-                            newNode.setParentNode(lastNode);
-                            newNode.nodeId = this.getNodePath(newNode);
-                            newNode.addProperty("ID", newNode.nodeId);
-                            lastNode.addChild(newNode);
-                        } catch (EmptyStackException e) {
-                        }
-                        nodeStack.push(newNode);
-                        starStack.push(numstars);
-                    }
-                    else if (numstars == starStack.peek()) {
-                        nodeStack.pop();
-                        starStack.pop();
-                        nodeStack.peek().addChild(newNode);
-                        newNode.setParentNode(nodeStack.peek());
-                        newNode.nodeId = this.getNodePath(newNode);
-                        newNode.addProperty("ID", newNode.nodeId);
-                        nodeStack.push(newNode);
-                        starStack.push(numstars);
-                    }
-                    else if (numstars < starStack.peek()) {
-                        while (numstars <= starStack.peek()) {
-                            nodeStack.pop();
-                            starStack.pop();
-                        }
+		try {
+			String thisLine;
 
-                        Node lastNode = nodeStack.peek();
-                        newNode.setParentNode(lastNode);
-                        newNode.nodeId = this.getNodePath(newNode);
-                        newNode.addProperty("ID", newNode.nodeId);
-                        lastNode.addChild(newNode);
-                        nodeStack.push(newNode);
-                        starStack.push(numstars);
-                    }
-                }
-                //content
-                else {
-                    Matcher propm = propertiesLine.matcher(thisLine);
-                    Node lastNode = nodeStack.peek();
-                    if (thisLine.indexOf(":ID:") != -1) {
-                        String trimmedLine = thisLine.substring(thisLine.indexOf(":ID:")+4).trim();
-                        lastNode.addProperty("ID", trimmedLine);
-                        lastNode.nodeId = trimmedLine;
-                        continue;
-                    }
-                    else if (thisLine.indexOf(":ORIGINAL_ID:") != -1) {
-                    	String trimmedLine = thisLine.substring(thisLine.indexOf(":ORIGINAL_ID:")+13).trim();
-                        lastNode.addProperty("ORIGINAL_ID", trimmedLine);
-                        lastNode.nodeId = trimmedLine;
-                        continue;
-                    }
-                    else if (propm.find()) {
-                        continue;
-                    }
-                    else if (thisLine.indexOf("DEADLINE:") != -1 ||
-                             thisLine.indexOf("SCHEDULED:") != -1) {
-                        try {
-                            Pattern deadlineP = Pattern.compile(
-                                                  "^.*DEADLINE: <(\\S+ \\S+)( \\S+)?>");
-                            Matcher deadlineM = deadlineP.matcher(thisLine);
-                            Pattern schedP = Pattern.compile(
-                                                  "^.*SCHEDULED: <(\\S+ \\S+)( \\S+)?>");
-                            Matcher schedM = schedP.matcher(thisLine);
-                            SimpleDateFormat dFormatter = new SimpleDateFormat(
-                                                            "yyyy-MM-dd EEE");
-                            SimpleDateFormat sFormatter = new SimpleDateFormat(
-                                                            "yyyy-MM-dd EEE");
-                            if (deadlineM.find()) {
-                                lastNode.deadline = dFormatter.parse(deadlineM.group(1));
-                            }
-                            if (schedM.find()) {
-                                lastNode.schedule = sFormatter.parse(schedM.group(1));
-                            }
-                        }
-                        catch (java.text.ParseException e) {
-                           // Log.e(LT, "Could not parse deadline");
-                        }
-                        continue;
-                    }
-                    lastNode.addPayload(thisLine);
-                }
+			while ((thisLine = breader.readLine()) != null) {
+
+				// Skip edit fields
+				Matcher editm = editTitlePattern.matcher(thisLine);
+				if (thisLine.length() < 1 || editm.find())
+					continue;
+
+				// Find title fields and set title for file node
+				if (thisLine.charAt(0) == '#') {
+					if (thisLine.indexOf("#+TITLE:") != -1) {
+						fileNode.altNodeTitle = thisLine.substring(
+								thisLine.indexOf("#+TITLE:") + 8).trim();
+					}
+				}
+
+				int numstars = numberOfStars(thisLine);
+				if (numstars > 0) {
+					parseHeading(thisLine, numstars);
+				} else {
+					boolean parsedSuccessfully = parseContent(thisLine);
+
+					if (parsedSuccessfully)
+						continue;
+				}
+			}
+
+			// TODO Replace this with the creation of new stacks?
+			while (starStack.peek() > 0) {
+				nodeStack.pop();
+				starStack.pop();
+			}
+
+			fileNode.parsed = true;
+		} catch (IOException e) {
+			Log.e(LT, "IO Exception on readerline: " + e.getMessage());
+		}
+	}
+
+    private void parseHeading(String thisLine, int numstars) {
+        String title = thisLine.substring(numstars+1);
+        
+        TitleComponents titleComp = parseTitle(this.stripTitle(title));
+        
+        Node newNode = new Node(titleComp.title);
+        newNode.setTitle(this.stripTitle(title));
+        newNode.todo = titleComp.todo;
+        newNode.priority = titleComp.priority;
+        newNode.setTags(titleComp.tags);
+        
+        if (numstars > starStack.peek()) {
+            try {
+                Node lastNode = nodeStack.peek();
+                newNode.setParentNode(lastNode);
+                lastNode.addChild(newNode);
+            } catch (EmptyStackException e) {
             }
-            while (starStack.peek() > 0) {
+            nodeStack.push(newNode);
+            starStack.push(numstars);
+        }
+        else if (numstars == starStack.peek()) {
+            nodeStack.pop();
+            starStack.pop();
+            nodeStack.peek().addChild(newNode);
+            newNode.setParentNode(nodeStack.peek());
+            nodeStack.push(newNode);
+            starStack.push(numstars);
+        }
+        else if (numstars < starStack.peek()) {
+            while (numstars <= starStack.peek()) {
                 nodeStack.pop();
                 starStack.pop();
             }
-            fileNode.parsed = true;
-            breader.close();
-        }
-        catch (IOException e) {
-            Log.e(LT, "IO Exception on readerline: " + e.getMessage());
-        }
 
+            Node lastNode = nodeStack.peek();
+            newNode.setParentNode(lastNode);
+            lastNode.addChild(newNode);
+            nodeStack.push(newNode);
+            starStack.push(numstars);
+        }
     }
+    
+	Pattern propertiesLine = Pattern.compile("^\\s*:[A-Z]+:");
+    private boolean parseContent(String thisLine) {
+        Matcher propm = propertiesLine.matcher(thisLine);
+        Node lastNode = nodeStack.peek();
+        
+        // ID field
+        if (thisLine.indexOf(":ID:") != -1) {
+            String trimmedLine = thisLine.substring(thisLine.indexOf(":ID:")+4).trim();
+            lastNode.addProperty("ID", trimmedLine);
+            lastNode.setNodeId(trimmedLine);
+            return true;
+        }
+        // Original ID field
+        else if (thisLine.indexOf(":ORIGINAL_ID:") != -1) {
+        	String trimmedLine = thisLine.substring(thisLine.indexOf(":ORIGINAL_ID:")+13).trim();
+            lastNode.addProperty("ORIGINAL_ID", trimmedLine);
+            lastNode.setNodeId(trimmedLine);
+            return true;
+        }
+        // Property
+        else if (propm.find()) {
+            return true;
+        }
+        // Scheduled or Deadline
+        else if (thisLine.indexOf("DEADLINE:") != -1 ||
+                 thisLine.indexOf("SCHEDULED:") != -1) {
+        	parseDates(thisLine, lastNode);
+            return true;
+        }
+        
+        lastNode.addPayload(thisLine);
+        return false;
+    }
+    
+	Pattern deadlineP = Pattern.compile("^.*DEADLINE: <(\\S+ \\S+)( \\S+)?>");
+	Pattern schedP = Pattern.compile("^.*SCHEDULED: <(\\S+ \\S+)( \\S+)?>");
+    private void parseDates(String thisLine, Node lastNode) {
+        try {
+            Matcher deadlineM = deadlineP.matcher(thisLine);
+            SimpleDateFormat dFormatter = new SimpleDateFormat(
+                                            "yyyy-MM-dd EEE");
+            if (deadlineM.find()) {
+                lastNode.deadline = dFormatter.parse(deadlineM.group(1));
+            }
 
-
+            SimpleDateFormat sFormatter = new SimpleDateFormat(
+                    "yyyy-MM-dd EEE");
+            Matcher schedM = schedP.matcher(thisLine);                            
+            if (schedM.find()) {
+                lastNode.schedule = sFormatter.parse(schedM.group(1));
+            }
+        }
+        catch (java.text.ParseException e) {
+           // Log.e(LT, "Could not parse deadline");
+        }
+    }
+    
+    
     private Pattern prepareTitlePattern() {
     	if (this.titlePattern == null) {
     		StringBuffer pattern = new StringBuffer();
@@ -297,12 +321,10 @@ public class OrgFileParser {
     	}
     	return component;
     }
-
-    
-    
+ 
+    Pattern titlePattern2 = Pattern.compile("<before.*</before>|<after.*</after>");
     private String stripTitle(String orgTitle) {
-        Pattern titlePattern = Pattern.compile("<before.*</before>|<after.*</after>");
-        Matcher titleMatcher = titlePattern.matcher(orgTitle);
+        Matcher titleMatcher = titlePattern2.matcher(orgTitle);
         String newTitle = "";
         if (titleMatcher.find()) {
             newTitle += orgTitle.substring(0, titleMatcher.start());
@@ -313,20 +335,8 @@ public class OrgFileParser {
         }
         return newTitle;
     }
-    
-    private String getNodePath(Node baseNode) {
-        String npath = baseNode.name;
-        Node pnode = baseNode;
-        while ((pnode = pnode.parent) != null) {
-            if (pnode.name.length() > 0) {
-                npath = pnode.name + "/" + npath;
-            }
-        }
-        npath = "olp:" + npath;
-        return npath;
-    }
 
-    public ArrayList<EditNode> parseEdits() {
+    private ArrayList<EditNode> parseEdits() {
         Pattern editTitlePattern = Pattern.compile("F\\((edit:.*?)\\) \\[\\[(.*?)\\]\\[(.*?)\\]\\]");
         Pattern createTitlePattern = Pattern.compile("^\\*\\s+(.*)");
  

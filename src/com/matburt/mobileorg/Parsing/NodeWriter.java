@@ -31,20 +31,20 @@ public class NodeWriter {
 			String newPriority, String newPayload) throws IOException {
 
 		if (!node.name.equals(newTitle)) {
-			editNode("heading", node.nodeId, newTitle, node.name, newTitle);
+			editNode("heading", node.getNodeId(), newTitle, node.name, newTitle);
 			node.name = newTitle;
 		}
 		if (newTodo != null && !node.todo.equals(newTodo)) {
-			editNode("todo", node.nodeId, newTitle, node.todo, newTodo);
+			editNode("todo", node.getNodeId(), newTitle, node.todo, newTodo);
 			node.todo = newTodo;
 		}
 		if (newPriority != null && !node.priority.equals(newPriority)) {
-			editNode("priority", node.nodeId, newTitle, node.priority,
+			editNode("priority", node.getNodeId(), newTitle, node.priority,
 					newPriority);
 			node.priority = newPriority;
 		}
 		if (!node.payload.equals(newPayload)) {
-			editNode("body", node.nodeId, newTitle, node.payload, newPayload);
+			editNode("body", node.getNodeId(), newTitle, node.payload, newPayload);
 			node.payload = newPayload;
 		}
 	}
