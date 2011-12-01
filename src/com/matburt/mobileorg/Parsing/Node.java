@@ -22,7 +22,7 @@ public class Node implements Cloneable {
 	public String priority = "";
 	private ArrayList<String> tags = new ArrayList<String>();
 
-	private String payload = "";
+	private StringBuilder payload = new StringBuilder();
 
 	private Date schedule = null;
 	private Date deadline = null;
@@ -47,13 +47,13 @@ public class Node implements Cloneable {
 	}
 
 	public String getPayload() {
-		return this.payload;
+		return this.payload.toString();
 	}	
 	public void setPayload(String payload) {
-		this.payload = payload;
+		this.payload = new StringBuilder(payload);
 	}
 	void addPayload(String payload) {
-		this.payload += payload + "\n";
+		this.payload.append(payload + "\n");
 	}
 	
 	public Node findChildNode(String regex) {
@@ -99,7 +99,7 @@ public class Node implements Cloneable {
 				this.name = e.newVal;
 				break;
 			case PAYLOAD:
-				this.payload = e.newVal;
+				this.setPayload(e.newVal);
 				break;
 			}
 		}
@@ -174,7 +174,7 @@ public class Node implements Cloneable {
 		} else
 			return "";
 	}
-	
+
 	public String getId() {
 		if (payload.indexOf(":ID:") != -1) {
 			String trimmedLine = payload.substring(
