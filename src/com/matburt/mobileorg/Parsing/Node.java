@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Node implements Cloneable {
@@ -14,18 +15,20 @@ public class Node implements Cloneable {
 	public String name = "";
 	public String nodeTitle = "";
 	public String altNodeTitle = null;
+	
 	public String todo = "";
 	public String priority = "";
-	private String nodeId = "";
+	private ArrayList<String> tags = new ArrayList<String>();
+	
 	public String payload = "";
 
-	public Date schedule = null;
-	public Date deadline = null;
+	Date schedule = null;
+	Date deadline = null;
+	
 	public boolean encrypted = false;
 	public boolean parsed = false;
+	private String nodeId = "";
 
-	ArrayList<String> tags = new ArrayList<String>();
-	String tagString = "";
 	HashMap<String, String> properties = new HashMap<String, String>();
 
 	public Node() {
@@ -60,12 +63,11 @@ public class Node implements Cloneable {
 
 	public void setTags(ArrayList<String> todoList) {
 		this.tags.clear();
-		this.tagString = "";
 		this.tags.addAll(todoList);
-		for (String titem : todoList) {
-			this.tagString += titem + " ";
-		}
-		this.tagString = this.tagString.trim();
+	}
+	
+	public void addTag(String tag) {
+		this.tags.add(tag);
 	}
 	
 	/**
@@ -161,22 +163,79 @@ public class Node implements Cloneable {
 			return this.nodeId;
 		}
 	}
+	
+    private boolean parseContent(String thisLine) {
+    	Pattern propertiesLine = Pattern.compile("^\\s*:[A-Z]+:");
+        Matcher propm = propertiesLine.matcher(thisLine);
+        Node lastNode = this;
+        
+        // ID field
+        if (thisLine.indexOf(":ID:") != -1) {
+            String trimmedLine = thisLine.substring(thisLine.indexOf(":ID:")+4).trim();
+            lastNode.addProperty("ID", trimmedLine);
+            lastNode.setNodeId(trimmedLine);
+            return true;
+        }
+        // Original ID field
+        else if (thisLine.indexOf(":ORIGINAL_ID:") != -1) {
+        	String trimmedLine = thisLine.substring(thisLine.indexOf(":ORIGINAL_ID:")+13).trim();
+            lastNode.addProperty("ORIGINAL_ID", trimmedLine);
+            lastNode.setNodeId(trimmedLine);
+            return true;
+        }
+        // Property
+        else if (propm.find()) {
+            return true;
+        }
+        // Scheduled or Deadline
+        else if (thisLine.indexOf("DEADLINE:") != -1 ||
+                 thisLine.indexOf("SCHEDULED:") != -1) {
+        	parseDates(thisLine, lastNode);
+            return true;
+        }
+        
+        lastNode.addPayload(thisLine);
+        return false;
+    }
+    
+    private void parseDates(String thisLine, Node lastNode) {
+    	Pattern deadlineP = Pattern.compile("^.*DEADLINE: <(\\S+ \\S+)( \\S+)?>");
+    	Pattern schedP = Pattern.compile("^.*SCHEDULED: <(\\S+ \\S+)( \\S+)?>");
+
+        try {
+            Matcher deadlineM = deadlineP.matcher(thisLine);
+            SimpleDateFormat dFormatter = new SimpleDateFormat(
+                                            "yyyy-MM-dd EEE");
+            if (deadlineM.find()) {
+                lastNode.deadline = dFormatter.parse(deadlineM.group(1));
+            }
+
+            SimpleDateFormat sFormatter = new SimpleDateFormat(
+                    "yyyy-MM-dd EEE");
+            Matcher schedM = schedP.matcher(thisLine);                            
+            if (schedM.find()) {
+                lastNode.schedule = sFormatter.parse(schedM.group(1));
+            }
+        }
+        catch (java.text.ParseException e) {
+           // Log.e(LT, "Could not parse deadline");
+        }
+    }
+    
+    
+
 
 	public void setNodeId(String nodeId) {
 		this.nodeId = nodeId;
 	}
 
-	void setParentNode(Node pnode) {
+	public void setParentNode(Node pnode) {
 		this.parent = pnode;
 	}
 	
 	public void addChild(Node childNode) {
 		this.children.add(childNode);
 		childNode.parent = this;
-	}
-
-	void clearChildren() {
-		this.children.clear();
 	}
 
 	public ArrayList<String> getTags() {
@@ -190,21 +249,17 @@ public class Node implements Cloneable {
 	void addProperty(String key, String val) {
 		this.properties.put(key, val);
 	}
-
-	String getProperty(String key) {
-		return this.properties.get(key);
-	}
-
-	boolean hasProperty(String key) {
-		return this.properties.containsKey(key);
-	}
 	
-	void setTitle(String title) {
+	public void setTitle(String title) {
 		this.nodeTitle = title;
 	}
 	
 	public String getTagString() {
-		return this.tagString;
+		StringBuilder tagString = new StringBuilder();
+		for (String titem : this.tags) {
+			tagString.append(titem + " ");
+		}
+		return tagString.toString().trim();
 	}
 	
 	public boolean hasChildren() {
