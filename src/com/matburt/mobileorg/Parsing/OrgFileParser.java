@@ -124,6 +124,7 @@ public class OrgFileParser {
 
 			while ((thisLine = breader.readLine()) != null) {
 
+				// TODO This is only needed when parsing the capture file
 				// Skip edit fields
 				Matcher editm = editTitlePattern.matcher(thisLine);
 				if (thisLine.length() < 1 || editm.find())
