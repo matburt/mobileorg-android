@@ -22,7 +22,7 @@ public class Node implements Cloneable {
 	public String priority = "";
 	private ArrayList<String> tags = new ArrayList<String>();
 
-	public String payload = "";
+	private String payload = "";
 
 	private Date schedule = null;
 	private Date deadline = null;
@@ -46,6 +46,16 @@ public class Node implements Cloneable {
 		this.encrypted = encrypted;
 	}
 
+	public String getPayload() {
+		return this.payload;
+	}	
+	public void setPayload(String payload) {
+		this.payload = payload;
+	}
+	void addPayload(String payload) {
+		this.payload += payload + "\n";
+	}
+	
 	public Node findChildNode(String regex) {
 		Pattern findNodePattern = Pattern.compile(regex);
 		for (Node child : children) {
@@ -147,12 +157,12 @@ public class Node implements Cloneable {
 
 	
 	// This function does nothing yet, It's a reminder of how to find properties
-	private void findProperties() {
-		Pattern propertiesLine = Pattern.compile("^\\s*:[A-Z]+:");
-		Matcher propm = propertiesLine.matcher(this.payload);
-		
-		propm.find();
-	}
+//	private void findProperties() {
+//		Pattern propertiesLine = Pattern.compile("^\\s*:[A-Z]+:");
+//		Matcher propm = propertiesLine.matcher(this.payload);
+//		
+//		propm.find();
+//	}
 	
 	public String getOriginalId() {
 		if (payload.indexOf(":ORIGINAL_ID:") != -1) {
@@ -246,10 +256,6 @@ public class Node implements Cloneable {
 
 	public ArrayList<String> getTags() {
 		return tags;
-	}
-
-	void addPayload(String npayload) {
-		this.payload += npayload + "\n";
 	}
 
 	void addProperty(String key, String val) {

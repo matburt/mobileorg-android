@@ -12,6 +12,7 @@ import java.util.regex.Pattern;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Debug;
 import android.util.Log;
 
 import com.matburt.mobileorg.MobileOrgApplication;
@@ -39,10 +40,12 @@ public class OrgFileParser {
 
 	public void runParser(SharedPreferences appSettings,
 			MobileOrgApplication appInst) {
+		Debug.startMethodTracing("org");
 		parseAllFiles();
 		appInst.rootNode = rootNode;
 		appInst.edits = parseEdits();
 		Collections.sort(appInst.rootNode.children, Node.comparator);
+		Debug.stopMethodTracing();
 	}
 	
     public void parseAllFiles() {

@@ -244,7 +244,7 @@ public class OutlineActivity extends ListActivity
 
 	private void runViewNodeActivity(Node node) {
 		Intent intent = new Intent(this, NodeViewActivity.class);
-		String docBuffer = node.name + "\n\n" + node.payload;
+		String docBuffer = node.name + "\n\n" + node.getPayload();
 		intent.putExtra("txtValue", docBuffer);
 		startActivity(intent);
 	}

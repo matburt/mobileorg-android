@@ -43,9 +43,9 @@ public class NodeWriter {
 					newPriority);
 			node.priority = newPriority;
 		}
-		if (!node.payload.equals(newPayload)) {
-			editNode("body", node.getNodeId(), newTitle, node.payload, newPayload);
-			node.payload = newPayload;
+		if (!node.getPayload().equals(newPayload)) {
+			editNode("body", node.getNodeId(), newTitle, node.getPayload(), newPayload);
+			node.setPayload(newPayload);
 		}
 	}
 
