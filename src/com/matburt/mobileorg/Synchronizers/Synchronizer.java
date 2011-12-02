@@ -121,7 +121,7 @@ abstract public class Synchronizer {
 			appInst.addOrUpdateFile(filename, key,
 					remoteChecksums.get(key));
 			
-			appInst.invalidateNode(filename);
+			appInst.invalidateFile(filename);
 		}
 	}
 	

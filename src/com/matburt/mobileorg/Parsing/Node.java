@@ -12,7 +12,7 @@ import java.util.regex.Pattern;
 
 // TODO Clean up this mess
 public class Node implements Cloneable {
-	Node parent = null;
+	private Node parent = null;
 	public ArrayList<Node> children = new ArrayList<Node>();
 
 	public String name = "";

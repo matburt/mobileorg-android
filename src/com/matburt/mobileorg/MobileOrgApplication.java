@@ -15,6 +15,7 @@ import android.util.Log;
 
 import com.matburt.mobileorg.Parsing.EditNode;
 import com.matburt.mobileorg.Parsing.Node;
+import com.matburt.mobileorg.Parsing.NodeWriter;
 import com.matburt.mobileorg.Parsing.OrgDatabase;
 import com.matburt.mobileorg.Parsing.OrgFileParser;
 
@@ -63,12 +64,14 @@ public class MobileOrgApplication extends Application {
 	 * Additionally it will try to update the node stack to point to the new
 	 * nodes, which will cause the user display to be updated appropriately.
 	 */
-   public void invalidateNode(String filename) {
+   public void invalidateFile(String filename) {
 		Node fileNode = this.rootNode.getChild(filename);
 		
-		if(fileNode != null) {
+		if(fileNode != null)
 			fileNode.parsed = false;
-		}
+		
+		if(filename.equals(NodeWriter.ORGFILE))
+			this.edits = parser.parseEdits();
 		
 		if(nodestack.size() >= 2 && nodestack.get(1).name.equals(filename)) {		
 			fileNode = parser.parseFile(filename, this.rootNode);
@@ -129,21 +132,6 @@ public class MobileOrgApplication extends Application {
 			return false;
 		else
 			return true;
-	}
-
-    //TODO Should do something else
-	public static String nodeSelectionStr(ArrayList<Integer> nodes) {
-		if (nodes != null) {
-			String tmp = "";
-	
-			for (Integer i : nodes) {
-				if (tmp.length() > 0)
-					tmp += ",";
-				tmp += i;
-			}
-			return tmp;
-		}
-		return "null";
 	}
 
     public static final String SYNCHRONIZER_PLUGIN_ACTION = "com.matburt.mobileorg.SYNCHRONIZE";
