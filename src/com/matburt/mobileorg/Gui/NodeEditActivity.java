@@ -60,7 +60,7 @@ public class NodeEditActivity extends Activity {
 				.getApplication();
 
 		if (this.actionMode.equals(ACTIONMODE_CREATE)) {
-			node = new Node();
+			node = new Node("");
 		} else if (this.actionMode.equals(ACTIONMODE_EDIT)) {
 			node = appInst.nodestackTop();
 			appInst.popNodestack();

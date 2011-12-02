@@ -1,6 +1,5 @@
 package com.matburt.mobileorg;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -11,13 +10,13 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageItemInfo;
 import android.content.pm.ResolveInfo;
-import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.matburt.mobileorg.Parsing.EditNode;
 import com.matburt.mobileorg.Parsing.Node;
 import com.matburt.mobileorg.Parsing.OrgDatabase;
+import com.matburt.mobileorg.Parsing.OrgFileParser;
 
 public class MobileOrgApplication extends Application {
     public Node rootNode = null;
@@ -25,12 +24,37 @@ public class MobileOrgApplication extends Application {
     
     public ArrayList<EditNode> edits;
     private OrgDatabase appdb;
+    private OrgFileParser parser;
     
     @Override
     public void onCreate() {
     	this.appdb = new OrgDatabase(this);
     }
     
+    
+    public boolean init() {
+		if (this.appdb.getOrgFiles().isEmpty())
+			return false;
+
+		this.parser = new OrgFileParser(getBaseContext(), this);
+		this.rootNode = this.parser.prepareRootNode();
+		pushNodestack(this.rootNode);
+		
+		this.edits = this.parser.parseEdits();
+		
+		return true;
+	}
+    
+    public void makeSureNodeIsParsed(Node node) {	
+		if (node.parsed == false) {
+			if (node.encrypted == false) {
+				this.parser.parseFile(node.name, rootNode);
+			} else {
+			//	decryptNode(node);
+				return;
+			}
+		}
+    }
     
     public void pushNodestack(Node node) {
         nodestack.add(node);
@@ -55,6 +79,7 @@ public class MobileOrgApplication extends Application {
     public int nodestackSize() {
     	return this.nodestack.size();
     }
+
 
 	/**
 	 * Updates the {@link nodestack} with new nodes. When the parser has run, it
@@ -130,15 +155,7 @@ public class MobileOrgApplication extends Application {
 		return "null";
 	}
 
-	static String getStorageFolder()
-    {
-        File root = Environment.getExternalStorageDirectory();   
-        File morgDir = new File(root, "mobileorg");
-        return morgDir.getAbsolutePath() + "/";
-    }
-
     public static final String SYNCHRONIZER_PLUGIN_ACTION = "com.matburt.mobileorg.SYNCHRONIZE";
-	
     public static List<PackageItemInfo> discoverSynchronizerPlugins(Context context)
     {
         Intent discoverSynchro = new Intent(SYNCHRONIZER_PLUGIN_ACTION);

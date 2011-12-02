@@ -114,10 +114,9 @@ abstract public class Synchronizer {
             OrgFile orgfile = new OrgFile(fileChecksumMap.get(key), context);
             orgfile.fetch(getRemoteFile(fileChecksumMap.get(key)));
   
-            this.appdb.addOrUpdateFile(fileChecksumMap.get(key),
-                                       key,
-                                       fileChecksumMap.get(key));
-        }
+			this.appdb.addOrUpdateFile(fileChecksumMap.get(key), key,
+					fileChecksumMap.get(key));
+		}
 	}
 	
 	private HashMap<String, String> getOrgFilesFromMaster(String master) {

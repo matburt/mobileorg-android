@@ -3,6 +3,7 @@ package com.matburt.mobileorg.Parsing;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
@@ -28,22 +29,18 @@ public class Node implements Cloneable {
 	private Date deadline = null;
 
 	public boolean encrypted = false;
-	public boolean parsed = false;
+	public boolean parsed = true;
 	private String nodeId = "";
 
 	HashMap<String, String> properties = new HashMap<String, String>();
 
-	public Node() {
-		this("", false);
+	public Node(String name, Node parent) {
+		this.name = name;
+		this.parent = parent;
+		parent.addChild(this);
 	}
-
-	public Node(String heading) {
-		this(heading, false);
-	}
-
-	public Node(String heading, boolean encrypted) {
-		this.name = heading;
-		this.encrypted = encrypted;
+	public Node(String name) {
+		this.name = name;
 	}
 
 	public String getPayload() {
@@ -274,11 +271,26 @@ public class Node implements Cloneable {
 		return tagString.toString().trim();
 	}
 
+// ****************
+	
+	public Node getChield(String childName) {
+		for(Node child: this.children) {
+			if(child.name.equals(childName))
+				return child;
+		}
+		
+		return null;
+	}
+	
 	public boolean hasChildren() {
 		if (children.isEmpty())
 			return false;
 		else
 			return true;
+	}
+
+	public void sortChildren() {
+		Collections.sort(this.children, Node.comparator);
 	}
 
 	public boolean isSimple() {

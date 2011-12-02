@@ -12,10 +12,6 @@ import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
-import com.matburt.mobileorg.MobileOrgApplication;
-import com.matburt.mobileorg.Error.ErrorReporter;
-import com.matburt.mobileorg.Parsing.OrgFileParser;
-
 public class MobileOrgSyncService extends Service implements SharedPreferences.OnSharedPreferenceChangeListener{
 	private Timer timer = new Timer();
 	private Date lastSyncDate;
@@ -122,23 +118,9 @@ public class MobileOrgSyncService extends Service implements SharedPreferences.O
 				} finally {
 					syncman.close();
 				}
-
-				runParser();
 			}
 		};
 		syncThread.start();
 		this.lastSyncDate = new Date();
 	}
-
-	public void runParser() {
-        MobileOrgApplication appInst = (MobileOrgApplication)this.getApplication();
-
-        OrgFileParser ofp = new OrgFileParser(getBaseContext(), appInst);
-        try {
-        	ofp.runParser(appSettings, appInst);
-        }
-        catch(Throwable e) {
-        	ErrorReporter.displayError(this, "An error occurred during parsing: " + e.toString());
-        }
-    }
 }

@@ -3,7 +3,6 @@ package com.matburt.mobileorg.Parsing;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.EmptyStackException;
 import java.util.HashMap;
 import java.util.Stack;
@@ -11,112 +10,126 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.os.Debug;
 import android.util.Log;
 
 import com.matburt.mobileorg.MobileOrgApplication;
-import com.matburt.mobileorg.Error.ErrorReporter;
 
 
 public class OrgFileParser {
 
-    public Node rootNode = new Node("");
-    private HashMap<String, String> orgPathFileMap;
     private Context context;
     private OrgDatabase appdb;
-	private ArrayList<HashMap<String, Integer>> todos = null;
     private static final String LT = "MobileOrg";
+
+    private ArrayList<HashMap<String, Integer>> todos = null;
 
 	public OrgFileParser(Context context, MobileOrgApplication appInst) {
 		this.appdb = new OrgDatabase(context);
 		this.context = context;
-		
-		HashMap<String, String> orgPathFileMap = this.appdb.getOrgFiles();
-		if (orgPathFileMap.isEmpty())
-			return;
-		this.orgPathFileMap = orgPathFileMap;
-	}
-
-	public void runParser(SharedPreferences appSettings,
-			MobileOrgApplication appInst) {
-		Debug.startMethodTracing("org");
-		parseAllFiles();
-		appInst.rootNode = rootNode;
-		appInst.edits = parseEdits();
-		Collections.sort(appInst.rootNode.children, Node.comparator);
-		Debug.stopMethodTracing();
 	}
 	
-    public void parseAllFiles() {
-        Stack<Node> nodeStack = new Stack<Node>();
-        nodeStack.push(this.rootNode);
+	public Node prepareRootNode() {
+		Node rootNode = new Node("");
+		HashMap<String, String> orgPathFileMap = this.appdb.getOrgFiles();
 
-        for (String key : this.orgPathFileMap.keySet()) {
-            String altName = this.orgPathFileMap.get(key);
-            Log.d(LT, "Parsing: " + key);
-            //if file is encrypted just add a placeholder node to be parsed later
-            if(key.endsWith(".gpg") ||
-               key.endsWith(".pgp") ||
-               key.endsWith(".enc"))
-            {
-                Node nnode = new Node(key, true);
-                nnode.altNodeTitle = altName;
-                nnode.setParentNode(nodeStack.peek());
-                nodeStack.peek().addChild(nnode);
-                continue;
-            }
+		for (String key : orgPathFileMap.keySet()) {
+			Node fileNode = new Node(key, rootNode);
+			fileNode.altNodeTitle = orgPathFileMap.get(key);
+			fileNode.parsed = false;
 
-            Node fileNode = new Node(key, false);
-            fileNode.setParentNode(nodeStack.peek());
-            fileNode.altNodeTitle = altName;
-            nodeStack.peek().addChild(fileNode);
-            nodeStack.push(fileNode);
-            
-        	OrgFile orgfile = new OrgFile(fileNode.name, context);
-            BufferedReader breader = orgfile.getReader();
-            
-            if(breader == null) {
-            	ErrorReporter.displayError(context, new Exception("breader == null!"));
-            }
-            
-            parseFile(fileNode, breader);
-            try {
-				breader.close();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-            
-            nodeStack.pop();
-        }
-    }
+			if (key.endsWith(".gpg") || key.endsWith(".pgp")
+					|| key.endsWith(".enc"))
+				fileNode.encrypted = true;
+		}
+
+		rootNode.sortChildren();
+		return rootNode;
+	}
+	
+	public Node parseFile(String filename, Node rootNode) {		
+    	OrgFile orgfile = new OrgFile(filename, context);
+        BufferedReader breader = orgfile.getReader();
+
+        if(breader == null)
+			return null;
+
+		Node node;
+		if (rootNode != null) {
+			node = rootNode.getChield(filename);
+
+			if (node == null)
+				node = new Node(filename, rootNode);
+		} else
+			node = new Node(filename);
+		
+		parse(node, breader);
+		return node;
+	}
+
+//	public void runParser(SharedPreferences appSettings,
+//			MobileOrgApplication appInst) {
+//		parseAllFiles();
+//		appInst.rootNode = this.rootNode;
+//		appInst.edits = parseEdits();
+//		appInst.rootNode.sortChildren();
+//	}
+//	
+//    public void parseAllFiles() {
+//        Stack<Node> nodeStack = new Stack<Node>();
+//        nodeStack.push(this.rootNode);
+//        
+//		HashMap<String, String> orgPathFileMap = this.appdb.getOrgFiles();
+//
+//        for (String key : orgPathFileMap.keySet()) {
+//            String altName = orgPathFileMap.get(key);
+//            Log.d(LT, "Parsing: " + key);
+//            //if file is encrypted just add a placeholder node to be parsed later
+//            if(key.endsWith(".gpg") ||
+//               key.endsWith(".pgp") ||
+//               key.endsWith(".enc"))
+//            {
+//                Node nnode = new Node(key);
+//                nnode.encrypted = true;
+//                nnode.altNodeTitle = altName;
+//                nnode.parsed = false;
+//                nnode.setParentNode(nodeStack.peek());
+//                nodeStack.peek().addChild(nnode);
+//                continue;
+//            }
+//
+//            Node fileNode = new Node(key);
+//            fileNode.setParentNode(nodeStack.peek());
+//            fileNode.altNodeTitle = altName;
+//            nodeStack.peek().addChild(fileNode);
+//            nodeStack.push(fileNode);
+//            
+//        	OrgFile orgfile = new OrgFile(fileNode.name, context);
+//            BufferedReader breader = orgfile.getReader();
+//            
+//            if(breader == null) {
+//            	ErrorReporter.displayError(context, new Exception("breader == null!"));
+//            }
+//            
+//            parseFile(fileNode, breader);
+//            try {
+//				breader.close();
+//			} catch (IOException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//            
+//            nodeStack.pop();
+//        }
+//    }
 
     private Pattern titlePattern = null;
     private Stack<Node> nodeStack = new Stack<Node>();
     private Stack<Integer> starStack = new Stack<Integer>();
-
-    private static int numberOfStars(String thisLine) {
-        int numstars = 0;
-    	
-        for (int idx = 0; idx < thisLine.length(); idx++) {
-            if (thisLine.charAt(idx) != '*') {
-                break;
-            }
-            numstars++;
-        }
-
-        if (numstars >= thisLine.length() || thisLine.charAt(numstars) != ' ')
-            numstars = 0;
-        
-        return numstars;
-    }
-    
 	
 	Pattern editTitlePattern = Pattern
 			.compile("F\\((edit:.*?)\\) \\[\\[(.*?)\\]\\[(.*?)\\]\\]");
 
-	public void parseFile(Node fileNode, BufferedReader breader) {
+	private void parse(Node fileNode, BufferedReader breader) {
 		this.todos = appdb.getGroupedTodods();
 
 		nodeStack.push(fileNode);
@@ -160,6 +173,22 @@ public class OrgFileParser {
 		}
 	}
 
+    private static int numberOfStars(String thisLine) {
+        int numstars = 0;
+    	
+        for (int idx = 0; idx < thisLine.length(); idx++) {
+            if (thisLine.charAt(idx) != '*') {
+                break;
+            }
+            numstars++;
+        }
+
+        if (numstars >= thisLine.length() || thisLine.charAt(numstars) != ' ')
+            numstars = 0;
+        
+        return numstars;
+    }
+    
     private void parseHeading(String thisLine, int numstars) {
         String title = thisLine.substring(numstars+1);
         
@@ -270,7 +299,7 @@ public class OrgFileParser {
         return newTitle;
     }
 
-    private ArrayList<EditNode> parseEdits() {
+    public ArrayList<EditNode> parseEdits() {
         Pattern editTitlePattern = Pattern.compile("F\\((edit:.*?)\\) \\[\\[(.*?)\\]\\[(.*?)\\]\\]");
         Pattern createTitlePattern = Pattern.compile("^\\*\\s+(.*)");
  
