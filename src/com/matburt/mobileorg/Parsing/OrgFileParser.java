@@ -14,7 +14,6 @@ import android.util.Log;
 
 import com.matburt.mobileorg.MobileOrgApplication;
 
-
 public class OrgFileParser {
 
     private Context context;
@@ -28,6 +27,11 @@ public class OrgFileParser {
 		this.context = context;
 	}
 	
+	/**
+	 * This function will return a Node that contains an entry for each org
+	 * file. All files are added with {@link Node.parsed} equal to false,
+	 * indicating that it should be parsed before accessing.
+	 */
 	public Node prepareRootNode() {
 		Node rootNode = new Node("");
 		HashMap<String, String> orgPathFileMap = this.appdb.getOrgFiles();
@@ -46,6 +50,11 @@ public class OrgFileParser {
 		return rootNode;
 	}
 	
+	/**
+	 * This causes the given filename to be parsed and the resulting node will
+	 * be returned. An optional root node can be given, resulting in it's entry
+	 * of the node being updated.
+	 */
 	public Node parseFile(String filename, Node rootNode) {		
     	OrgFile orgfile = new OrgFile(filename, context);
         BufferedReader breader = orgfile.getReader();
@@ -55,77 +64,26 @@ public class OrgFileParser {
 
 		Node node;
 		if (rootNode != null) {
-			node = rootNode.getChield(filename);
+			node = rootNode.getChild(filename);
 
 			if (node == null)
 				node = new Node(filename, rootNode);
+			else
+				node.children.clear();
 		} else
 			node = new Node(filename);
 		
 		parse(node, breader);
+		node.parsed = true;
+		
+		try { breader.close(); } catch (IOException e) {}
 		return node;
 	}
 
-//	public void runParser(SharedPreferences appSettings,
-//			MobileOrgApplication appInst) {
-//		parseAllFiles();
-//		appInst.rootNode = this.rootNode;
-//		appInst.edits = parseEdits();
-//		appInst.rootNode.sortChildren();
-//	}
-//	
-//    public void parseAllFiles() {
-//        Stack<Node> nodeStack = new Stack<Node>();
-//        nodeStack.push(this.rootNode);
-//        
-//		HashMap<String, String> orgPathFileMap = this.appdb.getOrgFiles();
-//
-//        for (String key : orgPathFileMap.keySet()) {
-//            String altName = orgPathFileMap.get(key);
-//            Log.d(LT, "Parsing: " + key);
-//            //if file is encrypted just add a placeholder node to be parsed later
-//            if(key.endsWith(".gpg") ||
-//               key.endsWith(".pgp") ||
-//               key.endsWith(".enc"))
-//            {
-//                Node nnode = new Node(key);
-//                nnode.encrypted = true;
-//                nnode.altNodeTitle = altName;
-//                nnode.parsed = false;
-//                nnode.setParentNode(nodeStack.peek());
-//                nodeStack.peek().addChild(nnode);
-//                continue;
-//            }
-//
-//            Node fileNode = new Node(key);
-//            fileNode.setParentNode(nodeStack.peek());
-//            fileNode.altNodeTitle = altName;
-//            nodeStack.peek().addChild(fileNode);
-//            nodeStack.push(fileNode);
-//            
-//        	OrgFile orgfile = new OrgFile(fileNode.name, context);
-//            BufferedReader breader = orgfile.getReader();
-//            
-//            if(breader == null) {
-//            	ErrorReporter.displayError(context, new Exception("breader == null!"));
-//            }
-//            
-//            parseFile(fileNode, breader);
-//            try {
-//				breader.close();
-//			} catch (IOException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
-//            
-//            nodeStack.pop();
-//        }
-//    }
+	private Pattern titlePattern = null;
+	private Stack<Node> nodeStack = new Stack<Node>();
+	private Stack<Integer> starStack = new Stack<Integer>();
 
-    private Pattern titlePattern = null;
-    private Stack<Node> nodeStack = new Stack<Node>();
-    private Stack<Integer> starStack = new Stack<Integer>();
-	
 	Pattern editTitlePattern = Pattern
 			.compile("F\\((edit:.*?)\\) \\[\\[(.*?)\\]\\[(.*?)\\]\\]");
 
@@ -135,30 +93,40 @@ public class OrgFileParser {
 		nodeStack.push(fileNode);
 		starStack.push(0);
 
+		boolean parsingCaptureFile = false;
+		if (fileNode.name.equals(NodeWriter.ORGFILE))
+			parsingCaptureFile = true;
+
 		try {
-			String thisLine;
+			String currentLine;
+			int lineLength;
 
-			while ((thisLine = breader.readLine()) != null) {
+			while ((currentLine = breader.readLine()) != null) {
 
-				// TODO This is only needed when parsing the capture file
-				// Skip edit fields
-				Matcher editm = editTitlePattern.matcher(thisLine);
-				if (thisLine.length() < 1 || editm.find())
+				lineLength = currentLine.length();
+				
+				if (lineLength < 1)
 					continue;
 
+				if (parsingCaptureFile) {
+					Matcher editm = editTitlePattern.matcher(currentLine);
+					if (editm.find())
+						continue;
+				}
+
 				// Find title fields and set title for file node
-				if (thisLine.charAt(0) == '#') {
-					if (thisLine.indexOf("#+TITLE:") != -1) {
-						fileNode.altNodeTitle = thisLine.substring(
-								thisLine.indexOf("#+TITLE:") + 8).trim();
+				if (currentLine.charAt(0) == '#') {
+					if (currentLine.indexOf("#+TITLE:") != -1) {
+						fileNode.altNodeTitle = currentLine.substring(
+								currentLine.indexOf("#+TITLE:") + 8).trim();
 					}
 				}
 
-				int numstars = numberOfStars(thisLine);
+				int numstars = numberOfStars(currentLine, lineLength);
 				if (numstars > 0) {
-					parseHeading(thisLine, numstars);
+					parseHeading(currentLine, numstars);
 				} else {
-					nodeStack.peek().addPayload(thisLine);
+					nodeStack.peek().addPayload(currentLine);
 				}
 			}
 
@@ -167,27 +135,24 @@ public class OrgFileParser {
 				starStack.pop();
 			}
 
-			fileNode.parsed = true;
-		} catch (IOException e) {
-			Log.e(LT, "IO Exception on readerline: " + e.getMessage());
-		}
+		} catch (IOException e) {}
 	}
 
-    private static int numberOfStars(String thisLine) {
-        int numstars = 0;
-    	
-        for (int idx = 0; idx < thisLine.length(); idx++) {
-            if (thisLine.charAt(idx) != '*') {
-                break;
-            }
-            numstars++;
-        }
+	private static int numberOfStars(String thisLine, int lineLength) {
+		int numstars = 0;
 
-        if (numstars >= thisLine.length() || thisLine.charAt(numstars) != ' ')
-            numstars = 0;
-        
-        return numstars;
-    }
+		for (int idx = 0; idx < lineLength; idx++) {
+			if (thisLine.charAt(idx) != '*')
+				break;
+
+			numstars++;
+		}
+
+		if (numstars >= lineLength || thisLine.charAt(numstars) != ' ')
+			numstars = 0;
+
+		return numstars;
+	}
     
     private void parseHeading(String thisLine, int numstars) {
         String title = thisLine.substring(numstars+1);

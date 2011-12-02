@@ -273,7 +273,7 @@ public class Node implements Cloneable {
 
 // ****************
 	
-	public Node getChield(String childName) {
+	public Node getChild(String childName) {
 		for(Node child: this.children) {
 			if(child.name.equals(childName))
 				return child;
@@ -282,15 +282,21 @@ public class Node implements Cloneable {
 		return null;
 	}
 	
+	public boolean removeChild(String childName) {
+		Node child = getChild(childName);
+		
+		if(child != null) {
+			this.children.remove(child);
+			return true;
+		} else
+			return false;
+	}
+	
 	public boolean hasChildren() {
 		if (children.isEmpty())
 			return false;
 		else
 			return true;
-	}
-
-	public void sortChildren() {
-		Collections.sort(this.children, Node.comparator);
 	}
 
 	public boolean isSimple() {
@@ -301,6 +307,10 @@ public class Node implements Cloneable {
 
 	}
 
+	public void sortChildren() {
+		Collections.sort(this.children, Node.comparator);
+	}
+	
 	public static Comparator<Node> comparator = new Comparator<Node>() {
 		@Override
 		public int compare(Node node1, Node node2) {

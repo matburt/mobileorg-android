@@ -12,6 +12,8 @@ import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
+
+import com.matburt.mobileorg.MobileOrgApplication;
 import com.matburt.mobileorg.Parsing.NodeWriter;
 import com.matburt.mobileorg.Parsing.OrgDatabase;
 import com.matburt.mobileorg.Parsing.OrgFile;
@@ -44,9 +46,9 @@ abstract public class Synchronizer {
 	 */
 	protected abstract BufferedReader getRemoteFile(String filename) throws IOException;
 
-	protected OrgDatabase appdb = null;
-	protected SharedPreferences appSettings = null;
-	protected Context context = null;
+	protected OrgDatabase appdb;
+	protected SharedPreferences appSettings;
+	protected Context context;
 	protected Resources r;
 
 	Synchronizer(Context context) {
@@ -57,9 +59,9 @@ abstract public class Synchronizer {
                                    context.getApplicationContext());
 	}
 
-	public void sync() throws IOException {
+	public void sync(MobileOrgApplication appInst) throws IOException {
 		push(NodeWriter.ORGFILE);
-		pull();
+		pull(appInst);
 	}
 
 	/**
@@ -71,7 +73,7 @@ abstract public class Synchronizer {
     	String localContents = orgFile.read();
 
     	String remoteContent = OrgFile.read(getRemoteFile(filename));
- 
+
         if(localContents.equals(""))
         	return;
         
@@ -89,7 +91,7 @@ abstract public class Synchronizer {
 	 * host. Using those files, it determines the other files that need updating
 	 * and downloads them.
 	 */
-	protected void pull() throws IOException {
+	protected void pull(MobileOrgApplication appInst) throws IOException {
 		String remoteIndexContents = OrgFile.read(getRemoteFile("index.org"));
         
         ArrayList<HashMap<String, Boolean>> todoLists = getTodos(remoteIndexContents);
@@ -104,18 +106,22 @@ abstract public class Synchronizer {
 		HashMap<String, String> localChecksums = this.appdb.getChecksums();
 		
 		HashMap<String, String> fileChecksumMap = getOrgFilesFromMaster(remoteIndexContents);
-
+		
         for (String key : fileChecksumMap.keySet()) {
+        	String filename = fileChecksumMap.get(key);
+        	
             if (localChecksums.containsKey(key) &&
                 remoteChecksums.containsKey(key) &&
                 localChecksums.get(key).equals(remoteChecksums.get(key)))
                 continue;
           
-            OrgFile orgfile = new OrgFile(fileChecksumMap.get(key), context);
-            orgfile.fetch(getRemoteFile(fileChecksumMap.get(key)));
+            OrgFile orgfile = new OrgFile(filename, context);
+            orgfile.fetch(getRemoteFile(filename));
   
-			this.appdb.addOrUpdateFile(fileChecksumMap.get(key), key,
-					fileChecksumMap.get(key));
+			appInst.addOrUpdateFile(filename, key,
+					remoteChecksums.get(key));
+			
+			appInst.invalidateNode(filename);
 		}
 	}
 	

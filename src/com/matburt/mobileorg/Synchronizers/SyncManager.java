@@ -2,6 +2,8 @@ package com.matburt.mobileorg.Synchronizers;
 
 import java.io.IOException;
 
+import com.matburt.mobileorg.MobileOrgApplication;
+
 import android.content.Context;
 import android.preference.PreferenceManager;
 
@@ -12,7 +14,9 @@ import android.preference.PreferenceManager;
 public class SyncManager {
 	final Synchronizer synchronizer;
 
-	public SyncManager(Context context) {
+	MobileOrgApplication appInst;
+	
+	public SyncManager(Context context, MobileOrgApplication appInst) {
 		String userSynchro = PreferenceManager.getDefaultSharedPreferences(context).getString("syncSource", "");
 		if (userSynchro.equals("webdav")) {
 			synchronizer = new WebDAVSynchronizer(context);
@@ -22,6 +26,8 @@ public class SyncManager {
 			synchronizer = new DropboxSynchronizer(context);
 		} else
 			synchronizer = null;
+		
+		this.appInst = appInst;
 	}
 	
 	public boolean isConfigured() {
@@ -35,7 +41,7 @@ public class SyncManager {
 		if (!isConfigured())
 			return false;
 		
-		synchronizer.sync();
+		synchronizer.sync(appInst);
 		return true;
 	}
 	

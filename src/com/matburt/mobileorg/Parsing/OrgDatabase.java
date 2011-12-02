@@ -52,7 +52,6 @@ public class OrgDatabase {
 				ErrorReporter.displayError(this.appcontext,
 						r.getString(R.string.error_opening_database));
 			}
-			Log.d(LT, "Setting database path to " + morgFile.getAbsolutePath());
 		} else {
 			ErrorReporter.displayError(this.appcontext,
 					r.getString(R.string.error_opening_database));

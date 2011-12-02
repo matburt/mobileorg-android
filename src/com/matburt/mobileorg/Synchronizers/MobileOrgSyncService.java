@@ -5,6 +5,8 @@ import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import com.matburt.mobileorg.MobileOrgApplication;
+
 import android.app.Service;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -104,7 +106,8 @@ public class MobileOrgSyncService extends Service implements SharedPreferences.O
 	}
 
 	public void runSynchronizer() {
-		final SyncManager syncman = new SyncManager(this);
+		MobileOrgApplication appInst = (MobileOrgApplication) this.getApplication();
+		final SyncManager syncman = new SyncManager(this, appInst);
 
 		if (!syncman.isConfigured()) {
 			return;

@@ -331,7 +331,7 @@ public class OutlineActivity extends ListActivity
 	
 
 	private void runSynchronizer() {
-		final SyncManager synchman = new SyncManager(this);
+		final SyncManager synchman = new SyncManager(this, this.appInst);
 
 		if (!synchman.isConfigured()) {
 			Toast error = Toast.makeText((Context) this,
