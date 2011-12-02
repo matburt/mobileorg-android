@@ -81,7 +81,7 @@ public class OutlineActivity extends ListActivity
 		super.onResume();
 
 		// If this is the case, the parser has invalidated nodes
-		if (this.depth > this.appInst.nodestackSize()) {
+		if (this.depth != 1 && this.depth > this.appInst.nodestackSize()) {
 			this.setResult(RESULT_DONTPOP);
 			finish();
 		}		
@@ -95,11 +95,6 @@ public class OutlineActivity extends ListActivity
 	private void refreshDisplay() {
 		this.setListAdapter(new OutlineListAdapter(this, appInst.nodestackTop()));
 		getListView().setSelection(lastSelection);
-		
-		if (this.newSetupDialog_shown) {
-			newSetupDialog_shown = false;
-			newSetupDialog.cancel();
-		}
 	}
 
 	@Override
@@ -371,6 +366,12 @@ public class OutlineActivity extends ListActivity
 		if (this.syncError != null) {
 			ErrorReporter.displayError(this, this.syncError.getMessage());
 		} else {
+			
+			if (this.newSetupDialog_shown) {
+				newSetupDialog_shown = false;
+				newSetupDialog.cancel();
+			}
+			
 			this.onResume();
 		}
 	}

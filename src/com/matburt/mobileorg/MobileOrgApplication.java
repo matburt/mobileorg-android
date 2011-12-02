@@ -29,13 +29,14 @@ public class MobileOrgApplication extends Application {
     @Override
     public void onCreate() {
     	this.appdb = new OrgDatabase(this);
+		this.rootNode = new Node("");
     }
     
     
     public boolean init() {
 		if (this.appdb.getOrgFiles().isEmpty())
 			return false;
-
+		
 		this.parser = new OrgFileParser(getBaseContext(), this);
 		this.rootNode = this.parser.prepareRootNode();
 		pushNodestack(this.rootNode);
@@ -68,7 +69,6 @@ public class MobileOrgApplication extends Application {
 		if(fileNode != null) {
 			fileNode.parsed = false;
 		}
-		
 		
 		if(nodestack.size() >= 2 && nodestack.get(1).name.equals(filename)) {		
 			fileNode = parser.parseFile(filename, this.rootNode);
