@@ -253,15 +253,15 @@ public class OrgFileParser {
                              thisLine.indexOf("SCHEDULED:") != -1) {
                         try {
                             Pattern deadlineP = Pattern.compile(
-                                                  "^.*(DEADLINE: <.+?>)");
+                                                  "^.*DEADLINE: <(\\S+ \\S+)( \\S+)?>");
                             Matcher deadlineM = deadlineP.matcher(thisLine);
                             Pattern schedP = Pattern.compile(
-                                                  "^.*(SCHEDULED: <.+?>)");
+                                                  "^.*SCHEDULED: <(\\S+ \\S+)( \\S+)?>");
                             Matcher schedM = schedP.matcher(thisLine);
                             SimpleDateFormat dFormatter = new SimpleDateFormat(
-                                                            "'DEADLINE': <yyyy-MM-dd EEE>");
+                                                            "yyyy-MM-dd EEE");
                             SimpleDateFormat sFormatter = new SimpleDateFormat(
-                                                            "'SCHEDULED': <yyyy-MM-dd EEE>");
+                                                            "yyyy-MM-dd EEE");
                             if (deadlineM.find()) {
                                 lastNode.deadline = dFormatter.parse(deadlineM.group(1));
                             }
