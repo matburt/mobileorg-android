@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout android:id="@+id/LinearLayout1"
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:orientation="vertical" android:layout_width="match_parent"
+	android:layout_height="match_parent" android:minHeight="@dimen/outline_item">
+	<TextView android:id="@+id/orgItem" android:layout_width="wrap_content"
+		android:text="TextView" android:textAppearance="?android:attr/textAppearanceLarge"
+		android:layout_height="wrap_content" android:layout_alignParentTop="true"
+		android:layout_alignParentRight="true" android:gravity="left"
+		android:layout_alignParentLeft="true"></TextView>
+	<TextView android:id="@+id/dateInfo" android:layout_width="wrap_content"
+		android:text="TextView" android:textAppearance="?android:attr/textAppearanceMedium"
+		android:layout_height="wrap_content" android:layout_marginLeft="16dp"
+		android:visibility="invisible"></TextView>
+	<TextView android:layout_width="wrap_content" android:id="@+id/priorityState"
+		android:textAppearance="?android:attr/textAppearanceMedium"
+		android:layout_height="wrap_content" android:text="TextView"
+		android:layout_below="@+id/orgItem" android:layout_toRightOf="@+id/todoState"
+		android:visibility="gone"></TextView>
+	<TextView android:layout_width="wrap_content" android:id="@+id/todoState"
+		android:textAppearance="?android:attr/textAppearanceMedium"
+		android:layout_height="wrap_content" android:text="TODO"
+		android:layout_below="@+id/orgItem" android:layout_alignParentLeft="true"></TextView>
+	<LinearLayout android:layout_height="wrap_content"
+		android:layout_width="wrap_content" android:paddingLeft="10px"
+		android:id="@+id/tagsLayout" android:layout_below="@+id/orgItem"
+		android:layout_alignParentRight="true"></LinearLayout>
+
+</RelativeLayout>

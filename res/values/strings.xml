@@ -5,6 +5,8 @@
   <string name="menu_capture">Capture</string>
   <string name="menu_settings">Settings</string>
   <string name="menu_sync">Sync</string>
+  <string name="contextmenu_edit">Edit Node</string>
+  <string name="contextmenu_view">View Node</string>
   <string name="sync_wait">Synchronizing, please wait...</string>
   <string name="sync_failed">Synchronization failed, try again?</string>
   <string name="yes">Yes</string>
@@ -24,6 +26,7 @@
   <string name="error_file_write">An error occurred while writing to file %s</string>
   <string name="error_invalid_url">URL Contains Invalid Characters: %s</string>
   <string name="error_synchronizer_type_unknown">Unknown Synchronizer Method %s"</string>
+  <string name="error_synchronizer_not_configured">You have not fully configured the synchronizer.  Make sure you visit the \'Configure Synchronizer Settings\' in the Settings menu</string>
   <string name="error_local_storage_method_unknown">Local storage method %s unknown</string>
   <string name="error_unsupported_encoding">Encountered unsupported encoding on file %s</string>
   <string name="error_url_fetch">An error occurred attempting to fetch the url %s</string>
@@ -41,4 +44,6 @@
   <string name="priority">Priority</string>
   <string name="todo_state">Todo state</string>
   <string name="back">Back</string>
+  <string name="cancel">Cancel</string>
+  <string name="save">Save</string>  
 </resources>

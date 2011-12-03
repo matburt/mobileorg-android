@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.Preference.OnPreferenceClickListener;
 import android.preference.PreferenceActivity;
+
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Synchronizers.DropboxAuthActivity;
 

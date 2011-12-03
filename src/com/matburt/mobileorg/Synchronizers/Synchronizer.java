@@ -1,5 +1,19 @@
 package com.matburt.mobileorg.Synchronizers;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
@@ -7,19 +21,14 @@ import android.content.res.Resources.NotFoundException;
 import android.os.Environment;
 import android.text.TextUtils;
 import android.util.Log;
-import com.matburt.mobileorg.Error.ReportableError;
-import com.matburt.mobileorg.MobileOrgDatabase;
-import com.matburt.mobileorg.R;
 
-import java.io.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import com.matburt.mobileorg.R;
+import com.matburt.mobileorg.Error.ReportableError;
+import com.matburt.mobileorg.Parsing.OrgDatabase;
 
 abstract public class Synchronizer
 {
-    public MobileOrgDatabase appdb = null;
+    public OrgDatabase appdb = null;
     public SharedPreferences appSettings = null;
     public Context rootContext = null;
     public static final String LT = "MobileOrg";

@@ -5,7 +5,8 @@
 	<TableRow>
 		<EditText android:id="@+id/title" android:layout_span="4"
 		android:hint="@string/title"
-			android:layout_width="fill_parent" android:layout_height="wrap_content" />
+			android:layout_width="fill_parent" android:layout_height="wrap_content" 
+			android:inputType="text|textMultiLine|textAutoCorrect|textCapSentences" />
 	</TableRow>
 	<TableRow>
 		<TextView android:text="@string/todo_state" android:layout_width="wrap_content" android:layout_height="wrap_content" />
@@ -36,16 +37,13 @@
 			android:gravity="top"
 		android:inputType="textMultiLine" />
 	</TableRow>
-	<TableRow>
-      <Button android:id="@+id/view_as_document" 
-              android:text="@string/view_as_document"
-              android:layout_width="fill_parent"
-              android:layout_height="fill_parent"
-              />
-      <Button android:id="@+id/save_node"
-              android:text="Save Note"
-              android:layout_width="fill_parent"
-              android:layout_height="fill_parent"
-              />
-	</TableRow>
+	<LinearLayout android:orientation="horizontal"
+		android:layout_width="wrap_content" android:layout_height="52dp">
+		<Button android:id="@+id/cancel" android:text="@string/cancel"
+			android:layout_width="fill_parent" android:layout_height="fill_parent"
+			android:layout_weight="6" />
+		<Button android:id="@+id/save" android:text="@string/save"
+			android:layout_width="fill_parent" android:layout_height="fill_parent"
+			android:layout_weight="6" />
+	</LinearLayout>
 </TableLayout>

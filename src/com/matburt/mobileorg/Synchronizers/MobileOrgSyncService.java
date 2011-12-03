@@ -1,31 +1,28 @@
-package com.matburt.mobileorg;
+package com.matburt.mobileorg.Synchronizers;
+
+import java.util.Collections;
+import java.util.Date;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.Environment;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.util.Log;
+
+import com.matburt.mobileorg.MobileOrgApplication;
 import com.matburt.mobileorg.Error.ErrorReporter;
 import com.matburt.mobileorg.Error.ReportableError;
 import com.matburt.mobileorg.Parsing.Node;
 import com.matburt.mobileorg.Parsing.OrgFileParser;
-import com.matburt.mobileorg.Synchronizers.DropboxSynchronizer;
-import com.matburt.mobileorg.Synchronizers.SDCardSynchronizer;
-import com.matburt.mobileorg.Synchronizers.Synchronizer;
-import com.matburt.mobileorg.Synchronizers.WebDAVSynchronizer;
-
-import java.io.File;
-import java.util.*;
 
 public class MobileOrgSyncService extends Service implements SharedPreferences.OnSharedPreferenceChangeListener{
 	private Timer timer = new Timer();
 	private Date lastSyncDate;
 	private Boolean timerScheduled = false;
 	private SharedPreferences appSettings;
-	private ReportableError syncError;
 	private static long kMinimalSyncInterval = 30000;
 	
 	@Override
@@ -113,79 +110,51 @@ public class MobileOrgSyncService extends Service implements SharedPreferences.O
 	}
 
 	public void runSynchronizer() {
-        String userSynchro = this.appSettings.getString("syncSource","");
-        final Synchronizer appSync;
-        if (userSynchro.equals("webdav")) {
-            appSync = new WebDAVSynchronizer(this);
-        }
-        else if (userSynchro.equals("sdcard")) {
-            appSync = new SDCardSynchronizer(this);
-        }
-        else if (userSynchro.equals("dropbox")) {
-            appSync = new DropboxSynchronizer(this);
-        }
-        else {
-            return;
-        }
+		String userSynchro = this.appSettings.getString("syncSource", "");
+		final Synchronizer appSync;
+		if (userSynchro.equals("webdav")) {
+			appSync = new WebDAVSynchronizer(this);
+		} else if (userSynchro.equals("sdcard")) {
+			appSync = new SDCardSynchronizer(this);
+		} else if (userSynchro.equals("dropbox")) {
+			appSync = new DropboxSynchronizer(this);
+		} else {
+			return;
+		}
 
-        if (!appSync.checkReady()) {
-            return;
-        }
+		if (!appSync.checkReady()) {
+			return;
+		}
 
-        Thread syncThread = new Thread() {
-                public void run() {
-                	try {
-                		syncError = null;
-	                    appSync.pull();
-	                    appSync.push();
-                	}
-                	catch(ReportableError e) {
-                		syncError = e;
-                	}
-                    finally {
-                        appSync.close();
-                    }
-					
-					runParser();
+		Thread syncThread = new Thread() {
+			public void run() {
+				try {
+					appSync.pull();
+					appSync.push();
+				} catch (ReportableError e) {
+				} finally {
+					appSync.close();
 				}
-			};
-        syncThread.start();
+
+				runParser();
+			}
+		};
+		syncThread.start();
 		this.lastSyncDate = new Date();
-    }
+	}
 
 	public void runParser() {
         MobileOrgApplication appInst = (MobileOrgApplication)this.getApplication();
-		MobileOrgDatabase appdb = new MobileOrgDatabase((Context)this);
-        HashMap<String, String> allOrgList = appdb.getOrgFiles();
-        String storageMode = this.appSettings.getString("storageMode", "");
-        String userSynchro = this.appSettings.getString("syncSource","");
-        String orgBasePath = "";
 
-        if (userSynchro.equals("sdcard")) {
-            String indexFile = this.appSettings.getString("indexFilePath","");
-            File fIndexFile = new File(indexFile);
-            orgBasePath = fIndexFile.getParent() + "/";
-        }
-        else {
-            orgBasePath = Environment.getExternalStorageDirectory().getAbsolutePath() +
-                          "/mobileorg/";
-        }
-
-        OrgFileParser ofp = new OrgFileParser(allOrgList,
-                                              storageMode,
-                                              userSynchro,
-                                              appdb,
-                                              orgBasePath);
+        OrgFileParser ofp = new OrgFileParser(getBaseContext(), appInst);
         try {
         	ofp.parse();
         	appInst.rootNode = ofp.rootNode;
             appInst.edits = ofp.parseEdits();
-			Collections.sort(appInst.rootNode.subNodes, Node.comparator);
+			Collections.sort(appInst.rootNode.children, Node.comparator);
         }
         catch(Throwable e) {
         	ErrorReporter.displayError(this, "An error occurred during parsing: " + e.toString());
         }
-
-		appdb.close();
     }
 }

@@ -1,5 +1,12 @@
 package com.matburt.mobileorg.Synchronizers;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.HashMap;
+
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Resources.NotFoundException;
@@ -7,36 +14,29 @@ import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
+
 import com.dropbox.client.DropboxAPI;
 import com.dropbox.client.DropboxAPI.Config;
 import com.dropbox.client.DropboxAPI.FileDownload;
-import com.matburt.mobileorg.Error.ReportableError;
-import com.matburt.mobileorg.MobileOrgDatabase;
 import com.matburt.mobileorg.R;
-
-import java.io.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
+import com.matburt.mobileorg.Error.ReportableError;
+import com.matburt.mobileorg.Parsing.OrgDatabase;
 
 public class DropboxSynchronizer extends Synchronizer {
-    private boolean hasToken = false;
-
     private DropboxAPI api = new DropboxAPI();
     private Config dbConfig;
 
     public DropboxSynchronizer(Context parentContext) {
         this.rootContext = parentContext;
         this.r = this.rootContext.getResources();
-        this.appdb = new MobileOrgDatabase((Context)parentContext);
+        this.appdb = new OrgDatabase((Context)parentContext);
         this.appSettings = PreferenceManager.getDefaultSharedPreferences(
                                       parentContext.getApplicationContext());
         this.connect();
     }
 
     public void push() throws NotFoundException, ReportableError {
-        String fileActual = this.getRootPath() + "mobileorg.org";
-        String storageMode = this.appSettings.getString("storageMode", "");
+        this.appSettings.getString("storageMode", "");
         String fileContents = "";
 
         BufferedReader reader = this.getReadHandle("mobileorg.org");
@@ -68,7 +68,6 @@ public class DropboxSynchronizer extends Synchronizer {
     }
 
     public void setLoggedIn(boolean loggedIn) {
-    	this.hasToken = loggedIn;
     }
 
     public void pull() throws NotFoundException, ReportableError {
@@ -181,7 +180,6 @@ public class DropboxSynchronizer extends Synchronizer {
     public File getFile(String fileName) throws ReportableError {
         String storageMode = this.appSettings.getString("storageMode", "");
         if (storageMode.equals("internal") || storageMode == null) {
-            FileInputStream fs;
             File morgFile = new File("/data/data/com.matburt.mobileorg/files", fileName);
             return morgFile;
         }

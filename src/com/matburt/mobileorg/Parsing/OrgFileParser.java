@@ -1,18 +1,28 @@
 package com.matburt.mobileorg.Parsing;
 
-import android.content.ContentValues;
-import android.os.Environment;
-import android.util.Log;
-import com.matburt.mobileorg.MobileOrgDatabase;
-
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.EmptyStackException;
 import java.util.HashMap;
 import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import com.matburt.mobileorg.MobileOrgApplication;
+import android.content.ContentValues;
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.os.Environment;
+import android.preference.PreferenceManager;
+import android.util.Log;
+
 
 public class OrgFileParser {
 
@@ -30,23 +40,47 @@ public class OrgFileParser {
     Pattern titlePattern = null;
     FileInputStream fstream;
     public Node rootNode = new Node("");
-    MobileOrgDatabase appdb;
+    OrgDatabase appdb;
 	ArrayList<HashMap<String, Integer>> todos = null;
     public static final String LT = "MobileOrg";
     public String orgDir = Environment.getExternalStorageDirectory() +
                            "/mobileorg/";
+    
+	public OrgFileParser(Context context, MobileOrgApplication appInst) {
+		this.appdb = new OrgDatabase(context);;
+		SharedPreferences appSettings = PreferenceManager
+				.getDefaultSharedPreferences(context);
 
-    public OrgFileParser(HashMap<String, String> orgpaths,
-                         String storageMode,
-                         String userSynchro,
-                         MobileOrgDatabase appdb,
-                         String orgBasePath) {
-        this.appdb = appdb;
-        this.storageMode = storageMode;
-        this.userSynchro = userSynchro;
-        this.orgPaths = orgpaths;
-        this.orgDir = orgBasePath;
-    }
+		HashMap<String, String> allOrgList = this.appdb.getOrgFiles();
+		if (allOrgList.isEmpty())
+			return;
+		this.orgPaths = allOrgList;
+
+		this.storageMode = appSettings.getString("storageMode", "");
+		this.userSynchro = appSettings.getString("syncSource", "");
+
+		String orgBasePath = "";
+
+		if (userSynchro.equals("sdcard")) {
+			String indexFile = appSettings.getString("indexFilePath", "");
+			File fIndexFile = new File(indexFile);
+			orgBasePath = fIndexFile.getParent() + "/";
+		} else {
+			orgBasePath = Environment.getExternalStorageDirectory()
+					.getAbsolutePath() + "/mobileorg/";
+		}
+
+		this.orgDir = orgBasePath;
+
+	}
+    
+	public void runParser(SharedPreferences appSettings,
+			MobileOrgApplication appInst) {
+		parse();
+		appInst.rootNode = rootNode;
+		appInst.edits = parseEdits();
+		Collections.sort(appInst.rootNode.children, Node.comparator);
+	}
     
     private Pattern prepareTitlePattern() {
     	if (this.titlePattern == null) {
@@ -131,11 +165,11 @@ public class OrgFileParser {
     }
 
     public String getNodePath(Node baseNode) {
-        String npath = baseNode.nodeName;
+        String npath = baseNode.name;
         Node pnode = baseNode;
-        while ((pnode = pnode.parentNode) != null) {
-            if (pnode.nodeName.length() > 0) {
-                npath = pnode.nodeName + "/" + npath;
+        while ((pnode = pnode.parent) != null) {
+            if (pnode.name.length() > 0) {
+                npath = pnode.name + "/" + npath;
             }
         }
         npath = "olp:" + npath;
@@ -148,15 +182,15 @@ public class OrgFileParser {
             Pattern.compile("F\\((edit:.*?)\\) \\[\\[(.*?)\\]\\[(.*?)\\]\\]");
         try
         {
-			this.todos = appdb.getTodos();
+			this.todos = appdb.getGroupedTodods();
 
             String thisLine;
-            Stack<Node> nodeStack = new Stack();
-            Stack<Integer> starStack = new Stack();
+            Stack<Node> nodeStack = new Stack<Node>();
+            Stack<Integer> starStack = new Stack<Integer>();
             Pattern propertiesLine = Pattern.compile("^\\s*:[A-Z]+:");
             if(breader == null)
             {
-                breader = this.getHandle(fileNode.nodeName);
+                breader = this.getHandle(fileNode.name);
             }
             nodeStack.push(fileNode);
             starStack.push(0);
@@ -189,7 +223,7 @@ public class OrgFileParser {
                     String title = thisLine.substring(numstars+1);
                     TitleComponents titleComp = parseTitle(this.stripTitle(title));
                     Node newNode = new Node(titleComp.title);
-                    newNode.setFullTitle(this.stripTitle(title));
+                    newNode.setTitle(this.stripTitle(title));
                     newNode.todo = titleComp.todo;
                     newNode.priority = titleComp.priority;
                     newNode.setTags(titleComp.tags);
@@ -199,7 +233,7 @@ public class OrgFileParser {
                             newNode.setParentNode(lastNode);
                             newNode.nodeId = this.getNodePath(newNode);
                             newNode.addProperty("ID", newNode.nodeId);
-                            lastNode.addChildNode(newNode);
+                            lastNode.addChild(newNode);
                         } catch (EmptyStackException e) {
                         }
                         nodeStack.push(newNode);
@@ -208,7 +242,7 @@ public class OrgFileParser {
                     else if (numstars == starStack.peek()) {
                         nodeStack.pop();
                         starStack.pop();
-                        nodeStack.peek().addChildNode(newNode);
+                        nodeStack.peek().addChild(newNode);
                         newNode.setParentNode(nodeStack.peek());
                         newNode.nodeId = this.getNodePath(newNode);
                         newNode.addProperty("ID", newNode.nodeId);
@@ -225,7 +259,7 @@ public class OrgFileParser {
                         newNode.setParentNode(lastNode);
                         newNode.nodeId = this.getNodePath(newNode);
                         newNode.addProperty("ID", newNode.nodeId);
-                        lastNode.addChildNode(newNode);
+                        lastNode.addChild(newNode);
                         nodeStack.push(newNode);
                         starStack.push(numstars);
                     }
@@ -291,7 +325,7 @@ public class OrgFileParser {
     }
 
     public void parse() {
-        Stack<Node> nodeStack = new Stack();
+        Stack<Node> nodeStack = new Stack<Node>();
         nodeStack.push(this.rootNode);
 
         for (String key : this.orgPaths.keySet()) {
@@ -306,7 +340,7 @@ public class OrgFileParser {
                 nnode.altNodeTitle = altName;
                 nnode.setParentNode(nodeStack.peek());
                 nnode.addProperty("ID", this.getNodePath(nnode));
-                nodeStack.peek().addChildNode(nnode);
+                nodeStack.peek().addChild(nnode);
                 continue;
             }
 
@@ -314,7 +348,7 @@ public class OrgFileParser {
             fileNode.setParentNode(nodeStack.peek());
             fileNode.addProperty("ID", this.getNodePath(fileNode));
             fileNode.altNodeTitle = altName;
-            nodeStack.peek().addChildNode(fileNode);
+            nodeStack.peek().addChild(fileNode);
             nodeStack.push(fileNode);
             parse(fileNode, null);
             nodeStack.pop();
@@ -325,14 +359,13 @@ public class OrgFileParser {
         Pattern editTitlePattern = Pattern.compile("F\\((edit:.*?)\\) \\[\\[(.*?)\\]\\[(.*?)\\]\\]");
         Pattern createTitlePattern = Pattern.compile("^\\*\\s+(.*)");
         ArrayList<EditNode> edits = new ArrayList<EditNode>();
-        BufferedReader breader = this.getHandle("mobileorg.org");
+        BufferedReader breader = this.getHandle(NodeWriter.ORGFILE);
         if (breader == null)
             return edits;
 
         String thisLine;
         boolean awaitingOldVal = false;
         boolean awaitingNewVal = false;
-        boolean awaitingCaptureBody = false;
         EditNode thisNode = null;
 
         try {
@@ -415,10 +448,10 @@ public class OrgFileParser {
         return breader;
     }
 
-    public static byte[] getRawFileData(String baseDir, String filename)
+    public byte[] getRawFileData(String filename)
     {
         try {
-            File file = new File(baseDir + filename);
+            File file = new File(this.orgDir + filename);
             FileInputStream is = new FileInputStream(file);
             byte[] buffer = new byte[(int)file.length()];
             int offset = 0;
@@ -439,4 +472,5 @@ public class OrgFileParser {
             return null;
         }
     }
+
 }

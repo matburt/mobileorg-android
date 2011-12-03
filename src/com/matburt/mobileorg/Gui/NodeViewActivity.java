@@ -1,11 +1,13 @@
-package com.matburt.mobileorg;
+package com.matburt.mobileorg.Gui;
 
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.TextView;
 
-public class SimpleTextDisplay extends Activity
+import com.matburt.mobileorg.R;
+
+public class NodeViewActivity extends Activity
 {
     private TextView orgDisplay;
     public static final String LT = "MobileOrg";
@@ -13,7 +15,7 @@ public class SimpleTextDisplay extends Activity
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.simpletext);
+        setContentView(R.layout.viewnode);
         this.orgDisplay = (TextView)this.findViewById(R.id.orgTxt);
         this.poplateDisplay();
     }

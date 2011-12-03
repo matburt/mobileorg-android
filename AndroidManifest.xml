@@ -20,18 +20,18 @@
                  android:resource="@xml/widget_mobileorg" />
     </receiver>
     <service android:name=".MobileOrgWidget$MobileOrgWidgetService" />
-	<service android:name="MobileOrgSyncService">
+	<service android:name=".Synchronizers.MobileOrgSyncService">
 	  <intent-filter>
 		<action android:name="com.matburt.mobileorg.SYNC_SERVICE" />
 	  </intent-filter>
 	</service>
-	<receiver android:name="MobileOrgStartupIntentReceiver">
+	<receiver android:name=".MobileOrgStartupIntentReceiver">
 	  <intent-filter>
 		<action android:name="android.intent.action.BOOT_COMPLETED" />
 		<category android:name="android.intent.category.HOME" />
 	  </intent-filter>
 	</receiver>
-    <activity android:name="MobileOrgActivity"
+    <activity android:name=".Gui.OutlineActivity"
               android:label="MobileOrg">
       <intent-filter>
         <action android:name="android.intent.action.MAIN" />
@@ -44,7 +44,7 @@
     <activity android:name=".Synchronizers.DropboxAuthActivity"
               android:label="Dropbox Authentication">
     </activity>
-    <activity android:name="SimpleTextDisplay"
+    <activity android:name=".Gui.NodeViewActivity"
               android:label="Org View">
     </activity>
     <activity android:name=".Capture.EditDetailsActivity"
@@ -53,7 +53,7 @@
     <activity android:name="OrgContextMenu"
               android:label="OrgMenu">
     </activity>
-    <activity android:name=".Capture.Capture"
+    <activity android:name=".Gui.NodeEditBodyActivity"
               android:label="Org Capture"
               android:windowSoftInputMode="adjustResize"
               android:exported="true">
@@ -77,6 +77,6 @@
     <activity android:name=".Settings.DropboxSettingsActivity"
               android:label="Dropbox Settings">
     </activity>
-  <activity android:name=".Capture.ViewNodeDetailsActivity" android:windowSoftInputMode="adjustPan"></activity>
+  <activity android:name=".Gui.NodeEditActivity" android:windowSoftInputMode="adjustPan"></activity>
 </application>
 </manifest>

@@ -1,5 +1,6 @@
 package com.matburt.mobileorg.Parsing;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
@@ -7,126 +8,198 @@ import java.util.HashMap;
 import java.util.regex.Pattern;
 
 public class Node implements Cloneable {
+	Node parent = null;
+	public ArrayList<Node> children = new ArrayList<Node>();
 
-    public ArrayList<Node> subNodes = new ArrayList<Node>();
-    public ArrayList<String> tags = new ArrayList<String>();
-    HashMap<String, String> properties = new HashMap<String, String>();
+	public String name = "";
+	public String nodeTitle = "";
+	public String altNodeTitle = null;
+	public String todo = "";
+	public String priority = "";
+	public String nodeId = "";
+	public String payload = "";
 
-    public String nodeName = "";
-    public String todo = "";
-    public String priority = "";
-    public String nodeId = "";
-    public String nodePayload = "";
-    public String nodeTitle = "";
-    public String tagString = "";
-    public String altNodeTitle = null;
-    public Date schedule = null;
-    public Date deadline = null;
-    public boolean encrypted = false;
-    public boolean parsed = false;
-    Node parentNode = null;
+	public Date schedule = null;
+	public Date deadline = null;
+	public boolean encrypted = false;
+	public boolean parsed = false;
 
-    public Node() {
-        this("", false);
-    }
+	ArrayList<String> tags = new ArrayList<String>();
+	String tagString = "";
+	HashMap<String, String> properties = new HashMap<String, String>();
 
-    public Node(String heading) {
-        this(heading, false);
-    }
+	public Node() {
+		this("", false);
+	}
 
-    public Node(String heading, boolean encrypted) {
-        this.nodeName = heading;
-        this.encrypted = encrypted;
-    }
+	public Node(String heading) {
+		this(heading, false);
+	}
+
+	public Node(String heading, boolean encrypted) {
+		this.name = heading;
+		this.encrypted = encrypted;
+	}
 
 	public static Comparator<Node> comparator = new Comparator<Node>() {
 		@Override
 		public int compare(Node node1, Node node2) {
-			return node1.nodeName.compareToIgnoreCase(node2.nodeName);
+			return node1.name.compareToIgnoreCase(node2.name);
 		}
 	};
 
-    void setFullTitle(String title) {
-        this.nodeTitle = title;
-    }
+	public Node findChildNode(String regex) {
+		Pattern findNodePattern = Pattern.compile(regex);
+		for (Node child: children) {
+			if (findNodePattern.matcher(child.name).matches()) {
+				return child;
+			}
+		}
+		return null;
+	}
 
-    public Node findChildNode(String regex) {
-        Pattern findNodePattern = Pattern.compile(regex);
-        for (int idx = 0; idx < this.subNodes.size(); idx++) {
-            if (findNodePattern.matcher(this.subNodes.get(idx).nodeName).matches()) {
-                return this.subNodes.get(idx);
-            }
-        }
-        return null;
-    }
+	public void setTags(ArrayList<String> todoList) {
+		this.tags.clear();
+		this.tagString = "";
+		this.tags.addAll(todoList);
+		for (String titem : todoList) {
+			this.tagString += titem + " ";
+		}
+		this.tagString = this.tagString.trim();
+	}
+	
+	/**
+	 * This applies an edit to the Node, modifying the data structure and
+	 * removing the applied edits from the list.
+	 */
+	public void applyEdits(ArrayList<EditNode> edits) {
+		if(edits != null) {
+			if (edits.size() == 0)
+				return;
+		}
+		
+		ArrayList<EditNode> nodeEdits = findEdits(edits);
 
-    void setTags(ArrayList<String> todoList) {
-        this.tags.clear();
-        this.tagString = "";
-        this.tags.addAll(todoList);
-        for (String titem : todoList) {
-            this.tagString += titem + " ";
-        }
-        this.tagString = this.tagString.trim();
-    }
+		for (EditNode e : nodeEdits) {
+			switch (e.getType()) {
+			case TODO:
+				this.todo = e.newVal;
+				break;
+			case PRIORITY:
+				this.priority = e.newVal;
+				break;
+			case NAME:
+				this.name = e.newVal;
+				break;
+			case PAYLOAD:
+				this.payload = e.newVal;
+				break;
+			}
+		}
+	}
+    
+	private ArrayList<EditNode> findEdits(ArrayList<EditNode> edits) {
+		ArrayList<EditNode> thisEdits = new ArrayList<EditNode>();
+		
+		for (EditNode editNode: edits) {		
+			if (editNode.getNodeId().equals(this.nodeId)) {
+				thisEdits.add(editNode);
+				edits.remove(editNode);
+			}
+		}
+		return thisEdits;
+	}
 
-    void setParentNode(Node pnode) {
-        this.parentNode = pnode;
-    }
 
-    void addPayload(String npayload) {
-        this.nodePayload += npayload + "\n";
-    }
+	/**
+	 * Generates string which can be used to write node to file.
+	 */
+	public String generateNoteEntry() {
+		String noteStr = "* ";
+		
+		if (!todo.equals(""))
+			noteStr += todo + " ";
+		
+		if (!priority.equals(""))
+			noteStr += "[#" + priority + "] ";
+		
+		noteStr += this.name + "\n";
 
-    void addChildNode(Node childNode) {
-        this.subNodes.add(childNode);
-    }
+		if (this.payload.length() > 0)
+			noteStr += this.payload + "\n";
 
-    void clearNodes() {
-        this.subNodes.clear();
-    }
+		noteStr += "\n";
+		return noteStr;
+	}
+	
+	public String formatDate() {
+		String dateInfo = "";
 
-    void addProperty(String key, String val) {
-        this.properties.put(key, val);
-    }
+		// Format Deadline and scheduled
+		SimpleDateFormat formatter = new SimpleDateFormat("<yyyy-MM-dd EEE>");
+		if (this.deadline != null)
+			dateInfo += "DEADLINE: " + formatter.format(this.deadline) + " ";
 
-    String getProperty(String key) {
-    	return this.properties.get(key);
-    }
+		if (this.schedule != null)
+			dateInfo += "SCHEDULED: " + formatter.format(this.schedule) + " ";
 
-    boolean hasProperty(String key) {
-        return this.properties.containsKey(key);
-    }
+		return dateInfo;
+	}
 
-    public void applyEdit(EditNode e) {
-    	if (e.editType.equals("todo"))
-    		todo = e.newVal;
-    	else if (e.editType.equals("priority"))
-    		priority = e.newVal;
-    	else if (e.editType.equals("heading")) 
-    		nodeName = e.newVal;
-    	else if (e.editType.equals("body"))
-    		nodePayload = e.newVal;
-    }
 
-    public void applyEdits(ArrayList<EditNode> edits) {
-    	if (edits != null) {
-    		for (EditNode e : edits) {
-    			this.applyEdit(e);
-    		}
-    	}
-    }
+	void setParentNode(Node pnode) {
+		this.parent = pnode;
+	}
+	
+	public void addChild(Node childNode) {
+		this.children.add(childNode);
+		childNode.parent = this;
+	}
 
-    public String generateNoteEntry() {
-        String noteStr = "* ";
-        if (todo != null && !todo.equals("")) {
-            noteStr += todo + " ";
-        }
-        if (priority != null && !priority.equals("")) {
-            noteStr += "[#" + priority + "] ";
-        }
-        noteStr += this.nodeName + "\n";
-        noteStr += this.nodePayload + "\n\n";
-        return noteStr;
-    }
+	void clearChildren() {
+		this.children.clear();
+	}
+
+	public ArrayList<String> getTags() {
+		return tags;
+	}
+	
+	void addPayload(String npayload) {
+		this.payload += npayload + "\n";
+	}
+
+	void addProperty(String key, String val) {
+		this.properties.put(key, val);
+	}
+
+	String getProperty(String key) {
+		return this.properties.get(key);
+	}
+
+	boolean hasProperty(String key) {
+		return this.properties.containsKey(key);
+	}
+	
+	void setTitle(String title) {
+		this.nodeTitle = title;
+	}
+	
+	public String getTagString() {
+		return this.tagString;
+	}
+	
+	public boolean hasChildren() {
+		if(children.size() > 0)
+			return true;
+		else
+			return false;
+	}
+	
+	public boolean isSimple() {
+		if (this.todo.equals("") && this.priority.equals(""))
+			return true;
+		else
+			return false;
+				
+	}
 }

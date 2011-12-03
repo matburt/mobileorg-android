@@ -4,7 +4,7 @@
    android:orientation="vertical"
    android:layout_height="fill_parent"
    android:layout_width="fill_parent">
-  <EditText android:id="@+id/orgEditTxt"
+  <EditText android:id="@+id/textDisplay"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:layout_weight="1"
@@ -15,13 +15,13 @@
       android:layout_width="fill_parent"
       android:layout_height="fill_parent"
       android:layout_weight="6">
-    <Button android:id="@+id/captureAdvanced"
-            android:text="Advanced Capture"
+    <Button android:id="@+id/cancel"
+            android:text="@string/cancel"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:layout_weight="6"/>
-    <Button android:id="@+id/captureSave"
-            android:text="Save"
+    <Button android:id="@+id/save"
+            android:text="@string/save"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:layout_weight="6"/>

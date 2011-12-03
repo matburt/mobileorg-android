@@ -1,12 +1,16 @@
 package com.matburt.mobileorg.Synchronizers;
 
-import android.content.Context;
-import android.content.res.Resources.NotFoundException;
-import android.preference.PreferenceManager;
-import android.util.Log;
-import com.matburt.mobileorg.Error.ReportableError;
-import com.matburt.mobileorg.MobileOrgDatabase;
-import com.matburt.mobileorg.R;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.regex.Pattern;
+
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
 import org.apache.http.auth.AuthScope;
@@ -24,15 +28,14 @@ import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.params.CoreProtocolPNames;
 import org.apache.http.params.HttpParams;
 
-import java.io.*;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.regex.Pattern;
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.SSLSession;
+import android.content.Context;
+import android.content.res.Resources.NotFoundException;
+import android.preference.PreferenceManager;
+import android.util.Log;
+
+import com.matburt.mobileorg.R;
+import com.matburt.mobileorg.Error.ReportableError;
+import com.matburt.mobileorg.Parsing.OrgDatabase;
 
 public class WebDAVSynchronizer extends Synchronizer
 {
@@ -41,14 +44,13 @@ public class WebDAVSynchronizer extends Synchronizer
     public WebDAVSynchronizer(Context parentContext) {
         this.rootContext = parentContext;
         this.r = this.rootContext.getResources();
-        this.appdb = new MobileOrgDatabase((Context)parentContext);
+        this.appdb = new OrgDatabase((Context)parentContext);
         this.appSettings = PreferenceManager.getDefaultSharedPreferences(
                                    parentContext.getApplicationContext());
     }
 
     public void push() throws NotFoundException, ReportableError {
         String urlActual = this.getRootUrl() + "mobileorg.org";
-        String storageMode = this.appSettings.getString("storageMode", "");
         BufferedReader reader = this.getReadHandle("mobileorg.org");
         String fileContents = "";
         this.pushedStageFile = false;
@@ -272,15 +274,6 @@ public class WebDAVSynchronizer extends Synchronizer
     	String originalContent = this.fetchOrgFileString(url);
     	String newContent = originalContent + '\n' + content;
     	this.putUrlFile(url, httpClient, newContent);
-    }
-
-    private String ReadInputStream(InputStream in) throws IOException {
-        StringBuffer stream = new StringBuffer();
-        byte[] b = new byte[4096];
-        for (int n; (n = in.read(b)) != -1;) {
-            stream.append(new String(b, 0, n));
-        }
-        return stream.toString();
     }
 }
 
