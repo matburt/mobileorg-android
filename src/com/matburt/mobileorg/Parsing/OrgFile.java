@@ -13,6 +13,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Environment;
 import android.preference.PreferenceManager;
 
@@ -25,7 +26,7 @@ public class OrgFile {
 
 	public OrgFile(String file, Context context) {
 		this.context = context;
-		this.fileName = file;
+		this.fileName = file.replace("/", "_");
 	}
 
 	public String read() throws IOException {
@@ -55,17 +56,13 @@ public class OrgFile {
 		writer.close();
 	}
 
-	private BufferedReader getReader() throws FileNotFoundException {
+	public BufferedReader getReader() {
 		String storageMode = getStorageMode();
+		String synchMode = getSynchMode();
 		BufferedReader reader = null;
 
 		try {
-			if (storageMode.equals("internal") || storageMode.equals("")) {
-				FileInputStream fs;
-				fs = context.openFileInput(fileName);
-				reader = new BufferedReader(new InputStreamReader(fs));
-
-			} else if (storageMode.equals("sdcard")) {
+			if (storageMode.equals("sdcard") || synchMode.equals("sdcard")) {
 				File root = Environment.getExternalStorageDirectory();
 				File morgDir = new File(root, "mobileorg");
 				File morgFile = new File(morgDir, fileName);
@@ -73,6 +70,12 @@ public class OrgFile {
 					return null;
 				}
 				reader = new BufferedReader(new FileReader(morgFile));
+			} else if (storageMode.equals("internal") || storageMode.equals("")) {
+				String dirActual = this.fileName;
+
+				FileInputStream fs;
+				fs = context.openFileInput(dirActual);
+				reader = new BufferedReader(new InputStreamReader(fs));
 			}
 		} catch (FileNotFoundException e) {
 			return null;
@@ -141,20 +144,68 @@ public class OrgFile {
 	}
 
 	public void remove(OrgDatabase appdb) {
-		appdb.removeFile(fileName);
+		appdb.removeFile(this.fileName);
 		String storageMode = getStorageMode();
 		if (storageMode.equals("internal") || storageMode.equals("")) {
-			context.deleteFile(fileName);
+			context.deleteFile(this.fileName);
 		} else if (storageMode.equals("sdcard")) {
 			File root = Environment.getExternalStorageDirectory();
 			File morgDir = new File(root, "mobileorg");
-			File morgFile = new File(morgDir, fileName);
+			File morgFile = new File(morgDir, this.fileName);
 			morgFile.delete();
 		}
 	}
 
 	private String getStorageMode() {
-		return PreferenceManager.getDefaultSharedPreferences(context)
+		return PreferenceManager.getDefaultSharedPreferences(this.context)
 				.getString("storageMode", "");
 	}
+	
+	private String getSynchMode() {
+		return PreferenceManager.getDefaultSharedPreferences(this.context)
+				.getString("storageMode", "");		
+	}
+	
+	public String getBasePath() {
+		SharedPreferences appSettings = PreferenceManager
+				.getDefaultSharedPreferences(this.context);
+		String orgBasePath = "";
+
+		if (getStorageMode().equals("sdcard")) {
+			String indexFile = appSettings.getString("indexFilePath", "");
+			File fIndexFile = new File(indexFile);
+			orgBasePath = fIndexFile.getParent() + "/";
+		} else {
+			orgBasePath = Environment.getExternalStorageDirectory()
+					.getAbsolutePath() + "/mobileorg/";
+		}
+
+		return orgBasePath;
+	}
+	
+    // Used by encryption
+    public byte[] getRawFileData()
+    {
+        try {
+            File file = getFile();
+            FileInputStream is = new FileInputStream(file);
+            byte[] buffer = new byte[(int)file.length()];
+            int offset = 0;
+            int numRead = 0;
+            while (offset < buffer.length
+                   && (numRead=is.read(buffer, offset, buffer.length-offset)) >= 0) 
+            {
+                offset += numRead;
+            }
+            is.close();
+            if (offset < buffer.length) {
+                throw new IOException("Could not completely read file "+file.getName());
+            }
+            return buffer;
+        }
+        catch (IOException e) {
+            return null;
+        }
+    }
+
 }

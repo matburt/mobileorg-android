@@ -1,10 +1,11 @@
 package com.matburt.mobileorg.Synchronizers;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import com.matburt.mobileorg.MobileOrgApplication;
 
 import android.app.Service;
 import android.content.Intent;
@@ -12,11 +13,6 @@ import android.content.SharedPreferences;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.util.Log;
-
-import com.matburt.mobileorg.MobileOrgApplication;
-import com.matburt.mobileorg.Error.ErrorReporter;
-import com.matburt.mobileorg.Parsing.Node;
-import com.matburt.mobileorg.Parsing.OrgFileParser;
 
 public class MobileOrgSyncService extends Service implements SharedPreferences.OnSharedPreferenceChangeListener{
 	private Timer timer = new Timer();
@@ -110,7 +106,8 @@ public class MobileOrgSyncService extends Service implements SharedPreferences.O
 	}
 
 	public void runSynchronizer() {
-		final SyncManager syncman = new SyncManager(this);
+		MobileOrgApplication appInst = (MobileOrgApplication) this.getApplication();
+		final SyncManager syncman = new SyncManager(this, appInst);
 
 		if (!syncman.isConfigured()) {
 			return;
@@ -124,26 +121,9 @@ public class MobileOrgSyncService extends Service implements SharedPreferences.O
 				} finally {
 					syncman.close();
 				}
-
-				runParser();
 			}
 		};
 		syncThread.start();
 		this.lastSyncDate = new Date();
 	}
-
-	public void runParser() {
-        MobileOrgApplication appInst = (MobileOrgApplication)this.getApplication();
-
-        OrgFileParser ofp = new OrgFileParser(getBaseContext(), appInst);
-        try {
-        	ofp.parse();
-        	appInst.rootNode = ofp.rootNode;
-            appInst.edits = ofp.parseEdits();
-			Collections.sort(appInst.rootNode.children, Node.comparator);
-        }
-        catch(Throwable e) {
-        	ErrorReporter.displayError(this, "An error occurred during parsing: " + e.toString());
-        }
-    }
 }

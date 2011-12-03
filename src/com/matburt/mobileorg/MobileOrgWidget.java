@@ -54,8 +54,7 @@ public class MobileOrgWidget extends AppWidgetProvider {
             MobileOrgApplication appInst = (MobileOrgApplication)this.getApplication();
             OrgFileParser ofp = new OrgFileParser(getBaseContext(), appInst);
 
-            ofp.parse();
-            Node agendaNode = ofp.rootNode.findChildNode("agendas.org");
+            Node agendaNode = ofp.parseFile("agenda.org", null);
             if (agendaNode != null) {
                 Node todoNode = agendaNode.findChildNode("ToDo: ALL");
                 if (todoNode != null) {

@@ -1,56 +1,61 @@
 package com.matburt.mobileorg.Parsing;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+// TODO Clean up this mess
 public class Node implements Cloneable {
-	Node parent = null;
+	private Node parent = null;
 	public ArrayList<Node> children = new ArrayList<Node>();
 
 	public String name = "";
 	public String nodeTitle = "";
 	public String altNodeTitle = null;
+
 	public String todo = "";
 	public String priority = "";
-	public String nodeId = "";
-	public String payload = "";
+	private ArrayList<String> tags = new ArrayList<String>();
 
-	public Date schedule = null;
-	public Date deadline = null;
+	private StringBuilder payload = new StringBuilder();
+
+	private Date schedule = null;
+	private Date deadline = null;
+
 	public boolean encrypted = false;
-	public boolean parsed = false;
+	public boolean parsed = true;
+	private String nodeId = "";
 
-	ArrayList<String> tags = new ArrayList<String>();
-	String tagString = "";
 	HashMap<String, String> properties = new HashMap<String, String>();
 
-	public Node() {
-		this("", false);
+	public Node(String name, Node parent) {
+		this.name = name;
+		this.parent = parent;
+		parent.addChild(this);
+	}
+	public Node(String name) {
+		this.name = name;
 	}
 
-	public Node(String heading) {
-		this(heading, false);
+	public String getPayload() {
+		return this.payload.toString();
+	}	
+	public void setPayload(String payload) {
+		this.payload = new StringBuilder(payload);
 	}
-
-	public Node(String heading, boolean encrypted) {
-		this.name = heading;
-		this.encrypted = encrypted;
+	void addPayload(String payload) {
+		this.payload.append(payload + "\n");
 	}
-
-	public static Comparator<Node> comparator = new Comparator<Node>() {
-		@Override
-		public int compare(Node node1, Node node2) {
-			return node1.name.compareToIgnoreCase(node2.name);
-		}
-	};
-
+	
 	public Node findChildNode(String regex) {
 		Pattern findNodePattern = Pattern.compile(regex);
-		for (Node child: children) {
+		for (Node child : children) {
 			if (findNodePattern.matcher(child.name).matches()) {
 				return child;
 			}
@@ -60,24 +65,23 @@ public class Node implements Cloneable {
 
 	public void setTags(ArrayList<String> todoList) {
 		this.tags.clear();
-		this.tagString = "";
 		this.tags.addAll(todoList);
-		for (String titem : todoList) {
-			this.tagString += titem + " ";
-		}
-		this.tagString = this.tagString.trim();
 	}
-	
+
+	public void addTag(String tag) {
+		this.tags.add(tag);
+	}
+
 	/**
 	 * This applies an edit to the Node, modifying the data structure and
 	 * removing the applied edits from the list.
 	 */
 	public void applyEdits(ArrayList<EditNode> edits) {
-		if(edits != null) {
+		if (edits != null) {
 			if (edits.size() == 0)
 				return;
 		}
-		
+
 		ArrayList<EditNode> nodeEdits = findEdits(edits);
 
 		for (EditNode e : nodeEdits) {
@@ -92,16 +96,16 @@ public class Node implements Cloneable {
 				this.name = e.newVal;
 				break;
 			case PAYLOAD:
-				this.payload = e.newVal;
+				this.setPayload(e.newVal);
 				break;
 			}
 		}
 	}
-    
+
 	private ArrayList<EditNode> findEdits(ArrayList<EditNode> edits) {
 		ArrayList<EditNode> thisEdits = new ArrayList<EditNode>();
-		
-		for (EditNode editNode: edits) {		
+
+		for (EditNode editNode : edits) {
 			if (editNode.getNodeId().equals(this.nodeId)) {
 				thisEdits.add(editNode);
 				edits.remove(editNode);
@@ -110,19 +114,18 @@ public class Node implements Cloneable {
 		return thisEdits;
 	}
 
-
 	/**
 	 * Generates string which can be used to write node to file.
 	 */
 	public String generateNoteEntry() {
 		String noteStr = "* ";
-		
+
 		if (!todo.equals(""))
 			noteStr += todo + " ";
-		
+
 		if (!priority.equals(""))
 			noteStr += "[#" + priority + "] ";
-		
+
 		noteStr += this.name + "\n";
 
 		if (this.payload.length() > 0)
@@ -131,7 +134,96 @@ public class Node implements Cloneable {
 		noteStr += "\n";
 		return noteStr;
 	}
+
+
+	public String getNodeId() {
+		if (this.nodeId.length() < 0) {
+			String npath = this.name;
+			Node pnode = this;
+			while ((pnode = pnode.parent) != null) {
+				if (pnode.name.length() > 0) {
+					npath = pnode.name + "/" + npath;
+				}
+			}
+			npath = "olp:" + npath;
+			return npath;
+		} else {
+			return this.nodeId;
+		}
+	}
+
 	
+	// This function does nothing yet, It's a reminder of how to find properties
+//	private void findProperties() {
+//		Pattern propertiesLine = Pattern.compile("^\\s*:[A-Z]+:");
+//		Matcher propm = propertiesLine.matcher(this.payload);
+//		
+//		propm.find();
+//	}
+	
+	public String getOriginalId() {
+		if (payload.indexOf(":ORIGINAL_ID:") != -1) {
+			String trimmedLine = payload.substring(
+					payload.indexOf(":ORIGINAL_ID:") + 13).trim();
+			this.addProperty("ORIGINAL_ID", trimmedLine);
+			this.setNodeId(trimmedLine);
+			return trimmedLine;
+		} else
+			return "";
+	}
+
+	public String getId() {
+		if (payload.indexOf(":ID:") != -1) {
+			String trimmedLine = payload.substring(
+					payload.indexOf(":ID:") + 4).trim();
+			this.addProperty("ID", trimmedLine);
+			this.setNodeId(trimmedLine);
+			return trimmedLine;
+		} else
+			return "";
+	}
+	
+	// TODO Make more efficient
+	public Date getDeadline() {
+		//payload.indexOf("DEADLINE:");
+		
+		Pattern deadlineP = Pattern
+				.compile("^.*DEADLINE: <(\\S+ \\S+)( \\S+)?>");
+
+		try {
+			Matcher deadlineM = deadlineP.matcher(this.payload);
+			SimpleDateFormat dFormatter = new SimpleDateFormat("yyyy-MM-dd EEE");
+			if (deadlineM.find()) {
+				this.deadline = dFormatter.parse(deadlineM.group(1));
+			}
+
+		} catch (java.text.ParseException e) {
+			// Log.e(LT, "Could not parse deadline");
+		}
+
+		return this.deadline;
+	}
+	
+	// TODO Make more efficient
+	public Date getScheduled() {
+		//this.payload.indexOf("SCHEDULED:");
+		
+		Pattern schedP = Pattern.compile("^.*SCHEDULED: <(\\S+ \\S+)( \\S+)?>");
+
+		SimpleDateFormat sFormatter = new SimpleDateFormat("yyyy-MM-dd EEE");
+		Matcher schedM = schedP.matcher(this.payload);
+		if (schedM.find()) {
+			try {
+				this.schedule = sFormatter.parse(schedM.group(1));
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+
+		return this.schedule;
+	}
+
 	public String formatDate() {
 		String dateInfo = "";
 
@@ -146,60 +238,83 @@ public class Node implements Cloneable {
 		return dateInfo;
 	}
 
+	public void setNodeId(String nodeId) {
+		this.nodeId = nodeId;
+	}
 
-	void setParentNode(Node pnode) {
+	public void setParentNode(Node pnode) {
 		this.parent = pnode;
 	}
-	
+
 	public void addChild(Node childNode) {
 		this.children.add(childNode);
 		childNode.parent = this;
 	}
 
-	void clearChildren() {
-		this.children.clear();
-	}
-
 	public ArrayList<String> getTags() {
 		return tags;
-	}
-	
-	void addPayload(String npayload) {
-		this.payload += npayload + "\n";
 	}
 
 	void addProperty(String key, String val) {
 		this.properties.put(key, val);
 	}
 
-	String getProperty(String key) {
-		return this.properties.get(key);
-	}
-
-	boolean hasProperty(String key) {
-		return this.properties.containsKey(key);
-	}
-	
-	void setTitle(String title) {
+	public void setTitle(String title) {
 		this.nodeTitle = title;
 	}
-	
+
 	public String getTagString() {
-		return this.tagString;
+		StringBuilder tagString = new StringBuilder();
+		for (String titem : this.tags) {
+			tagString.append(titem + " ");
+		}
+		return tagString.toString().trim();
+	}
+
+// ****************
+	
+	public Node getChild(String childName) {
+		for(Node child: this.children) {
+			if(child.name.equals(childName))
+				return child;
+		}
+		
+		return null;
 	}
 	
-	public boolean hasChildren() {
-		if(children.size() > 0)
+	public boolean removeChild(String childName) {
+		Node child = getChild(childName);
+		
+		if(child != null) {
+			this.children.remove(child);
 			return true;
-		else
+		} else
 			return false;
 	}
 	
+	public boolean hasChildren() {
+		if (children.isEmpty())
+			return false;
+		else
+			return true;
+	}
+
 	public boolean isSimple() {
 		if (this.todo.equals("") && this.priority.equals(""))
 			return true;
 		else
 			return false;
-				
+
 	}
+
+	public void sortChildren() {
+		Collections.sort(this.children, Node.comparator);
+	}
+	
+	public static Comparator<Node> comparator = new Comparator<Node>() {
+		@Override
+		public int compare(Node node1, Node node2) {
+			return node1.name.compareToIgnoreCase(node2.name);
+		}
+	};
 }
