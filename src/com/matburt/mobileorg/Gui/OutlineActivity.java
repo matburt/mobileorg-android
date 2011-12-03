@@ -1,7 +1,9 @@
 package com.matburt.mobileorg.Gui;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.StringReader;
+
 import android.app.Dialog;
 import android.app.ListActivity;
 import android.app.ProgressDialog;
@@ -11,7 +13,6 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Menu;
@@ -27,15 +28,11 @@ import android.widget.Toast;
 import com.matburt.mobileorg.MobileOrgApplication;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Error.ErrorReporter;
-import com.matburt.mobileorg.Error.ReportableError;
 import com.matburt.mobileorg.Parsing.Node;
 import com.matburt.mobileorg.Parsing.NodeEncryption;
 import com.matburt.mobileorg.Parsing.OrgFileParser;
 import com.matburt.mobileorg.Settings.SettingsActivity;
-import com.matburt.mobileorg.Synchronizers.DropboxSynchronizer;
-import com.matburt.mobileorg.Synchronizers.SDCardSynchronizer;
-import com.matburt.mobileorg.Synchronizers.Synchronizer;
-import com.matburt.mobileorg.Synchronizers.WebDAVSynchronizer;
+import com.matburt.mobileorg.Synchronizers.SyncManager;
 
 public class OutlineActivity extends ListActivity
 {
@@ -66,7 +63,7 @@ public class OutlineActivity extends ListActivity
 	private boolean newSetupDialog_shown = false;
 
 	final Handler syncHandler = new Handler();
-	private ReportableError syncError;
+	private IOException syncError;
 	private ProgressDialog syncDialog;
 
 	@Override
@@ -173,10 +170,13 @@ public class OutlineActivity extends ListActivity
 		inflater.inflate(R.menu.outline_contextmenu, menu);
 
 		// Prevents editing of file nodes.
-		if (this.appInst.nodestackSize() < 2)
+		if (this.depth == 1) {
 			menu.findItem(R.id.contextmenu_edit).setVisible(false);
+		} else {
+			menu.findItem(R.id.contextmenu_delete).setVisible(false);
+		}
 	}
-
+	
 	@Override
 	public boolean onContextItemSelected(MenuItem item) {
 		AdapterContextMenuInfo info = (AdapterContextMenuInfo) item
@@ -190,6 +190,10 @@ public class OutlineActivity extends ListActivity
 
 		case R.id.contextmenu_edit:
 			runEditNodeActivity(node);
+			break;
+			
+		case R.id.contextmenu_delete:
+			runDeleteNode(node);
 			break;
 		}
 
@@ -228,7 +232,7 @@ public class OutlineActivity extends ListActivity
 
 	private void runEditNodeActivity(Node node) {
 		/* Pushes the given Node to the nodestack, to give it as argument to
-		 * NodeEditActivity, which pops the node after use. We probably wan't to
+		 * NodeEditActivity, which pops the node after use. We probably want to
 		 * find a more elegant solution. */
 		this.appInst.pushNodestack(node);
 		
@@ -252,6 +256,12 @@ public class OutlineActivity extends ListActivity
 		int childDepth = this.depth + 1;
 		intent.putExtra("depth", childDepth);
 		startActivityForResult(intent, RUNFOR_EXPAND);
+	}
+	
+	private void runDeleteNode(Node node) {
+		// TODO Maybe prompt with a yes-no dialog
+		appInst.deleteFile(node.name);
+		refreshDisplay();
 	}
 
 	
@@ -352,20 +362,9 @@ public class OutlineActivity extends ListActivity
 	
 
 	private void runSynchronizer() {
-		String userSynchro = this.appSettings.getString("syncSource", "");
-		final Synchronizer appSync;
-		if (userSynchro.equals("webdav")) {
-			appSync = new WebDAVSynchronizer(this);
-		} else if (userSynchro.equals("sdcard")) {
-			appSync = new SDCardSynchronizer(this);
-		} else if (userSynchro.equals("dropbox")) {
-			appSync = new DropboxSynchronizer(this);
-		} else {
-			this.runShowSettings();
-			return;
-		}
+		final SyncManager synchman = new SyncManager(this);
 
-		if (!appSync.checkReady()) {
+		if (!synchman.isConfigured()) {
 			Toast error = Toast.makeText((Context) this,
 					getString(R.string.error_synchronizer_not_configured),
 					Toast.LENGTH_LONG);
@@ -378,13 +377,11 @@ public class OutlineActivity extends ListActivity
 			public void run() {
 				try {
 					syncError = null;
-					appSync.pull();
-					appSync.push();
-					Log.d("MobileOrg" + this, "Finished parsing...");
-				} catch (ReportableError e) {
+					synchman.sync();
+				} catch (IOException e) {
 					syncError = e;
 				} finally {
-					appSync.close();
+					synchman.close();
 				}
 				syncHandler.post(syncUpdateResults);
 			}
@@ -394,7 +391,7 @@ public class OutlineActivity extends ListActivity
 				getString(R.string.sync_wait), true);
 	}
 	
-	final Runnable syncUpdateResults = new Runnable() {
+	private final Runnable syncUpdateResults = new Runnable() {
 		public void run() {
 			postSynchronize();
 		}
@@ -403,7 +400,7 @@ public class OutlineActivity extends ListActivity
 	private void postSynchronize() {
 		syncDialog.dismiss();
 		if (this.syncError != null) {
-			ErrorReporter.displayError(this, this.syncError);
+			ErrorReporter.displayError(this, this.syncError.getMessage());
 		} else {
 			this.runParser();
 			this.onResume();

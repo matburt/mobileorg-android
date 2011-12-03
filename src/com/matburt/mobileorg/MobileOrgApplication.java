@@ -31,6 +31,7 @@ public class MobileOrgApplication extends Application {
     	this.appdb = new OrgDatabase(this);
     }
     
+    
     public void pushNodestack(Node node) {
         nodestack.add(node);
     }
@@ -54,7 +55,6 @@ public class MobileOrgApplication extends Application {
     public int nodestackSize() {
     	return this.nodestack.size();
     }
-
 
 	/**
 	 * Updates the {@link nodestack} with new nodes. When the parser has run, it
@@ -157,6 +157,11 @@ public class MobileOrgApplication extends Application {
     
     public HashMap<String, String> getOrgFiles() {
     	return appdb.getOrgFiles();
+    }
+    
+    public boolean deleteFile(String filename) {
+    	appdb.removeFile(filename);
+    	return true;
     }
     
     public ArrayList<String> getPriorities() {

@@ -1,5 +1,6 @@
 package com.matburt.mobileorg.Synchronizers;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Timer;
@@ -14,7 +15,6 @@ import android.util.Log;
 
 import com.matburt.mobileorg.MobileOrgApplication;
 import com.matburt.mobileorg.Error.ErrorReporter;
-import com.matburt.mobileorg.Error.ReportableError;
 import com.matburt.mobileorg.Parsing.Node;
 import com.matburt.mobileorg.Parsing.OrgFileParser;
 
@@ -110,30 +110,19 @@ public class MobileOrgSyncService extends Service implements SharedPreferences.O
 	}
 
 	public void runSynchronizer() {
-		String userSynchro = this.appSettings.getString("syncSource", "");
-		final Synchronizer appSync;
-		if (userSynchro.equals("webdav")) {
-			appSync = new WebDAVSynchronizer(this);
-		} else if (userSynchro.equals("sdcard")) {
-			appSync = new SDCardSynchronizer(this);
-		} else if (userSynchro.equals("dropbox")) {
-			appSync = new DropboxSynchronizer(this);
-		} else {
-			return;
-		}
+		final SyncManager syncman = new SyncManager(this);
 
-		if (!appSync.checkReady()) {
+		if (!syncman.isConfigured()) {
 			return;
 		}
 
 		Thread syncThread = new Thread() {
 			public void run() {
 				try {
-					appSync.pull();
-					appSync.push();
-				} catch (ReportableError e) {
+					syncman.sync();
+				} catch (IOException e) {
 				} finally {
-					appSync.close();
+					syncman.close();
 				}
 
 				runParser();
