@@ -1,6 +1,5 @@
 package com.matburt.mobileorg.Parsing;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -11,6 +10,7 @@ public class NodePayload {
 
 	private StringBuilder payload = new StringBuilder();
 	
+	private String content = null;
 	private Date schedule = null;
 	private Date deadline = null;
 	
@@ -21,69 +21,83 @@ public class NodePayload {
 		this.payload.append(line + "\n");
 	}
 	
-	public void set(String payload) {
-		this.payload = new StringBuilder(payload);
+	public void setContent(String content) {
+		this.content = content;
 	}
 	
 	public String getContent() {
-		return this.payload.toString();
+		if(this.content == null) {
+			// TODO Clean up content
+			this.content = this.payload.toString();
+		}
+		return this.content;
+	}
+	
+	public String getNodeId() {
+		return this.nodeId;
 	}
 	
 	
-	// This function does nothing yet, It's a reminder of how to find properties
-//	private void findProperties() {
-//		Pattern propertiesLine = Pattern.compile("^\\s*:[A-Z]+:");
-//		Matcher propm = propertiesLine.matcher(this.payload);
-//		
-//		propm.find();
-//	}
-
-	
-	// TODO Make more efficient
-	public Date getDeadline() {
-		//payload.indexOf("DEADLINE:");
+	private void findProperties() {
+		Pattern propertiesLine = Pattern.compile("^\\s*:[A-Z]+:");
+		Matcher propm = propertiesLine.matcher(this.payload);
 		
-		Pattern deadlineP = Pattern
-				.compile("^.*DEADLINE: <(\\S+ \\S+)( \\S+)?>");
+		propm.find();
+	}
 
+	private String getProperty(String name) {
+		String nameWithColon = ":" + name + ":";
+		int indexOfName = payload.indexOf(nameWithColon);
+		if (indexOfName != -1) {
+			String value = payload.substring(indexOfName + nameWithColon.length()).trim();
+//			this.properties.put(name, value);
+			return value;
+		} else
+			return "";		
+	}
+	
+	private String getOriginalId() {
+		this.nodeId = getProperty("ORIGINAL_ID");
+		return this.nodeId;
+	}
+
+	private String getId() {
+		this.nodeId = getProperty("ID");
+		return this.nodeId;
+	}
+
+	private Date getDate(String name) {
+		if(payload.indexOf(name + ":") == -1)
+			return null;
+		
+		Pattern datePattern = Pattern
+				.compile("^.*" + name + ": <(\\S+ \\S+)( \\S+)?>");
+
+		Date date = null;
+		
 		try {
-			Matcher deadlineM = deadlineP.matcher(this.payload);
+			Matcher dateMatcher = datePattern.matcher(this.payload);
 			SimpleDateFormat dFormatter = new SimpleDateFormat("yyyy-MM-dd EEE");
-			if (deadlineM.find()) {
-				this.deadline = dFormatter.parse(deadlineM.group(1));
-			}
-
-		} catch (java.text.ParseException e) {
-			// Log.e(LT, "Could not parse deadline");
-		}
-
+			if (dateMatcher.find())
+				date = dFormatter.parse(dateMatcher.group(1));
+		} catch (java.text.ParseException e) {}
+		
+		return date;
+	}
+	
+	private Date getDeadline() {
+		this.deadline = getDate("DEADLINE");
 		return this.deadline;
 	}
 	
-	// TODO Make more efficient
-	public Date getScheduled() {
-		//this.payload.indexOf("SCHEDULED:");
-		
-		Pattern schedP = Pattern.compile("^.*SCHEDULED: <(\\S+ \\S+)( \\S+)?>");
-
-		SimpleDateFormat sFormatter = new SimpleDateFormat("yyyy-MM-dd EEE");
-		Matcher schedM = schedP.matcher(this.payload);
-		if (schedM.find()) {
-			try {
-				this.schedule = sFormatter.parse(schedM.group(1));
-			} catch (ParseException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-
+	private Date getScheduled() {
+		this.schedule = getDate("SCHEDULED");
 		return this.schedule;
 	}
 
-	public String formatDate() {
+	public String datesToString() {
 		String dateInfo = "";
 
-		// Format Deadline and scheduled
 		SimpleDateFormat formatter = new SimpleDateFormat("<yyyy-MM-dd EEE>");
 		if (this.deadline != null)
 			dateInfo += "DEADLINE: " + formatter.format(this.deadline) + " ";
@@ -92,40 +106,5 @@ public class NodePayload {
 			dateInfo += "SCHEDULED: " + formatter.format(this.schedule) + " ";
 
 		return dateInfo;
-	}
-	
-	
-	public String getOriginalId() {
-		if (payload.indexOf(":ORIGINAL_ID:") != -1) {
-			String trimmedLine = payload.substring(
-					payload.indexOf(":ORIGINAL_ID:") + 13).trim();
-			this.addProperty("ORIGINAL_ID", trimmedLine);
-			this.setNodeId(trimmedLine);
-			return trimmedLine;
-		} else
-			return "";
-	}
-
-	public String getId() {
-		if (payload.indexOf(":ID:") != -1) {
-			String trimmedLine = payload.substring(
-					payload.indexOf(":ID:") + 4).trim();
-			this.addProperty("ID", trimmedLine);
-			this.setNodeId(trimmedLine);
-			return trimmedLine;
-		} else
-			return "";
-	}
-	
-	public String getNodeId() {
-		return this.nodeId;
-	}
-	
-	public void setNodeId(String nodeId) {
-		this.nodeId = nodeId;
-	}
-	
-	void addProperty(String key, String val) {
-		this.properties.put(key, val);
 	}
 }

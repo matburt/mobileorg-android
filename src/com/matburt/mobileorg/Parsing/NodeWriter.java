@@ -45,7 +45,7 @@ public class NodeWriter {
 		}
 		if (!node.payload.getContent().equals(newPayload)) {
 			editNode("body", node.getNodeId(), newTitle, node.payload.getContent(), newPayload);
-			node.payload.set(newPayload);
+			node.payload.setContent(newPayload);
 		}
 	}
 

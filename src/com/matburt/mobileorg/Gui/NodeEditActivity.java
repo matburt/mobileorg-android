@@ -119,7 +119,7 @@ public class NodeEditActivity extends Activity {
 			if (resultCode == RESULT_OK) {
 				String result = data
 						.getStringExtra(NodeEditBodyActivity.RESULT_STRING);
-				node.payload.set(result);
+				node.payload.setContent(result);
 				payloadView.setText(result);
 			}
 		}
@@ -137,7 +137,7 @@ public class NodeEditActivity extends Activity {
 			node.name = newTitle;
 			node.todo = newTodo;
 			node.priority = newPriority;
-			node.payload.set(newPayload);
+			node.payload.setContent(newPayload);
 
 			try {
 				writer.write(node);		

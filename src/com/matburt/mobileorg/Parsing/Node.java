@@ -134,7 +134,7 @@ public class Node implements Cloneable {
 				this.name = e.newVal;
 				break;
 			case PAYLOAD:
-				this.payload.set(e.newVal);
+				this.payload.setContent(e.newVal);
 				break;
 			}
 		}

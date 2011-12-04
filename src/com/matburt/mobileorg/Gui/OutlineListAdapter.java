@@ -91,7 +91,7 @@ class OutlineListAdapter extends BaseAdapter
 		String name = node.name;
 		String todo = node.todo;
 		String priority = node.priority;
-		String dateInfo = node.payload.formatDate();
+		String dateInfo = node.payload.datesToString();
 
 		setupHolder(holder, node, name, todo, priority, dateInfo);
 
