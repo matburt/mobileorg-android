@@ -373,7 +373,7 @@ public class OutlineActivity extends ListActivity
 				newSetupDialog_shown = false;
 				newSetupDialog.cancel();
 			}
-			
+			this.appInst.init();
 			this.onResume();
 		}
 	}

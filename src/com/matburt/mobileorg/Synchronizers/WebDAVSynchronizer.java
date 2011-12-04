@@ -164,9 +164,9 @@ public class WebDAVSynchronizer extends Synchronizer {
 		String directoryActual = "/";
 
 		if (pathElements.length > 1) {
-			for (String pathElement : pathElements) {
-				if (pathElement.length() > 0) {
-					directoryActual += pathElement + "/";
+			for (int i = 0; i < pathElements.length - 1; i++) {
+				if (pathElements[i].length() > 0) {
+					directoryActual += pathElements[i] + "/";
 				}
 			}
 		}
