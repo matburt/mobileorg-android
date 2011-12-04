@@ -6,7 +6,6 @@ import java.io.IOException;
 import android.app.Activity;
 import android.content.Context;
 
-import com.matburt.mobileorg.MobileOrgApplication;
 
 public class NodeWriter {
 	private Activity appActivity;

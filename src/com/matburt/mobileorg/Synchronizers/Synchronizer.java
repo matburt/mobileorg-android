@@ -13,7 +13,7 @@ import android.content.res.Resources;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
 
-import com.matburt.mobileorg.MobileOrgApplication;
+import com.matburt.mobileorg.Parsing.MobileOrgApplication;
 import com.matburt.mobileorg.Parsing.NodeWriter;
 import com.matburt.mobileorg.Parsing.OrgDatabase;
 import com.matburt.mobileorg.Parsing.OrgFile;

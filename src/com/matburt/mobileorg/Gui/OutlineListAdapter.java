@@ -13,9 +13,9 @@ import android.widget.BaseAdapter;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.matburt.mobileorg.MobileOrgApplication;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Parsing.EditNode;
+import com.matburt.mobileorg.Parsing.MobileOrgApplication;
 import com.matburt.mobileorg.Parsing.Node;
 
 class OutlineListAdapter extends BaseAdapter 

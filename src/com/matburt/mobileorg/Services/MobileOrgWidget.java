@@ -1,4 +1,4 @@
-package com.matburt.mobileorg;
+package com.matburt.mobileorg.Services;
 
 import android.app.Service;
 import android.appwidget.AppWidgetManager;
@@ -12,9 +12,12 @@ import android.preference.PreferenceManager;
 import android.widget.RemoteViews;
 
 import com.matburt.mobileorg.R;
+import com.matburt.mobileorg.Parsing.MobileOrgApplication;
 import com.matburt.mobileorg.Parsing.OrgDatabase;
 import com.matburt.mobileorg.Parsing.Node;
 import com.matburt.mobileorg.Parsing.OrgFileParser;
+import com.matburt.mobileorg.R.id;
+import com.matburt.mobileorg.R.layout;
 
 public class MobileOrgWidget extends AppWidgetProvider {
     @SuppressWarnings("unused")

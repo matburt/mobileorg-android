@@ -1,4 +1,4 @@
-package com.matburt.mobileorg.Error;
+package com.matburt.mobileorg.Gui;
 
 import android.app.AlertDialog;
 import android.content.Context;

@@ -9,8 +9,8 @@ import android.os.Bundle;
 import android.preference.ListPreference;
 import android.preference.PreferenceActivity;
 
-import com.matburt.mobileorg.MobileOrgApplication;
 import com.matburt.mobileorg.R;
+import com.matburt.mobileorg.Parsing.MobileOrgApplication;
 
 public class SettingsActivity extends PreferenceActivity
 {

@@ -12,7 +12,6 @@ import java.util.regex.Pattern;
 import android.content.Context;
 import android.util.Log;
 
-import com.matburt.mobileorg.MobileOrgApplication;
 
 public class OrgFileParser {
 

@@ -21,9 +21,8 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.matburt.mobileorg.MobileOrgApplication;
 import com.matburt.mobileorg.R;
-import com.matburt.mobileorg.Error.ErrorReporter;
+import com.matburt.mobileorg.Parsing.MobileOrgApplication;
 import com.matburt.mobileorg.Parsing.Node;
 import com.matburt.mobileorg.Parsing.NodeWriter;
 import com.matburt.mobileorg.Settings.SettingsActivity;

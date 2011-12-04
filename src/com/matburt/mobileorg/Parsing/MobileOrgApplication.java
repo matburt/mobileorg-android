@@ -1,4 +1,4 @@
-package com.matburt.mobileorg;
+package com.matburt.mobileorg.Parsing;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,11 +13,6 @@ import android.content.pm.ResolveInfo;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
-import com.matburt.mobileorg.Parsing.EditNode;
-import com.matburt.mobileorg.Parsing.Node;
-import com.matburt.mobileorg.Parsing.NodeWriter;
-import com.matburt.mobileorg.Parsing.OrgDatabase;
-import com.matburt.mobileorg.Parsing.OrgFileParser;
 
 public class MobileOrgApplication extends Application {
     private Node rootNode = null;

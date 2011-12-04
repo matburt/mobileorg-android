@@ -8,10 +8,10 @@
 
   <uses-permission android:name="android.permission.INTERNET"/>
   <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-  <application android:name=".MobileOrgApplication"
+  <application android:name=".Parsing.MobileOrgApplication"
                android:label="MobileOrg"
                android:icon="@drawable/icon" android:debuggable="true">
-    <receiver android:name=".MobileOrgWidget"
+    <receiver android:name=".Services.MobileOrgWidget"
               android:label="MobileOrg Tasks">
       <intent-filter>
         <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
@@ -20,12 +20,12 @@
                  android:resource="@xml/widget_mobileorg" />
     </receiver>
     <service android:name=".MobileOrgWidget$MobileOrgWidgetService" />
-	<service android:name=".Synchronizers.MobileOrgSyncService">
+	<service android:name=".Services.MobileOrgSyncService">
 	  <intent-filter>
 		<action android:name="com.matburt.mobileorg.SYNC_SERVICE" />
 	  </intent-filter>
 	</service>
-	<receiver android:name=".MobileOrgStartupIntentReceiver">
+	<receiver android:name=".Services.MobileOrgStartupIntentReceiver">
 	  <intent-filter>
 		<action android:name="android.intent.action.BOOT_COMPLETED" />
 		<category android:name="android.intent.category.HOME" />

@@ -12,8 +12,8 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import com.matburt.mobileorg.MobileOrgApplication;
 import com.matburt.mobileorg.R;
+import com.matburt.mobileorg.Parsing.MobileOrgApplication;
 import com.matburt.mobileorg.Parsing.NodeWriter;
 import com.matburt.mobileorg.Parsing.Node;
 
