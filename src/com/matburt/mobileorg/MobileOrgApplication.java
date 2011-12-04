@@ -118,6 +118,7 @@ public class MobileOrgApplication extends Application {
     	return this.nodestack.size();
     }
     
+    
     public boolean isSynchConfigured() {
     	SharedPreferences appSettings = PreferenceManager
 		.getDefaultSharedPreferences(getBaseContext());
@@ -151,6 +152,17 @@ public class MobileOrgApplication extends Application {
         return out;
     }
     
+    
+    public void addOrUpdateFile(String filename, String name, String checksum) {
+    	appdb.addOrUpdateFile(filename, name, checksum);
+    	
+    	if(this.rootNode.getChild(filename) == null) {
+    		Node node = new Node(filename, this.rootNode);
+    		node.parsed = false;
+    		rootNode.sortChildren();
+    	}
+    }
+    
     public HashMap<String, String> getOrgFiles() {
     	return appdb.getOrgFiles();
     }
@@ -160,6 +172,7 @@ public class MobileOrgApplication extends Application {
     	this.rootNode.removeChild(filename);    	
     	return true;
     }
+    
     
     public ArrayList<String> getPriorities() {
     	return appdb.getPriorities();
@@ -171,15 +184,5 @@ public class MobileOrgApplication extends Application {
     
     public ArrayList<String> getTodods() {
     	return appdb.getTodods();
-    }
-    
-    public void addOrUpdateFile(String filename, String name, String checksum) {
-    	appdb.addOrUpdateFile(filename, name, checksum);
-    	
-    	if(this.rootNode.getChild(filename) == null) {
-    		Node node = new Node(filename, this.rootNode);
-    		node.parsed = false;
-    		rootNode.sortChildren();
-    	}
     }
 }

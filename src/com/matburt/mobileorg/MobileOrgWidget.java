@@ -59,8 +59,8 @@ public class MobileOrgWidget extends AppWidgetProvider {
                 Node todoNode = agendaNode.findChildNode("ToDo: ALL");
                 if (todoNode != null) {
                     String widgetBuffer = "";
-                    for (int idx = 0; idx < todoNode.children.size(); idx++) {
-                        widgetBuffer = widgetBuffer + todoNode.children.get(idx).name + "\n";
+                    for (int idx = 0; idx < todoNode.getChildren().size(); idx++) {
+                        widgetBuffer = widgetBuffer + todoNode.getChildren().get(idx).name + "\n";
                     }
                     updateViews.setTextViewText(R.id.message, widgetBuffer);
                 }

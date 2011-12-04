@@ -66,7 +66,7 @@ public class NodeEditActivity extends Activity {
 			appInst.popNodestack();
 			
 			titleView.setText(node.name);
-			payloadView.setText(node.getPayload());
+			payloadView.setText(node.payload.getContent());
 			tagsView.setText(node.getTagString());
 		}
 
@@ -108,7 +108,7 @@ public class NodeEditActivity extends Activity {
 		public void onClick(View v) {
 			Intent intent = new Intent(v.getContext(),
 					NodeEditBodyActivity.class);
-			intent.putExtra(NodeEditBodyActivity.DISPLAY_STRING, node.getPayload());
+			intent.putExtra(NodeEditBodyActivity.DISPLAY_STRING, node.payload.getContent());
 			startActivityForResult(intent, EDIT_BODY);
 		}
 	};
@@ -119,7 +119,7 @@ public class NodeEditActivity extends Activity {
 			if (resultCode == RESULT_OK) {
 				String result = data
 						.getStringExtra(NodeEditBodyActivity.RESULT_STRING);
-				node.setPayload(result);
+				node.payload.set(result);
 				payloadView.setText(result);
 			}
 		}
@@ -137,7 +137,7 @@ public class NodeEditActivity extends Activity {
 			node.name = newTitle;
 			node.todo = newTodo;
 			node.priority = newPriority;
-			node.setPayload(newPayload);
+			node.payload.set(newPayload);
 
 			try {
 				writer.write(node);		

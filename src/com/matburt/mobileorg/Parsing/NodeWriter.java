@@ -19,7 +19,7 @@ public class NodeWriter {
 	}
 	
 	public void write(Node node) throws IOException {
-		writeNode(node.generateNoteEntry());
+		writeNode(node.toString());
 	}
 	
 	/**
@@ -43,9 +43,9 @@ public class NodeWriter {
 					newPriority);
 			node.priority = newPriority;
 		}
-		if (!node.getPayload().equals(newPayload)) {
-			editNode("body", node.getNodeId(), newTitle, node.getPayload(), newPayload);
-			node.setPayload(newPayload);
+		if (!node.payload.getContent().equals(newPayload)) {
+			editNode("body", node.getNodeId(), newTitle, node.payload.getContent(), newPayload);
+			node.payload.set(newPayload);
 		}
 	}
 

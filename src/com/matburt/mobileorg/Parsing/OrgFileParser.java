@@ -38,7 +38,7 @@ public class OrgFileParser {
 
 		for (String key : orgPathFileMap.keySet()) {
 			Node fileNode = new Node(key, rootNode);
-			fileNode.altNodeTitle = orgPathFileMap.get(key);
+//			fileNode.altNodeTitle = orgPathFileMap.get(key);
 			fileNode.parsed = false;
 
 			if (key.endsWith(".gpg") || key.endsWith(".pgp")
@@ -69,7 +69,7 @@ public class OrgFileParser {
 			if (node == null)
 				node = new Node(filename, rootNode);
 			else
-				node.children.clear();
+				node.getChildren().clear();
 		} else
 			node = new Node(filename);
 		
@@ -117,8 +117,8 @@ public class OrgFileParser {
 				// Find title fields and set title for file node
 				if (currentLine.charAt(0) == '#') {
 					if (currentLine.indexOf("#+TITLE:") != -1) {
-						fileNode.altNodeTitle = currentLine.substring(
-								currentLine.indexOf("#+TITLE:") + 8).trim();
+//						fileNode.altNodeTitle = currentLine.substring(
+//								currentLine.indexOf("#+TITLE:") + 8).trim();
 					}
 				}
 
@@ -126,7 +126,7 @@ public class OrgFileParser {
 				if (numstars > 0) {
 					parseHeading(currentLine, numstars);
 				} else {
-					nodeStack.peek().addPayload(currentLine);
+					nodeStack.peek().payload.add(currentLine);
 				}
 			}
 
@@ -244,7 +244,7 @@ public class OrgFileParser {
     		newNode.name = title;
     	}
     	
-        newNode.setTitle(this.stripTitle(title));
+//        newNode.setTitle(this.stripTitle(title));
 
     	return newNode;
     }
