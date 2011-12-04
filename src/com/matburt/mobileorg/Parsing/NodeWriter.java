@@ -57,12 +57,13 @@ public class NodeWriter {
 	
 	private void writeNode(String message) throws IOException {
 		OrgFile orgfile = new OrgFile(OrgFile.CAPTURE_FILE, context);
-		BufferedWriter writer = orgfile.getWriter();
-		writer.write(message);
+		BufferedWriter writer = orgfile.getWriter(true);
+		writer.append(message);
 	
 		MobileOrgApplication appInst = (MobileOrgApplication) 
 				this.appActivity.getApplication();
 		appInst.addOrUpdateFile(OrgFile.CAPTURE_FILE, "New Notes", "");
+		appInst.invalidateFile(OrgFile.CAPTURE_FILE);
 		writer.close();
 	}
 }

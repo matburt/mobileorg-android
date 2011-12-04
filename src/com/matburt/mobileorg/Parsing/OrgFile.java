@@ -85,13 +85,20 @@ public class OrgFile {
 	}
 	
 	public BufferedWriter getWriter() throws IOException {
+		return getWriter(false);
+	}
+	
+	public BufferedWriter getWriter(boolean append) throws IOException {
 		String storageMode = getStorageMode();
 		BufferedWriter writer = null;
 
 		if (storageMode.equals("internal") || storageMode.equals("")) {
 			FileOutputStream fs;
 			String normalized = fileName.replace("/", "_");
-			fs = context.openFileOutput(normalized, Context.MODE_PRIVATE);
+			if(append)
+				fs = context.openFileOutput(normalized, Context.MODE_APPEND);
+			else
+				fs = context.openFileOutput(normalized, Context.MODE_PRIVATE);
 			writer = new BufferedWriter(new OutputStreamWriter(fs));
 
 		} else if (storageMode.equals("sdcard")) {
@@ -100,7 +107,7 @@ public class OrgFile {
 			morgDir.mkdir();
 			if (morgDir.canWrite()) {
 				File orgFileCard = new File(morgDir, fileName);
-				FileWriter orgFWriter = new FileWriter(orgFileCard, false);
+				FileWriter orgFWriter = new FileWriter(orgFileCard, append);
 				writer = new BufferedWriter(orgFWriter);
 			}
 		}

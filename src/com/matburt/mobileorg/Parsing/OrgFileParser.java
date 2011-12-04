@@ -25,7 +25,7 @@ public class OrgFileParser {
 		this.appdb = new OrgDatabase(context);
 		this.context = context;
 	}
-	
+
 	/**
 	 * This function will return a Node that contains an entry for each org
 	 * file. All files are added with {@link Node.parsed} equal to false,
@@ -37,7 +37,7 @@ public class OrgFileParser {
 
 		for (String key : orgPathFileMap.keySet()) {
 			Node fileNode = new Node(key, rootNode);
-//			fileNode.altNodeTitle = orgPathFileMap.get(key);
+			// fileNode.altNodeTitle = orgPathFileMap.get(key);
 			fileNode.parsed = false;
 
 			if (key.endsWith(".gpg") || key.endsWith(".pgp")
@@ -48,17 +48,17 @@ public class OrgFileParser {
 		rootNode.sortChildren();
 		return rootNode;
 	}
-	
+
 	/**
 	 * This causes the given filename to be parsed and the resulting node will
 	 * be returned. An optional root node can be given, resulting in it's entry
 	 * of the node being updated.
 	 */
-	public Node parseFile(String filename, Node rootNode) {		
-    	OrgFile orgfile = new OrgFile(filename, context);
-        BufferedReader breader = orgfile.getReader();
+	public Node parseFile(String filename, Node rootNode) {
+		OrgFile orgfile = new OrgFile(filename, context);
+		BufferedReader breader = orgfile.getReader();
 
-        if(breader == null)
+		if (breader == null)
 			return null;
 
 		Node node;
@@ -71,10 +71,10 @@ public class OrgFileParser {
 				node.getChildren().clear();
 		} else
 			node = new Node(filename);
-		
+
 		parse(node, breader);
 		node.parsed = true;
-		
+
 		try { breader.close(); } catch (IOException e) {}
 		return node;
 	}

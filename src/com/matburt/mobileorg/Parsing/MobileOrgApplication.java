@@ -59,34 +59,31 @@ public class MobileOrgApplication extends Application {
 	 * Additionally it will try to update the node stack to point to the new
 	 * nodes, which will cause the user display to be updated appropriately.
 	 */
-   public void invalidateFile(String filename) {
+	public void invalidateFile(String filename) {
 		Node fileNode = this.rootNode.getChild(filename);
-		
-		if(fileNode != null)
+
+		if (fileNode != null)
 			fileNode.parsed = false;
-		
-		if(filename.equals(OrgFile.CAPTURE_FILE))
-			this.edits = parser.parseEdits();
-		
-		if(nodestack.size() >= 2 && nodestack.get(1).name.equals(filename)) {		
+
+		if (nodestack.size() >= 2 && nodestack.get(1).name.equals(filename)) {
 			fileNode = parser.parseFile(filename, this.rootNode);
-			
+
 			ArrayList<Node> newNodestack = new ArrayList<Node>();
 			newNodestack.add(rootNode);
-			
+
 			this.nodestack.remove(0);
-			
+
 			Node newNode = this.rootNode;
-			for(Node node: this.nodestack) {
+			for (Node node : this.nodestack) {
 				newNode = newNode.getChild(node.name);
-				if(newNode != null)
+				if (newNode != null)
 					newNodestack.add(newNode);
 				else
 					break;
 			}
-			
+
 			this.nodestack = newNodestack;
-		}	
+		}
 	}
     
     public void pushNodestack(Node node) {
@@ -111,6 +108,40 @@ public class MobileOrgApplication extends Application {
     
     public int nodestackSize() {
     	return this.nodestack.size();
+    }
+    
+
+    public void addOrUpdateFile(String filename, String name, String checksum) {
+    	appdb.addOrUpdateFile(filename, name, checksum);
+    	
+    	if(this.rootNode.getChild(filename) == null) {
+    		Node node = new Node(filename, this.rootNode);
+    		node.parsed = false;
+    		rootNode.sortChildren();
+    	}
+    }
+    
+    public HashMap<String, String> getOrgFiles() {
+    	return appdb.getOrgFiles();
+    }
+    
+    public boolean deleteFile(String filename) {
+    	appdb.removeFile(filename);
+    	this.rootNode.removeChild(filename);    	
+    	return true;
+    }
+    
+    
+    public ArrayList<String> getPriorities() {
+    	return appdb.getPriorities();
+    }
+    
+    public ArrayList<HashMap<String, Integer>> getGroupedTodods() {
+    	return appdb.getGroupedTodods();
+    }
+    
+    public ArrayList<String> getTodods() {
+    	return appdb.getTodods();
     }
     
     
@@ -145,44 +176,5 @@ public class MobileOrgApplication extends Application {
             Log.d("MobileOrg","Found synchronizer plugin: "+info.activityInfo.packageName);            
         }
         return out;
-    }
-    
-    
-    public void addOrUpdateFile(String filename, String name, String checksum) {
-    	appdb.addOrUpdateFile(filename, name, checksum);
-    	
-    	if(this.rootNode.getChild(filename) == null) {
-    		Node node = new Node(filename, this.rootNode);
-    		node.parsed = false;
-    		rootNode.sortChildren();
-    	}
-    	
-    	if(filename.equals(OrgFile.CAPTURE_FILE)) {
-    		this.parser.parseFile(filename, rootNode);
-    		this.edits = this.parser.parseEdits();
-    	}
-    }
-    
-    public HashMap<String, String> getOrgFiles() {
-    	return appdb.getOrgFiles();
-    }
-    
-    public boolean deleteFile(String filename) {
-    	appdb.removeFile(filename);
-    	this.rootNode.removeChild(filename);    	
-    	return true;
-    }
-    
-    
-    public ArrayList<String> getPriorities() {
-    	return appdb.getPriorities();
-    }
-    
-    public ArrayList<HashMap<String, Integer>> getGroupedTodods() {
-    	return appdb.getGroupedTodods();
-    }
-    
-    public ArrayList<String> getTodods() {
-    	return appdb.getTodods();
     }
 }

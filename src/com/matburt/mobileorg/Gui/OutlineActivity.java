@@ -24,7 +24,6 @@ import android.widget.Toast;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Parsing.MobileOrgApplication;
 import com.matburt.mobileorg.Parsing.Node;
-import com.matburt.mobileorg.Parsing.OrgFile;
 import com.matburt.mobileorg.Settings.SettingsActivity;
 import com.matburt.mobileorg.Settings.WizardActivity;
 import com.matburt.mobileorg.Synchronizers.SyncManager;
@@ -251,10 +250,9 @@ public class OutlineActivity extends ListActivity
 			break;
 			
 		case RUNFOR_NEWNODE:
-			if(resultCode == RESULT_OK) {
-				this.appInst.invalidateFile(OrgFile.CAPTURE_FILE);
+			if(resultCode == RESULT_OK)
 				this.refreshDisplay();
-			}
+
 			break;
 
 //		case NodeEncryption.DECRYPT_MESSAGE:
