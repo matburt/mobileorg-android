@@ -93,7 +93,7 @@ public class OrgFileParser {
 		starStack.push(0);
 
 		boolean parsingCaptureFile = false;
-		if (fileNode.name.equals(NodeWriter.ORGFILE))
+		if (fileNode.name.equals(OrgFile.CAPTURE_FILE))
 			parsingCaptureFile = true;
 
 		try {
@@ -268,7 +268,7 @@ public class OrgFileParser {
         Pattern createTitlePattern = Pattern.compile("^\\*\\s+(.*)");
  
         ArrayList<EditNode> edits = new ArrayList<EditNode>();
-        OrgFile orgfile = new OrgFile(NodeWriter.ORGFILE, context);
+        OrgFile orgfile = new OrgFile(OrgFile.CAPTURE_FILE, context);
         BufferedReader breader = orgfile.getReader();
         if (breader == null)
             return edits;

@@ -65,7 +65,7 @@ public class MobileOrgApplication extends Application {
 		if(fileNode != null)
 			fileNode.parsed = false;
 		
-		if(filename.equals(NodeWriter.ORGFILE))
+		if(filename.equals(OrgFile.CAPTURE_FILE))
 			this.edits = parser.parseEdits();
 		
 		if(nodestack.size() >= 2 && nodestack.get(1).name.equals(filename)) {		
@@ -155,6 +155,11 @@ public class MobileOrgApplication extends Application {
     		Node node = new Node(filename, this.rootNode);
     		node.parsed = false;
     		rootNode.sortChildren();
+    	}
+    	
+    	if(filename.equals(OrgFile.CAPTURE_FILE)) {
+    		this.parser.parseFile(filename, rootNode);
+    		this.edits = this.parser.parseEdits();
     	}
     }
     

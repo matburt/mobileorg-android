@@ -19,7 +19,7 @@ import android.preference.PreferenceManager;
 
 public class OrgFile {
 
-	final private static int BUFFER_SIZE = 23 * 1024;
+	public static final String CAPTURE_FILE = "mobileorg.org";
 
 	private Context context;
 	private String fileName;
@@ -133,6 +133,7 @@ public class OrgFile {
 	public void fetch(BufferedReader reader) throws IOException {
 		BufferedWriter writer = getWriter();
 
+		final int BUFFER_SIZE = 23 * 1024;
 		char[] baf = new char[BUFFER_SIZE];
 		int actual = 0;
 

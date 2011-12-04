@@ -32,7 +32,7 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
 import com.matburt.mobileorg.R;
-import com.matburt.mobileorg.Parsing.NodeWriter;
+import com.matburt.mobileorg.Parsing.OrgFile;
 
 public class WebDAVSynchronizer extends Synchronizer {
 
@@ -147,7 +147,7 @@ public class WebDAVSynchronizer extends Synchronizer {
 			httpClient.getConnectionManager().shutdown();
 		} catch (UnsupportedEncodingException e) {
 			throw new IOException(r.getString(
-					R.string.error_unsupported_encoding, NodeWriter.ORGFILE));
+					R.string.error_unsupported_encoding, OrgFile.CAPTURE_FILE));
 		}
 	}
 

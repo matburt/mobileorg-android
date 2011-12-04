@@ -10,7 +10,6 @@ import android.content.Context;
 public class NodeWriter {
 	private Activity appActivity;
 	private Context context;
-	public static final String ORGFILE = "mobileorg.org";
 
 	public NodeWriter(Activity parentActivity) {
 		this.appActivity = parentActivity;
@@ -57,14 +56,13 @@ public class NodeWriter {
 	}
 	
 	private void writeNode(String message) throws IOException {
-		OrgFile orgfile = new OrgFile(ORGFILE, context);
+		OrgFile orgfile = new OrgFile(OrgFile.CAPTURE_FILE, context);
 		BufferedWriter writer = orgfile.getWriter();
 		writer.write(message);
 	
 		MobileOrgApplication appInst = (MobileOrgApplication) 
 				this.appActivity.getApplication();
-		appInst.addOrUpdateFile(ORGFILE, "New Notes", "");
-		// TODO Parse ORGFILE to update data structures.
+		appInst.addOrUpdateFile(OrgFile.CAPTURE_FILE, "New Notes", "");
 		writer.close();
 	}
 }

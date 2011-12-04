@@ -14,7 +14,6 @@ import android.preference.PreferenceManager;
 import android.text.TextUtils;
 
 import com.matburt.mobileorg.Parsing.MobileOrgApplication;
-import com.matburt.mobileorg.Parsing.NodeWriter;
 import com.matburt.mobileorg.Parsing.OrgDatabase;
 import com.matburt.mobileorg.Parsing.OrgFile;
 
@@ -60,7 +59,7 @@ abstract public class Synchronizer {
 	}
 
 	public void sync(MobileOrgApplication appInst) throws IOException {
-		push(NodeWriter.ORGFILE);
+		push(OrgFile.CAPTURE_FILE);
 		pull(appInst);
 	}
 
