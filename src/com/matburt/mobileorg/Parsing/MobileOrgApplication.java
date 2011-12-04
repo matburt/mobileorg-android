@@ -66,10 +66,10 @@ public class MobileOrgApplication extends Application {
 			fileNode.parsed = false;
 
 		if (nodestack.size() >= 2 && nodestack.get(1).name.equals(filename)) {
-			fileNode = parser.parseFile(filename, this.rootNode);
+			parser.parseFile(filename, this.rootNode);
 
 			ArrayList<Node> newNodestack = new ArrayList<Node>();
-			newNodestack.add(rootNode);
+			newNodestack.add(this.rootNode);
 
 			this.nodestack.remove(0);
 
@@ -125,9 +125,11 @@ public class MobileOrgApplication extends Application {
     	return appdb.getOrgFiles();
     }
     
-    public boolean deleteFile(String filename) {
+    public boolean removeFile(String filename) {
     	appdb.removeFile(filename);
-    	this.rootNode.removeChild(filename);    	
+    	this.rootNode.removeChild(filename);
+    	OrgFile orgfile = new OrgFile(filename, this.getApplicationContext());
+    	orgfile.delete();
     	return true;
     }
     

@@ -59,11 +59,11 @@ public class NodeWriter {
 		OrgFile orgfile = new OrgFile(OrgFile.CAPTURE_FILE, context);
 		BufferedWriter writer = orgfile.getWriter(true);
 		writer.append(message);
+		writer.close();
 	
 		MobileOrgApplication appInst = (MobileOrgApplication) 
 				this.appActivity.getApplication();
 		appInst.addOrUpdateFile(OrgFile.CAPTURE_FILE, "New Notes", "");
 		appInst.invalidateFile(OrgFile.CAPTURE_FILE);
-		writer.close();
 	}
 }

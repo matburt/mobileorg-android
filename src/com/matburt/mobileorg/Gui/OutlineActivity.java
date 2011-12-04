@@ -226,7 +226,7 @@ public class OutlineActivity extends ListActivity
 	
 	private void runDeleteNode(Node node) {
 		// TODO Maybe prompt with a yes-no dialog
-		appInst.deleteFile(node.name);
+		appInst.removeFile(node.name);
 		refreshDisplay();
 	}
 	
@@ -252,7 +252,6 @@ public class OutlineActivity extends ListActivity
 		case RUNFOR_NEWNODE:
 			if(resultCode == RESULT_OK)
 				this.refreshDisplay();
-
 			break;
 
 //		case NodeEncryption.DECRYPT_MESSAGE:

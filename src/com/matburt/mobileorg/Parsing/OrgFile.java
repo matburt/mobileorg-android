@@ -117,7 +117,7 @@ public class OrgFile {
 
 	public File getFile() {
 		String storageMode = getStorageMode();
-		if (storageMode.equals("internal") || storageMode == null) {
+		if (storageMode.equals("internal") || storageMode.equals("")) {
 			File morgFile = new File("/data/data/com.matburt.mobileorg/files",
 					fileName);
 			return morgFile;
@@ -161,6 +161,16 @@ public class OrgFile {
 			File morgDir = new File(root, "mobileorg");
 			File morgFile = new File(morgDir, this.fileName);
 			morgFile.delete();
+		}
+	}
+	
+	public void delete() {
+		String storageMode = getStorageMode();
+		
+		if(storageMode.equals("internal") || storageMode.equals("")) {
+			this.context.deleteFile(this.fileName);
+		} else if (storageMode.equals("external")) {
+			this.getFile().delete();
 		}
 	}
 
