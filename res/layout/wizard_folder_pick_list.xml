@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout 
+        xmlns:android="http://schemas.android.com/apk/res/android"
+	android:id="@+id/wizard_folder_pick_list"
+	android:layout_width="fill_parent"
+	android:layout_height="fill_parent">
+	<LinearLayout 
+	       android:layout_width="fill_parent"
+	       android:layout_height="fill_parent"
+	       android:orientation="vertical">
+	       <TextView
+	               android:layout_width="fill_parent"
+	               android:layout_height="wrap_content"
+	               android:gravity="center"
+	               android:text="@string/pick_folder"
+	               android:textStyle="bold"
+	               android:textSize="20dp"/>
+               <ListView
+                        xmlns:android="http://schemas.android.com/apk/res/android"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingBottom="80dp"
+                        android:id="@+id/wizard_folder_list"/>
+                        <!-- 60dp = 48dp size of arrows + 10dp margin -->
+	</LinearLayout>
+	<include layout="@layout/wizard_navbar_last" />
+</RelativeLayout>
