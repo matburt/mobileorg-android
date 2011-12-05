@@ -1,8 +1,0 @@
-* Roadmap
-** TODO Finalize design of Wizard
-*** DONE Add text to strings.xml ("I want to...")
-*** TODO Create image resources for different resolutions
-*** TODO Fix bugs
- + rotation bug
- + i just noticed a bug when you swype right to the homescreen, it "snaps" back for some reason
- + users should be able to re-run wizard with current settings filled in
