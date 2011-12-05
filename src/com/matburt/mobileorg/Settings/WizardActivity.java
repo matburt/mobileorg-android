@@ -135,8 +135,10 @@ public class WizardActivity extends Activity {
 
 	@Override
 	    public void onCheckedChanged(RadioGroup arg, int checkedId) {
-	    if ( checkedId == syncWebDav )
+	    if ( checkedId == syncWebDav ) {
 	    	syncSource = "webdav";
+            createWebDAVConfig();
+        }
 	    else if ( checkedId == syncDropBox ) {
 	    	syncSource = "dropbox";
 	    	createDropboxLogin();
@@ -151,6 +153,13 @@ public class WizardActivity extends Activity {
 	    //createDropboxList();
 	    //wizard.enablePage(1);
 	}
+    }
+
+    void createWebDAVConfig() {
+        wizard.removePagesAfter(1);
+        wizard.addPage(R.layout.wizard_webdav);
+        //wizard.setNavButtonStateOnPage(1, true, PageFlipView.LAST_PAGE);
+        //wizard.setDoneButtonOnClickListener(new FinishWizardButtonListener());
     }
 
     void createSDcardFolderSelector() {
