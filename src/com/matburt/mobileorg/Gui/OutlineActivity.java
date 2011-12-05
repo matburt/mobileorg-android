@@ -27,6 +27,7 @@ import com.matburt.mobileorg.Error.ErrorReporter;
 import com.matburt.mobileorg.Parsing.Node;
 import com.matburt.mobileorg.Parsing.NodeWriter;
 import com.matburt.mobileorg.Settings.SettingsActivity;
+import com.matburt.mobileorg.Settings.WizardActivity;
 import com.matburt.mobileorg.Synchronizers.SyncManager;
 
 public class OutlineActivity extends ListActivity
@@ -71,7 +72,9 @@ public class OutlineActivity extends ListActivity
 		
 		if(this.depth == 1) {
 			if(appInst.init() == false)
-				this.showNewUserWindow();
+                // Old popup shown to new users
+				//this.showNewUserWindow();
+                this.showWizard();
 		}
 
 		registerForContextMenu(getListView());
@@ -183,6 +186,10 @@ public class OutlineActivity extends ListActivity
 			}
 		}
 	}
+
+    public void showWizard() {
+        startActivity(new Intent(this, WizardActivity.class));
+    }
 	
 	private boolean runEditNewNodeActivity() {
 		Intent intent = new Intent(this, NodeEditActivity.class);

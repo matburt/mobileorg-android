@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="320"
+   height="480"
+   id="svg2"
+   version="1.1"
+   inkscape:version="0.47pre4 r22446"
+   sodipodi:docname="normal-mdpi-template.svg">
+  <defs
+     id="defs4">
+    <inkscape:perspective
+       sodipodi:type="inkscape:persp3d"
+       inkscape:vp_x="0 : 526.18109 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_z="744.09448 : 526.18109 : 1"
+       inkscape:persp3d-origin="372.04724 : 350.78739 : 1"
+       id="perspective10" />
+    <inkscape:perspective
+       id="perspective2845"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.7"
+     inkscape:cx="248.58611"
+     inkscape:cy="299.92968"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     inkscape:window-width="841"
+     inkscape:window-height="597"
+     inkscape:window-x="326"
+     inkscape:window-y="14"
+     inkscape:window-maximized="0" />
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(0,-572.36218)">
+    <rect
+       style="fill:#000000;fill-opacity:1;stroke:#808080;stroke-width:1.25000000000000000;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:7.50000000000000000, 2.50000000000000000;stroke-dashoffset:0"
+       id="rect2882"
+       width="497.14285"
+       height="552.85712"
+       x="-85.714287"
+       y="-35.714287"
+       transform="translate(0,572.36218)" />
+    <g
+       id="g3659"
+       inkscape:export-filename="/mnt/work2/mobileorg-android/res/drawable/logo.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90">
+      <image
+         xlink:href="file:///mnt/work2/mobileorg-android/src-img/inkscape_pasted_image_20110901_112511.png"
+         width="82.333336"
+         height="90"
+         id="image2847"
+         x="27.958309"
+         y="590.29108"
+         style="fill:#000000" />
+      <text
+         id="text2851"
+         y="674.6994"
+         x="99.737473"
+         style="font-size:32px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;fill:#b3b3b3;fill-opacity:1;stroke:none;font-family:Palatino Linotype;-inkscape-font-specification:Bitstream Vera Sans"
+         xml:space="preserve"><tspan
+           style="font-size:32px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;fill:#b3b3b3;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans Bold;stroke:none"
+           y="674.6994"
+           x="99.737473"
+           id="tspan2853"
+           sodipodi:role="line">MobileOrg</tspan></text>
+    </g>
+    <flowRoot
+       xml:space="preserve"
+       id="flowRoot2866"
+       style="fill:black;stroke:none;stroke-opacity:1;stroke-width:1px;stroke-linejoin:miter;stroke-linecap:butt;fill-opacity:1;font-family:Palatino Linotype;font-style:italic;font-weight:normal;font-size:12;-inkscape-font-specification:Bitstream Vera Sans Oblique;font-stretch:normal;font-variant:normal"><flowRegion
+         id="flowRegion2868"><rect
+           id="rect2870"
+           width="78.791901"
+           height="15.152288"
+           x="114.14724"
+           y="141.59889" /></flowRegion><flowPara
+         id="flowPara2872"></flowPara></flowRoot>    <text
+       xml:space="preserve"
+       style="font-size:20px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans Mono;-inkscape-font-specification:Bitstream Vera Sans Mono"
+       x="162.70634"
+       y="744.02057"
+       id="text2874"><tspan
+         sodipodi:role="line"
+         id="tspan2876"
+         x="162.70634"
+         y="744.02057"
+         style="font-size:20px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:center;text-anchor:middle;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans">I want to sync using:</tspan></text>
+  </g>
+</svg>

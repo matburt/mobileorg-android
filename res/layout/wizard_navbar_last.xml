@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+   xmlns:android="http://schemas.android.com/apk/res/android"
+   android:id="@+id/wizard_navbar_last"
+   android:background="#ff000000"
+   android:paddingTop="10dp"
+   android:layout_width="fill_parent"
+   android:layout_height="wrap_content"
+   android:layout_alignParentBottom="true">
+  <LinearLayout
+     xmlns:android="http://schemas.android.com/apk/res/android"
+     android:layout_width="fill_parent"
+     android:layout_height="wrap_content"
+     android:orientation="horizontal">
+    <include
+       layout="@layout/wizard_previous_button"/>
+    <View
+       android:layout_width="wrap_content"
+       android:layout_height="1dp"
+       android:layout_weight="1.0"
+       />
+    <Button
+       android:id="@+id/wizard_done_button"
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       android:text="Done"
+       android:textSize="20dp"/>
+  </LinearLayout>
+</RelativeLayout>
