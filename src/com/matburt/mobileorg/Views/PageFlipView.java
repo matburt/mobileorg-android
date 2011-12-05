@@ -1,30 +1,19 @@
 package com.matburt.mobileorg.Views;
 
-import android.util.Log;
 import android.app.Activity;
-import android.os.Bundle;
 import android.content.Context;
-import android.view.Display;
-import android.widget.Button;
-import android.widget.LinearLayout;
-import android.widget.HorizontalScrollView;
-import android.view.ViewGroup;
-import android.view.ViewGroup.LayoutParams;
-import android.util.AttributeSet;
-import android.view.WindowManager;
-import android.graphics.Canvas;
-import android.view.GestureDetector; 
-import android.view.GestureDetector.SimpleOnGestureListener;
-import android.view.View;
-import android.view.MotionEvent;
-import android.view.LayoutInflater;
-import android.preference.PreferenceManager;
 import android.content.SharedPreferences;
-import android.widget.EditText;
-import java.util.ArrayList;
+import android.util.AttributeSet;
+import android.util.Log;
+import android.view.GestureDetector;
+import android.view.GestureDetector.SimpleOnGestureListener;
+import android.view.LayoutInflater;
+import android.view.MotionEvent;
+import android.view.View;
 import android.view.inputmethod.InputMethodManager;
-import android.graphics.Rect;
-import android.view.ViewGroup.LayoutParams;
+import android.widget.Button;
+import android.widget.HorizontalScrollView;
+
 import com.matburt.mobileorg.R;
 
 public class PageFlipView extends HorizontalScrollView 

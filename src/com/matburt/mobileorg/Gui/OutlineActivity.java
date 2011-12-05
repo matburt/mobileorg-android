@@ -2,7 +2,6 @@ package com.matburt.mobileorg.Gui;
 
 import java.io.IOException;
 
-import android.app.Dialog;
 import android.app.ListActivity;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -15,9 +14,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.widget.AdapterView.AdapterContextMenuInfo;
-import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -51,9 +48,6 @@ public class OutlineActivity extends ListActivity
 	 * feature.
 	 */
 	private int lastSelection = 0;
-	
-	private Dialog newSetupDialog;
-	private boolean newSetupDialog_shown = false;
 	
 	final Handler syncHandler = new Handler();
 	private IOException syncError;
@@ -300,36 +294,6 @@ public class OutlineActivity extends ListActivity
 //				decryptedData)));
 //	}
 
-
-	private void showNewUserWindow() {
-		if (this.newSetupDialog_shown) {
-			this.newSetupDialog.cancel();
-		}
-		newSetupDialog = new Dialog(this);
-		newSetupDialog.setContentView(R.layout.outline_unconfigured);
-		Button syncButton = (Button) newSetupDialog
-				.findViewById(R.id.dialog_run_sync);
-		syncButton.setOnClickListener(new OnClickListener() {
-			public void onClick(View v) {
-				if (!appInst.isSynchConfigured())
-					runShowSettings();
-				else
-					runSynchronizer();
-			}
-		});
-		Button settingsButton = (Button) newSetupDialog
-				.findViewById(R.id.dialog_show_settings);
-		settingsButton.setOnClickListener(new OnClickListener() {
-			public void onClick(View v) {
-				runShowSettings();
-			}
-		});
-		newSetupDialog.setTitle("Synchronize Org Files");
-		newSetupDialog.show();
-		this.newSetupDialog_shown = true;
-	}
-	
-
 	private void runSynchronizer() {
 		final SyncManager synchman = new SyncManager(this, this.appInst);
 
@@ -371,11 +335,7 @@ public class OutlineActivity extends ListActivity
 		if (this.syncError != null) {
 			ErrorReporter.displayError(this, this.syncError.getMessage());
 		} else {
-			
-			if (this.newSetupDialog_shown) {
-				newSetupDialog_shown = false;
-				newSetupDialog.cancel();
-			}
+
 			this.appInst.init();
 			this.onResume();
 		}

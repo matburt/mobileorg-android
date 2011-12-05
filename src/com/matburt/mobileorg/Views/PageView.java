@@ -1,26 +1,12 @@
 package com.matburt.mobileorg.Views;
 
-import android.util.Log;
-import android.app.Activity;
-import android.os.Bundle;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
 import android.content.Context;
-import android.preference.PreferenceManager;
-import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
-import android.view.Display;
-import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
-import android.view.ViewGroup;
-import android.widget.Button;
-import android.view.ViewGroup.LayoutParams;
 import android.util.AttributeSet;
+import android.util.Log;
+import android.view.Display;
 import android.view.WindowManager;
-import android.graphics.Canvas;
-import android.view.LayoutInflater;
-import android.view.View;
-import com.matburt.mobileorg.R;
+import android.widget.Button;
+import android.widget.RelativeLayout;
 
 public class PageView extends RelativeLayout {
     static String TAG = "PageView";
@@ -86,7 +72,7 @@ public class PageView extends RelativeLayout {
     			    getContext().getSystemService(Context.WINDOW_SERVICE) )
     	    .getDefaultDisplay(); 
         int screenWidth = display.getWidth();
-        int screenHeight = display.getHeight();
+//        int screenHeight = display.getHeight();
         if (specMode == MeasureSpec.EXACTLY) {
     	    // We were told how big to be
     	    result = specSize;
@@ -109,7 +95,7 @@ public class PageView extends RelativeLayout {
         Display display = ( (WindowManager)
     			    getContext().getSystemService(Context.WINDOW_SERVICE) )
     	    .getDefaultDisplay();
-        int screenWidth = display.getWidth();
+//        int screenWidth = display.getWidth();
         int screenHeight = display.getHeight();
         if (specMode == MeasureSpec.EXACTLY) {
     	    // We were told how big to be
