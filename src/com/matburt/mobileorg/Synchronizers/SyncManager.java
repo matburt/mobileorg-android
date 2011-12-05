@@ -2,7 +2,7 @@ package com.matburt.mobileorg.Synchronizers;
 
 import java.io.IOException;
 
-import com.matburt.mobileorg.MobileOrgApplication;
+import com.matburt.mobileorg.Parsing.MobileOrgApplication;
 
 import android.content.Context;
 import android.preference.PreferenceManager;

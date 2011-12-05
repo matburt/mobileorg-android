@@ -15,7 +15,7 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.matburt.mobileorg.R;
-import com.matburt.mobileorg.Error.ErrorReporter;
+import com.matburt.mobileorg.Gui.ErrorReporter;
 
 public class OrgDatabase {
 	private Context appcontext;

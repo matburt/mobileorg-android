@@ -12,7 +12,6 @@ import java.util.regex.Pattern;
 import android.content.Context;
 import android.util.Log;
 
-import com.matburt.mobileorg.MobileOrgApplication;
 
 public class OrgFileParser {
 
@@ -26,7 +25,7 @@ public class OrgFileParser {
 		this.appdb = new OrgDatabase(context);
 		this.context = context;
 	}
-	
+
 	/**
 	 * This function will return a Node that contains an entry for each org
 	 * file. All files are added with {@link Node.parsed} equal to false,
@@ -38,7 +37,7 @@ public class OrgFileParser {
 
 		for (String key : orgPathFileMap.keySet()) {
 			Node fileNode = new Node(key, rootNode);
-			fileNode.altNodeTitle = orgPathFileMap.get(key);
+			// fileNode.altNodeTitle = orgPathFileMap.get(key);
 			fileNode.parsed = false;
 
 			if (key.endsWith(".gpg") || key.endsWith(".pgp")
@@ -49,17 +48,17 @@ public class OrgFileParser {
 		rootNode.sortChildren();
 		return rootNode;
 	}
-	
+
 	/**
 	 * This causes the given filename to be parsed and the resulting node will
 	 * be returned. An optional root node can be given, resulting in it's entry
 	 * of the node being updated.
 	 */
-	public Node parseFile(String filename, Node rootNode) {		
-    	OrgFile orgfile = new OrgFile(filename, context);
-        BufferedReader breader = orgfile.getReader();
+	public Node parseFile(String filename, Node rootNode) {
+		OrgFile orgfile = new OrgFile(filename, context);
+		BufferedReader breader = orgfile.getReader();
 
-        if(breader == null)
+		if (breader == null)
 			return null;
 
 		Node node;
@@ -69,13 +68,13 @@ public class OrgFileParser {
 			if (node == null)
 				node = new Node(filename, rootNode);
 			else
-				node.children.clear();
+				node.getChildren().clear();
 		} else
 			node = new Node(filename);
-		
+
 		parse(node, breader);
 		node.parsed = true;
-		
+
 		try { breader.close(); } catch (IOException e) {}
 		return node;
 	}
@@ -94,7 +93,7 @@ public class OrgFileParser {
 		starStack.push(0);
 
 		boolean parsingCaptureFile = false;
-		if (fileNode.name.equals(NodeWriter.ORGFILE))
+		if (fileNode.name.equals(OrgFile.CAPTURE_FILE))
 			parsingCaptureFile = true;
 
 		try {
@@ -117,8 +116,8 @@ public class OrgFileParser {
 				// Find title fields and set title for file node
 				if (currentLine.charAt(0) == '#') {
 					if (currentLine.indexOf("#+TITLE:") != -1) {
-						fileNode.altNodeTitle = currentLine.substring(
-								currentLine.indexOf("#+TITLE:") + 8).trim();
+//						fileNode.altNodeTitle = currentLine.substring(
+//								currentLine.indexOf("#+TITLE:") + 8).trim();
 					}
 				}
 
@@ -126,7 +125,7 @@ public class OrgFileParser {
 				if (numstars > 0) {
 					parseHeading(currentLine, numstars);
 				} else {
-					nodeStack.peek().addPayload(currentLine);
+					nodeStack.peek().payload.add(currentLine);
 				}
 			}
 
@@ -244,7 +243,7 @@ public class OrgFileParser {
     		newNode.name = title;
     	}
     	
-        newNode.setTitle(this.stripTitle(title));
+//        newNode.setTitle(this.stripTitle(title));
 
     	return newNode;
     }
@@ -269,7 +268,7 @@ public class OrgFileParser {
         Pattern createTitlePattern = Pattern.compile("^\\*\\s+(.*)");
  
         ArrayList<EditNode> edits = new ArrayList<EditNode>();
-        OrgFile orgfile = new OrgFile(NodeWriter.ORGFILE, context);
+        OrgFile orgfile = new OrgFile(OrgFile.CAPTURE_FILE, context);
         BufferedReader breader = orgfile.getReader();
         if (breader == null)
             return edits;

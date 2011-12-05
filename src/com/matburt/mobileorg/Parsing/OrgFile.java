@@ -19,7 +19,7 @@ import android.preference.PreferenceManager;
 
 public class OrgFile {
 
-	final private static int BUFFER_SIZE = 23 * 1024;
+	public static final String CAPTURE_FILE = "mobileorg.org";
 
 	private Context context;
 	private String fileName;
@@ -85,13 +85,20 @@ public class OrgFile {
 	}
 	
 	public BufferedWriter getWriter() throws IOException {
+		return getWriter(false);
+	}
+	
+	public BufferedWriter getWriter(boolean append) throws IOException {
 		String storageMode = getStorageMode();
 		BufferedWriter writer = null;
 
 		if (storageMode.equals("internal") || storageMode.equals("")) {
 			FileOutputStream fs;
 			String normalized = fileName.replace("/", "_");
-			fs = context.openFileOutput(normalized, Context.MODE_PRIVATE);
+			if(append)
+				fs = context.openFileOutput(normalized, Context.MODE_APPEND);
+			else
+				fs = context.openFileOutput(normalized, Context.MODE_PRIVATE);
 			writer = new BufferedWriter(new OutputStreamWriter(fs));
 
 		} else if (storageMode.equals("sdcard")) {
@@ -100,7 +107,7 @@ public class OrgFile {
 			morgDir.mkdir();
 			if (morgDir.canWrite()) {
 				File orgFileCard = new File(morgDir, fileName);
-				FileWriter orgFWriter = new FileWriter(orgFileCard, false);
+				FileWriter orgFWriter = new FileWriter(orgFileCard, append);
 				writer = new BufferedWriter(orgFWriter);
 			}
 		}
@@ -110,7 +117,7 @@ public class OrgFile {
 
 	public File getFile() {
 		String storageMode = getStorageMode();
-		if (storageMode.equals("internal") || storageMode == null) {
+		if (storageMode.equals("internal") || storageMode.equals("")) {
 			File morgFile = new File("/data/data/com.matburt.mobileorg/files",
 					fileName);
 			return morgFile;
@@ -133,6 +140,7 @@ public class OrgFile {
 	public void fetch(BufferedReader reader) throws IOException {
 		BufferedWriter writer = getWriter();
 
+		final int BUFFER_SIZE = 23 * 1024;
 		char[] baf = new char[BUFFER_SIZE];
 		int actual = 0;
 
@@ -153,6 +161,16 @@ public class OrgFile {
 			File morgDir = new File(root, "mobileorg");
 			File morgFile = new File(morgDir, this.fileName);
 			morgFile.delete();
+		}
+	}
+	
+	public void delete() {
+		String storageMode = getStorageMode();
+		
+		if(storageMode.equals("internal") || storageMode.equals("")) {
+			this.context.deleteFile(this.fileName);
+		} else if (storageMode.equals("external")) {
+			this.getFile().delete();
 		}
 	}
 

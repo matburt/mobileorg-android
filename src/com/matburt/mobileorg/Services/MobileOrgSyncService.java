@@ -1,11 +1,12 @@
-package com.matburt.mobileorg.Synchronizers;
+package com.matburt.mobileorg.Services;
 
 import java.io.IOException;
 import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import com.matburt.mobileorg.MobileOrgApplication;
+import com.matburt.mobileorg.Parsing.MobileOrgApplication;
+import com.matburt.mobileorg.Synchronizers.SyncManager;
 
 import android.app.Service;
 import android.content.Intent;

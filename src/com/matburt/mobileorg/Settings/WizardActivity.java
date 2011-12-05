@@ -1,55 +1,37 @@
 package com.matburt.mobileorg.Settings;
 
+import java.util.ArrayList;
+
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.res.Resources;
-import android.content.SharedPreferences.Editor;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.util.AttributeSet;
-import android.util.Log;
-import android.view.Display;
 import android.view.LayoutInflater;
-import android.widget.AdapterView;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.ViewGroup.LayoutParams;
-import android.view.MotionEvent;
 import android.view.ViewGroup;
-import android.view.inputmethod.InputMethodManager;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
-import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
-//import android.widget.AdapterView;
-import com.matburt.mobileorg.Views.*;
-import com.matburt.mobileorg.Dropbox.*;
-import com.matburt.mobileorg.R;
-import com.dropbox.client.DropboxAPI;
-import java.util.ArrayList;
-import android.widget.ListView;
-//import android.widget.ArrayAdapter;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.CheckBox;
-import android.view.LayoutInflater;
-import android.widget.TextView;
-import android.widget.CompoundButton;
-import java.util.ArrayList;
 
-//import java.util.Map.Entry;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
+import com.matburt.mobileorg.R;
+import com.matburt.mobileorg.Dropbox.Dropbox;
+import com.matburt.mobileorg.Dropbox.DropboxLoginListener;
+import com.matburt.mobileorg.Views.PageFlipView;
 
 public class WizardActivity extends Activity {
     static String TAG="WizardActivity";

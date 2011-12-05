@@ -13,9 +13,9 @@ import android.widget.BaseAdapter;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.matburt.mobileorg.MobileOrgApplication;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Parsing.EditNode;
+import com.matburt.mobileorg.Parsing.MobileOrgApplication;
 import com.matburt.mobileorg.Parsing.Node;
 
 class OutlineListAdapter extends BaseAdapter 
@@ -39,14 +39,14 @@ class OutlineListAdapter extends BaseAdapter
 
 	@Override
 	public int getCount() {
-		if (this.node == null || this.node.children == null)
+		if (this.node == null || this.node.hasChildren() == false)
 			return 0;
-		return this.node.children.size();
+		return this.node.getChildren().size();
 	}
 
 	@Override
 	public Object getItem(int position) {
-		return this.node.children.get(position);
+		return this.node.getChildren().get(position);
 	}
 
 	@Override
@@ -85,13 +85,13 @@ class OutlineListAdapter extends BaseAdapter
 			holder = (ViewHolder) convertView.getTag();
 		}
 		
-		Node node = this.node.children.get(position);
+		Node node = this.node.getChildren().get(position);
 		node.applyEdits(this.edits);
 		
 		String name = node.name;
 		String todo = node.todo;
 		String priority = node.priority;
-		String dateInfo = node.formatDate();
+		String dateInfo = node.payload.datesToString();
 
 		setupHolder(holder, node, name, todo, priority, dateInfo);
 

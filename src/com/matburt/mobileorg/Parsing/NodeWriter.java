@@ -6,12 +6,10 @@ import java.io.IOException;
 import android.app.Activity;
 import android.content.Context;
 
-import com.matburt.mobileorg.MobileOrgApplication;
 
 public class NodeWriter {
 	private Activity appActivity;
 	private Context context;
-	public static final String ORGFILE = "mobileorg.org";
 
 	public NodeWriter(Activity parentActivity) {
 		this.appActivity = parentActivity;
@@ -19,7 +17,7 @@ public class NodeWriter {
 	}
 	
 	public void write(Node node) throws IOException {
-		writeNode(node.generateNoteEntry());
+		writeNode(node.toString());
 	}
 	
 	/**
@@ -43,9 +41,9 @@ public class NodeWriter {
 					newPriority);
 			node.priority = newPriority;
 		}
-		if (!node.getPayload().equals(newPayload)) {
-			editNode("body", node.getNodeId(), newTitle, node.getPayload(), newPayload);
-			node.setPayload(newPayload);
+		if (!node.payload.getContent().equals(newPayload)) {
+			editNode("body", node.getNodeId(), newTitle, node.payload.getContent(), newPayload);
+			node.payload.setContent(newPayload);
 		}
 	}
 
@@ -58,14 +56,14 @@ public class NodeWriter {
 	}
 	
 	private void writeNode(String message) throws IOException {
-		OrgFile orgfile = new OrgFile(ORGFILE, context);
-		BufferedWriter writer = orgfile.getWriter();
-		writer.write(message);
+		OrgFile orgfile = new OrgFile(OrgFile.CAPTURE_FILE, context);
+		BufferedWriter writer = orgfile.getWriter(true);
+		writer.append(message);
+		writer.close();
 	
 		MobileOrgApplication appInst = (MobileOrgApplication) 
 				this.appActivity.getApplication();
-		appInst.addOrUpdateFile(ORGFILE, "New Notes", "");
-		// TODO Parse ORGFILE to update data structures.
-		writer.close();
+		appInst.addOrUpdateFile(OrgFile.CAPTURE_FILE, "New Notes", "");
+		appInst.invalidateFile(OrgFile.CAPTURE_FILE);
 	}
 }

@@ -1,4 +1,4 @@
-package com.matburt.mobileorg;
+package com.matburt.mobileorg.Services;
 
 import android.app.Service;
 import android.appwidget.AppWidgetManager;
@@ -12,6 +12,7 @@ import android.preference.PreferenceManager;
 import android.widget.RemoteViews;
 
 import com.matburt.mobileorg.R;
+import com.matburt.mobileorg.Parsing.MobileOrgApplication;
 import com.matburt.mobileorg.Parsing.OrgDatabase;
 import com.matburt.mobileorg.Parsing.Node;
 import com.matburt.mobileorg.Parsing.OrgFileParser;
@@ -59,8 +60,8 @@ public class MobileOrgWidget extends AppWidgetProvider {
                 Node todoNode = agendaNode.findChildNode("ToDo: ALL");
                 if (todoNode != null) {
                     String widgetBuffer = "";
-                    for (int idx = 0; idx < todoNode.children.size(); idx++) {
-                        widgetBuffer = widgetBuffer + todoNode.children.get(idx).name + "\n";
+                    for (int idx = 0; idx < todoNode.getChildren().size(); idx++) {
+                        widgetBuffer = widgetBuffer + todoNode.getChildren().get(idx).name + "\n";
                     }
                     updateViews.setTextViewText(R.id.message, widgetBuffer);
                 }

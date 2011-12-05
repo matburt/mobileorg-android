@@ -1,4 +1,4 @@
-package com.matburt.mobileorg;
+package com.matburt.mobileorg.Parsing;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,11 +13,6 @@ import android.content.pm.ResolveInfo;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
-import com.matburt.mobileorg.Parsing.EditNode;
-import com.matburt.mobileorg.Parsing.Node;
-import com.matburt.mobileorg.Parsing.NodeWriter;
-import com.matburt.mobileorg.Parsing.OrgDatabase;
-import com.matburt.mobileorg.Parsing.OrgFileParser;
 
 public class MobileOrgApplication extends Application {
     private Node rootNode = null;
@@ -64,34 +59,31 @@ public class MobileOrgApplication extends Application {
 	 * Additionally it will try to update the node stack to point to the new
 	 * nodes, which will cause the user display to be updated appropriately.
 	 */
-   public void invalidateFile(String filename) {
+	public void invalidateFile(String filename) {
 		Node fileNode = this.rootNode.getChild(filename);
-		
-		if(fileNode != null)
+
+		if (fileNode != null)
 			fileNode.parsed = false;
-		
-		if(filename.equals(NodeWriter.ORGFILE))
-			this.edits = parser.parseEdits();
-		
-		if(nodestack.size() >= 2 && nodestack.get(1).name.equals(filename)) {		
-			fileNode = parser.parseFile(filename, this.rootNode);
-			
+
+		if (nodestack.size() >= 2 && nodestack.get(1).name.equals(filename)) {
+			parser.parseFile(filename, this.rootNode);
+
 			ArrayList<Node> newNodestack = new ArrayList<Node>();
-			newNodestack.add(rootNode);
-			
+			newNodestack.add(this.rootNode);
+
 			this.nodestack.remove(0);
-			
+
 			Node newNode = this.rootNode;
-			for(Node node: this.nodestack) {
+			for (Node node : this.nodestack) {
 				newNode = newNode.getChild(node.name);
-				if(newNode != null)
+				if (newNode != null)
 					newNodestack.add(newNode);
 				else
 					break;
 			}
-			
+
 			this.nodestack = newNodestack;
-		}	
+		}
 	}
     
     public void pushNodestack(Node node) {
@@ -117,6 +109,43 @@ public class MobileOrgApplication extends Application {
     public int nodestackSize() {
     	return this.nodestack.size();
     }
+    
+
+    public void addOrUpdateFile(String filename, String name, String checksum) {
+    	appdb.addOrUpdateFile(filename, name, checksum);
+    	
+    	if(this.rootNode.getChild(filename) == null) {
+    		Node node = new Node(filename, this.rootNode);
+    		node.parsed = false;
+    		rootNode.sortChildren();
+    	}
+    }
+    
+    public HashMap<String, String> getOrgFiles() {
+    	return appdb.getOrgFiles();
+    }
+    
+    public boolean removeFile(String filename) {
+    	appdb.removeFile(filename);
+    	this.rootNode.removeChild(filename);
+    	OrgFile orgfile = new OrgFile(filename, this.getApplicationContext());
+    	orgfile.delete();
+    	return true;
+    }
+    
+    
+    public ArrayList<String> getPriorities() {
+    	return appdb.getPriorities();
+    }
+    
+    public ArrayList<HashMap<String, Integer>> getGroupedTodods() {
+    	return appdb.getGroupedTodods();
+    }
+    
+    public ArrayList<String> getTodods() {
+    	return appdb.getTodods();
+    }
+    
     
     public boolean isSynchConfigured() {
     	SharedPreferences appSettings = PreferenceManager
@@ -149,37 +178,5 @@ public class MobileOrgApplication extends Application {
             Log.d("MobileOrg","Found synchronizer plugin: "+info.activityInfo.packageName);            
         }
         return out;
-    }
-    
-    public HashMap<String, String> getOrgFiles() {
-    	return appdb.getOrgFiles();
-    }
-    
-    public boolean deleteFile(String filename) {
-    	appdb.removeFile(filename);
-    	this.rootNode.removeChild(filename);    	
-    	return true;
-    }
-    
-    public ArrayList<String> getPriorities() {
-    	return appdb.getPriorities();
-    }
-    
-    public ArrayList<HashMap<String, Integer>> getGroupedTodods() {
-    	return appdb.getGroupedTodods();
-    }
-    
-    public ArrayList<String> getTodods() {
-    	return appdb.getTodods();
-    }
-    
-    public void addOrUpdateFile(String filename, String name, String checksum) {
-    	appdb.addOrUpdateFile(filename, name, checksum);
-    	
-    	if(this.rootNode.getChild(filename) == null) {
-    		Node node = new Node(filename, this.rootNode);
-    		node.parsed = false;
-    		rootNode.sortChildren();
-    	}
     }
 }
