@@ -116,11 +116,8 @@ abstract public class Synchronizer {
           
             OrgFile orgfile = new OrgFile(filename, context);
             orgfile.fetch(getRemoteFile(filename));
-  
-			appInst.addOrUpdateFile(filename, key,
-					remoteChecksums.get(key));
-			
-			appInst.invalidateFile(filename);
+
+			appInst.addOrUpdateFile(filename, key, remoteChecksums.get(key));
 		}
 	}
 	

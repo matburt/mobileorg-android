@@ -49,7 +49,9 @@ public class OutlineActivity extends ListActivity
 	 */
 	private int lastSelection = 0;
 	
-	final Handler syncHandler = new Handler();
+	private boolean initSuccess = true;
+	
+	private final Handler syncHandler = new Handler();
 	private IOException syncError;
 	private ProgressDialog syncDialog;
 
@@ -63,9 +65,8 @@ public class OutlineActivity extends ListActivity
 		this.depth = intent.getIntExtra("depth", 1);
 		
 		if(this.depth == 1) {
-			if(appInst.init() == false)
-                // Old popup shown to new users
-				//this.showNewUserWindow();
+			this.initSuccess = appInst.init();
+			if(this.initSuccess == false)
                 this.showWizard();
 		}
 
@@ -335,8 +336,9 @@ public class OutlineActivity extends ListActivity
 		if (this.syncError != null) {
 			ErrorReporter.displayError(this, this.syncError.getMessage());
 		} else {
-
-			this.appInst.init();
+			if(this.initSuccess == false) {
+				this.initSuccess = appInst.init();
+			}
 			this.onResume();
 		}
 	}

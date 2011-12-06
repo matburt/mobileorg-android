@@ -33,6 +33,7 @@ public class OrgFileParser {
 	 */
 	public Node prepareRootNode() {
 		Node rootNode = new Node("");
+		
 		HashMap<String, String> orgPathFileMap = this.appdb.getOrgFiles();
 
 		for (String key : orgPathFileMap.keySet()) {

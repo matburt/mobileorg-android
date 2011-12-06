@@ -26,6 +26,8 @@ public class MobileOrgApplication extends Application {
     public void onCreate() {
     	this.appdb = new OrgDatabase(this);
 		this.rootNode = new Node("");
+		clearNodestack();
+		this.parser = new OrgFileParser(getBaseContext(), this);
     }
     
     
@@ -33,59 +35,14 @@ public class MobileOrgApplication extends Application {
 		if (this.appdb.getOrgFiles().isEmpty())
 			return false;
 		
-		this.parser = new OrgFileParser(getBaseContext(), this);
 		this.rootNode = this.parser.prepareRootNode();
-		pushNodestack(this.rootNode);
+		clearNodestack();
 		
 		this.edits = this.parser.parseEdits();
 		
 		return true;
 	}
-    
-    public void makeSureNodeIsParsed(Node node) {	
-		if (node.parsed == false) {
-			if (node.encrypted == false) {
-				this.parser.parseFile(node.name, rootNode);
-			} else {
-			//	decryptNode(node);
-				return;
-			}
-		}
-    }
-    
-	/**
-	 * This function is called by the synchronizer for each file that has
-	 * changed. It will set the parsed flag of the file's node to false.
-	 * Additionally it will try to update the node stack to point to the new
-	 * nodes, which will cause the user display to be updated appropriately.
-	 */
-	public void invalidateFile(String filename) {
-		Node fileNode = this.rootNode.getChild(filename);
-
-		if (fileNode != null)
-			fileNode.parsed = false;
-
-		if (nodestack.size() >= 2 && nodestack.get(1).name.equals(filename)) {
-			parser.parseFile(filename, this.rootNode);
-
-			ArrayList<Node> newNodestack = new ArrayList<Node>();
-			newNodestack.add(this.rootNode);
-
-			this.nodestack.remove(0);
-
-			Node newNode = this.rootNode;
-			for (Node node : this.nodestack) {
-				newNode = newNode.getChild(node.name);
-				if (newNode != null)
-					newNodestack.add(newNode);
-				else
-					break;
-			}
-
-			this.nodestack = newNodestack;
-		}
-	}
-    
+  
     public void pushNodestack(Node node) {
         nodestack.add(node);
     }
@@ -111,19 +68,60 @@ public class MobileOrgApplication extends Application {
     }
     
 
+    public void makeSureNodeIsParsed(Node node) {	
+		if (node.parsed == false) {
+			if (node.encrypted == false) {
+				this.parser.parseFile(node.name, rootNode);
+			} else {
+			//	decryptNode(node);
+				return;
+			}
+		}
+    }
+
+	/**
+	 * This function is called by the synchronizer or capture for each file that
+	 * has changed. It will set the parsed flag of the file's node to false.
+	 * Additionally it will try to update the node stack to point to the new
+	 * nodes, which will cause the user display to be updated appropriately.
+	 */
     public void addOrUpdateFile(String filename, String name, String checksum) {
     	appdb.addOrUpdateFile(filename, name, checksum);
     	
-    	if(this.rootNode.getChild(filename) == null) {
-    		Node node = new Node(filename, this.rootNode);
-    		node.parsed = false;
+    	Node filenode = this.rootNode.getChild(filename);
+    	
+    	if(filenode == null) {
+    		filenode = new Node(filename, this.rootNode);
     		rootNode.sortChildren();
     	}
+    	
+		filenode.parsed = false;
+    	
+    	refreshNodestack(filename);
     }
-    
-    public HashMap<String, String> getOrgFiles() {
-    	return appdb.getOrgFiles();
-    }
+
+	private void refreshNodestack(String filename) {
+		if (nodestack.size() >= 2 && nodestack.get(1).name.equals(filename)) {
+			parser.parseFile(filename, this.rootNode);
+
+			ArrayList<Node> newNodestack = new ArrayList<Node>();
+			newNodestack.add(this.rootNode);
+
+			this.nodestack.remove(0);
+
+			Node newNode = this.rootNode;
+			for (Node node : this.nodestack) {
+				newNode = newNode.getChild(node.name);
+				if (newNode != null) {
+					newNodestack.add(newNode);
+				}
+				else
+					break;
+			}
+
+			this.nodestack = newNodestack;
+		}
+	}
     
     public boolean removeFile(String filename) {
     	appdb.removeFile(filename);
@@ -133,6 +131,10 @@ public class MobileOrgApplication extends Application {
     	return true;
     }
     
+    public HashMap<String, String> getOrgFiles() {
+    	return appdb.getOrgFiles();
+    }
+
     
     public ArrayList<String> getPriorities() {
     	return appdb.getPriorities();

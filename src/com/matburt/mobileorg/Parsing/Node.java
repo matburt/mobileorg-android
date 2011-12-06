@@ -115,10 +115,8 @@ public class Node implements Cloneable {
 	 * removing the applied edits from the list.
 	 */
 	public void applyEdits(ArrayList<EditNode> edits) {
-		if (edits != null) {
-			if (edits.size() == 0)
+		if (edits == null || edits.size() == 0)
 				return;
-		}
 
 		ArrayList<EditNode> nodeEdits = findEdits(edits);
 

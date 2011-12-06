@@ -64,6 +64,5 @@ public class NodeWriter {
 		MobileOrgApplication appInst = (MobileOrgApplication) 
 				this.appActivity.getApplication();
 		appInst.addOrUpdateFile(OrgFile.CAPTURE_FILE, "New Notes", "");
-		appInst.invalidateFile(OrgFile.CAPTURE_FILE);
 	}
 }
