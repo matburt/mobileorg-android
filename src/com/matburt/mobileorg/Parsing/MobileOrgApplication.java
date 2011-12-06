@@ -122,15 +122,14 @@ public class MobileOrgApplication extends Application {
 			this.nodestack = newNodestack;
 		}
 	}
-    
-    public boolean removeFile(String filename) {
-    	appdb.removeFile(filename);
-    	this.rootNode.removeChild(filename);
-    	OrgFile orgfile = new OrgFile(filename, this.getApplicationContext());
-    	orgfile.delete();
-    	return true;
-    }
-    
+
+	public boolean removeFile(String filename) {
+		OrgFile orgfile = new OrgFile(filename, this.getApplicationContext());
+		orgfile.remove(this.appdb);
+		this.rootNode.removeChild(filename);
+		return true;
+	}
+
     public HashMap<String, String> getOrgFiles() {
     	return appdb.getOrgFiles();
     }

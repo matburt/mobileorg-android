@@ -163,16 +163,6 @@ public class OrgFile {
 			morgFile.delete();
 		}
 	}
-	
-	public void delete() {
-		String storageMode = getStorageMode();
-		
-		if(storageMode.equals("internal") || storageMode.equals("")) {
-			this.context.deleteFile(this.fileName);
-		} else if (storageMode.equals("external")) {
-			this.getFile().delete();
-		}
-	}
 
 	private String getStorageMode() {
 		return PreferenceManager.getDefaultSharedPreferences(this.context)
