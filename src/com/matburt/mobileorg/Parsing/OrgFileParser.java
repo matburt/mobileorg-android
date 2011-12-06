@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.EmptyStackException;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -81,8 +82,8 @@ public class OrgFileParser {
 	}
 
 	private Pattern titlePattern = null;
-	private Stack<Node> nodeStack = new Stack<Node>();
-	private Stack<Integer> starStack = new Stack<Integer>();
+	private Stack<Node> nodeStack;
+	private Stack<Integer> starStack;
 
 	Pattern editTitlePattern = Pattern
 			.compile("F\\((edit:.*?)\\) \\[\\[(.*?)\\]\\[(.*?)\\]\\]");
@@ -90,12 +91,11 @@ public class OrgFileParser {
 	private void parse(Node fileNode, BufferedReader breader) {
 		this.todos = appdb.getGroupedTodods();
 
-		nodeStack.push(fileNode);
-		starStack.push(0);
-
-		boolean parsingCaptureFile = false;
-		if (fileNode.name.equals(OrgFile.CAPTURE_FILE))
-			parsingCaptureFile = true;
+		this.nodeStack = new Stack<Node>();
+		this.starStack = new Stack<Integer>();
+		
+		this.nodeStack.push(fileNode);
+		this.starStack.push(0);
 
 		try {
 			String currentLine;
@@ -105,14 +105,8 @@ public class OrgFileParser {
 
 				lineLength = currentLine.length();
 				
-				if (lineLength < 1)
+				if (lineLength == 0)
 					continue;
-
-				if (parsingCaptureFile) {
-					Matcher editm = editTitlePattern.matcher(currentLine);
-					if (editm.find())
-						continue;
-				}
 
 				// Find title fields and set title for file node
 				if (currentLine.charAt(0) == '#') {
@@ -130,14 +124,21 @@ public class OrgFileParser {
 				}
 			}
 
-			while (starStack.peek() > 0) {
-				nodeStack.pop();
-				starStack.pop();
-			}
-
 		} catch (IOException e) {}
+		
+		if(fileNode.name.equals(OrgFile.CAPTURE_FILE)) {
+			deleteEditNodes(fileNode);
+		}
 	}
 
+	private void deleteEditNodes(Node fileNode) {
+		for(Iterator<Node> it = fileNode.getChildren().iterator(); it.hasNext();) {
+			final Node child = it.next();
+			if(child.name.startsWith("F(edit"))
+				it.remove();
+		}
+	}
+	
 	private static int numberOfStars(String thisLine, int lineLength) {
 		int numstars = 0;
 
@@ -159,36 +160,23 @@ public class OrgFileParser {
         
         Node newNode = parseTitle(this.stripTitle(title));
 
-        if (numstars > starStack.peek()) {
-            try {
-                Node lastNode = nodeStack.peek();
-                newNode.setParentNode(lastNode);
-                lastNode.addChild(newNode);
-            } catch (EmptyStackException e) {
-            }
-            nodeStack.push(newNode);
-            starStack.push(numstars);
-        }
-        else if (numstars == starStack.peek()) {
+        if (numstars == starStack.peek()) {
             nodeStack.pop();
             starStack.pop();
-            nodeStack.peek().addChild(newNode);
-            newNode.setParentNode(nodeStack.peek());
-            nodeStack.push(newNode);
-            starStack.push(numstars);
         }
         else if (numstars < starStack.peek()) {
             while (numstars <= starStack.peek()) {
                 nodeStack.pop();
                 starStack.pop();
             }
-
-            Node lastNode = nodeStack.peek();
-            newNode.setParentNode(lastNode);
-            lastNode.addChild(newNode);
-            nodeStack.push(newNode);
-            starStack.push(numstars);
         }
+        
+        try {
+            nodeStack.peek().addChild(newNode);
+        } catch (EmptyStackException e) {}
+        
+        nodeStack.push(newNode);
+        starStack.push(numstars);
     }
     
     private Pattern prepareTitlePattern() {

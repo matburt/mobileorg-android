@@ -26,11 +26,7 @@ public class Node implements Cloneable {
 		this.name = name;
 	}
 
-	
-	public void setParentNode(Node parent) {
-		this.parent = parent;
-	}
-	
+
 	public void addChild(Node childNode) {
 		this.children.add(childNode);
 		childNode.parent = this;
