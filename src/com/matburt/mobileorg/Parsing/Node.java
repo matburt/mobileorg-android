@@ -147,7 +147,7 @@ public class Node implements Cloneable {
 	}
 
 	public String getNodeId() {
-		if (this.payload.getNodeId().length() == 0) {
+		if (this.payload.getNodeId() == null) {
 			String npath = this.name;
 			Node pnode = this;
 			while ((pnode = pnode.parent) != null) {
