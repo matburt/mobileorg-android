@@ -88,7 +88,7 @@ public class OrgFileParser {
 	Pattern editTitlePattern = Pattern
 			.compile("F\\((edit:.*?)\\) \\[\\[(.*?)\\]\\[(.*?)\\]\\]");
 
-	private void parse(Node fileNode, BufferedReader breader) {
+	public void parse(Node fileNode, BufferedReader breader) {
 		this.todos = appdb.getGroupedTodods();
 
 		this.nodeStack = new Stack<Node>();

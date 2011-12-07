@@ -1,6 +1,8 @@
 package com.matburt.mobileorg.Gui;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.StringReader;
 
 import android.app.ListActivity;
 import android.app.ProgressDialog;
@@ -21,6 +23,9 @@ import android.widget.Toast;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Parsing.MobileOrgApplication;
 import com.matburt.mobileorg.Parsing.Node;
+import com.matburt.mobileorg.Parsing.NodeEncryption;
+import com.matburt.mobileorg.Parsing.OrgFile;
+import com.matburt.mobileorg.Parsing.OrgFileParser;
 import com.matburt.mobileorg.Settings.SettingsActivity;
 import com.matburt.mobileorg.Settings.WizardActivity;
 import com.matburt.mobileorg.Synchronizers.SyncManager;
@@ -164,7 +169,13 @@ public class OutlineActivity extends ListActivity
 	@Override
 	public void onListItemClick(ListView l, View v, int position, long id) {
 		Node node = (Node) l.getItemAtPosition(position);
-		appInst.makeSureNodeIsParsed(node);
+
+		if(node.encrypted) {
+			runDecryptAndExpandNode(node);
+			return;
+		}
+		else
+			appInst.makeSureNodeIsParsed(node);
 
 		this.lastSelection = position;
 		
@@ -250,51 +261,48 @@ public class OutlineActivity extends ListActivity
 				this.refreshDisplay();
 			break;
 
-//		case NodeEncryption.DECRYPT_MESSAGE:
-//			if (resultCode != RESULT_OK || intent == null) {
-//				this.appInst.popNodestack();
-//				return;
-//			}
-//
-//			parseEncryptedNode(intent);
-//			runExpandSelection(this.appInst.nodestackTop());
-//			break;
+		case NodeEncryption.DECRYPT_MESSAGE:
+			if (resultCode != RESULT_OK || intent == null)
+				return;
+			
+			Node node = this.appInst.nodestackTop();
+			this.appInst.popNodestack();
+			parseEncryptedNode(intent, node);
+			this.runExpandSelection(node);
+			break;
 		}
 	}
+  
+	/**
+	 * This calls startActivityForResult() with Encryption.DECRYPT_MESSAGE. The
+	 * result is handled by onActivityResult() in this class, which calls a
+	 * function to parse the resulting plain text file.
+	 */
+	private void runDecryptAndExpandNode(Node node) {
+		// if suitable APG version is installed
+		if (NodeEncryption.isAvailable((Context) this)) {
+			// retrieve the encrypted file data
+			OrgFile orgfile = new OrgFile(node.name, getBaseContext());
+			byte[] rawData = orgfile.getRawFileData();
+			// save node so parsing function knows which node to parse into.
+			appInst.pushNodestack(node);
+			// and send it to APG for decryption
+			NodeEncryption.decrypt(this, rawData);
+		}
+	}
+	
+	/**
+	 * This function is called with the results of {@link #runDecryptAndExpandNode}.
+	 */
+	private void parseEncryptedNode(Intent data, Node node) {
+		OrgFileParser ofp = new OrgFileParser(getBaseContext(), appInst);
 
-	
-//    
-//	/**
-//	 * This calls startActivityForResult() with Encryption.DECRYPT_MESSAGE. The
-//	 * result is handled by onActivityResult() in this class, which calls a
-//	 * function to parse the resulting plain text file.
-//	 */
-//	private void decryptNode(Node node) {
-//		// if suitable APG version is installed
-//		if (NodeEncryption.isAvailable((Context) this)) {
-//			// retrieve the encrypted file data
-//			OrgFile orgfile = new OrgFile(node.name, getBaseContext());
-//			byte[] rawData = orgfile.getRawFileData();
-//			// and send it to APG for decryption
-//		//	NodeEncryption.decrypt(this, rawData);
-//		} else {
-//			popNodestack();
-//		}
-//	}
-	
-//	/**
-//	 * This function is called with the results of {@link #decryptNode}.
-//	 */
-//	private void parseEncryptedNode(Intent data) {
-//		OrgFileParser ofp = new OrgFileParser(getBaseContext(), appInst);
-//		Node node = this.appInst.nodestackTop();
-//
-//		String decryptedData = data
-//				.getStringExtra(NodeEncryption.EXTRA_DECRYPTED_MESSAGE);
-//
-//		ofp.parseFile(node, new BufferedReader(new StringReader(
-//				decryptedData)));
-//	}
+		String decryptedData = data
+				.getStringExtra(NodeEncryption.EXTRA_DECRYPTED_MESSAGE);
+
+		ofp.parse(node, new BufferedReader(new StringReader(
+				decryptedData)));
+	}
 
 	private void runSynchronizer() {
 		final SyncManager synchman = new SyncManager(this, this.appInst);
