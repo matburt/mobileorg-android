@@ -324,7 +324,7 @@ public class WizardActivity extends Activity {
 	    editor.putString("syncSource", syncSource);
 	    if ( syncSource.equals("webdav") ) ;
 	    else if ( syncSource.equals("dropbox") )
-		    editor.putString("dropboxPath", directoryAdapter.getCheckedDirectory() );
+		    editor.putString("dropboxPath", directoryAdapter.getCheckedDirectory() + "/");
 	    else if ( syncSource.equals("sdcard") ) 
 		    editor.putString("indexFilePath", directoryAdapter.getCheckedDirectory() );
 	    editor.putString("storageMode", "sdcard");
