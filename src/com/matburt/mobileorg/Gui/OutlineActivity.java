@@ -200,7 +200,7 @@ public class OutlineActivity extends ListActivity
 		Intent intent = new Intent(this,
 				NodeEditActivity.class);
 		intent.putExtra("actionMode", NodeEditActivity.ACTIONMODE_EDIT);
-		startActivity(intent);
+		startActivityForResult(intent, RUNFOR_EDITNODE);
 	}
 
 	private void runViewNodeActivity(Node node) {
@@ -242,6 +242,7 @@ public class OutlineActivity extends ListActivity
 			break;
 
 		case RUNFOR_EDITNODE:
+			this.appInst.popNodestack();
 			break;
 			
 		case RUNFOR_NEWNODE:
