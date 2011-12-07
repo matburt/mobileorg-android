@@ -17,13 +17,13 @@ import android.util.Log;
 public class OrgFileParser {
 
     private Context context;
-    private OrgDatabase appdb;
+    private MobileOrgApplication appInst;
     private static final String LT = "MobileOrg";
 
     private ArrayList<HashMap<String, Integer>> todos = null;
 
 	public OrgFileParser(Context context, MobileOrgApplication appInst) {
-		this.appdb = new OrgDatabase(context);
+		this.appInst = appInst;
 		this.context = context;
 	}
 
@@ -35,7 +35,7 @@ public class OrgFileParser {
 	public Node prepareRootNode() {
 		Node rootNode = new Node("");
 		
-		HashMap<String, String> orgPathFileMap = this.appdb.getOrgFiles();
+		HashMap<String, String> orgPathFileMap = this.appInst.getOrgFiles();
 
 		for (String key : orgPathFileMap.keySet()) {
 			Node fileNode = new Node(key, rootNode);
@@ -89,7 +89,7 @@ public class OrgFileParser {
 			.compile("F\\((edit:.*?)\\) \\[\\[(.*?)\\]\\[(.*?)\\]\\]");
 
 	public void parse(Node fileNode, BufferedReader breader) {
-		this.todos = appdb.getGroupedTodods();
+		this.todos = this.appInst.getGroupedTodods();
 
 		this.nodeStack = new Stack<Node>();
 		this.starStack = new Stack<Integer>();
