@@ -1,85 +1,109 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-      package="com.matburt.mobileorg"
-      android:versionCode="62"
-      android:versionName="0.6.2"
-      android:installLocation="auto">
-  <uses-sdk android:minSdkVersion="8" android:targetSdkVersion="8"/>
+    android:installLocation="auto"
+    package="com.matburt.mobileorg"
+    android:versionCode="62"
+    android:versionName="0.6.2" >
 
-  <uses-permission android:name="android.permission.INTERNET"/>
-  <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-  <application android:name=".Parsing.MobileOrgApplication"
-               android:label="MobileOrg"
-               android:icon="@drawable/icon" android:debuggable="true">
-    <receiver android:name=".Services.MobileOrgWidget"
-              android:label="MobileOrg Tasks">
-      <intent-filter>
-        <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-      </intent-filter>
-      <meta-data android:name="android.appwidget.provider"
-                 android:resource="@xml/widget_mobileorg" />
-    </receiver>
-    <service android:name=".MobileOrgWidget$MobileOrgWidgetService" />
-	<service android:name=".Services.MobileOrgSyncService">
-	  <intent-filter>
-		<action android:name="com.matburt.mobileorg.SYNC_SERVICE" />
-	  </intent-filter>
-	</service>
-	<receiver android:name=".Services.MobileOrgStartupIntentReceiver">
-	  <intent-filter>
-		<action android:name="android.intent.action.BOOT_COMPLETED" />
-		<category android:name="android.intent.category.HOME" />
-	  </intent-filter>
-	</receiver>
-    <activity android:name=".Gui.OutlineActivity"
-              android:label="MobileOrg">
-      <intent-filter>
-        <action android:name="android.intent.action.MAIN" />
-        <category android:name="android.intent.category.LAUNCHER" />
-      </intent-filter>
-    </activity>
-    <activity android:name=".Settings.SettingsActivity"
-              android:label="MobileOrg Settings">
-    </activity>
-    <activity android:name=".Settings.WizardActivity"
-              android:label="MobileOrg Wizard">
-    </activity>
-    <activity android:name=".Synchronizers.DropboxAuthActivity"
-              android:label="Dropbox Authentication">
-    </activity>
-    <activity android:name=".Gui.NodeViewActivity"
-              android:label="Org View">
-    </activity>
-    <activity android:name=".Capture.EditDetailsActivity"
-              android:label="TODO State Selection">
-    </activity>
-    <activity android:name="OrgContextMenu"
-              android:label="OrgMenu">
-    </activity>
-    <activity android:name=".Gui.NodeEditBodyActivity"
-              android:label="Org Capture"
-              android:windowSoftInputMode="adjustResize"
-              android:exported="true">
-      <intent-filter>
-        <action android:name="com.matburt.mobileorg.CAPTURE"/>
-        <action android:name="android.intent.action.MAIN" />
-        <category android:name="android.intent.category.DEFAULT" />
-      </intent-filter>
-	  <intent-filter>
-		<action android:name="android.intent.action.SEND" />
-		<category android:name="android.intent.category.DEFAULT" />
-		<data android:mimeType="text/*" />
-	  </intent-filter>
-    </activity>
-    <activity android:name=".Settings.WebDAVSettingsActivity"
-              android:label="WebDAV Settings">
-    </activity>
-    <activity android:name=".Settings.SDCardSettingsActivity"
-              android:label="SDCard Settings">
-    </activity>
-    <activity android:name=".Settings.DropboxSettingsActivity"
-              android:label="Dropbox Settings">
-    </activity>
-  <activity android:name=".Gui.NodeEditActivity" android:windowSoftInputMode="adjustPan"></activity>
-</application>
+    <uses-sdk
+        android:minSdkVersion="8"
+        android:targetSdkVersion="8" />
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
+    <application
+        android:debuggable="true"
+        android:icon="@drawable/icon"
+        android:label="MobileOrg"
+        android:name=".Parsing.MobileOrgApplication" >
+        <receiver
+            android:label="MobileOrg Tasks"
+            android:name=".Services.MobileOrgWidget" >
+            <intent-filter >
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_mobileorg" />
+        </receiver>
+
+        <service android:name=".Services.MobileOrgWidget$MobileOrgWidgetService" />
+        <service android:name=".Services.MobileOrgSyncService" >
+            <intent-filter >
+                <action android:name="com.matburt.mobileorg.SYNC_SERVICE" />
+            </intent-filter>
+        </service>
+
+        <receiver android:name=".Services.MobileOrgStartupIntentReceiver" >
+            <intent-filter >
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+
+                <category android:name="android.intent.category.HOME" />
+            </intent-filter>
+        </receiver>
+
+        <activity
+            android:label="MobileOrg"
+            android:name=".Gui.OutlineActivity" >
+            <intent-filter >
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:label="Org View"
+            android:name=".Gui.NodeViewActivity" >
+        </activity>
+        <activity
+            android:exported="true"
+            android:label="Org Capture"
+            android:name=".Gui.NodeEditActivity"
+            android:windowSoftInputMode="adjustPan" >
+            <intent-filter >
+                <action android:name="com.matburt.mobileorg.CAPTURE" />
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            <intent-filter >
+                <action android:name="android.intent.action.SEND" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:mimeType="text/*" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".Gui.NodeEditBodyActivity"
+            android:windowSoftInputMode="adjustResize" >
+        </activity>
+        <activity
+            android:label="MobileOrg Settings"
+            android:name=".Settings.SettingsActivity" >
+        </activity>
+        <activity
+            android:label="MobileOrg Wizard"
+            android:name=".Settings.WizardActivity" >
+        </activity>
+        <activity
+            android:label="Dropbox Authentication"
+            android:name=".Synchronizers.DropboxAuthActivity" >
+        </activity>
+        <activity
+            android:label="WebDAV Settings"
+            android:name=".Settings.WebDAVSettingsActivity" >
+        </activity>
+        <activity
+            android:label="SDCard Settings"
+            android:name=".Settings.SDCardSettingsActivity" >
+        </activity>
+        <activity
+            android:label="Dropbox Settings"
+            android:name=".Settings.DropboxSettingsActivity" >
+        </activity>
+    </application>
+
 </manifest>

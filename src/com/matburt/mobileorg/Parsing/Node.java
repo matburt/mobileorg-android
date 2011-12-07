@@ -180,9 +180,9 @@ public class Node implements Cloneable {
 			noteStr += "[#" + priority + "] ";
 
 		noteStr += this.name + "\n";
-
+		
 		if (this.payload.getContent().length() > 0)
-			noteStr += this.payload + "\n";
+			noteStr += this.payload.getContent() + "\n";
 
 		noteStr += "\n";
 		return noteStr;

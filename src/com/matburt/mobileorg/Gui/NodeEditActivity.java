@@ -59,7 +59,19 @@ public class NodeEditActivity extends Activity {
 		MobileOrgApplication appInst = (MobileOrgApplication) this
 				.getApplication();
 
-		if (this.actionMode.equals(ACTIONMODE_CREATE)) {
+		if(this.actionMode == null) {
+			this.actionMode = ACTIONMODE_CREATE;
+			node = new Node("");
+
+			Intent intent = getIntent();
+
+			String subject = intent.getStringExtra("android.intent.extra.SUBJECT");
+			String text = intent.getStringExtra("android.intent.extra.TEXT");
+
+			titleView.setText(subject);
+			payloadView.setText(text);
+		}
+		else if (this.actionMode.equals(ACTIONMODE_CREATE)) {
 			node = new Node("");
 		} else if (this.actionMode.equals(ACTIONMODE_EDIT)) {
 			node = appInst.nodestackTop();
