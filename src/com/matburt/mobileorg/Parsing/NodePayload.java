@@ -70,7 +70,12 @@ public class NodePayload {
 			String name = propm.group();
 			
 			int start = propm.start();
-			int end = payload.indexOf("\n", propm.end());
+			int end;
+			
+			if(name.equals(":LOGBOOK:")) {
+				end = payload.indexOf(":END:");
+			} else
+				end = payload.indexOf("\n", propm.end());
 
 			
 			if(end == -1)
