@@ -10,7 +10,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.widget.RemoteViews;
 
 import com.matburt.mobileorg.R;
@@ -56,30 +55,35 @@ public class MobileOrgWidget extends AppWidgetProvider {
             PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
             updateViews.setOnClickPendingIntent(R.id.widget, pendingIntent);
 
+
+			updateViews.setTextViewText(R.id.message, getAgenda());
+            return updateViews;
+        }
+
+        private String getAgenda() {
             MobileOrgApplication appInst = (MobileOrgApplication)this.getApplication();
             OrgFileParser ofp = new OrgFileParser(getBaseContext(), appInst);
 
+            StringBuilder widgetBuffer = new StringBuilder();
+            
 			Node agendaNode = ofp.parseFile("agendas.org", null);
 			if (agendaNode != null) {
 				Node todoNode = agendaNode.findChildNode("Today");
 				if (todoNode != null) {
 					todoNode = todoNode.getChildren().get(0);
 					if (todoNode != null) {
-						String widgetBuffer = "";
 						for (Node child : todoNode.getChildren()) {
-							widgetBuffer = widgetBuffer + child.name + "\n";
-						}
-						updateViews.setTextViewText(R.id.message, widgetBuffer);
+							widgetBuffer.append(child.payload.getTime());
+							widgetBuffer.append(" ");
+							widgetBuffer.append(child.name);
+							widgetBuffer.append("\n");
+						}		
 					}
 				}
 			}
-            return updateViews;
+			
+			return widgetBuffer.toString();
         }
-
-        
-    	public void click() {
-    		Log.d("mobileorg", "click de click!");
-    	}
 
         public String getStorageLocation(Context context) {
             SharedPreferences appPrefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());

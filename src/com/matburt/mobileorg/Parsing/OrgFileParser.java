@@ -81,7 +81,7 @@ public class OrgFileParser {
 		return node;
 	}
 
-	private Pattern titlePattern = null;
+	private static Pattern titlePattern = null;
 	private Stack<Node> nodeStack;
 	private Stack<Integer> starStack;
 
@@ -155,21 +155,18 @@ public class OrgFileParser {
 		return numstars;
 	}
     
-    private void parseHeading(String thisLine, int numstars) {
-        String title = thisLine.substring(numstars+1);
-        
-        Node newNode = parseTitle(this.stripTitle(title));
+	private void parseHeading(String thisLine, int numstars) {
+		Node newNode = parseLineIntoNode(thisLine, numstars);
 
-        if (numstars == starStack.peek()) {
-            nodeStack.pop();
-            starStack.pop();
-        }
-        else if (numstars < starStack.peek()) {
-            while (numstars <= starStack.peek()) {
-                nodeStack.pop();
-                starStack.pop();
-            }
-        }
+		if (numstars == starStack.peek()) {
+			nodeStack.pop();
+			starStack.pop();
+		} else if (numstars < starStack.peek()) {
+			while (numstars <= starStack.peek()) {
+				nodeStack.pop();
+				starStack.pop();
+			}
+		}
         
         try {
             nodeStack.peek().addChild(newNode);
@@ -179,16 +176,75 @@ public class OrgFileParser {
         starStack.push(numstars);
     }
     
+    private Node parseLineIntoNode (String thisLine, int numstars) {
+    	String heading = stripHeading(thisLine, numstars).trim();
+    	
+        Node newNode = new Node("");
+    	
+    	Pattern pattern = prepareTitlePattern();
+    	Matcher m = pattern.matcher(heading);
+		if (m.find()) {
+			if (m.group(1) != null) {
+				String tempTodo = m.group(1).trim();
+				if (tempTodo.length() > 0 && isValidTodo(tempTodo)) {
+					newNode.todo = tempTodo;
+				} else {
+					newNode.name = tempTodo + " ";
+				}
+			}
+			if (m.group(2) != null) {
+				newNode.priority = m.group(2);
+				newNode.priority = newNode.priority.replace("#", "");
+				newNode.priority = newNode.priority.replace("[", "");
+				newNode.priority = newNode.priority.replace("]", "");
+			}
+			newNode.name += m.group(3);
+			String tempTags = m.group(4);
+			if (tempTags != null) {
+				for (String tag : tempTags.split(":")) {
+					newNode.addTag(tag);
+				}
+			}
+		} else {
+			Log.w(LT, "Title not matched: " + heading);
+			newNode.name = heading;
+		}
+    	
+    	return newNode;
+    }
+
+    final static Pattern titlePattern2 = Pattern.compile("<before.*</before>|<after.*</after>");
+    private String stripHeading(String line, int numstars) {
+        String heading = line.substring(numstars+1);
+
+        Matcher titleMatcher = titlePattern2.matcher(heading);
+        String newHeading = "";
+        if (titleMatcher.find()) {
+            newHeading += heading.substring(0, titleMatcher.start());
+            newHeading += heading.substring(titleMatcher.end(), heading.length());
+        }
+        else
+            newHeading = heading;
+
+        // Hack to strip out * from habits
+        if(this.nodeStack.get(0).name.equals("agendas.org"))
+        	newHeading = newHeading.replaceAll("\\*", "");
+        
+        return newHeading;
+    }
+ 
     private Pattern prepareTitlePattern() {
-    	if (this.titlePattern == null) {
+    	if (OrgFileParser.titlePattern == null) {
     		StringBuffer pattern = new StringBuffer();
     		pattern.append("^(?:([A-Z]{2,}:?\\s+");
     		pattern.append(")\\s*)?");
     		pattern.append("(\\[\\#.*\\])?(.*?)");
-    		pattern.append("\\s*(?::([^\\s]+):)?$");
-    		this.titlePattern = Pattern.compile(pattern.toString());
+    		pattern.append("\\s*(?::([^\\s]+):)?");
+    		// TODO Line beneath should filter out habit stuff from agenda.org, but it doesn't seem to filter *
+    		pattern.append("(\\s*[\\*!])?$");
+    		OrgFileParser.titlePattern = Pattern.compile(pattern.toString());
     	}
-		return this.titlePattern;
+		return OrgFileParser.titlePattern;
     }
 	
 	private boolean isValidTodo(String todo) {
@@ -198,59 +254,6 @@ public class OrgFileParser {
 		return false;
 	}
 
-    private Node parseTitle (String orgTitle) {
-    	String title = orgTitle.trim();
-    	
-        Node newNode = new Node("");
-    	
-    	Pattern pattern = prepareTitlePattern();
-    	Matcher m = pattern.matcher(title);
-    	if (m.find()) {
-    		if (m.group(1) != null) {
-				String tempTodo = m.group(1).trim();
-				if(tempTodo.length() > 0 && isValidTodo(tempTodo)) {
-					newNode.todo = tempTodo;
-				} else {
-					newNode.name = tempTodo + " ";
-				}
-			}
-            if (m.group(2) != null) {
-                newNode.priority = m.group(2);
-                newNode.priority = newNode.priority.replace("#", "");
-                newNode.priority = newNode.priority.replace("[", "");
-                newNode.priority = newNode.priority.replace("]", "");
-            }
-    		newNode.name += m.group(3);
-    		String tempTags = m.group(4);
-    		if (tempTags != null) {
-    			for (String tag : tempTags.split(":")) {
-    				newNode.addTag(tag);
-				}
-    		}
-    	} else {
-    		Log.w(LT, "Title not matched: " + title);
-    		newNode.name = title;
-    	}
-    	
-//        newNode.setTitle(this.stripTitle(title));
-
-    	return newNode;
-    }
- 
-    Pattern titlePattern2 = Pattern.compile("<before.*</before>|<after.*</after>");
-    private String stripTitle(String orgTitle) {
-    	// TODO Strip links to only display real title: [[foo][bar]] should be bar 
-        Matcher titleMatcher = titlePattern2.matcher(orgTitle);
-        String newTitle = "";
-        if (titleMatcher.find()) {
-            newTitle += orgTitle.substring(0, titleMatcher.start());
-            newTitle += orgTitle.substring(titleMatcher.end(), orgTitle.length());
-        }
-        else {
-            newTitle = orgTitle;
-        }
-        return newTitle;
-    }
 
     public ArrayList<EditNode> parseEdits() {
         Pattern editTitlePattern = Pattern.compile("F\\((edit:.*?)\\) \\[\\[(.*?)\\]\\[(.*?)\\]\\]");

@@ -1,7 +1,6 @@
 package com.matburt.mobileorg.Parsing;
 
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -10,8 +9,8 @@ public class NodePayload {
 	private StringBuilder payload = new StringBuilder();
 	
 	private String content = null;
-	private Date schedule = null;
-	private Date deadline = null;
+	private String scheduled = null;
+	private String deadline = null;
 	
 	private String nodeId = null;
 	
@@ -39,8 +38,8 @@ public class NodePayload {
 
 	
 	private String cleanPayload() {
-		stripDate("SCHEDULED:");
-		stripDate("DEADLINE:");
+		this.scheduled = stripDate("SCHEDULED:");
+		this.deadline = stripDate("DEADLINE:");
 
 		stripTags();
 		
@@ -51,7 +50,7 @@ public class NodePayload {
 		int index = payload.indexOf(scheduled);
 		
 		if(index == -1)
-			return null;
+			return "";
 		
 		int start = payload.indexOf("<", index);
 		int end = payload.indexOf(">", start);
@@ -64,7 +63,6 @@ public class NodePayload {
 	}
 	
 	private void stripTags() {
-
 		final Pattern propertiesLine = Pattern.compile(":[A-Za-z_]+:");
 		Matcher propm = propertiesLine.matcher(this.payload);
 
@@ -88,6 +86,36 @@ public class NodePayload {
 		}
 	}
 
+	
+	public String getTime() {
+		String time = "            ";
+		
+		if(this.scheduled == null)
+			this.scheduled = stripDate("SCHEDULED:");
+		
+		int start = this.scheduled.indexOf(":");
+		
+		if(start != -1)
+			time = this.scheduled.substring(start-2, start+3) + " ";
+		
+		return time;
+	}
+
+	public String datesToString() {
+		String dateInfo = "";
+
+		try{
+		SimpleDateFormat formatter = new SimpleDateFormat("<yyyy-MM-dd EEE>");
+		if (this.deadline != null && this.deadline.length() > 0)
+			dateInfo += "DEADLINE: " + formatter.format(this.deadline) + " ";
+
+		if (this.scheduled != null && this.scheduled.length() > 0)
+			dateInfo += "SCHEDULED: " + formatter.format(this.scheduled) + " ";
+		} catch(IllegalArgumentException e) { dateInfo = "";}
+		
+		return dateInfo;
+	}
+	
 //	private String getProperty(String name) {
 //		String nameWithColon = ":" + name + ":";
 //		int indexOfName = payload.indexOf(nameWithColon);
@@ -137,17 +165,4 @@ public class NodePayload {
 //		this.schedule = getDate("SCHEDULED");
 //		return this.schedule;
 //	}
-
-	public String datesToString() {
-		String dateInfo = "";
-
-		SimpleDateFormat formatter = new SimpleDateFormat("<yyyy-MM-dd EEE>");
-		if (this.deadline != null)
-			dateInfo += "DEADLINE: " + formatter.format(this.deadline) + " ";
-
-		if (this.schedule != null)
-			dateInfo += "SCHEDULED: " + formatter.format(this.schedule) + " ";
-
-		return dateInfo;
-	}
 }
