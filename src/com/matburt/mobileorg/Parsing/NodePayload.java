@@ -91,7 +91,9 @@ public class NodePayload {
 		}
 	}
 
-	
+	/**
+	 * Returns a string containing the time at which a todo is scheduled.
+	 */
 	public String getTime() {
 		String time = "            ";
 		
@@ -120,54 +122,4 @@ public class NodePayload {
 		
 		return dateInfo;
 	}
-	
-//	private String getProperty(String name) {
-//		String nameWithColon = ":" + name + ":";
-//		int indexOfName = payload.indexOf(nameWithColon);
-//		if (indexOfName != -1) {
-//			String value = payload.substring(indexOfName + nameWithColon.length()).trim();
-////			this.properties.put(name, value);
-//			return value;
-//		} else
-//			return "";		
-//	}
-	
-//	private String getOriginalId() {
-//		this.nodeId = getProperty("ORIGINAL_ID");
-//		return this.nodeId;
-//	}
-
-//	private String getId() {
-//		//this.nodeId = getProperty("ID");
-//		return this.nodeId;
-//	}
-//
-//	private Date getDate(String name) {
-//		if(payload.indexOf(name + ":") == -1)
-//			return null;
-//		
-//		Pattern datePattern = Pattern
-//				.compile("^.*" + name + ": <(\\S+ \\S+)( \\S+)?>");
-//
-//		Date date = null;
-//		
-//		try {
-//			Matcher dateMatcher = datePattern.matcher(this.payload);
-//			SimpleDateFormat dFormatter = new SimpleDateFormat("yyyy-MM-dd EEE");
-//			if (dateMatcher.find())
-//				date = dFormatter.parse(dateMatcher.group(1));
-//		} catch (java.text.ParseException e) {}
-//		
-//		return date;
-//	}
-//	
-//	private Date getDeadline() {
-//		this.deadline = getDate("DEADLINE");
-//		return this.deadline;
-//	}
-//	
-//	private Date getScheduled() {
-//		this.schedule = getDate("SCHEDULED");
-//		return this.schedule;
-//	}
 }

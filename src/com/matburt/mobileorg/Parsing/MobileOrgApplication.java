@@ -66,7 +66,7 @@ public class MobileOrgApplication extends Application {
     public int nodestackSize() {
     	return this.nodestack.size();
     }
-    
+
 
     public void makeSureNodeIsParsed(Node node) {	
 		if (node.parsed == false) {

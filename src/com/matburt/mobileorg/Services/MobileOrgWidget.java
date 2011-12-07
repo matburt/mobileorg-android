@@ -1,5 +1,7 @@
 package com.matburt.mobileorg.Services;
 
+import java.util.ArrayList;
+
 import android.app.PendingIntent;
 import android.app.Service;
 import android.appwidget.AppWidgetManager;
@@ -14,6 +16,7 @@ import android.widget.RemoteViews;
 
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Gui.NodeEditActivity;
+import com.matburt.mobileorg.Parsing.EditNode;
 import com.matburt.mobileorg.Parsing.MobileOrgApplication;
 import com.matburt.mobileorg.Parsing.Node;
 import com.matburt.mobileorg.Parsing.OrgFileParser;
@@ -62,16 +65,19 @@ public class MobileOrgWidget extends AppWidgetProvider {
 
         private String getAgenda() {
             MobileOrgApplication appInst = (MobileOrgApplication)this.getApplication();
-            OrgFileParser ofp = new OrgFileParser(getBaseContext(), appInst);
-
-            StringBuilder widgetBuffer = new StringBuilder();
             
+            OrgFileParser ofp = new OrgFileParser(getBaseContext(), appInst);
 			Node agendaNode = ofp.parseFile("agendas.org", null);
+			ArrayList<EditNode> parseEdits = ofp.parseEdits();
+			
+			
+            StringBuilder widgetBuffer = new StringBuilder();            
 			if (agendaNode != null) {
 				Node todoNode = agendaNode.findChildNode("Today");
 				if (todoNode != null) {
 					todoNode = todoNode.getChildren().get(0);
-					if (todoNode != null) {
+					todoNode.applyEdits(parseEdits);
+					if (todoNode != null && !todoNode.todo.equals("DONE")) {
 						for (Node child : todoNode.getChildren()) {
 							widgetBuffer.append(child.payload.getTime());
 							widgetBuffer.append(" ");
