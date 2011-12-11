@@ -59,7 +59,7 @@ abstract public class Synchronizer {
 	}
 
 	public void sync(MobileOrgApplication appInst) throws IOException {
-		push(OrgFile.CAPTURE_FILE);
+		push(OrgFile.CAPTURE_FILE, appInst);
 		pull(appInst);
 	}
 
@@ -67,7 +67,7 @@ abstract public class Synchronizer {
 	 * This method will fetch the local and the remote version of a file and
 	 * combine their content. This combined version is transfered to the remote.
 	 */
-	protected void push(String filename) throws IOException {
+	protected void push(String filename, MobileOrgApplication appInst) throws IOException {
     	OrgFile orgFile = new OrgFile(filename, context);
     	String localContents = orgFile.read();
 
@@ -81,8 +81,7 @@ abstract public class Synchronizer {
 		
 		putRemoteFile(filename, localContents);
 		
-		OrgFile orgfile = new OrgFile(filename, context);
-		orgfile.remove(appdb);
+		appInst.removeFile(filename);
 	}
 	
 	/**
