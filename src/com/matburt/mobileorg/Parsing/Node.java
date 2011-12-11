@@ -3,6 +3,7 @@ package com.matburt.mobileorg.Parsing;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.regex.Pattern;
 
 public class Node implements Cloneable {
@@ -137,10 +138,11 @@ public class Node implements Cloneable {
 	private ArrayList<EditNode> findEdits(ArrayList<EditNode> edits) {
 		ArrayList<EditNode> thisEdits = new ArrayList<EditNode>();
 
-		for (EditNode editNode : edits) {
+		for (Iterator<EditNode> editIt = edits.iterator(); editIt.hasNext() ;) {
+			EditNode editNode = editIt.next();
 			if (editNode.getNodeId().equals(this.payload.getNodeId())) {
 				thisEdits.add(editNode);
-				edits.remove(editNode);
+				editIt.remove();
 			}
 		}
 		return thisEdits;
