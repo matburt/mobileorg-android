@@ -28,19 +28,17 @@ public class MobileOrgApplication extends Application {
 		this.rootNode = new Node("");
 		clearNodestack();
 		this.parser = new OrgFileParser(getBaseContext(), this);
+		init();
     }
-    
-    
-    public boolean init() {
+
+    private void init() {
 		if (this.appdb.getOrgFiles().isEmpty())
-			return false;
+			return;
 		
 		this.rootNode = this.parser.prepareRootNode();
 		clearNodestack();
 		
 		this.edits = this.parser.parseEdits();
-		
-		return true;
 	}
   
     public void pushNodestack(Node node) {
@@ -68,16 +66,26 @@ public class MobileOrgApplication extends Application {
     }
 
 
-    public void makeSureNodeIsParsed(Node node) {	
+	public boolean makeSureNodeIsParsed(Node node) {
+		if (node == null)
+			return false;
+
 		if (node.parsed == false) {
 			if (node.encrypted == false) {
 				this.parser.parseFile(node.name, rootNode);
 			} else {
 			//	decryptNode(node);
-				return;
+				return true;
 			}
 		}
-    }
+		return false;
+	}
+
+	public Node getFileNode(String filename) {
+		Node node = this.rootNode.findChildNode(filename);
+		makeSureNodeIsParsed(node);
+		return node;
+	}
 
 	/**
 	 * This function is called by the synchronizer or capture for each file that
@@ -134,6 +142,9 @@ public class MobileOrgApplication extends Application {
     	return appdb.getOrgFiles();
     }
 
+    public ArrayList<EditNode> getNodeEdits() {
+    	return this.edits;
+    }
     
     public ArrayList<String> getPriorities() {
     	return appdb.getPriorities();

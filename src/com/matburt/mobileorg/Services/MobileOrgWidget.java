@@ -9,9 +9,7 @@ import android.appwidget.AppWidgetProvider;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.IBinder;
-import android.preference.PreferenceManager;
 import android.widget.RemoteViews;
 
 import com.matburt.mobileorg.R;
@@ -19,7 +17,6 @@ import com.matburt.mobileorg.Gui.NodeEditActivity;
 import com.matburt.mobileorg.Parsing.EditNode;
 import com.matburt.mobileorg.Parsing.MobileOrgApplication;
 import com.matburt.mobileorg.Parsing.Node;
-import com.matburt.mobileorg.Parsing.OrgFileParser;
 
 public class MobileOrgWidget extends AppWidgetProvider {
     public static String WIDGET_CAPTURE = "WIDGET_CAPTURE";
@@ -48,7 +45,7 @@ public class MobileOrgWidget extends AppWidgetProvider {
             super.onDestroy();
         }
 
-        public RemoteViews genUpdateDisplay(Context context) {
+        private RemoteViews genUpdateDisplay(Context context) {
             RemoteViews updateViews = null;
             updateViews = new RemoteViews(context.getPackageName(),
                                           R.layout.widget);
@@ -66,10 +63,8 @@ public class MobileOrgWidget extends AppWidgetProvider {
         private String getAgenda() {
             MobileOrgApplication appInst = (MobileOrgApplication)this.getApplication();
             
-            OrgFileParser ofp = new OrgFileParser(getBaseContext(), appInst);
-			Node agendaNode = ofp.parseFile("agendas.org", null);
-			ArrayList<EditNode> parseEdits = ofp.parseEdits();
-			
+            Node agendaNode = appInst.getFileNode("agendas.org");
+            ArrayList<EditNode> parseEdits = appInst.getNodeEdits();
 			
             StringBuilder widgetBuffer = new StringBuilder();            
 			if (agendaNode != null) {
@@ -89,11 +84,6 @@ public class MobileOrgWidget extends AppWidgetProvider {
 			}
 			
 			return widgetBuffer.toString();
-        }
-
-        public String getStorageLocation(Context context) {
-            SharedPreferences appPrefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-            return appPrefs.getString("storageMode", "");
         }
 
         @Override

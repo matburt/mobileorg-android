@@ -54,11 +54,10 @@ public class OutlineActivity extends ListActivity
 	 */
 	private int lastSelection = 0;
 	
-	private boolean initSuccess = true;
-	
 	private final Handler syncHandler = new Handler();
 	private IOException syncError;
 	private ProgressDialog syncDialog;
+	private OutlineListAdapter outlineAdapter;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -66,12 +65,14 @@ public class OutlineActivity extends ListActivity
 		
 		this.appInst = (MobileOrgApplication) this.getApplication();
 		
+		this.outlineAdapter = new OutlineListAdapter(this, appInst.nodestackTop());
+		this.setListAdapter(outlineAdapter);
+		
 		Intent intent = getIntent();
 		this.depth = intent.getIntExtra("depth", 1);
 		
 		if(this.depth == 1) {
-			this.initSuccess = appInst.init();
-			if(this.initSuccess == false)
+			if(this.appInst.getOrgFiles().isEmpty())
                 this.showWizard();
 		}
 
@@ -95,7 +96,7 @@ public class OutlineActivity extends ListActivity
 	 * data has been updated.
 	 */
 	private void refreshDisplay() {
-		this.setListAdapter(new OutlineListAdapter(this, appInst.nodestackTop()));
+		outlineAdapter.notifyDataSetChanged();
 		getListView().setSelection(lastSelection);
 	}
 
@@ -345,9 +346,6 @@ public class OutlineActivity extends ListActivity
 		if (this.syncError != null) {
 			ErrorReporter.displayError(this, this.syncError.getMessage());
 		} else {
-			if(this.initSuccess == false) {
-				this.initSuccess = appInst.init();
-			}
 			this.onResume();
 		}
 	}

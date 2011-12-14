@@ -46,7 +46,7 @@ public class MobileOrgSyncService extends Service implements SharedPreferences.O
 		startTimer();
 	}
 
-	public void startTimer() {
+	private void startTimer() {
 		if(!this.timerScheduled) {
 			boolean doAutoSync = this.appSettings.getBoolean("doAutoSync", false);
 			if(doAutoSync) { //This may can be removed since we are checking this at a higher level
@@ -83,7 +83,7 @@ public class MobileOrgSyncService extends Service implements SharedPreferences.O
 		}
 	}
 
-	public void stopTimer() {
+	private void stopTimer() {
 		if(this.timer != null) {
 			this.timer.cancel();
 			this.timer = new Timer();
@@ -106,7 +106,7 @@ public class MobileOrgSyncService extends Service implements SharedPreferences.O
 		}
 	}
 
-	public void runSynchronizer() {
+	private void runSynchronizer() {
 		MobileOrgApplication appInst = (MobileOrgApplication) this.getApplication();
 		final SyncManager syncman = new SyncManager(this, appInst);
 
