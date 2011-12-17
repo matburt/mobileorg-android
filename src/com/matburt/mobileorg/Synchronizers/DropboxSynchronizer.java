@@ -15,6 +15,7 @@ import com.dropbox.client.DropboxAPI;
 import com.dropbox.client.DropboxAPI.Config;
 import com.dropbox.client.DropboxAPI.FileDownload;
 import com.matburt.mobileorg.R;
+import com.matburt.mobileorg.Parsing.MobileOrgApplication;
 import com.matburt.mobileorg.Parsing.OrgFile;
 
 public class DropboxSynchronizer extends Synchronizer {
@@ -25,8 +26,8 @@ public class DropboxSynchronizer extends Synchronizer {
 	private DropboxAPI dropboxAPI = new DropboxAPI();
     private com.dropbox.client.DropboxAPI.Config dropboxConfig;
     
-    DropboxSynchronizer(Context context) {
-    	super(context);
+    public DropboxSynchronizer(Context context, MobileOrgApplication appInst) {
+    	super(context, appInst);
 
 		SharedPreferences sharedPreferences = PreferenceManager
 				.getDefaultSharedPreferences(context);

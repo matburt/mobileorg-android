@@ -1,15 +1,15 @@
 package com.matburt.mobileorg.Gui;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.StringReader;
 
 import android.app.ListActivity;
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
-import android.os.Handler;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Menu;
@@ -18,7 +18,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Parsing.MobileOrgApplication;
@@ -26,9 +25,10 @@ import com.matburt.mobileorg.Parsing.Node;
 import com.matburt.mobileorg.Parsing.NodeEncryption;
 import com.matburt.mobileorg.Parsing.OrgFile;
 import com.matburt.mobileorg.Parsing.OrgFileParser;
+import com.matburt.mobileorg.Services.SyncService;
 import com.matburt.mobileorg.Settings.SettingsActivity;
 import com.matburt.mobileorg.Settings.WizardActivity;
-import com.matburt.mobileorg.Synchronizers.SyncManager;
+import com.matburt.mobileorg.Synchronizers.Synchronizer;
 
 public class OutlineActivity extends ListActivity
 {
@@ -54,10 +54,9 @@ public class OutlineActivity extends ListActivity
 	 */
 	private int lastSelection = 0;
 	
-	private final Handler syncHandler = new Handler();
-	private IOException syncError;
 	private ProgressDialog syncDialog;
 	private OutlineListAdapter outlineAdapter;
+	private SynchServiceReceiver syncReceiver;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -77,18 +76,24 @@ public class OutlineActivity extends ListActivity
 		}
 
 		registerForContextMenu(getListView());
+		
+        this.syncReceiver = new SynchServiceReceiver();
 	}
 	
 	@Override
-	public void onResume() {
-		super.onResume();
-
-		// If this is the case, the parser has invalidated nodes
-		if (this.depth != 1 && this.depth > this.appInst.nodestackSize()) {
-			this.setResult(RESULT_DONTPOP);
-			finish();
-		}		
+	public void onResume() {	
 		refreshDisplay();
+
+		IntentFilter serviceFilter = new IntentFilter(SyncService.SYNC_UPDATE);
+        registerReceiver(syncReceiver, serviceFilter);
+
+        super.onResume();
+	}
+	
+	@Override
+	public void onPause() {
+		unregisterReceiver(this.syncReceiver);
+        super.onPause();
 	}
 		
 	/**
@@ -96,6 +101,12 @@ public class OutlineActivity extends ListActivity
 	 * data has been updated.
 	 */
 	private void refreshDisplay() {
+		// If this is the case, the parser/syncer has invalidated nodes
+		if (this.depth != 1 && this.depth > this.appInst.nodestackSize()) {
+			this.setResult(RESULT_DONTPOP);
+			finish();
+		}
+
 		outlineAdapter.notifyDataSetChanged();
 		getListView().setSelection(lastSelection);
 	}
@@ -111,7 +122,7 @@ public class OutlineActivity extends ListActivity
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.menu_sync:
-			runSynchronizer();
+			runSync();
 			return true;
 		
 		case R.id.menu_settings:
@@ -192,8 +203,18 @@ public class OutlineActivity extends ListActivity
 		}
 	}
 
-    public void showWizard() {
+    private void showWizard() {
         startActivity(new Intent(this, WizardActivity.class));
+    }
+    
+    private void runSync() {
+		this.syncDialog = new ProgressDialog(this);
+		this.syncDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+		this.syncDialog.setCancelable(false);
+		this.syncDialog.setMessage("Started synchronization");
+		this.syncDialog.show();
+
+		startService(new Intent(this, SyncService.class));
     }
 	
 	private boolean runEditNewNodeActivity() {
@@ -273,7 +294,47 @@ public class OutlineActivity extends ListActivity
 			break;
 		}
 	}
-  
+
+
+	private void showMessage(String message) {
+		this.syncDialog.setMessage(message);
+	}
+	
+	private void stopSyncDialog() {
+		this.syncDialog.dismiss();
+		this.refreshDisplay();
+	}
+	
+	private void showProgressDialog(int number, int total) {
+		int progress = ((40 / total) * number);
+		// TODO Fix progress bar
+		this.syncDialog.setProgress(60 + progress + 1);
+	}
+	
+	private void showProgress(int total) {
+		this.syncDialog.setProgress(total);
+	}
+	
+	// TODO Add the handling of thrown error messages from synchronizer
+	public class SynchServiceReceiver extends BroadcastReceiver {
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			int num = intent.getIntExtra(Synchronizer.SYNC_FILES, 0);
+			int totalfiles = intent.getIntExtra(Synchronizer.SYNC_FILES_TOTAL, 0);
+			int progress = intent.getIntExtra(Synchronizer.SYNC_PROGRESS, 0);
+			String message = intent.getStringExtra(Synchronizer.SYNC_MESSAGE);
+
+			if (intent.getBooleanExtra(Synchronizer.SYNC_DONE, false))
+				stopSyncDialog();
+			if (num > 0)
+				showProgressDialog(num, totalfiles);
+			if (message != null)
+				showMessage(message);
+			if (progress > 0)
+				showProgress(progress);
+		}
+	}
+	
 	/**
 	 * This calls startActivityForResult() with Encryption.DECRYPT_MESSAGE. The
 	 * result is handled by onActivityResult() in this class, which calls a
@@ -291,9 +352,10 @@ public class OutlineActivity extends ListActivity
 			NodeEncryption.decrypt(this, rawData);
 		}
 	}
-	
+
 	/**
-	 * This function is called with the results of {@link #runDecryptAndExpandNode}.
+	 * This function is called with the results of
+	 * {@link #runDecryptAndExpandNode}.
 	 */
 	private void parseEncryptedNode(Intent data, Node node) {
 		OrgFileParser ofp = new OrgFileParser(getBaseContext(), appInst);
@@ -301,52 +363,6 @@ public class OutlineActivity extends ListActivity
 		String decryptedData = data
 				.getStringExtra(NodeEncryption.EXTRA_DECRYPTED_MESSAGE);
 
-		ofp.parse(node, new BufferedReader(new StringReader(
-				decryptedData)));
-	}
-
-	private void runSynchronizer() {
-		final SyncManager synchman = new SyncManager(this, this.appInst);
-
-		if (!synchman.isConfigured()) {
-			Toast error = Toast.makeText((Context) this,
-					getString(R.string.error_synchronizer_not_configured),
-					Toast.LENGTH_LONG);
-			error.show();
-			this.runShowSettings();
-			return;
-		}
-
-		Thread syncThread = new Thread() {
-			public void run() {
-				try {
-					syncError = null;
-					synchman.sync();
-				} catch (IOException e) {
-					syncError = e;
-				} finally {
-					synchman.close();
-				}
-				syncHandler.post(syncUpdateResults);
-			}
-		};
-		syncThread.start();
-		syncDialog = ProgressDialog.show(this, "",
-				getString(R.string.sync_wait), true);
-	}
-	
-	private final Runnable syncUpdateResults = new Runnable() {
-		public void run() {
-			postSynchronize();
-		}
-	};
-	
-	private void postSynchronize() {
-		syncDialog.dismiss();
-		if (this.syncError != null) {
-			ErrorReporter.displayError(this, this.syncError.getMessage());
-		} else {
-			this.onResume();
-		}
+		ofp.parse(node, new BufferedReader(new StringReader(decryptedData)));
 	}
 }

@@ -32,6 +32,7 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
 import com.matburt.mobileorg.R;
+import com.matburt.mobileorg.Parsing.MobileOrgApplication;
 import com.matburt.mobileorg.Parsing.OrgFile;
 
 public class WebDAVSynchronizer extends Synchronizer {
@@ -42,8 +43,8 @@ public class WebDAVSynchronizer extends Synchronizer {
 	private String username;
 	private String password;
 
-	WebDAVSynchronizer(Context parentContext) {
-		super(parentContext);
+	public WebDAVSynchronizer(Context parentContext, MobileOrgApplication appInst) {
+		super(parentContext, appInst);
 
 		SharedPreferences sharedPreferences = PreferenceManager
 				.getDefaultSharedPreferences(context);

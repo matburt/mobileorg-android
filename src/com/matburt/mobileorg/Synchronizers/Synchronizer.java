@@ -8,6 +8,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.preference.PreferenceManager;
@@ -16,6 +17,7 @@ import android.text.TextUtils;
 import com.matburt.mobileorg.Parsing.MobileOrgApplication;
 import com.matburt.mobileorg.Parsing.OrgDatabase;
 import com.matburt.mobileorg.Parsing.OrgFile;
+import com.matburt.mobileorg.Services.SyncService;
 
 /**
  * This class implements many of the operations that need to be done on
@@ -26,6 +28,12 @@ import com.matburt.mobileorg.Parsing.OrgFile;
  * needed.
  */
 abstract public class Synchronizer {
+	public final static String SYNC_PROGRESS = "sync_progress";
+	public final static String SYNC_MESSAGE = "sync_message";
+	public final static String SYNC_FILES = "sync_files";
+	public final static String SYNC_FILES_TOTAL = "sync_total";
+	public final static String SYNC_DONE = "sync_done";
+	
 	/**
 	 * Called before running the synchronizer to ensure that it's configuration
 	 * is in a valid state.
@@ -49,30 +57,38 @@ abstract public class Synchronizer {
 	protected SharedPreferences appSettings;
 	protected Context context;
 	protected Resources r;
+	private MobileOrgApplication appInst;
 
-	Synchronizer(Context context) {
+	Synchronizer(Context context, MobileOrgApplication appInst) {
         this.context = context;
         this.r = this.context.getResources();
         this.appdb = new OrgDatabase((Context)context);
         this.appSettings = PreferenceManager.getDefaultSharedPreferences(
                                    context.getApplicationContext());
+        this.appInst = appInst;
+        
+        announceSyncMessage("Connecting to service");
 	}
 
-	public void sync(MobileOrgApplication appInst) throws IOException {
-		push(OrgFile.CAPTURE_FILE, appInst);
-		pull(appInst);
+	public void sync() throws IOException {
+		announceSyncMessage("Uploading " + OrgFile.CAPTURE_FILE);
+		push(OrgFile.CAPTURE_FILE);
+		announceSyncProgress(20);
+		pull();
+		announceSyncDone();
 	}
 
 	/**
 	 * This method will fetch the local and the remote version of a file and
 	 * combine their content. This combined version is transfered to the remote.
 	 */
-	protected void push(String filename, MobileOrgApplication appInst) throws IOException {
+	protected void push(String filename) throws IOException {
     	OrgFile orgFile = new OrgFile(filename, context);
     	String localContents = orgFile.read();
 
     	String remoteContent = OrgFile.read(getRemoteFile(filename));
-
+    	announceSyncProgress(10);
+    	
         if(localContents.equals(""))
         	return;
         
@@ -89,35 +105,76 @@ abstract public class Synchronizer {
 	 * host. Using those files, it determines the other files that need updating
 	 * and downloads them.
 	 */
-	protected void pull(MobileOrgApplication appInst) throws IOException {
+	protected void pull() throws IOException {
+		announceSyncMessage("Downloading index file");
 		String remoteIndexContents = OrgFile.read(getRemoteFile("index.org"));
+		announceSyncProgress(40);
         
         ArrayList<HashMap<String, Boolean>> todoLists = getTodos(remoteIndexContents);
         this.appdb.setTodoList(todoLists);
 
         ArrayList<ArrayList<String>> priorityLists = getPriorities(remoteIndexContents);
         this.appdb.setPriorityList(priorityLists);
-        
+
+        announceSyncMessage("Downloading checksum file");
         String remoteChecksumContents = OrgFile.read(getRemoteFile("checksums.dat"));
+        announceSyncProgress(60);
 
 		HashMap<String, String> remoteChecksums = getChecksums(remoteChecksumContents);
 		HashMap<String, String> localChecksums = this.appdb.getChecksums();
 		
 		HashMap<String, String> fileChecksumMap = getOrgFilesFromMaster(remoteIndexContents);
 		
-        for (String key : fileChecksumMap.keySet()) {
-        	String filename = fileChecksumMap.get(key);
-        	
+		ArrayList<String> filesToGet = new ArrayList<String>();
+		
+        for (String key : fileChecksumMap.keySet()) {     	
             if (localChecksums.containsKey(key) &&
                 remoteChecksums.containsKey(key) &&
                 localChecksums.get(key).equals(remoteChecksums.get(key)))
                 continue;
-          
+            
+            filesToGet.add(key);
+        }
+        
+        int i = 0;
+        for(String key: filesToGet) {
+        	String filename = fileChecksumMap.get(key);
+        	
+        	i++;
+			announceSyncFile("Downloading " + filename, i, filesToGet.size());
+
             OrgFile orgfile = new OrgFile(filename, context);
             orgfile.fetch(getRemoteFile(filename));
 
 			appInst.addOrUpdateFile(filename, key, remoteChecksums.get(key));
-		}
+        }
+	}
+	
+	
+	private void announceSyncProgress(int progress) {
+		Intent intent = new Intent(SyncService.SYNC_UPDATE);
+		intent.putExtra(SYNC_PROGRESS, progress);
+		this.context.sendBroadcast(intent);
+	}
+
+	private void announceSyncFile(String message, int number, int total) {
+		Intent intent = new Intent(SyncService.SYNC_UPDATE);
+		intent.putExtra(SYNC_MESSAGE, message);
+		intent.putExtra(SYNC_FILES, number);
+		intent.putExtra(SYNC_FILES_TOTAL, total);
+		this.context.sendBroadcast(intent);
+	}
+	
+	private void announceSyncMessage(String message) {
+		Intent intent = new Intent(SyncService.SYNC_UPDATE);
+		intent.putExtra(SYNC_MESSAGE, message);
+		this.context.sendBroadcast(intent);
+	}
+
+	private void announceSyncDone() {
+		Intent intent = new Intent(SyncService.SYNC_UPDATE);
+		intent.putExtra(SYNC_DONE, true);
+		this.context.sendBroadcast(intent);
 	}
 	
 	private HashMap<String, String> getOrgFilesFromMaster(String master) {

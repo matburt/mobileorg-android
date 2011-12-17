@@ -30,7 +30,7 @@
         </receiver>
 
         <service android:name=".Services.MobileOrgWidget$MobileOrgWidgetService" />
-        <service android:name=".Services.MobileOrgSyncService" >
+        <service android:name=".Services.SyncService" >
             <intent-filter >
                 <action android:name="com.matburt.mobileorg.SYNC_SERVICE" />
             </intent-filter>
@@ -51,6 +51,8 @@
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
+
+                <action android:name="com.matburt.mobileorg.SyncService.SyncService.action.SYNC_UPDATE" />
             </intent-filter>
         </activity>
         <activity

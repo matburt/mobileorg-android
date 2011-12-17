@@ -10,6 +10,7 @@ import java.io.InputStreamReader;
 import android.content.Context;
 import android.preference.PreferenceManager;
 
+import com.matburt.mobileorg.Parsing.MobileOrgApplication;
 import com.matburt.mobileorg.Parsing.OrgFile;
 
 public class SDCardSynchronizer extends Synchronizer {	
@@ -17,8 +18,8 @@ public class SDCardSynchronizer extends Synchronizer {
 	private String remoteIndexPath;
 	private String remotePath;
 
-    SDCardSynchronizer(Context context) {
-    	super(context);
+    public SDCardSynchronizer(Context context, MobileOrgApplication appInst) {
+    	super(context, appInst);
 		this.remoteIndexPath = PreferenceManager.getDefaultSharedPreferences(
 				context).getString("indexFilePath", "");
 		
