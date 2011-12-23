@@ -37,6 +37,8 @@ public class OutlineActivity extends ListActivity
 	private static final int RUNFOR_EXPAND = 1;
 	private static final int RUNFOR_EDITNODE = 2;
 	private static final int RUNFOR_NEWNODE = 3;
+	private static final int RUNFOR_VIEWNODE = 4;
+
 
 	private MobileOrgApplication appInst;
 
@@ -237,10 +239,10 @@ public class OutlineActivity extends ListActivity
 	}
 
 	private void runViewNodeActivity(Node node) {
+		this.appInst.pushNodestack(node);
+		
 		Intent intent = new Intent(this, NodeViewActivity.class);
-		String docBuffer = node.name + "\n\n" + node.payload.getContent();
-		intent.putExtra("txtValue", docBuffer);
-		startActivity(intent);
+		startActivityForResult(intent, RUNFOR_VIEWNODE);
 	}
 
 	private void runExpandSelection(Node node) {
@@ -281,6 +283,10 @@ public class OutlineActivity extends ListActivity
 		case RUNFOR_NEWNODE:
 			if(resultCode == RESULT_OK)
 				this.refreshDisplay();
+			break;
+			
+		case RUNFOR_VIEWNODE:
+			this.appInst.popNodestack();
 			break;
 
 		case NodeEncryption.DECRYPT_MESSAGE:
