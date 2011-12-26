@@ -2,7 +2,6 @@ package com.matburt.mobileorg.Synchronizers;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -14,9 +13,9 @@ import android.util.Log;
 import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.matburt.mobileorg.Parsing.MobileOrgApplication;
-import com.matburt.mobileorg.Parsing.OrgFile;
 
 public class SSHSynchronizer extends Synchronizer {
 	private final String LT = "MobileOrg";
@@ -25,6 +24,8 @@ public class SSHSynchronizer extends Synchronizer {
 	private String host;
 	private String remotePath;
 
+	private Session session;
+
 	public SSHSynchronizer(Context context, MobileOrgApplication appInst) {
 		super(context, appInst);
 
@@ -32,6 +33,21 @@ public class SSHSynchronizer extends Synchronizer {
 		user = appSettings.getString("scpUser", "");
 		host = orgPath.substring(0, orgPath.indexOf(':'));
 		remotePath = orgPath.substring(orgPath.indexOf(':') + 1);
+
+		JSch jsch = new JSch();
+		try {
+			session = jsch.getSession(user, host, 22);
+			session.setPassword(appSettings.getString("scpPass", ""));
+
+			java.util.Properties config = new java.util.Properties();
+			config.put("StrictHostKeyChecking", "no");
+			session.setConfig(config);
+
+			session.connect();
+			Log.d(LT, "Connected");
+		} catch (JSchException e) {
+			Log.d(LT, e.getLocalizedMessage());
+		}
 	}
 
 	@Override
@@ -44,19 +60,8 @@ public class SSHSynchronizer extends Synchronizer {
 	@Override
 	protected void putRemoteFile(String filename, String contents)
 			throws IOException {
-		FileInputStream fis = null;
 		try {
 			Log.d(LT, "Uploading: " + filename);
-			JSch jsch = new JSch();
-			Session session = jsch.getSession(user, host, 22);
-			session.setPassword(appSettings.getString("scpPass", ""));
-
-			java.util.Properties config = new java.util.Properties();
-			config.put("StrictHostKeyChecking", "no");
-			session.setConfig(config);
-
-			session.connect();
-			Log.d(LT, "Connected");
 
 			// exec 'scp -t rfile' remotely
 			String command = "scp -p -t " + remotePath + filename;
@@ -74,46 +79,33 @@ public class SSHSynchronizer extends Synchronizer {
 
 			// send "C0644 filesize filename", where filename should not include
 			// '/'
-			OrgFile orgfile = new OrgFile(filename, this.context);
-			long filesize = orgfile.getFile().length();
+			long filesize = contents.getBytes().length;
 			command = "C0644 " + filesize + " ";
 			command += filename;
 			command += "\n";
 
 			out.write(command.getBytes());
 			out.flush();
+
 			if (checkAck(in) != 0)
 				return;
 
-			// send a content of lfile
-			fis = new FileInputStream(orgfile.getFile());
+			// send content
+			out.write(contents.getBytes());
+
 			byte[] buf = new byte[1024];
-			while (true) {
-				int len = fis.read(buf, 0, buf.length);
-				if (len <= 0)
-					break;
-				out.write(buf, 0, len); // out.flush();
-			}
-			fis.close();
-			fis = null;
+
 			// send '\0'
 			buf[0] = 0;
 			out.write(buf, 0, 1);
 			out.flush();
 			if (checkAck(in) != 0)
 				return;
-			
-			out.close();
 
+			out.close();
 			channel.disconnect();
-			session.disconnect();
 		} catch (Exception e) {
 			Log.d(LT, e.getLocalizedMessage());
-			try {
-				if (fis != null)
-					fis.close();
-			} catch (Exception ee) {
-			}
 		}
 	}
 
@@ -122,16 +114,6 @@ public class SSHSynchronizer extends Synchronizer {
 		ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 
 		try {
-			JSch jsch = new JSch();
-			Session session = jsch.getSession(user, host, 22);
-			session.setPassword(appSettings.getString("scpPass", ""));
-
-			java.util.Properties config = new java.util.Properties();
-			config.put("StrictHostKeyChecking", "no");
-			session.setConfig(config);
-
-			session.connect();
-			Log.d(LT, "Connected");
 
 			final String command = "scp -f " + remotePath + filename;
 			Log.d(LT, "Running: " + command);
@@ -219,7 +201,6 @@ public class SSHSynchronizer extends Synchronizer {
 
 			Log.d(LT, "disconnecting...");
 			channel.disconnect();
-			session.disconnect();
 		} catch (Exception e) {
 			Log.d(LT, e.getMessage() + e.getLocalizedMessage());
 		}
