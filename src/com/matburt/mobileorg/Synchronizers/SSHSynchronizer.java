@@ -2,7 +2,6 @@ package com.matburt.mobileorg.Synchronizers;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,6 +16,7 @@ import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.Session;
 import com.matburt.mobileorg.Parsing.MobileOrgApplication;
+import com.matburt.mobileorg.Parsing.OrgFile;
 
 public class SSHSynchronizer extends Synchronizer {
 	private final String LT = "MobileOrg";
@@ -46,6 +46,7 @@ public class SSHSynchronizer extends Synchronizer {
 			throws IOException {
 		FileInputStream fis = null;
 		try {
+			Log.d(LT, "Uploading: " + filename);
 			JSch jsch = new JSch();
 			Session session = jsch.getSession(user, host, 22);
 			session.setPassword(appSettings.getString("scpPass", ""));
@@ -73,22 +74,19 @@ public class SSHSynchronizer extends Synchronizer {
 
 			// send "C0644 filesize filename", where filename should not include
 			// '/'
-			long filesize = (new File(filename)).length();
+			OrgFile orgfile = new OrgFile(filename, this.context);
+			long filesize = orgfile.getFile().length();
 			command = "C0644 " + filesize + " ";
-			if (filename.lastIndexOf('/') > 0) {
-				command += filename.substring(filename.lastIndexOf('/') + 1);
-			} else {
-				command += filename;
-			}
+			command += filename;
 			command += "\n";
+
 			out.write(command.getBytes());
 			out.flush();
-			if (checkAck(in) != 0) {
+			if (checkAck(in) != 0)
 				return;
-			}
 
 			// send a content of lfile
-			fis = new FileInputStream(filename);
+			fis = new FileInputStream(orgfile.getFile());
 			byte[] buf = new byte[1024];
 			while (true) {
 				int len = fis.read(buf, 0, buf.length);
@@ -109,8 +107,6 @@ public class SSHSynchronizer extends Synchronizer {
 
 			channel.disconnect();
 			session.disconnect();
-
-			System.exit(0);
 		} catch (Exception e) {
 			Log.d(LT, e.getLocalizedMessage());
 			try {
@@ -125,7 +121,6 @@ public class SSHSynchronizer extends Synchronizer {
 	protected BufferedReader getRemoteFile(String filename) {
 		ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 
-		Log.d(LT, "Started getRemoteFile()");
 		try {
 			JSch jsch = new JSch();
 			Session session = jsch.getSession(user, host, 22);
