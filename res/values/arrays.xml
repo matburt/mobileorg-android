@@ -50,8 +50,8 @@
     </string-array>
     <string-array name="viewRecursionLevels">
         <item>Current node only</item>
-        <item>All nodes children</item>
-        <item>All nodes children and there children</item>
+        <item>Node and all it\'s children</item>
+        <item>Node, it\'s children and their children</item>
         <item>3 Levels of recursion</item>
         <item>4 Levels of recursion</item>
     </string-array>

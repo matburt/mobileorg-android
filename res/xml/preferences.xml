@@ -28,7 +28,7 @@
             android:summary="@string/summary_auto_sync_interval"
             android:title="@string/title_auto_sync_interval" />
     </PreferenceCategory>
-    <PreferenceCategory android:title="View Options" >
+    <PreferenceCategory android:title="Viewing" >
         <CheckBoxPreference
             android:key="viewWrapLines"
             android:summary="@string/summary_view_wrap_lines"

@@ -192,16 +192,10 @@ public class OutlineActivity extends ListActivity
 
 		this.lastSelection = position;
 		
-		if (node.hasChildren()) {
+		if (node.hasChildren())
 			runExpandSelection(node);
-		} else {
-
-			if (node.isSimple()) {
-				runViewNodeActivity(node);
-			} else {
-				runEditNodeActivity(node);
-			}
-		}
+		else
+			runViewNodeActivity(node);
 	}
 
     private void showWizard() {

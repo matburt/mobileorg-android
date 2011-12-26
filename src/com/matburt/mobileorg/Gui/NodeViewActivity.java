@@ -4,8 +4,12 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -16,87 +20,121 @@ import com.matburt.mobileorg.Parsing.Node;
 
 public class NodeViewActivity extends Activity {
 	private WebView display;
-
+	private MobileOrgApplication appInst;
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.viewnode);
-		
+
 		this.display = (WebView) this.findViewById(R.id.viewnode_webview);
 		display.setWebViewClient(new InternalWebViewClient());
 		display.setWebChromeClient(new InternalWebChromeClient());
 		display.getSettings().setBuiltInZoomControls(true);
 
+		this.appInst = (MobileOrgApplication) this.getApplication();
+
 		String data = convertToHTML();
 		this.display.loadData(data, "text/html", "UTF-8");
 	}
+	
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		MenuInflater inflater = getMenuInflater();
+	    inflater.inflate(R.menu.nodeview_menu, menu);
+	    
+	    if(this.appInst.nodestackSize() <= 2)
+	    	menu.findItem(R.id.viewmenu_edit).setVisible(false);
 
+		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case R.id.viewmenu_edit:
+			runEditNodeActivity();
+			break;
+			
+		case R.id.viewmenu_capture:
+			runEditNewNodeActivity();
+			break;
+		}
+		return false;
+	}
+	
+	private void runEditNodeActivity() {
+		Intent intent = new Intent(this, NodeEditActivity.class);
+		intent.putExtra("actionMode", NodeEditActivity.ACTIONMODE_EDIT);
+		startActivity(intent);
+	}
+	
+	private void runEditNewNodeActivity() {
+		Intent intent = new Intent(this, NodeEditActivity.class);
+		intent.putExtra("actionMode", NodeEditActivity.ACTIONMODE_CREATE);
+		startActivity(intent);
+	}
 
 	private String convertToHTML() {
-		MobileOrgApplication appInst = (MobileOrgApplication) this
-				.getApplication();
-		Node node = appInst.nodestackTop();
-		
+		Node node = this.appInst.nodestackTop();
+
 		this.setTitle(node.name);
-		
-		
-//		String level = PreferenceManager.getDefaultSharedPreferences(this)
-//				.getString("viewRecursionMax", "0");
-		int levelOfRecursion = 0; //Integer.getInteger(level);
-		
-		String text = nodeToHTMLRecursive(node, levelOfRecursion, true);
+
+		int levelOfRecursion = Integer.parseInt(PreferenceManager
+				.getDefaultSharedPreferences(this).getString(
+						"viewRecursionMax", "0"));
+
+		String text = nodeToHTMLRecursive(node, levelOfRecursion);
 		text = convertLinks(text);
-		
-		String result;
+
 		boolean wrapLines = PreferenceManager.getDefaultSharedPreferences(this)
 				.getBoolean("viewWrapLines", false);
 		if (wrapLines) {
+			// TODO Improve custom line wrapping
 			text = text.replaceAll("\\n\\n", "<br/>\n<br/>\n");
 			text = text.replaceAll("\\n-", "<br/>\n-");
-			result = "<html><body>" + text + "</body></html>";
+			text = "<html><body>" + text + "</body></html>";
 		} else {
 			text = text.replaceAll("\\n", "<br/>\n");
-			result = "<html><body><pre>" + text + "</pre></body></html>";
+			text = "<html><body><pre>" + text + "</pre></body></html>";
 		}
-		
-		return result;
+
+		return text;
 	}
 
-	private String nodeToHTMLRecursive(Node node, int level, boolean hideHeading) {
+	private String nodeToHTMLRecursive(Node node, int level) {
 		StringBuilder result = new StringBuilder();
-		result.append(nodeToHTML(node, level, hideHeading));
-		
-		if(level <= 0) {
-			if(node.hasChildren())
+		result.append(nodeToHTML(node, level));
+
+		if (level <= 0) {
+			if (node.hasChildren())
 				result.append("<b>...</b><br/>");
 
 			return result.toString();
 		}
 		level--;
 
-		for(Node child: node.getChildren())
-			result.append(nodeToHTMLRecursive(child, level, false));
-			
+		for (Node child : node.getChildren())
+			result.append(nodeToHTMLRecursive(child, level));
+
 		return result.toString();
 	}
-	
-	private String nodeToHTML(Node node, int headingLevel, boolean hideHeading) {
+
+	private String nodeToHTML(Node node, int headingLevel) {
 		StringBuilder result = new StringBuilder();
 
-		if (!hideHeading) {
-			int fontSize = 3 + headingLevel;
-			result.append("<font size=\"");
-			result.append(fontSize);
-			result.append("\"> <b>");
-			result.append(node.name);
-			result.append("</b></font> <hr />");
-		}
+		int fontSize = 3 + headingLevel;
+		result.append("<font size=\"");
+		result.append(fontSize);
+		result.append("\"> <b>");
+		result.append(node.name);
+		result.append("</b></font> <hr />");
 
-		if(!node.payload.getContent().equals("")) {
+		if (!node.payload.getContent().equals("")) {
 			result.append(node.payload.getContent());
 			result.append("<br/>\n");
 		}
-		
+
 		result.append("<br/>\n");
 		return result.toString();
 	}
