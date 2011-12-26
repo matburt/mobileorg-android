@@ -39,7 +39,6 @@ public class OutlineActivity extends ListActivity
 	private static final int RUNFOR_NEWNODE = 3;
 	private static final int RUNFOR_VIEWNODE = 4;
 
-
 	private MobileOrgApplication appInst;
 
 	/**

@@ -32,7 +32,7 @@ public class MobileOrgApplication extends Application {
     }
 
     private void init() {
-		if (this.appdb.getOrgFiles().isEmpty())
+		if (this.appdb == null || this.appdb.getOrgFiles().isEmpty())
 			return;
 		
 		this.rootNode = this.parser.prepareRootNode();

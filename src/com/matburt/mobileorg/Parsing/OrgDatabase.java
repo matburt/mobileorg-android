@@ -36,8 +36,14 @@ public class OrgDatabase {
 	private void initialize() {
 		String storageMode = this.appSettings.getString("storageMode", "");
 		if (storageMode.equals("internal") || storageMode.equals(""))
-			this.appdb = this.appcontext.openOrCreateDatabase("MobileOrg", 0,
+			try {
+				this.appdb = this.appcontext.openOrCreateDatabase("MobileOrg", 0,
 					null);
+			} catch (Exception e) {
+			ErrorReporter.displayError(this.appcontext,
+					r.getString(R.string.error_opening_database));
+			return;
+		}
 		else if (storageMode.equals("sdcard")) {
 			File sdcard = Environment.getExternalStorageDirectory();
 			File morgDir = new File(sdcard, "mobileorg");

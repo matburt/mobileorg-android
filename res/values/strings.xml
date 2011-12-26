@@ -8,7 +8,7 @@
   <string name="contextmenu_edit">Edit Node</string>
   <string name="contextmenu_view">View Node</string>
   <string name="contextmenu_delete">Delete File</string>
-  <string name="sync_wait">Synchronizing, please wait...</string>
+  <string name="sync_wait">Synchronizing, please wait…</string>
   <string name="sync_failed">Synchronization failed, try again?</string>
   <string name="yes">Yes</string>
   <string name="no">No</string>
@@ -19,6 +19,8 @@
   <string name="summary_do_auto_sync">Automatically synchronize MobileOrg database in the background</string>
   <string name="title_auto_sync_interval">Background Sync Interval</string>
   <string name="summary_auto_sync_interval">How often the background sync service should run</string>
+  <string name="title_view_wrap_lines">Wrap Lines</string>
+  <string name="summary_view_wrap_lines">Using custom line wrapping when viewing nodes</string>
   <string name="error_sqlio">There was a problem reading from the database, is your drive corrupted or is the SDCard mounted?</string>
   <string name="error_generic_database">Unhandled database error: %s</string>
   <string name="error_file_not_found">The file %s was not found</string>
@@ -50,7 +52,7 @@
 
   <!-- setup wizard strings -->
   <string name="up_one_level">Up one level</string>
-  <string name="please_wait">Please wait...</string>
+  <string name="please_wait">Please wait…</string>
   <string name="signing_in">Signing in</string>
   <string name="pick_folder">Choose a folder to sync from:</string>
   <string name="email">Email</string>

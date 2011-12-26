@@ -5,6 +5,7 @@ import java.net.URL;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -14,55 +15,116 @@ import com.matburt.mobileorg.Parsing.MobileOrgApplication;
 import com.matburt.mobileorg.Parsing.Node;
 
 public class NodeViewActivity extends Activity {
-	private WebView orgDisplay;
+	private WebView display;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.viewnode);
-		this.orgDisplay = (WebView) this.findViewById(R.id.orgTxt);
-		orgDisplay.setWebViewClient(new InternalWebViewClient());
-		orgDisplay.setWebChromeClient(new InternalWebChromeClient());
-		this.populateDisplay();
+		
+		this.display = (WebView) this.findViewById(R.id.viewnode_webview);
+		display.setWebViewClient(new InternalWebViewClient());
+		display.setWebChromeClient(new InternalWebChromeClient());
+		display.getSettings().setBuiltInZoomControls(true);
+
+		String data = convertToHTML();
+		this.display.loadData(data, "text/html", "UTF-8");
 	}
 
-	private void populateDisplay() {
+
+	private String convertToHTML() {
 		MobileOrgApplication appInst = (MobileOrgApplication) this
 				.getApplication();
 		Node node = appInst.nodestackTop();
 		
 		this.setTitle(node.name);
-		String srcText = node.payload.getContent();
-		srcText = convertToHtml(srcText);
-		this.orgDisplay.loadData(srcText, "text/html", "UTF-8");
+		
+		
+//		String level = PreferenceManager.getDefaultSharedPreferences(this)
+//				.getString("viewRecursionMax", "0");
+		int levelOfRecursion = 0; //Integer.getInteger(level);
+		
+		String text = nodeToHTMLRecursive(node, levelOfRecursion, true);
+		text = convertLinks(text);
+		
+		String result;
+		boolean wrapLines = PreferenceManager.getDefaultSharedPreferences(this)
+				.getBoolean("viewWrapLines", false);
+		if (wrapLines) {
+			text = text.replaceAll("\\n\\n", "<br/>\n<br/>\n");
+			text = text.replaceAll("\\n-", "<br/>\n-");
+			result = "<html><body>" + text + "</body></html>";
+		} else {
+			text = text.replaceAll("\\n", "<br/>\n");
+			result = "<html><body><pre>" + text + "</pre></body></html>";
+		}
+		
+		return result;
 	}
 
-	private String convertToHtml(String srcText) {
+	private String nodeToHTMLRecursive(Node node, int level, boolean hideHeading) {
+		StringBuilder result = new StringBuilder();
+		result.append(nodeToHTML(node, level, hideHeading));
+		
+		if(level <= 0) {
+			if(node.hasChildren())
+				result.append("<b>...</b><br/>");
+
+			return result.toString();
+		}
+		level--;
+
+		for(Node child: node.getChildren())
+			result.append(nodeToHTMLRecursive(child, level, false));
+			
+		return result.toString();
+	}
+	
+	private String nodeToHTML(Node node, int headingLevel, boolean hideHeading) {
+		StringBuilder result = new StringBuilder();
+
+		if (!hideHeading) {
+			int fontSize = 3 + headingLevel;
+			result.append("<font size=\"");
+			result.append(fontSize);
+			result.append("\"> <b>");
+			result.append(node.name);
+			result.append("</b></font> <hr />");
+		}
+
+		if(!node.payload.getContent().equals("")) {
+			result.append(node.payload.getContent());
+			result.append("<br/>\n");
+		}
+		
+		result.append("<br/>\n");
+		return result.toString();
+	}
+
+	private String convertLinks(String text) {
 		int i1 = 0, i2 = 0;
 		while (true) {
-			i1 = srcText.indexOf("[[", i2 + 1);
+			i1 = text.indexOf("[[", i2 + 1);
 			if (i1 < 0)
 				break;
-			i2 = srcText.indexOf("]]", i1);
+			i2 = text.indexOf("]]", i1);
 			if (i2 < 0)
 				break;
-			int i3 = srcText.indexOf("][", i1);
+			int i3 = text.indexOf("][", i1);
 			String linkUrl;
 			String linkText;
 			if (i3 >= 0 && i3 < i2) {
-				linkUrl = srcText.substring(i1 + 2, i3);
-				linkText = srcText.substring(i3 + 2, i2);
+				linkUrl = text.substring(i1 + 2, i3);
+				linkText = text.substring(i3 + 2, i2);
 			} else {
-				linkUrl = srcText.substring(i1 + 2, i2);
+				linkUrl = text.substring(i1 + 2, i2);
 				linkText = linkUrl;
 
 			}
-			srcText = srcText.substring(0, i1) + "<a href=\"" + linkUrl + "\">"
-					+ linkText + "</a>" + srcText.substring(i2 + 2);
+			text = text.substring(0, i1) + "<a href=\"" + linkUrl + "\">"
+					+ linkText + "</a>" + text.substring(i2 + 2);
 		}
-		String result = "<html><body><pre>"
-				+ srcText.replaceAll("\\n", "<br/>\n") + "</pre></body></html>";
-		return result;
+		return text;
 	}
 
 	private static class InternalWebViewClient extends WebViewClient {
@@ -75,7 +137,6 @@ public class NodeViewActivity extends Activity {
 					return true;
 				}
 			} catch (MalformedURLException e) {
-				// ignore?
 			}
 			return false;
 		}
@@ -88,7 +149,6 @@ public class NodeViewActivity extends Activity {
 	}
 
 	private static class InternalWebChromeClient extends WebChromeClient {
-		// TODO empty; unused right now...
 	}
 
 }

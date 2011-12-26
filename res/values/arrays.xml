@@ -1,43 +1,59 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <string-array name="storageModes">
-    <item>internal</item>
-    <item>sdcard</item>
-  </string-array>
-  <string-array name="storageModesVals">
-    <item>internal</item>
-    <item>sdcard</item>
-  </string-array>
-  <string-array name="fileSources">
-    <item>WebDAV</item>
-    <item>Dropbox</item>
-    <item>SDCard</item>
-  </string-array>
-  <string-array name="fileSourcesVals">
-    <item>webdav</item>
-    <item>dropbox</item>
-    <item>sdcard</item>
-  </string-array>
-  <string-array name="syncIntervals">
-	<item>5 min</item>
-	<item>10 min</item>
-	<item>15 min</item>
-	<item>30 min</item>
-	<item>45 min</item>
-	<item>1 hour</item>
-	<item>3 hours</item>
-	<item>6 hours</item>
-	<item>12 hours</item>
-  </string-array>
-  <string-array name="syncIntervalsVals">
-	<item>300000</item>
-	<item>600000</item>
-	<item>900000</item>
-	<item>1800000</item>
-	<item>2700000</item>
-	<item>3600000</item>
-	<item>10800000</item>
-	<item>21600000</item>
-	<item>43200000</item>
-  </string-array>
+
+    <string-array name="storageModes">
+        <item>internal</item>
+        <item>sdcard</item>
+    </string-array>
+    <string-array name="storageModesVals">
+        <item>internal</item>
+        <item>sdcard</item>
+    </string-array>
+    <string-array name="fileSources">
+        <item>WebDAV</item>
+        <item>Dropbox</item>
+        <item>SDCard</item>
+    </string-array>
+    <string-array name="fileSourcesVals">
+        <item>webdav</item>
+        <item>dropbox</item>
+        <item>sdcard</item>
+    </string-array>
+    <string-array name="syncIntervals">
+        <item>5 min</item>
+        <item>10 min</item>
+        <item>15 min</item>
+        <item>30 min</item>
+        <item>45 min</item>
+        <item>1 hour</item>
+        <item>3 hours</item>
+        <item>6 hours</item>
+        <item>12 hours</item>
+    </string-array>
+    <string-array name="syncIntervalsVals">
+        <item>300000</item>
+        <item>600000</item>
+        <item>900000</item>
+        <item>1800000</item>
+        <item>2700000</item>
+        <item>3600000</item>
+        <item>10800000</item>
+        <item>21600000</item>
+        <item>43200000</item>
+    </string-array>
+    <string-array name="viewRecursionLevelsVals">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+    </string-array>
+    <string-array name="viewRecursionLevels">
+        <item>Current node only</item>
+        <item>All nodes children</item>
+        <item>All nodes children and there children</item>
+        <item>3 Levels of recursion</item>
+        <item>4 Levels of recursion</item>
+    </string-array>
+
 </resources>
