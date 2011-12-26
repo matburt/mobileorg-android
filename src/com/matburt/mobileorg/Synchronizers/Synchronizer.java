@@ -199,7 +199,8 @@ abstract public class Synchronizer {
 			if (TextUtils.isEmpty(eachLine))
 				continue;
 			String[] chksTuple = eachLine.split("\\s+");
-			chksums.put(chksTuple[1], chksTuple[0]);
+			if(chksTuple.length >= 2)
+				chksums.put(chksTuple[1], chksTuple[0]);
 		}
 		return chksums;
 	}
