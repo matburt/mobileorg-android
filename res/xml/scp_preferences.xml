@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+  <PreferenceCategory android:title="Scp">
+    <EditTextPreference
+        android:summary="Full URL path to your index.org file"
+        android:title="URL"
+        android:key="scpUrl" android:name="scp_url" android:inputType="textUri"/>
+    <EditTextPreference
+        android:summary="Username to login"
+        android:title="Username"
+        android:key="scpUser" android:name="scp_user"/>
+    <EditTextPreference
+        android:summary="Password to login"
+        android:title="Password"
+        android:key="scpPass" android:password="true" android:inputType="textPassword" android:name="scp_password"/>
+  </PreferenceCategory>
+</PreferenceScreen>

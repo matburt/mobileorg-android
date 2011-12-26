@@ -8,6 +8,7 @@ import java.util.TimerTask;
 import com.matburt.mobileorg.Parsing.MobileOrgApplication;
 import com.matburt.mobileorg.Synchronizers.DropboxSynchronizer;
 import com.matburt.mobileorg.Synchronizers.SDCardSynchronizer;
+import com.matburt.mobileorg.Synchronizers.SSHSynchronizer;
 import com.matburt.mobileorg.Synchronizers.Synchronizer;
 import com.matburt.mobileorg.Synchronizers.WebDAVSynchronizer;
 
@@ -63,6 +64,8 @@ public class SyncService extends Service implements SharedPreferences.OnSharedPr
 			synchronizer = new SDCardSynchronizer(this, this.appInst);
 		else if (syncSource.equals("dropbox"))
 			synchronizer = new DropboxSynchronizer(this, this.appInst);
+		else if (syncSource.equals("scp"))
+			synchronizer = new SSHSynchronizer(this, this.appInst);
 		else
 			return; // TODO Throw error
 		

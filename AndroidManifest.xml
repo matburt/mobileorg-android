@@ -13,14 +13,14 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
+        android:name=".Parsing.MobileOrgApplication"
         android:debuggable="true"
         android:icon="@drawable/icon"
-        android:label="MobileOrg"
-        android:name=".Parsing.MobileOrgApplication" >
+        android:label="MobileOrg" >
         <receiver
-            android:label="MobileOrg Tasks"
-            android:name=".Services.MobileOrgWidget" >
-            <intent-filter >
+            android:name=".Services.MobileOrgWidget"
+            android:label="MobileOrg Tasks" >
+            <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
 
@@ -31,13 +31,13 @@
 
         <service android:name=".Services.MobileOrgWidget$MobileOrgWidgetService" />
         <service android:name=".Services.SyncService" >
-            <intent-filter >
+            <intent-filter>
                 <action android:name="com.matburt.mobileorg.SYNC_SERVICE" />
             </intent-filter>
         </service>
 
         <receiver android:name=".Services.MobileOrgStartupIntentReceiver" >
-            <intent-filter >
+            <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
 
                 <category android:name="android.intent.category.HOME" />
@@ -45,9 +45,10 @@
         </receiver>
 
         <activity
+            android:name=".Gui.OutlineActivity"
             android:label="MobileOrg"
-            android:name=".Gui.OutlineActivity" >
-            <intent-filter >
+            android:theme="@android:style/Theme.Black.NoTitleBar" >
+            <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -56,21 +57,22 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".Gui.NodeViewActivity"
             android:label="Org View"
-            android:name=".Gui.NodeViewActivity" >
+            android:theme="@android:style/Theme.Black.NoTitleBar" >
         </activity>
         <activity
+            android:name=".Gui.NodeEditActivity"
             android:exported="true"
             android:label="Org Capture"
-            android:name=".Gui.NodeEditActivity"
             android:windowSoftInputMode="adjustPan" >
-            <intent-filter >
+            <intent-filter>
                 <action android:name="com.matburt.mobileorg.CAPTURE" />
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
-            <intent-filter >
+            <intent-filter>
                 <action android:name="android.intent.action.SEND" />
 
                 <category android:name="android.intent.category.DEFAULT" />
@@ -83,28 +85,32 @@
             android:windowSoftInputMode="adjustResize" >
         </activity>
         <activity
-            android:label="MobileOrg Settings"
-            android:name=".Settings.SettingsActivity" >
+            android:name=".Settings.SettingsActivity"
+            android:label="MobileOrg Settings" >
         </activity>
         <activity
-            android:label="MobileOrg Wizard"
-            android:name=".Settings.WizardActivity" >
+            android:name=".Settings.WizardActivity"
+            android:label="MobileOrg Wizard" >
         </activity>
         <activity
-            android:label="Dropbox Authentication"
-            android:name=".Synchronizers.DropboxAuthActivity" >
+            android:name=".Synchronizers.DropboxAuthActivity"
+            android:label="Dropbox Authentication" >
         </activity>
         <activity
-            android:label="WebDAV Settings"
-            android:name=".Settings.WebDAVSettingsActivity" >
+            android:name=".Settings.WebDAVSettingsActivity"
+            android:label="WebDAV Settings" >
         </activity>
         <activity
-            android:label="SDCard Settings"
-            android:name=".Settings.SDCardSettingsActivity" >
+            android:name=".Settings.SDCardSettingsActivity"
+            android:label="SDCard Settings" >
         </activity>
         <activity
-            android:label="Dropbox Settings"
-            android:name=".Settings.DropboxSettingsActivity" >
+            android:name=".Settings.DropboxSettingsActivity"
+            android:label="Dropbox Settings" >
+        </activity>
+        <activity
+            android:name=".Settings.ScpSettingsActivity"
+            android:label="Scp Settings" >
         </activity>
     </application>
 

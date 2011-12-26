@@ -58,6 +58,9 @@ public class SettingsActivity extends PreferenceActivity
 
         synchroIntent = new Intent(this, DropboxSettingsActivity.class);
         SynchronizerPreferences.syncIntents.put("dropbox", synchroIntent);
+        
+        synchroIntent = new Intent(this, ScpSettingsActivity.class);
+        SynchronizerPreferences.syncIntents.put("scp", synchroIntent);
 
         //populate the sync source list with updated data
         syncSource.setEntries(entries);
