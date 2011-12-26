@@ -46,4 +46,9 @@ public class SDCardSynchronizer extends Synchronizer {
 		FileInputStream fileIS = new FileInputStream(file);
 		return new BufferedReader(new InputStreamReader(fileIS));
 	}
+
+
+	@Override
+	protected void postSynchronize() {		
+	}
 }

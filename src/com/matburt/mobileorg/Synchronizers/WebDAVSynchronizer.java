@@ -174,4 +174,8 @@ public class WebDAVSynchronizer extends Synchronizer {
 		return manageUrl.getProtocol() + "://" + manageUrl.getAuthority()
 				+ directoryActual;
 	}
+
+	@Override
+	protected void postSynchronize() {		
+	}
 }

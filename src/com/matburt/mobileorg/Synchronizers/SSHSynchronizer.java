@@ -230,4 +230,10 @@ public class SSHSynchronizer extends Synchronizer {
 		}
 		return b;
 	}
+
+	@Override
+	protected void postSynchronize() {
+		if(this.session != null)
+			this.session.disconnect();
+	}
 }

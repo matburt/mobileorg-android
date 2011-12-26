@@ -52,6 +52,11 @@ abstract public class Synchronizer {
 	 * @param filename Name of the file, without path
 	 */
 	protected abstract BufferedReader getRemoteFile(String filename) throws IOException;
+	
+	/** 
+	 * Use this to disconnect from any services and cleanup.
+	 */
+	protected abstract void postSynchronize();
 
 	protected OrgDatabase appdb;
 	protected SharedPreferences appSettings;
@@ -252,5 +257,6 @@ abstract public class Synchronizer {
 	public void close() {
 		if (this.appdb != null)
 			this.appdb.close();
+		this.postSynchronize();
 	}
 }

@@ -134,4 +134,9 @@ public class DropboxSynchronizer extends Synchronizer {
         Toast error = Toast.makeText(this.context, msg, Toast.LENGTH_LONG);
         error.show();
     }
+
+
+	@Override
+	protected void postSynchronize() {
+	}
 }
