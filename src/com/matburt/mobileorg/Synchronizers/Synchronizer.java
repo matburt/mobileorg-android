@@ -23,7 +23,6 @@ import com.matburt.mobileorg.Gui.OutlineActivity;
 import com.matburt.mobileorg.Parsing.MobileOrgApplication;
 import com.matburt.mobileorg.Parsing.OrgDatabase;
 import com.matburt.mobileorg.Parsing.OrgFile;
-import com.matburt.mobileorg.Services.SyncService;
 
 /**
  * This class implements many of the operations that need to be done on
@@ -34,11 +33,9 @@ import com.matburt.mobileorg.Services.SyncService;
  * needed.
  */
 abstract public class Synchronizer {
-	public final static String SYNC_PROGRESS = "sync_progress";
-	public final static String SYNC_MESSAGE = "sync_message";
-	public final static String SYNC_FILES = "sync_files";
-	public final static String SYNC_FILES_TOTAL = "sync_total";
 	public final static String SYNC_DONE = "sync_done";
+	public static final String SYNC_UPDATE = "com.matburt.mobileorg.Synchronizer.action.SYNC_UPDATE";
+
 	
 	/**
 	 * Called before running the synchronizer to ensure that it's configuration
@@ -83,7 +80,6 @@ abstract public class Synchronizer {
 		setupNotification();
 		updateNotification(0, "Uploading " + OrgFile.CAPTURE_FILE);
 		push(OrgFile.CAPTURE_FILE);
-		updateNotification(20);
 		pull();
 		finalizeNotification();
 		announceSyncDone();
@@ -119,7 +115,6 @@ abstract public class Synchronizer {
 	protected void pull() throws IOException {
 		updateNotification(20, "Downloading index file");
 		String remoteIndexContents = OrgFile.read(getRemoteFile("index.org"));
-		updateNotification(40);
 		
         ArrayList<HashMap<String, Boolean>> todoLists = getTodos(remoteIndexContents);
         this.appdb.setTodoList(todoLists);
@@ -127,7 +122,7 @@ abstract public class Synchronizer {
         ArrayList<ArrayList<String>> priorityLists = getPriorities(remoteIndexContents);
         this.appdb.setPriorityList(priorityLists);
 
-		updateNotification(50, "Downloading checksum file");
+		updateNotification(40, "Downloading checksum file");
         String remoteChecksumContents = OrgFile.read(getRemoteFile("checksums.dat"));
 		updateNotification(60);
 
@@ -208,7 +203,7 @@ abstract public class Synchronizer {
 	}
 
 	private void announceSyncDone() {
-		Intent intent = new Intent(SyncService.SYNC_UPDATE);
+		Intent intent = new Intent(Synchronizer.SYNC_UPDATE);
 		intent.putExtra(SYNC_DONE, true);
 		this.context.sendBroadcast(intent);
 	}

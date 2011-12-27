@@ -6,9 +6,11 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.IBinder;
 import android.widget.RemoteViews;
 
@@ -17,9 +19,9 @@ import com.matburt.mobileorg.Gui.NodeEditActivity;
 import com.matburt.mobileorg.Parsing.EditNode;
 import com.matburt.mobileorg.Parsing.MobileOrgApplication;
 import com.matburt.mobileorg.Parsing.Node;
+import com.matburt.mobileorg.Synchronizers.Synchronizer;
 
 public class MobileOrgWidget extends AppWidgetProvider {
-    public static String WIDGET_CAPTURE = "WIDGET_CAPTURE";
 
    @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager,
@@ -31,22 +33,22 @@ public class MobileOrgWidget extends AppWidgetProvider {
 
     public static class MobileOrgWidgetService extends Service {
 
+    	private RemoteViews updateViews;
+    	private AppWidgetManager manager;
+    	private ComponentName thisWidget;
+    	
     	@Override
         public void onStart(Intent intent, int startId) {
             RemoteViews updateViews = this.genUpdateDisplay(this);
-            ComponentName thisWidget = new ComponentName(this,
-                                                         MobileOrgWidget.class);
-            AppWidgetManager manager = AppWidgetManager.getInstance(this);
+            thisWidget = new ComponentName(this, MobileOrgWidget.class);
+            manager = AppWidgetManager.getInstance(this);
             manager.updateAppWidget(thisWidget, updateViews);
-        }
-
-        @Override
-        public void onDestroy() {
-            super.onDestroy();
+            
+            IntentFilter serviceFilter = new IntentFilter(Synchronizer.SYNC_UPDATE);
+            registerReceiver(new SynchServiceReceiver(), serviceFilter);
         }
 
         private RemoteViews genUpdateDisplay(Context context) {
-            RemoteViews updateViews = null;
             updateViews = new RemoteViews(context.getPackageName(),
                                           R.layout.widget);
             
@@ -54,7 +56,6 @@ public class MobileOrgWidget extends AppWidgetProvider {
             intent.setAction(NodeEditActivity.ACTIONMODE_CREATE);
             PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
             updateViews.setOnClickPendingIntent(R.id.widget, pendingIntent);
-
 
 			updateViews.setTextViewText(R.id.message, getAgenda());
             return updateViews;
@@ -85,11 +86,24 @@ public class MobileOrgWidget extends AppWidgetProvider {
 			
 			return widgetBuffer.toString();
         }
+        
+        private void refreshDisplay() {
+        	updateViews.setTextViewText(R.id.message, getAgenda());
+            manager.updateAppWidget(thisWidget, updateViews);
+        }
 
         @Override
         public IBinder onBind(Intent intent) {
             // We don't need to bind to this service
             return null;
         }
+        
+    	private class SynchServiceReceiver extends BroadcastReceiver {
+    		@Override
+    		public void onReceive(Context context, Intent intent) {
+    			if (intent.getBooleanExtra(Synchronizer.SYNC_DONE, false))
+    				refreshDisplay();
+    		}
+    	}
     }
 }

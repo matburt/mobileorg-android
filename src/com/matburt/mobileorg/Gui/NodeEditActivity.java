@@ -16,6 +16,7 @@ import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Parsing.MobileOrgApplication;
 import com.matburt.mobileorg.Parsing.NodeWriter;
 import com.matburt.mobileorg.Parsing.Node;
+import com.matburt.mobileorg.Synchronizers.Synchronizer;
 
 public class NodeEditActivity extends Activity {
 	public final static String ACTIONMODE_CREATE = "create";
@@ -154,6 +155,7 @@ public class NodeEditActivity extends Activity {
 				writer.write(node);		
 			} catch (IOException e) {
 			}
+			
 		} else if (this.actionMode.equals(ACTIONMODE_EDIT)) {
 			try {
 				writer.editNode(node, newTitle, newTodo, newPriority,
@@ -161,5 +163,8 @@ public class NodeEditActivity extends Activity {
 			} catch (IOException e) {
 			}
 		}
+		Intent intent = new Intent(Synchronizer.SYNC_UPDATE);
+		intent.putExtra(Synchronizer.SYNC_DONE, true);
+		sendBroadcast(intent);
 	}
 }

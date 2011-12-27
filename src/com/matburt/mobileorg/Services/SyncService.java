@@ -20,8 +20,6 @@ import com.matburt.mobileorg.Synchronizers.Synchronizer;
 import com.matburt.mobileorg.Synchronizers.WebDAVSynchronizer;
 
 public class SyncService extends Service implements SharedPreferences.OnSharedPreferenceChangeListener{
-	public static final String SYNC_UPDATE = "com.matburt.mobileorg.SyncService.action.SYNC_UPDATE";
-
 	private SharedPreferences appSettings;
 	private MobileOrgApplication appInst;
 	

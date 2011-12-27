@@ -29,9 +29,14 @@
                 android:resource="@xml/widget_mobileorg" />
         </receiver>
 
-        <service android:name=".Services.MobileOrgWidget$MobileOrgWidgetService" />
+        <service android:name=".Services.MobileOrgWidget$MobileOrgWidgetService" >
+            <intent-filter>
+                <action android:name="com.matburt.mobileorg.Synchronizer.action.SYNC_UPDATE" />
+            </intent-filter>
+        </service>
         <service android:name=".Services.SyncService" >
             <intent-filter>
+                <category android:name="android.intent.category.DEFAULT" />
                 <action android:name="com.matburt.mobileorg.SYNC_SERVICE" />
             </intent-filter>
         </service>
@@ -52,7 +57,7 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
 
-                <action android:name="com.matburt.mobileorg.SyncService.SyncService.action.SYNC_UPDATE" />
+                <action android:name="com.matburt.mobileorg.Synchronizer.action.SYNC_UPDATE" />
             </intent-filter>
         </activity>
         <activity

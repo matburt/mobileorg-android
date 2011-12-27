@@ -84,7 +84,7 @@ public class OutlineActivity extends ListActivity
 	public void onResume() {	
 		refreshDisplay();
 
-		IntentFilter serviceFilter = new IntentFilter(SyncService.SYNC_UPDATE);
+		IntentFilter serviceFilter = new IntentFilter(Synchronizer.SYNC_UPDATE);
         registerReceiver(syncReceiver, serviceFilter);
 
         super.onResume();
@@ -130,7 +130,7 @@ public class OutlineActivity extends ListActivity
 		
 		case R.id.menu_outline:
 			appInst.clearNodestack();
-			onResume();
+			refreshDisplay();
 			return true;
 		
 		case R.id.menu_capture:
@@ -264,11 +264,6 @@ public class OutlineActivity extends ListActivity
 
 		case RUNFOR_EDITNODE:
 			this.appInst.popNodestack();
-			break;
-			
-		case RUNFOR_NEWNODE:
-			if(resultCode == RESULT_OK)
-				this.refreshDisplay();
 			break;
 			
 		case RUNFOR_VIEWNODE:
