@@ -7,13 +7,19 @@ import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
+import android.widget.RemoteViews;
 
+import com.matburt.mobileorg.R;
+import com.matburt.mobileorg.Gui.OutlineActivity;
 import com.matburt.mobileorg.Parsing.MobileOrgApplication;
 import com.matburt.mobileorg.Parsing.OrgDatabase;
 import com.matburt.mobileorg.Parsing.OrgFile;
@@ -70,16 +76,16 @@ abstract public class Synchronizer {
         this.appdb = new OrgDatabase((Context)context);
         this.appSettings = PreferenceManager.getDefaultSharedPreferences(
                                    context.getApplicationContext());
-        this.appInst = appInst;
-        
-        announceSyncMessage("Connecting to service");
+        this.appInst = appInst;        
 	}
 
 	public void sync() throws IOException {
-		announceSyncMessage("Uploading " + OrgFile.CAPTURE_FILE);
+		setupNotification();
+		updateNotification(0, "Uploading " + OrgFile.CAPTURE_FILE);
 		push(OrgFile.CAPTURE_FILE);
-		announceSyncProgress(20);
+		updateNotification(20);
 		pull();
+		finalizeNotification();
 		announceSyncDone();
 	}
 
@@ -92,7 +98,7 @@ abstract public class Synchronizer {
     	String localContents = orgFile.read();
 
     	String remoteContent = OrgFile.read(getRemoteFile(filename));
-    	announceSyncProgress(10);
+		updateNotification(10);
     	
         if(localContents.equals(""))
         	return;
@@ -111,19 +117,19 @@ abstract public class Synchronizer {
 	 * and downloads them.
 	 */
 	protected void pull() throws IOException {
-		announceSyncMessage("Downloading index file");
+		updateNotification(20, "Downloading index file");
 		String remoteIndexContents = OrgFile.read(getRemoteFile("index.org"));
-		announceSyncProgress(40);
-        
+		updateNotification(40);
+		
         ArrayList<HashMap<String, Boolean>> todoLists = getTodos(remoteIndexContents);
         this.appdb.setTodoList(todoLists);
 
         ArrayList<ArrayList<String>> priorityLists = getPriorities(remoteIndexContents);
         this.appdb.setPriorityList(priorityLists);
 
-        announceSyncMessage("Downloading checksum file");
+		updateNotification(50, "Downloading checksum file");
         String remoteChecksumContents = OrgFile.read(getRemoteFile("checksums.dat"));
-        announceSyncProgress(60);
+		updateNotification(60);
 
 		HashMap<String, String> remoteChecksums = getChecksums(remoteChecksumContents);
 		HashMap<String, String> localChecksums = this.appdb.getChecksums();
@@ -146,7 +152,7 @@ abstract public class Synchronizer {
         	String filename = fileChecksumMap.get(key);
         	
         	i++;
-			announceSyncFile("Downloading " + filename, i, filesToGet.size());
+			updateNotification(i, "Downloading " + filename, filesToGet.size());
 
             OrgFile orgfile = new OrgFile(filename, context);
             orgfile.fetch(getRemoteFile(filename));
@@ -155,25 +161,50 @@ abstract public class Synchronizer {
         }
 	}
 	
+	private NotificationManager notificationManager;
+	private Notification notification;
+	private int notifyRef = 1;
 	
-	private void announceSyncProgress(int progress) {
-		Intent intent = new Intent(SyncService.SYNC_UPDATE);
-		intent.putExtra(SYNC_PROGRESS, progress);
-		this.context.sendBroadcast(intent);
+	private void setupNotification() {
+		this.notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+		PendingIntent contentIntent = PendingIntent.getActivity(context, 0,
+				new Intent(this.context, OutlineActivity.class), 0);
+
+		notification = new Notification(R.drawable.icon,
+				"MobileOrg", System.currentTimeMillis());
+		
+		notification.contentIntent = contentIntent;
+		notification.flags = notification.flags | Notification.FLAG_ONGOING_EVENT;
+		notification.contentView = new RemoteViews(context
+				.getPackageName(), R.layout.sync_notification);
+		
+		notification.contentView.setImageViewResource(R.id.status_icon, R.drawable.icon);
+        notification.contentView.setTextViewText(R.id.status_text, "Synching");
+        notification.contentView.setProgressBar(R.id.status_progress, 100, 0, false);
+		notificationManager.notify(notifyRef, notification);
 	}
 
-	private void announceSyncFile(String message, int number, int total) {
-		Intent intent = new Intent(SyncService.SYNC_UPDATE);
-		intent.putExtra(SYNC_MESSAGE, message);
-		intent.putExtra(SYNC_FILES, number);
-		intent.putExtra(SYNC_FILES_TOTAL, total);
-		this.context.sendBroadcast(intent);
+	private void updateNotification(int progress) {
+		notification.contentView.setProgressBar(R.id.status_progress, 100, progress, false);
+        notificationManager.notify(notifyRef, notification);
+	}
+
+	
+	private void updateNotification(int progress, String message) {		
+        notification.contentView.setTextViewText(R.id.status_text, message);
+		notification.contentView.setProgressBar(R.id.status_progress, 100, progress, false);
+        notificationManager.notify(notifyRef, notification);
+	}
+
+	private void updateNotification(int fileNumber, String message, int totalFiles) {
+		int partialProgress = ((40 / totalFiles) * fileNumber);
+		notification.contentView.setProgressBar(R.id.status_progress, 100, 60 + partialProgress, false);
+        notification.contentView.setTextViewText(R.id.status_text, message);
+        notificationManager.notify(notifyRef, notification);
 	}
 	
-	private void announceSyncMessage(String message) {
-		Intent intent = new Intent(SyncService.SYNC_UPDATE);
-		intent.putExtra(SYNC_MESSAGE, message);
-		this.context.sendBroadcast(intent);
+	private void finalizeNotification() {
+		notificationManager.cancel(notifyRef);
 	}
 
 	private void announceSyncDone() {

@@ -5,19 +5,19 @@ import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import com.matburt.mobileorg.Parsing.MobileOrgApplication;
-import com.matburt.mobileorg.Synchronizers.DropboxSynchronizer;
-import com.matburt.mobileorg.Synchronizers.SDCardSynchronizer;
-import com.matburt.mobileorg.Synchronizers.SSHSynchronizer;
-import com.matburt.mobileorg.Synchronizers.Synchronizer;
-import com.matburt.mobileorg.Synchronizers.WebDAVSynchronizer;
-
 import android.app.Service;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.util.Log;
+
+import com.matburt.mobileorg.Parsing.MobileOrgApplication;
+import com.matburt.mobileorg.Synchronizers.DropboxSynchronizer;
+import com.matburt.mobileorg.Synchronizers.SDCardSynchronizer;
+import com.matburt.mobileorg.Synchronizers.SSHSynchronizer;
+import com.matburt.mobileorg.Synchronizers.Synchronizer;
+import com.matburt.mobileorg.Synchronizers.WebDAVSynchronizer;
 
 public class SyncService extends Service implements SharedPreferences.OnSharedPreferenceChangeListener{
 	public static final String SYNC_UPDATE = "com.matburt.mobileorg.SyncService.action.SYNC_UPDATE";
@@ -86,8 +86,6 @@ public class SyncService extends Service implements SharedPreferences.OnSharedPr
 		syncThread.start();
 		this.lastSyncDate = new Date();
 	}
-	
-	
 
 	@Override
 	public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {

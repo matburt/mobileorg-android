@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.StringReader;
 
 import android.app.ListActivity;
-import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -55,7 +54,6 @@ public class OutlineActivity extends ListActivity
 	 */
 	private int lastSelection = 0;
 	
-	private ProgressDialog syncDialog;
 	private OutlineListAdapter outlineAdapter;
 	private SynchServiceReceiver syncReceiver;
 
@@ -80,6 +78,7 @@ public class OutlineActivity extends ListActivity
 		
         this.syncReceiver = new SynchServiceReceiver();
 	}
+
 	
 	@Override
 	public void onResume() {	
@@ -203,12 +202,6 @@ public class OutlineActivity extends ListActivity
     }
     
     private void runSync() {
-		this.syncDialog = new ProgressDialog(this);
-		this.syncDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-		this.syncDialog.setCancelable(false);
-		this.syncDialog.setMessage("Started synchronization");
-		this.syncDialog.show();
-
 		startService(new Intent(this, SyncService.class));
     }
 	
@@ -294,43 +287,11 @@ public class OutlineActivity extends ListActivity
 		}
 	}
 
-
-	private void showMessage(String message) {
-		this.syncDialog.setMessage(message);
-	}
-	
-	private void stopSyncDialog() {
-		this.syncDialog.dismiss();
-		this.refreshDisplay();
-	}
-	
-	private void showProgressDialog(int number, int total) {
-		int progress = ((40 / total) * number);
-		// TODO Fix progress bar
-		this.syncDialog.setProgress(60 + progress + 1);
-	}
-	
-	private void showProgress(int total) {
-		this.syncDialog.setProgress(total);
-	}
-	
-	// TODO Add the handling of thrown error messages from synchronizer
 	public class SynchServiceReceiver extends BroadcastReceiver {
 		@Override
 		public void onReceive(Context context, Intent intent) {
-			int num = intent.getIntExtra(Synchronizer.SYNC_FILES, 0);
-			int totalfiles = intent.getIntExtra(Synchronizer.SYNC_FILES_TOTAL, 0);
-			int progress = intent.getIntExtra(Synchronizer.SYNC_PROGRESS, 0);
-			String message = intent.getStringExtra(Synchronizer.SYNC_MESSAGE);
-
 			if (intent.getBooleanExtra(Synchronizer.SYNC_DONE, false))
-				stopSyncDialog();
-			if (num > 0)
-				showProgressDialog(num, totalfiles);
-			if (message != null)
-				showMessage(message);
-			if (progress > 0)
-				showProgress(progress);
+				refreshDisplay();
 		}
 	}
 	

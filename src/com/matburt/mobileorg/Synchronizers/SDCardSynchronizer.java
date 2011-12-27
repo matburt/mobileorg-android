@@ -22,7 +22,7 @@ public class SDCardSynchronizer extends Synchronizer {
     	super(context, appInst);
 		this.remoteIndexPath = PreferenceManager.getDefaultSharedPreferences(
 				context).getString("indexFilePath", "");
-		
+	
 		this.remotePath = new File(remoteIndexPath).getParent() + "/";
 	}
     

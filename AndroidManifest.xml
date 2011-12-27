@@ -46,7 +46,7 @@
 
         <activity
             android:name=".Gui.OutlineActivity"
-            android:label="MobileOrg"  >
+            android:label="MobileOrg" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
