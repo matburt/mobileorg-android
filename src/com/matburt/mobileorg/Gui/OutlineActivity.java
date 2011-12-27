@@ -35,8 +35,7 @@ public class OutlineActivity extends ListActivity
 	
 	private static final int RUNFOR_EXPAND = 1;
 	private static final int RUNFOR_EDITNODE = 2;
-	private static final int RUNFOR_NEWNODE = 3;
-	private static final int RUNFOR_VIEWNODE = 4;
+	private static final int RUNFOR_VIEWNODE = 3;
 
 	private MobileOrgApplication appInst;
 
@@ -208,7 +207,7 @@ public class OutlineActivity extends ListActivity
 	private boolean runEditNewNodeActivity() {
 		Intent intent = new Intent(this, NodeEditActivity.class);
 		intent.putExtra("actionMode", NodeEditActivity.ACTIONMODE_CREATE);
-		startActivityForResult(intent, RUNFOR_NEWNODE);
+		startActivity(intent);
 		return true;
 	}
 	
