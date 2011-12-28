@@ -125,17 +125,13 @@ public class NodeViewActivity extends Activity {
 		StringBuilder result = new StringBuilder();
 		result.append(nodeToHTML(node, level));
 
-		if (level <= 0) {
-			if (node.hasChildren())
-				result.append("<b>...</b><br/>");
-
+		if (level <= 0)
 			return result.toString();
-		}
 		level--;
 
-		for (Node child : node.getChildren())
+		for (Node child : node.getChildren()) {
 			result.append(nodeToHTMLRecursive(child, level));
-
+		}
 		return result.toString();
 	}
 
@@ -147,6 +143,10 @@ public class NodeViewActivity extends Activity {
 		result.append(fontSize);
 		result.append("\"> <b>");
 		result.append(node.name);
+		
+		if(headingLevel == 0 && node.hasChildren())
+			result.append("...");
+		
 		result.append("</b></font> <hr />");
 
 		if (!node.payload.getContent().equals("")) {
