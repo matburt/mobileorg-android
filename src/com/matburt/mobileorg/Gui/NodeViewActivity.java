@@ -40,11 +40,16 @@ public class NodeViewActivity extends Activity {
 		this.appInst = (MobileOrgApplication) this.getApplication();
 		
         this.syncReceiver = new SynchServiceReceiver();
-        
 		registerReceiver(this.syncReceiver, new IntentFilter(
 				Synchronizer.SYNC_UPDATE));
         
 		refreshDisplay();
+	}
+	
+	@Override
+	public void onDestroy() {
+		unregisterReceiver(this.syncReceiver);
+		super.onDestroy();
 	}
 	
 	private void refreshDisplay() {

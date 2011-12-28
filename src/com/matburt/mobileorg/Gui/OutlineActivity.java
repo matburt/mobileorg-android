@@ -3,9 +3,11 @@ package com.matburt.mobileorg.Gui;
 import java.io.BufferedReader;
 import java.io.StringReader;
 
+import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
@@ -55,6 +57,7 @@ public class OutlineActivity extends ListActivity
 	private int lastSelection = 0;
 	
 	private OutlineListAdapter outlineAdapter;
+	private SynchServiceReceiver syncReceiver;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -75,8 +78,15 @@ public class OutlineActivity extends ListActivity
 
 		registerForContextMenu(getListView());	
 		
-		IntentFilter serviceFilter = new IntentFilter(Synchronizer.SYNC_UPDATE);
-        registerReceiver(new SynchServiceReceiver(), serviceFilter);
+		this.syncReceiver = new SynchServiceReceiver();
+		registerReceiver(this.syncReceiver, new IntentFilter(
+				Synchronizer.SYNC_UPDATE));
+	}
+	
+	@Override
+	public void onDestroy() {
+		unregisterReceiver(this.syncReceiver);
+		super.onDestroy();
 	}
 		
 	/**
@@ -223,10 +233,23 @@ public class OutlineActivity extends ListActivity
 		startActivityForResult(intent, RUNFOR_EXPAND);
 	}
 	
-	private void runDeleteNode(Node node) {
-		// TODO Maybe prompt with a yes-no dialog
-		appInst.removeFile(node.name);
-		refreshDisplay();
+	private void runDeleteNode(final Node node) {
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setMessage("Are you sure you want to delete " + node.name + "?")
+				.setCancelable(false)
+				.setPositiveButton("Yes",
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int id) {
+								appInst.removeFile(node.name);
+								refreshDisplay();
+							}
+						})
+				.setNegativeButton("No", new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						dialog.cancel();
+					}
+				});
+		builder.create().show();
 	}
 	
 	private boolean runShowSettings() {
@@ -269,8 +292,9 @@ public class OutlineActivity extends ListActivity
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			if (intent.getBooleanExtra(Synchronizer.SYNC_DONE, false)) {
-				Toast.makeText(context, "Sychronization Successful",
-						Toast.LENGTH_SHORT).show();
+				if (intent.getBooleanExtra("showToast", true))
+					Toast.makeText(context, "Sychronization Successful",
+							Toast.LENGTH_SHORT).show();
 				refreshDisplay();
 			}
 		}

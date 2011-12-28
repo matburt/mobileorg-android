@@ -216,6 +216,7 @@ public class NodeEditActivity extends Activity {
 		}
 		Intent intent = new Intent(Synchronizer.SYNC_UPDATE);
 		intent.putExtra(Synchronizer.SYNC_DONE, true);
+		intent.putExtra("showToast", false);
 		sendBroadcast(intent);
 	}
 }
