@@ -75,7 +75,7 @@ abstract public class Synchronizer {
         this.appInst = appInst;        
 	}
 
-	public void sync() throws IOException {		
+	public void sync() {		
 		if(isConfigured() == false) {
 			displayErrorNotification("Sync not configured");
 			return;
@@ -83,8 +83,10 @@ abstract public class Synchronizer {
 		
 		setupNotification();
 		updateNotification(0, "Uploading " + OrgFile.CAPTURE_FILE);
+		try {
 		push(OrgFile.CAPTURE_FILE);
 		pull();
+		} catch(IOException e) {}
 		finalizeNotification();
 		announceSyncDone();
 	}

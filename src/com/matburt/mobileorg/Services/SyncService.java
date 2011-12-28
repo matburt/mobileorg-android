@@ -1,7 +1,5 @@
 package com.matburt.mobileorg.Services;
 
-import java.io.IOException;
-
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -10,7 +8,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
-import android.util.Log;
 
 import com.matburt.mobileorg.Parsing.MobileOrgApplication;
 import com.matburt.mobileorg.Synchronizers.DropboxSynchronizer;
@@ -62,7 +59,7 @@ public class SyncService extends Service implements
 	}
 
 	private void runSynchronizer() {
-		Log.d("MobileOrg", "Starting synch");
+		unsetAlarm();
 		String syncSource = appSettings.getString("syncSource", "");
 		final Synchronizer synchronizer;
 
@@ -79,48 +76,31 @@ public class SyncService extends Service implements
 
 		Thread syncThread = new Thread() {
 			public void run() {
-				try {
-					synchronizer.sync();
-				} catch (IOException e) {
-				} finally {
-					synchronizer.close();
-				}
+				synchronizer.sync();
+				synchronizer.close();
+				setAlarm();
 			}
 		};
 
 		syncThread.start();
 	}
 
-	@Override
-	public void onSharedPreferenceChanged(SharedPreferences sharedPreferences,
-			String key) {
-		if (key.equals("doAutoSync")) {
-			if (sharedPreferences.getBoolean("doAutoSync", false)
-					&& !this.alarmScheduled)
-				setAlarm();
-			else if (!sharedPreferences.getBoolean("doAutoSync", false)
-					&& this.alarmScheduled)
-				unsetAlarm();
-		} else if (key.equals("autoSyncInterval"))
-			resetAlarm();
-	}
 
 	private void setAlarm() {
-		if (!this.alarmScheduled) {
-			boolean doAutoSync = this.appSettings.getBoolean("doAutoSync",
-					false);
-			if (doAutoSync) {
-				int interval = Integer.parseInt(this.appSettings.getString(
-						"autoSyncInterval", "1800000"), 10);
+		boolean doAutoSync = this.appSettings.getBoolean("doAutoSync", false);
+		if (!this.alarmScheduled && doAutoSync) {
 
-				this.alarmIntent = PendingIntent.getService(appInst, 0,
-						new Intent(this, SyncService.class), 0);
-				alarmManager.setRepeating(AlarmManager.RTC,
-						System.currentTimeMillis() + interval, interval,
-						alarmIntent);
+			int interval = Integer.parseInt(
+					this.appSettings.getString("autoSyncInterval", "1800000"),
+					10);
 
-				this.alarmScheduled = true;
-			}
+			this.alarmIntent = PendingIntent.getService(appInst, 0, new Intent(
+					this, SyncService.class), 0);
+			alarmManager.setRepeating(AlarmManager.RTC,
+					System.currentTimeMillis() + interval, interval,
+					alarmIntent);
+
+			this.alarmScheduled = true;
 		}
 	}
 
@@ -136,6 +116,21 @@ public class SyncService extends Service implements
 		setAlarm();
 	}
 
+
+	@Override
+	public void onSharedPreferenceChanged(SharedPreferences sharedPreferences,
+			String key) {
+		if (key.equals("doAutoSync")) {
+			if (sharedPreferences.getBoolean("doAutoSync", false)
+					&& !this.alarmScheduled)
+				setAlarm();
+			else if (!sharedPreferences.getBoolean("doAutoSync", false)
+					&& this.alarmScheduled)
+				unsetAlarm();
+		} else if (key.equals("autoSyncInterval"))
+			resetAlarm();
+	}
+	
 	@Override
 	public IBinder onBind(Intent intent) {
 		return null;

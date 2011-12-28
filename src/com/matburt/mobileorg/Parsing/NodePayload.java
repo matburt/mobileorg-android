@@ -23,16 +23,16 @@ public class NodePayload {
 	}
 	
 	public String getContent() {
-		if(this.content == null) {
+		if(this.content == null)
 			this.content = cleanPayload();
-		}
+
 		return this.content;
 	}
 		
 	public String getNodeId() {
 		if(this.nodeId == null)
 			this.stripTags();
-		
+
 		return this.nodeId;
 	}
 
@@ -42,6 +42,7 @@ public class NodePayload {
 		this.deadline = stripDate("DEADLINE:");
 
 		stripTags();
+		stripFileProperties();
 		
 		return payload.toString().trim();
 	}
@@ -88,6 +89,20 @@ public class NodePayload {
 			}
 			payload.delete(start, end);
 			propm = propertiesLine.matcher(this.payload);
+		}
+	}
+	
+	private void stripFileProperties() {
+		while (true) {
+			int start = payload.indexOf("#+");
+			if (start == -1)
+				break;
+			
+			int end = payload.substring(start).indexOf("\n");
+			if(end == -1)
+				break;
+			
+			payload.delete(start, end + 1);
 		}
 	}
 
