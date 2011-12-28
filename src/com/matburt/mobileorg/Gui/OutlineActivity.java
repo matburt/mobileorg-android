@@ -17,6 +17,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Parsing.MobileOrgApplication;
@@ -281,11 +282,16 @@ public class OutlineActivity extends ListActivity
 		}
 	}
 
+	private void postSynchronize() {
+		Toast.makeText(this, "Sychronization Successful", Toast.LENGTH_SHORT).show();
+		refreshDisplay();
+	}
+	
 	public class SynchServiceReceiver extends BroadcastReceiver {
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			if (intent.getBooleanExtra(Synchronizer.SYNC_DONE, false))
-				refreshDisplay();
+				postSynchronize();
 		}
 	}
 	

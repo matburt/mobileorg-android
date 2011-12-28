@@ -166,7 +166,7 @@ abstract public class Synchronizer {
 				new Intent(this.context, OutlineActivity.class), 0);
 
 		notification = new Notification(R.drawable.icon,
-				"Synchronizing", System.currentTimeMillis());
+				"Started synchronization", System.currentTimeMillis());
 		
 		notification.contentIntent = contentIntent;
 		notification.flags = notification.flags | Notification.FLAG_ONGOING_EVENT;
@@ -174,7 +174,7 @@ abstract public class Synchronizer {
 				.getPackageName(), R.layout.sync_notification);
 		
 		notification.contentView.setImageViewResource(R.id.status_icon, R.drawable.icon);
-        notification.contentView.setTextViewText(R.id.status_text, "Synchronizing");
+        notification.contentView.setTextViewText(R.id.status_text, "Synchronizing...");
         notification.contentView.setProgressBar(R.id.status_progress, 100, 0, false);
 		notificationManager.notify(notifyRef, notification);
 	}
