@@ -8,18 +8,18 @@ import android.preference.PreferenceManager;
 
 public class MobileOrgStartupIntentReceiver extends BroadcastReceiver {
 
-    private SharedPreferences appSettings;
+	private SharedPreferences appSettings;
 
-    private boolean shouldStartService(Context ctxt) {
-        this.appSettings = PreferenceManager.getDefaultSharedPreferences(ctxt.getApplicationContext());
-        return this.appSettings.getBoolean("doAutoSync", false);
-    }
+	private boolean shouldStartService(Context context) {
+		this.appSettings = PreferenceManager
+				.getDefaultSharedPreferences(context.getApplicationContext());
+		return this.appSettings.getBoolean("doAutoSync", false);
+	}
 
 	@Override
 	public void onReceive(Context context, Intent intent) {
-        if (this.shouldStartService(context)) {
-            Intent serviceIntent = new Intent(context, SyncService.class);
-            context.startService(serviceIntent);
-        }
+		if (this.shouldStartService(context)) {
+			SyncService.startAlarm(context);
+		}
 	}
 }

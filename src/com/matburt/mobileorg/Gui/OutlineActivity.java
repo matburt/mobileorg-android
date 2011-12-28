@@ -74,8 +74,7 @@ public class OutlineActivity extends ListActivity
                 this.showWizard();
 		}
 
-		registerForContextMenu(getListView());
-		
+		registerForContextMenu(getListView());	
         this.syncReceiver = new SynchServiceReceiver();
 	}
 
@@ -281,17 +280,15 @@ public class OutlineActivity extends ListActivity
 			break;
 		}
 	}
-
-	private void postSynchronize() {
-		Toast.makeText(this, "Sychronization Successful", Toast.LENGTH_SHORT).show();
-		refreshDisplay();
-	}
 	
-	public class SynchServiceReceiver extends BroadcastReceiver {
+	private class SynchServiceReceiver extends BroadcastReceiver {
 		@Override
 		public void onReceive(Context context, Intent intent) {
-			if (intent.getBooleanExtra(Synchronizer.SYNC_DONE, false))
-				postSynchronize();
+			if (intent.getBooleanExtra(Synchronizer.SYNC_DONE, false)) {
+				Toast.makeText(context, "Sychronization Successful",
+						Toast.LENGTH_SHORT).show();
+				refreshDisplay();
+			}
 		}
 	}
 	

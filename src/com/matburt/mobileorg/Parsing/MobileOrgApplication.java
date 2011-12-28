@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import com.matburt.mobileorg.Services.SyncService;
+
 import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
@@ -29,6 +31,8 @@ public class MobileOrgApplication extends Application {
 		clearNodestack();
 		this.parser = new OrgFileParser(getBaseContext(), this);
 		init();
+
+		SyncService.startAlarm(this);
     }
 
     private void init() {

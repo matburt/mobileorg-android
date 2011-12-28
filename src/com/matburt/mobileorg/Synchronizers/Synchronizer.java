@@ -33,9 +33,8 @@ import com.matburt.mobileorg.Parsing.OrgFile;
  * needed.
  */
 abstract public class Synchronizer {
-	public final static String SYNC_DONE = "sync_done";
 	public static final String SYNC_UPDATE = "com.matburt.mobileorg.Synchronizer.action.SYNC_UPDATE";
-
+	public final static String SYNC_DONE = "sync_done";
 	
 	/**
 	 * Called before running the synchronizer to ensure that it's configuration
@@ -76,7 +75,12 @@ abstract public class Synchronizer {
         this.appInst = appInst;        
 	}
 
-	public void sync() throws IOException {
+	public void sync() throws IOException {		
+		if(isConfigured() == false) {
+			displayErrorNotification("Sync not configured");
+			return;
+		}
+		
 		setupNotification();
 		updateNotification(0, "Uploading " + OrgFile.CAPTURE_FILE);
 		push(OrgFile.CAPTURE_FILE);
@@ -89,7 +93,7 @@ abstract public class Synchronizer {
 	 * This method will fetch the local and the remote version of a file and
 	 * combine their content. This combined version is transfered to the remote.
 	 */
-	protected void push(String filename) throws IOException {
+	private void push(String filename) throws IOException {
     	OrgFile orgFile = new OrgFile(filename, context);
     	String localContents = orgFile.read();
 
@@ -112,7 +116,7 @@ abstract public class Synchronizer {
 	 * host. Using those files, it determines the other files that need updating
 	 * and downloads them.
 	 */
-	protected void pull() throws IOException {
+	private void pull() throws IOException {
 		updateNotification(20, "Downloading index file");
 		String remoteIndexContents = OrgFile.read(getRemoteFile("index.org"));
 		
@@ -184,7 +188,6 @@ abstract public class Synchronizer {
         notificationManager.notify(notifyRef, notification);
 	}
 
-	
 	private void updateNotification(int progress, String message) {		
         notification.contentView.setTextViewText(R.id.status_text, message);
 		notification.contentView.setProgressBar(R.id.status_progress, 100, progress, false);
@@ -200,6 +203,12 @@ abstract public class Synchronizer {
 	
 	private void finalizeNotification() {
 		notificationManager.cancel(notifyRef);
+	}
+	
+	private void displayErrorNotification(String message) {
+        notification.contentView.setTextViewText(R.id.status_text, message);
+        // TODO Cancel old and create new notification
+        notificationManager.notify(notifyRef, notification);
 	}
 
 	private void announceSyncDone() {
