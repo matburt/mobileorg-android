@@ -168,8 +168,11 @@ abstract public class Synchronizer {
 	
 	private void setupNotification() {
 		this.notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+		Intent notifyIntent = new Intent(context, OutlineActivity.class);
+		notifyIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+
 		PendingIntent contentIntent = PendingIntent.getActivity(context, 0,
-				new Intent(this.context, OutlineActivity.class), 0);
+				notifyIntent, 0);
 
 		notification = new Notification(R.drawable.icon,
 				"Started synchronization", System.currentTimeMillis());
