@@ -37,6 +37,7 @@
         <service android:name=".Services.SyncService" >
             <intent-filter>
                 <category android:name="android.intent.category.DEFAULT" />
+
                 <action android:name="com.matburt.mobileorg.SYNC_SERVICE" />
             </intent-filter>
         </service>
@@ -63,6 +64,11 @@
         <activity
             android:name=".Gui.NodeViewActivity"
             android:label="Org View" >
+            <intent-filter>
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <action android:name="com.matburt.mobileorg.Synchronizer.action.SYNC_UPDATE" />
+            </intent-filter>
         </activity>
         <activity
             android:name=".Gui.NodeEditActivity"

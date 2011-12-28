@@ -55,7 +55,6 @@ public class OutlineActivity extends ListActivity
 	private int lastSelection = 0;
 	
 	private OutlineListAdapter outlineAdapter;
-	private SynchServiceReceiver syncReceiver;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -75,24 +74,9 @@ public class OutlineActivity extends ListActivity
 		}
 
 		registerForContextMenu(getListView());	
-        this.syncReceiver = new SynchServiceReceiver();
-	}
-
-	
-	@Override
-	public void onResume() {	
-		refreshDisplay();
-
+		
 		IntentFilter serviceFilter = new IntentFilter(Synchronizer.SYNC_UPDATE);
-        registerReceiver(syncReceiver, serviceFilter);
-
-        super.onResume();
-	}
-	
-	@Override
-	public void onPause() {
-		unregisterReceiver(this.syncReceiver);
-        super.onPause();
+        registerReceiver(new SynchServiceReceiver(), serviceFilter);
 	}
 		
 	/**

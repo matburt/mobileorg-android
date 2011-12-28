@@ -4,7 +4,10 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.Menu;
@@ -17,10 +20,12 @@ import android.webkit.WebViewClient;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Parsing.MobileOrgApplication;
 import com.matburt.mobileorg.Parsing.Node;
+import com.matburt.mobileorg.Synchronizers.Synchronizer;
 
 public class NodeViewActivity extends Activity {
 	private WebView display;
 	private MobileOrgApplication appInst;
+	private SynchServiceReceiver syncReceiver;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -33,7 +38,16 @@ public class NodeViewActivity extends Activity {
 		display.getSettings().setBuiltInZoomControls(true);
 
 		this.appInst = (MobileOrgApplication) this.getApplication();
-
+		
+        this.syncReceiver = new SynchServiceReceiver();
+        
+		registerReceiver(this.syncReceiver, new IntentFilter(
+				Synchronizer.SYNC_UPDATE));
+        
+		refreshDisplay();
+	}
+	
+	private void refreshDisplay() {
 		String data = convertToHTML();
 		this.display.loadData(data, "text/html", "UTF-8");
 	}
@@ -189,4 +203,12 @@ public class NodeViewActivity extends Activity {
 	private static class InternalWebChromeClient extends WebChromeClient {
 	}
 
+	private class SynchServiceReceiver extends BroadcastReceiver {
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			if (intent.getBooleanExtra(Synchronizer.SYNC_DONE, false)) {
+				refreshDisplay();
+			}
+		}
+	}
 }

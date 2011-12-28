@@ -3,6 +3,8 @@ package com.matburt.mobileorg.Gui;
 import java.io.IOException;
 import java.util.ArrayList;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -109,13 +111,6 @@ public class NodeEditActivity extends Activity {
 		}
 	};
 
-	View.OnClickListener cancelListener = new View.OnClickListener() {
-		public void onClick(View v) {
-			setResult(RESULT_CANCELED);
-			finish();
-		}
-	};
-
 	View.OnClickListener editBodyListener = new View.OnClickListener() {
 		public void onClick(View v) {
 			Intent intent = new Intent(v.getContext(),
@@ -125,6 +120,17 @@ public class NodeEditActivity extends Activity {
 		}
 	};
 
+	View.OnClickListener cancelListener = new View.OnClickListener() {
+		public void onClick(View v) {
+			doCancel();
+		}
+	};
+	
+	@Override
+	public void onBackPressed() {
+		doCancel();
+	}
+	
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if (requestCode == EDIT_BODY) {
@@ -137,6 +143,51 @@ public class NodeEditActivity extends Activity {
 		}
 	}
 
+
+	private void doCancel() {
+		if(!hasEdits()) {
+			setResult(RESULT_CANCELED);
+			finish();
+			return;
+		}
+		
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setMessage("Are you sure you want to discard changes?")
+				.setCancelable(false)
+				.setPositiveButton("Yes",
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int id) {
+								setResult(RESULT_CANCELED);
+								finish();
+							}
+						})
+				.setNegativeButton("No", new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						dialog.cancel();
+					}
+				});
+		builder.create().show();
+	}
+	
+	private boolean hasEdits() {
+		String newPayload = payloadView.getText().toString();
+		String newTitle = titleView.getText().toString();
+		String newTodo = todoStateView.getSelectedItem().toString();
+		String newPriority = priorityView.getSelectedItem().toString();
+		
+		if (this.actionMode.equals(ACTIONMODE_CREATE)) {
+			if (newPayload.length() == 0 && newTitle.length() == 0)
+				return false;
+		} else if (this.actionMode.equals(ACTIONMODE_EDIT)) {
+			if (newPayload.equals(node.payload.getContent()) && newTitle.equals(node.name)
+					&& newTodo.equals(node.todo)
+					&& newPriority.equals(node.priority))
+				return false;
+		}
+		
+		return true;
+	}
+	
 	private void save() {
 		String newTitle = titleView.getText().toString();
 		String newTodo = todoStateView.getSelectedItem().toString();
