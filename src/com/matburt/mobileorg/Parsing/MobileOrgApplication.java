@@ -2,19 +2,10 @@ package com.matburt.mobileorg.Parsing;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
-
-import com.matburt.mobileorg.Services.SyncService;
 
 import android.app.Application;
-import android.content.Context;
-import android.content.Intent;
-import android.content.SharedPreferences;
-import android.content.pm.PackageItemInfo;
-import android.content.pm.ResolveInfo;
-import android.preference.PreferenceManager;
-import android.util.Log;
 
+import com.matburt.mobileorg.Services.SyncService;
 
 public class MobileOrgApplication extends Application {
     private Node rootNode = null;
@@ -160,39 +151,5 @@ public class MobileOrgApplication extends Application {
     
     public ArrayList<String> getTodods() {
     	return appdb.getTodods();
-    }
-    
-    
-    public boolean isSynchConfigured() {
-    	SharedPreferences appSettings = PreferenceManager
-		.getDefaultSharedPreferences(getBaseContext());
-    	
-		if (appSettings.getString("syncSource", "").equals("")
-				|| (appSettings.getString("syncSource", "").equals(
-						"webdav") && appSettings.getString("webUrl", "")
-						.equals(""))
-				|| (appSettings.getString("syncSource", "").equals(
-						"sdcard") && appSettings.getString(
-						"indexFilePath", "").equals("")))
-			return false;
-		else
-			return true;
-	}
-
-    public static final String SYNCHRONIZER_PLUGIN_ACTION = "com.matburt.mobileorg.SYNCHRONIZE";
-    public static List<PackageItemInfo> discoverSynchronizerPlugins(Context context)
-    {
-        Intent discoverSynchro = new Intent(SYNCHRONIZER_PLUGIN_ACTION);
-        List<ResolveInfo> packages = context.getPackageManager().queryIntentActivities(discoverSynchro,0);
-        Log.d("MobileOrg","Found " + packages.size() + " total synchronizer plugins");
-
-        ArrayList<PackageItemInfo> out = new ArrayList<PackageItemInfo>();
-
-        for (ResolveInfo info : packages)
-        {
-            out.add(info.activityInfo);
-            Log.d("MobileOrg","Found synchronizer plugin: "+info.activityInfo.packageName);            
-        }
-        return out;
     }
 }

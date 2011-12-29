@@ -40,7 +40,7 @@ abstract public class Synchronizer {
 	 * Called before running the synchronizer to ensure that it's configuration
 	 * is in a valid state.
 	 */
-	public abstract boolean isConfigured();
+	protected abstract boolean isConfigured();
 	
 	/**
 	 * Replaces the file on the remote end with the given content.
@@ -69,24 +69,28 @@ abstract public class Synchronizer {
 	Synchronizer(Context context, MobileOrgApplication appInst) {
         this.context = context;
         this.r = this.context.getResources();
-        this.appdb = new OrgDatabase((Context)context);
+        this.appdb = new OrgDatabase(context);
         this.appSettings = PreferenceManager.getDefaultSharedPreferences(
                                    context.getApplicationContext());
         this.appInst = appInst;        
 	}
 
-	public void sync() {		
-		if(isConfigured() == false) {
+	public void sync() {
+		if (isConfigured() == false) {
 			displayErrorNotification("Sync not configured");
 			return;
 		}
-		
+
 		setupNotification();
 		updateNotification(0, "Uploading " + OrgFile.CAPTURE_FILE);
 		try {
-		push(OrgFile.CAPTURE_FILE);
-		pull();
-		} catch(IOException e) {}
+			push(OrgFile.CAPTURE_FILE);
+			pull();
+		} catch (IOException e) {
+			displayErrorNotification("Error occured during sync: "
+					+ e.getLocalizedMessage());
+			return;
+		}
 		finalizeNotification();
 		announceSyncDone();
 	}
@@ -158,6 +162,7 @@ abstract public class Synchronizer {
             OrgFile orgfile = new OrgFile(filename, context);
             orgfile.fetch(getRemoteFile(filename));
 
+            // TODO Generate checksum of file and compare to remoteChecksum
 			appInst.addOrUpdateFile(filename, key, remoteChecksums.get(key));
         }
 	}

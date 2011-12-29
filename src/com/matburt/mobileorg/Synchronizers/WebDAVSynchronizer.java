@@ -56,7 +56,7 @@ public class WebDAVSynchronizer extends Synchronizer {
 		this.password = sharedPreferences.getString("webPass", "");
 	}
 
-	public boolean isConfigured() {
+	protected boolean isConfigured() {
 		if (this.remoteIndexPath.equals(""))
 			return false;
 

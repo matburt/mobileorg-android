@@ -6,147 +6,72 @@ import java.util.HashMap;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.content.res.Resources;
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDiskIOException;
 import android.os.Environment;
 import android.preference.PreferenceManager;
-import android.util.Log;
-
-import com.matburt.mobileorg.R;
-import com.matburt.mobileorg.Gui.ErrorReporter;
 
 public class OrgDatabase {
-	private Context appcontext;
-	private String lastStorageMode = "";
-	private Resources r;
-	public SQLiteDatabase appdb;
-	public SharedPreferences appSettings;
-	public static final String LT = "MobileOrg";
+	private static final String databaseFilename = "mobileorg.db";
+	private Context context;
+	private SQLiteDatabase appdb;
+	private SharedPreferences appSettings;
 
-	public OrgDatabase(Context appctxt) {
-		this.appcontext = appctxt;
+	public OrgDatabase(Context context) {
+		this.context = context;
 		this.appSettings = PreferenceManager
-				.getDefaultSharedPreferences(appctxt);
-		this.r = appctxt.getResources();
+				.getDefaultSharedPreferences(context);
 		this.initialize();
+
+		OnSharedPreferenceChangeListener listener = new SharedPreferences.OnSharedPreferenceChangeListener() {
+			public void onSharedPreferenceChanged(SharedPreferences sharedPreferences,
+					String key) {
+				if (key.equals("storageMode")) {
+					close();
+					initialize();
+				}
+			}
+		};
+		this.appSettings.registerOnSharedPreferenceChangeListener(listener);
 	}
 
+
 	private void initialize() {
-		String storageMode = this.appSettings.getString("storageMode", "");
-		if (storageMode.equals("internal") || storageMode.equals(""))
-			try {
-				this.appdb = this.appcontext.openOrCreateDatabase("MobileOrg", 0,
+		String storageMode = this.appSettings.getString("storageMode", "internal");
+		if (storageMode.equals("internal"))
+			this.appdb = this.context.openOrCreateDatabase("MobileOrg", 0,
 					null);
-			} catch (Exception e) {
-			ErrorReporter.displayError(this.appcontext,
-					r.getString(R.string.error_opening_database));
-			return;
-		}
+
 		else if (storageMode.equals("sdcard")) {
-			File sdcard = Environment.getExternalStorageDirectory();
-			File morgDir = new File(sdcard, "mobileorg");
-			if (!morgDir.exists()) {
-				morgDir.mkdir();
-			}
-			File morgFile = new File(morgDir, "mobileorg.db");
-			try {
-				this.appdb = SQLiteDatabase
-						.openOrCreateDatabase(morgFile, null);
-			} catch (Exception e) {
-				ErrorReporter.displayError(this.appcontext,
-						r.getString(R.string.error_opening_database));
-			}
-		} else {
-			ErrorReporter.displayError(this.appcontext,
-					r.getString(R.string.error_opening_database));
-			return;
-		}
+			File dbDir = new File(Environment.getExternalStorageDirectory(), "mobileorg");
+			if (!dbDir.exists())
+				dbDir.mkdir();
+			this.appdb = SQLiteDatabase.openOrCreateDatabase(new File(dbDir,
+					OrgDatabase.databaseFilename), null);
+		} else
+			return; // TODO Error
+		
+		createTables();
+	}
+	
+	private void createTables() {
 		this.wrapExecSQL("CREATE TABLE IF NOT EXISTS files"
 				+ " (file VARCHAR, name VARCHAR," + " checksum VARCHAR)");
 		this.wrapExecSQL("CREATE TABLE IF NOT EXISTS todos"
 				+ " (tdgroup int, name VARCHAR," + " isdone INT)");
 		this.wrapExecSQL("CREATE TABLE IF NOT EXISTS priorities"
 				+ " (tdgroup int, name VARCHAR," + " isdone INT)");
-		this.lastStorageMode = storageMode;
 	}
 
-	private void wrapExecSQL(String sqlText) {
-		try {
-			this.appdb.execSQL(sqlText);
-		} catch (SQLiteDiskIOException e) {
-			ErrorReporter.displayError(this.appcontext,
-					r.getString(R.string.error_sqlio));
-		} catch (Exception e) {
-			ErrorReporter.displayError(this.appcontext,
-					r.getString(R.string.error_generic_database, e.toString()));
-		}
-	}
-
-	private Cursor wrapRawQuery(String sqlText) {
-		Cursor result = null;
-		try {
-			result = this.appdb.rawQuery(sqlText, null);
-		} catch (SQLiteDiskIOException e) {
-			ErrorReporter.displayError(this.appcontext,
-					r.getString(R.string.error_sqlio));
-		} catch (Exception e) {
-			ErrorReporter.displayError(this.appcontext,
-					r.getString(R.string.error_generic_database, e.toString()));
-		}
-		return result;
-	}
-
-	private void checkStorageMode() {
-		String storageMode = this.appSettings.getString("storageMode", "");
-		if (storageMode != this.lastStorageMode) {
-			this.close();
-			this.initialize();
-		}
-	}
-
-	public HashMap<String, String> getOrgFiles() {
-		this.checkStorageMode();
-		HashMap<String, String> allFiles = new HashMap<String, String>();
-		Cursor result = this.wrapRawQuery("SELECT file, name FROM files");
-		if (result != null) {
-			if (result.getCount() > 0) {
-				result.moveToFirst();
-				do {
-					allFiles.put(result.getString(0), result.getString(1));
-				} while (result.moveToNext());
-			}
-			result.close();
-		}
-		return allFiles;
-	}
-
-	public HashMap<String, String> getChecksums() {
-		this.checkStorageMode();
-		HashMap<String, String> fchecks = new HashMap<String, String>();
-		Cursor result = this.wrapRawQuery("SELECT file, checksum FROM files");
-		if (result != null) {
-			if (result.getCount() > 0) {
-				result.moveToFirst();
-				do {
-					fchecks.put(result.getString(0), result.getString(1));
-				} while (result.moveToNext());
-			}
-			result.close();
-		}
-		return fchecks;
-	}
-
+	
+	
 	public void removeFile(String filename) {
-		this.checkStorageMode();
-		this.wrapExecSQL("DELETE FROM files " + "WHERE file = '" + filename
-				+ "'");
-		Log.i(LT, "Finished deleting files " + filename);
+		this.wrapExecSQL("DELETE FROM files WHERE file = '" + filename + "'");
 	}
 
 	public void addOrUpdateFile(String filename, String name, String checksum) {
-		this.checkStorageMode();
 		Cursor result = this.wrapRawQuery("SELECT * FROM files "
 				+ "WHERE file = '" + filename + "'");
 		if (result != null) {
@@ -163,6 +88,40 @@ public class OrgDatabase {
 		}
 	}
 
+
+	public HashMap<String, String> getOrgFiles() {
+		HashMap<String, String> allFiles = new HashMap<String, String>();
+		Cursor result = this.wrapRawQuery("SELECT file, name FROM files");
+		if (result != null) {
+			if (result.getCount() > 0) {
+				result.moveToFirst();
+				do {
+					allFiles.put(result.getString(0), result.getString(1));
+				} while (result.moveToNext());
+			}
+			result.close();
+		}
+		return allFiles;
+	}
+
+	public HashMap<String, String> getChecksums() {
+		HashMap<String, String> fchecks = new HashMap<String, String>();
+		Cursor result = this.wrapRawQuery("SELECT file, checksum FROM files");
+		if (result != null) {
+			if (result.getCount() > 0) {
+				result.moveToFirst();
+				do {
+					fchecks.put(result.getString(0), result.getString(1));
+				} while (result.moveToNext());
+			}
+			result.close();
+		}
+		return fchecks;
+	}
+
+	
+	
+	
 	public void setTodoList(ArrayList<HashMap<String, Boolean>> newList) {
 		this.clearTodos();
 		int grouping = 0;
@@ -280,20 +239,39 @@ public class OrgDatabase {
 		}
 	}
 
+	private void wrapExecSQL(String sqlText) {
+		try {
+			this.appdb.execSQL(sqlText);
+		} catch (SQLiteDiskIOException e) {
+			//R.string.error_sqlio
+		} catch (Exception e) {
+			//R.string.error_generic_database;
+		}
+	}
+
+	private Cursor wrapRawQuery(String sqlText) {
+		Cursor result = null;
+		try {
+			result = this.appdb.rawQuery(sqlText, null);
+		} catch (SQLiteDiskIOException e) {
+			//R.string.error_sqlio
+		} catch (Exception e) {
+			//R.string.error_generic_database
+		}
+		return result;
+	}
+	
 	@SuppressWarnings("unused")
 	private void clearData() {
-		this.checkStorageMode();
 		this.wrapExecSQL("DELETE FROM data");
 	}
 
 	private void clearTodos() {
-		this.checkStorageMode();
-		this.wrapExecSQL("DELETE from todos");
+		this.wrapExecSQL("DELETE FROM todos");
 	}
 
 	private void clearPriorities() {
-		this.checkStorageMode();
-		this.wrapExecSQL("DELETE from priorities");
+		this.wrapExecSQL("DELETE FROM priorities");
 	}
 
 	public void close() {

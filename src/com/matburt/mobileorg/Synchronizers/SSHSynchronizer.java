@@ -51,7 +51,7 @@ public class SSHSynchronizer extends Synchronizer {
 	}
 
 	@Override
-	public boolean isConfigured() {
+	protected boolean isConfigured() {
 		if (this.appSettings.getString("scpUrl", "").equals(""))
 			return false;
 		return true;

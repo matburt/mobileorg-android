@@ -44,7 +44,7 @@ public class DropboxSynchronizer extends Synchronizer {
     }
 
 
-    public boolean isConfigured() {
+    protected boolean isConfigured() {
         if (this.remoteIndexPath.equals(""))
             return false;
         return true;
