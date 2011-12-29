@@ -1,280 +1,214 @@
 package com.matburt.mobileorg.Parsing;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import android.content.ContentValues;
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteDiskIOException;
-import android.os.Environment;
-import android.preference.PreferenceManager;
+import android.database.sqlite.SQLiteOpenHelper;
 
-public class OrgDatabase {
-	private static final String databaseFilename = "mobileorg.db";
-	private Context context;
-	private SQLiteDatabase appdb;
-	private SharedPreferences appSettings;
+public class OrgDatabase extends SQLiteOpenHelper {
+	private static final String DATABASE_NAME = "MobileOrg";
+	private static final int DATABASE_VERSION = 3;
 
 	public OrgDatabase(Context context) {
-		this.context = context;
-		this.appSettings = PreferenceManager
-				.getDefaultSharedPreferences(context);
-		this.initialize();
-
-		OnSharedPreferenceChangeListener listener = new SharedPreferences.OnSharedPreferenceChangeListener() {
-			public void onSharedPreferenceChanged(SharedPreferences sharedPreferences,
-					String key) {
-				if (key.equals("storageMode")) {
-					close();
-					initialize();
-				}
-			}
-		};
-		this.appSettings.registerOnSharedPreferenceChangeListener(listener);
+		super(context, DATABASE_NAME, null, DATABASE_VERSION);
 	}
 
-
-	private void initialize() {
-		String storageMode = this.appSettings.getString("storageMode", "internal");
-		if (storageMode.equals("internal"))
-			this.appdb = this.context.openOrCreateDatabase("MobileOrg", 0,
-					null);
-
-		else if (storageMode.equals("sdcard")) {
-			File dbDir = new File(Environment.getExternalStorageDirectory(), "mobileorg");
-			if (!dbDir.exists())
-				dbDir.mkdir();
-			this.appdb = SQLiteDatabase.openOrCreateDatabase(new File(dbDir,
-					OrgDatabase.databaseFilename), null);
-		} else
-			return; // TODO Error
-		
-		createTables();
-	}
-	
-	private void createTables() {
-		this.wrapExecSQL("CREATE TABLE IF NOT EXISTS files"
-				+ " (file VARCHAR, name VARCHAR," + " checksum VARCHAR)");
-		this.wrapExecSQL("CREATE TABLE IF NOT EXISTS todos"
-				+ " (tdgroup int, name VARCHAR," + " isdone INT)");
-		this.wrapExecSQL("CREATE TABLE IF NOT EXISTS priorities"
-				+ " (tdgroup int, name VARCHAR," + " isdone INT)");
+	@Override
+	public void onCreate(SQLiteDatabase db) {
+		db.execSQL("CREATE TABLE IF NOT EXISTS files"
+				+ " (file text,"
+				+ " name text,"
+				+ " checksum text)");
+		db.execSQL("CREATE TABLE IF NOT EXISTS todos"
+				+ " (id integer primary key autoincrement,"
+				+ " todogroup integer,"
+				+ " name text,"
+				+ " isdone integer default 0)");
+		db.execSQL("CREATE TABLE IF NOT EXISTS priorities"
+				+ " (id integer primary key autoincrement,"
+				+ " name text)");
 	}
 
-	
-	
+	@Override
+	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+		switch (newVersion) {
+		case 2:
+			db.execSQL("DROP TABLE IF EXISTS priorities");
+			break;
+
+		case 3:
+			db.execSQL("DROP TABLE IF EXISTS files");
+			db.execSQL("DROP TABLE IF EXISTS todos");
+			break;
+		}
+
+		onCreate(db);
+	}
+
 	public void removeFile(String filename) {
-		this.wrapExecSQL("DELETE FROM files WHERE file = '" + filename + "'");
+		SQLiteDatabase db = this.getWritableDatabase();
+		db.delete("files", "file = ?", new String[] { filename });
+		db.close();
 	}
 
-	public void addOrUpdateFile(String filename, String name, String checksum) {
-		Cursor result = this.wrapRawQuery("SELECT * FROM files "
-				+ "WHERE file = '" + filename + "'");
-		if (result != null) {
-			if (result.getCount() > 0) {
-				this.wrapExecSQL("UPDATE files set name = '" + name + "', "
-						+ "checksum = '" + checksum + "' where file = '"
-						+ filename + "'");
-			} else {
-				this.wrapExecSQL("INSERT INTO files (file, name, checksum) "
-						+ "VALUES ('" + filename + "','" + name + "','"
-						+ checksum + "')");
-			}
-			result.close();
-		}
+	public void addOrUpdateFile(String file, String name, String checksum) {
+		ContentValues values = new ContentValues();
+		values.put("file", file);
+		values.put("name", name);
+		values.put("checksum", checksum);
+
+		SQLiteDatabase db = this.getWritableDatabase();
+		db.beginTransaction();
+		db.delete("files", "file=? AND name=?", new String[] { file, name });
+		db.insert("files", null, values);
+		db.setTransactionSuccessful();
+		db.endTransaction();
+		db.close();
 	}
 
-
-	public HashMap<String, String> getOrgFiles() {
+	public HashMap<String, String> getFiles() {
 		HashMap<String, String> allFiles = new HashMap<String, String>();
-		Cursor result = this.wrapRawQuery("SELECT file, name FROM files");
-		if (result != null) {
-			if (result.getCount() > 0) {
-				result.moveToFirst();
-				do {
-					allFiles.put(result.getString(0), result.getString(1));
-				} while (result.moveToNext());
-			}
-			result.close();
+		SQLiteDatabase db = this.getReadableDatabase();
+
+		Cursor cursor = db.query("files", new String[] { "file", "name" },
+				null, null, null, null, null);
+		cursor.moveToFirst();
+
+		while (cursor.isAfterLast() == false) {
+			allFiles.put(cursor.getString(0), cursor.getString(1));
+			cursor.moveToNext();
 		}
+
+		cursor.close();
+		db.close();
 		return allFiles;
 	}
 
-	public HashMap<String, String> getChecksums() {
-		HashMap<String, String> fchecks = new HashMap<String, String>();
-		Cursor result = this.wrapRawQuery("SELECT file, checksum FROM files");
-		if (result != null) {
-			if (result.getCount() > 0) {
-				result.moveToFirst();
-				do {
-					fchecks.put(result.getString(0), result.getString(1));
-				} while (result.moveToNext());
-			}
-			result.close();
+	public HashMap<String, String> getFileChecksums() {
+		HashMap<String, String> checksums = new HashMap<String, String>();
+		SQLiteDatabase db = this.getReadableDatabase();
+
+		Cursor cursor = db.query("files", new String[] { "file", "checksum" },
+				null, null, null, null, null);
+		cursor.moveToFirst();
+
+		while (cursor.isAfterLast() == false) {
+			checksums.put(cursor.getString(0), cursor.getString(1));
+			cursor.moveToNext();
 		}
-		return fchecks;
+
+		cursor.close();
+		db.close();
+		return checksums;
 	}
 
-	
-	
-	
-	public void setTodoList(ArrayList<HashMap<String, Boolean>> newList) {
-		this.clearTodos();
+	public void setTodos(ArrayList<HashMap<String, Boolean>> todos) {
+		SQLiteDatabase db = this.getWritableDatabase();
+		db.beginTransaction();
+		db.delete("todos", null, null);
+
 		int grouping = 0;
-		for (HashMap<String, Boolean> entry : newList) {
-			for (String key : entry.keySet()) {
-				String isDone = "0";
-				if (entry.get(key))
-					isDone = "1";
-				this.wrapExecSQL("INSERT INTO todos (tdgroup, name, isdone) "
-						+ "VALUES (" + grouping + "," + "        '" + key
-						+ "'," + "        " + isDone + ")");
+		for (HashMap<String, Boolean> entry : todos) {
+			for (String name : entry.keySet()) {
+				ContentValues values = new ContentValues();
+				values.put("name", name);
+				values.put("todogroup", grouping);
+
+				if (entry.get(name))
+					values.put("isdone", 1);
+				db.insert("todos", null, values);
 			}
 			grouping++;
 		}
-	}
-	
-	public ArrayList<String> getTodods() {
-		ArrayList<String> allTodos = new ArrayList<String>();
-		Cursor resultCursor = this.wrapRawQuery("SELECT tdgroup, name, isdone "
-				+ "FROM todos order by tdgroup");
 
-		if (resultCursor != null && resultCursor.getCount() > 0) {		
-			for (resultCursor.moveToFirst(); resultCursor.isAfterLast() == false; 
-					resultCursor.moveToNext()) {
-				allTodos.add(resultCursor.getString(1));
-			}		
-			resultCursor.close();
-		}
-		return allTodos;
+		db.setTransactionSuccessful();
+		db.endTransaction();
+		db.close();
 	}
-	
+
+	public ArrayList<String> getTodos() {
+		SQLiteDatabase db = this.getReadableDatabase();
+
+		Cursor cursor = db.query("todos", new String[] { "name" }, null, null,
+				null, null, "id");
+
+		ArrayList<String> todos = cursorToArrayList(cursor);
+
+		cursor.close();
+		db.close();
+		return todos;
+	}
+
 	public ArrayList<HashMap<String, Integer>> getGroupedTodods() {
-		ArrayList<HashMap<String, Integer>> allTodos = new ArrayList<HashMap<String, Integer>>();
-		Cursor resultCursor = this.wrapRawQuery("SELECT tdgroup, name, isdone "
-				+ "FROM todos order by tdgroup");
+		ArrayList<HashMap<String, Integer>> todos = new ArrayList<HashMap<String, Integer>>();
+		SQLiteDatabase db = this.getReadableDatabase();
+		Cursor cursor = db.query("todos", new String[] { "todogroup", "name",
+				"isdone" }, null, null, null, null, "todogroup");
 
-		if (resultCursor != null && resultCursor.getCount() > 0) {
+		if (cursor.getCount() > 0) {
 			HashMap<String, Integer> grouping = new HashMap<String, Integer>();
 			int resultgroup = 0;
-			
-			for (resultCursor.moveToFirst(); resultCursor.isAfterLast() == false; 
-					resultCursor.moveToNext()) {
+
+			for (cursor.moveToFirst(); cursor.isAfterLast() == false; cursor
+					.moveToNext()) {
 				// If new result group, create new grouping
-				if (resultgroup != resultCursor.getInt(0)) {
-					resultgroup = resultCursor.getInt(0);
-					allTodos.add(grouping);
-					grouping = new HashMap<String, Integer>();		
-				}
-				// Add item to grouping 
-				grouping.put(resultCursor.getString(1), resultCursor.getInt(2));
-			}
-			
-			allTodos.add(grouping);
-			resultCursor.close();
-		}
-		return allTodos;
-	}
-	
-	public ArrayList<String> getPriorities() {
-		ArrayList<String> allPriorities = new ArrayList<String>();
-		Cursor resultCursor = this
-				.wrapRawQuery("SELECT tdgroup, name FROM priorities order by tdgroup");
-
-		if (resultCursor != null && resultCursor.getCount() > 0) {
-			for (resultCursor.moveToFirst(); resultCursor.isAfterLast() == false;
-					resultCursor.moveToNext()) {
-				allPriorities.add(resultCursor.getString(1));
-			}
-			resultCursor.close();
-		}
-		return allPriorities;
-	}
-
-
-	public ArrayList<ArrayList<String>> getGroupedPriorities() {
-		ArrayList<ArrayList<String>> allPriorities = new ArrayList<ArrayList<String>>();
-		Cursor resultCursor = this
-				.wrapRawQuery("SELECT tdgroup, name FROM priorities order by tdgroup");
-
-		if (resultCursor != null && resultCursor.getCount() > 0) {
-			ArrayList<String> grouping = new ArrayList<String>();
-			int resultgroup = 0;
-
-			for (resultCursor.moveToFirst(); resultCursor.isAfterLast() == false;
-					resultCursor.moveToNext()) {
-				// If new result group, create new grouping
-				if (resultgroup != resultCursor.getInt(0)) {
-					resultgroup = resultCursor.getInt(0);
-					allPriorities.add(grouping);
-					grouping = new ArrayList<String>();
+				if (resultgroup != cursor.getInt(0)) {
+					resultgroup = cursor.getInt(0);
+					todos.add(grouping);
+					grouping = new HashMap<String, Integer>();
 				}
 				// Add item to grouping
-				grouping.add(resultCursor.getString(1));
+				grouping.put(cursor.getString(1), cursor.getInt(2));
 			}
 
-			allPriorities.add(grouping);
-			resultCursor.close();
+			todos.add(grouping);
 		}
-		return allPriorities;
+
+		cursor.close();
+		db.close();
+		return todos;
 	}
 
-	public void setPriorityList(ArrayList<ArrayList<String>> newList) {
-		this.clearPriorities();
-		for (int idx = 0; idx < newList.size(); idx++) {
-			for (int jdx = 0; jdx < newList.get(idx).size(); jdx++) {
-				this.wrapExecSQL("INSERT INTO priorities (tdgroup, name, isdone) "
-						+ "VALUES ("
-						+ Integer.toString(idx)
-						+ ","
-						+ "        '"
-						+ newList.get(idx).get(jdx)
-						+ "',"
-						+ "        0)");
-			}
+	public ArrayList<String> getPriorities() {
+		SQLiteDatabase db = this.getReadableDatabase();
+		Cursor cursor = db.query("priorities", new String[] { "name", "id" },
+				null, null, null, null, "id");
+
+		ArrayList<String> priorities = cursorToArrayList(cursor);
+
+		cursor.close();
+		db.close();
+		return priorities;
+	}
+
+	public void setPriorities(ArrayList<String> priorities) {
+		SQLiteDatabase db = this.getWritableDatabase();
+		db.beginTransaction();
+		db.delete("priorities", null, null);
+
+		for (String priority : priorities) {
+			ContentValues values = new ContentValues();
+			values.put("name", priority);
+			db.insert("priorities", null, values);
 		}
+
+		db.setTransactionSuccessful();
+		db.endTransaction();
+		db.close();
 	}
 
-	private void wrapExecSQL(String sqlText) {
-		try {
-			this.appdb.execSQL(sqlText);
-		} catch (SQLiteDiskIOException e) {
-			//R.string.error_sqlio
-		} catch (Exception e) {
-			//R.string.error_generic_database;
+	private ArrayList<String> cursorToArrayList(Cursor cursor) {
+		ArrayList<String> list = new ArrayList<String>();
+		cursor.moveToFirst();
+
+		while (cursor.isAfterLast() == false) {
+			list.add(cursor.getString(0));
+			cursor.moveToNext();
 		}
-	}
-
-	private Cursor wrapRawQuery(String sqlText) {
-		Cursor result = null;
-		try {
-			result = this.appdb.rawQuery(sqlText, null);
-		} catch (SQLiteDiskIOException e) {
-			//R.string.error_sqlio
-		} catch (Exception e) {
-			//R.string.error_generic_database
-		}
-		return result;
-	}
-	
-	@SuppressWarnings("unused")
-	private void clearData() {
-		this.wrapExecSQL("DELETE FROM data");
-	}
-
-	private void clearTodos() {
-		this.wrapExecSQL("DELETE FROM todos");
-	}
-
-	private void clearPriorities() {
-		this.wrapExecSQL("DELETE FROM priorities");
-	}
-
-	public void close() {
-		this.appdb.close();
+		return list;
 	}
 }

@@ -127,17 +127,16 @@ abstract public class Synchronizer {
 		String remoteIndexContents = OrgFile.read(getRemoteFile("index.org"));
 		
         ArrayList<HashMap<String, Boolean>> todoLists = getTodos(remoteIndexContents);
-        this.appdb.setTodoList(todoLists);
+        this.appdb.setTodos(todoLists);
 
-        ArrayList<ArrayList<String>> priorityLists = getPriorities(remoteIndexContents);
-        this.appdb.setPriorityList(priorityLists);
+        this.appdb.setPriorities(getPriorities(remoteIndexContents));
 
 		updateNotification(40, "Downloading checksum file");
         String remoteChecksumContents = OrgFile.read(getRemoteFile("checksums.dat"));
 		updateNotification(60);
 
 		HashMap<String, String> remoteChecksums = getChecksums(remoteChecksumContents);
-		HashMap<String, String> localChecksums = this.appdb.getChecksums();
+		HashMap<String, String> localChecksums = this.appdb.getFileChecksums();
 		
 		HashMap<String, String> fileChecksumMap = getOrgFilesFromMaster(remoteIndexContents);
 		
@@ -280,24 +279,20 @@ abstract public class Synchronizer {
 		return todoList;
 	}
 
-	private ArrayList<ArrayList<String>> getPriorities(String master) {
+	private ArrayList<String> getPriorities(String master) {
 		Pattern getPriorities = Pattern
 				.compile("#\\+ALLPRIORITIES:\\s+([A-Z\\s]*)");
 		Matcher t = getPriorities.matcher(master);
-		
-		ArrayList<ArrayList<String>> priorityList = new ArrayList<ArrayList<String>>();
-		
-		while (t.find()) {
-			ArrayList<String> holding = new ArrayList<String>();
-			if (t.group(1) != null && t.group(1).length() > 0) {
-				String[] grouping = t.group(1).split("\\s+");
-				for (String group : grouping) {
-					holding.add(group.trim());
-				}
+
+		ArrayList<String> priorities = new ArrayList<String>();
+
+		if (t.find() && t.group(1) != null && t.group(1).length() > 0) {
+			String[] grouping = t.group(1).split("\\s+");
+			for (String group : grouping) {
+				priorities.add(group.trim());
 			}
-			priorityList.add(holding);
 		}
-		return priorityList;
+		return priorities;
 	}
 		
 	public void close() {

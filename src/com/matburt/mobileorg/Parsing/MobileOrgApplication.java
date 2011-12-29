@@ -26,8 +26,18 @@ public class MobileOrgApplication extends Application {
 		SyncService.startAlarm(this);
     }
 
+//	OnSharedPreferenceChangeListener listener = new SharedPreferences.OnSharedPreferenceChangeListener() {
+//		public void onSharedPreferenceChanged(SharedPreferences sharedPreferences,
+//				String key) {
+//			if (key.equals("storageMode")) {
+//				close();
+//			}
+//		}
+//	};
+//	this.appSettings.registerOnSharedPreferenceChangeListener(listener);
+    
     private void init() {
-		if (this.appdb == null || this.appdb.getOrgFiles().isEmpty())
+		if (this.appdb == null || this.appdb.getFiles().isEmpty())
 			return;
 		
 		this.rootNode = this.parser.prepareRootNode();
@@ -134,7 +144,7 @@ public class MobileOrgApplication extends Application {
 	}
 
     public HashMap<String, String> getOrgFiles() {
-    	return appdb.getOrgFiles();
+    	return appdb.getFiles();
     }
 
     public ArrayList<EditNode> getNodeEdits() {
@@ -150,6 +160,6 @@ public class MobileOrgApplication extends Application {
     }
     
     public ArrayList<String> getTodods() {
-    	return appdb.getTodods();
+    	return appdb.getTodos();
     }
 }
