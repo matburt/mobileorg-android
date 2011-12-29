@@ -137,8 +137,7 @@ public class MobileOrgApplication extends Application {
 	}
 
 	public boolean removeFile(String filename) {
-		OrgFile orgfile = new OrgFile(filename, this.getApplicationContext());
-		orgfile.remove(this.appdb);
+		this.appdb.removeFile(filename);
 		this.rootNode.removeChild(filename);
 		return true;
 	}

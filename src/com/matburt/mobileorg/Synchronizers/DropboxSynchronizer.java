@@ -52,9 +52,9 @@ public class DropboxSynchronizer extends Synchronizer {
 
     
     protected void putRemoteFile(String filename, String contents) throws IOException {
-    	OrgFile orgFile = new OrgFile(filename, context);
-        orgFile.remove(appdb);
+        this.appdb.removeFile(filename);
        
+		OrgFile orgFile = new OrgFile(filename, context);
         BufferedWriter writer =  orgFile.getWriter();
         writer.write(contents);
         writer.close();

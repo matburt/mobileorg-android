@@ -151,8 +151,7 @@ public class OrgFile {
 		writer.close();
 	}
 
-	public void remove(OrgDatabase appdb) {
-		appdb.removeFile(this.fileName);
+	public void remove() {
 		String storageMode = getStorageMode();
 		if (storageMode.equals("internal") || storageMode.equals("")) {
 			context.deleteFile(this.fileName);

@@ -11,26 +11,37 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 public class OrgDatabase extends SQLiteOpenHelper {
 	private static final String DATABASE_NAME = "MobileOrg";
-	private static final int DATABASE_VERSION = 3;
+	private static final int DATABASE_VERSION = 4;
+	
+	private Context context;
 
 	public OrgDatabase(Context context) {
 		super(context, DATABASE_NAME, null, DATABASE_VERSION);
+		this.context = context;
 	}
 
 	@Override
 	public void onCreate(SQLiteDatabase db) {
-		db.execSQL("CREATE TABLE IF NOT EXISTS files"
-				+ " (file text,"
-				+ " name text,"
-				+ " checksum text)");
-		db.execSQL("CREATE TABLE IF NOT EXISTS todos"
-				+ " (id integer primary key autoincrement,"
-				+ " todogroup integer,"
-				+ " name text,"
-				+ " isdone integer default 0)");
-		db.execSQL("CREATE TABLE IF NOT EXISTS priorities"
-				+ " (id integer primary key autoincrement,"
-				+ " name text)");
+		db.execSQL("CREATE TABLE IF NOT EXISTS files("
+				+ "filename text,"
+				+ "name text,"
+				+ "checksum text)");
+		db.execSQL("CREATE TABLE IF NOT EXISTS todos("
+				+ "id integer primary key autoincrement,"
+				+ "todogroup integer,"
+				+ "name text,"
+				+ "isdone integer default 0)");
+		db.execSQL("CREATE TABLE IF NOT EXISTS priorities("
+				+ "id integer primary key autoincrement,"
+				+ "name text)");
+		db.execSQL("CREATE TABLE IF NOT EXISTS changes("
+				+ "id integer primary key autoincrement,"
+				+ "type text,"
+				+ "title text,"
+				+ "data_id integer," 
+				+ "old_value text,"
+				+ "new_value text,"
+				+ "changed integer)");
 	}
 
 	@Override
@@ -44,27 +55,44 @@ public class OrgDatabase extends SQLiteOpenHelper {
 			db.execSQL("DROP TABLE IF EXISTS files");
 			db.execSQL("DROP TABLE IF EXISTS todos");
 			break;
+		case 4:
+			db.execSQL("DROP TABLE IF EXISTS files");
+			break;
 		}
 
 		onCreate(db);
 	}
 
 	public void removeFile(String filename) {
+		OrgFile orgfile = new OrgFile(filename, context);
+		orgfile.remove();
+		
 		SQLiteDatabase db = this.getWritableDatabase();
-		db.delete("files", "file = ?", new String[] { filename });
+		db.delete("files", "filename = ?", new String[] { filename });
+		db.execSQL("DROP TABLE IF EXISTS " + filename);
 		db.close();
 	}
 
-	public void addOrUpdateFile(String file, String name, String checksum) {
+	public void addOrUpdateFile(String filename, String name, String checksum) {
 		ContentValues values = new ContentValues();
-		values.put("file", file);
+		values.put("filename", filename);
 		values.put("name", name);
 		values.put("checksum", checksum);
 
 		SQLiteDatabase db = this.getWritableDatabase();
 		db.beginTransaction();
-		db.delete("files", "file=? AND name=?", new String[] { file, name });
+		db.delete("files", "filename=? AND name=?", new String[] { filename, name });
 		db.insert("files", null, values);
+		
+		db.execSQL("CREATE TABLE IF NOT EXISTS " + filename + " ("
+				+ "id integer primary key autoincrement,"
+				+ "parent_id integer,"
+				+ "level integer default 0,"
+				+ "node_id text,"
+				+ "priority text,"
+				+ "todo text,"
+				+ "title text)");		
+		
 		db.setTransactionSuccessful();
 		db.endTransaction();
 		db.close();
@@ -74,7 +102,7 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		HashMap<String, String> allFiles = new HashMap<String, String>();
 		SQLiteDatabase db = this.getReadableDatabase();
 
-		Cursor cursor = db.query("files", new String[] { "file", "name" },
+		Cursor cursor = db.query("files", new String[] { "filename", "name" },
 				null, null, null, null, null);
 		cursor.moveToFirst();
 
@@ -92,7 +120,7 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		HashMap<String, String> checksums = new HashMap<String, String>();
 		SQLiteDatabase db = this.getReadableDatabase();
 
-		Cursor cursor = db.query("files", new String[] { "file", "checksum" },
+		Cursor cursor = db.query("files", new String[] { "filename", "checksum" },
 				null, null, null, null, null);
 		cursor.moveToFirst();
 
@@ -175,7 +203,7 @@ public class OrgDatabase extends SQLiteOpenHelper {
 
 	public ArrayList<String> getPriorities() {
 		SQLiteDatabase db = this.getReadableDatabase();
-		Cursor cursor = db.query("priorities", new String[] { "name", "id" },
+		Cursor cursor = db.query("priorities", new String[] { "name" },
 				null, null, null, null, "id");
 
 		ArrayList<String> priorities = cursorToArrayList(cursor);
