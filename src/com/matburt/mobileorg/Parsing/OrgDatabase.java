@@ -11,7 +11,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 public class OrgDatabase extends SQLiteOpenHelper {
 	private static final String DATABASE_NAME = "MobileOrg";
-	private static final int DATABASE_VERSION = 9;
+	private static final int DATABASE_VERSION = 10;
 	
 	private Context context;
 
@@ -87,6 +87,13 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		return cursor;
 	}
 	
+	public Cursor getNode(Long id) {
+		SQLiteDatabase db = this.getReadableDatabase();
+
+		Cursor cursor = db.query("orgdata", nodeFields, "_id=?", new String[] {id.toString()} , null, null, null);
+		cursor.moveToFirst();
+		return cursor;
+	}
 
 	public Cursor getFileCursor() {
 		SQLiteDatabase db = this.getReadableDatabase();

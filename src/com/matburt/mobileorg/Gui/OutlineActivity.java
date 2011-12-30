@@ -1,13 +1,8 @@
 package com.matburt.mobileorg.Gui;
 
-import java.io.BufferedReader;
-import java.io.StringReader;
-
-import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
@@ -24,10 +19,6 @@ import android.widget.Toast;
 
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Parsing.MobileOrgApplication;
-import com.matburt.mobileorg.Parsing.Node;
-import com.matburt.mobileorg.Parsing.NodeEncryption;
-import com.matburt.mobileorg.Parsing.OrgFile;
-import com.matburt.mobileorg.Parsing.OrgFileParser;
 import com.matburt.mobileorg.Services.SyncService;
 import com.matburt.mobileorg.Settings.SettingsActivity;
 import com.matburt.mobileorg.Settings.WizardActivity;
@@ -49,6 +40,7 @@ public class OutlineActivity extends ListActivity
 	 * underlying data structure.
 	 */
 	private int depth;
+	private long node_id;
 	
 	/**
 	 * Keeps track of the last selected item chosen from the outline. When the
@@ -69,7 +61,7 @@ public class OutlineActivity extends ListActivity
 		Intent intent = getIntent();
 		this.depth = intent.getIntExtra("depth", 1);
 		
-		long node_id = intent.getLongExtra("node_id", -1);
+		node_id = intent.getLongExtra("node_id", -1);
 		
 		Cursor cursor;
 		if(node_id >= 0)
@@ -111,7 +103,13 @@ public class OutlineActivity extends ListActivity
 			finish();
 		}
 
-		outlineAdapter.notifyDataSetChanged();
+		//outlineAdapter.notifyDataSetChanged();
+		Cursor cursor;
+		if(node_id >= 0)
+			cursor = appInst.getDB().getNodeChildren(node_id);
+		else
+			cursor = appInst.getDB().getFileCursor();
+		this.outlineAdapter.changeCursor(cursor);
 		getListView().setSelection(lastSelection);
 	}
 
@@ -162,20 +160,21 @@ public class OutlineActivity extends ListActivity
 	public boolean onContextItemSelected(MenuItem item) {
 		AdapterContextMenuInfo info = (AdapterContextMenuInfo) item
 				.getMenuInfo();
-		Node node = (Node) getListAdapter().getItem(info.position);
-		appInst.makeSureNodeIsParsed(node);
+		
+		long itemId = getListAdapter().getItemId(info.position);
+		//appInst.makeSureNodeIsParsed(node);
 
 		switch (item.getItemId()) {
 		case R.id.contextmenu_view:
-			runViewNodeActivity(node);
+			runViewNodeActivity(itemId);
 			break;
 
 		case R.id.contextmenu_edit:
-			runEditNodeActivity(node);
+			runEditNodeActivity(itemId);
 			break;
 			
 		case R.id.contextmenu_delete:
-			runDeleteNode(node);
+			runDeleteNode(itemId);
 			break;
 		}
 
@@ -219,22 +218,17 @@ public class OutlineActivity extends ListActivity
 		return true;
 	}
 	
-	private void runEditNodeActivity(Node node) {
-		/* Pushes the given Node to the nodestack, to give it as argument to
-		 * NodeEditActivity, which pops the node after use. We probably want to
-		 * find a more elegant solution. */
-		this.appInst.pushNodestack(node);
-		
+	private void runEditNodeActivity(long nodeId) {
 		Intent intent = new Intent(this,
 				NodeEditActivity.class);
 		intent.putExtra("actionMode", NodeEditActivity.ACTIONMODE_EDIT);
-		startActivityForResult(intent, RUNFOR_EDITNODE);
+		intent.putExtra("node_id", nodeId);
+		startActivity(intent);
 	}
 
-	private void runViewNodeActivity(Node node) {
-		this.appInst.pushNodestack(node);
-		
+	private void runViewNodeActivity(long nodeId) {		
 		Intent intent = new Intent(this, NodeViewActivity.class);
+		intent.putExtra("node_id", nodeId);
 		startActivityForResult(intent, RUNFOR_VIEWNODE);
 	}
 
@@ -246,32 +240,32 @@ public class OutlineActivity extends ListActivity
 		startActivity(intent);
 	}
 	
-	private void runExpandSelection(Node node) {
-		appInst.pushNodestack(node);
-
-		Intent intent = new Intent(this, OutlineActivity.class);
-		int childDepth = this.depth + 1;
-		intent.putExtra("depth", childDepth);
-		startActivityForResult(intent, RUNFOR_EXPAND);
-	}
+//	private void runExpandSelection(Node node) {
+//		appInst.pushNodestack(node);
+//
+//		Intent intent = new Intent(this, OutlineActivity.class);
+//		int childDepth = this.depth + 1;
+//		intent.putExtra("depth", childDepth);
+//		startActivityForResult(intent, RUNFOR_EXPAND);
+//	}
 	
-	private void runDeleteNode(final Node node) {
-		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setMessage("Are you sure you want to delete " + node.name + "?")
-				.setCancelable(false)
-				.setPositiveButton("Yes",
-						new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int id) {
-								appInst.removeFile(node.name);
-								refreshDisplay();
-							}
-						})
-				.setNegativeButton("No", new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int id) {
-						dialog.cancel();
-					}
-				});
-		builder.create().show();
+	private void runDeleteNode(final long nodeId) {
+//		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+//		builder.setMessage("Are you sure you want to delete " + node.name + "?")
+//				.setCancelable(false)
+//				.setPositiveButton("Yes",
+//						new DialogInterface.OnClickListener() {
+//							public void onClick(DialogInterface dialog, int id) {
+//								appInst.removeFile(node.name);
+//								refreshDisplay();
+//							}
+//						})
+//				.setNegativeButton("No", new DialogInterface.OnClickListener() {
+//					public void onClick(DialogInterface dialog, int id) {
+//						dialog.cancel();
+//					}
+//				});
+//		builder.create().show();
 	}
 	
 	private boolean runShowSettings() {
@@ -298,15 +292,15 @@ public class OutlineActivity extends ListActivity
 			this.appInst.popNodestack();
 			break;
 
-		case NodeEncryption.DECRYPT_MESSAGE:
-			if (resultCode != RESULT_OK || intent == null)
-				return;
-			
-			Node node = this.appInst.nodestackTop();
-			this.appInst.popNodestack();
-			parseEncryptedNode(intent, node);
-			this.runExpandSelection(node);
-			break;
+//		case NodeEncryption.DECRYPT_MESSAGE:
+//			if (resultCode != RESULT_OK || intent == null)
+//				return;
+//			
+//			Node node = this.appInst.nodestackTop();
+//			this.appInst.popNodestack();
+//			parseEncryptedNode(intent, node);
+//			this.runExpandSelection(node);
+//			break;
 		}
 	}
 	
@@ -322,34 +316,34 @@ public class OutlineActivity extends ListActivity
 		}
 	}
 	
-	/**
-	 * This calls startActivityForResult() with Encryption.DECRYPT_MESSAGE. The
-	 * result is handled by onActivityResult() in this class, which calls a
-	 * function to parse the resulting plain text file.
-	 */
-	private void runDecryptAndExpandNode(Node node) {
-		// if suitable APG version is installed
-		if (NodeEncryption.isAvailable((Context) this)) {
-			// retrieve the encrypted file data
-			OrgFile orgfile = new OrgFile(node.name, getBaseContext());
-			byte[] rawData = orgfile.getRawFileData();
-			// save node so parsing function knows which node to parse into.
-			appInst.pushNodestack(node);
-			// and send it to APG for decryption
-			NodeEncryption.decrypt(this, rawData);
-		}
-	}
-
-	/**
-	 * This function is called with the results of
-	 * {@link #runDecryptAndExpandNode}.
-	 */
-	private void parseEncryptedNode(Intent data, Node node) {
-		OrgFileParser ofp = new OrgFileParser(getBaseContext(), appInst);
-
-		String decryptedData = data
-				.getStringExtra(NodeEncryption.EXTRA_DECRYPTED_MESSAGE);
-
-		//ofp.parse(node, new BufferedReader(new StringReader(decryptedData)));
-	}
+//	/**
+//	 * This calls startActivityForResult() with Encryption.DECRYPT_MESSAGE. The
+//	 * result is handled by onActivityResult() in this class, which calls a
+//	 * function to parse the resulting plain text file.
+//	 */
+//	private void runDecryptAndExpandNode(Node node) {
+//		// if suitable APG version is installed
+//		if (NodeEncryption.isAvailable((Context) this)) {
+//			// retrieve the encrypted file data
+//			OrgFile orgfile = new OrgFile(node.name, getBaseContext());
+//			byte[] rawData = orgfile.getRawFileData();
+//			// save node so parsing function knows which node to parse into.
+//			appInst.pushNodestack(node);
+//			// and send it to APG for decryption
+//			NodeEncryption.decrypt(this, rawData);
+//		}
+//	}
+//
+//	/**
+//	 * This function is called with the results of
+//	 * {@link #runDecryptAndExpandNode}.
+//	 */
+//	private void parseEncryptedNode(Intent data, Node node) {
+//		OrgFileParser ofp = new OrgFileParser(getBaseContext(), appInst);
+//
+//		String decryptedData = data
+//				.getStringExtra(NodeEncryption.EXTRA_DECRYPTED_MESSAGE);
+//
+//		//ofp.parse(node, new BufferedReader(new StringReader(decryptedData)));
+//	}
 }

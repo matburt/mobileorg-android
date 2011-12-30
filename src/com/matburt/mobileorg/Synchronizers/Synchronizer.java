@@ -165,6 +165,7 @@ abstract public class Synchronizer {
 
             OrgFileParser parser = new OrgFileParser(context, appInst);
 			appInst.getDB().addOrUpdateFile(filename, key, remoteChecksums.get(key));
+			updateNotification(i, "Parsing " + filename, filesToGet.size());
             parser.parse(filename, orgfile.getReader());
             // TODO Generate checksum of file and compare to remoteChecksum
         }

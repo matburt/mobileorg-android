@@ -43,6 +43,7 @@ public class OutlineCursorAdapter extends SimpleCursorAdapter {
 
 	@Override
 	public void bindView(View v, Context context, Cursor c) {
+		
 		TextView orgItem = (TextView) v.findViewById(R.id.orgItem);
 		TextView todoState = (TextView) v.findViewById(R.id.todoState);
 		TextView priorityState = (TextView) v.findViewById(R.id.priorityState);
