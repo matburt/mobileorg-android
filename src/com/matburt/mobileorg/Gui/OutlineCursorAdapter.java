@@ -52,6 +52,8 @@ public class OutlineCursorAdapter extends SimpleCursorAdapter {
 
 		int orgItemNum = c.getColumnIndex("name");
 		orgItem.setText(c.getString(orgItemNum));
+		
+		todoState.setVisibility(View.GONE);
 
 		// // Setup todo state view
 		// if (TextUtils.isEmpty(todo)) {

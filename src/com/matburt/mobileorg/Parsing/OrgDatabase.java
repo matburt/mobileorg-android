@@ -11,7 +11,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 public class OrgDatabase extends SQLiteOpenHelper {
 	private static final String DATABASE_NAME = "MobileOrg";
-	private static final int DATABASE_VERSION = 7;
+	private static final int DATABASE_VERSION = 9;
 	
 	private Context context;
 
@@ -24,6 +24,7 @@ public class OrgDatabase extends SQLiteOpenHelper {
 	public void onCreate(SQLiteDatabase db) {
 		db.execSQL("CREATE TABLE IF NOT EXISTS files("
 				+ "_id integer primary key autoincrement,"
+				+ "node_id integer," // Id that gives file node in orgdata
 				+ "filename text,"
 				+ "name text,"
 				+ "checksum text)");
@@ -47,7 +48,7 @@ public class OrgDatabase extends SQLiteOpenHelper {
 				+ "_id integer primary key autoincrement,"
 				+ "parent_id integer,"
 				+ "level integer default 0,"
-				+ "node_id text,"
+				+ "node_id text," // Org data id
 				+ "priority text,"
 				+ "todo text,"
 				+ "tags text,"
@@ -90,9 +91,19 @@ public class OrgDatabase extends SQLiteOpenHelper {
 	public Cursor getFileCursor() {
 		SQLiteDatabase db = this.getReadableDatabase();
 
-		Cursor cursor = db.query("orgdata", nodeFields,
-				"level=0", null, null, null, null);
-		return cursor;
+		// This gets all of the org file nodes
+		return db.rawQuery("SELECT data.* FROM orgdata data JOIN" 
+				+ "(SELECT f.node_id FROM files f) file on file.node_id = data._id;", null);
+	}
+	
+	public long getFileId(String filename) {
+		SQLiteDatabase db = this.getReadableDatabase();
+
+		Cursor cursor = db.query("files", new String[] { "node_id" },
+				"filename=?", new String[] {filename}, null, null, null);
+		
+		cursor.moveToFirst();
+		return cursor.getInt(cursor.getColumnIndex("node_id"));
 	}
 	
 	public void addEdit(String edittype, String nodeId, String nodeTitle,
@@ -163,14 +174,16 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		case 5:
 			db.execSQL("DROP TABLE IF EXISTS files");
 			break;
-		case 7:
-			db.execSQL("DROP TABLE IF EXISTS files");
-			db.execSQL("DROP TABLE IF EXISTS todos");
-			db.execSQL("DROP TABLE IF EXISTS priorities");
-			db.execSQL("DROP TABLE IF EXISTS edits");
+		case 9:
+
 			break;
 		}
 
+		db.execSQL("DROP TABLE IF EXISTS files");
+		db.execSQL("DROP TABLE IF EXISTS todos");
+		db.execSQL("DROP TABLE IF EXISTS priorities");
+		db.execSQL("DROP TABLE IF EXISTS edits");
+		db.execSQL("DROP TABLE IF EXISTS orgdata");
 		onCreate(db);
 	}
 		
@@ -201,10 +214,14 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		
 		SQLiteDatabase db = this.getWritableDatabase();
 		db.beginTransaction();
+
+		
+		long id = db.insert("orgdata", null, orgdata);
+		values.put("node_id", id);
+		
 		db.delete("files", "filename=? AND name=?", new String[] { filename, name });
 		db.insert("files", null, values);	
 		
-		db.insert("orgdata", null, orgdata);
 		db.setTransactionSuccessful();
 		db.endTransaction();
 	}

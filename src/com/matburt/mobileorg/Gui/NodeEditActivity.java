@@ -16,9 +16,9 @@ import android.widget.TextView;
 
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Parsing.MobileOrgApplication;
-import com.matburt.mobileorg.Parsing.NodeWriter;
 import com.matburt.mobileorg.Parsing.Node;
 import com.matburt.mobileorg.Parsing.OrgDatabase;
+import com.matburt.mobileorg.Parsing.OrgFile;
 import com.matburt.mobileorg.Synchronizers.Synchronizer;
 
 public class NodeEditActivity extends Activity {
@@ -194,8 +194,6 @@ public class NodeEditActivity extends Activity {
 		String newTodo = todoStateView.getSelectedItem().toString();
 		String newPriority = priorityView.getSelectedItem().toString();
 		String newPayload = payloadView.getText().toString();
-
-		NodeWriter writer = new NodeWriter(this);
 		
 		if (this.actionMode.equals(ACTIONMODE_CREATE)) {
 			node.name = newTitle;
@@ -203,13 +201,10 @@ public class NodeEditActivity extends Activity {
 			node.priority = newPriority;
 			node.payload.setContent(newPayload);
 			MobileOrgApplication appInst = (MobileOrgApplication) this.getApplication();
-			OrgDatabase db = appInst.getDB();
-			db.addNode( new Long(5), newTitle, newTodo, newPriority, null);
-
-			try {
-				writer.write(node);		
-			} catch (IOException e) {
-			}
+			OrgDatabase orgDB = appInst.getDB();
+			orgDB.addOrUpdateFile(OrgFile.CAPTURE_FILE, "Captures", "");
+			Long parent = orgDB.getFileId(OrgFile.CAPTURE_FILE);
+			orgDB.addNode(parent, newTitle, newTodo, newPriority, null);
 			
 		} else if (this.actionMode.equals(ACTIONMODE_EDIT)) {
 			try {
@@ -231,23 +226,23 @@ public class NodeEditActivity extends Activity {
 	private void editNode(Node node, String newTitle, String newTodo,
 			String newPriority, String newPayload) throws IOException {
 		MobileOrgApplication appInst = (MobileOrgApplication) this.getApplication();
-		OrgDatabase db = appInst.getDB();
+		OrgDatabase orgDB = appInst.getDB();
 		
 		if (!node.name.equals(newTitle)) {
-			db.addEdit("heading", node.getNodeId(), newTitle, node.name, newTitle);
+			orgDB.addEdit("heading", node.getNodeId(), newTitle, node.name, newTitle);
 			node.name = newTitle;
 		}
 		if (newTodo != null && !node.todo.equals(newTodo)) {
-			db.addEdit("todo", node.getNodeId(), newTitle, node.todo, newTodo);
+			orgDB.addEdit("todo", node.getNodeId(), newTitle, node.todo, newTodo);
 			node.todo = newTodo;
 		}
 		if (newPriority != null && !node.priority.equals(newPriority)) {
-			db.addEdit("priority", node.getNodeId(), newTitle, node.priority,
+			orgDB.addEdit("priority", node.getNodeId(), newTitle, node.priority,
 					newPriority);
 			node.priority = newPriority;
 		}
 		if (!node.payload.getContent().equals(newPayload)) {
-			db.addEdit("body", node.getNodeId(), newTitle, node.payload.getContent(), newPayload);
+			orgDB.addEdit("body", node.getNodeId(), newTitle, node.payload.getContent(), newPayload);
 			node.payload.setContent(newPayload);
 		}
 	}
