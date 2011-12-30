@@ -74,7 +74,7 @@ public class OrgFileParser {
 		} else
 			node = new Node(filename);
 
-		parse(node, breader);
+		//parse(node, breader);
 		node.parsed = true;
 
 		try { breader.close(); } catch (IOException e) {}
@@ -82,23 +82,24 @@ public class OrgFileParser {
 	}
 
 	private static Pattern titlePattern = null;
-	private Stack<Node> nodeStack;
+	//private Stack<Node> nodeStack;
 	private Stack<Integer> starStack;
 	private Stack<Long> parentIdStack;
 
 	Pattern editTitlePattern = Pattern
 			.compile("F\\((edit:.*?)\\) \\[\\[(.*?)\\]\\[(.*?)\\]\\]");
 
-	public void parse(Node fileNode, BufferedReader breader) {
+	public void parse(String filename, BufferedReader breader) {
 		this.todos = this.appInst.getGroupedTodods();
 
-		this.nodeStack = new Stack<Node>();
+		//this.nodeStack = new Stack<Node>();
 		this.starStack = new Stack<Integer>();
 		this.parentIdStack = new Stack<Long>();
 		
-		this.nodeStack.push(fileNode);
+		Long fileID = this.appInst.getDB().getFileId(filename);
+		//this.nodeStack.push(fileNode);
 		this.starStack.push(0);
-		this.parentIdStack.push(new Long(0));
+		this.parentIdStack.push(fileID);
 
 		try {
 			String currentLine;
@@ -123,15 +124,15 @@ public class OrgFileParser {
 				if (numstars > 0) {
 					parseHeading(currentLine, numstars);
 				} else {
-					nodeStack.peek().payload.add(currentLine);
+					//nodeStack.peek().payload.add(currentLine);
 				}
 			}
 
 		} catch (IOException e) {}
 		
-		if(fileNode.name.equals(OrgFile.CAPTURE_FILE)) {
-			deleteEditNodes(fileNode);
-		}
+//		if(fileNode.name.equals(OrgFile.CAPTURE_FILE)) {
+//			deleteEditNodes(fileNode);
+//		}
 	}
 
 	private void deleteEditNodes(Node fileNode) {
@@ -236,8 +237,8 @@ public class OrgFileParser {
             newHeading = heading;
 
         // Hack to strip out * from habits
-        if(this.nodeStack.get(0).name.equals("agendas.org"))
-        	newHeading = newHeading.replaceAll("\\*", "");
+//        if(this.nodeStack.get(0).name.equals("agendas.org"))
+//        	newHeading = newHeading.replaceAll("\\*", "");
         
         return newHeading;
     }

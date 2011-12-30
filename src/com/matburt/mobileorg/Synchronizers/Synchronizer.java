@@ -23,6 +23,7 @@ import com.matburt.mobileorg.Gui.OutlineActivity;
 import com.matburt.mobileorg.Parsing.MobileOrgApplication;
 import com.matburt.mobileorg.Parsing.OrgDatabase;
 import com.matburt.mobileorg.Parsing.OrgFile;
+import com.matburt.mobileorg.Parsing.OrgFileParser;
 
 /**
  * This class implements many of the operations that need to be done on
@@ -162,8 +163,10 @@ abstract public class Synchronizer {
             OrgFile orgfile = new OrgFile(filename, context);
             orgfile.fetch(getRemoteFile(filename));
 
+            OrgFileParser parser = new OrgFileParser(context, appInst);
+			appInst.getDB().addOrUpdateFile(filename, key, remoteChecksums.get(key));
+            parser.parse(filename, orgfile.getReader());
             // TODO Generate checksum of file and compare to remoteChecksum
-			appInst.addOrUpdateFile(filename, key, remoteChecksums.get(key));
         }
 	}
 	
