@@ -84,6 +84,7 @@ public class OrgFileParser {
 	private static Pattern titlePattern = null;
 	private Stack<Node> nodeStack;
 	private Stack<Integer> starStack;
+	private Stack<Long> parentIdStack;
 
 	Pattern editTitlePattern = Pattern
 			.compile("F\\((edit:.*?)\\) \\[\\[(.*?)\\]\\[(.*?)\\]\\]");
@@ -93,9 +94,11 @@ public class OrgFileParser {
 
 		this.nodeStack = new Stack<Node>();
 		this.starStack = new Stack<Integer>();
+		this.parentIdStack = new Stack<Long>();
 		
 		this.nodeStack.push(fileNode);
 		this.starStack.push(0);
+		this.parentIdStack.push(new Long(0));
 
 		try {
 			String currentLine;
@@ -156,27 +159,32 @@ public class OrgFileParser {
 	}
     
 	private void parseHeading(String thisLine, int numstars) {
-		Node newNode = parseLineIntoNode(thisLine, numstars);
 
 		if (numstars == starStack.peek()) {
-			nodeStack.pop();
+			//nodeStack.pop();
 			starStack.pop();
+			parentIdStack.pop();
 		} else if (numstars < starStack.peek()) {
 			while (numstars <= starStack.peek()) {
-				nodeStack.pop();
+				//nodeStack.pop();
 				starStack.pop();
+				parentIdStack.pop();
 			}
 		}
         
+		long newId = parseLineIntoNode(thisLine, numstars);
+
         try {
-            nodeStack.peek().addChild(newNode);
+           // nodeStack.peek().addChild(newNode);
         } catch (EmptyStackException e) {}
         
-        nodeStack.push(newNode);
+        //nodeStack.push(newNode);
         starStack.push(numstars);
+        this.parentIdStack.push(newId);
+        
     }
     
-    private Node parseLineIntoNode (String thisLine, int numstars) {
+    private long parseLineIntoNode (String thisLine, int numstars) {
     	String heading = stripHeading(thisLine, numstars).trim();
     	
         Node newNode = new Node("");
@@ -210,7 +218,8 @@ public class OrgFileParser {
 			newNode.name = heading;
 		}
     	
-    	return newNode;
+        Long nodeId = this.appInst.getDB().addNode(this.parentIdStack.peek(), newNode.name, newNode.todo, newNode.priority, null);
+    	return nodeId;
     }
 
     final static Pattern titlePattern2 = Pattern.compile("<before.*</before>|<after.*</after>");

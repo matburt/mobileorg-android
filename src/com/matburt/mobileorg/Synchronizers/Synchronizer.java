@@ -85,6 +85,7 @@ abstract public class Synchronizer {
 		updateNotification(0, "Uploading " + OrgFile.CAPTURE_FILE);
 		try {
 			push(OrgFile.CAPTURE_FILE);
+			this.appdb.clearDB();
 			pull();
 		} catch (IOException e) {
 			displayErrorNotification("Error occured during sync: "

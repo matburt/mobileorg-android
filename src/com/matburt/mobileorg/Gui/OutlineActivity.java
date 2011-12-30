@@ -10,6 +10,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
@@ -56,7 +57,7 @@ public class OutlineActivity extends ListActivity
 	 */
 	private int lastSelection = 0;
 	
-	private OutlineListAdapter outlineAdapter;
+	private OutlineCursorAdapter outlineAdapter;
 	private SynchServiceReceiver syncReceiver;
 
 	@Override
@@ -65,11 +66,21 @@ public class OutlineActivity extends ListActivity
 		
 		this.appInst = (MobileOrgApplication) this.getApplication();
 		
-		this.outlineAdapter = new OutlineListAdapter(this, appInst.nodestackTop());
-		this.setListAdapter(outlineAdapter);
-		
 		Intent intent = getIntent();
 		this.depth = intent.getIntExtra("depth", 1);
+		
+		long node_id = intent.getLongExtra("node_id", -1);
+		
+		Cursor cursor;
+		if(node_id >= 0)
+			cursor = appInst.getDB().getNodeChildren(node_id);
+		else
+			cursor = appInst.getDB().getFileCursor();
+		
+		startManagingCursor(cursor);
+		this.outlineAdapter = new OutlineCursorAdapter(this,
+				cursor);
+		this.setListAdapter(outlineAdapter);
 		
 		if(this.depth == 1) {
 			if(this.appInst.getOrgFiles().isEmpty())
@@ -173,21 +184,24 @@ public class OutlineActivity extends ListActivity
 
 	@Override
 	public void onListItemClick(ListView l, View v, int position, long id) {
-		Node node = (Node) l.getItemAtPosition(position);
+		Long name = l.getItemIdAtPosition(position);
 
-		if(node.encrypted) {
-			runDecryptAndExpandNode(node);
-			return;
-		}
-		else
-			appInst.makeSureNodeIsParsed(node);
-
-		this.lastSelection = position;
-		
-		if (node.hasChildren())
-			runExpandSelection(node);
-		else
-			runViewNodeActivity(node);
+		runExpandSelection(name);
+		//		Node node = (Node) l.getItemAtPosition(position);
+//
+//		if(node.encrypted) {
+//			runDecryptAndExpandNode(node);
+//			return;
+//		}
+//		else
+//			appInst.makeSureNodeIsParsed(node);
+//
+//		this.lastSelection = position;
+//		
+//		if (node.hasChildren())
+//			runExpandSelection(node);
+//		else
+//			runViewNodeActivity(node);
 	}
 
     private void showWizard() {
@@ -224,6 +238,14 @@ public class OutlineActivity extends ListActivity
 		startActivityForResult(intent, RUNFOR_VIEWNODE);
 	}
 
+	private void runExpandSelection(long id) {
+		Intent intent = new Intent(this, OutlineActivity.class);
+		int childDepth = this.depth + 1;
+		intent.putExtra("depth", childDepth);
+		intent.putExtra("node_id", id);
+		startActivity(intent);
+	}
+	
 	private void runExpandSelection(Node node) {
 		appInst.pushNodestack(node);
 

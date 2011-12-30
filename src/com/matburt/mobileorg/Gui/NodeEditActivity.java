@@ -202,6 +202,9 @@ public class NodeEditActivity extends Activity {
 			node.todo = newTodo;
 			node.priority = newPriority;
 			node.payload.setContent(newPayload);
+			MobileOrgApplication appInst = (MobileOrgApplication) this.getApplication();
+			OrgDatabase db = appInst.getDB();
+			db.addNode( new Long(5), newTitle, newTodo, newPriority, null);
 
 			try {
 				writer.write(node);		
