@@ -18,6 +18,7 @@ import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Parsing.MobileOrgApplication;
 import com.matburt.mobileorg.Parsing.NodeWriter;
 import com.matburt.mobileorg.Parsing.Node;
+import com.matburt.mobileorg.Parsing.OrgDatabase;
 import com.matburt.mobileorg.Synchronizers.Synchronizer;
 
 public class NodeEditActivity extends Activity {
@@ -209,8 +210,7 @@ public class NodeEditActivity extends Activity {
 			
 		} else if (this.actionMode.equals(ACTIONMODE_EDIT)) {
 			try {
-				writer.editNode(node, newTitle, newTodo, newPriority,
-						newPayload);
+				editNode(node, newTitle, newTodo, newPriority, newPayload);
 			} catch (IOException e) {
 			}
 		}
@@ -218,5 +218,34 @@ public class NodeEditActivity extends Activity {
 		intent.putExtra(Synchronizer.SYNC_DONE, true);
 		intent.putExtra("showToast", false);
 		sendBroadcast(intent);
+	}
+	
+	/**
+	 * Takes a Node and four strings, representing edits to the node.
+	 * This function will generate a new edit entry for each value that was 
+	 * changed.
+	 */
+	private void editNode(Node node, String newTitle, String newTodo,
+			String newPriority, String newPayload) throws IOException {
+		MobileOrgApplication appInst = (MobileOrgApplication) this.getApplication();
+		OrgDatabase db = appInst.getDB();
+		
+		if (!node.name.equals(newTitle)) {
+			db.addEdit("heading", node.getNodeId(), newTitle, node.name, newTitle);
+			node.name = newTitle;
+		}
+		if (newTodo != null && !node.todo.equals(newTodo)) {
+			db.addEdit("todo", node.getNodeId(), newTitle, node.todo, newTodo);
+			node.todo = newTodo;
+		}
+		if (newPriority != null && !node.priority.equals(newPriority)) {
+			db.addEdit("priority", node.getNodeId(), newTitle, node.priority,
+					newPriority);
+			node.priority = newPriority;
+		}
+		if (!node.payload.getContent().equals(newPayload)) {
+			db.addEdit("body", node.getNodeId(), newTitle, node.payload.getContent(), newPayload);
+			node.payload.setContent(newPayload);
+		}
 	}
 }

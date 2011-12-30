@@ -161,4 +161,8 @@ public class MobileOrgApplication extends Application {
     public ArrayList<String> getTodods() {
     	return appdb.getTodos();
     }
+    
+    public OrgDatabase getDB() {
+    	return this.appdb;
+    }
 }

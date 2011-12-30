@@ -34,7 +34,7 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		db.execSQL("CREATE TABLE IF NOT EXISTS priorities("
 				+ "id integer primary key autoincrement,"
 				+ "name text)");
-		db.execSQL("CREATE TABLE IF NOT EXISTS changes("
+		db.execSQL("CREATE TABLE IF NOT EXISTS edits("
 				+ "id integer primary key autoincrement,"
 				+ "type text,"
 				+ "title text,"
@@ -43,14 +43,68 @@ public class OrgDatabase extends SQLiteOpenHelper {
 				+ "new_value text,"
 				+ "changed integer)");
 	}
+	
+	public void addEdit(String edittype, String nodeId, String nodeTitle,
+			String oldValue, String newValue) {
 
-	@Override
+		ContentValues values = new ContentValues();
+		values.put("type", edittype);
+		values.put("data_it", nodeId);
+		values.put("title", nodeTitle);
+		values.put("old_value", oldValue);
+		values.put("new_value", newValue);
+		
+		SQLiteDatabase db = this.getWritableDatabase();
+		db.insert("edits", null, values);
+		db.close();
+	}
+
+	public String editsToString() {
+		StringBuilder result = new StringBuilder();
+		SQLiteDatabase db = this.getReadableDatabase();
+
+		Cursor cursor = db.query("edits", new String[] { "data_it", "title",
+				"type", "old_value", "new_value" }, null, null, null, null, null);
+		cursor.moveToFirst();
+
+		while (cursor.isAfterLast() == false) {
+			result.append(editToString(cursor.getString(0),
+					cursor.getString(1), cursor.getString(2),
+					cursor.getString(3), cursor.getString(4)));
+			cursor.moveToNext();
+		}
+		
+		cursor.close();
+		db.close();
+		return result.toString();
+	}
+
+	private String editToString(String nodeId, String title, String editType,
+			String oldVal, String newVal) {
+		if (nodeId.indexOf("olp:") != 0)
+			nodeId = "id:" + nodeId;
+		
+		StringBuilder result = new StringBuilder();
+		result.append("* F(edit:" + editType + ") [[" + nodeId + "]["
+				+ title.trim() + "]]\n");
+		result.append("** Old value\n" + oldVal.trim() + "\n");
+		result.append("** New value\n" + newVal.trim() + "\n");
+		result.append("** End of edit" + "\n\n");
+		return result.toString();
+	}
+	
+	public void clearChanges() {
+		SQLiteDatabase db = this.getWritableDatabase();
+		db.delete("edits", null, null);
+		db.close();
+	}
+	
+		@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 		switch (newVersion) {
 		case 2:
 			db.execSQL("DROP TABLE IF EXISTS priorities");
 			break;
-
 		case 3:
 			db.execSQL("DROP TABLE IF EXISTS files");
 			db.execSQL("DROP TABLE IF EXISTS todos");
@@ -69,7 +123,7 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		
 		SQLiteDatabase db = this.getWritableDatabase();
 		db.delete("files", "filename = ?", new String[] { filename });
-		db.execSQL("DROP TABLE IF EXISTS " + filename);
+//		db.execSQL("DROP TABLE IF EXISTS " + filename);
 		db.close();
 	}
 
@@ -84,14 +138,14 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		db.delete("files", "filename=? AND name=?", new String[] { filename, name });
 		db.insert("files", null, values);
 		
-		db.execSQL("CREATE TABLE IF NOT EXISTS " + filename + " ("
-				+ "id integer primary key autoincrement,"
-				+ "parent_id integer,"
-				+ "level integer default 0,"
-				+ "node_id text,"
-				+ "priority text,"
-				+ "todo text,"
-				+ "title text)");		
+//		db.execSQL("CREATE TABLE IF NOT EXISTS " + filename + " ("
+//				+ "id integer primary key autoincrement,"
+//				+ "parent_id integer,"
+//				+ "level integer default 0,"
+//				+ "node_id text,"
+//				+ "priority text,"
+//				+ "todo text,"
+//				+ "title text)");		
 		
 		db.setTransactionSuccessful();
 		db.endTransaction();
