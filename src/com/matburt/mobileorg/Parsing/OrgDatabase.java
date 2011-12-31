@@ -128,8 +128,50 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		db.insert("edits", null, values);
 	}
 
+	// TODO Make recursive
+	public String fileToString(String filename) {
+		StringBuilder result = new StringBuilder();
+		
+		long file_id = getFileId(filename);
+		
+		Cursor cursor = getNodeChildren(file_id);
+		cursor.moveToFirst();
+		
+		while(cursor.isAfterLast() == false) {
+			result.append(nodeToString(cursor));
+			cursor.moveToNext();
+		}
+		
+		return result.toString();
+	}
+	
+	private String nodeToString(Cursor cursor) {
+		final String todo = cursor.getString(cursor.getColumnIndex("todo"));
+		final String name = cursor.getString(cursor.getColumnIndex("name"));
+		final String priority = cursor.getString(cursor.getColumnIndex("priority"));
+		//final String payload = cursor.getString(cursor.getColumnIndex("payload"));
+		// TODO Tags
+		
+		StringBuilder noteStr = new StringBuilder();
+		noteStr.append("* ");
+
+		if (!todo.equals(""))
+			noteStr.append(todo + " ");
+
+		if (!priority.equals(""))
+			noteStr.append("[#" + priority + "] ");
+
+		noteStr.append(name + "\n");
+
+//		if (payload.length() > 0)
+//			noteStr.append(payload + "\n");
+
+		noteStr.append("\n");
+		return noteStr.toString();
+	}
+	
 	public String editsToString() {		
-		Cursor cursor = db.query("edits", new String[] { "data_it", "title",
+		Cursor cursor = db.query("edits", new String[] { "data_id", "title",
 				"type", "old_value", "new_value" }, null, null, null, null, null);
 		cursor.moveToFirst();
 

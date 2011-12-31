@@ -96,15 +96,14 @@ abstract public class Synchronizer {
 	 * combine their content. This combined version is transfered to the remote.
 	 */
 	private void push(String filename) throws IOException {
-    	OrgFile orgFile = new OrgFile(filename, context);
-    	String localContents = orgFile.read();
+    	String localContents = this.appdb.fileToString(filename);
 
-    	String remoteContent = OrgFile.read(getRemoteFile(filename));
-		updateNotification(10);
-    	
         if(localContents.equals(""))
         	return;
-        
+    	
+    	String remoteContent = OrgFile.read(getRemoteFile(filename));
+		updateNotification(10);
+
         if (remoteContent.indexOf("{\"error\":") == -1)
             localContents = remoteContent + "\n" + localContents;
 		
