@@ -11,7 +11,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 public class OrgDatabase extends SQLiteOpenHelper {
 	private static final String DATABASE_NAME = "MobileOrg";
-	private static final int DATABASE_VERSION = 10;
+	private static final int DATABASE_VERSION = 12;
 	
 	private Context context;
 
@@ -260,7 +260,8 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		cursor.moveToFirst();
 
 		while (cursor.isAfterLast() == false) {
-			checksums.put(cursor.getString(0), cursor.getString(1));
+			checksums.put(cursor.getString(cursor.getColumnIndex("filename")),
+					cursor.getString(cursor.getColumnIndex("checksum")));
 			cursor.moveToNext();
 		}
 

@@ -103,13 +103,14 @@ public class OutlineActivity extends ListActivity
 			finish();
 		}
 
-		//outlineAdapter.notifyDataSetChanged();
-		Cursor cursor;
-		if(node_id >= 0)
-			cursor = appInst.getDB().getNodeChildren(node_id);
-		else
-			cursor = appInst.getDB().getFileCursor();
-		this.outlineAdapter.changeCursor(cursor);
+		outlineAdapter.notifyDataSetChanged();
+//		Cursor cursor;
+//		if(node_id >= 0)
+//			cursor = appInst.getDB().getNodeChildren(node_id);
+//		else
+//			cursor = appInst.getDB().getFileCursor();
+//		cursor.moveToFirst();
+//		this.outlineAdapter.changeCursor(cursor);
 		getListView().setSelection(lastSelection);
 	}
 

@@ -2,6 +2,8 @@ package com.matburt.mobileorg.Synchronizers;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.Reader;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.regex.Matcher;
@@ -16,6 +18,7 @@ import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
+import android.util.Log;
 import android.widget.RemoteViews;
 
 import com.matburt.mobileorg.R;
@@ -70,7 +73,7 @@ abstract public class Synchronizer {
 	Synchronizer(Context context, MobileOrgApplication appInst) {
         this.context = context;
         this.r = this.context.getResources();
-        this.appdb = new OrgDatabase(context);
+        this.appdb = appInst.getDB();
         this.appSettings = PreferenceManager.getDefaultSharedPreferences(
                                    context.getApplicationContext());
         this.appInst = appInst;        
@@ -125,51 +128,129 @@ abstract public class Synchronizer {
 	 * and downloads them.
 	 */
 	private void pull() throws IOException {
-		updateNotification(20, "Downloading index file");
-		String remoteIndexContents = OrgFile.read(getRemoteFile("index.org"));
-		
-        ArrayList<HashMap<String, Boolean>> todoLists = getTodos(remoteIndexContents);
-        this.appdb.setTodos(todoLists);
 
-        this.appdb.setPriorities(getPriorities(remoteIndexContents));
 
-		updateNotification(40, "Downloading checksum file");
+		updateNotification(20, "Downloading checksum file");
         String remoteChecksumContents = OrgFile.read(getRemoteFile("checksums.dat"));
-		updateNotification(60);
+		updateNotification(40);
 
 		HashMap<String, String> remoteChecksums = getChecksums(remoteChecksumContents);
 		HashMap<String, String> localChecksums = this.appdb.getFileChecksums();
 		
-		HashMap<String, String> fileChecksumMap = getOrgFilesFromMaster(remoteIndexContents);
-		
+
 		ArrayList<String> filesToGet = new ArrayList<String>();
-		
-        for (String key : fileChecksumMap.keySet()) {     	
+        Log.d("MobileOrg", "Size of lch : " + localChecksums.size());
+
+        for (String key : remoteChecksums.keySet()) {     	
             if (localChecksums.containsKey(key) &&
-                remoteChecksums.containsKey(key) &&
                 localChecksums.get(key).equals(remoteChecksums.get(key)))
                 continue;
-            
+            Log.d("MobileOrg", "Comparing : " + key + localChecksums.get(key) + " to " + remoteChecksums.get(key));
             filesToGet.add(key);
         }
+
+        filesToGet.remove("mobileorg.org");
+
+        if(filesToGet.size() == 0)
+        	return;
         
+		filesToGet.remove("index.org");
+		updateNotification(60, "Downloading index file");
+		String remoteIndexContents = OrgFile.read(getRemoteFile("index.org"));
+		
+        this.appdb.setTodos(getTodosFromIndex(remoteIndexContents));
+        this.appdb.setPriorities(getPrioritiesFromIndex(remoteIndexContents));
+		HashMap<String, String> filenameMap = getFilesFromIndex(remoteIndexContents);
+        
+        OrgFileParser parser = new OrgFileParser(context, appInst);
         int i = 0;
-        for(String key: filesToGet) {
-        	String filename = fileChecksumMap.get(key);
-        	
+        for(String filename: filesToGet) {        	
         	i++;
 			updateNotification(i, "Downloading " + filename, filesToGet.size());
-
-            OrgFile orgfile = new OrgFile(filename, context);
-            orgfile.fetch(getRemoteFile(filename));
-
-            OrgFileParser parser = new OrgFileParser(context, appInst);
-			appInst.getDB().addOrUpdateFile(filename, key, remoteChecksums.get(key));
-			updateNotification(i, "Parsing " + filename, filesToGet.size());
-            parser.parse(filename, orgfile.getReader());
+			appInst.getDB().addOrUpdateFile(filename, filenameMap.get(filename), remoteChecksums.get(filename));
+            parser.parse(filename, getRemoteFile(filename));
             // TODO Generate checksum of file and compare to remoteChecksum
         }
 	}
+
+	/**
+	 * Parses the checksum file.
+	 * @return HashMap with Filename->checksum
+	 */
+	private HashMap<String, String> getChecksums(String master) {
+		HashMap<String, String> checksums = new HashMap<String, String>();
+		for (String line : master.split("[\\n\\r]+")) {
+			if (TextUtils.isEmpty(line))
+				continue;
+			String[] chksTuple = line.split("\\s+");
+			if(chksTuple.length >= 2)
+				checksums.put(chksTuple[1], chksTuple[0]);
+		}
+		return checksums;
+	}
+	
+	/**
+	 * Parses the file list from index file.
+	 * @return HashMap with Filename->Filename Alias
+	 */
+	private HashMap<String, String> getFilesFromIndex(String master) {
+		Pattern getOrgFiles = Pattern.compile("\\[file:(.*?)\\]\\[(.*?)\\]\\]");
+		Matcher m = getOrgFiles.matcher(master);
+		HashMap<String, String> allOrgFiles = new HashMap<String, String>();
+		while (m.find()) {
+			allOrgFiles.put(m.group(1), m.group(2));
+		}
+
+		return allOrgFiles;
+	}
+
+
+	private ArrayList<HashMap<String, Boolean>> getTodosFromIndex(String master) {
+		Pattern getTodos = Pattern
+				.compile("#\\+TODO:\\s+([\\s\\w-]*)(\\| ([\\s\\w-]*))*");
+		Matcher m = getTodos.matcher(master);
+		ArrayList<HashMap<String, Boolean>> todoList = new ArrayList<HashMap<String, Boolean>>();
+		while (m.find()) {
+			String lastTodo = "";
+			HashMap<String, Boolean> holding = new HashMap<String, Boolean>();
+			Boolean isDone = false;
+			for (int idx = 1; idx <= m.groupCount(); idx++) {
+				if (m.group(idx) != null && m.group(idx).length() > 0) {
+					if (m.group(idx).indexOf("|") != -1) {
+						isDone = true;
+						continue;
+					}
+					String[] grouping = m.group(idx).split("\\s+");
+					for (String group : grouping) {
+						lastTodo = group.trim();
+						holding.put(group.trim(), isDone);
+					}
+				}
+			}
+			if (!isDone) {
+				holding.put(lastTodo, true);
+			}
+			todoList.add(holding);
+		}
+		return todoList;
+	}
+	
+	private ArrayList<String> getPrioritiesFromIndex(String master) {
+		Pattern getPriorities = Pattern
+				.compile("#\\+ALLPRIORITIES:\\s+([A-Z\\s]*)");
+		Matcher t = getPriorities.matcher(master);
+
+		ArrayList<String> priorities = new ArrayList<String>();
+
+		if (t.find() && t.group(1) != null && t.group(1).length() > 0) {
+			String[] grouping = t.group(1).split("\\s+");
+			for (String group : grouping) {
+				priorities.add(group.trim());
+			}
+		}
+		return priorities;
+	}
+	
 	
 	private NotificationManager notificationManager;
 	private Notification notification;
@@ -229,75 +310,6 @@ abstract public class Synchronizer {
 		Intent intent = new Intent(Synchronizer.SYNC_UPDATE);
 		intent.putExtra(SYNC_DONE, true);
 		this.context.sendBroadcast(intent);
-	}
-	
-	private HashMap<String, String> getOrgFilesFromMaster(String master) {
-		Pattern getOrgFiles = Pattern.compile("\\[file:(.*?)\\]\\[(.*?)\\]\\]");
-		Matcher m = getOrgFiles.matcher(master);
-		HashMap<String, String> allOrgFiles = new HashMap<String, String>();
-		while (m.find()) {
-			allOrgFiles.put(m.group(2), m.group(1));
-		}
-
-		return allOrgFiles;
-	}
-
-	private HashMap<String, String> getChecksums(String master) {
-		HashMap<String, String> chksums = new HashMap<String, String>();
-		for (String eachLine : master.split("[\\n\\r]+")) {
-			if (TextUtils.isEmpty(eachLine))
-				continue;
-			String[] chksTuple = eachLine.split("\\s+");
-			if(chksTuple.length >= 2)
-				chksums.put(chksTuple[1], chksTuple[0]);
-		}
-		return chksums;
-	}
-
-	private ArrayList<HashMap<String, Boolean>> getTodos(String master) {
-		Pattern getTodos = Pattern
-				.compile("#\\+TODO:\\s+([\\s\\w-]*)(\\| ([\\s\\w-]*))*");
-		Matcher m = getTodos.matcher(master);
-		ArrayList<HashMap<String, Boolean>> todoList = new ArrayList<HashMap<String, Boolean>>();
-		while (m.find()) {
-			String lastTodo = "";
-			HashMap<String, Boolean> holding = new HashMap<String, Boolean>();
-			Boolean isDone = false;
-			for (int idx = 1; idx <= m.groupCount(); idx++) {
-				if (m.group(idx) != null && m.group(idx).length() > 0) {
-					if (m.group(idx).indexOf("|") != -1) {
-						isDone = true;
-						continue;
-					}
-					String[] grouping = m.group(idx).split("\\s+");
-					for (String group : grouping) {
-						lastTodo = group.trim();
-						holding.put(group.trim(), isDone);
-					}
-				}
-			}
-			if (!isDone) {
-				holding.put(lastTodo, true);
-			}
-			todoList.add(holding);
-		}
-		return todoList;
-	}
-
-	private ArrayList<String> getPriorities(String master) {
-		Pattern getPriorities = Pattern
-				.compile("#\\+ALLPRIORITIES:\\s+([A-Z\\s]*)");
-		Matcher t = getPriorities.matcher(master);
-
-		ArrayList<String> priorities = new ArrayList<String>();
-
-		if (t.find() && t.group(1) != null && t.group(1).length() > 0) {
-			String[] grouping = t.group(1).split("\\s+");
-			for (String group : grouping) {
-				priorities.add(group.trim());
-			}
-		}
-		return priorities;
 	}
 		
 	public void close() {
