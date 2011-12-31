@@ -21,6 +21,10 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		this.context = context;
 		this.db = this.getWritableDatabase();
 	}
+	
+	public SQLiteDatabase getDB() {
+		return this.db;
+	}
 
 	@Override
 	public void onCreate(SQLiteDatabase db) {
@@ -161,25 +165,25 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		final String todo = cursor.getString(cursor.getColumnIndex("todo"));
 		final String name = cursor.getString(cursor.getColumnIndex("name"));
 		final String priority = cursor.getString(cursor.getColumnIndex("priority"));
-		//final String payload = cursor.getString(cursor.getColumnIndex("payload"));
-		// TODO Tags
+		final String payload = cursor.getString(cursor.getColumnIndex("payload"));
+		// TODO Add Tags
 		
-		StringBuilder noteStr = new StringBuilder();
-		noteStr.append("* ");
+		StringBuilder result = new StringBuilder();
+		result.append("* ");
 
 		if (!todo.equals(""))
-			noteStr.append(todo + " ");
+			result.append(todo + " ");
 
 		if (!priority.equals(""))
-			noteStr.append("[#" + priority + "] ");
+			result.append("[#" + priority + "] ");
 
-		noteStr.append(name + "\n");
+		result.append(name + "\n");
 
-//		if (payload.length() > 0)
-//			noteStr.append(payload + "\n");
+		if (payload != null && payload.length() > 0)
+			result.append(payload + "\n");
 
-		noteStr.append("\n");
-		return noteStr.toString();
+		result.append("\n");
+		return result.toString();
 	}
 	
 	public String editsToString() {		
@@ -215,35 +219,6 @@ public class OrgDatabase extends SQLiteOpenHelper {
 	
 	public void clearChanges() {
 		db.delete("edits", null, null);
-	}
-	
-		@Override
-	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-		switch (newVersion) {
-		case 2:
-			db.execSQL("DROP TABLE IF EXISTS priorities");
-			break;
-		case 3:
-			db.execSQL("DROP TABLE IF EXISTS files");
-			db.execSQL("DROP TABLE IF EXISTS todos");
-			break;
-		case 4:
-			db.execSQL("DROP TABLE IF EXISTS files");
-			break;
-		case 5:
-			db.execSQL("DROP TABLE IF EXISTS files");
-			break;
-		case 9:
-
-			break;
-		}
-
-		db.execSQL("DROP TABLE IF EXISTS files");
-		db.execSQL("DROP TABLE IF EXISTS todos");
-		db.execSQL("DROP TABLE IF EXISTS priorities");
-		db.execSQL("DROP TABLE IF EXISTS edits");
-		db.execSQL("DROP TABLE IF EXISTS orgdata");
-		onCreate(db);
 	}
 		
 	public void clearDB() {
@@ -419,5 +394,34 @@ public class OrgDatabase extends SQLiteOpenHelper {
 			cursor.moveToNext();
 		}
 		return list;
+	}
+	
+	@Override
+	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+		switch (newVersion) {
+		case 2:
+			db.execSQL("DROP TABLE IF EXISTS priorities");
+			break;
+		case 3:
+			db.execSQL("DROP TABLE IF EXISTS files");
+			db.execSQL("DROP TABLE IF EXISTS todos");
+			break;
+		case 4:
+			db.execSQL("DROP TABLE IF EXISTS files");
+			break;
+		case 5:
+			db.execSQL("DROP TABLE IF EXISTS files");
+			break;
+		case 9:
+
+			break;
+		}
+
+		db.execSQL("DROP TABLE IF EXISTS files");
+		db.execSQL("DROP TABLE IF EXISTS todos");
+		db.execSQL("DROP TABLE IF EXISTS priorities");
+		db.execSQL("DROP TABLE IF EXISTS edits");
+		db.execSQL("DROP TABLE IF EXISTS orgdata");
+		onCreate(db);
 	}
 }
