@@ -14,10 +14,12 @@ public class OrgDatabase extends SQLiteOpenHelper {
 	private static final int DATABASE_VERSION = 12;
 	
 	private Context context;
+	private SQLiteDatabase db;
 
 	public OrgDatabase(Context context) {
 		super(context, DATABASE_NAME, null, DATABASE_VERSION);
 		this.context = context;
+		this.db = this.getWritableDatabase();
 	}
 
 	@Override
@@ -73,7 +75,6 @@ public class OrgDatabase extends SQLiteOpenHelper {
 			values.put("tags", tagString.toString());
 		}
 		
-		SQLiteDatabase db = this.getWritableDatabase();
 		return db.insert("orgdata", null, values);
 	}
 	
@@ -81,31 +82,24 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		"payload", "parent_id"};
 	
 	public Cursor getNodeChildren(Long id) {
-		SQLiteDatabase db = this.getReadableDatabase();
 		Cursor cursor = db.query("orgdata", nodeFields, "parent_id=?",
 				new String[] { id.toString() }, null, null, null);
 		return cursor;
 	}
 	
 	public Cursor getNode(Long id) {
-		SQLiteDatabase db = this.getReadableDatabase();
-
 		Cursor cursor = db.query("orgdata", nodeFields, "_id=?", new String[] {id.toString()} , null, null, null);
 		cursor.moveToFirst();
 		return cursor;
 	}
 
 	public Cursor getFileCursor() {
-		SQLiteDatabase db = this.getReadableDatabase();
-
 		// This gets all of the org file nodes
 		return db.rawQuery("SELECT data.* FROM orgdata data JOIN" 
 				+ "(SELECT f.node_id FROM files f) file on file.node_id = data._id;", null);
 	}
 	
 	public long getFileId(String filename) {
-		SQLiteDatabase db = this.getReadableDatabase();
-
 		Cursor cursor = db.query("files", new String[] { "node_id" },
 				"filename=?", new String[] {filename}, null, null, null);
 		
@@ -127,14 +121,12 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		db.insert("edits", null, values);
 	}
 
-	public String editsToString() {
-		StringBuilder result = new StringBuilder();
-		SQLiteDatabase db = this.getReadableDatabase();
-
+	public String editsToString() {		
 		Cursor cursor = db.query("edits", new String[] { "data_it", "title",
 				"type", "old_value", "new_value" }, null, null, null, null, null);
 		cursor.moveToFirst();
 
+		StringBuilder result = new StringBuilder();
 		while (cursor.isAfterLast() == false) {
 			result.append(editToString(cursor.getString(0),
 					cursor.getString(1), cursor.getString(2),
@@ -146,7 +138,7 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		return result.toString();
 	}
 
-	private String editToString(String nodeId, String title, String editType,
+	private static String editToString(String nodeId, String title, String editType,
 			String oldVal, String newVal) {
 		if (nodeId.indexOf("olp:") != 0)
 			nodeId = "id:" + nodeId;
@@ -161,7 +153,6 @@ public class OrgDatabase extends SQLiteOpenHelper {
 	}
 	
 	public void clearChanges() {
-		SQLiteDatabase db = this.getWritableDatabase();
 		db.delete("edits", null, null);
 	}
 	
@@ -195,7 +186,6 @@ public class OrgDatabase extends SQLiteOpenHelper {
 	}
 		
 	public void clearDB() {
-		SQLiteDatabase db = this.getWritableDatabase();
 		db.delete("orgdata", null, null);
 		db.delete("files", null, null);
 	}
@@ -204,7 +194,6 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		OrgFile orgfile = new OrgFile(filename, context);
 		orgfile.remove();
 		
-		SQLiteDatabase db = this.getWritableDatabase();
 		db.delete("files", "filename = ?", new String[] { filename });
 	}
 
@@ -218,11 +207,7 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		orgdata.put("name", name);
 		orgdata.put("todo", "");
 		
-		
-		SQLiteDatabase db = this.getWritableDatabase();
 		db.beginTransaction();
-
-		
 		long id = db.insert("orgdata", null, orgdata);
 		values.put("node_id", id);
 		
@@ -236,7 +221,6 @@ public class OrgDatabase extends SQLiteOpenHelper {
 	
 	public HashMap<String, String> getFiles() {
 		HashMap<String, String> allFiles = new HashMap<String, String>();
-		SQLiteDatabase db = this.getReadableDatabase();
 
 		Cursor cursor = db.query("files", new String[] { "filename", "name" },
 				null, null, null, null, "name");
@@ -253,7 +237,6 @@ public class OrgDatabase extends SQLiteOpenHelper {
 
 	public HashMap<String, String> getFileChecksums() {
 		HashMap<String, String> checksums = new HashMap<String, String>();
-		SQLiteDatabase db = this.getReadableDatabase();
 
 		Cursor cursor = db.query("files", new String[] { "filename", "checksum" },
 				null, null, null, null, null);
@@ -270,7 +253,6 @@ public class OrgDatabase extends SQLiteOpenHelper {
 	}
 
 	public void setTodos(ArrayList<HashMap<String, Boolean>> todos) {
-		SQLiteDatabase db = this.getWritableDatabase();
 		db.beginTransaction();
 		db.delete("todos", null, null);
 
@@ -293,8 +275,6 @@ public class OrgDatabase extends SQLiteOpenHelper {
 	}
 
 	public ArrayList<String> getTodos() {
-		SQLiteDatabase db = this.getReadableDatabase();
-
 		Cursor cursor = db.query("todos", new String[] { "name" }, null, null,
 				null, null, "_id");
 
@@ -306,7 +286,6 @@ public class OrgDatabase extends SQLiteOpenHelper {
 
 	public ArrayList<HashMap<String, Integer>> getGroupedTodods() {
 		ArrayList<HashMap<String, Integer>> todos = new ArrayList<HashMap<String, Integer>>();
-		SQLiteDatabase db = this.getReadableDatabase();
 		Cursor cursor = db.query("todos", new String[] { "todogroup", "name",
 				"isdone" }, null, null, null, null, "todogroup");
 
@@ -334,7 +313,6 @@ public class OrgDatabase extends SQLiteOpenHelper {
 	}
 
 	public ArrayList<String> getPriorities() {
-		SQLiteDatabase db = this.getReadableDatabase();
 		Cursor cursor = db.query("priorities", new String[] { "name" },
 				null, null, null, null, "_id");
 
@@ -345,7 +323,6 @@ public class OrgDatabase extends SQLiteOpenHelper {
 	}
 
 	public void setPriorities(ArrayList<String> priorities) {
-		SQLiteDatabase db = this.getWritableDatabase();
 		db.beginTransaction();
 		db.delete("priorities", null, null);
 

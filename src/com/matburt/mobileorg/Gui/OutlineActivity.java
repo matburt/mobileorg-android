@@ -28,10 +28,6 @@ public class OutlineActivity extends ListActivity
 {
 	private static final int RESULT_DONTPOP = 1337;
 	
-	private static final int RUNFOR_EXPAND = 1;
-	private static final int RUNFOR_EDITNODE = 2;
-	private static final int RUNFOR_VIEWNODE = 3;
-
 	private MobileOrgApplication appInst;
 
 	/**
@@ -75,7 +71,7 @@ public class OutlineActivity extends ListActivity
 		this.setListAdapter(outlineAdapter);
 		
 		if(this.depth == 1) {
-			if(this.appInst.getOrgFiles().isEmpty())
+			if(this.appInst.getDB().getFiles().isEmpty())
                 this.showWizard();
 		}
 
@@ -98,10 +94,10 @@ public class OutlineActivity extends ListActivity
 	 */
 	private void refreshDisplay() {
 		// If this is the case, the parser/syncer has invalidated nodes
-		if (this.depth != 1 && this.depth > this.appInst.nodestackSize()) {
-			this.setResult(RESULT_DONTPOP);
-			finish();
-		}
+//		if (this.depth != 1 && this.depth > this.appInst.nodestackSize()) {
+//			this.setResult(RESULT_DONTPOP);
+//			finish();
+//		}
 
 		outlineAdapter.notifyDataSetChanged();
 //		Cursor cursor;
@@ -132,7 +128,6 @@ public class OutlineActivity extends ListActivity
 			return runShowSettings();
 		
 		case R.id.menu_outline:
-			appInst.clearNodestack();
 			refreshDisplay();
 			return true;
 		
@@ -163,7 +158,6 @@ public class OutlineActivity extends ListActivity
 				.getMenuInfo();
 		
 		long itemId = getListAdapter().getItemId(info.position);
-		//appInst.makeSureNodeIsParsed(node);
 
 		switch (item.getItemId()) {
 		case R.id.contextmenu_view:
@@ -230,7 +224,7 @@ public class OutlineActivity extends ListActivity
 	private void runViewNodeActivity(long nodeId) {		
 		Intent intent = new Intent(this, NodeViewActivity.class);
 		intent.putExtra("node_id", nodeId);
-		startActivityForResult(intent, RUNFOR_VIEWNODE);
+		startActivity(intent);
 	}
 
 	private void runExpandSelection(long id) {
@@ -240,15 +234,6 @@ public class OutlineActivity extends ListActivity
 		intent.putExtra("node_id", id);
 		startActivity(intent);
 	}
-	
-//	private void runExpandSelection(Node node) {
-//		appInst.pushNodestack(node);
-//
-//		Intent intent = new Intent(this, OutlineActivity.class);
-//		int childDepth = this.depth + 1;
-//		intent.putExtra("depth", childDepth);
-//		startActivityForResult(intent, RUNFOR_EXPAND);
-//	}
 	
 	private void runDeleteNode(final long nodeId) {
 //		AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -275,36 +260,6 @@ public class OutlineActivity extends ListActivity
 		return true;
 	}
 
-	@Override
-	public void onActivityResult(int requestCode, int resultCode, Intent intent) {
-
-		switch (requestCode) {
-
-		case RUNFOR_EXPAND:
-			if(resultCode != RESULT_DONTPOP)
-				this.appInst.popNodestack();
-			break;
-
-		case RUNFOR_EDITNODE:
-			this.appInst.popNodestack();
-			break;
-			
-		case RUNFOR_VIEWNODE:
-			this.appInst.popNodestack();
-			break;
-
-//		case NodeEncryption.DECRYPT_MESSAGE:
-//			if (resultCode != RESULT_OK || intent == null)
-//				return;
-//			
-//			Node node = this.appInst.nodestackTop();
-//			this.appInst.popNodestack();
-//			parseEncryptedNode(intent, node);
-//			this.runExpandSelection(node);
-//			break;
-		}
-	}
-	
 	private class SynchServiceReceiver extends BroadcastReceiver {
 		@Override
 		public void onReceive(Context context, Intent intent) {
@@ -317,6 +272,22 @@ public class OutlineActivity extends ListActivity
 		}
 	}
 	
+
+//	@Override
+//	public void onActivityResult(int requestCode, int resultCode, Intent intent) {
+//
+//		switch (requestCode) {
+//		case NodeEncryption.DECRYPT_MESSAGE:
+//			if (resultCode != RESULT_OK || intent == null)
+//				return;
+//			
+//			Node node = this.appInst.nodestackTop();
+//			this.appInst.popNodestack();
+//			parseEncryptedNode(intent, node);
+//			this.runExpandSelection(node);
+//			break;
+//		}
+//	}
 //	/**
 //	 * This calls startActivityForResult() with Encryption.DECRYPT_MESSAGE. The
 //	 * result is handled by onActivityResult() in this class, which calls a

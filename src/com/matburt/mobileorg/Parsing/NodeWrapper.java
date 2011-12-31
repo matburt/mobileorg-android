@@ -2,11 +2,11 @@ package com.matburt.mobileorg.Parsing;
 
 import android.database.Cursor;
 
-public class Node2 {
+public class NodeWrapper {
 
 	private Cursor cursor;
 	
-	public Node2(Cursor cursor) {
+	public NodeWrapper(Cursor cursor) {
 		this.cursor = cursor;
 	}
 	
@@ -32,5 +32,13 @@ public class Node2 {
 	
 	public String getNodeId() {
 		return cursor.getString(cursor.getColumnIndex("node_id"));
+	}
+	
+	public boolean hasChildren() {
+		return false;
+	}
+	
+	public Cursor getChildren() {
+		return null;
 	}
 }

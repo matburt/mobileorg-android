@@ -2,12 +2,8 @@ package com.matburt.mobileorg.Synchronizers;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.Reader;
-import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -17,8 +13,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.preference.PreferenceManager;
-import android.text.TextUtils;
-import android.util.Log;
 import android.widget.RemoteViews;
 
 import com.matburt.mobileorg.R;
@@ -64,19 +58,17 @@ abstract public class Synchronizer {
 	 */
 	protected abstract void postSynchronize();
 
+	protected Context context;
 	protected OrgDatabase appdb;
 	protected SharedPreferences appSettings;
-	protected Context context;
 	protected Resources r;
-	private MobileOrgApplication appInst;
 
 	Synchronizer(Context context, MobileOrgApplication appInst) {
         this.context = context;
         this.r = this.context.getResources();
-        this.appdb = appInst.getDB();
         this.appSettings = PreferenceManager.getDefaultSharedPreferences(
                                    context.getApplicationContext());
-        this.appInst = appInst;        
+        this.appdb = appInst.getDB();
 	}
 
 	public void sync() {
@@ -86,10 +78,9 @@ abstract public class Synchronizer {
 		}
 
 		setupNotification();
-		updateNotification(0, "Uploading " + OrgFile.CAPTURE_FILE);
+		updateNotification(0, "Synchronizing changes " + OrgFile.CAPTURE_FILE);
 		try {
 			push(OrgFile.CAPTURE_FILE);
-			this.appdb.clearDB();
 			pull();
 		} catch (IOException e) {
 			displayErrorNotification("Error occured during sync: "
@@ -119,7 +110,7 @@ abstract public class Synchronizer {
 		
 		putRemoteFile(filename, localContents);
 		
-		appInst.removeFile(filename);
+		this.appdb.removeFile(filename);
 	}
 	
 	/**
@@ -128,24 +119,19 @@ abstract public class Synchronizer {
 	 * and downloads them.
 	 */
 	private void pull() throws IOException {
-
-
 		updateNotification(20, "Downloading checksum file");
         String remoteChecksumContents = OrgFile.read(getRemoteFile("checksums.dat"));
 		updateNotification(40);
 
-		HashMap<String, String> remoteChecksums = getChecksums(remoteChecksumContents);
+		HashMap<String, String> remoteChecksums = OrgFileParser.getChecksums(remoteChecksumContents);
 		HashMap<String, String> localChecksums = this.appdb.getFileChecksums();
 		
-
 		ArrayList<String> filesToGet = new ArrayList<String>();
-        Log.d("MobileOrg", "Size of lch : " + localChecksums.size());
 
         for (String key : remoteChecksums.keySet()) {     	
             if (localChecksums.containsKey(key) &&
                 localChecksums.get(key).equals(remoteChecksums.get(key)))
                 continue;
-            Log.d("MobileOrg", "Comparing : " + key + localChecksums.get(key) + " to " + remoteChecksums.get(key));
             filesToGet.add(key);
         }
 
@@ -158,100 +144,25 @@ abstract public class Synchronizer {
 		updateNotification(60, "Downloading index file");
 		String remoteIndexContents = OrgFile.read(getRemoteFile("index.org"));
 		
-        this.appdb.setTodos(getTodosFromIndex(remoteIndexContents));
-        this.appdb.setPriorities(getPrioritiesFromIndex(remoteIndexContents));
-		HashMap<String, String> filenameMap = getFilesFromIndex(remoteIndexContents);
+        this.appdb.setTodos(OrgFileParser.getTodosFromIndex(remoteIndexContents));
+        this.appdb.setPriorities(OrgFileParser.getPrioritiesFromIndex(remoteIndexContents));
+		HashMap<String, String> filenameMap = OrgFileParser.getFilesFromIndex(remoteIndexContents);
+		this.appdb.addOrUpdateFile("index.org", filenameMap.get("index.org"),
+				remoteChecksums.get("index.org"));
         
-        OrgFileParser parser = new OrgFileParser(context, appInst);
+        OrgFileParser parser = new OrgFileParser(this.appdb);
         int i = 0;
         for(String filename: filesToGet) {        	
         	i++;
 			updateNotification(i, "Downloading " + filename, filesToGet.size());
-			appInst.getDB().addOrUpdateFile(filename, filenameMap.get(filename), remoteChecksums.get(filename));
-            parser.parse(filename, getRemoteFile(filename));
+			this.appdb.removeFile(filename);
+			this.appdb.addOrUpdateFile(filename, filenameMap.get(filename), remoteChecksums.get(filename));
+            parser.parse(filename, getRemoteFile(filename), this.appdb);
             // TODO Generate checksum of file and compare to remoteChecksum
         }
 	}
 
-	/**
-	 * Parses the checksum file.
-	 * @return HashMap with Filename->checksum
-	 */
-	private HashMap<String, String> getChecksums(String master) {
-		HashMap<String, String> checksums = new HashMap<String, String>();
-		for (String line : master.split("[\\n\\r]+")) {
-			if (TextUtils.isEmpty(line))
-				continue;
-			String[] chksTuple = line.split("\\s+");
-			if(chksTuple.length >= 2)
-				checksums.put(chksTuple[1], chksTuple[0]);
-		}
-		return checksums;
-	}
-	
-	/**
-	 * Parses the file list from index file.
-	 * @return HashMap with Filename->Filename Alias
-	 */
-	private HashMap<String, String> getFilesFromIndex(String master) {
-		Pattern getOrgFiles = Pattern.compile("\\[file:(.*?)\\]\\[(.*?)\\]\\]");
-		Matcher m = getOrgFiles.matcher(master);
-		HashMap<String, String> allOrgFiles = new HashMap<String, String>();
-		while (m.find()) {
-			allOrgFiles.put(m.group(1), m.group(2));
-		}
 
-		return allOrgFiles;
-	}
-
-
-	private ArrayList<HashMap<String, Boolean>> getTodosFromIndex(String master) {
-		Pattern getTodos = Pattern
-				.compile("#\\+TODO:\\s+([\\s\\w-]*)(\\| ([\\s\\w-]*))*");
-		Matcher m = getTodos.matcher(master);
-		ArrayList<HashMap<String, Boolean>> todoList = new ArrayList<HashMap<String, Boolean>>();
-		while (m.find()) {
-			String lastTodo = "";
-			HashMap<String, Boolean> holding = new HashMap<String, Boolean>();
-			Boolean isDone = false;
-			for (int idx = 1; idx <= m.groupCount(); idx++) {
-				if (m.group(idx) != null && m.group(idx).length() > 0) {
-					if (m.group(idx).indexOf("|") != -1) {
-						isDone = true;
-						continue;
-					}
-					String[] grouping = m.group(idx).split("\\s+");
-					for (String group : grouping) {
-						lastTodo = group.trim();
-						holding.put(group.trim(), isDone);
-					}
-				}
-			}
-			if (!isDone) {
-				holding.put(lastTodo, true);
-			}
-			todoList.add(holding);
-		}
-		return todoList;
-	}
-	
-	private ArrayList<String> getPrioritiesFromIndex(String master) {
-		Pattern getPriorities = Pattern
-				.compile("#\\+ALLPRIORITIES:\\s+([A-Z\\s]*)");
-		Matcher t = getPriorities.matcher(master);
-
-		ArrayList<String> priorities = new ArrayList<String>();
-
-		if (t.find() && t.group(1) != null && t.group(1).length() > 0) {
-			String[] grouping = t.group(1).split("\\s+");
-			for (String group : grouping) {
-				priorities.add(group.trim());
-			}
-		}
-		return priorities;
-	}
-	
-	
 	private NotificationManager notificationManager;
 	private Notification notification;
 	private int notifyRef = 1;
@@ -313,8 +224,6 @@ abstract public class Synchronizer {
 	}
 		
 	public void close() {
-		if (this.appdb != null)
-			this.appdb.close();
 		this.postSynchronize();
 	}
 }

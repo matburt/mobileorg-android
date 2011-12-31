@@ -18,7 +18,7 @@ import android.widget.TextView;
 
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Parsing.MobileOrgApplication;
-import com.matburt.mobileorg.Parsing.Node2;
+import com.matburt.mobileorg.Parsing.NodeWrapper;
 import com.matburt.mobileorg.Parsing.OrgDatabase;
 import com.matburt.mobileorg.Parsing.OrgFile;
 import com.matburt.mobileorg.Synchronizers.Synchronizer;
@@ -32,7 +32,7 @@ public class NodeEditActivity extends Activity {
 	private Spinner priorityView;
 	private Spinner todoStateView;
 	private EditText tagsView;
-	private Node2 node;
+	private NodeWrapper node;
 	private String actionMode;
 
 	private static int EDIT_BODY = 1;
@@ -69,7 +69,7 @@ public class NodeEditActivity extends Activity {
 
 		if(this.actionMode == null) {
 			this.actionMode = ACTIONMODE_CREATE;
-			node = new Node2(null);
+			node = new NodeWrapper(null);
 
 
 			String subject = intent.getStringExtra("android.intent.extra.SUBJECT");
@@ -77,24 +77,24 @@ public class NodeEditActivity extends Activity {
 
 			titleView.setText(subject);
 			payloadView.setText(text);
-			setSpinner(todoStateView, appInst.getTodods(), "");
-			setSpinner(priorityView, appInst.getPriorities(), "");
+			setSpinner(todoStateView, appInst.getDB().getTodos(), "");
+			setSpinner(priorityView, appInst.getDB().getPriorities(), "");
 		}
 		else if (this.actionMode.equals(ACTIONMODE_CREATE)) {
-			node = new Node2(null);
+			node = new NodeWrapper(null);
 		} else if (this.actionMode.equals(ACTIONMODE_EDIT)) {
 			long nodeId = intent.getLongExtra("node_id", 0);
 
 			Cursor cursor = appInst.getDB().getNode(nodeId);
-			node = new Node2(cursor);
+			node = new NodeWrapper(cursor);
 			
 			//titleView.setText(cursor.getString(cursor.getColumnIndex("name")));
 			titleView.setText(node.getName());
 			payloadView.setText(node.getPayload());
 			tagsView.setText(node.getTags());
 
-			setSpinner(todoStateView, appInst.getTodods(), node.getTodo());
-			setSpinner(priorityView, appInst.getPriorities(), node.getPriority());
+			setSpinner(todoStateView, appInst.getDB().getTodos(), node.getTodo());
+			setSpinner(priorityView, appInst.getDB().getPriorities(), node.getPriority());
 		}
 
 	}
