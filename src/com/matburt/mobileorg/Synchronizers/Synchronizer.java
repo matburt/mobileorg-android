@@ -13,6 +13,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.widget.RemoteViews;
 
 import com.matburt.mobileorg.R;
@@ -81,6 +82,7 @@ abstract public class Synchronizer {
 		updateNotification(0, "Synchronizing changes " + OrgFile.CAPTURE_FILE);
 		try {
 			push(OrgFile.CAPTURE_FILE);
+			this.appdb.clearDB(); // TODO Hack, update files properly during sync
 			pull();
 		} catch (IOException e) {
 			displayErrorNotification("Error occured during sync: "
@@ -142,22 +144,23 @@ abstract public class Synchronizer {
 		filesToGet.remove("index.org");
 		updateNotification(60, "Downloading index file");
 		String remoteIndexContents = OrgFile.read(getRemoteFile("index.org"));
-		
+				
         this.appdb.setTodos(OrgFileParser.getTodosFromIndex(remoteIndexContents));
         this.appdb.setPriorities(OrgFileParser.getPrioritiesFromIndex(remoteIndexContents));
 		HashMap<String, String> filenameMap = OrgFileParser.getFilesFromIndex(remoteIndexContents);
 		this.appdb.addOrUpdateFile("index.org", filenameMap.get("index.org"),
-				remoteChecksums.get("index.org"));
+				remoteChecksums.get("index.org"), false);
         
         OrgFileParser parser = new OrgFileParser(this.appdb);
         int i = 0;
         for(String filename: filesToGet) {        	
         	i++;
 			updateNotification(i, "Downloading " + filename, filesToGet.size());
+			Log.d("MobileOrg", "Getting " + filename + "/" + filenameMap.get(filename));
 			this.appdb.removeFile(filename);
-			this.appdb.addOrUpdateFile(filename, filenameMap.get(filename), remoteChecksums.get(filename));
+			this.appdb.addOrUpdateFile(filename, filenameMap.get(filename), remoteChecksums.get(filename), true);
+			// TODO Generate checksum of file and compare to remoteChecksum
             parser.parse(filename, getRemoteFile(filename), this.appdb);
-            // TODO Generate checksum of file and compare to remoteChecksum
         }
 	}
 

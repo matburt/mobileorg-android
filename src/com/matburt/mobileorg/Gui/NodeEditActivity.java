@@ -82,6 +82,11 @@ public class NodeEditActivity extends Activity {
 		}
 		else if (this.actionMode.equals(ACTIONMODE_CREATE)) {
 			node = new NodeWrapper(null);
+
+			titleView.setText("");
+			payloadView.setText("");
+			setSpinner(todoStateView, appInst.getDB().getTodos(), "");
+			setSpinner(priorityView, appInst.getDB().getPriorities(), "");
 		} else if (this.actionMode.equals(ACTIONMODE_EDIT)) {
 			long nodeId = intent.getLongExtra("node_id", 0);
 
@@ -212,7 +217,7 @@ public class NodeEditActivity extends Activity {
 //			node.payload.setContent(newPayload);
 			MobileOrgApplication appInst = (MobileOrgApplication) this.getApplication();
 			OrgDatabase orgDB = appInst.getDB();
-			orgDB.addOrUpdateFile(OrgFile.CAPTURE_FILE, "Captures", "");
+			orgDB.addOrUpdateFile(OrgFile.CAPTURE_FILE, "Captures", "", true);
 			Long parent = orgDB.getFileId(OrgFile.CAPTURE_FILE);
 			orgDB.addNode(parent, newTitle, newTodo, newPriority, null);
 			

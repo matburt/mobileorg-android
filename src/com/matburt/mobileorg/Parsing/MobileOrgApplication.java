@@ -3,7 +3,6 @@ package com.matburt.mobileorg.Parsing;
 import java.util.ArrayList;
 
 import android.app.Application;
-import android.util.Log;
 
 import com.matburt.mobileorg.Services.SyncService;
 
@@ -15,8 +14,6 @@ public class MobileOrgApplication extends Application {
     public void onCreate() {
     	this.appdb = new OrgDatabase(this);
 		init();
-
-		Log.d("MobileOrg", "Reference : " + appdb.fileToString("reference/outlines.org"));
 		SyncService.startAlarm(this);
     }
     

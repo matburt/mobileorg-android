@@ -3,7 +3,6 @@ package com.matburt.mobileorg.Parsing;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.EmptyStackException;
 import java.util.HashMap;
 import java.util.Stack;
 import java.util.regex.Matcher;
@@ -19,29 +18,30 @@ public class OrgFileParser {
 
     private ArrayList<HashMap<String, Integer>> todos = null;
 
+	private static Pattern titlePattern = null;
+	private Stack<Integer> starStack;
+	private Stack<Long> parentIdStack;
+	private StringBuilder payload;
+	
+	Pattern editTitlePattern = Pattern
+			.compile("F\\((edit:.*?)\\) \\[\\[(.*?)\\]\\[(.*?)\\]\\]");
+    
 	public OrgFileParser(OrgDatabase appdb) {
 	}
 
-	private static Pattern titlePattern = null;
-	//private Stack<Node> nodeStack;
-	private Stack<Integer> starStack;
-	private Stack<Long> parentIdStack;
-
-	Pattern editTitlePattern = Pattern
-			.compile("F\\((edit:.*?)\\) \\[\\[(.*?)\\]\\[(.*?)\\]\\]");
 
 	public void parse(String filename, BufferedReader breader, OrgDatabase orgdb) {
 		this.todos = orgdb.getGroupedTodods();
 
-		//this.nodeStack = new Stack<Node>();
 		this.starStack = new Stack<Integer>();
 		this.parentIdStack = new Stack<Long>();
 		
-		Long fileID = orgdb.getFileId(filename);
-		//this.nodeStack.push(fileNode);
 		this.starStack.push(0);
+		Long fileID = orgdb.getFileId(filename);
 		this.parentIdStack.push(fileID);
 
+		this.payload = new StringBuilder();
+		
 		try {
 			String currentLine;
 			int lineLength;
@@ -65,7 +65,8 @@ public class OrgFileParser {
 				if (numstars > 0) {
 					parseHeading(currentLine, numstars, orgdb);
 				} else {
-					//nodeStack.peek().payload.add(currentLine);
+					payload.append(currentLine);
+					payload.append("\n");
 				}
 			}
 
@@ -79,7 +80,6 @@ public class OrgFileParser {
 		for (int idx = 0; idx < lineLength; idx++) {
 			if (thisLine.charAt(idx) != '*')
 				break;
-
 			numstars++;
 		}
 
@@ -90,29 +90,23 @@ public class OrgFileParser {
 	}
     
 	private void parseHeading(String thisLine, int numstars, OrgDatabase orgdb) {
-
-		if (numstars == starStack.peek()) {
-			//nodeStack.pop();
+		
+		orgdb.addNodePayload(this.parentIdStack.peek(), this.payload.toString());
+		this.payload = new StringBuilder();
+		
+		if (numstars == starStack.peek()) { // Node on same level
 			starStack.pop();
 			parentIdStack.pop();
-		} else if (numstars < starStack.peek()) {
+		} else if (numstars < starStack.peek()) { // Node on lower level
 			while (numstars <= starStack.peek()) {
-				//nodeStack.pop();
 				starStack.pop();
 				parentIdStack.pop();
 			}
 		}
         
 		long newId = parseLineIntoNode(thisLine, numstars, orgdb);
-
-        try {
-           // nodeStack.peek().addChild(newNode);
-        } catch (EmptyStackException e) {}
-        
-        //nodeStack.push(newNode);
-        starStack.push(numstars);
         this.parentIdStack.push(newId);
-        
+        starStack.push(numstars);        
     }
     
     private long parseLineIntoNode (String thisLine, int numstars, OrgDatabase orgdb) {

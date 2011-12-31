@@ -78,6 +78,12 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		return db.insert("orgdata", null, values);
 	}
 	
+	public void addNodePayload(Long node_id, final String payload) {
+		ContentValues values = new ContentValues();
+		values.put("payload", payload);
+		db.update("orgdata", values, "_id=?", new String[] {node_id.toString()});
+	}
+	
 	private final static String[] nodeFields = {"_id", "name", "todo", "tags", "priority",
 		"payload", "parent_id"};
 	
@@ -110,6 +116,9 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		Cursor cursor = db.query("files", new String[] { "node_id" },
 				"filename=?", new String[] {filename}, null, null, null);
 		
+		if(cursor.getCount() == 0)
+			return -1;
+		
 		cursor.moveToFirst();
 		return cursor.getInt(cursor.getColumnIndex("node_id"));
 	}
@@ -133,6 +142,9 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		StringBuilder result = new StringBuilder();
 		
 		long file_id = getFileId(filename);
+		
+		if(file_id < 0)
+			return "";
 		
 		Cursor cursor = getNodeChildren(file_id);
 		cursor.moveToFirst();
@@ -256,7 +268,7 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		removeFile(filename);
 	}
 	
-	public void addOrUpdateFile(String filename, String name, String checksum) {
+	public void addOrUpdateFile(String filename, String name, String checksum, boolean includeInOutline) {
 		ContentValues values = new ContentValues();
 		values.put("filename", filename);
 		values.put("name", name);
@@ -267,8 +279,11 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		orgdata.put("todo", "");
 		
 		db.beginTransaction();
-		long id = db.insert("orgdata", null, orgdata);
-		values.put("node_id", id);
+		
+		if(includeInOutline) {
+			long id = db.insert("orgdata", null, orgdata);
+			values.put("node_id", id);
+		}
 		
 		db.delete("files", "filename=? AND name=?", new String[] { filename, name });
 		db.insert("files", null, values);	

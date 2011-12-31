@@ -13,35 +13,58 @@ public class NodeWrapper {
 	
 	public NodeWrapper(Cursor cursor) {
 		this.cursor = cursor;
-		this.cursor.moveToFirst();
+		
+		if(cursor != null)
+			this.cursor.moveToFirst();
 	}
 	
 	public String getName() {
+		if(cursor == null)
+			return "";
+		
 		return cursor.getString(cursor.getColumnIndex("name"));
 	}
 	
 	public String getPayload() {
-		//return cursor.getString(cursor.getColumnIndex("payload"));
-		return "";
+		if(cursor == null)
+			return "";
+		
+		String result = cursor.getString(cursor.getColumnIndex("payload"));
+		
+		if(result == null)
+			return "";
+
+		NodePayload payload = new NodePayload(result);
+		return payload.getContent();
 	}
 	
 	public String getTags() {
+		if(cursor == null)
+			return "";
 		return cursor.getString(cursor.getColumnIndex("tags"));
 	}
 	
 	public String getTodo() {
+		if(cursor == null)
+			return "";
 		return cursor.getString(cursor.getColumnIndex("todo"));
 	}
 	
 	public String getPriority() {
+		if(cursor == null)
+			return "";
 		return cursor.getString(cursor.getColumnIndex("priority"));
 	}
 	
 	public String getNodeId() {
+		if(cursor == null)
+			return "";
 		return cursor.getString(cursor.getColumnIndex("node_id"));
 	}
 	
 	public long getId() {
+		if(cursor == null)
+			return -1;
 		return cursor.getInt(cursor.getColumnIndex("_id"));
 	}
 }
