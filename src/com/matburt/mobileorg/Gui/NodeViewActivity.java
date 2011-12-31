@@ -106,7 +106,7 @@ public class NodeViewActivity extends Activity {
 				.getDefaultSharedPreferences(this).getString(
 						"viewRecursionMax", "0"));
 
-		String text = "";//nodeToHTMLRecursive(node, levelOfRecursion);
+		String text = nodeToHTMLRecursive(new NodeWrapper(node_id, appInst.getDB()), levelOfRecursion);
 		text = convertLinks(text);
 
 		boolean wrapLines = PreferenceManager.getDefaultSharedPreferences(this)
@@ -147,7 +147,7 @@ public class NodeViewActivity extends Activity {
 		result.append("\"> <b>");
 		result.append(node.getName());
 		
-		if(headingLevel == 0 && node.hasChildren())
+		if(headingLevel == 0 && this.appInst.getDB().hasNodeChildren(node_id))
 			result.append("...");
 		
 		result.append("</b></font> <hr />");

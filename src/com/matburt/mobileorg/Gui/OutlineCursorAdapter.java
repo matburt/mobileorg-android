@@ -2,8 +2,6 @@ package com.matburt.mobileorg.Gui;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.graphics.Color;
-import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,8 +23,7 @@ public class OutlineCursorAdapter extends SimpleCursorAdapter {
 	@Override
 	public long getItemId(int position) {
 		cursor.moveToPosition(position);
-		int columnIndex = cursor.getColumnIndex("_id");
-		return cursor.getInt(columnIndex);
+		return cursor.getInt(cursor.getColumnIndex("_id"));
 	}
 
 	@Override
@@ -46,10 +43,10 @@ public class OutlineCursorAdapter extends SimpleCursorAdapter {
 		
 		TextView orgItem = (TextView) v.findViewById(R.id.orgItem);
 		TextView todoState = (TextView) v.findViewById(R.id.todoState);
-		TextView priorityState = (TextView) v.findViewById(R.id.priorityState);
-		LinearLayout tagsLayout = (LinearLayout) v
-				.findViewById(R.id.tagsLayout);
-		TextView dateInfo = (TextView) v.findViewById(R.id.dateInfo);
+//		TextView priorityState = (TextView) v.findViewById(R.id.priorityState);
+//		LinearLayout tagsLayout = (LinearLayout) v
+//				.findViewById(R.id.tagsLayout);
+//		TextView dateInfo = (TextView) v.findViewById(R.id.dateInfo);
 
 		int orgItemNum = c.getColumnIndex("name");
 		orgItem.setText(c.getString(orgItemNum));

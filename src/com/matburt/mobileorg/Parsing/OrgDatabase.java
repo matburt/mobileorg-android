@@ -81,10 +81,17 @@ public class OrgDatabase extends SQLiteOpenHelper {
 	private final static String[] nodeFields = {"_id", "name", "todo", "tags", "priority",
 		"payload", "parent_id"};
 	
-	public Cursor getNodeChildren(Long id) {
+	public Cursor getNodeChildren(Long node_id) {
 		Cursor cursor = db.query("orgdata", nodeFields, "parent_id=?",
-				new String[] { id.toString() }, null, null, null);
+				new String[] { node_id.toString() }, null, null, null);
 		return cursor;
+	}
+	
+	public boolean hasNodeChildren(Long node_id) {
+		if(getNodeChildren(node_id).getCount() > 0)
+			return true;
+		else
+			return false;
 	}
 	
 	public Cursor getNode(Long id) {
@@ -197,6 +204,16 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		db.delete("files", "filename = ?", new String[] { filename });
 	}
 
+	public void removeFile(Long node_id) {
+		Cursor cursor = db.query("files", new String[] { "filename" },
+				"node_id=?", new String[] { node_id.toString() }, null, null,
+				null);
+		cursor.moveToFirst();
+		String filename = cursor.getString(cursor.getColumnIndex("filename"));
+		cursor.close();
+		removeFile(filename);
+	}
+	
 	public void addOrUpdateFile(String filename, String name, String checksum) {
 		ContentValues values = new ContentValues();
 		values.put("filename", filename);

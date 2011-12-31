@@ -6,8 +6,14 @@ public class NodeWrapper {
 
 	private Cursor cursor;
 	
+	public NodeWrapper(long node_id, OrgDatabase db) {
+		this.cursor = db.getNode(node_id);
+		this.cursor.moveToFirst();
+	}
+	
 	public NodeWrapper(Cursor cursor) {
 		this.cursor = cursor;
+		this.cursor.moveToFirst();
 	}
 	
 	public String getName() {
@@ -15,7 +21,8 @@ public class NodeWrapper {
 	}
 	
 	public String getPayload() {
-		return cursor.getString(cursor.getColumnIndex("payload"));
+		//return cursor.getString(cursor.getColumnIndex("payload"));
+		return "";
 	}
 	
 	public String getTags() {
@@ -34,11 +41,7 @@ public class NodeWrapper {
 		return cursor.getString(cursor.getColumnIndex("node_id"));
 	}
 	
-	public boolean hasChildren() {
-		return false;
-	}
-	
-	public Cursor getChildren() {
-		return null;
+	public long getId() {
+		return cursor.getInt(cursor.getColumnIndex("_id"));
 	}
 }

@@ -1,8 +1,10 @@
 package com.matburt.mobileorg.Gui;
 
+import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
@@ -26,16 +28,10 @@ import com.matburt.mobileorg.Synchronizers.Synchronizer;
 
 public class OutlineActivity extends ListActivity
 {
-	private static final int RESULT_DONTPOP = 1337;
+//	private static final int RESULT_DONTPOP = 1337;
 	
 	private MobileOrgApplication appInst;
 
-	/**
-	 * Keeps track of the depth of the tree. This is used to recursively finish
-	 * OutlineActivities, updating the display properly on changes to the
-	 * underlying data structure.
-	 */
-	private int depth;
 	private long node_id;
 	
 	/**
@@ -55,22 +51,9 @@ public class OutlineActivity extends ListActivity
 		this.appInst = (MobileOrgApplication) this.getApplication();
 		
 		Intent intent = getIntent();
-		this.depth = intent.getIntExtra("depth", 1);
-		
 		node_id = intent.getLongExtra("node_id", -1);
-		
-		Cursor cursor;
-		if(node_id >= 0)
-			cursor = appInst.getDB().getNodeChildren(node_id);
-		else
-			cursor = appInst.getDB().getFileCursor();
-		
-		startManagingCursor(cursor);
-		this.outlineAdapter = new OutlineCursorAdapter(this,
-				cursor);
-		this.setListAdapter(outlineAdapter);
-		
-		if(this.depth == 1) {
+
+		if(this.node_id == -1) {
 			if(this.appInst.getDB().getFiles().isEmpty())
                 this.showWizard();
 		}
@@ -80,6 +63,8 @@ public class OutlineActivity extends ListActivity
 		this.syncReceiver = new SynchServiceReceiver();
 		registerReceiver(this.syncReceiver, new IntentFilter(
 				Synchronizer.SYNC_UPDATE));
+		
+		refreshDisplay();
 	}
 	
 	@Override
@@ -93,21 +78,17 @@ public class OutlineActivity extends ListActivity
 	 * data has been updated.
 	 */
 	private void refreshDisplay() {
-		// If this is the case, the parser/syncer has invalidated nodes
-//		if (this.depth != 1 && this.depth > this.appInst.nodestackSize()) {
-//			this.setResult(RESULT_DONTPOP);
-//			finish();
-//		}
+		Cursor cursor;
+		if (node_id >= 0)
+			cursor = appInst.getDB().getNodeChildren(node_id);
+		else
+			cursor = appInst.getDB().getFileCursor();
 
-		outlineAdapter.notifyDataSetChanged();
-//		Cursor cursor;
-//		if(node_id >= 0)
-//			cursor = appInst.getDB().getNodeChildren(node_id);
-//		else
-//			cursor = appInst.getDB().getFileCursor();
-//		cursor.moveToFirst();
-//		this.outlineAdapter.changeCursor(cursor);
-		getListView().setSelection(lastSelection);
+		startManagingCursor(cursor);
+		this.outlineAdapter = new OutlineCursorAdapter(this, cursor);
+		this.setListAdapter(outlineAdapter);
+
+		getListView().setSelection(this.lastSelection);
 	}
 
 	@Override
@@ -145,7 +126,7 @@ public class OutlineActivity extends ListActivity
 		inflater.inflate(R.menu.outline_contextmenu, menu);
 
 		// Prevents editing of file nodes.
-		if (this.depth == 1) {
+		if (this.node_id == -1) {
 			menu.findItem(R.id.contextmenu_edit).setVisible(false);
 		} else {
 			menu.findItem(R.id.contextmenu_delete).setVisible(false);
@@ -157,19 +138,19 @@ public class OutlineActivity extends ListActivity
 		AdapterContextMenuInfo info = (AdapterContextMenuInfo) item
 				.getMenuInfo();
 		
-		long itemId = getListAdapter().getItemId(info.position);
+		long node_id = getListAdapter().getItemId(info.position);
 
 		switch (item.getItemId()) {
 		case R.id.contextmenu_view:
-			runViewNodeActivity(itemId);
+			runViewNodeActivity(node_id);
 			break;
 
 		case R.id.contextmenu_edit:
-			runEditNodeActivity(itemId);
+			runEditNodeActivity(node_id);
 			break;
 			
 		case R.id.contextmenu_delete:
-			runDeleteNode(itemId);
+			runDeleteNode(node_id);
 			break;
 		}
 
@@ -178,24 +159,14 @@ public class OutlineActivity extends ListActivity
 
 	@Override
 	public void onListItemClick(ListView l, View v, int position, long id) {
-		Long name = l.getItemIdAtPosition(position);
+		Long node_id = l.getItemIdAtPosition(position);
 
-		runExpandSelection(name);
-		//		Node node = (Node) l.getItemAtPosition(position);
-//
-//		if(node.encrypted) {
-//			runDecryptAndExpandNode(node);
-//			return;
-//		}
-//		else
-//			appInst.makeSureNodeIsParsed(node);
-//
-//		this.lastSelection = position;
-//		
-//		if (node.hasChildren())
-//			runExpandSelection(node);
-//		else
-//			runViewNodeActivity(node);
+		this.lastSelection = position;
+		
+		if (this.appInst.getDB().hasNodeChildren(node_id))
+			runExpandSelection(node_id);
+		else
+			runViewNodeActivity(node_id);
 	}
 
     private void showWizard() {
@@ -229,29 +200,27 @@ public class OutlineActivity extends ListActivity
 
 	private void runExpandSelection(long id) {
 		Intent intent = new Intent(this, OutlineActivity.class);
-		int childDepth = this.depth + 1;
-		intent.putExtra("depth", childDepth);
 		intent.putExtra("node_id", id);
 		startActivity(intent);
 	}
 	
-	private void runDeleteNode(final long nodeId) {
-//		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-//		builder.setMessage("Are you sure you want to delete " + node.name + "?")
-//				.setCancelable(false)
-//				.setPositiveButton("Yes",
-//						new DialogInterface.OnClickListener() {
-//							public void onClick(DialogInterface dialog, int id) {
-//								appInst.removeFile(node.name);
-//								refreshDisplay();
-//							}
-//						})
-//				.setNegativeButton("No", new DialogInterface.OnClickListener() {
-//					public void onClick(DialogInterface dialog, int id) {
-//						dialog.cancel();
-//					}
-//				});
-//		builder.create().show();
+	private void runDeleteNode(final long node_id) {	
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setMessage("Are you sure you want to delete?")
+				.setCancelable(false)
+				.setPositiveButton("Yes",
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int id) {
+								appInst.getDB().removeFile(node_id);
+								refreshDisplay();
+							}
+						})
+				.setNegativeButton("No", new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						dialog.cancel();
+					}
+				});
+		builder.create().show();
 	}
 	
 	private boolean runShowSettings() {
