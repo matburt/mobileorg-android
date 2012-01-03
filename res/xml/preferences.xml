@@ -58,7 +58,7 @@
         </PreferenceScreen>
         <PreferenceScreen
             android:key="VersionDisp"
-            android:summary="0.6.2"
+            android:summary="0.7.0"
             android:title="Version" >
         </PreferenceScreen>
     </PreferenceCategory>
