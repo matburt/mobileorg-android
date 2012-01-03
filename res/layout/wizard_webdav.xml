@@ -30,7 +30,7 @@
               android:text="@string/username"
               android:textSize="20dp"/>
            <EditText
-              android:id="@+id/wizard_username"
+              android:id="@+id/wizard_webdav_username"
               android:layout_width="fill_parent"
               android:layout_height="wrap_content"
               android:textSize="20dp"
@@ -60,14 +60,14 @@
               android:layout_width="fill_parent"
               android:layout_height="wrap_content"
               android:textSize="20dp"
-              android:password="true"
-              android:singleLine="true" android:inputType="textUri|textPassword"/>
+              android:singleLine="true"
+              android:inputType="textUri"/>
            <Button
               android:layout_marginTop="20dp"
               android:id="@+id/wizard_webdav_login_button"
               android:layout_width="wrap_content"
               android:layout_height="wrap_content"
-              android:text="@string/login"
+              android:text="@string/login_webdav"
               android:textSize="20dp"/>
               </LinearLayout>
            <View
@@ -75,6 +75,6 @@
                android:layout_height="1dp"
                android:layout_weight="1.0" 
               />
-              <include layout="@layout/wizard_navbar"/>
+              <include layout="@layout/wizard_navbar_last"/>
         </LinearLayout>
 </ScrollView>

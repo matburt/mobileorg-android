@@ -30,7 +30,7 @@ import org.apache.http.params.HttpParams;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
-
+import android.util.Log;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Parsing.MobileOrgApplication;
 import com.matburt.mobileorg.Parsing.OrgFile;
@@ -55,6 +55,38 @@ public class WebDAVSynchronizer extends Synchronizer {
 		this.username = sharedPreferences.getString("webUser", "");
 		this.password = sharedPreferences.getString("webPass", "");
 	}
+
+    public String testConnection(String url, String user, String pass) {
+        this.remoteIndexPath = url;
+        this.remotePath = getRootUrl();
+        this.username = user;
+        this.password = pass;
+
+        if (!this.isConfigured()) {
+            Log.i("MobileOrg", "Test Connection Failed for not being configured");
+            return "Invalid URL must match: 'http://url.com/path/index.org'";
+        }
+
+        try {
+            DefaultHttpClient dhc = this.createConnection();
+            if (dhc == null) {
+                Log.i("MobileOrg", "Test Connection is null");
+                return "Connection could not be established";
+            }
+
+            Log.i("MobileOrg", "Test Path: " + this.remoteIndexPath);
+            InputStream mainFile = this.getUrlStream(this.remoteIndexPath, dhc);
+
+            if (mainFile == null) {
+                return "File '" + this.remoteIndexPath + "' doesn't appear to exist";
+            }
+        }
+        catch (Exception e) {
+            Log.i("MobileOrg", "Test Exception: " + e.getMessage());
+            return "Test Exception: " + e.getMessage();
+        }
+        return null;
+    }
 
 	public boolean isConfigured() {
 		if (this.remoteIndexPath.equals(""))

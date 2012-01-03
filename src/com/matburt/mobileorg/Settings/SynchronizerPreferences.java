@@ -55,8 +55,6 @@ public class SynchronizerPreferences extends Preference {
         view.setGravity(Gravity.LEFT);
         view.setLayoutParams(params1);
 
-        //NOTE: Need a way to dynamically pick a preferences activity based on the
-        //synchro mode selected, replace with a plugin architecture
         this.setOnPreferenceClickListener(new OnPreferenceClickListener() {
                 public boolean onPreferenceClick(Preference arg0) {
                     SharedPreferences appSettings = PreferenceManager.getDefaultSharedPreferences(getContext());

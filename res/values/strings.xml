@@ -60,6 +60,7 @@
   <string name="username">Username</string>
   <string name="password">Password</string>
   <string name="login">Log in</string>
+  <string name="login_webdav">Check Login</string>
   <string name="i_want_to_sync_using">I want to sync using:</string>
   <string name="wizard_webdav">a WebDAV server</string>
   <string name="wizard_dropbox">a Dropbox account</string>

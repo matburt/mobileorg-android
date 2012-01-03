@@ -122,8 +122,8 @@ public class PageFlipView extends HorizontalScrollView
 		break;
 	case LAST_PAGE:
 		setButtonState(prevButton,state,previousPageButtonListener);
-		Button done=(Button) pageContainer.findViewById(R.id.wizard_done_button);
-		done.setEnabled(false);
+		//Button done=(Button) pageContainer.findViewById(R.id.wizard_done_button);
+		//done.setEnabled(false);
 		break;
 	}
     }
