@@ -33,11 +33,15 @@ public class OrgFileParser {
 	private int nameColumn;
 	private int todoColumn;
 	private int priorityColumn;
-	private int payloadColumn;
+//	private int payloadColumn;
 	private int parentColumn;
+//	private int idColumn;
+	private OrgDatabase orgdb;
 	
 	public void parse(String filename, BufferedReader breader, OrgDatabase orgdb) {
 		this.todos = orgdb.getGroupedTodods();
+		
+		this.orgdb = orgdb;
 
 		this.starStack = new Stack<Integer>();
 		this.parentIdStack = new Stack<Long>();
@@ -52,8 +56,9 @@ public class OrgFileParser {
 		nameColumn = ih.getColumnIndex("name");
 		todoColumn = ih.getColumnIndex("todo");
 		priorityColumn = ih.getColumnIndex("priority");
-		payloadColumn = ih.getColumnIndex("payload");
+//		payloadColumn = ih.getColumnIndex("payload");
 		parentColumn = ih.getColumnIndex("parent_id");
+//		idColumn = ih.getColumnIndex("_id");
 		
 		orgdb.getDB().beginTransaction();
 		
@@ -98,10 +103,11 @@ public class OrgFileParser {
 	}
     
 	private void parseHeading(String thisLine, int numstars, InsertHelper ih) {
-		//orgdb.addNodePayload(this.parentIdStack.peek(), this.payload.toString());
-		ih.prepareForInsert();
-		ih.bind(payloadColumn, this.payload.toString());
-		ih.execute();
+		orgdb.addNodePayload(this.parentIdStack.peek(), this.payload.toString());
+//		ih.prepareForInsert();
+//		ih.bind(idColumn, this.parentIdStack.peek());
+//		ih.bind(payloadColumn, this.payload.toString());
+//		ih.execute();
 		
 		this.payload = new StringBuilder();
 		
@@ -157,7 +163,6 @@ public class OrgFileParser {
 			name = heading;
 		}
     	
-        //Long nodeId = orgdb.addNode(this.parentIdStack.peek(), name, todo, priority, null);
 		ih.prepareForInsert();
 		ih.bind(nameColumn, name);
 		ih.bind(todoColumn, todo);

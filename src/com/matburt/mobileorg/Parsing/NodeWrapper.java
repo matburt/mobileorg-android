@@ -8,7 +8,6 @@ public class NodeWrapper {
 	
 	public NodeWrapper(long node_id, OrgDatabase db) {
 		this.cursor = db.getNode(node_id);
-		this.cursor.moveToFirst();
 	}
 	
 	public NodeWrapper(Cursor cursor) {
@@ -26,11 +25,11 @@ public class NodeWrapper {
 	}
 	
 	public String getPayload() {
-		if(cursor == null)
+		if(this.cursor == null)
 			return "";
 		
 		String result = cursor.getString(cursor.getColumnIndex("payload"));
-		
+
 		if(result == null)
 			return "";
 

@@ -8,6 +8,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.database.sqlite.SQLiteStatement;
 
 public class OrgDatabase extends SQLiteOpenHelper {
 	private static final String DATABASE_NAME = "MobileOrg";
@@ -82,10 +83,18 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		return db.insert("orgdata", null, values);
 	}
 	
+	SQLiteStatement addPayload;
+	
 	public void addNodePayload(Long node_id, final String payload) {
-		ContentValues values = new ContentValues();
-		values.put("payload", payload);
-		db.update("orgdata", values, "_id=?", new String[] {node_id.toString()});
+		if(addPayload == null)
+			addPayload = this.db.compileStatement("UPDATE orgdata SET payload=? WHERE _id=?");
+		
+		addPayload.bindString(1, payload);
+		addPayload.bindLong(2, node_id);
+		addPayload.execute();
+//		ContentValues values = new ContentValues();
+//		values.put("payload", payload);
+//		db.update("orgdata", values, "_id=?", new String[] {node_id.toString()});
 	}
 	
 	private final static String[] nodeFields = {"_id", "name", "todo", "tags", "priority",
