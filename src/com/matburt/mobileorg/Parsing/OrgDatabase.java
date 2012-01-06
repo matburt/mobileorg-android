@@ -6,6 +6,7 @@ import java.util.HashMap;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.DatabaseUtils.InsertHelper;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
@@ -14,8 +15,22 @@ public class OrgDatabase extends SQLiteOpenHelper {
 	private static final String DATABASE_NAME = "MobileOrg";
 	private static final int DATABASE_VERSION = 12;
 	
+	private final static String[] nodeFields = {"_id", "name", "todo", "tags", "priority",
+		"payload", "parent_id"};
+	
+	@SuppressWarnings("unused")
+	private int orgdata_idColumn;
+	private int orgdata_nameColumn;
+	private int orgdata_todoColumn;
+	private int orgdata_tagsColumn;
+	private int orgdata_priorityColumn;
+	@SuppressWarnings("unused")
+	private int orgdata_payloadColumn;
+	private int orgdata_parentidColumn;
+	
 	private Context context;
 	private SQLiteDatabase db;
+	private InsertHelper orgdataInsertHelper;
 
 	public OrgDatabase(Context context) {
 		super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -60,16 +75,18 @@ public class OrgDatabase extends SQLiteOpenHelper {
 				+ "todo text,"
 				+ "tags text,"
 				+ "payload text,"
-				+ "name text)");	
+				+ "name text)");
 	}
-	
-	public long addNode(Long parentid, String name, String todo, String priority, ArrayList<String> tags) {
-		ContentValues values = new ContentValues();
-		values.put("name", name);
-		values.put("todo", todo);
-		values.put("priority", priority);
-		values.put("parent_id", parentid);
-		
+
+	public long addNode(Long parentid, String name, String todo,
+			String priority, ArrayList<String> tags) {
+		prepareOrgdataInsert();
+
+		orgdataInsertHelper.bind(orgdata_parentidColumn, parentid);
+		orgdataInsertHelper.bind(orgdata_nameColumn, name);
+		orgdataInsertHelper.bind(orgdata_todoColumn, todo);
+		orgdataInsertHelper.bind(orgdata_priorityColumn, priority);
+
 		if (tags != null) {
 			StringBuilder tagString = new StringBuilder();
 			for (String tag : tags) {
@@ -77,11 +94,25 @@ public class OrgDatabase extends SQLiteOpenHelper {
 				tagString.append(tag);
 			}
 			tagString.deleteCharAt(0);
-			values.put("tags", tagString.toString());
+			orgdataInsertHelper.bind(orgdata_tagsColumn, tagString.toString());
 		}
 		
-		return db.insert("orgdata", null, values);
+		return orgdataInsertHelper.execute();
 	}
+
+	private void prepareOrgdataInsert() {
+		if(this.orgdataInsertHelper == null) {
+			this.orgdataInsertHelper = new InsertHelper(db, "orgdata");
+			this.orgdata_idColumn = orgdataInsertHelper.getColumnIndex("_id");
+			this.orgdata_nameColumn = orgdataInsertHelper.getColumnIndex("name");
+			this.orgdata_todoColumn = orgdataInsertHelper.getColumnIndex("todo");
+			this.orgdata_priorityColumn = orgdataInsertHelper.getColumnIndex("priority");
+			this.orgdata_payloadColumn = orgdataInsertHelper.getColumnIndex("payload");
+			this.orgdata_parentidColumn = orgdataInsertHelper.getColumnIndex("parent_id");
+		}
+		orgdataInsertHelper.prepareForInsert();
+	}
+
 	
 	SQLiteStatement addPayload;
 	
@@ -96,9 +127,7 @@ public class OrgDatabase extends SQLiteOpenHelper {
 //		values.put("payload", payload);
 //		db.update("orgdata", values, "_id=?", new String[] {node_id.toString()});
 	}
-	
-	private final static String[] nodeFields = {"_id", "name", "todo", "tags", "priority",
-		"payload", "parent_id"};
+
 	
 	public Cursor getNodeChildren(Long node_id) {
 		Cursor cursor = db.query("orgdata", nodeFields, "parent_id=?",
@@ -133,7 +162,7 @@ public class OrgDatabase extends SQLiteOpenHelper {
 			return -1;
 		
 		cursor.moveToFirst();
-		return cursor.getInt(cursor.getColumnIndex("node_id"));
+		return cursor.getInt(0);
 	}
 	
 	public void addEdit(String edittype, String nodeId, String nodeTitle,
@@ -146,7 +175,6 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		values.put("old_value", oldValue);
 		values.put("new_value", newValue);
 		
-		SQLiteDatabase db = this.getWritableDatabase();
 		db.insert("edits", null, values);
 	}
 

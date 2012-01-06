@@ -8,7 +8,6 @@ import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import android.database.DatabaseUtils.InsertHelper;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -30,18 +29,9 @@ public class OrgFileParser {
 	public OrgFileParser(OrgDatabase appdb) {
 	}
 
-	private int nameColumn;
-	private int todoColumn;
-	private int priorityColumn;
-//	private int payloadColumn;
-	private int parentColumn;
-//	private int idColumn;
-	private OrgDatabase orgdb;
 	
 	public void parse(String filename, BufferedReader breader, OrgDatabase orgdb) {
 		this.todos = orgdb.getGroupedTodods();
-		
-		this.orgdb = orgdb;
 
 		this.starStack = new Stack<Integer>();
 		this.parentIdStack = new Stack<Long>();
@@ -51,14 +41,6 @@ public class OrgFileParser {
 		this.parentIdStack.push(fileID);
 
 		this.payload = new StringBuilder();
-		
-		InsertHelper ih = new InsertHelper(orgdb.getDB(), "orgdata");
-		nameColumn = ih.getColumnIndex("name");
-		todoColumn = ih.getColumnIndex("todo");
-		priorityColumn = ih.getColumnIndex("priority");
-//		payloadColumn = ih.getColumnIndex("payload");
-		parentColumn = ih.getColumnIndex("parent_id");
-//		idColumn = ih.getColumnIndex("_id");
 		
 		orgdb.getDB().beginTransaction();
 		
@@ -73,7 +55,7 @@ public class OrgFileParser {
 				int lineLength = currentLine.length();
 				int numstars = numberOfStars(currentLine, lineLength);
 				if (numstars > 0) {
-					parseHeading(currentLine, numstars, ih);
+					parseHeading(currentLine, numstars, orgdb);
 				} else {
 					payload.append(currentLine);
 					payload.append("\n");
@@ -102,12 +84,8 @@ public class OrgFileParser {
 		return numstars;
 	}
     
-	private void parseHeading(String thisLine, int numstars, InsertHelper ih) {
+	private void parseHeading(String thisLine, int numstars, OrgDatabase orgdb) {
 		orgdb.addNodePayload(this.parentIdStack.peek(), this.payload.toString());
-//		ih.prepareForInsert();
-//		ih.bind(idColumn, this.parentIdStack.peek());
-//		ih.bind(payloadColumn, this.payload.toString());
-//		ih.execute();
 		
 		this.payload = new StringBuilder();
 		
@@ -121,12 +99,12 @@ public class OrgFileParser {
 			}
 		}
         
-		long newId = parseLineIntoNode(thisLine, numstars, ih);
+		long newId = parseLineIntoNode(thisLine, numstars, orgdb);
         this.parentIdStack.push(newId);
         starStack.push(numstars);        
     }
     
-    private long parseLineIntoNode (String thisLine, int numstars, InsertHelper ih) {
+    private long parseLineIntoNode (String thisLine, int numstars, OrgDatabase orgdb) {
     	String heading = stripHeading(thisLine, numstars).trim();
     	
         String name = "";
@@ -163,12 +141,7 @@ public class OrgFileParser {
 			name = heading;
 		}
     	
-		ih.prepareForInsert();
-		ih.bind(nameColumn, name);
-		ih.bind(todoColumn, todo);
-		ih.bind(priorityColumn, priority);
-		ih.bind(parentColumn, this.parentIdStack.peek());
-		long nodeId = ih.execute();
+		long nodeId = orgdb.addNode(this.parentIdStack.peek(), name, todo, priority, null);
     	return nodeId;
     }
 
