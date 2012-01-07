@@ -1,5 +1,7 @@
 package com.matburt.mobileorg.Parsing;
 
+import java.util.ArrayList;
+
 import android.database.Cursor;
 
 public class NodeWrapper {
@@ -12,9 +14,6 @@ public class NodeWrapper {
 	
 	public NodeWrapper(Cursor cursor) {
 		this.cursor = cursor;
-		
-		if(cursor != null)
-			this.cursor.moveToFirst();
 	}
 	
 	public String getName() {
@@ -22,6 +21,23 @@ public class NodeWrapper {
 			return "";
 		
 		return cursor.getString(cursor.getColumnIndex("name"));
+	}
+	
+	public ArrayList<NodeWrapper> getChildren(OrgDatabase db) {
+		ArrayList<NodeWrapper> result = new ArrayList<NodeWrapper>();
+		
+		if(!db.hasNodeChildren(this.getId()))
+			return result;
+		
+		Cursor nodeChildren = db.getNodeChildren(this.getId());
+		nodeChildren.moveToFirst();
+		
+		while(nodeChildren.isAfterLast() == false) {
+			result.add(new NodeWrapper(nodeChildren));
+			nodeChildren.moveToNext();
+		}
+		
+		return result;
 	}
 	
 	public String getPayload() {

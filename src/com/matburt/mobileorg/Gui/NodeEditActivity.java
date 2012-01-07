@@ -91,6 +91,7 @@ public class NodeEditActivity extends Activity {
 			long nodeId = intent.getLongExtra("node_id", 0);
 
 			Cursor cursor = appInst.getDB().getNode(nodeId);
+			cursor.moveToFirst();
 			node = new NodeWrapper(cursor);
 			
 			//titleView.setText(cursor.getString(cursor.getColumnIndex("name")));
