@@ -75,6 +75,8 @@ public class SyncService extends Service implements
 			synchronizer = new DropboxSynchronizer(this, this.appInst);
 		else if (syncSource.equals("scp"))
 			synchronizer = new SSHSynchronizer(this, this.appInst);
+        else if (syncSource.equals("none"))
+            synchronizer = new NullSynchronizer(this, this.appInst);
 		else
 			return;
 
