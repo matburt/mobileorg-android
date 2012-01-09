@@ -13,13 +13,13 @@
         <item>WebDAV</item>
         <item>Dropbox</item>
         <item>SDCard</item>
-        <item>SSH</item>
+<!--        <item>SSH</item> -->
     </string-array>
     <string-array name="fileSourcesVals">
         <item>webdav</item>
         <item>dropbox</item>
         <item>sdcard</item>
-        <item>scp</item>
+<!--        <item>scp</item> -->
     </string-array>
     <string-array name="syncIntervals">
         <item>5 min</item>
