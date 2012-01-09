@@ -1,5 +1,4 @@
 package com.matburt.mobileorg.Settings;
-import java.util.HashMap;
 
 import android.content.Context;
 import android.content.Intent;
@@ -14,18 +13,18 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-public class SynchronizerPreferences extends Preference {
-    
-    public static HashMap<String,Intent> syncIntents = new HashMap<String,Intent>();
-    public SynchronizerPreferences(Context context) {
+import com.matburt.mobileorg.Settings.WizardActivity;
+
+public class WizardPreferences extends Preference {
+    public WizardPreferences(Context context) {
         super(context);
     }
     
-    public SynchronizerPreferences(Context context, AttributeSet attrs) {
+    public WizardPreferences(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
     
-    public SynchronizerPreferences(Context context, AttributeSet attrs, int defStyle) {
+    public WizardPreferences(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
     }
     
@@ -36,26 +35,21 @@ public class SynchronizerPreferences extends Preference {
         LinearLayout.LayoutParams params1 = new LinearLayout.LayoutParams(
                               LinearLayout.LayoutParams.WRAP_CONTENT,
                               LinearLayout.LayoutParams.WRAP_CONTENT);
+        //params1.gravity = Gravity.LEFT;
         params1.weight  = 1.0f;
         layout.setPadding(20, 10, 10, 10);
         layout.setOrientation(LinearLayout.HORIZONTAL);
         TextView view = new TextView(getContext());
-        view.setText("Configure Synchronizer Settings");
-        view.setLayoutParams(params1);
+        view.setText("Re-run Setup Wizard");
+        // view.setTextSize(18);
+        // view.setTypeface(Typeface.SANS_SERIF, Typeface.BOLD);
         view.setTextAppearance(getContext(), android.R.style.TextAppearance_Large);
+        //view.setGravity(Gravity.LEFT);
+        view.setLayoutParams(params1);
+
         this.setOnPreferenceClickListener(new OnPreferenceClickListener() {
                 public boolean onPreferenceClick(Preference arg0) {
-                    SharedPreferences appSettings = PreferenceManager.getDefaultSharedPreferences(getContext());
-                    String synchroMode = appSettings.getString("syncSource","");
-                    if(syncIntents.containsKey(synchroMode))
-                    {
-                    
-                        getContext().startActivity(syncIntents.get(synchroMode));
-                    }
-                    else {
-                        //throw new ReportableError(R.string.error_synchronizer_type_unknown,
-                        //                          synchroMode);
-                    }
+                    getContext().startActivity(new Intent(getContext(), WizardActivity.class));
                     return true;
                 }
             });

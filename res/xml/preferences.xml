@@ -1,66 +1,67 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
-
-    <PreferenceCategory android:title="Synchronization" >
-        <ListPreference
-            android:defaultValue="webdav"
-            android:entries="@array/fileSources"
-            android:entryValues="@array/fileSourcesVals"
-            android:key="syncSource"
-            android:summary="Where to sync Org files from"
-            android:title="Synchronization Mode" />
-
-        <com.matburt.mobileorg.Settings.SynchronizerPreferences
-            android:defaultValue="32"
-            android:key="syncPref"
-            android:title="Custom Preference" />
-
-        <CheckBoxPreference
-            android:key="doAutoSync"
-            android:summary="@string/summary_do_auto_sync"
-            android:title="@string/title_do_auto_sync" />
-
-        <ListPreference
-            android:dependency="doAutoSync"
-            android:entries="@array/syncIntervals"
-            android:entryValues="@array/syncIntervalsVals"
-            android:key="autoSyncInterval"
-            android:summary="@string/summary_auto_sync_interval"
-            android:title="@string/title_auto_sync_interval" />
-    </PreferenceCategory>
-    <PreferenceCategory android:title="Viewing" >
-        <CheckBoxPreference
-            android:key="viewWrapLines"
-            android:summary="@string/summary_view_wrap_lines"
-            android:title="@string/title_view_wrap_lines" />
-        <ListPreference
-            android:defaultValue="0"
-            android:entries="@array/viewRecursionLevels"
-            android:entryValues="@array/viewRecursionLevelsVals"
-            android:key="viewRecursionMax"
-            android:summary="How many levels of child nodes to display on view"
-            android:title="Recursion Level" />
-    </PreferenceCategory>
-    <PreferenceCategory android:title="Storage" >
-        <ListPreference
-            android:defaultValue="internal"
-            android:entries="@array/storageModes"
-            android:entryValues="@array/storageModesVals"
-            android:key="storageMode"
-            android:summary="Where to store the org files"
-            android:title="Storage Mode" />
-    </PreferenceCategory>
-    <PreferenceCategory android:title="Other" >
-        <PreferenceScreen
-            android:key="Widget"
-            android:summary="Preferences for a Widget"
-            android:title="Widget Preferences" >
-        </PreferenceScreen>
-        <PreferenceScreen
-            android:key="VersionDisp"
-            android:summary="0.7.0"
-            android:title="Version" >
-        </PreferenceScreen>
-    </PreferenceCategory>
-
+  <PreferenceCategory android:title="Synchronization" >
+    <com.matburt.mobileorg.Settings.WizardPreferences
+        android:key="wizardPref"
+        android:title="Wizard Preference"/>
+    <ListPreference
+        android:defaultValue="webdav"
+        android:entries="@array/fileSources"
+        android:entryValues="@array/fileSourcesVals"
+        android:key="syncSource"
+        android:summary="Where to sync Org files from"
+        android:title="Synchronization Mode" />
+    
+    <com.matburt.mobileorg.Settings.SynchronizerPreferences
+        android:defaultValue="32"
+        android:key="syncPref"
+        android:title="Custom Preference" />
+    
+    <CheckBoxPreference
+        android:key="doAutoSync"
+        android:summary="@string/summary_do_auto_sync"
+        android:title="@string/title_do_auto_sync" />
+    
+    <ListPreference
+        android:dependency="doAutoSync"
+        android:entries="@array/syncIntervals"
+        android:entryValues="@array/syncIntervalsVals"
+        android:key="autoSyncInterval"
+        android:summary="@string/summary_auto_sync_interval"
+        android:title="@string/title_auto_sync_interval" />
+  </PreferenceCategory>
+  <PreferenceCategory android:title="Viewing" >
+    <CheckBoxPreference
+        android:key="viewWrapLines"
+        android:summary="@string/summary_view_wrap_lines"
+        android:title="@string/title_view_wrap_lines" />
+    <ListPreference
+        android:defaultValue="0"
+        android:entries="@array/viewRecursionLevels"
+        android:entryValues="@array/viewRecursionLevelsVals"
+        android:key="viewRecursionMax"
+        android:summary="How many levels of child nodes to display on view"
+        android:title="Recursion Level" />
+  </PreferenceCategory>
+  <PreferenceCategory android:title="Storage" >
+    <ListPreference
+        android:defaultValue="internal"
+        android:entries="@array/storageModes"
+        android:entryValues="@array/storageModesVals"
+        android:key="storageMode"
+        android:summary="Where to store the org files"
+        android:title="Storage Mode" />
+  </PreferenceCategory>
+  <PreferenceCategory android:title="Other" >
+    <PreferenceScreen
+        android:key="Widget"
+        android:summary="Preferences for a Widget"
+        android:title="Widget Preferences" >
+    </PreferenceScreen>
+    <PreferenceScreen
+        android:key="VersionDisp"
+        android:summary="0.7.0"
+        android:title="Version" >
+    </PreferenceScreen>
+  </PreferenceCategory>
 </PreferenceScreen>
