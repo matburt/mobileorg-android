@@ -147,6 +147,27 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		cursor.moveToFirst();
 		return cursor;
 	}
+	
+	public Cursor search(String query) {
+		Cursor cursor = db.query("orgdata", nodeFields, null, null, null, null, null);
+		
+		cursor.moveToFirst();
+		return cursor;
+	}
+	
+	public long getFileId(String filename) {
+		Cursor cursor = db.query("files", new String[] { "node_id" },
+				"filename=?", new String[] {filename}, null, null, null);
+		
+		if(cursor.getCount() == 0)
+			return -1;
+		
+		cursor.moveToFirst();
+		return cursor.getInt(0);
+	}
+	
+	public void addEdit(String edittype, String nodeId, String nodeTitle,
+			String oldValue, String newValue) {
 
 	public Cursor getFileCursor() {
 		// This gets all of the org file nodes

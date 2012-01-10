@@ -114,6 +114,9 @@ public class OutlineActivity extends ListActivity
 		
 		case R.id.menu_capture:
 			return runEditNewNodeActivity();
+			
+		case R.id.menu_search:
+			return runSearch();
 		}
 		return false;
 	}
@@ -221,6 +224,10 @@ public class OutlineActivity extends ListActivity
 					}
 				});
 		builder.create().show();
+	}
+
+	private boolean runSearch() {
+		return onSearchRequested();
 	}
 	
 	private boolean runShowSettings() {
