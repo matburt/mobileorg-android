@@ -51,6 +51,10 @@
         android:key="storageMode"
         android:summary="Where to store the org files"
         android:title="Storage Mode" />
+    <CheckBoxPreference
+        android:key="captureWithTimestamp"
+        android:summary="@string/summary_capture_with_timestamp"
+        android:title="@string/title_capture_with_timestamp" />
   </PreferenceCategory>
   <PreferenceCategory android:title="Other" >
     <PreferenceScreen

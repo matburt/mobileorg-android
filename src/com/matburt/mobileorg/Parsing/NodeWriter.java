@@ -2,9 +2,12 @@ package com.matburt.mobileorg.Parsing;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import android.app.Activity;
 import android.content.Context;
+import android.preference.PreferenceManager;
 
 
 public class NodeWriter {
@@ -55,9 +58,20 @@ public class NodeWriter {
 		writeNode(editNode.toString());
 	}
 	
+	private String addTimestamp(String message) {
+		SimpleDateFormat sdf = new SimpleDateFormat("[yyyy-MM-dd EEE HH:mm]");		
+		return message + sdf.format(new Date()) + "\n";
+	}
+	
 	private void writeNode(String message) throws IOException {
 		OrgFile orgfile = new OrgFile(OrgFile.CAPTURE_FILE, context);
 		BufferedWriter writer = orgfile.getWriter(true);
+		
+		boolean addTimestamp = PreferenceManager.getDefaultSharedPreferences(
+				this.context).getBoolean("captureWithTimestamp", false);
+		if(addTimestamp)
+			message = addTimestamp(message);
+		
 		writer.append(message);
 		writer.close();
 	
