@@ -2,8 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     android:installLocation="auto"
     package="com.matburt.mobileorg"
-    android:versionCode="71"
-    android:versionName="0.7.1" >
+    android:versionCode="72"
+    android:versionName="0.7.2" >
 
     <uses-sdk
         android:minSdkVersion="8"
