@@ -54,7 +54,8 @@ public class NodeViewActivity extends Activity {
 	
 	private void refreshDisplay() {
 		String data = convertToHTML();
-		this.display.loadData(data, "text/html", "UTF-8");
+		//this.display.loadData(data, "text/html", data);
+		this.display.loadDataWithBaseURL(null, data, "text/html", "UTF-8", null);
 	}
 	
 	@Override
