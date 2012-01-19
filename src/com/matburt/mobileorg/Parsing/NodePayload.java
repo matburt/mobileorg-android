@@ -98,7 +98,7 @@ public class NodePayload {
 			if (start == -1)
 				break;
 			
-			int end = payload.substring(start).indexOf("\n");
+			int end = payload.indexOf("\n", start);
 			if(end == -1)
 				break;
 			
