@@ -1,16 +1,17 @@
 package com.matburt.mobileorg.Settings;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageItemInfo;
+import android.content.pm.ResolveInfo;
 import android.os.Bundle;
 import android.preference.ListPreference;
 import android.preference.PreferenceActivity;
 
 import com.matburt.mobileorg.R;
-import com.matburt.mobileorg.Parsing.MobileOrgApplication;
 
 public class SettingsActivity extends PreferenceActivity
 {
@@ -26,7 +27,7 @@ public class SettingsActivity extends PreferenceActivity
 
     protected void populateSyncSources()
     {
-        List<PackageItemInfo> synchronizers = MobileOrgApplication.discoverSynchronizerPlugins((Context) this);
+        List<PackageItemInfo> synchronizers = discoverSynchronizerPlugins(this);
 
         ListPreference syncSource = (ListPreference)findPreference("syncSource");
 
@@ -65,5 +66,19 @@ public class SettingsActivity extends PreferenceActivity
         //populate the sync source list with updated data
         syncSource.setEntries(entries);
         syncSource.setEntryValues(values);
+    }
+    
+    public static final String SYNCHRONIZER_PLUGIN_ACTION = "com.matburt.mobileorg.SYNCHRONIZE";
+    public static List<PackageItemInfo> discoverSynchronizerPlugins(Context context)
+    {
+        Intent discoverSynchro = new Intent(SYNCHRONIZER_PLUGIN_ACTION);
+        List<ResolveInfo> packages = context.getPackageManager().queryIntentActivities(discoverSynchro,0);
+
+        ArrayList<PackageItemInfo> out = new ArrayList<PackageItemInfo>();
+
+        for (ResolveInfo info : packages)
+            out.add(info.activityInfo);
+
+        return out;
     }
 }

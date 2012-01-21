@@ -27,6 +27,8 @@ public class SyncService extends Service implements
 	private PendingIntent alarmIntent;
 	private boolean alarmScheduled = false;
 
+	private boolean syncRunning;
+
 	@Override
 	public void onCreate() {
 		super.onCreate();
@@ -53,8 +55,10 @@ public class SyncService extends Service implements
 		String action = intent.getStringExtra("action");
 		if (action != null && action.equals(START_ALARM))
 			setAlarm();
-		else
+		else if(!this.syncRunning) {
+			this.syncRunning = true;
 			runSynchronizer();
+		}
 		return 0;
 	}
 
@@ -78,6 +82,7 @@ public class SyncService extends Service implements
 			public void run() {
 				synchronizer.sync();
 				synchronizer.close();
+				syncRunning = false;
 				setAlarm();
 			}
 		};

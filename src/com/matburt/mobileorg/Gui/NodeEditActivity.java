@@ -2,10 +2,12 @@ package com.matburt.mobileorg.Gui;
 
 import java.io.IOException;
 import java.util.ArrayList;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -16,8 +18,9 @@ import android.widget.TextView;
 
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Parsing.MobileOrgApplication;
-import com.matburt.mobileorg.Parsing.NodeWriter;
-import com.matburt.mobileorg.Parsing.Node;
+import com.matburt.mobileorg.Parsing.NodeWrapper;
+import com.matburt.mobileorg.Parsing.OrgDatabase;
+import com.matburt.mobileorg.Parsing.OrgFile;
 import com.matburt.mobileorg.Synchronizers.Synchronizer;
 
 public class NodeEditActivity extends Activity {
@@ -29,7 +32,7 @@ public class NodeEditActivity extends Activity {
 	private Spinner priorityView;
 	private Spinner todoStateView;
 	private EditText tagsView;
-	private Node node;
+	private NodeWrapper node;
 	private String actionMode;
 
 	private static int EDIT_BODY = 1;
@@ -62,30 +65,44 @@ public class NodeEditActivity extends Activity {
 		MobileOrgApplication appInst = (MobileOrgApplication) this
 				.getApplication();
 
+		Intent intent = getIntent();
+
 		if(this.actionMode == null) {
 			this.actionMode = ACTIONMODE_CREATE;
-			node = new Node("");
+			node = new NodeWrapper(null);
 
-			Intent intent = getIntent();
 
 			String subject = intent.getStringExtra("android.intent.extra.SUBJECT");
 			String text = intent.getStringExtra("android.intent.extra.TEXT");
 
 			titleView.setText(subject);
 			payloadView.setText(text);
+			setSpinner(todoStateView, appInst.getDB().getTodos(), "");
+			setSpinner(priorityView, appInst.getDB().getPriorities(), "");
 		}
 		else if (this.actionMode.equals(ACTIONMODE_CREATE)) {
-			node = new Node("");
+			node = new NodeWrapper(null);
+
+			titleView.setText("");
+			payloadView.setText("");
+			setSpinner(todoStateView, appInst.getDB().getTodos(), "");
+			setSpinner(priorityView, appInst.getDB().getPriorities(), "");
 		} else if (this.actionMode.equals(ACTIONMODE_EDIT)) {
-			node = appInst.nodestackTop();
+			long nodeId = intent.getLongExtra("node_id", 0);
+
+			Cursor cursor = appInst.getDB().getNode(nodeId);
+			cursor.moveToFirst();
+			node = new NodeWrapper(cursor);
 			
-			titleView.setText(node.name);
-			payloadView.setText(node.payload.getContent());
-			tagsView.setText(node.getTagString());
+			//titleView.setText(cursor.getString(cursor.getColumnIndex("name")));
+			titleView.setText(node.getName());
+			payloadView.setText(node.getPayload());
+			tagsView.setText(node.getTags());
+
+			setSpinner(todoStateView, appInst.getDB().getTodos(), node.getTodo());
+			setSpinner(priorityView, appInst.getDB().getPriorities(), node.getPriority());
 		}
 
-		setSpinner(todoStateView, appInst.getTodods(), node.todo);
-		setSpinner(priorityView, appInst.getPriorities(), node.priority);
 	}
 
 	private void setSpinner(Spinner view, ArrayList<String> data,
@@ -115,7 +132,7 @@ public class NodeEditActivity extends Activity {
 		public void onClick(View v) {
 			Intent intent = new Intent(v.getContext(),
 					NodeEditBodyActivity.class);
-			intent.putExtra(NodeEditBodyActivity.DISPLAY_STRING, node.payload.getContent());
+			intent.putExtra(NodeEditBodyActivity.DISPLAY_STRING, node.getPayload());
 			startActivityForResult(intent, EDIT_BODY);
 		}
 	};
@@ -137,7 +154,7 @@ public class NodeEditActivity extends Activity {
 			if (resultCode == RESULT_OK) {
 				String result = data
 						.getStringExtra(NodeEditBodyActivity.RESULT_STRING);
-				node.payload.setContent(result);
+				//node.payload.setContent(result);
 				payloadView.setText(result);
 			}
 		}
@@ -179,9 +196,9 @@ public class NodeEditActivity extends Activity {
 			if (newPayload.length() == 0 && newTitle.length() == 0)
 				return false;
 		} else if (this.actionMode.equals(ACTIONMODE_EDIT)) {
-			if (newPayload.equals(node.payload.getContent()) && newTitle.equals(node.name)
-					&& newTodo.equals(node.todo)
-					&& newPriority.equals(node.priority))
+			if (newPayload.equals(node.getPayload()) && newTitle.equals(node.getName())
+					&& newTodo.equals(node.getTodo())
+					&& newPriority.equals(node.getPriority()))
 				return false;
 		}
 		
@@ -193,24 +210,21 @@ public class NodeEditActivity extends Activity {
 		String newTodo = todoStateView.getSelectedItem().toString();
 		String newPriority = priorityView.getSelectedItem().toString();
 		String newPayload = payloadView.getText().toString();
-
-		NodeWriter writer = new NodeWriter(this);
 		
 		if (this.actionMode.equals(ACTIONMODE_CREATE)) {
-			node.name = newTitle;
-			node.todo = newTodo;
-			node.priority = newPriority;
-			node.payload.setContent(newPayload);
-
-			try {
-				writer.write(node);		
-			} catch (IOException e) {
-			}
+//			node.name = newTitle;
+//			node.todo = newTodo;
+//			node.priority = newPriority;
+//			node.payload.setContent(newPayload);
+			MobileOrgApplication appInst = (MobileOrgApplication) this.getApplication();
+			OrgDatabase orgDB = appInst.getDB();
+			orgDB.addOrUpdateFile(OrgFile.CAPTURE_FILE, "Captures", "", true);
+			Long parent = orgDB.getFileId(OrgFile.CAPTURE_FILE);
+			orgDB.addNode(parent, newTitle, newTodo, newPriority, null);
 			
 		} else if (this.actionMode.equals(ACTIONMODE_EDIT)) {
 			try {
-				writer.editNode(node, newTitle, newTodo, newPriority,
-						newPayload);
+				editNode(newTitle, newTodo, newPriority, newPayload);
 			} catch (IOException e) {
 			}
 		}
@@ -218,5 +232,34 @@ public class NodeEditActivity extends Activity {
 		intent.putExtra(Synchronizer.SYNC_DONE, true);
 		intent.putExtra("showToast", false);
 		sendBroadcast(intent);
+	}
+	
+	/**
+	 * Takes a Node and four strings, representing edits to the node.
+	 * This function will generate a new edit entry for each value that was 
+	 * changed.
+	 */
+	private void editNode(String newTitle, String newTodo,
+			String newPriority, String newPayload) throws IOException {
+		MobileOrgApplication appInst = (MobileOrgApplication) this.getApplication();
+		OrgDatabase orgDB = appInst.getDB();
+		
+		if (!node.getName().equals(newTitle)) {
+			orgDB.addEdit("heading", node.getNodeId(), newTitle, node.getName(), newTitle);
+			//node.name = newTitle;
+		}
+		if (newTodo != null && !node.getTodo().equals(newTodo)) {
+			orgDB.addEdit("todo", node.getNodeId(), newTitle, node.getTodo(), newTodo);
+			//node.todo = newTodo;
+		}
+		if (newPriority != null && !node.getPriority().equals(newPriority)) {
+			orgDB.addEdit("priority", node.getNodeId(), newTitle, node.getPriority(),
+					newPriority);
+			//node.priority = newPriority;
+		}
+		if (!node.getPayload().equals(newPayload)) {
+			orgDB.addEdit("body", node.getNodeId(), newTitle, node.getPayload(), newPayload);
+			//node.payload.setContent(newPayload);
+		}
 	}
 }

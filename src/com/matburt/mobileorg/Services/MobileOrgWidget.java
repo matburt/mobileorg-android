@@ -18,7 +18,6 @@ import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Gui.NodeEditActivity;
 import com.matburt.mobileorg.Parsing.EditNode;
 import com.matburt.mobileorg.Parsing.MobileOrgApplication;
-import com.matburt.mobileorg.Parsing.Node;
 import com.matburt.mobileorg.Synchronizers.Synchronizer;
 
 public class MobileOrgWidget extends AppWidgetProvider {
@@ -64,27 +63,28 @@ public class MobileOrgWidget extends AppWidgetProvider {
         private String getAgenda() {
             MobileOrgApplication appInst = (MobileOrgApplication)this.getApplication();
             
-            Node agendaNode = appInst.getFileNode("agendas.org");
-            ArrayList<EditNode> parseEdits = appInst.getNodeEdits();
+//            Node agendaNode = appInst.getDB().getFileNode("agendas.org");
+//            ArrayList<EditNode> parseEdits = appInst.getNodeEdits();
 			
-            StringBuilder widgetBuffer = new StringBuilder();            
-			if (agendaNode != null) {
-				Node todoNode = agendaNode.findChildNode("Today");
-				if (todoNode != null) {
-					todoNode = todoNode.getChildren().get(0);
-					todoNode.applyEdits(parseEdits);
-					if (todoNode != null && !todoNode.todo.equals("DONE")) {
-						for (Node child : todoNode.getChildren()) {
-							widgetBuffer.append(child.payload.getTime());
-							widgetBuffer.append(" ");
-							widgetBuffer.append(child.name);
-							widgetBuffer.append("\n");
-						}		
-					}
-				}
-			}
+//            StringBuilder widgetBuffer = new StringBuilder();            
+//			if (agendaNode != null) {
+//				Node todoNode = agendaNode.findChildNode("Today");
+//				if (todoNode != null) {
+//					todoNode = todoNode.getChildren().get(0);
+//					todoNode.applyEdits(parseEdits);
+//					if (todoNode != null && !todoNode.todo.equals("DONE")) {
+//						for (Node child : todoNode.getChildren()) {
+//							widgetBuffer.append(child.payload.getTime());
+//							widgetBuffer.append(" ");
+//							widgetBuffer.append(child.name);
+//							widgetBuffer.append("\n");
+//						}		
+//					}
+//				}
+//			}
 			
-			return widgetBuffer.toString();
+//			return widgetBuffer.toString();
+            return "";
         }
         
         private void refreshDisplay() {

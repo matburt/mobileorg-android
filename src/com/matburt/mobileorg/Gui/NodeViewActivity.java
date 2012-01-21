@@ -19,23 +19,27 @@ import android.webkit.WebViewClient;
 
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Parsing.MobileOrgApplication;
-import com.matburt.mobileorg.Parsing.Node;
+import com.matburt.mobileorg.Parsing.NodeWrapper;
 import com.matburt.mobileorg.Synchronizers.Synchronizer;
 
 public class NodeViewActivity extends Activity {
 	private WebView display;
 	private MobileOrgApplication appInst;
 	private SynchServiceReceiver syncReceiver;
+	private long node_id;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.viewnode);
 
+		Intent intent = getIntent();
+		this.node_id = intent.getLongExtra("node_id", -1);
+		
 		this.display = (WebView) this.findViewById(R.id.viewnode_webview);
-		display.setWebViewClient(new InternalWebViewClient());
-		display.setWebChromeClient(new InternalWebChromeClient());
-		display.getSettings().setBuiltInZoomControls(true);
+		this.display.setWebViewClient(new InternalWebViewClient());
+		this.display.setWebChromeClient(new InternalWebChromeClient());
+		this.display.getSettings().setBuiltInZoomControls(true);
 
 		this.appInst = (MobileOrgApplication) this.getApplication();
 		
@@ -63,8 +67,8 @@ public class NodeViewActivity extends Activity {
 		MenuInflater inflater = getMenuInflater();
 	    inflater.inflate(R.menu.nodeview_menu, menu);
 	    
-	    if(this.appInst.nodestackSize() <= 2)
-	    	menu.findItem(R.id.viewmenu_edit).setVisible(false);
+//	    if(this.appInst.nodestackSize() <= 2)
+//	    	menu.findItem(R.id.viewmenu_edit).setVisible(false);
 
 		return true;
 	}
@@ -96,15 +100,15 @@ public class NodeViewActivity extends Activity {
 	}
 
 	private String convertToHTML() {
-		Node node = this.appInst.nodestackTop();
 
-		this.setTitle(node.name);
+//		this.setTitle(node.name);
 
 		int levelOfRecursion = Integer.parseInt(PreferenceManager
 				.getDefaultSharedPreferences(this).getString(
 						"viewRecursionMax", "0"));
 
-		String text = nodeToHTMLRecursive(node, levelOfRecursion);
+		String text = nodeToHTMLRecursive(
+				new NodeWrapper(node_id, appInst.getDB()), levelOfRecursion);
 		text = convertLinks(text);
 
 		boolean wrapLines = PreferenceManager.getDefaultSharedPreferences(this)
@@ -122,7 +126,7 @@ public class NodeViewActivity extends Activity {
 		return text;
 	}
 
-	private String nodeToHTMLRecursive(Node node, int level) {
+	private String nodeToHTMLRecursive(NodeWrapper node, int level) {
 		StringBuilder result = new StringBuilder();
 		result.append(nodeToHTML(node, level));
 
@@ -130,28 +134,28 @@ public class NodeViewActivity extends Activity {
 			return result.toString();
 		level--;
 
-		for (Node child : node.getChildren()) {
+		for (NodeWrapper child : node.getChildren(appInst.getDB())) {
 			result.append(nodeToHTMLRecursive(child, level));
 		}
 		return result.toString();
 	}
 
-	private String nodeToHTML(Node node, int headingLevel) {
+	private String nodeToHTML(NodeWrapper node, int headingLevel) {
 		StringBuilder result = new StringBuilder();
 
 		int fontSize = 3 + headingLevel;
 		result.append("<font size=\"");
 		result.append(fontSize);
 		result.append("\"> <b>");
-		result.append(node.name);
+		result.append(node.getName());
 		
-		if(headingLevel == 0 && node.hasChildren())
+		if(headingLevel == 0 && this.appInst.getDB().hasNodeChildren(node_id))
 			result.append("...");
 		
 		result.append("</b></font> <hr />");
 
-		if (!node.payload.getContent().equals("")) {
-			result.append(node.payload.getContent());
+		if (!node.getPayload().equals("")) {
+			result.append(node.getPayload());
 			result.append("<br/>\n");
 		}
 

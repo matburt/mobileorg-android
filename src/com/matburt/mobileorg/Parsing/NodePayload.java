@@ -14,6 +14,10 @@ public class NodePayload {
 	
 	private String nodeId = null;
 	
+	public NodePayload(String payload) {
+		this.payload = new StringBuilder(payload);
+	}
+	
 	public void add(String line) {
 		this.payload.append(line + "\n");
 	}

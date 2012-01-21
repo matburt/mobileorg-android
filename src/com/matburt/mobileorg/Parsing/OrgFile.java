@@ -151,8 +151,7 @@ public class OrgFile {
 		writer.close();
 	}
 
-	public void remove(OrgDatabase appdb) {
-		appdb.removeFile(this.fileName);
+	public void remove() {
 		String storageMode = getStorageMode();
 		if (storageMode.equals("internal") || storageMode.equals("")) {
 			context.deleteFile(this.fileName);
@@ -191,29 +190,27 @@ public class OrgFile {
 		return orgBasePath;
 	}
 	
-    // Used by encryption
-    public byte[] getRawFileData()
-    {
-        try {
-            File file = getFile();
-            FileInputStream is = new FileInputStream(file);
-            byte[] buffer = new byte[(int)file.length()];
-            int offset = 0;
-            int numRead = 0;
-            while (offset < buffer.length
-                   && (numRead=is.read(buffer, offset, buffer.length-offset)) >= 0) 
-            {
-                offset += numRead;
-            }
-            is.close();
-            if (offset < buffer.length) {
-                throw new IOException("Could not completely read file "+file.getName());
-            }
-            return buffer;
-        }
-        catch (IOException e) {
-            return null;
-        }
-    }
-
+	// Used by encryption
+	public byte[] getRawFileData() {
+		try {
+			File file = getFile();
+			FileInputStream is = new FileInputStream(file);
+			byte[] buffer = new byte[(int) file.length()];
+			int offset = 0;
+			int numRead = 0;
+			while (offset < buffer.length
+					&& (numRead = is.read(buffer, offset, buffer.length
+							- offset)) >= 0) {
+				offset += numRead;
+			}
+			is.close();
+			if (offset < buffer.length) {
+				throw new IOException("Could not completely read file "
+						+ file.getName());
+			}
+			return buffer;
+		} catch (IOException e) {
+			return null;
+		}
+	}
 }
