@@ -37,6 +37,7 @@ import com.matburt.mobileorg.Dropbox.Dropbox;
 import com.matburt.mobileorg.Dropbox.DropboxLoginListener;
 import com.matburt.mobileorg.Views.PageFlipView;
 import com.matburt.mobileorg.Synchronizers.WebDAVSynchronizer;
+import com.matburt.mobileorg.Parsing.MobileOrgApplication;
 
 public class WizardActivity extends Activity {
 
@@ -262,7 +263,7 @@ public class WizardActivity extends Activity {
 
         Thread loginThread = new Thread() {
                 public void run() {
-                    WebDAVSynchronizer wds = new WebDAVSynchronizer(ctxt, null);
+                    WebDAVSynchronizer wds = new WebDAVSynchronizer(ctxt, (MobileOrgApplication)getApplication());
                     String extra = wds.testConnection(urlActual, userActual, passActual);
                     if (extra != null) {
                         showToastRemote("Login failed: " + extra);
