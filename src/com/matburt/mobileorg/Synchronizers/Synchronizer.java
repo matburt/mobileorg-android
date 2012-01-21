@@ -15,6 +15,7 @@ import android.content.res.Resources;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.RemoteViews;
+import android.widget.Toast;
 
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Gui.OutlineActivity;
@@ -159,8 +160,13 @@ abstract public class Synchronizer {
 			Log.d("MobileOrg", "Getting " + filename + "/" + filenameMap.get(filename));
 			this.appdb.removeFile(filename);
 			this.appdb.addOrUpdateFile(filename, filenameMap.get(filename), remoteChecksums.get(filename), true);
+            BufferedReader rfile = getRemoteFile(filename);
+            if (rfile == null) {
+                Log.w("MobileOrg", "File does not seem to exist: " + filename);
+                continue;
+            }
 			// TODO Generate checksum of file and compare to remoteChecksum
-            parser.parse(filename, getRemoteFile(filename), this.appdb);
+            parser.parse(filename, rfile, this.appdb);
         }
 	}
 
