@@ -113,6 +113,11 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		orgdataInsertHelper.prepareForInsert();
 	}
 
+	public Cursor getFileCursor() {
+		// This gets all of the org file nodes
+		return db.rawQuery("SELECT data.* FROM orgdata data JOIN" 
+				+ "(SELECT f.node_id FROM files f) file on file.node_id = data._id;", null);
+	}
 	
 	SQLiteStatement addPayload;
 	
@@ -153,26 +158,6 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		
 		cursor.moveToFirst();
 		return cursor;
-	}
-	
-	public long getFileId(String filename) {
-		Cursor cursor = db.query("files", new String[] { "node_id" },
-				"filename=?", new String[] {filename}, null, null, null);
-		
-		if(cursor.getCount() == 0)
-			return -1;
-		
-		cursor.moveToFirst();
-		return cursor.getInt(0);
-	}
-	
-	public void addEdit(String edittype, String nodeId, String nodeTitle,
-			String oldValue, String newValue) {
-
-	public Cursor getFileCursor() {
-		// This gets all of the org file nodes
-		return db.rawQuery("SELECT data.* FROM orgdata data JOIN" 
-				+ "(SELECT f.node_id FROM files f) file on file.node_id = data._id;", null);
 	}
 	
 	public long getFileId(String filename) {

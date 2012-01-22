@@ -15,7 +15,6 @@ import android.content.res.Resources;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.RemoteViews;
-import android.widget.Toast;
 
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Gui.OutlineActivity;

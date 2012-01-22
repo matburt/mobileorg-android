@@ -2,18 +2,12 @@ package com.matburt.mobileorg.Settings;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.graphics.Typeface;
 import android.preference.Preference;
-import android.preference.PreferenceManager;
 import android.util.AttributeSet;
-import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
-import com.matburt.mobileorg.Settings.WizardActivity;
 
 public class WizardPreferences extends Preference {
     public WizardPreferences(Context context) {
