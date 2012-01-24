@@ -19,7 +19,7 @@
         android:title="@string/menu_settings"/>
     <item
         android:id="@+id/menu_search"
-        android:icon="@drawable/ic_menu_preferences"
+        android:icon="@drawable/ic_menu_search"
         android:title="@string/menu_search"/>
 
 </menu>

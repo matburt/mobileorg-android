@@ -158,10 +158,6 @@ public class OrgFileParser {
         else
             newHeading = heading;
 
-        // Hack to strip out * from habits
-//        if(this.nodeStack.get(0).name.equals("agendas.org"))
-//        	newHeading = newHeading.replaceAll("\\*", "");
-        
         return newHeading;
     }
  
@@ -172,7 +168,6 @@ public class OrgFileParser {
     		pattern.append(")\\s*)?");
     		pattern.append("(\\[\\#.*\\])?(.*?)");
     		pattern.append("\\s*(?::([^\\s]+):)?");
-    		// TODO Line beneath should filter out habit stuff from agenda.org, but it doesn't seem to filter *
     		pattern.append("(\\s*[\\*!])?$");
     		OrgFileParser.titlePattern = Pattern.compile(pattern.toString());
     	}

@@ -5,45 +5,58 @@ import android.app.SearchManager;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.SimpleCursorAdapter;
 
-import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Parsing.MobileOrgApplication;
 
 public class SearchActivity extends ListActivity {
 
-	private OutlineCursorAdapter adapter;
+	private SimpleCursorAdapter adapter;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.search_outline);
 
-		// Get the intent, verify the action and get the query
 		Intent intent = getIntent();
-		if (Intent.ACTION_VIEW.equals(intent.getAction())) {
-			String query = intent.getStringExtra(SearchManager.QUERY);
-			doSearch(query);
-		} else if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
-			String query = intent.getStringExtra(SearchManager.QUERY);
-			doSearch(query);
-		}
-
+		handleIntent(intent);
 	}
 
 	@Override
 	protected void onNewIntent(Intent intent) {
-		setIntent(intent);
-		doSearch("");
+		handleIntent(intent);
+	}
+	
+	private void handleIntent(Intent intent) {
+		if (Intent.ACTION_VIEW.equals(intent.getAction())) {
+			// This handles clicking on search suggestions
+		} else if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
+			String query = intent.getStringExtra(SearchManager.QUERY);
+			doSearch(query);
+		}
 	}
 
-	void doSearch(String query) {
+	private void doSearch(String query) {
 		MobileOrgApplication appInst = (MobileOrgApplication) this
 				.getApplication();
-		Cursor result = appInst.getDB().search(query);
-
-		startManagingCursor(result);
+		
+		Cursor result = appInst.getDB().search("%"+ query + "%");
+		
 		adapter = new OutlineCursorAdapter(this, result, appInst.getDB());
 		this.setListAdapter(adapter);
-		adapter.notifyDataSetChanged();
+				
+		this.getListView().setOnItemClickListener(showNode);
 	}
+	
+	private OnItemClickListener showNode = new AdapterView.OnItemClickListener() {
+		@Override
+		public void onItemClick(AdapterView<?> parent, View view, int position,
+				long id) {
+			Intent intent = new Intent(getApplicationContext(), NodeViewActivity.class);
+			intent.putExtra("node_id", id);
+			startActivity(intent);
+		}
+	};
 }

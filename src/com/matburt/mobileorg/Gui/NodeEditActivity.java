@@ -120,7 +120,7 @@ public class NodeEditActivity extends Activity {
 		view.setSelection(pos);
 	}
 
-	View.OnClickListener saveNodeListener = new View.OnClickListener() {
+	private View.OnClickListener saveNodeListener = new View.OnClickListener() {
 		public void onClick(View v) {
 			save();
 			setResult(RESULT_OK);
@@ -128,7 +128,7 @@ public class NodeEditActivity extends Activity {
 		}
 	};
 
-	View.OnClickListener editBodyListener = new View.OnClickListener() {
+	private View.OnClickListener editBodyListener = new View.OnClickListener() {
 		public void onClick(View v) {
 			Intent intent = new Intent(v.getContext(),
 					NodeEditBodyActivity.class);
@@ -137,7 +137,7 @@ public class NodeEditActivity extends Activity {
 		}
 	};
 
-	View.OnClickListener cancelListener = new View.OnClickListener() {
+	private View.OnClickListener cancelListener = new View.OnClickListener() {
 		public void onClick(View v) {
 			doCancel();
 		}

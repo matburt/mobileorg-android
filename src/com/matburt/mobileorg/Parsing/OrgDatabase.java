@@ -126,9 +126,6 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		addPayload.bindString(1, payload);
 		addPayload.bindLong(2, node_id);
 		addPayload.execute();
-//		ContentValues values = new ContentValues();
-//		values.put("payload", payload);
-//		db.update("orgdata", values, "_id=?", new String[] {node_id.toString()});
 	}
 
 	
@@ -152,10 +149,11 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		return cursor;
 	}
 	
-	public Cursor search(String query) {
-		Cursor cursor = db.query("orgdata", nodeFields, "_id < 100", null, null, null, null);
+	public Cursor search(String query) {		
+		Cursor cursor = db.rawQuery(
+				"SELECT * FROM orgdata WHERE name LIKE ?",
+				new String[] { query });
 		
-		cursor.moveToFirst();
 		return cursor;
 	}
 	
