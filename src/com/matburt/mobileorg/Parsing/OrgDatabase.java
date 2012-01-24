@@ -71,7 +71,7 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		db.execSQL("CREATE TABLE IF NOT EXISTS orgdata ("
 				+ "_id integer primary key autoincrement,"
 				+ "parent_id integer,"
-				+ "file_id integer,"
+				+ "file_id integer," // Which _id in files table this node belongs to
 				+ "level integer default 0,"
 				+ "node_id text," // Org data id
 				+ "priority text,"

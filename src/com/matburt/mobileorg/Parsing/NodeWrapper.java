@@ -36,8 +36,7 @@ public class NodeWrapper {
 		while(nodeChildren.isAfterLast() == false) {
 			long id = (new NodeWrapper(nodeChildren)).getId();
 			result.add(new NodeWrapper(id, db));
-//			result.add(new NodeWrapper(nodeChildren));
-//			nodeChildren.moveToNext();
+			nodeChildren.moveToNext();
 		}
 		
 		return result;

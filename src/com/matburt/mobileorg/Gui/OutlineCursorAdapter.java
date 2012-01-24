@@ -48,11 +48,7 @@ public class OutlineCursorAdapter extends SimpleCursorAdapter {
 
 	@Override
 	public void bindView(View v, Context context, Cursor c) {
-		
 		TextView orgItem = (TextView) v.findViewById(R.id.orgItem);
-//		LinearLayout tagsLayout = (LinearLayout) v
-//				.findViewById(R.id.tagsLayout);
-//		TextView dateInfo = (TextView) v.findViewById(R.id.dateInfo);
 
 		int nameColumn = c.getColumnIndex("name");
 		int todoColumn = c.getColumnIndex("todo");
@@ -85,7 +81,11 @@ public class OutlineCursorAdapter extends SimpleCursorAdapter {
 			
 		orgItem.setText(itemText);
 
-		//
+		
+		// LinearLayout tagsLayout = (LinearLayout) v
+		// .findViewById(R.id.tagsLayout);
+		// TextView dateInfo = (TextView) v.findViewById(R.id.dateInfo);
+
 		// // Setup date view
 		// //if (TextUtils.isEmpty(dateInfo)) {
 		// holder.dateInfo.setVisibility(View.GONE);
