@@ -54,7 +54,7 @@ public class OutlineActivity extends ListActivity
 		node_id = intent.getLongExtra("node_id", -1);
 
 		if(this.node_id == -1) {
-			if(this.appInst.getDB().getFiles().isEmpty())
+			if(!this.appInst.isSyncConfigured())
                 this.showWizard();
 		}
 

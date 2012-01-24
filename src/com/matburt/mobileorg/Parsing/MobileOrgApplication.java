@@ -3,6 +3,7 @@ package com.matburt.mobileorg.Parsing;
 import java.util.ArrayList;
 
 import android.app.Application;
+import android.preference.PreferenceManager;
 
 import com.matburt.mobileorg.Services.SyncService;
 
@@ -25,5 +26,15 @@ public class MobileOrgApplication extends Application {
     
     public OrgDatabase getDB() {
     	return this.appdb;
+    }
+    
+    public boolean isSyncConfigured() {
+    	String syncSource = PreferenceManager.getDefaultSharedPreferences(this)
+		.getString("syncSource", "");
+    	
+    	if(syncSource.isEmpty())
+    		return false;
+    	else
+    		return true;
     }
 }
