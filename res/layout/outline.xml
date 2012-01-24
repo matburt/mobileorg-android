@@ -1,55 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout android:id="@+id/orgTopLayout"
-	android:layout_width="fill_parent"
-	android:layout_height="fill_parent"
-	xmlns:android="http://schemas.android.com/apk/res/android"
-	android:minHeight="?android:attr/listPreferredItemHeight">
-	 <TextView
-	    android:id="@+id/orgItem"
-	    android:layout_width="fill_parent"
-	    android:layout_height="wrap_content"
-	    android:layout_marginTop="5dip"
-	    android:layout_marginLeft="5dip"
-	    android:gravity="left"
-	    android:textAppearance="?android:attr/textAppearanceLarge"
-	    android:minHeight="20sp" />	
-	 <TextView
-	    android:id="@+id/todoState"
-	    android:layout_width="wrap_content"
-	    android:layout_height="20sp"
-        android:layout_below="@id/orgItem"
-        android:paddingLeft="5px"
-        android:paddingRight="5px"
-	    android:textColor="#FF0000"
-	    android:gravity="left"
-	     />
-     <TextView
-	    android:id="@+id/priorityState"
-	    android:layout_width="wrap_content"
-	    android:layout_height="20sp"
-        android:layout_below="@id/orgItem"
-        android:layout_toRightOf="@id/todoState"
-        android:paddingLeft="5px"
-        android:paddingRight="5px"
-	    android:textColor="#FFFF00"
-	     />
-	<LinearLayout 
-		android:id="@+id/tagsLayout"
-		android:layout_marginLeft="5dip"
-		android:orientation="horizontal"
-		android:layout_width="fill_parent"
-		android:layout_height="20sp"
-        android:layout_below="@id/orgItem"
-		android:layout_toRightOf="@id/priorityState"
-	/>
-     <TextView
-	    android:id="@+id/dateInfo"
-	    android:layout_width="wrap_content"
-	    android:layout_height="20sp"
-        android:layout_below="@id/todoState"
-        android:gravity="left"
-        android:layout_toRightOf="@id/todoState"
-	    android:textColor="#C0C0C0"
-	     />
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
 
-</RelativeLayout>
+    <com.markupartist.android.widget.ActionBar
+        android:id="@+id/actionbar"
+        style="@style/ActionBar" />
+
+    <ListView
+        android:id="@id/android:list"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"/>
+</LinearLayout>

@@ -3,5 +3,8 @@
     <dimen name="font_size">16sp</dimen>
     <dimen name="outline_item">32sp</dimen>
     <dimen name="outline_todostate">18sp</dimen>
-    
+
+    <dimen name="actionbar_height">35dip</dimen>
+    <dimen name="actionbar_item_height">45dip</dimen>
+    <dimen name="actionbar_item_width">45dip</dimen>
 </resources>
