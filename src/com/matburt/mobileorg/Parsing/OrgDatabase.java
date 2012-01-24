@@ -399,6 +399,23 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		cursor.close();
 		return todos;
 	}
+	
+	public boolean isTodoActive(String todo) {
+		Cursor cursor = db.query("todos", new String[] {"isdone"}, "name = ?",
+				new String[] { todo }, null, null, null);		
+		
+		if(cursor.getCount() > 0) {
+			cursor.moveToFirst();
+			int isdone = cursor.getInt(0);
+			
+			if(isdone == 0)
+				return true;
+			else
+				return false;
+		}
+		
+		return false;
+	}
 
 	public ArrayList<HashMap<String, Integer>> getGroupedTodods() {
 		ArrayList<HashMap<String, Integer>> todos = new ArrayList<HashMap<String, Integer>>();

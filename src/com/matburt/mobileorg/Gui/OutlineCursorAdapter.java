@@ -2,6 +2,11 @@ package com.matburt.mobileorg.Gui;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.graphics.Color;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.SpannableStringBuilder;
+import android.text.style.ForegroundColorSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,14 +15,17 @@ import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 
 import com.matburt.mobileorg.R;
+import com.matburt.mobileorg.Parsing.OrgDatabase;
 
 public class OutlineCursorAdapter extends SimpleCursorAdapter {
 
+	private OrgDatabase db;
 	private Cursor cursor;
 	
-	public OutlineCursorAdapter(Context context, Cursor cursor) {
-		super(context, R.layout.outline_new, cursor, new String[] {}, new int[] {});
+	public OutlineCursorAdapter(Context context, Cursor cursor, OrgDatabase db) {
+		super(context, R.layout.outline_item, cursor, new String[] {}, new int[] {});
 		this.cursor = cursor;
+		this.db = db;
 	}
 	
 	@Override
@@ -31,7 +39,7 @@ public class OutlineCursorAdapter extends SimpleCursorAdapter {
 		Cursor c = getCursor();
 
 		final LayoutInflater inflater = LayoutInflater.from(context);
-		View v = inflater.inflate(R.layout.outline_new, parent, false);
+		View v = inflater.inflate(R.layout.outline_item, parent, false);
 
 		bindView(v, context, c);
 
@@ -42,38 +50,41 @@ public class OutlineCursorAdapter extends SimpleCursorAdapter {
 	public void bindView(View v, Context context, Cursor c) {
 		
 		TextView orgItem = (TextView) v.findViewById(R.id.orgItem);
-		TextView todoState = (TextView) v.findViewById(R.id.todoState);
-//		TextView priorityState = (TextView) v.findViewById(R.id.priorityState);
 //		LinearLayout tagsLayout = (LinearLayout) v
 //				.findViewById(R.id.tagsLayout);
 //		TextView dateInfo = (TextView) v.findViewById(R.id.dateInfo);
 
-		int orgItemNum = c.getColumnIndex("name");
-		orgItem.setText(c.getString(orgItemNum));
-		
-		todoState.setVisibility(View.GONE);
+		int nameColumn = c.getColumnIndex("name");
+		int todoColumn = c.getColumnIndex("todo");
+		int priorityColumn = c.getColumnIndex("priority");
 
-		// // Setup todo state view
-		// if (TextUtils.isEmpty(todo)) {
-		// holder.todoState.setVisibility(View.GONE);
-		// } else {
-		// holder.todoState.setText(todo);
-		// Integer todoState = this.findTodoState(todo);
-		// if (todoState > 0)
-		// holder.todoState.setBackgroundColor(Color.GREEN);
-		// else
-		// holder.todoState.setBackgroundColor(Color.RED);
-		// holder.todoState.setTextColor(Color.WHITE);
-		// holder.todoState.setVisibility(View.VISIBLE);
-		// }
-		//
-		// // Setup priority view
-		// if (TextUtils.isEmpty(priority)) {
-		// holder.priorityState.setVisibility(View.GONE);
-		// } else {
-		// holder.priorityState.setText(priority);
-		// holder.priorityState.setVisibility(View.VISIBLE);
-		// }
+		String todo = c.getString(todoColumn);
+		String name = c.getString(nameColumn);
+		String priority = c.getString(priorityColumn);
+		
+		SpannableStringBuilder itemText = new SpannableStringBuilder(name);
+		
+		if (priority != null && !priority.isEmpty()) {
+			Spannable prioritySpan = new SpannableString(priority + " ");
+			prioritySpan.setSpan(new ForegroundColorSpan(Color.YELLOW), 0,
+					priority.length(), 0);
+			itemText.insert(0, prioritySpan);
+		}
+		
+		if(!todo.isEmpty()) {
+			Spannable todoSpan = new SpannableString(todo + " ");
+			
+			if(db.isTodoActive(todo))
+				todoSpan.setSpan(new ForegroundColorSpan(Color.RED), 0,
+						todo.length(), 0);
+			else
+				todoSpan.setSpan(new ForegroundColorSpan(Color.GREEN), 0,
+						todo.length(), 0);
+			itemText.insert(0, todoSpan);
+		}
+			
+		orgItem.setText(itemText);
+
 		//
 		// // Setup date view
 		// //if (TextUtils.isEmpty(dateInfo)) {
