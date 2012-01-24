@@ -41,7 +41,9 @@ public class SearchActivity extends ListActivity {
 				.getApplication();
 		Cursor result = appInst.getDB().search(query);
 
+		startManagingCursor(result);
 		adapter = new OutlineCursorAdapter(this, result);
 		this.setListAdapter(adapter);
+		adapter.notifyDataSetChanged();
 	}
 }

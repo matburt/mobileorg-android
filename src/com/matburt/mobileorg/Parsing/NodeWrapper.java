@@ -32,9 +32,12 @@ public class NodeWrapper {
 		Cursor nodeChildren = db.getNodeChildren(this.getId());
 		nodeChildren.moveToFirst();
 		
+		
 		while(nodeChildren.isAfterLast() == false) {
-			result.add(new NodeWrapper(nodeChildren));
-			nodeChildren.moveToNext();
+			long id = (new NodeWrapper(nodeChildren)).getId();
+			result.add(new NodeWrapper(id, db));
+//			result.add(new NodeWrapper(nodeChildren));
+//			nodeChildren.moveToNext();
 		}
 		
 		return result;

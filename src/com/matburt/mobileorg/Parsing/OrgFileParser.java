@@ -29,15 +29,17 @@ public class OrgFileParser {
 	public OrgFileParser(OrgDatabase appdb) {
 	}
 
+	long file_id;
 	
-	public void parse(String filename, BufferedReader breader, OrgDatabase orgdb) {
+	public void parse(String filename, BufferedReader breader, OrgDatabase orgdb, long file_id) {
+		this.file_id = file_id;
 		this.todos = orgdb.getGroupedTodods();
 
 		this.starStack = new Stack<Integer>();
 		this.parentIdStack = new Stack<Long>();
 		
 		this.starStack.push(0);
-		Long fileID = orgdb.getFileId(filename);
+		Long fileID = orgdb.getFileNodeId(filename);
 		this.parentIdStack.push(fileID);
 
 		this.payload = new StringBuilder();
@@ -141,7 +143,7 @@ public class OrgFileParser {
 			name = heading;
 		}
     	
-		long nodeId = orgdb.addNode(this.parentIdStack.peek(), name, todo, priority, null);
+		long nodeId = orgdb.addNode(this.parentIdStack.peek(), name, todo, priority, null, this.file_id);
     	return nodeId;
     }
 

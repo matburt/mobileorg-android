@@ -218,9 +218,9 @@ public class NodeEditActivity extends Activity {
 //			node.payload.setContent(newPayload);
 			MobileOrgApplication appInst = (MobileOrgApplication) this.getApplication();
 			OrgDatabase orgDB = appInst.getDB();
-			orgDB.addOrUpdateFile(OrgFile.CAPTURE_FILE, "Captures", "", true);
-			Long parent = orgDB.getFileId(OrgFile.CAPTURE_FILE);
-			orgDB.addNode(parent, newTitle, newTodo, newPriority, null);
+			long file_id = orgDB.addOrUpdateFile(OrgFile.CAPTURE_FILE, "Captures", "", true);
+			Long parent = orgDB.getFileNodeId(OrgFile.CAPTURE_FILE);
+			orgDB.addNode(parent, newTitle, newTodo, newPriority, null, file_id);
 			
 		} else if (this.actionMode.equals(ACTIONMODE_EDIT)) {
 			try {

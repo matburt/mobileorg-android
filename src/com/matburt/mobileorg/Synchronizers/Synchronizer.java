@@ -82,7 +82,6 @@ abstract public class Synchronizer {
 		updateNotification(0, "Synchronizing changes " + OrgFile.CAPTURE_FILE);
 		try {
 			push(OrgFile.CAPTURE_FILE);
-			this.appdb.clearDB(); // TODO Hack, update files properly during sync
 			pull();
 		} catch (IOException e) {
 			displayErrorNotification("Error occured during sync: "
@@ -158,14 +157,14 @@ abstract public class Synchronizer {
 			updateNotification(i, "Downloading " + filename, filesToGet.size());
 			Log.d("MobileOrg", "Getting " + filename + "/" + filenameMap.get(filename));
 			this.appdb.removeFile(filename);
-			this.appdb.addOrUpdateFile(filename, filenameMap.get(filename), remoteChecksums.get(filename), true);
+			long file_id = this.appdb.addOrUpdateFile(filename, filenameMap.get(filename), remoteChecksums.get(filename), true);
             BufferedReader rfile = getRemoteFile(filename);
             if (rfile == null) {
                 Log.w("MobileOrg", "File does not seem to exist: " + filename);
                 continue;
             }
 			// TODO Generate checksum of file and compare to remoteChecksum
-            parser.parse(filename, rfile, this.appdb);
+            parser.parse(filename, rfile, this.appdb, file_id);
         }
 	}
 
