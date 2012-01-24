@@ -15,6 +15,7 @@ import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 
 import com.matburt.mobileorg.R;
+import com.matburt.mobileorg.Parsing.NodeWrapper;
 import com.matburt.mobileorg.Parsing.OrgDatabase;
 
 public class OutlineCursorAdapter extends SimpleCursorAdapter {
@@ -49,25 +50,25 @@ public class OutlineCursorAdapter extends SimpleCursorAdapter {
 	@Override
 	public void bindView(View v, Context context, Cursor c) {
 		TextView orgItem = (TextView) v.findViewById(R.id.orgItem);
+		TextView tagsLayout = (TextView) v.findViewById(R.id.tagsLayout);
 
-		int nameColumn = c.getColumnIndex("name");
-		int todoColumn = c.getColumnIndex("todo");
-		int priorityColumn = c.getColumnIndex("priority");
+		NodeWrapper node = new NodeWrapper(c);
 
-		String todo = c.getString(todoColumn);
-		String name = c.getString(nameColumn);
-		String priority = c.getString(priorityColumn);
+		String todo = node.getTodo();
+		String name = node.getName();
+		String priority = node.getPriority();
+		String tags = node.getTags();
 		
 		SpannableStringBuilder itemText = new SpannableStringBuilder(name);
 		
-		if (priority != null && !priority.isEmpty()) {
+		if (priority != null && priority.isEmpty() == false) {
 			Spannable prioritySpan = new SpannableString(priority + " ");
 			prioritySpan.setSpan(new ForegroundColorSpan(Color.YELLOW), 0,
 					priority.length(), 0);
 			itemText.insert(0, prioritySpan);
 		}
 		
-		if(!todo.isEmpty()) {
+		if(todo.isEmpty() == false) {
 			Spannable todoSpan = new SpannableString(todo + " ");
 			
 			if(db.isTodoActive(todo))
@@ -82,8 +83,12 @@ public class OutlineCursorAdapter extends SimpleCursorAdapter {
 		orgItem.setText(itemText);
 
 		
-		// LinearLayout tagsLayout = (LinearLayout) v
-		// .findViewById(R.id.tagsLayout);
+		if(tags != null && tags.isEmpty() == false) {
+			tagsLayout.setTextColor(Color.GRAY);
+			tagsLayout.setText(tags);
+		} else
+			tagsLayout.setVisibility(View.GONE);
+		
 		// TextView dateInfo = (TextView) v.findViewById(R.id.dateInfo);
 
 		// // Setup date view
@@ -93,17 +98,6 @@ public class OutlineCursorAdapter extends SimpleCursorAdapter {
 		// // holder.dateInfo.setText(dateInfo);
 		// // holder.dateInfo.setVisibility(View.VISIBLE);
 		// // }
-		//
-		// // Add tag view(s)
-		// holder.tagsLayout.removeAllViews();
-		// for (String tag : node.getTags()) {
-		// TextView tagView = new TextView(this.context);
-		// tagView.setText(tag);
-		// tagView.setTextColor(Color.LTGRAY);
-		// tagView.setPadding(0, 0, 5, 0);
-		// holder.tagsLayout.addView(tagView);
-		// }
-
 	}
 
 	/**

@@ -58,19 +58,37 @@ public class NodeWrapper {
 	public String getTags() {
 		if(cursor == null)
 			return "";
-		return cursor.getString(cursor.getColumnIndex("tags"));
+		
+		int tagsColumn = cursor.getColumnIndex("tags");
+		
+		if(tagsColumn == -1)
+			return "";
+		
+		return cursor.getString(tagsColumn);
 	}
 	
 	public String getTodo() {
 		if(cursor == null)
 			return "";
-		return cursor.getString(cursor.getColumnIndex("todo"));
+		
+		int todoColumn = cursor.getColumnIndex("todo");
+		
+		if(todoColumn == -1)
+			return "";
+		
+		return cursor.getString(todoColumn);
 	}
 	
 	public String getPriority() {
 		if(cursor == null)
 			return "";
-		return cursor.getString(cursor.getColumnIndex("priority"));
+		
+		int priorityColumn = cursor.getColumnIndex("priority");
+		
+		if(priorityColumn == -1)
+			return "";
+		
+		return cursor.getString(priorityColumn);
 	}
 	
 	public String getNodeId() {

@@ -33,7 +33,7 @@ public class OrgFileParser {
 	
 	public void parse(String filename, BufferedReader breader, OrgDatabase orgdb, long file_id) {
 		this.file_id = file_id;
-		this.todos = orgdb.getGroupedTodods();
+		this.todos = orgdb.getGroupedTodos();
 
 		this.starStack = new Stack<Integer>();
 		this.parentIdStack = new Stack<Long>();
@@ -112,8 +112,8 @@ public class OrgFileParser {
         String name = "";
         String priority = "";
         String todo = "";
-        ArrayList<String> tags = new ArrayList<String>();
-    	    	
+        String tags = "";
+        
     	Pattern pattern = prepareTitlePattern();
     	Matcher m = pattern.matcher(heading);
 		if (m.find()) {
@@ -134,16 +134,14 @@ public class OrgFileParser {
 			name += m.group(3);
 			String tempTags = m.group(4);
 			if (tempTags != null) {
-				for (String tag : tempTags.split(":")) {
-					tags.add(tag);
-				}
+					tags = tempTags;
 			}
 		} else {
 			Log.w(LT, "Title not matched: " + heading);
 			name = heading;
 		}
     	
-		long nodeId = orgdb.addNode(this.parentIdStack.peek(), name, todo, priority, null, this.file_id);
+		long nodeId = orgdb.addNode(this.parentIdStack.peek(), name, todo, priority, tags, this.file_id);
     	return nodeId;
     }
 

@@ -82,7 +82,7 @@ public class OrgDatabase extends SQLiteOpenHelper {
 	}
 
 	public long addNode(Long parentid, String name, String todo,
-			String priority, ArrayList<String> tags, long file_id) {
+			String priority, String tags, long file_id) {
 		prepareOrgdataInsert();
 
 		orgdataInsertHelper.bind(orgdata_parentidColumn, parentid);
@@ -90,16 +90,7 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		orgdataInsertHelper.bind(orgdata_todoColumn, todo);
 		orgdataInsertHelper.bind(orgdata_priorityColumn, priority);
 		orgdataInsertHelper.bind(orgdata_fileidColumn, file_id);
-
-		if (tags != null) {
-			StringBuilder tagString = new StringBuilder();
-			for (String tag : tags) {
-				tagString.append(":");
-				tagString.append(tag);
-			}
-			tagString.deleteCharAt(0);
-			orgdataInsertHelper.bind(orgdata_tagsColumn, tagString.toString());
-		}
+		orgdataInsertHelper.bind(orgdata_tagsColumn, tags);
 		
 		return orgdataInsertHelper.execute();
 	}
@@ -114,6 +105,7 @@ public class OrgDatabase extends SQLiteOpenHelper {
 			this.orgdata_payloadColumn = orgdataInsertHelper.getColumnIndex("payload");
 			this.orgdata_parentidColumn = orgdataInsertHelper.getColumnIndex("parent_id");
 			this.orgdata_fileidColumn = orgdataInsertHelper.getColumnIndex("file_id");
+			this.orgdata_tagsColumn = orgdataInsertHelper.getColumnIndex("tags");
 		}
 		orgdataInsertHelper.prepareForInsert();
 	}
@@ -122,6 +114,7 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		// This gets all of the org file nodes
 		return db.rawQuery("SELECT data.* FROM orgdata data JOIN" 
 				+ "(SELECT f.node_id FROM files f) file on file.node_id = data._id;", null);
+		// TODO Use a better way of retrieving file nodes, so we can use NodeWrapper on them
 	}
 	
 	SQLiteStatement addPayload;
@@ -427,7 +420,7 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		return false;
 	}
 
-	public ArrayList<HashMap<String, Integer>> getGroupedTodods() {
+	public ArrayList<HashMap<String, Integer>> getGroupedTodos() {
 		ArrayList<HashMap<String, Integer>> todos = new ArrayList<HashMap<String, Integer>>();
 		Cursor cursor = db.query("todos", new String[] { "todogroup", "name",
 				"isdone" }, null, null, null, null, "todogroup");

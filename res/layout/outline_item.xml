@@ -26,13 +26,13 @@
         android:visibility="invisible" >
     </TextView>
 
-    <LinearLayout
+    <TextView
         android:id="@+id/tagsLayout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_below="@+id/orgItem"
         android:paddingLeft="10dp" >
-    </LinearLayout>
+    </TextView>
 
 </RelativeLayout>
