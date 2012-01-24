@@ -85,3 +85,4 @@ public class NodeWrapper {
 		return cursor.getInt(cursor.getColumnIndex("_id"));
 	}
 }
+

@@ -67,8 +67,8 @@ public class NodeViewActivity extends Activity {
 		MenuInflater inflater = getMenuInflater();
 	    inflater.inflate(R.menu.nodeview_menu, menu);
 	    
-//	    if(this.appInst.nodestackSize() <= 2)
-//	    	menu.findItem(R.id.viewmenu_edit).setVisible(false);
+	    if(this.appInst.getDB().isNodeEditable(node_id) == false)
+	    	menu.findItem(R.id.viewmenu_edit).setVisible(false);
 
 		return true;
 	}
@@ -90,6 +90,7 @@ public class NodeViewActivity extends Activity {
 	private void runEditNodeActivity() {
 		Intent intent = new Intent(this, NodeEditActivity.class);
 		intent.putExtra("actionMode", NodeEditActivity.ACTIONMODE_EDIT);
+		intent.putExtra("node_id", this.node_id);
 		startActivity(intent);
 	}
 	

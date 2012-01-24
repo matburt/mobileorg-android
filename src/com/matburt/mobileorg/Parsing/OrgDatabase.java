@@ -188,6 +188,16 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		return cursor.getInt(0);
 	}
 	
+	public boolean isNodeEditable(Long node_id) {
+		Cursor cursor = db.query("files", new String[] { "_id" }, "node_id=?",
+				new String[] { node_id.toString() }, null, null, null);
+		
+		if(cursor.getCount() > 0)
+			return false;
+		else
+			return true;
+	}
+	
 	public void addEdit(String edittype, String nodeId, String nodeTitle,
 			String oldValue, String newValue) {
 
