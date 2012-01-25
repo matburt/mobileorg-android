@@ -12,7 +12,7 @@ public class NodePayload {
 	private String scheduled = null;
 	private String deadline = null;
 	
-	private String nodeId = null;
+	private String id = null; // Can be :ID: (or :ORIGINAL_ID: for agendas.org)
 	
 	public NodePayload(String payload) {
 		this.payload = new StringBuilder(payload);
@@ -33,13 +33,12 @@ public class NodePayload {
 		return this.content;
 	}
 		
-	public String getNodeId() {
-		if(this.nodeId == null)
+	public String getId() {
+		if(this.id == null)
 			this.stripTags();
-
-		return this.nodeId;
+		
+		return this.id;
 	}
-
 	
 	private String cleanPayload() {
 		this.scheduled = stripDate("SCHEDULED:");
@@ -87,8 +86,8 @@ public class NodePayload {
 				end = propm.end();
 			else {
 				String value = payload.substring(propm.end(), end);
-				if(name.equals(":ID:")) {
-					this.nodeId = value.trim();
+				if(name.equals(":ID:") || name.equals(":ORIGINAL_ID:")) {
+					this.id = value.trim();
 				}
 			}
 			payload.delete(start, end);

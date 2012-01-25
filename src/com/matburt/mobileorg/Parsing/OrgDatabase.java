@@ -48,7 +48,7 @@ public class OrgDatabase extends SQLiteOpenHelper {
 	public void onCreate(SQLiteDatabase db) {
 		db.execSQL("CREATE TABLE IF NOT EXISTS files("
 				+ "_id integer primary key autoincrement,"
-				+ "node_id integer," // Id that gives file node in orgdata
+				+ "node_id integer," //orgdata:_id of files' root node
 				+ "filename text,"
 				+ "name text,"
 				+ "checksum text)");
@@ -64,16 +64,16 @@ public class OrgDatabase extends SQLiteOpenHelper {
 				+ "_id integer primary key autoincrement,"
 				+ "type text,"
 				+ "title text,"
-				+ "data_id integer," 
+				+ "data_id integer,"
 				+ "old_value text,"
 				+ "new_value text,"
 				+ "changed integer)");
 		db.execSQL("CREATE TABLE IF NOT EXISTS orgdata ("
 				+ "_id integer primary key autoincrement,"
-				+ "parent_id integer,"
-				+ "file_id integer," // Which _id in files table this node belongs to
+				+ "parent_id integer," // orgdata:_id of parent node
+				+ "file_id integer," // files:_id of file node
 				+ "level integer default 0,"
-				+ "node_id text," // Org data id
+//				+ "node_id text," // Org data id
 				+ "priority text,"
 				+ "todo text,"
 				+ "tags text,"
@@ -119,24 +119,23 @@ public class OrgDatabase extends SQLiteOpenHelper {
 	
 	SQLiteStatement addPayload;
 	
-	public void addNodePayload(Long node_id, final String payload) {
+	public void addNodePayload(Long id, final String payload) {
 		if(addPayload == null)
 			addPayload = this.db.compileStatement("UPDATE orgdata SET payload=? WHERE _id=?");
 		
 		addPayload.bindString(1, payload);
-		addPayload.bindLong(2, node_id);
+		addPayload.bindLong(2, id);
 		addPayload.execute();
 	}
-
 	
-	public Cursor getNodeChildren(Long node_id) {
+	public Cursor getNodeChildren(Long id) {
 		Cursor cursor = db.query("orgdata", nodeFields, "parent_id=?",
-				new String[] { node_id.toString() }, null, null, null);
+				new String[] { id.toString() }, null, null, null);
 		return cursor;
 	}
 	
-	public boolean hasNodeChildren(Long node_id) {
-		if(getNodeChildren(node_id).getCount() > 0)
+	public boolean hasNodeChildren(Long id) {
+		if(getNodeChildren(id).getCount() > 0)
 			return true;
 		else
 			return false;
@@ -168,6 +167,18 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		return cursor.getInt(0);
 	}
 	
+	public String getFileName(Long id) {
+		Cursor cursor = db.query("files", new String[] { "filename" },
+				"node_id=?", new String[] {id.toString()}, null, null, null);
+		
+		if(cursor.getCount() == 0)
+			return "";
+		
+		cursor.moveToFirst();
+		
+		return cursor.getString(cursor.getColumnIndex("filename"));
+	}
+	
 	public long getFileId(String filename) {
 		Cursor cursor = db.query("files", new String[] { "_id" },
 				"filename=?", new String[] {filename}, null, null, null);
@@ -194,7 +205,7 @@ public class OrgDatabase extends SQLiteOpenHelper {
 
 		ContentValues values = new ContentValues();
 		values.put("type", edittype);
-		values.put("data_it", nodeId);
+		values.put("data_id", nodeId);
 		values.put("title", nodeTitle);
 		values.put("old_value", oldValue);
 		values.put("new_value", newValue);
@@ -254,9 +265,12 @@ public class OrgDatabase extends SQLiteOpenHelper {
 
 		StringBuilder result = new StringBuilder();
 		while (cursor.isAfterLast() == false) {
-			result.append(editToString(cursor.getString(0),
-					cursor.getString(1), cursor.getString(2),
-					cursor.getString(3), cursor.getString(4)));
+			result.append(editToString(
+					cursor.getString(cursor.getColumnIndex("data_id")),
+					cursor.getString(cursor.getColumnIndex("title")),
+					cursor.getString(cursor.getColumnIndex("type")),
+					cursor.getString(cursor.getColumnIndex("old_value")),
+					cursor.getString(cursor.getColumnIndex("new_value"))));
 			cursor.moveToNext();
 		}
 		
@@ -278,13 +292,14 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		return result.toString();
 	}
 	
-	public void clearChanges() {
+	public void clearEdits() {
 		db.delete("edits", null, null);
 	}
 
 	public void clearDB() {
 		db.delete("orgdata", null, null);
 		db.delete("files", null, null);
+		db.delete("edits", null, null);
 	}
 
 	public void removeFile(String filename) {

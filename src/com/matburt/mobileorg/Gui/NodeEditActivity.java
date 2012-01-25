@@ -100,7 +100,7 @@ public class NodeEditActivity extends Activity {
 			
 			//titleView.setText(cursor.getString(cursor.getColumnIndex("name")));
 			titleView.setText(node.getName());
-			payloadView.setText(node.getPayload());
+			payloadView.setText(node.getCleanedPayload());
 			tagsView.setText(node.getTags());
 
 			setSpinner(todoStateView, appInst.getDB().getTodos(), node.getTodo());
@@ -136,7 +136,7 @@ public class NodeEditActivity extends Activity {
 		public void onClick(View v) {
 			Intent intent = new Intent(v.getContext(),
 					NodeEditBodyActivity.class);
-			intent.putExtra(NodeEditBodyActivity.DISPLAY_STRING, node.getPayload());
+			intent.putExtra(NodeEditBodyActivity.DISPLAY_STRING, node.getCleanedPayload());
 			startActivityForResult(intent, EDIT_BODY);
 		}
 	};
@@ -200,7 +200,7 @@ public class NodeEditActivity extends Activity {
 			if (newPayload.length() == 0 && newTitle.length() == 0)
 				return false;
 		} else if (this.actionMode.equals(ACTIONMODE_EDIT)) {
-			if (newPayload.equals(node.getPayload()) && newTitle.equals(node.getName())
+			if (newPayload.equals(node.getCleanedPayload()) && newTitle.equals(node.getName())
 					&& newTodo.equals(node.getTodo())
 					&& newPriority.equals(node.getPriority()))
 				return false;
@@ -247,20 +247,20 @@ public class NodeEditActivity extends Activity {
 		OrgDatabase orgDB = appInst.getDB();
 		
 		if (!node.getName().equals(newTitle)) {
-			orgDB.addEdit("heading", node.getNodeId(), newTitle, node.getName(), newTitle);
+			orgDB.addEdit("heading", node.getNodeId(orgDB), newTitle, node.getName(), newTitle);
 			//node.name = newTitle;
 		}
 		if (newTodo != null && !node.getTodo().equals(newTodo)) {
-			orgDB.addEdit("todo", node.getNodeId(), newTitle, node.getTodo(), newTodo);
+			orgDB.addEdit("todo", node.getNodeId(orgDB), newTitle, node.getTodo(), newTodo);
 			//node.todo = newTodo;
 		}
 		if (newPriority != null && !node.getPriority().equals(newPriority)) {
-			orgDB.addEdit("priority", node.getNodeId(), newTitle, node.getPriority(),
+			orgDB.addEdit("priority", node.getNodeId(orgDB), newTitle, node.getPriority(),
 					newPriority);
 			//node.priority = newPriority;
 		}
-		if (!node.getPayload().equals(newPayload)) {
-			orgDB.addEdit("body", node.getNodeId(), newTitle, node.getPayload(), newPayload);
+		if (!node.getCleanedPayload().equals(newPayload)) {
+			orgDB.addEdit("body", node.getNodeId(orgDB), newTitle, node.getCleanedPayload(), newPayload);
 			//node.payload.setContent(newPayload);
 		}
 	}
