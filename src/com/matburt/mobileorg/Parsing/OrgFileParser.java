@@ -165,10 +165,10 @@ public class OrgFileParser {
     	if (OrgFileParser.titlePattern == null) {
     		StringBuffer pattern = new StringBuffer();
     		pattern.append("^(?:([A-Z]{2,}:?\\s+");
-    		pattern.append(")\\s*)?");
+    		pattern.append(")\\s*)?"); 
     		pattern.append("(\\[\\#.*\\])?(.*?)");
-    		pattern.append("\\s*(?::([^\\s]+):)?");
-    		pattern.append("(\\s*[\\*!])?$");
+    		pattern.append("\\s*(?::([^\\s]+):)?"); // tags
+    		pattern.append("(\\s*[!\\*])*$"); // habits
     		OrgFileParser.titlePattern = Pattern.compile(pattern.toString());
     	}
 		return OrgFileParser.titlePattern;

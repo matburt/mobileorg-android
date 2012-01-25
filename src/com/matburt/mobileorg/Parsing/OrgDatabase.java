@@ -281,7 +281,7 @@ public class OrgDatabase extends SQLiteOpenHelper {
 	public void clearChanges() {
 		db.delete("edits", null, null);
 	}
-		
+
 	public void clearDB() {
 		db.delete("orgdata", null, null);
 		db.delete("files", null, null);
