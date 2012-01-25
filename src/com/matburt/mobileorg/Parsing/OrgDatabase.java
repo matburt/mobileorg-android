@@ -309,25 +309,29 @@ public class OrgDatabase extends SQLiteOpenHelper {
 	}
 	
 	public long addOrUpdateFile(String filename, String name, String checksum, boolean includeInOutline) {
-		ContentValues values = new ContentValues();
-		values.put("filename", filename);
-		values.put("name", name);
-		values.put("checksum", checksum);
+		long file_id = this.getFileId(filename);
+	
+		if(file_id >= 0)
+			return file_id;
+
+		db.beginTransaction();
 
 		ContentValues orgdata = new ContentValues();
 		orgdata.put("name", name);
 		orgdata.put("todo", "");
 		
-		db.beginTransaction();
-		
-		
+		ContentValues values = new ContentValues();
+
 		if(includeInOutline) {
 			long id = db.insert("orgdata", null, orgdata);
 			values.put("node_id", id);
 		}
 		
-		db.delete("files", "filename=? AND name=?", new String[] { filename, name });
-		long file_id = db.insert("files", null, values);	
+		values.put("filename", filename);
+		values.put("name", name);
+		values.put("checksum", checksum);
+		
+		file_id = db.insert("files", null, values);	
 		
 		db.setTransactionSuccessful();
 		db.endTransaction();

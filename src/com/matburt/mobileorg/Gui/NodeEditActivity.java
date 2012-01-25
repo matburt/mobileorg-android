@@ -210,17 +210,15 @@ public class NodeEditActivity extends Activity {
 		String newTodo = todoStateView.getSelectedItem().toString();
 		String newPriority = priorityView.getSelectedItem().toString();
 		String newPayload = payloadView.getText().toString();
+		String newTags = tagsView.getText().toString();
 		
 		if (this.actionMode.equals(ACTIONMODE_CREATE)) {
-//			node.name = newTitle;
-//			node.todo = newTodo;
-//			node.priority = newPriority;
-//			node.payload.setContent(newPayload);
 			MobileOrgApplication appInst = (MobileOrgApplication) this.getApplication();
 			OrgDatabase orgDB = appInst.getDB();
 			long file_id = orgDB.addOrUpdateFile(OrgFile.CAPTURE_FILE, "Captures", "", true);
 			Long parent = orgDB.getFileNodeId(OrgFile.CAPTURE_FILE);
-			orgDB.addNode(parent, newTitle, newTodo, newPriority, null, file_id);
+			long node_id = orgDB.addNode(parent, newTitle, newTodo, newPriority, newTags, file_id);
+			orgDB.addNodePayload(node_id, newPayload);
 			
 		} else if (this.actionMode.equals(ACTIONMODE_EDIT)) {
 			try {
