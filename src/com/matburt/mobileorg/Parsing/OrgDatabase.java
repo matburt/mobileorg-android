@@ -14,7 +14,7 @@ import android.util.Log;
 
 public class OrgDatabase extends SQLiteOpenHelper {
 	private static final String DATABASE_NAME = "MobileOrg.db";
-	private static final int DATABASE_VERSION = 13;
+	private static final int DATABASE_VERSION = 2;
 	
 	private final static String[] nodeFields = {"_id", "name", "todo", "tags", "priority",
 		"payload", "parent_id"};
@@ -490,27 +490,13 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		switch (newVersion) {
 		case 2:
 			db.execSQL("DROP TABLE IF EXISTS priorities");
-			break;
-		case 3:
 			db.execSQL("DROP TABLE IF EXISTS files");
 			db.execSQL("DROP TABLE IF EXISTS todos");
-			break;
-		case 4:
-			db.execSQL("DROP TABLE IF EXISTS files");
-			break;
-		case 5:
-			db.execSQL("DROP TABLE IF EXISTS files");
-			break;
-		case 9:
-
+			db.execSQL("DROP TABLE IF EXISTS edits");
+			db.execSQL("DROP TABLE IF EXISTS orgdata");
 			break;
 		}
 
-		db.execSQL("DROP TABLE IF EXISTS files");
-		db.execSQL("DROP TABLE IF EXISTS todos");
-		db.execSQL("DROP TABLE IF EXISTS priorities");
-		db.execSQL("DROP TABLE IF EXISTS edits");
-		db.execSQL("DROP TABLE IF EXISTS orgdata");
 		onCreate(db);
 	}
 }
