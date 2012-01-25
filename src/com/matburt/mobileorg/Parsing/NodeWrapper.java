@@ -161,5 +161,21 @@ public class NodeWrapper {
 			return -1;
 		return cursor.getInt(cursor.getColumnIndex("_id"));
 	}
+
+	public void setName(String name, OrgDatabase db) {
+		db.updateNodeField(getId(), "name", name);
+	}
+
+	public void setTodo(String todo, OrgDatabase db) {
+		db.updateNodeField(getId(), "todo", todo);
+	}
+
+	public void setPriority(String priority, OrgDatabase db) {
+		db.updateNodeField(getId(), "priority", priority);
+	}
+
+	public void setPayload(String payload, OrgDatabase db) {
+		db.addNodePayload(getId(), payload);
+	}
 }
 

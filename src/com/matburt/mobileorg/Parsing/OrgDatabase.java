@@ -128,6 +128,11 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		addPayload.execute();
 	}
 	
+	public void updateNodeField(Long id, String entry, String value) {
+		this.db.execSQL("UPDATE orgdata SET " + entry + "='" + value + "'"
+				+ " WHERE _id=" + id.toString());
+	}
+	
 	public Cursor getNodeChildren(Long id) {
 		Cursor cursor = db.query("orgdata", nodeFields, "parent_id=?",
 				new String[] { id.toString() }, null, null, null);

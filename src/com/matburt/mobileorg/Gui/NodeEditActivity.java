@@ -248,20 +248,20 @@ public class NodeEditActivity extends Activity {
 		
 		if (!node.getName().equals(newTitle)) {
 			orgDB.addEdit("heading", node.getNodeId(orgDB), newTitle, node.getName(), newTitle);
-			//node.name = newTitle;
+			node.setName(newTitle, orgDB);
 		}
 		if (newTodo != null && !node.getTodo().equals(newTodo)) {
 			orgDB.addEdit("todo", node.getNodeId(orgDB), newTitle, node.getTodo(), newTodo);
-			//node.todo = newTodo;
+			node.setTodo(newTodo, orgDB);
 		}
 		if (newPriority != null && !node.getPriority().equals(newPriority)) {
 			orgDB.addEdit("priority", node.getNodeId(orgDB), newTitle, node.getPriority(),
 					newPriority);
-			//node.priority = newPriority;
+			node.setPriority(newPriority, orgDB);
 		}
 		if (!node.getCleanedPayload().equals(newPayload)) {
 			orgDB.addEdit("body", node.getNodeId(orgDB), newTitle, node.getCleanedPayload(), newPayload);
-			//node.payload.setContent(newPayload);
+			node.setPayload(newPayload, orgDB);
 		}
 	}
 }
