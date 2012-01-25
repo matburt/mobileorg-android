@@ -9,6 +9,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -66,18 +67,21 @@ public class NodeEditActivity extends Activity {
 				.getApplication();
 
 		Intent intent = getIntent();
+		
+		String defaultTodo = PreferenceManager.getDefaultSharedPreferences(
+				getApplicationContext()).getString("defaultTodo", "");
 
 		if(this.actionMode == null) {
 			this.actionMode = ACTIONMODE_CREATE;
 			node = new NodeWrapper(null);
 
-
-			String subject = intent.getStringExtra("android.intent.extra.SUBJECT");
+			String subject = intent
+					.getStringExtra("android.intent.extra.SUBJECT");
 			String text = intent.getStringExtra("android.intent.extra.TEXT");
 
 			titleView.setText(subject);
 			payloadView.setText(text);
-			setSpinner(todoStateView, appInst.getDB().getTodos(), "");
+			setSpinner(todoStateView, appInst.getDB().getTodos(), defaultTodo);
 			setSpinner(priorityView, appInst.getDB().getPriorities(), "");
 		}
 		else if (this.actionMode.equals(ACTIONMODE_CREATE)) {
@@ -85,7 +89,7 @@ public class NodeEditActivity extends Activity {
 
 			titleView.setText("");
 			payloadView.setText("");
-			setSpinner(todoStateView, appInst.getDB().getTodos(), "");
+			setSpinner(todoStateView, appInst.getDB().getTodos(), defaultTodo);
 			setSpinner(priorityView, appInst.getDB().getPriorities(), "");
 		} else if (this.actionMode.equals(ACTIONMODE_EDIT)) {
 			long nodeId = intent.getLongExtra("node_id", 0);

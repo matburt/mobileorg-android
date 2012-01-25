@@ -20,7 +20,12 @@ public class NodeWrapper {
 		if(cursor == null)
 			return "";
 		
-		return cursor.getString(cursor.getColumnIndex("name"));
+		String name = cursor.getString(cursor.getColumnIndex("name"));
+		
+		if(name == null)
+			return "";
+		else
+			return name;
 	}
 	
 	public ArrayList<NodeWrapper> getChildren(OrgDatabase db) {
