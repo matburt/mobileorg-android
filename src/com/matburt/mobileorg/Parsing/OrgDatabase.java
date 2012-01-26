@@ -10,10 +10,11 @@ import android.database.DatabaseUtils.InsertHelper;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
+import android.util.Log;
 
 public class OrgDatabase extends SQLiteOpenHelper {
-	private static final String DATABASE_NAME = "MobileOrg";
-	private static final int DATABASE_VERSION = 12;
+	private static final String DATABASE_NAME = "MobileOrg.db";
+	private static final int DATABASE_VERSION = 13;
 	
 	private final static String[] nodeFields = {"_id", "name", "todo", "tags", "priority",
 		"payload", "parent_id"};
@@ -27,6 +28,7 @@ public class OrgDatabase extends SQLiteOpenHelper {
 	@SuppressWarnings("unused")
 	private int orgdata_payloadColumn;
 	private int orgdata_parentidColumn;
+	private int orgdata_fileidColumn;
 	
 	private Context context;
 	private SQLiteDatabase db;
@@ -69,6 +71,7 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		db.execSQL("CREATE TABLE IF NOT EXISTS orgdata ("
 				+ "_id integer primary key autoincrement,"
 				+ "parent_id integer,"
+				+ "file_id integer," // Which _id in files table this node belongs to
 				+ "level integer default 0,"
 				+ "node_id text," // Org data id
 				+ "priority text,"
@@ -79,23 +82,15 @@ public class OrgDatabase extends SQLiteOpenHelper {
 	}
 
 	public long addNode(Long parentid, String name, String todo,
-			String priority, ArrayList<String> tags) {
+			String priority, String tags, long file_id) {
 		prepareOrgdataInsert();
 
 		orgdataInsertHelper.bind(orgdata_parentidColumn, parentid);
 		orgdataInsertHelper.bind(orgdata_nameColumn, name);
 		orgdataInsertHelper.bind(orgdata_todoColumn, todo);
 		orgdataInsertHelper.bind(orgdata_priorityColumn, priority);
-
-		if (tags != null) {
-			StringBuilder tagString = new StringBuilder();
-			for (String tag : tags) {
-				tagString.append(":");
-				tagString.append(tag);
-			}
-			tagString.deleteCharAt(0);
-			orgdataInsertHelper.bind(orgdata_tagsColumn, tagString.toString());
-		}
+		orgdataInsertHelper.bind(orgdata_fileidColumn, file_id);
+		orgdataInsertHelper.bind(orgdata_tagsColumn, tags);
 		
 		return orgdataInsertHelper.execute();
 	}
@@ -109,10 +104,18 @@ public class OrgDatabase extends SQLiteOpenHelper {
 			this.orgdata_priorityColumn = orgdataInsertHelper.getColumnIndex("priority");
 			this.orgdata_payloadColumn = orgdataInsertHelper.getColumnIndex("payload");
 			this.orgdata_parentidColumn = orgdataInsertHelper.getColumnIndex("parent_id");
+			this.orgdata_fileidColumn = orgdataInsertHelper.getColumnIndex("file_id");
+			this.orgdata_tagsColumn = orgdataInsertHelper.getColumnIndex("tags");
 		}
 		orgdataInsertHelper.prepareForInsert();
 	}
 
+	public Cursor getFileCursor() {
+		// This gets all of the org file nodes
+		return db.rawQuery("SELECT data.* FROM orgdata data JOIN" 
+				+ "(SELECT f.node_id FROM files f) file on file.node_id = data._id;", null);
+		// TODO Use a better way of retrieving file nodes, so we can use NodeWrapper on them
+	}
 	
 	SQLiteStatement addPayload;
 	
@@ -123,9 +126,6 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		addPayload.bindString(1, payload);
 		addPayload.bindLong(2, node_id);
 		addPayload.execute();
-//		ContentValues values = new ContentValues();
-//		values.put("payload", payload);
-//		db.update("orgdata", values, "_id=?", new String[] {node_id.toString()});
 	}
 
 	
@@ -144,17 +144,20 @@ public class OrgDatabase extends SQLiteOpenHelper {
 	
 	public Cursor getNode(Long id) {
 		Cursor cursor = db.query("orgdata", nodeFields, "_id=?", new String[] {id.toString()} , null, null, null);
+		
 		cursor.moveToFirst();
 		return cursor;
 	}
-
-	public Cursor getFileCursor() {
-		// This gets all of the org file nodes
-		return db.rawQuery("SELECT data.* FROM orgdata data JOIN" 
-				+ "(SELECT f.node_id FROM files f) file on file.node_id = data._id;", null);
+	
+	public Cursor search(String query) {		
+		Cursor cursor = db.rawQuery(
+				"SELECT * FROM orgdata WHERE name LIKE ?",
+				new String[] { query });
+		
+		return cursor;
 	}
 	
-	public long getFileId(String filename) {
+	public long getFileNodeId(String filename) {
 		Cursor cursor = db.query("files", new String[] { "node_id" },
 				"filename=?", new String[] {filename}, null, null, null);
 		
@@ -163,6 +166,27 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		
 		cursor.moveToFirst();
 		return cursor.getInt(0);
+	}
+	
+	public long getFileId(String filename) {
+		Cursor cursor = db.query("files", new String[] { "_id" },
+				"filename=?", new String[] {filename}, null, null, null);
+		
+		if(cursor.getCount() == 0)
+			return -1;
+		
+		cursor.moveToFirst();
+		return cursor.getInt(0);
+	}
+	
+	public boolean isNodeEditable(Long node_id) {
+		Cursor cursor = db.query("files", new String[] { "_id" }, "node_id=?",
+				new String[] { node_id.toString() }, null, null, null);
+		
+		if(cursor.getCount() > 0)
+			return false;
+		else
+			return true;
 	}
 	
 	public void addEdit(String edittype, String nodeId, String nodeTitle,
@@ -182,7 +206,7 @@ public class OrgDatabase extends SQLiteOpenHelper {
 	public String fileToString(String filename) {
 		StringBuilder result = new StringBuilder();
 		
-		long file_id = getFileId(filename);
+		long file_id = getFileNodeId(filename);
 		
 		if(file_id < 0)
 			return "";
@@ -267,6 +291,9 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		OrgFile orgfile = new OrgFile(filename, context);
 		orgfile.remove();
 		
+		Long file_id = this.getFileId(filename);
+		Log.d("MobileOrg", "Deleting file_id " + file_id);
+		db.delete("orgdata", "file_id = ?", new String[] { file_id.toString() });
 		db.delete("files", "filename = ?", new String[] { filename });
 	}
 
@@ -277,10 +304,11 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		cursor.moveToFirst();
 		String filename = cursor.getString(cursor.getColumnIndex("filename"));
 		cursor.close();
+		
 		removeFile(filename);
 	}
 	
-	public void addOrUpdateFile(String filename, String name, String checksum, boolean includeInOutline) {
+	public long addOrUpdateFile(String filename, String name, String checksum, boolean includeInOutline) {
 		ContentValues values = new ContentValues();
 		values.put("filename", filename);
 		values.put("name", name);
@@ -292,16 +320,19 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		
 		db.beginTransaction();
 		
+		
 		if(includeInOutline) {
 			long id = db.insert("orgdata", null, orgdata);
 			values.put("node_id", id);
 		}
 		
 		db.delete("files", "filename=? AND name=?", new String[] { filename, name });
-		db.insert("files", null, values);	
+		long file_id = db.insert("files", null, values);	
 		
 		db.setTransactionSuccessful();
 		db.endTransaction();
+		
+		return file_id;
 	}
 
 	
@@ -369,8 +400,25 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		cursor.close();
 		return todos;
 	}
+	
+	public boolean isTodoActive(String todo) {
+		Cursor cursor = db.query("todos", new String[] {"isdone"}, "name = ?",
+				new String[] { todo }, null, null, null);		
+		
+		if(cursor.getCount() > 0) {
+			cursor.moveToFirst();
+			int isdone = cursor.getInt(0);
+			
+			if(isdone == 0)
+				return true;
+			else
+				return false;
+		}
+		
+		return false;
+	}
 
-	public ArrayList<HashMap<String, Integer>> getGroupedTodods() {
+	public ArrayList<HashMap<String, Integer>> getGroupedTodos() {
 		ArrayList<HashMap<String, Integer>> todos = new ArrayList<HashMap<String, Integer>>();
 		Cursor cursor = db.query("todos", new String[] { "todogroup", "name",
 				"isdone" }, null, null, null, null, "todogroup");

@@ -54,7 +54,7 @@ public class OutlineActivity extends ListActivity
 		node_id = intent.getLongExtra("node_id", -1);
 
 		if(this.node_id == -1) {
-			if(this.appInst.getDB().getFiles().isEmpty())
+			if(this.appInst.isSyncConfigured() == false)
                 this.showWizard();
 		}
 
@@ -85,7 +85,7 @@ public class OutlineActivity extends ListActivity
 			cursor = appInst.getDB().getFileCursor();
 
 		startManagingCursor(cursor);
-		this.outlineAdapter = new OutlineCursorAdapter(this, cursor);
+		this.outlineAdapter = new OutlineCursorAdapter(this, cursor, appInst.getDB());
 		this.setListAdapter(outlineAdapter);
 
 		getListView().setSelection(this.lastSelection);
@@ -114,6 +114,9 @@ public class OutlineActivity extends ListActivity
 		
 		case R.id.menu_capture:
 			return runEditNewNodeActivity();
+			
+		case R.id.menu_search:
+			return runSearch();
 		}
 		return false;
 	}
@@ -221,6 +224,10 @@ public class OutlineActivity extends ListActivity
 					}
 				});
 		builder.create().show();
+	}
+
+	private boolean runSearch() {
+		return onSearchRequested();
 	}
 	
 	private boolean runShowSettings() {

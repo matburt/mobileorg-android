@@ -29,15 +29,17 @@ public class OrgFileParser {
 	public OrgFileParser(OrgDatabase appdb) {
 	}
 
+	long file_id;
 	
-	public void parse(String filename, BufferedReader breader, OrgDatabase orgdb) {
-		this.todos = orgdb.getGroupedTodods();
+	public void parse(String filename, BufferedReader breader, OrgDatabase orgdb, long file_id) {
+		this.file_id = file_id;
+		this.todos = orgdb.getGroupedTodos();
 
 		this.starStack = new Stack<Integer>();
 		this.parentIdStack = new Stack<Long>();
 		
 		this.starStack.push(0);
-		Long fileID = orgdb.getFileId(filename);
+		Long fileID = orgdb.getFileNodeId(filename);
 		this.parentIdStack.push(fileID);
 
 		this.payload = new StringBuilder();
@@ -110,8 +112,8 @@ public class OrgFileParser {
         String name = "";
         String priority = "";
         String todo = "";
-        ArrayList<String> tags = new ArrayList<String>();
-    	    	
+        String tags = "";
+        
     	Pattern pattern = prepareTitlePattern();
     	Matcher m = pattern.matcher(heading);
 		if (m.find()) {
@@ -132,16 +134,14 @@ public class OrgFileParser {
 			name += m.group(3);
 			String tempTags = m.group(4);
 			if (tempTags != null) {
-				for (String tag : tempTags.split(":")) {
-					tags.add(tag);
-				}
+					tags = tempTags;
 			}
 		} else {
 			Log.w(LT, "Title not matched: " + heading);
 			name = heading;
 		}
     	
-		long nodeId = orgdb.addNode(this.parentIdStack.peek(), name, todo, priority, null);
+		long nodeId = orgdb.addNode(this.parentIdStack.peek(), name, todo, priority, tags, this.file_id);
     	return nodeId;
     }
 
@@ -158,10 +158,6 @@ public class OrgFileParser {
         else
             newHeading = heading;
 
-        // Hack to strip out * from habits
-//        if(this.nodeStack.get(0).name.equals("agendas.org"))
-//        	newHeading = newHeading.replaceAll("\\*", "");
-        
         return newHeading;
     }
  
@@ -172,7 +168,6 @@ public class OrgFileParser {
     		pattern.append(")\\s*)?");
     		pattern.append("(\\[\\#.*\\])?(.*?)");
     		pattern.append("\\s*(?::([^\\s]+):)?");
-    		// TODO Line beneath should filter out habit stuff from agenda.org, but it doesn't seem to filter *
     		pattern.append("(\\s*[\\*!])?$");
     		OrgFileParser.titlePattern = Pattern.compile(pattern.toString());
     	}

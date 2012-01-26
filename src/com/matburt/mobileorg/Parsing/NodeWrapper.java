@@ -32,8 +32,10 @@ public class NodeWrapper {
 		Cursor nodeChildren = db.getNodeChildren(this.getId());
 		nodeChildren.moveToFirst();
 		
+		
 		while(nodeChildren.isAfterLast() == false) {
-			result.add(new NodeWrapper(nodeChildren));
+			long id = (new NodeWrapper(nodeChildren)).getId();
+			result.add(new NodeWrapper(id, db));
 			nodeChildren.moveToNext();
 		}
 		
@@ -56,19 +58,37 @@ public class NodeWrapper {
 	public String getTags() {
 		if(cursor == null)
 			return "";
-		return cursor.getString(cursor.getColumnIndex("tags"));
+		
+		int tagsColumn = cursor.getColumnIndex("tags");
+		
+		if(tagsColumn == -1)
+			return "";
+		
+		return cursor.getString(tagsColumn);
 	}
 	
 	public String getTodo() {
 		if(cursor == null)
 			return "";
-		return cursor.getString(cursor.getColumnIndex("todo"));
+		
+		int todoColumn = cursor.getColumnIndex("todo");
+		
+		if(todoColumn == -1)
+			return "";
+		
+		return cursor.getString(todoColumn);
 	}
 	
 	public String getPriority() {
 		if(cursor == null)
 			return "";
-		return cursor.getString(cursor.getColumnIndex("priority"));
+		
+		int priorityColumn = cursor.getColumnIndex("priority");
+		
+		if(priorityColumn == -1)
+			return "";
+		
+		return cursor.getString(priorityColumn);
 	}
 	
 	public String getNodeId() {
@@ -83,3 +103,4 @@ public class NodeWrapper {
 		return cursor.getInt(cursor.getColumnIndex("_id"));
 	}
 }
+

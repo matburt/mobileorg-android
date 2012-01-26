@@ -44,7 +44,7 @@ public class WizardActivity extends Activity {
     private final class UIHandler extends Handler
     {
         public static final int DISPLAY_UI_TOAST = 0;
-        public static final int DISPLAY_UI_DIALOG = 1;
+//        public static final int DISPLAY_UI_DIALOG = 1;
         
         public UIHandler(Looper looper)
         {

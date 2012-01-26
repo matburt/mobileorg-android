@@ -120,7 +120,7 @@ public class NodeEditActivity extends Activity {
 		view.setSelection(pos);
 	}
 
-	View.OnClickListener saveNodeListener = new View.OnClickListener() {
+	private View.OnClickListener saveNodeListener = new View.OnClickListener() {
 		public void onClick(View v) {
 			save();
 			setResult(RESULT_OK);
@@ -128,7 +128,7 @@ public class NodeEditActivity extends Activity {
 		}
 	};
 
-	View.OnClickListener editBodyListener = new View.OnClickListener() {
+	private View.OnClickListener editBodyListener = new View.OnClickListener() {
 		public void onClick(View v) {
 			Intent intent = new Intent(v.getContext(),
 					NodeEditBodyActivity.class);
@@ -137,7 +137,7 @@ public class NodeEditActivity extends Activity {
 		}
 	};
 
-	View.OnClickListener cancelListener = new View.OnClickListener() {
+	private View.OnClickListener cancelListener = new View.OnClickListener() {
 		public void onClick(View v) {
 			doCancel();
 		}
@@ -218,9 +218,9 @@ public class NodeEditActivity extends Activity {
 //			node.payload.setContent(newPayload);
 			MobileOrgApplication appInst = (MobileOrgApplication) this.getApplication();
 			OrgDatabase orgDB = appInst.getDB();
-			orgDB.addOrUpdateFile(OrgFile.CAPTURE_FILE, "Captures", "", true);
-			Long parent = orgDB.getFileId(OrgFile.CAPTURE_FILE);
-			orgDB.addNode(parent, newTitle, newTodo, newPriority, null);
+			long file_id = orgDB.addOrUpdateFile(OrgFile.CAPTURE_FILE, "Captures", "", true);
+			Long parent = orgDB.getFileNodeId(OrgFile.CAPTURE_FILE);
+			orgDB.addNode(parent, newTitle, newTodo, newPriority, null, file_id);
 			
 		} else if (this.actionMode.equals(ACTIONMODE_EDIT)) {
 			try {

@@ -1,7 +1,5 @@
 package com.matburt.mobileorg.Services;
 
-import java.util.ArrayList;
-
 import android.app.PendingIntent;
 import android.app.Service;
 import android.appwidget.AppWidgetManager;
@@ -16,7 +14,6 @@ import android.widget.RemoteViews;
 
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Gui.NodeEditActivity;
-import com.matburt.mobileorg.Parsing.EditNode;
 import com.matburt.mobileorg.Parsing.MobileOrgApplication;
 import com.matburt.mobileorg.Synchronizers.Synchronizer;
 
