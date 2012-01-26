@@ -20,7 +20,12 @@ public class NodeWrapper {
 		if(cursor == null)
 			return "";
 		
-		return cursor.getString(cursor.getColumnIndex("name"));
+		String name = cursor.getString(cursor.getColumnIndex("name"));
+		
+		if(name == null)
+			return "";
+		else
+			return name;
 	}
 	
 	public ArrayList<NodeWrapper> getChildren(OrgDatabase db) {
@@ -42,7 +47,7 @@ public class NodeWrapper {
 		return result;
 	}
 	
-	public String getPayload() {
+	public String getCleanedPayload() {
 		if(this.cursor == null)
 			return "";
 		
@@ -53,6 +58,18 @@ public class NodeWrapper {
 
 		NodePayload payload = new NodePayload(result);
 		return payload.getContent();
+	}
+	
+	public String getRawPayload() {
+		if(this.cursor == null)
+			return "";
+		
+		String result = cursor.getString(cursor.getColumnIndex("payload"));
+
+		if(result == null)
+			return "";
+
+		return result;
 	}
 	
 	public String getTags() {
@@ -91,16 +108,74 @@ public class NodeWrapper {
 		return cursor.getString(priorityColumn);
 	}
 	
-	public String getNodeId() {
+	/**
+	 * @return The :ID: or :ORIGINAL_ID: field of the payload.
+	 */
+	public String getNodeId(OrgDatabase db) {
 		if(cursor == null)
 			return "";
-		return cursor.getString(cursor.getColumnIndex("node_id"));
+		
+		NodePayload payload = new NodePayload(getRawPayload());
+		String id = payload.getId();
+				
+		if(id == null)
+			return constructOlpId(db);
+		
+		return id;
 	}
 	
-	public long getId() {
+	private String constructOlpId(OrgDatabase db) {
+		StringBuilder result = new StringBuilder();
+		result.insert(0, getName());
+		
+		long parentId = getParentId();
+
+		while(parentId > 0) {
+			NodeWrapper node = new NodeWrapper(db.getNode(parentId));
+			parentId = node.getParentId();
+
+			if(parentId > 0)
+				result.insert(0, node.getName() + "/");
+			else { // Get file nodes real name
+				String filename = db.getFileName(node.getId());
+				result.insert(0, filename + ":");
+			}
+		}
+		
+		result.insert(0, "olp:");
+		return result.toString();
+	}
+
+	private long getParentId() {
+		if(cursor == null)
+			return -1;
+		
+		return cursor.getInt(cursor.getColumnIndex("parent_id"));
+	}
+	
+	/**
+	 * @return The internal id of the node. Used for mapping to database.
+	 */
+	private long getId() {
 		if(cursor == null)
 			return -1;
 		return cursor.getInt(cursor.getColumnIndex("_id"));
+	}
+
+	public void setName(String name, OrgDatabase db) {
+		db.updateNodeField(getId(), "name", name);
+	}
+
+	public void setTodo(String todo, OrgDatabase db) {
+		db.updateNodeField(getId(), "todo", todo);
+	}
+
+	public void setPriority(String priority, OrgDatabase db) {
+		db.updateNodeField(getId(), "priority", priority);
+	}
+
+	public void setPayload(String payload, OrgDatabase db) {
+		db.addNodePayload(getId(), payload);
 	}
 }
 

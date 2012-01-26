@@ -60,6 +60,14 @@
             android:summary="@string/summary_capture_with_timestamp"
             android:title="@string/title_capture_with_timestamp" />
 
+        <ListPreference
+            android:defaultValue=""
+            android:entries="@array/storageModes"
+            android:entryValues="@array/storageModesVals"
+            android:key="defaultTodo"
+            android:summary="Default todo when capturing files"
+            android:title="Default todo" />
+
         <Preference
             android:key="clearDB"
             android:summary="Clean up the storage database"

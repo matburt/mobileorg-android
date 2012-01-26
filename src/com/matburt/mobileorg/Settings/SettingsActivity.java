@@ -13,7 +13,6 @@ import android.os.Bundle;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
-import android.preference.Preference.OnPreferenceClickListener;
 
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Parsing.MobileOrgApplication;
@@ -21,39 +20,61 @@ import com.matburt.mobileorg.Parsing.OrgDatabase;
 
 public class SettingsActivity extends PreferenceActivity {
 
+	OrgDatabase db;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		Intent prefsIntent = getIntent();
 		int resourceID = prefsIntent.getIntExtra("prefs", R.xml.preferences);
 		addPreferencesFromResource(resourceID);
+
+		this.db = ((MobileOrgApplication) this.getApplication()).getDB();
+
 		populateSyncSources();
+		populateTodoKeywords();
 
-		final OrgDatabase db = ((MobileOrgApplication) this.getApplication())
-				.getDB();
-		findPreference("clearDB").setOnPreferenceClickListener(
-				new OnPreferenceClickListener() {
+		findPreference("clearDB").setOnPreferenceClickListener(onClearDBClick);
+	}
 
-					@Override
-					public boolean onPreferenceClick(Preference preference) {
-						new AlertDialog.Builder(SettingsActivity.this)
-								.setIcon(android.R.drawable.ic_dialog_alert)
-								.setTitle("Clear DB?")
-								.setMessage("Are you sure want to clear DB?")
-								.setPositiveButton("Yes",
-										new DialogInterface.OnClickListener() {
+	private Preference.OnPreferenceClickListener onClearDBClick = new Preference.OnPreferenceClickListener() {
 
-											@Override
-											public void onClick(
-													DialogInterface dialog,
-													int which) {
-												db.clearDB();
-											}
+		@Override
+		public boolean onPreferenceClick(Preference preference) {
+			new AlertDialog.Builder(SettingsActivity.this)
+					.setIcon(android.R.drawable.ic_dialog_alert)
+					.setTitle("Clear DB?")
+					.setMessage("Are you sure want to clear DB?")
+					.setPositiveButton("Yes",
+							new DialogInterface.OnClickListener() {
 
-										}).setNegativeButton("No", null).show();
-						return false;
-					}
-				});
+								@Override
+								public void onClick(DialogInterface dialog,
+										int which) {
+									db.clearDB();
+								}
+
+							}).setNegativeButton("No", null).show();
+			return false;
+		}
+	};
+	
+	private void populateTodoKeywords() {
+		ListPreference defaultTodo = (ListPreference) findPreference("defaultTodo");
+		
+		ArrayList<String> todoList = db.getTodos();
+		
+		CharSequence[] todos = new CharSequence[todoList.size() + 1];
+		int i = 0;
+		for(String todo: todoList) {
+			todos[i] = todo;
+			i++;
+		}
+		
+		todos[i] = "";
+		
+		defaultTodo.setEntries(todos);
+		defaultTodo.setEntryValues(todos);
 	}
 
 	protected void populateSyncSources() {
@@ -102,9 +123,9 @@ public class SettingsActivity extends PreferenceActivity {
 		syncSource.setEntryValues(values);
 	}
 
-	public static final String SYNCHRONIZER_PLUGIN_ACTION = "com.matburt.mobileorg.SYNCHRONIZE";
+	private static final String SYNCHRONIZER_PLUGIN_ACTION = "com.matburt.mobileorg.SYNCHRONIZE";
 
-	public static List<PackageItemInfo> discoverSynchronizerPlugins(
+	private static List<PackageItemInfo> discoverSynchronizerPlugins(
 			Context context) {
 		Intent discoverSynchro = new Intent(SYNCHRONIZER_PLUGIN_ACTION);
 		List<ResolveInfo> packages = context.getPackageManager()

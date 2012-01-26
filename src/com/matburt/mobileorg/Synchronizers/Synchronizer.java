@@ -81,7 +81,7 @@ abstract public class Synchronizer {
 		setupNotification();
 		updateNotification(0, "Synchronizing changes " + OrgFile.CAPTURE_FILE);
 		try {
-			push(OrgFile.CAPTURE_FILE);
+			pushCaptures();
 			pull();
 		} catch (IOException e) {
 			displayErrorNotification("Error occured during sync: "
@@ -93,11 +93,14 @@ abstract public class Synchronizer {
 	}
 
 	/**
-	 * This method will fetch the local and the remote version of a file and
-	 * combine their content. This combined version is transfered to the remote.
+	 * This method will fetch the local and the remote version of the capture
+	 * file combine their content. This combined version is transfered to the
+	 * remote.
 	 */
-	private void push(String filename) throws IOException {
+	private void pushCaptures() throws IOException {
+		final String filename = OrgFile.CAPTURE_FILE;
     	String localContents = this.appdb.fileToString(filename);
+    	localContents += this.appdb.editsToString();
 
         if(localContents.equals(""))
         	return;
@@ -110,6 +113,7 @@ abstract public class Synchronizer {
 		
 		putRemoteFile(filename, localContents);
 		
+		this.appdb.clearEdits();
 		this.appdb.removeFile(filename);
 	}
 	

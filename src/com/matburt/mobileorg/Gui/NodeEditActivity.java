@@ -9,6 +9,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -66,18 +67,21 @@ public class NodeEditActivity extends Activity {
 				.getApplication();
 
 		Intent intent = getIntent();
+		
+		String defaultTodo = PreferenceManager.getDefaultSharedPreferences(
+				getApplicationContext()).getString("defaultTodo", "");
 
 		if(this.actionMode == null) {
 			this.actionMode = ACTIONMODE_CREATE;
 			node = new NodeWrapper(null);
 
-
-			String subject = intent.getStringExtra("android.intent.extra.SUBJECT");
+			String subject = intent
+					.getStringExtra("android.intent.extra.SUBJECT");
 			String text = intent.getStringExtra("android.intent.extra.TEXT");
 
 			titleView.setText(subject);
 			payloadView.setText(text);
-			setSpinner(todoStateView, appInst.getDB().getTodos(), "");
+			setSpinner(todoStateView, appInst.getDB().getTodos(), defaultTodo);
 			setSpinner(priorityView, appInst.getDB().getPriorities(), "");
 		}
 		else if (this.actionMode.equals(ACTIONMODE_CREATE)) {
@@ -85,7 +89,7 @@ public class NodeEditActivity extends Activity {
 
 			titleView.setText("");
 			payloadView.setText("");
-			setSpinner(todoStateView, appInst.getDB().getTodos(), "");
+			setSpinner(todoStateView, appInst.getDB().getTodos(), defaultTodo);
 			setSpinner(priorityView, appInst.getDB().getPriorities(), "");
 		} else if (this.actionMode.equals(ACTIONMODE_EDIT)) {
 			long nodeId = intent.getLongExtra("node_id", 0);
@@ -96,7 +100,7 @@ public class NodeEditActivity extends Activity {
 			
 			//titleView.setText(cursor.getString(cursor.getColumnIndex("name")));
 			titleView.setText(node.getName());
-			payloadView.setText(node.getPayload());
+			payloadView.setText(node.getCleanedPayload());
 			tagsView.setText(node.getTags());
 
 			setSpinner(todoStateView, appInst.getDB().getTodos(), node.getTodo());
@@ -132,7 +136,7 @@ public class NodeEditActivity extends Activity {
 		public void onClick(View v) {
 			Intent intent = new Intent(v.getContext(),
 					NodeEditBodyActivity.class);
-			intent.putExtra(NodeEditBodyActivity.DISPLAY_STRING, node.getPayload());
+			intent.putExtra(NodeEditBodyActivity.DISPLAY_STRING, node.getCleanedPayload());
 			startActivityForResult(intent, EDIT_BODY);
 		}
 	};
@@ -196,7 +200,7 @@ public class NodeEditActivity extends Activity {
 			if (newPayload.length() == 0 && newTitle.length() == 0)
 				return false;
 		} else if (this.actionMode.equals(ACTIONMODE_EDIT)) {
-			if (newPayload.equals(node.getPayload()) && newTitle.equals(node.getName())
+			if (newPayload.equals(node.getCleanedPayload()) && newTitle.equals(node.getName())
 					&& newTodo.equals(node.getTodo())
 					&& newPriority.equals(node.getPriority()))
 				return false;
@@ -210,17 +214,15 @@ public class NodeEditActivity extends Activity {
 		String newTodo = todoStateView.getSelectedItem().toString();
 		String newPriority = priorityView.getSelectedItem().toString();
 		String newPayload = payloadView.getText().toString();
+		String newTags = tagsView.getText().toString();
 		
 		if (this.actionMode.equals(ACTIONMODE_CREATE)) {
-//			node.name = newTitle;
-//			node.todo = newTodo;
-//			node.priority = newPriority;
-//			node.payload.setContent(newPayload);
 			MobileOrgApplication appInst = (MobileOrgApplication) this.getApplication();
 			OrgDatabase orgDB = appInst.getDB();
 			long file_id = orgDB.addOrUpdateFile(OrgFile.CAPTURE_FILE, "Captures", "", true);
 			Long parent = orgDB.getFileNodeId(OrgFile.CAPTURE_FILE);
-			orgDB.addNode(parent, newTitle, newTodo, newPriority, null, file_id);
+			long node_id = orgDB.addNode(parent, newTitle, newTodo, newPriority, newTags, file_id);
+			orgDB.addNodePayload(node_id, newPayload);
 			
 		} else if (this.actionMode.equals(ACTIONMODE_EDIT)) {
 			try {
@@ -245,21 +247,21 @@ public class NodeEditActivity extends Activity {
 		OrgDatabase orgDB = appInst.getDB();
 		
 		if (!node.getName().equals(newTitle)) {
-			orgDB.addEdit("heading", node.getNodeId(), newTitle, node.getName(), newTitle);
-			//node.name = newTitle;
+			orgDB.addEdit("heading", node.getNodeId(orgDB), newTitle, node.getName(), newTitle);
+			node.setName(newTitle, orgDB);
 		}
 		if (newTodo != null && !node.getTodo().equals(newTodo)) {
-			orgDB.addEdit("todo", node.getNodeId(), newTitle, node.getTodo(), newTodo);
-			//node.todo = newTodo;
+			orgDB.addEdit("todo", node.getNodeId(orgDB), newTitle, node.getTodo(), newTodo);
+			node.setTodo(newTodo, orgDB);
 		}
 		if (newPriority != null && !node.getPriority().equals(newPriority)) {
-			orgDB.addEdit("priority", node.getNodeId(), newTitle, node.getPriority(),
+			orgDB.addEdit("priority", node.getNodeId(orgDB), newTitle, node.getPriority(),
 					newPriority);
-			//node.priority = newPriority;
+			node.setPriority(newPriority, orgDB);
 		}
-		if (!node.getPayload().equals(newPayload)) {
-			orgDB.addEdit("body", node.getNodeId(), newTitle, node.getPayload(), newPayload);
-			//node.payload.setContent(newPayload);
+		if (!node.getCleanedPayload().equals(newPayload)) {
+			orgDB.addEdit("body", node.getNodeId(orgDB), newTitle, node.getCleanedPayload(), newPayload);
+			node.setPayload(newPayload, orgDB);
 		}
 	}
 }

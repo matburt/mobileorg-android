@@ -107,35 +107,48 @@ public class OrgFileParser {
     }
     
     private long parseLineIntoNode (String thisLine, int numstars, OrgDatabase orgdb) {
-    	String heading = stripHeading(thisLine, numstars).trim();
-    	
+        String heading = thisLine.substring(numstars+1);
+
         String name = "";
         String priority = "";
         String todo = "";
         String tags = "";
         
     	Pattern pattern = prepareTitlePattern();
-    	Matcher m = pattern.matcher(heading);
-		if (m.find()) {
-			if (m.group(1) != null) {
-				String tempTodo = m.group(1).trim();
+    	Matcher matcher = pattern.matcher(heading);
+		if (matcher.find()) {
+			if (matcher.group(TODO_GROUP) != null) {
+				String tempTodo = matcher.group(TODO_GROUP).trim();
 				if (tempTodo.length() > 0 && isValidTodo(tempTodo)) {
 					todo = tempTodo;
 				} else {
 					name = tempTodo + " ";
 				}
 			}
-			if (m.group(2) != null) {
-				priority = m.group(2);
+			if (matcher.group(PRIORITY_GROUP) != null) {
+				priority = matcher.group(PRIORITY_GROUP);
 				priority = priority.replace("#", "");
 				priority = priority.replace("[", "");
 				priority = priority.replace("]", "");
 			}
-			name += m.group(3);
-			String tempTags = m.group(4);
-			if (tempTags != null) {
-					tags = tempTags;
+			
+			name += matcher.group(TITLE_GROUP);
+			
+			if(matcher.group(AFTER_GROUP) != null) {
+				int start = matcher.group(AFTER_GROUP).indexOf("TITLE:");
+				int end = matcher.group(AFTER_GROUP).indexOf("</after>");
+				
+				if(start > -1 && end > -1) {
+					String title = matcher.group(AFTER_GROUP).substring(
+							start + 6, end);
+					name = title + ">" + name;
+				}
 			}
+			
+			tags = matcher.group(TAGS_GROUP);
+			if (tags == null)
+					tags = "";
+			
 		} else {
 			Log.w(LT, "Title not matched: " + heading);
 			name = heading;
@@ -144,31 +157,24 @@ public class OrgFileParser {
 		long nodeId = orgdb.addNode(this.parentIdStack.peek(), name, todo, priority, tags, this.file_id);
     	return nodeId;
     }
-
-    final static Pattern titlePattern2 = Pattern.compile("<before.*</before>|<after.*</after>");
-    private String stripHeading(String line, int numstars) {
-        String heading = line.substring(numstars+1);
-
-        Matcher titleMatcher = titlePattern2.matcher(heading);
-        String newHeading = "";
-        if (titleMatcher.find()) {
-            newHeading += heading.substring(0, titleMatcher.start());
-            newHeading += heading.substring(titleMatcher.end(), heading.length());
-        }
-        else
-            newHeading = heading;
-
-        return newHeading;
-    }
  
+    private final int TODO_GROUP = 1;
+    private final int PRIORITY_GROUP = 2;
+    private final int TITLE_GROUP = 3;
+    private final int TAGS_GROUP = 4;
+    private final int AFTER_GROUP = 7;
+    
     private Pattern prepareTitlePattern() {
     	if (OrgFileParser.titlePattern == null) {
     		StringBuffer pattern = new StringBuffer();
-    		pattern.append("^(?:([A-Z]{2,}:?\\s+");
-    		pattern.append(")\\s*)?");
-    		pattern.append("(\\[\\#.*\\])?(.*?)");
-    		pattern.append("\\s*(?::([^\\s]+):)?");
-    		pattern.append("(\\s*[\\*!])?$");
+    		pattern.append("^\\s?(?:([A-Z]{2,}:?\\s+)\\s*)?"); 	// Todo
+    		pattern.append("(\\[\\#.*\\])?"); 				// Priority
+    		pattern.append("(.*?)"); 						// Title
+    		pattern.append("\\s*(?::([^\\s]+):)?"); 		// Tags
+    		pattern.append("(\\s*[!\\*])*"); 				// Habits
+    		pattern.append("(<before>.*</before>)?");		// Before
+    		pattern.append("(<after>.*</after>)?");			// After
+    		pattern.append("$");							// End of line
     		OrgFileParser.titlePattern = Pattern.compile(pattern.toString());
     	}
 		return OrgFileParser.titlePattern;
