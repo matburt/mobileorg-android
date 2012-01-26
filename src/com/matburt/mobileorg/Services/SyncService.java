@@ -15,6 +15,7 @@ import com.matburt.mobileorg.Synchronizers.SDCardSynchronizer;
 import com.matburt.mobileorg.Synchronizers.SSHSynchronizer;
 import com.matburt.mobileorg.Synchronizers.Synchronizer;
 import com.matburt.mobileorg.Synchronizers.WebDAVSynchronizer;
+import com.matburt.mobileorg.Synchronizers.NullSynchronizer;
 
 public class SyncService extends Service implements
 		SharedPreferences.OnSharedPreferenceChangeListener {

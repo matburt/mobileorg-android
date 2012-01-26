@@ -235,7 +235,7 @@ abstract public class Synchronizer {
         notificationManager.notify(notifyRef, notification);
 	}
 
-	private void announceSyncDone() {
+	public void announceSyncDone() {
 		Intent intent = new Intent(Synchronizer.SYNC_UPDATE);
 		intent.putExtra(SYNC_DONE, true);
 		this.context.sendBroadcast(intent);
