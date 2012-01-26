@@ -62,11 +62,9 @@ public class SyncService extends Service implements
 		return 0;
 	}
 
-	private void runSynchronizer() {
-		unsetAlarm();
+    public Synchronizer getSynchronizer() {
+        Synchronizer synchronizer = null;
 		String syncSource = appSettings.getString("syncSource", "");
-		final Synchronizer synchronizer;
-
 		if (syncSource.equals("webdav"))
 			synchronizer = new WebDAVSynchronizer(this, this.appInst);
 		else if (syncSource.equals("sdcard"))
@@ -78,7 +76,13 @@ public class SyncService extends Service implements
         else if (syncSource.equals("none"))
             synchronizer = new NullSynchronizer(this, this.appInst);
 		else
-			return;
+			synchronizer = null;
+        return synchronizer;
+    }
+
+	private void runSynchronizer() {
+		unsetAlarm();
+		final Synchronizer synchronizer = this.getSynchronizer();
 
 		Thread syncThread = new Thread() {
 			public void run() {
