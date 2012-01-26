@@ -72,6 +72,14 @@ abstract public class Synchronizer {
         this.appdb = appInst.getDB();
 	}
 
+    /**
+     * Used to indicate to other systems if active synchronization is available (true)
+     * or if synchronization is implicit or non-existant (falsse)
+     */
+    public boolean isEnabled() {
+        return true;
+    }
+
 	public void sync() {
 		if (isConfigured() == false) {
 			displayErrorNotification("Sync not configured");
