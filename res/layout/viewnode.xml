@@ -4,6 +4,10 @@
     android:layout_height="fill_parent"
     android:orientation="vertical" >
 
+     <com.markupartist.android.widget.ActionBar
+        android:id="@+id/actionbar"
+        style="@style/ActionBar" />
+    
     <WebView
         android:id="@+id/viewnode_webview"
         android:layout_width="fill_parent"

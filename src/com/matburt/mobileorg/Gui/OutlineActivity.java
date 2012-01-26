@@ -1,5 +1,6 @@
 package com.matburt.mobileorg.Gui;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.content.BroadcastReceiver;
@@ -19,6 +20,9 @@ import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.markupartist.android.widget.ActionBar;
+import com.markupartist.android.widget.ActionBar.Action;
+import com.markupartist.android.widget.ActionBar.IntentAction;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Parsing.MobileOrgApplication;
 import com.matburt.mobileorg.Services.SyncService;
@@ -48,6 +52,9 @@ public class OutlineActivity extends ListActivity
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
+		setContentView(R.layout.outline);		
+		setupActionbar(this);
+		
 		this.appInst = (MobileOrgApplication) this.getApplication();
 		
 		Intent intent = getIntent();
@@ -63,8 +70,21 @@ public class OutlineActivity extends ListActivity
 		this.syncReceiver = new SynchServiceReceiver();
 		registerReceiver(this.syncReceiver, new IntentFilter(
 				Synchronizer.SYNC_UPDATE));
-		
+				
 		refreshDisplay();
+	}
+	
+	public static void setupActionbar(Activity activity) {
+		ActionBar actionBar = (ActionBar) activity.findViewById(R.id.actionbar);
+		actionBar.setTitle("MobileOrg");
+
+		actionBar.setHomeAction(new IntentAction(activity, new Intent(activity,
+				OutlineActivity.class), R.drawable.icon));
+        
+		Intent intent2 = new Intent(activity, NodeEditActivity.class);
+		intent2.putExtra("actionMode", NodeEditActivity.ACTIONMODE_CREATE);
+        final Action otherAction = new IntentAction(activity, intent2, R.drawable.ic_menu_compose);
+        actionBar.addAction(otherAction);
 	}
 	
 	@Override
@@ -108,10 +128,10 @@ public class OutlineActivity extends ListActivity
 		case R.id.menu_settings:
 			return runShowSettings();
 		
-		case R.id.menu_outline:
-			refreshDisplay();
-			return true;
-		
+//		case R.id.menu_outline:
+//			refreshDisplay();
+//			return true;
+//		
 		case R.id.menu_capture:
 			return runEditNewNodeActivity();
 			

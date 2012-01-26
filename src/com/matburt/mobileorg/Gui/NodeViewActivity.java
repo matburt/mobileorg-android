@@ -31,8 +31,10 @@ public class NodeViewActivity extends Activity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.viewnode);
 
+		setContentView(R.layout.viewnode);
+		OutlineActivity.setupActionbar(this);
+		
 		Intent intent = getIntent();
 		this.node_id = intent.getLongExtra("node_id", -1);
 		
