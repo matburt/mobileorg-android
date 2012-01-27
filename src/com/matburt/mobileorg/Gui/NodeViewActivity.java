@@ -62,7 +62,12 @@ public class NodeViewActivity extends Activity {
 	}
 	
 	private void refreshDisplay() {
-		String data = convertToHTML();
+		String data;
+		
+		if(this.node_id == -1)
+			data = "<html><body>" + "Error loading node" + "</body></html>";
+		else
+			data = convertToHTML();
 		this.display.loadDataWithBaseURL(null, data, "text/html", "UTF-8", null);
 	}
 	
@@ -147,7 +152,8 @@ public class NodeViewActivity extends Activity {
 			try {
 				URL urlObj = new URL(url);
 				if (urlObj.getProtocol().equals("file")) {
-					return false;
+					handleInternalOrgUrl(url);
+					return true;
 				}
 			} catch (MalformedURLException e) {
 				Log.d("MobileOrg", "Malformed url :" + url);
@@ -166,6 +172,14 @@ public class NodeViewActivity extends Activity {
 				String description, String failingUrl) {
 		}
 
+	}
+	
+	private void handleInternalOrgUrl(String url) {		
+		long nodeId = appInst.getDB().getNodeFromPath(url);
+				
+		Intent intent = new Intent(this, NodeViewActivity.class);
+		intent.putExtra("node_id", nodeId);
+		startActivity(intent);
 	}
 
 	private class SynchServiceReceiver extends BroadcastReceiver {
