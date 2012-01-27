@@ -1,5 +1,8 @@
 package com.matburt.mobileorg.Gui;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Color;
@@ -61,6 +64,18 @@ public class OutlineCursorAdapter extends SimpleCursorAdapter {
 		
 		SpannableStringBuilder itemText = new SpannableStringBuilder(name);
 		
+		Pattern urlPattern = Pattern.compile("\\[\\[[^\\]]*\\]\\[([^\\]]*)\\]\\]");
+		Matcher matcher = urlPattern.matcher(itemText);
+		while(matcher.find()) {
+			itemText.delete(matcher.start(), matcher.end());
+			itemText.insert(matcher.start(), matcher.group(1));
+		
+			itemText.setSpan(new ForegroundColorSpan(Color.argb(255, 6, 69, 173)),
+					matcher.start(), matcher.start() + matcher.group(1).length(), 0);	
+			
+			matcher = urlPattern.matcher(itemText);
+		}
+	
 		if (priority != null && priority.isEmpty() == false) {
 			Spannable prioritySpan = new SpannableString(priority + " ");
 			prioritySpan.setSpan(new ForegroundColorSpan(Color.YELLOW), 0,

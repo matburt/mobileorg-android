@@ -156,7 +156,7 @@ public class NodeWrapper {
 	/**
 	 * @return The internal id of the node. Used for mapping to database.
 	 */
-	private long getId() {
+	public long getId() {
 		if(cursor == null)
 			return -1;
 		return cursor.getInt(cursor.getColumnIndex("_id"));
