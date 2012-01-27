@@ -127,7 +127,8 @@ public class WebDAVSynchronizer extends Synchronizer {
 		return new BufferedReader(new InputStreamReader(mainFile));
 	}
 
-    private void trustEveryone() {
+    /* See: http://stackoverflow.com/questions/1217141/self-signed-ssl-acceptance-android */
+    private void handleTrustRelationship() {
         try {
             HttpsURLConnection.setDefaultHostnameVerifier(new HostnameVerifier(){
                     public boolean verify(String hostname, SSLSession session) {
