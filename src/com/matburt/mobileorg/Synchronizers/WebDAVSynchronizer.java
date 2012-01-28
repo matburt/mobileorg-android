@@ -153,6 +153,11 @@ public class WebDAVSynchronizer extends Synchronizer {
 					R.string.error_url_fetch_detail, url,
 					"Invalid username or password"));
 		}
+        if (status.getStatusCode() == 403) {
+            throw new FileNotFoundException(r.getString(
+                    R.string.error_url_fetch_detail, url,
+                    "Server reported 'Forbidden'"));
+       }
 		if (status.getStatusCode() == 404) {
 			return null;
 		}
