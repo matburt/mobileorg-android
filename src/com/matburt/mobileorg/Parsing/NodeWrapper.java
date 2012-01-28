@@ -177,5 +177,9 @@ public class NodeWrapper {
 	public void setPayload(String payload, OrgDatabase db) {
 		db.addNodePayload(getId(), payload);
 	}
+
+	public void setTags(String tags, OrgDatabase db) {
+		db.updateNodeField(getId(), "tags", tags);
+	}
 }
 

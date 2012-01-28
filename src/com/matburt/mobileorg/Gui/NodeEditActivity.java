@@ -226,7 +226,7 @@ public class NodeEditActivity extends Activity {
 			
 		} else if (this.actionMode.equals(ACTIONMODE_EDIT)) {
 			try {
-				editNode(newTitle, newTodo, newPriority, newPayload);
+				editNode(newTitle, newTodo, newPriority, newPayload, newTags);
 			} catch (IOException e) {
 			}
 		}
@@ -242,7 +242,7 @@ public class NodeEditActivity extends Activity {
 	 * changed.
 	 */
 	private void editNode(String newTitle, String newTodo,
-			String newPriority, String newPayload) throws IOException {
+			String newPriority, String newPayload, String newTags) throws IOException {
 		MobileOrgApplication appInst = (MobileOrgApplication) this.getApplication();
 		OrgDatabase orgDB = appInst.getDB();
 		
@@ -262,6 +262,10 @@ public class NodeEditActivity extends Activity {
 		if (!node.getCleanedPayload().equals(newPayload)) {
 			orgDB.addEdit("body", node.getNodeId(orgDB), newTitle, node.getCleanedPayload(), newPayload);
 			node.setPayload(newPayload, orgDB);
+		}
+		if(!node.getTags().equals(newTags)) {
+			orgDB.addEdit("tags", node.getNodeId(orgDB), newTitle, node.getTags(), newTags);
+			node.setTags(newTags, orgDB);
 		}
 	}
 }

@@ -272,7 +272,7 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		final String name = cursor.getString(cursor.getColumnIndex("name"));
 		final String priority = cursor.getString(cursor.getColumnIndex("priority"));
 		final String payload = cursor.getString(cursor.getColumnIndex("payload"));
-		// TODO Add Tags
+		final String tags = cursor.getString(cursor.getColumnIndex("tags"));
 		
 		StringBuilder result = new StringBuilder();
 		result.append("* ");
@@ -283,7 +283,12 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		if (!priority.equals(""))
 			result.append("[#" + priority + "] ");
 
-		result.append(name + "\n");
+		result.append(name + " ");
+		
+		if(tags != null && !tags.equals(""))
+			result.append(":" + tags + ":");
+		
+		result.append("\n");
 
 		if (payload != null && payload.length() > 0)
 			result.append(payload + "\n");

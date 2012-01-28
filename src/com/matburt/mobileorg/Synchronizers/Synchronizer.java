@@ -177,7 +177,7 @@ abstract public class Synchronizer {
             filesToGet.add(key);
         }
 
-        filesToGet.remove("mobileorg.org");
+        filesToGet.remove(OrgFile.CAPTURE_FILE);
 
         if(filesToGet.size() == 0)
         	return;

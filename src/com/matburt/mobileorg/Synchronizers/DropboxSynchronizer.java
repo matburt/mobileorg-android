@@ -72,7 +72,12 @@ public class DropboxSynchronizer extends Synchronizer {
 					filePath, "Error downloading file"));
 		}
 
-		return new BufferedReader(new InputStreamReader(fd.is));
+		BufferedReader fileReader = new BufferedReader(new InputStreamReader(fd.is));
+		
+		if(fileReader == null)
+			throw new IOException("Error getting file " + filename);
+			
+		return fileReader;
 	}
 
     
