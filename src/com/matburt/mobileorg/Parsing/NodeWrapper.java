@@ -47,6 +47,19 @@ public class NodeWrapper {
 		return result;
 	}
 	
+	public String getPayloadResidue() {
+		if(this.cursor == null)
+			return "";
+		
+		String result = cursor.getString(cursor.getColumnIndex("payload"));
+
+		if(result == null)
+			return "";
+
+		NodePayload payload = new NodePayload(result);
+		return payload.getPayloadResidue();
+	}
+	
 	public String getCleanedPayload() {
 		if(this.cursor == null)
 			return "";

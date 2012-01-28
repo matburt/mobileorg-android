@@ -328,7 +328,8 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		result.append("** Old value\n" + oldVal.trim() + "\n");
 		result.append("** New value\n" + newVal.trim() + "\n");
 		result.append("** End of edit" + "\n\n");
-		return result.toString();
+				
+		return result.toString().replace(":ORIGINAL_ID:", ":ID:");
 	}
 	
 	public void clearEdits() {
