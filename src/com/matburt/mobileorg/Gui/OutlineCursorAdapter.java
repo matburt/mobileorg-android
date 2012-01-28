@@ -13,7 +13,6 @@ import android.text.style.ForegroundColorSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 
@@ -40,20 +39,27 @@ public class OutlineCursorAdapter extends SimpleCursorAdapter {
 
 	@Override
 	public View newView(Context context, Cursor cursor, ViewGroup parent) {
-		Cursor c = getCursor();
+		//Cursor c = getCursor();
 
 		final LayoutInflater inflater = LayoutInflater.from(context);
 		View v = inflater.inflate(R.layout.outline_item, parent, false);
 
-		bindView(v, context, c);
+		bindView(v, context, cursor);
 
 		return v;
 	}
 
 	@Override
 	public void bindView(View v, Context context, Cursor c) {
-		TextView orgItem = (TextView) v.findViewById(R.id.orgItem);
-		TextView tagsLayout = (TextView) v.findViewById(R.id.tagsLayout);
+		super.bindView(v, context, c);
+		
+		ViewHolder holder = (ViewHolder) v.getTag();
+		
+		if(holder == null) {
+			holder = new ViewHolder();
+			holder.orgItem = (TextView) v.findViewById(R.id.orgItem);
+			holder.tagsLayout = (TextView) v.findViewById(R.id.tagsLayout);
+		}
 
 		NodeWrapper node = new NodeWrapper(c);
 
@@ -63,6 +69,10 @@ public class OutlineCursorAdapter extends SimpleCursorAdapter {
 		String tags = node.getTags();
 		
 		SpannableStringBuilder itemText = new SpannableStringBuilder(name);
+		
+		if (name.startsWith("COMMENT"))
+			itemText.setSpan(new ForegroundColorSpan(Color.GRAY), 0,
+					"COMMENT".length(), 0);
 		
 		Pattern urlPattern = Pattern.compile("\\[\\[[^\\]]*\\]\\[([^\\]]*)\\]\\]");
 		Matcher matcher = urlPattern.matcher(itemText);
@@ -95,14 +105,14 @@ public class OutlineCursorAdapter extends SimpleCursorAdapter {
 			itemText.insert(0, todoSpan);
 		}
 			
-		orgItem.setText(itemText);
+		holder.orgItem.setText(itemText);
 
 		
 		if(tags != null && tags.isEmpty() == false) {
-			tagsLayout.setTextColor(Color.GRAY);
-			tagsLayout.setText(tags);
+			holder.tagsLayout.setTextColor(Color.GRAY);
+			holder.tagsLayout.setText(tags);
 		} else
-			tagsLayout.setVisibility(View.GONE);
+			holder.tagsLayout.setVisibility(View.GONE);
 		
 		// TextView dateInfo = (TextView) v.findViewById(R.id.dateInfo);
 
@@ -114,20 +124,18 @@ public class OutlineCursorAdapter extends SimpleCursorAdapter {
 		// // holder.dateInfo.setVisibility(View.VISIBLE);
 		// // }
 	}
-//
-//	/**
-//	 * Used as part of the holding pattern.
-//	 * 
-//	 * The idea is to save the findViewById()'s into this container object to
-//	 * speed up the list adapter. setTag() and getTag() are used to bind and
-//	 * retrieve the container.
-//	 * 
-//	 */
-//	static class ViewHolder {
-//		TextView orgItem;
-//		TextView todoState;
-//		TextView priorityState;
-//		LinearLayout tagsLayout;
+
+	/**
+	 * Used as part of the holding pattern.
+	 * 
+	 * The idea is to save the findViewById()'s into this container object to
+	 * speed up the list adapter. setTag() and getTag() are used to bind and
+	 * retrieve the container.
+	 * 
+	 */
+	private static class ViewHolder {
+		TextView orgItem;
+		TextView tagsLayout;
 //		TextView dateInfo;
-//	}
+	}
 }
