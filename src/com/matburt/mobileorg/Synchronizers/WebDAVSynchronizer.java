@@ -31,9 +31,44 @@ import android.util.Base64;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Parsing.MobileOrgApplication;
 import com.matburt.mobileorg.Parsing.OrgFile;
+import com.matburt.mobileorg.Parsing.OrgDatabase;
 
 public class WebDAVSynchronizer extends Synchronizer {
 
+    class IntelligentX509TrustManager implements X509TrustManager {
+        OrgDatabase db;
+
+        public IntelligentX509TrustManager(OrgDatabase db) {
+            super();
+            this.db = db;
+        }
+
+        public void checkClientTrusted(X509Certificate[] chain,
+                                       String authType) throws CertificateException {}
+
+        public void checkServerTrusted(X509Certificate[] chain,
+                                       String authType) throws CertificateException {
+            for (int i = 0; i < chain.length; i++) {
+                String descr = chain[i].toString();
+                int hash = chain[i].hashCode();
+                if (!this.db.certificateExists(hash)) {
+                    Log.i("MobileOrg", "New Certificate Found: " + Integer.toString(chain[i].hashCode()));
+                    this.db.addCertificate(hash, descr);
+                    //We don't trust any certificates at first
+                    throw new CertificateException("Untrusted New Certificate: " + Integer.toString(hash));
+                }
+                else {
+                    if (!this.db.certificateTrusted(hash)) {
+                        throw new CertificateException("Untrusted Known Certificate: " + Integer.toString(hash));
+                    }
+                }
+            }
+        }
+
+        public X509Certificate[] getAcceptedIssuers() {
+            return new X509Certificate[0];
+        }
+    }
 
 	private String remoteIndexPath;
 	private String remotePath;
@@ -51,7 +86,7 @@ public class WebDAVSynchronizer extends Synchronizer {
 
 		this.username = sharedPreferences.getString("webUser", "");
 		this.password = sharedPreferences.getString("webPass", "");
-        this.handleTrustRelationship();
+        this.handleTrustRelationship(parentContext);
 	}
 
     public String testConnection(String url, String user, String pass) {
@@ -122,7 +157,7 @@ public class WebDAVSynchronizer extends Synchronizer {
 
             if (mainFile == null) {
                 return null;
-            }
+            } 
 
             return new BufferedReader(new InputStreamReader(mainFile));
         }
@@ -133,21 +168,14 @@ public class WebDAVSynchronizer extends Synchronizer {
 	}
 
     /* See: http://stackoverflow.com/questions/1217141/self-signed-ssl-acceptance-android */
-    private void handleTrustRelationship() {
+    private void handleTrustRelationship(Context c) {
         try {
             HttpsURLConnection.setDefaultHostnameVerifier(new HostnameVerifier(){
                     public boolean verify(String hostname, SSLSession session) {
                         return true;
                     }});
             SSLContext context = SSLContext.getInstance("TLS");
-            context.init(null, new X509TrustManager[]{new X509TrustManager(){
-                    public void checkClientTrusted(X509Certificate[] chain,
-                                                   String authType) throws CertificateException {}
-                    public void checkServerTrusted(X509Certificate[] chain,
-                                                   String authType) throws CertificateException {}
-                    public X509Certificate[] getAcceptedIssuers() {
-                        return new X509Certificate[0];
-                    }}}, new SecureRandom());
+            context.init(null, new X509TrustManager[]{new IntelligentX509TrustManager(new OrgDatabase(c))}, new SecureRandom());
             HttpsURLConnection.setDefaultSSLSocketFactory(
                                                           context.getSocketFactory());
         } catch (Exception e) { // should never happen

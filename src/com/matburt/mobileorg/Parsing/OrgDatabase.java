@@ -18,6 +18,8 @@ public class OrgDatabase extends SQLiteOpenHelper {
 	
 	private final static String[] nodeFields = {"_id", "name", "todo", "tags", "priority",
 		"payload", "parent_id"};
+
+    private final static String[] certFields = {"_id", "hash", "description", "trusted"};
 	
 	@SuppressWarnings("unused")
 	private int orgdata_idColumn;
@@ -79,6 +81,11 @@ public class OrgDatabase extends SQLiteOpenHelper {
 				+ "tags text,"
 				+ "payload text,"
 				+ "name text)");
+        db.execSQL("CREATE TABLE IF NOT EXISTS certificates ("
+                   + "_id integer primary key autoincrement,"
+                   + "hash integer,"
+                   + "description text,"
+                   + "trusted integer default 0)");
 	}
 
 	public long addNode(Long parentid, String name, String todo,
@@ -118,7 +125,50 @@ public class OrgDatabase extends SQLiteOpenHelper {
 	}
 	
 	SQLiteStatement addPayload;
-	
+
+    public void addCertificate(int hash, String description) {
+        db.execSQL("CREATE TABLE IF NOT EXISTS certificates ("
+                   + "_id integer primary key autoincrement,"
+                   + "hash integer,"
+                   + "description text,"
+                   + "trusted integer default 0)");
+		db.beginTransaction();        
+		ContentValues values = new ContentValues();
+		values.put("hash", hash);
+		values.put("description", description);
+		db.insert("certificates", null, values);	
+		db.setTransactionSuccessful();
+		db.endTransaction();        
+    }
+
+    public boolean certificateExists(int hash) {
+        db.execSQL("CREATE TABLE IF NOT EXISTS certificates ("
+                   + "_id integer primary key autoincrement,"
+                   + "hash integer,"
+                   + "description text,"
+                   + "trusted integer default 0)");
+        Cursor c = db.query("certificates", certFields, "hash=?",
+                            new String[] { Integer.toString(hash) }, null, null, null);
+		if(c.getCount() > 0)
+			return true;
+		else
+			return false;
+	}
+
+    public boolean certificateTrusted(int hash) {
+        Cursor c = db.query("certificates", certFields, "hash=?",
+                            new String[] { Integer.toString(hash) }, null, null, null);
+        if (c.getCount() < 0) {
+            return false;
+        }
+		c.moveToFirst();
+		int isTrusted = c.getInt(c.getColumnIndex("trusted"));
+        if (isTrusted == 0) {
+            return false;
+        }
+        return true;
+    }
+
 	public void addNodePayload(Long id, final String payload) {
 		if(addPayload == null)
 			addPayload = this.db.compileStatement("UPDATE orgdata SET payload=? WHERE _id=?");
