@@ -16,6 +16,8 @@ public class OrgFileParser {
 
     private static final String LT = "MobileOrg";
 
+    private OrgDatabase db;
+    
     private ArrayList<HashMap<String, Integer>> todos = null;
 
 	private long file_id;
@@ -24,27 +26,25 @@ public class OrgFileParser {
 	private Stack<Long> parentIdStack;
 	private StringBuilder payload;
 	
-	private Pattern editTitlePattern = Pattern
-			.compile("F\\((edit:.*?)\\) \\[\\[(.*?)\\]\\[(.*?)\\]\\]");
-    
-	public OrgFileParser(OrgDatabase appdb) {
+	public OrgFileParser(OrgDatabase db) {
+		this.db = db;
 	}
 
 	
-	public void parse(String filename, BufferedReader breader, OrgDatabase orgdb, long file_id) {
+	public void parse(String filename, BufferedReader breader, long file_id) {
 		this.file_id = file_id;
-		this.todos = orgdb.getGroupedTodos();
+		this.todos = db.getGroupedTodos();
 
 		this.starStack = new Stack<Integer>();
 		this.parentIdStack = new Stack<Long>();
 		
 		this.starStack.push(0);
-		Long fileID = orgdb.getFileNodeId(filename);
+		Long fileID = db.getFileNodeId(filename);
 		this.parentIdStack.push(fileID);
 
 		this.payload = new StringBuilder();
 		
-		orgdb.getDB().beginTransaction();
+		db.getDB().beginTransaction();
 		
 		try {
 			String currentLine;
@@ -57,7 +57,7 @@ public class OrgFileParser {
 				int lineLength = currentLine.length();
 				int numstars = numberOfStars(currentLine, lineLength);
 				if (numstars > 0) {
-					parseHeading(currentLine, numstars, orgdb);
+					parseHeading(currentLine, numstars);
 				} else {
 					payload.append(currentLine);
 					payload.append("\n");
@@ -66,8 +66,8 @@ public class OrgFileParser {
 
 		} catch (IOException e) {}
 		
-		orgdb.getDB().setTransactionSuccessful();
-		orgdb.getDB().endTransaction();
+		db.getDB().setTransactionSuccessful();
+		db.getDB().endTransaction();
 	}
 
 	
@@ -86,8 +86,8 @@ public class OrgFileParser {
 		return numstars;
 	}
     
-	private void parseHeading(String thisLine, int numstars, OrgDatabase orgdb) {
-		orgdb.addNodePayload(this.parentIdStack.peek(), this.payload.toString());
+	private void parseHeading(String thisLine, int numstars) {
+		db.addNodePayload(this.parentIdStack.peek(), this.payload.toString());
 		
 		this.payload = new StringBuilder();
 		
@@ -101,12 +101,12 @@ public class OrgFileParser {
 			}
 		}
         
-		long newId = parseLineIntoNode(thisLine, numstars, orgdb);
+		long newId = parseLineIntoNode(thisLine, numstars);
         this.parentIdStack.push(newId);
         starStack.push(numstars);        
     }
     
-    private long parseLineIntoNode (String thisLine, int numstars, OrgDatabase orgdb) {
+    private long parseLineIntoNode (String thisLine, int numstars) {
         String heading = thisLine.substring(numstars+1);
 
         String name = "";
@@ -150,15 +150,15 @@ public class OrgFileParser {
 			name = heading;
 		}
     	
-		long nodeId = orgdb.addNode(this.parentIdStack.peek(), name, todo, priority, tags, this.file_id);
+		long nodeId = db.addNode(this.parentIdStack.peek(), name, todo, priority, tags, this.file_id);
     	return nodeId;
     }
  
-    private final int TODO_GROUP = 1;
-    private final int PRIORITY_GROUP = 2;
-    private final int TITLE_GROUP = 3;
-    private final int TAGS_GROUP = 4;
-    private final int AFTER_GROUP = 7;
+    private static final int TODO_GROUP = 1;
+    private static final int PRIORITY_GROUP = 2;
+    private static final int TITLE_GROUP = 3;
+    private static final int TAGS_GROUP = 4;
+    private static final int AFTER_GROUP = 7;
     
     private Pattern prepareTitlePattern() {
     	if (OrgFileParser.titlePattern == null) {
@@ -184,6 +184,9 @@ public class OrgFileParser {
 	}
 
 
+//	private Pattern editTitlePattern = Pattern
+//			.compile("F\\((edit:.*?)\\) \\[\\[(.*?)\\]\\[(.*?)\\]\\]");
+//    
 //    public ArrayList<EditNode> parseEdits() {
 //        Pattern editTitlePattern = Pattern.compile("F\\((edit:.*?)\\) \\[\\[(.*?)\\]\\[(.*?)\\]\\]");
 //        Pattern createTitlePattern = Pattern.compile("^\\*\\s+(.*)");

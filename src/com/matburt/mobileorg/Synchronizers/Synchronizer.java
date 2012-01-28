@@ -230,7 +230,7 @@ abstract public class Synchronizer {
                 continue;
             }
 			// TODO Generate checksum of file and compare to remoteChecksum
-            parser.parse(filename, rfile, this.appdb, file_id);
+            parser.parse(filename, rfile, file_id);
         }
 	}
 
