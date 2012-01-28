@@ -7,6 +7,7 @@ import android.database.Cursor;
 public class NodeWrapper {
 
 	private Cursor cursor;
+	private NodePayload payload;
 	
 	public NodeWrapper(long node_id, OrgDatabase db) {
 		this.cursor = db.getNode(node_id);
@@ -56,7 +57,9 @@ public class NodeWrapper {
 		if(result == null)
 			return "";
 
-		NodePayload payload = new NodePayload(result);
+		if(this.payload == null)
+			payload = new NodePayload(result);
+		
 		return payload.getPayloadResidue();
 	}
 	
@@ -69,7 +72,8 @@ public class NodeWrapper {
 		if(result == null)
 			return "";
 
-		NodePayload payload = new NodePayload(result);
+		if(this.payload == null)
+			payload = new NodePayload(result);
 		return payload.getContent();
 	}
 	
@@ -128,7 +132,9 @@ public class NodeWrapper {
 		if(cursor == null)
 			return "";
 		
-		NodePayload payload = new NodePayload(getRawPayload());
+		if(this.payload == null)
+			this.payload = new NodePayload(getRawPayload());
+
 		String id = payload.getId();
 				
 		if(id == null)
