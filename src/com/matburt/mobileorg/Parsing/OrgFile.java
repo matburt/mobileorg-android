@@ -16,6 +16,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Environment;
 import android.preference.PreferenceManager;
+import android.util.Log;
 
 public class OrgFile {
 
@@ -45,7 +46,7 @@ public class OrgFile {
 			fileContents.append(line);
 			fileContents.append("\n");
 		}
-
+        
 		return fileContents.toString();
 	}
 
