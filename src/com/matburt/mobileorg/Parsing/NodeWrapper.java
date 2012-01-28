@@ -194,5 +194,10 @@ public class NodeWrapper {
 	public void setTags(String tags, OrgDatabase db) {
 		db.updateNodeField(getId(), "tags", tags);
 	}
+	
+	public void close() {
+		if(cursor != null)
+			this.cursor.close();
+	}
 }
 

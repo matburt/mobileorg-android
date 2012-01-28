@@ -67,11 +67,11 @@ public class SyncService extends Service implements
         Synchronizer synchronizer = null;
 		String syncSource = appSettings.getString("syncSource", "");
 		if (syncSource.equals("webdav"))
-			synchronizer = new WebDAVSynchronizer(this, this.appInst);
+			synchronizer = new WebDAVSynchronizer(getApplicationContext(), this.appInst);
 		else if (syncSource.equals("sdcard"))
-			synchronizer = new SDCardSynchronizer(this, this.appInst);
+			synchronizer = new SDCardSynchronizer(getApplicationContext(), this.appInst);
 		else if (syncSource.equals("dropbox"))
-			synchronizer = new DropboxSynchronizer(this, this.appInst);
+			synchronizer = new DropboxSynchronizer(getApplicationContext(), this.appInst);
 		else if (syncSource.equals("scp"))
 			synchronizer = new SSHSynchronizer(this, this.appInst);
         else if (syncSource.equals("none"))

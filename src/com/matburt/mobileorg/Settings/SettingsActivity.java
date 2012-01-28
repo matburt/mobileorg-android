@@ -106,16 +106,16 @@ public class SettingsActivity extends PreferenceActivity {
 		}
 
 		// fill in the Intents for built-in synchronizers
-		Intent synchroIntent = new Intent(this, WebDAVSettingsActivity.class);
+		Intent synchroIntent = new Intent(getApplicationContext(), WebDAVSettingsActivity.class);
 		SynchronizerPreferences.syncIntents.put("webdav", synchroIntent);
 
-		synchroIntent = new Intent(this, SDCardSettingsActivity.class);
+		synchroIntent = new Intent(getApplicationContext(), SDCardSettingsActivity.class);
 		SynchronizerPreferences.syncIntents.put("sdcard", synchroIntent);
 
-		synchroIntent = new Intent(this, DropboxSettingsActivity.class);
+		synchroIntent = new Intent(getApplicationContext(), DropboxSettingsActivity.class);
 		SynchronizerPreferences.syncIntents.put("dropbox", synchroIntent);
 
-		synchroIntent = new Intent(this, ScpSettingsActivity.class);
+		synchroIntent = new Intent(getApplicationContext(), ScpSettingsActivity.class);
 		SynchronizerPreferences.syncIntents.put("scp", synchroIntent);
 
 		// populate the sync source list with updated data

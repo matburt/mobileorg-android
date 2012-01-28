@@ -58,6 +58,7 @@ public class NodeViewActivity extends Activity {
 	@Override
 	public void onDestroy() {
 		unregisterReceiver(this.syncReceiver);
+		this.display.destroy();
 		super.onDestroy();
 	}
 	
@@ -111,15 +112,15 @@ public class NodeViewActivity extends Activity {
 
 	private String convertToHTML() {
 		int levelOfRecursion = Integer.parseInt(PreferenceManager
-				.getDefaultSharedPreferences(this).getString(
+				.getDefaultSharedPreferences(getApplicationContext()).getString(
 						"viewRecursionMax", "0"));
 
 		String text = nodeToHTMLRecursive(
 				new NodeWrapper(node_id, appInst.getDB()), levelOfRecursion);
 		text = convertLinks(text);
 
-		boolean wrapLines = PreferenceManager.getDefaultSharedPreferences(this)
-				.getBoolean("viewWrapLines", false);
+		boolean wrapLines = PreferenceManager.getDefaultSharedPreferences(
+				getApplicationContext()).getBoolean("viewWrapLines", false);
 		if (wrapLines) {
 			// TODO Improve custom line wrapping
 			text = text.replaceAll("\\n\\n", "<br/>\n<br/>\n");
@@ -201,11 +202,13 @@ public class NodeViewActivity extends Activity {
 
 		for (NodeWrapper child : node.getChildren(appInst.getDB())) {
 			result.append(nodeToHTMLRecursive(child, level));
+			child.close();
 		}
+		
+		node.close();
 		return result.toString();
 	}
 	
-
 	private String nodeToHTML(NodeWrapper node, int headingLevel) {
 		StringBuilder result = new StringBuilder();
 

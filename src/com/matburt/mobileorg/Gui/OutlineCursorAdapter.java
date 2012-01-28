@@ -114,20 +114,20 @@ public class OutlineCursorAdapter extends SimpleCursorAdapter {
 		// // holder.dateInfo.setVisibility(View.VISIBLE);
 		// // }
 	}
-
-	/**
-	 * Used as part of the holding pattern.
-	 * 
-	 * The idea is to save the findViewById()'s into this container object to
-	 * speed up the list adapter. setTag() and getTag() are used to bind and
-	 * retrieve the container.
-	 * 
-	 */
-	static class ViewHolder {
-		TextView orgItem;
-		TextView todoState;
-		TextView priorityState;
-		LinearLayout tagsLayout;
-		TextView dateInfo;
-	}
+//
+//	/**
+//	 * Used as part of the holding pattern.
+//	 * 
+//	 * The idea is to save the findViewById()'s into this container object to
+//	 * speed up the list adapter. setTag() and getTag() are used to bind and
+//	 * retrieve the container.
+//	 * 
+//	 */
+//	static class ViewHolder {
+//		TextView orgItem;
+//		TextView todoState;
+//		TextView priorityState;
+//		LinearLayout tagsLayout;
+//		TextView dateInfo;
+//	}
 }

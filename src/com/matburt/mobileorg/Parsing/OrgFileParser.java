@@ -18,18 +18,18 @@ public class OrgFileParser {
 
     private ArrayList<HashMap<String, Integer>> todos = null;
 
+	private long file_id;
 	private static Pattern titlePattern = null;
 	private Stack<Integer> starStack;
 	private Stack<Long> parentIdStack;
 	private StringBuilder payload;
 	
-	Pattern editTitlePattern = Pattern
+	private Pattern editTitlePattern = Pattern
 			.compile("F\\((edit:.*?)\\) \\[\\[(.*?)\\]\\[(.*?)\\]\\]");
     
 	public OrgFileParser(OrgDatabase appdb) {
 	}
 
-	long file_id;
 	
 	public void parse(String filename, BufferedReader breader, OrgDatabase orgdb, long file_id) {
 		this.file_id = file_id;
