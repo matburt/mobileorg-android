@@ -33,6 +33,8 @@ public class OrgDatabase extends SQLiteOpenHelper {
 	private Context context;
 	private SQLiteDatabase db;
 	private InsertHelper orgdataInsertHelper;
+	private SQLiteStatement addPayloadStatement;
+
 
 	public OrgDatabase(Context context) {
 		super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -72,8 +74,8 @@ public class OrgDatabase extends SQLiteOpenHelper {
 				+ "_id integer primary key autoincrement,"
 				+ "parent_id integer," // orgdata:_id of parent node
 				+ "file_id integer," // files:_id of file node
-				+ "level integer default 0,"
 //				+ "node_id text," // Org data id
+				+ "level integer default 0,"
 				+ "priority text,"
 				+ "todo text,"
 				+ "tags text,"
@@ -81,6 +83,153 @@ public class OrgDatabase extends SQLiteOpenHelper {
 				+ "name text)");
 	}
 
+	
+/***************************
+ * Functions for accessing the files table.
+ ***************************/
+	
+	public Cursor getFileCursor() {
+		// This gets all of the org file nodes
+		return db.rawQuery("SELECT data.* FROM orgdata data JOIN" 
+				+ "(SELECT f.node_id FROM files f) file on file.node_id = data._id;", null);
+		// TODO Use a better way of retrieving file nodes, so we can use NodeWrapper on them
+	}
+	
+	public long getFileNodeId(String filename) {
+		Cursor cursor = db.query("files", new String[] { "node_id" },
+				"filename=?", new String[] {filename}, null, null, null);
+		
+		if(cursor.getCount() == 0) {
+			cursor.close();
+			return -1;
+		}
+		
+		cursor.moveToFirst();
+		long node_id = cursor.getInt(0);
+		cursor.close();
+		return node_id;
+	}
+	
+	public String getFileName(Long id) {
+		Cursor cursor = db.query("files", new String[] { "filename" },
+				"node_id=?", new String[] {id.toString()}, null, null, null);
+		
+		if(cursor.getCount() == 0) {
+			cursor.close();
+			return "";
+		}
+		
+		cursor.moveToFirst();
+		String filename = cursor.getString(cursor.getColumnIndex("filename"));
+		cursor.close();
+		return filename;
+	}
+	
+	public long getFileId(String filename) {
+		Cursor cursor = db.query("files", new String[] { "_id" },
+				"filename=?", new String[] {filename}, null, null, null);
+		
+		if(cursor.getCount() == 0) {
+			cursor.close();
+			return -1;
+		}
+		
+		cursor.moveToFirst();
+		long id = cursor.getInt(0);
+		cursor.close();
+		return id;
+	}
+	
+
+	public void removeFile(String filename) {
+		OrgFile orgfile = new OrgFile(filename, context);
+		orgfile.remove();
+		
+		Long file_id = this.getFileId(filename);
+		Log.d("MobileOrg", "Deleting file_id " + file_id);
+		db.delete("orgdata", "file_id = ?", new String[] { file_id.toString() });
+		db.delete("files", "filename = ?", new String[] { filename });
+	}
+
+	public void removeFile(Long node_id) {
+		Cursor cursor = db.query("files", new String[] { "filename" },
+				"node_id=?", new String[] { node_id.toString() }, null, null,
+				null);
+		cursor.moveToFirst();
+		String filename = cursor.getString(cursor.getColumnIndex("filename"));
+		cursor.close();
+		
+		removeFile(filename);
+	}
+	
+	public long addOrUpdateFile(String filename, String name, String checksum, boolean includeInOutline) {
+		long file_id = this.getFileId(filename);
+	
+		if(file_id >= 0)
+			return file_id;
+
+		db.beginTransaction();
+
+		ContentValues orgdata = new ContentValues();
+		orgdata.put("name", name);
+		orgdata.put("todo", "");
+		
+		ContentValues values = new ContentValues();
+
+		if(includeInOutline) {
+			long id = db.insert("orgdata", null, orgdata);
+			values.put("node_id", id);
+		}
+		
+		values.put("filename", filename);
+		values.put("name", name);
+		values.put("checksum", checksum);
+		
+		file_id = db.insert("files", null, values);	
+		
+		db.setTransactionSuccessful();
+		db.endTransaction();
+		
+		return file_id;
+	}
+
+	public HashMap<String, String> getFiles() {
+		HashMap<String, String> allFiles = new HashMap<String, String>();
+
+		Cursor cursor = db.query("files", new String[] { "filename", "name" },
+				null, null, null, null, "name");
+		cursor.moveToFirst();
+
+		while (cursor.isAfterLast() == false) {
+			allFiles.put(cursor.getString(0), cursor.getString(1));
+			cursor.moveToNext();
+		}
+
+		cursor.close();
+		return allFiles;
+	}
+
+	public HashMap<String, String> getFileChecksums() {
+		HashMap<String, String> checksums = new HashMap<String, String>();
+
+		Cursor cursor = db.query("files", new String[] { "filename", "checksum" },
+				null, null, null, null, null);
+		cursor.moveToFirst();
+
+		while (cursor.isAfterLast() == false) {
+			checksums.put(cursor.getString(cursor.getColumnIndex("filename")),
+					cursor.getString(cursor.getColumnIndex("checksum")));
+			cursor.moveToNext();
+		}
+
+		cursor.close();
+		return checksums;
+	}
+	
+/***************************
+ * Fast insert functions into orgdata table for synchronizing. 
+ ***************************/
+	
 	public long addNode(Long parentid, String name, String todo,
 			String priority, String tags, long file_id) {
 		prepareOrgdataInsert();
@@ -109,23 +258,26 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		}
 		orgdataInsertHelper.prepareForInsert();
 	}
-
-	public Cursor getFileCursor() {
-		// This gets all of the org file nodes
-		return db.rawQuery("SELECT data.* FROM orgdata data JOIN" 
-				+ "(SELECT f.node_id FROM files f) file on file.node_id = data._id;", null);
-		// TODO Use a better way of retrieving file nodes, so we can use NodeWrapper on them
+		
+	public void addNodePayload(Long id, final String payload) {
+		if(addPayloadStatement == null)
+			addPayloadStatement = this.db.compileStatement("UPDATE orgdata SET payload=? WHERE _id=?");
+		
+		addPayloadStatement.bindString(1, payload);
+		addPayloadStatement.bindLong(2, id);
+		addPayloadStatement.execute();
 	}
 	
-	SQLiteStatement addPayload;
-
-	public void addNodePayload(Long id, final String payload) {
-		if(addPayload == null)
-			addPayload = this.db.compileStatement("UPDATE orgdata SET payload=? WHERE _id=?");
+	
+/***************************
+ * Functions to access orgdata table. 
+ ***************************/
+	
+	public Cursor getNode(Long id) {
+		Cursor cursor = db.query("orgdata", nodeFields, "_id=?", new String[] {id.toString()} , null, null, null);
 		
-		addPayload.bindString(1, payload);
-		addPayload.bindLong(2, id);
-		addPayload.execute();
+		cursor.moveToFirst();
+		return cursor;
 	}
 	
 	public void updateNodeField(Long id, String entry, String value) {
@@ -140,99 +292,31 @@ public class OrgDatabase extends SQLiteOpenHelper {
 	}
 	
 	public boolean hasNodeChildren(Long id) {
-		if(getNodeChildren(id).getCount() > 0)
+		Cursor cursor = getNodeChildren(id);
+		int childCount = cursor.getCount();
+		cursor.close();
+		if(childCount > 0)
 			return true;
 		else
 			return false;
-	}
-	
-	public Cursor getNode(Long id) {
-		Cursor cursor = db.query("orgdata", nodeFields, "_id=?", new String[] {id.toString()} , null, null, null);
-		
-		cursor.moveToFirst();
-		return cursor;
-	}
-	
-	public Cursor search(String query) {		
-		Cursor cursor = db.rawQuery(
-				"SELECT * FROM orgdata WHERE name LIKE ?",
-				new String[] { query });
-		
-		return cursor;
-	}
-	
-	public long getFileNodeId(String filename) {
-		Cursor cursor = db.query("files", new String[] { "node_id" },
-				"filename=?", new String[] {filename}, null, null, null);
-		
-		if(cursor.getCount() == 0)
-			return -1;
-		
-		cursor.moveToFirst();
-		return cursor.getInt(0);
-	}
-	
-	public String getFileName(Long id) {
-		Cursor cursor = db.query("files", new String[] { "filename" },
-				"node_id=?", new String[] {id.toString()}, null, null, null);
-		
-		if(cursor.getCount() == 0)
-			return "";
-		
-		cursor.moveToFirst();
-		
-		return cursor.getString(cursor.getColumnIndex("filename"));
-	}
-	
-	public long getFileId(String filename) {
-		Cursor cursor = db.query("files", new String[] { "_id" },
-				"filename=?", new String[] {filename}, null, null, null);
-		
-		if(cursor.getCount() == 0)
-			return -1;
-		
-		cursor.moveToFirst();
-		return cursor.getInt(0);
-	}
-	
-	/**
-	 * Handles the internal org file: links.
-	 */
-	public long getNodeFromPath(String path) {
-		String file = path.substring("file://".length(), path.length());
-				
-		Cursor cursor = getNode(getFileNodeId(file));
-		
-		if(cursor.getCount() == 0)
-			return -1;
-		
-		long nodeId = cursor.getLong(cursor.getColumnIndex("_id"));
-
-		return nodeId;
-	}
-	
-	/**
-	 * This method might be useful to implement the file+headline links.
-	 */
-	@SuppressWarnings("unused")
-	private long findNodeWithName(Cursor nodes, String name) {
-		while(nodes.isAfterLast() == false) {
-			String nodeName = nodes.getString(nodes.getColumnIndex("name"));
-			if(nodeName.equals(name))
-				return nodes.getLong(nodes.getColumnIndex("_id"));
-		}
-		return -1;
 	}
 	
 	public boolean isNodeEditable(Long node_id) {
 		Cursor cursor = db.query("files", new String[] { "_id" }, "node_id=?",
 				new String[] { node_id.toString() }, null, null, null);
+		int count = cursor.getCount();
+		cursor.close();
 		
-		if(cursor.getCount() > 0)
+		if(count > 0)
 			return false;
 		else
 			return true;
 	}
+
+	
+/***************************
+ * Functions with regards to edits. 
+***************************/	
 	
 	public void addEdit(String edittype, String nodeId, String nodeTitle,
 			String oldValue, String newValue) {
@@ -247,7 +331,7 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		db.insert("edits", null, values);
 	}
 
-	// TODO Make recursive
+	// TODO Make recursive to support capturing of sub-heading nodes
 	public String fileToString(String filename) {
 		StringBuilder result = new StringBuilder();
 		
@@ -336,97 +420,10 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		db.delete("edits", null, null);
 	}
 
-	public void clearDB() {
-		db.delete("orgdata", null, null);
-		db.delete("files", null, null);
-		db.delete("edits", null, null);
-	}
-
-	public void removeFile(String filename) {
-		OrgFile orgfile = new OrgFile(filename, context);
-		orgfile.remove();
-		
-		Long file_id = this.getFileId(filename);
-		Log.d("MobileOrg", "Deleting file_id " + file_id);
-		db.delete("orgdata", "file_id = ?", new String[] { file_id.toString() });
-		db.delete("files", "filename = ?", new String[] { filename });
-	}
-
-	public void removeFile(Long node_id) {
-		Cursor cursor = db.query("files", new String[] { "filename" },
-				"node_id=?", new String[] { node_id.toString() }, null, null,
-				null);
-		cursor.moveToFirst();
-		String filename = cursor.getString(cursor.getColumnIndex("filename"));
-		cursor.close();
-		
-		removeFile(filename);
-	}
 	
-	public long addOrUpdateFile(String filename, String name, String checksum, boolean includeInOutline) {
-		long file_id = this.getFileId(filename);
-	
-		if(file_id >= 0)
-			return file_id;
-
-		db.beginTransaction();
-
-		ContentValues orgdata = new ContentValues();
-		orgdata.put("name", name);
-		orgdata.put("todo", "");
-		
-		ContentValues values = new ContentValues();
-
-		if(includeInOutline) {
-			long id = db.insert("orgdata", null, orgdata);
-			values.put("node_id", id);
-		}
-		
-		values.put("filename", filename);
-		values.put("name", name);
-		values.put("checksum", checksum);
-		
-		file_id = db.insert("files", null, values);	
-		
-		db.setTransactionSuccessful();
-		db.endTransaction();
-		
-		return file_id;
-	}
-
-	
-	public HashMap<String, String> getFiles() {
-		HashMap<String, String> allFiles = new HashMap<String, String>();
-
-		Cursor cursor = db.query("files", new String[] { "filename", "name" },
-				null, null, null, null, "name");
-		cursor.moveToFirst();
-
-		while (cursor.isAfterLast() == false) {
-			allFiles.put(cursor.getString(0), cursor.getString(1));
-			cursor.moveToNext();
-		}
-
-		cursor.close();
-		return allFiles;
-	}
-
-	public HashMap<String, String> getFileChecksums() {
-		HashMap<String, String> checksums = new HashMap<String, String>();
-
-		Cursor cursor = db.query("files", new String[] { "filename", "checksum" },
-				null, null, null, null, null);
-		cursor.moveToFirst();
-
-		while (cursor.isAfterLast() == false) {
-			checksums.put(cursor.getString(cursor.getColumnIndex("filename")),
-					cursor.getString(cursor.getColumnIndex("checksum")));
-			cursor.moveToNext();
-		}
-
-		cursor.close();
-		return checksums;
-	}
+/***************************
+ * Functions to access priorities and todo table. 
+ ***************************/
 
 	public void setTodos(ArrayList<HashMap<String, Boolean>> todos) {
 		db.beginTransaction();
@@ -467,6 +464,7 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		if(cursor.getCount() > 0) {
 			cursor.moveToFirst();
 			int isdone = cursor.getInt(0);
+			cursor.close();
 			
 			if(isdone == 0)
 				return true;
@@ -529,16 +527,59 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		db.endTransaction();
 	}
 
-	private ArrayList<String> cursorToArrayList(Cursor cursor) {
-		ArrayList<String> list = new ArrayList<String>();
-		cursor.moveToFirst();
+	
+/***************************
+ * Misc. functions.
+***************************/
 
-		while (cursor.isAfterLast() == false) {
-			list.add(cursor.getString(0));
-			cursor.moveToNext();
-		}
-		return list;
+	public void clearDB() {
+		db.delete("orgdata", null, null);
+		db.delete("files", null, null);
+		db.delete("edits", null, null);
 	}
+
+	
+	public Cursor search(String query) {		
+		Cursor cursor = db.rawQuery(
+				"SELECT * FROM orgdata WHERE name LIKE ?",
+				new String[] { query });
+		
+		return cursor;
+	}
+	
+
+	/**
+	 * Handles the internal org file: links.
+	 */
+	public long getNodeFromPath(String path) {
+		String file = path.substring("file://".length(), path.length());
+				
+		Cursor cursor = getNode(getFileNodeId(file));
+		
+		if(cursor.getCount() == 0) {
+			cursor.close();
+			return -1;
+		}
+		
+		long nodeId = cursor.getLong(cursor.getColumnIndex("_id"));
+		cursor.close();
+
+		return nodeId;
+	}
+	
+	/**
+	 * This method might be useful to implement the file+headline links.
+	 */
+	@SuppressWarnings("unused")
+	private long findNodeWithName(Cursor nodes, String name) {
+		while(nodes.isAfterLast() == false) {
+			String nodeName = nodes.getString(nodes.getColumnIndex("name"));
+			if(nodeName.equals(name))
+				return nodes.getLong(nodes.getColumnIndex("_id"));
+		}
+		return -1;
+	}
+
 	
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
@@ -554,4 +595,16 @@ public class OrgDatabase extends SQLiteOpenHelper {
 
 		onCreate(db);
 	}
+
+	private ArrayList<String> cursorToArrayList(Cursor cursor) {
+		ArrayList<String> list = new ArrayList<String>();
+		cursor.moveToFirst();
+
+		while (cursor.isAfterLast() == false) {
+			list.add(cursor.getString(0));
+			cursor.moveToNext();
+		}
+		return list;
+	}
+	
 }
