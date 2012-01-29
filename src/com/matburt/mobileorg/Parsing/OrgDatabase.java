@@ -17,7 +17,7 @@ public class OrgDatabase extends SQLiteOpenHelper {
 	private static final int DATABASE_VERSION = 2;
 	
 	private final static String[] nodeFields = {"_id", "name", "todo", "tags", "priority",
-		"payload", "parent_id"};
+		"payload", "parent_id", "file_id"};
 
 	@SuppressWarnings("unused")
 	private int orgdata_idColumn;
@@ -110,9 +110,9 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		return node_id;
 	}
 	
-	public String getFileName(Long id) {
+	public String getFilenameFromNodeId(Long node_id) {
 		Cursor cursor = db.query("files", new String[] { "filename" },
-				"node_id=?", new String[] {id.toString()}, null, null, null);
+				"node_id=?", new String[] {node_id.toString()}, null, null, null);
 		
 		if(cursor.getCount() == 0) {
 			cursor.close();
@@ -124,6 +124,22 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		cursor.close();
 		return filename;
 	}
+	
+	public String getFilename(Long file_id) {
+		Cursor cursor = db.query("files", new String[] { "filename" },
+				"_id=?", new String[] {file_id.toString()}, null, null, null);
+		
+		if(cursor.getCount() == 0) {
+			cursor.close();
+			return "";
+		}
+		
+		cursor.moveToFirst();
+		String filename = cursor.getString(cursor.getColumnIndex("filename"));
+		cursor.close();
+		return filename;
+	}
+	
 	
 	public long getFileId(String filename) {
 		Cursor cursor = db.query("files", new String[] { "_id" },

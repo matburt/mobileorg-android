@@ -156,7 +156,7 @@ public class NodeWrapper {
 			if(parentId > 0)
 				result.insert(0, node.getName() + "/");
 			else { // Get file nodes real name
-				String filename = db.getFileName(node.getId());
+				String filename = db.getFilenameFromNodeId(node.getId());
 				result.insert(0, filename + ":");
 			}
 		}
@@ -170,6 +170,20 @@ public class NodeWrapper {
 			return -1;
 		
 		return cursor.getInt(cursor.getColumnIndex("parent_id"));
+	}
+	
+	public String getFileName(OrgDatabase db) {
+		if(cursor == null)
+			return "";
+		
+		int columnIndex = cursor.getColumnIndex("file_id");
+		
+		if(columnIndex == -1)
+			return "";
+		
+		long file_id = cursor.getLong(columnIndex);
+		
+		return db.getFilename(file_id);
 	}
 	
 	/**

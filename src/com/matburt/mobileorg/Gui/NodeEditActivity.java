@@ -246,25 +246,31 @@ public class NodeEditActivity extends Activity {
 		OrgDatabase orgDB = appInst.getDB();
 		
 		if (!node.getName().equals(newTitle)) {
-			orgDB.addEdit("heading", node.getNodeId(orgDB), newTitle, node.getName(), newTitle);
+			if(node.getFileName(orgDB).equals(OrgFile.CAPTURE_FILE) == false)
+				orgDB.addEdit("heading", node.getNodeId(orgDB), newTitle, node.getName(), newTitle);
 			node.setName(newTitle, orgDB);
 		}
 		if (newTodo != null && !node.getTodo().equals(newTodo)) {
-			orgDB.addEdit("todo", node.getNodeId(orgDB), newTitle, node.getTodo(), newTodo);
+			if(node.getFileName(orgDB).equals(OrgFile.CAPTURE_FILE) == false)
+				orgDB.addEdit("todo", node.getNodeId(orgDB), newTitle, node.getTodo(), newTodo);
 			node.setTodo(newTodo, orgDB);
 		}
 		if (newPriority != null && !node.getPriority().equals(newPriority)) {
-			orgDB.addEdit("priority", node.getNodeId(orgDB), newTitle, node.getPriority(),
+			if(node.getFileName(orgDB).equals(OrgFile.CAPTURE_FILE) == false)
+				orgDB.addEdit("priority", node.getNodeId(orgDB), newTitle, node.getPriority(),
 					newPriority);
 			node.setPriority(newPriority, orgDB);
 		}
 		if (!node.getCleanedPayload().equals(newPayload)) {
 			String newRawPayload = node.getPayloadResidue() + newPayload;
-			orgDB.addEdit("body", node.getNodeId(orgDB), newTitle, node.getRawPayload(), newRawPayload);
+	
+			if(node.getFileName(orgDB).equals(OrgFile.CAPTURE_FILE) == false)
+				orgDB.addEdit("body", node.getNodeId(orgDB), newTitle, node.getRawPayload(), newRawPayload);
 			node.setPayload(newRawPayload, orgDB);
 		}
 		if(!node.getTags().equals(newTags)) {
-			orgDB.addEdit("tags", node.getNodeId(orgDB), newTitle, node.getTags(), newTags);
+			if(node.getFileName(orgDB).equals(OrgFile.CAPTURE_FILE) == false)
+				orgDB.addEdit("tags", node.getNodeId(orgDB), newTitle, node.getTags(), newTags);
 			node.setTags(newTags, orgDB);
 		}
 	}
