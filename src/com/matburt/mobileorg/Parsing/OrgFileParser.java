@@ -63,6 +63,9 @@ public class OrgFileParser {
 					payload.append("\n");
 				}
 			}
+			
+			// Add payload to the final node
+			db.addNodePayload(this.parentIdStack.peek(), this.payload.toString());
 
 		} catch (IOException e) {}
 		

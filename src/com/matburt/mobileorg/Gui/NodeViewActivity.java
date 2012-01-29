@@ -1,8 +1,5 @@
 package com.matburt.mobileorg.Gui;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.regex.Matcher;
@@ -126,10 +123,11 @@ public class NodeViewActivity extends Activity {
 				getApplicationContext()).getBoolean("viewWrapLines", false);
 		if (wrapLines) {
 			text = text.replaceAll("\\n\\n", "<br/>\n<br/>\n");		// wrap "paragraphs"
-			text = text.replaceAll("\\n(\\s*\\|)", "<br/>\n$1");		// wrap tables
 
 			text = text.replaceAll("\\n(\\s*[-\\+])", "<br/>\n$1");		// wrap unordered lists
 			text = text.replaceAll("\\n(\\s*\\d+[\\)\\.])", "<br/>\n$1"); // wrap ordered lists
+			
+			text = text.replaceAll("((\\s*\\|[^\\n]*\\|\\s*(?:<br/>)?\\n)+)", "<pre>$1</pre>");
 			
 			text = "<html><body>" + text + "</body></html>";
 		} else {
@@ -137,42 +135,6 @@ public class NodeViewActivity extends Activity {
 			text = "<html><body><pre>" + text + "</pre></body></html>";
 		}
 
-		return text;
-	}
-	
-	
-	@SuppressWarnings("unused")
-	private String fancyLists(String text) {
-		try {
-			BufferedReader reader = new BufferedReader(new StringReader(text));
-			StringBuilder newText = new StringBuilder();
-			String line;
-			int listLevel = 0;
-			while((line = reader.readLine()) != null) {
-				Log.d("MobileOrg", "Line: " + line);
-				if(line.startsWith("- ")) {
-					if(listLevel == 0) {
-						line = "<ul>\n" + "<li>" + line + "</li>";
-						listLevel++;
-					} else
-						line = "<li>" + line + "</li>";
-				}
-				else {
-					while(listLevel > 0) {
-						listLevel--;
-						line = "</ul>" + line;
-					}
-				}
-				newText.append(line);
-			}
-			
-			Log.d("MobileOrg", "Result :\n" + newText.toString());
-			text = newText.toString();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
 		return text;
 	}
 	
@@ -267,10 +229,10 @@ public class NodeViewActivity extends Activity {
 
 		if (!node.getCleanedPayload().equals("")) {
 			result.append(node.getCleanedPayload());
-			result.append("\n<br/>");
+			result.append("\n<br/>\n");
 		}
 
-		result.append("\n<br/>\n");
+		result.append("<br/>\n");
 		return result.toString();
 	}
 
