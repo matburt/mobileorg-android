@@ -589,6 +589,10 @@ public class OrgDatabase extends SQLiteOpenHelper {
 	 */
 	public long getNodeFromPath(String path) {
 		String file = path.substring("file://".length(), path.length());
+		
+		// TODO Handle links to headings instead of simply stripping it out
+		if(file.indexOf(":") > -1)
+			file = file.substring(0, file.indexOf(":"));
 				
 		Cursor cursor = getNode(getFileNodeId(file));
 		
