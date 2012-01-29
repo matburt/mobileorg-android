@@ -7,6 +7,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.DatabaseUtils.InsertHelper;
+import android.database.MergeCursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
@@ -90,9 +91,28 @@ public class OrgDatabase extends SQLiteOpenHelper {
 	
 	public Cursor getFileCursor() {
 		// This gets all of the org file nodes
-		return db.rawQuery("SELECT data.* FROM orgdata data JOIN" 
-				+ "(SELECT f.node_id FROM files f) file on file.node_id = data._id;", null);
-		// TODO Use a better way of retrieving file nodes, so we can use NodeWrapper on them
+//		return db.rawQuery("SELECT data.* FROM orgdata data JOIN" 
+//				+ "(SELECT f.node_id FROM files f) file on file.node_id = data._id;", null);
+
+		Cursor cursor = db.query("files", new String[] { "node_id" }, null,
+				null, null, null, "name ASC");
+		
+		cursor.moveToFirst();
+		
+		Cursor[] nodes = new Cursor[cursor.getCount()];
+		
+		for(int i = 0; i < cursor.getCount(); i++) {
+			Long id = cursor.getLong(cursor.getColumnIndex("node_id"));
+			Cursor node = db.query("orgdata", nodeFields, "_id=?",
+					new String[] { id.toString() }, null, null, null);
+			nodes[i] = node;
+			cursor.moveToNext();
+		}
+		
+		cursor.close();
+		
+		MergeCursor cursors = new MergeCursor(nodes);	
+		return cursors;
 	}
 	
 	public long getFileNodeId(String filename) {
