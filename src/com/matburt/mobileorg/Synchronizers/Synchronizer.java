@@ -189,7 +189,7 @@ abstract public class Synchronizer {
             this.appdb.removeFile(filename);
 			long file_id = this.appdb.addOrUpdateFile(filename, filenameMap.get(filename), remoteChecksums.get(filename), true);
 			// TODO Generate checksum of file and compare to remoteChecksum
-            parser.parse(filename, rfile, file_id);
+            parser.parse(filename, rfile, file_id, context);
         }
 	}
 

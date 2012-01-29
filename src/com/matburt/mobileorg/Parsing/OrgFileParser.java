@@ -8,6 +8,8 @@ import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import android.content.Context;
+import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -26,12 +28,21 @@ public class OrgFileParser {
 	private Stack<Long> parentIdStack;
 	private StringBuilder payload;
 	
+	/**
+	 * This toggles the use of the <after>TITLE: </after> field. It is now
+	 * disabled, see https://github.com/matburt/mobileorg-android/issues/114
+	 */
+	private boolean useTitleField = false;
+	
 	public OrgFileParser(OrgDatabase db) {
 		this.db = db;
 	}
 
 	
-	public void parse(String filename, BufferedReader breader, long file_id) {
+	public void parse(String filename, BufferedReader breader, long file_id, Context context) {
+		useTitleField = PreferenceManager.getDefaultSharedPreferences(context)
+				.getBoolean("useAgendaTitle", false);
+		
 		this.file_id = file_id;
 		this.todos = db.getGroupedTodos();
 
@@ -133,13 +144,14 @@ public class OrgFileParser {
 			
 			name += matcher.group(TITLE_GROUP);
 			
-			if(matcher.group(AFTER_GROUP) != null) {
+			if(this.useTitleField && matcher.group(AFTER_GROUP) != null) {
 				int start = matcher.group(AFTER_GROUP).indexOf("TITLE:");
 				int end = matcher.group(AFTER_GROUP).indexOf("</after>");
 				
 				if(start > -1 && end > -1) {
 					String title = matcher.group(AFTER_GROUP).substring(
 							start + 6, end);
+					
 					name = title + ">" + name;
 				}
 			}
