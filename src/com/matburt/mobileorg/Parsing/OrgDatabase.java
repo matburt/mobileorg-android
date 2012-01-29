@@ -18,7 +18,7 @@ public class OrgDatabase extends SQLiteOpenHelper {
 	
 	private final static String[] nodeFields = {"_id", "name", "todo", "tags", "priority",
 		"payload", "parent_id"};
-	
+
 	@SuppressWarnings("unused")
 	private int orgdata_idColumn;
 	private int orgdata_nameColumn;
@@ -118,7 +118,7 @@ public class OrgDatabase extends SQLiteOpenHelper {
 	}
 	
 	SQLiteStatement addPayload;
-	
+
 	public void addNodePayload(Long id, final String payload) {
 		if(addPayload == null)
 			addPayload = this.db.compileStatement("UPDATE orgdata SET payload=? WHERE _id=?");

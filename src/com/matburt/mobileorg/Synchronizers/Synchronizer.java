@@ -4,6 +4,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.security.cert.CertificateException;
+import javax.net.ssl.SSLHandshakeException;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -18,6 +20,7 @@ import android.widget.RemoteViews;
 
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Gui.OutlineActivity;
+import com.matburt.mobileorg.Gui.CertificateConflictActivity;
 import com.matburt.mobileorg.Parsing.MobileOrgApplication;
 import com.matburt.mobileorg.Parsing.OrgDatabase;
 import com.matburt.mobileorg.Parsing.OrgFile;
@@ -52,7 +55,7 @@ abstract public class Synchronizer {
 	 * Returns a BufferedReader to the remote file.
 	 * @param filename Name of the file, without path
 	 */
-	protected abstract BufferedReader getRemoteFile(String filename) throws IOException;
+	protected abstract BufferedReader getRemoteFile(String filename) throws IOException, CertificateException, SSLHandshakeException;
 	
 	/** 
 	 * Use this to disconnect from any services and cleanup.
@@ -71,6 +74,20 @@ abstract public class Synchronizer {
                                    context.getApplicationContext());
         this.appdb = appInst.getDB();
 	}
+
+    /**
+     * Used to indicate to other systems if active synchronization is available (true)
+     * or if synchronization is implicit or non-existant (falsse)
+     */
+    public boolean isEnabled() {
+        return true;
+    }
+
+    private void handleChangedCertificate() {
+        Intent i = new Intent(this.context, CertificateConflictActivity.class);
+        i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        this.context.startActivity(i);
+    }
 
 	public void sync() {
 		if (isConfigured() == false) {
@@ -104,12 +121,21 @@ abstract public class Synchronizer {
 
         if(localContents.equals(""))
         	return;
-    	
-    	String remoteContent = OrgFile.read(getRemoteFile(filename));
-		updateNotification(10);
+    	try {
+            String remoteContent = OrgFile.read(getRemoteFile(filename));
+            updateNotification(10);
 
-        if (remoteContent.indexOf("{\"error\":") == -1)
-            localContents = remoteContent + "\n" + localContents;
+            if (remoteContent.indexOf("{\"error\":") == -1)
+                localContents = remoteContent + "\n" + localContents;
+        }
+        catch (CertificateException e) {
+            this.handleChangedCertificate();
+            return;
+        }
+        catch (SSLHandshakeException e) {
+            this.handleChangedCertificate();
+            return;
+        }
 		
 		putRemoteFile(filename, localContents);
 		
@@ -124,7 +150,19 @@ abstract public class Synchronizer {
 	 */
 	private void pull() throws IOException {
 		updateNotification(20, "Downloading checksum file");
-        String remoteChecksumContents = OrgFile.read(getRemoteFile("checksums.dat"));
+        String remoteChecksumContents = "";
+        try {
+            remoteChecksumContents = OrgFile.read(getRemoteFile("checksums.dat"));
+        }
+        catch (CertificateException e) {
+            this.handleChangedCertificate();
+            return;
+        }
+        catch (SSLHandshakeException e) {
+            this.handleChangedCertificate();
+            return;
+        }
+
 		updateNotification(40);
 
 		HashMap<String, String> remoteChecksums = OrgFileParser.getChecksums(remoteChecksumContents);
@@ -146,8 +184,20 @@ abstract public class Synchronizer {
         
 		filesToGet.remove("index.org");
 		updateNotification(60, "Downloading index file");
-		String remoteIndexContents = OrgFile.read(getRemoteFile("index.org"));
-				
+        String remoteIndexContents = "";
+        try {
+            remoteIndexContents = OrgFile.read(getRemoteFile("index.org"));
+        }
+        catch (CertificateException e) {
+            this.handleChangedCertificate();
+            return;
+        }
+        catch (SSLHandshakeException e) {
+            this.handleChangedCertificate();
+            return;
+        }
+
+        
         this.appdb.setTodos(OrgFileParser.getTodosFromIndex(remoteIndexContents));
         this.appdb.setPriorities(OrgFileParser.getPrioritiesFromIndex(remoteIndexContents));
 		HashMap<String, String> filenameMap = OrgFileParser.getFilesFromIndex(remoteIndexContents);
@@ -162,7 +212,19 @@ abstract public class Synchronizer {
 			Log.d("MobileOrg", "Getting " + filename + "/" + filenameMap.get(filename));
 			this.appdb.removeFile(filename);
 			long file_id = this.appdb.addOrUpdateFile(filename, filenameMap.get(filename), remoteChecksums.get(filename), true);
-            BufferedReader rfile = getRemoteFile(filename);
+            BufferedReader rfile = null;
+            try {
+                rfile = getRemoteFile(filename);
+            }
+            catch (CertificateException e) {
+                this.handleChangedCertificate();
+                return;
+            }
+            catch (SSLHandshakeException e) {
+                this.handleChangedCertificate();
+                return;
+            }
+
             if (rfile == null) {
                 Log.w("MobileOrg", "File does not seem to exist: " + filename);
                 continue;
@@ -227,7 +289,7 @@ abstract public class Synchronizer {
         notificationManager.notify(notifyRef, notification);
 	}
 
-	private void announceSyncDone() {
+	public void announceSyncDone() {
 		Intent intent = new Intent(Synchronizer.SYNC_UPDATE);
 		intent.putExtra(SYNC_DONE, true);
 		this.context.sendBroadcast(intent);

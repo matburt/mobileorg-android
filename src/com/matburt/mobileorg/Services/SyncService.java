@@ -15,6 +15,7 @@ import com.matburt.mobileorg.Synchronizers.SDCardSynchronizer;
 import com.matburt.mobileorg.Synchronizers.SSHSynchronizer;
 import com.matburt.mobileorg.Synchronizers.Synchronizer;
 import com.matburt.mobileorg.Synchronizers.WebDAVSynchronizer;
+import com.matburt.mobileorg.Synchronizers.NullSynchronizer;
 
 public class SyncService extends Service implements
 		SharedPreferences.OnSharedPreferenceChangeListener {
@@ -62,11 +63,9 @@ public class SyncService extends Service implements
 		return 0;
 	}
 
-	private void runSynchronizer() {
-		unsetAlarm();
+    public Synchronizer getSynchronizer() {
+        Synchronizer synchronizer = null;
 		String syncSource = appSettings.getString("syncSource", "");
-		final Synchronizer synchronizer;
-
 		if (syncSource.equals("webdav"))
 			synchronizer = new WebDAVSynchronizer(this, this.appInst);
 		else if (syncSource.equals("sdcard"))
@@ -75,8 +74,16 @@ public class SyncService extends Service implements
 			synchronizer = new DropboxSynchronizer(this, this.appInst);
 		else if (syncSource.equals("scp"))
 			synchronizer = new SSHSynchronizer(this, this.appInst);
+        else if (syncSource.equals("none"))
+            synchronizer = new NullSynchronizer(this, this.appInst);
 		else
-			return;
+			synchronizer = null;
+        return synchronizer;
+    }
+
+	private void runSynchronizer() {
+		unsetAlarm();
+		final Synchronizer synchronizer = this.getSynchronizer();
 
 		Thread syncThread = new Thread() {
 			public void run() {

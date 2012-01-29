@@ -5,44 +5,95 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.regex.Pattern;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.StatusLine;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.conn.scheme.PlainSocketFactory;
-import org.apache.http.conn.scheme.Scheme;
-import org.apache.http.conn.scheme.SchemeRegistry;
-import org.apache.http.conn.ssl.SSLSocketFactory;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
-import org.apache.http.params.CoreProtocolPNames;
-import org.apache.http.params.HttpParams;
+import java.security.SecureRandom;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.Authenticator;
+import java.net.PasswordAuthentication;
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.X509TrustManager;
+import javax.net.ssl.SSLHandshakeException;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.util.Base64;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Parsing.MobileOrgApplication;
 import com.matburt.mobileorg.Parsing.OrgFile;
+import com.matburt.mobileorg.Parsing.OrgDatabase;
 
 public class WebDAVSynchronizer extends Synchronizer {
 
+    class IntelligentX509TrustManager implements X509TrustManager {
+        Context c;
+
+        public IntelligentX509TrustManager(Context c) {
+            super();
+            this.c = c;
+        }
+
+        public boolean validateCertificate(int hash, String description) {
+            SharedPreferences appSettings = 
+                PreferenceManager.getDefaultSharedPreferences(this.c);
+            Editor edit = appSettings.edit();
+            int existingHash = appSettings.getInt("webCertHash", 0);
+            if (existingHash == 0) {
+                Log.i("MobileOrg", "Storing new certificate");
+                edit.putInt("webCertHash", hash);
+                edit.putString("webCertDescr", description);
+                edit.commit();
+                return true;
+            }
+            else if (existingHash != hash) {
+                Log.i("MobileOrg", "Conflicting Certificate Hash");
+                edit.putInt("webConflictHash", hash);
+                edit.putString("webConflictHashDesc", description);
+                edit.commit();
+                return false;
+            }
+            Log.i("MobileOrg", "Certificates match");
+            return true;
+        }
+
+        public void checkClientTrusted(X509Certificate[] chain,
+                                       String authType) throws CertificateException {}
+
+        public void checkServerTrusted(X509Certificate[] chain,
+                                       String authType) throws CertificateException {
+            for (int i = 0; i < chain.length; i++) {
+                String descr = chain[i].toString();
+                int hash = chain[i].hashCode();
+                Log.i("MobileOrg", "Validating certificate hash");
+                if (!this.validateCertificate(hash, descr)) {
+                    throw new CertificateException("Conflicting certificate found with hash " + 
+                                                   Integer.toString(hash));
+                }
+            }
+        }
+
+        public X509Certificate[] getAcceptedIssuers() {
+            return new X509Certificate[0];
+        }
+    }
+
 	private String remoteIndexPath;
 	private String remotePath;
+    private String username;
+    private String password;
 	
-	private String username;
-	private String password;
-
 	public WebDAVSynchronizer(Context parentContext, MobileOrgApplication appInst) {
 		super(parentContext, appInst);
 
@@ -54,6 +105,7 @@ public class WebDAVSynchronizer extends Synchronizer {
 
 		this.username = sharedPreferences.getString("webUser", "");
 		this.password = sharedPreferences.getString("webPass", "");
+        this.handleTrustRelationship(parentContext);
 	}
 
     public String testConnection(String url, String user, String pass) {
@@ -68,24 +120,35 @@ public class WebDAVSynchronizer extends Synchronizer {
         }
 
         try {
-            DefaultHttpClient dhc = this.createConnection();
+            HttpURLConnection dhc = this.createConnection(this.remoteIndexPath);
             if (dhc == null) {
                 Log.i("MobileOrg", "Test Connection is null");
                 return "Connection could not be established";
             }
 
             Log.i("MobileOrg", "Test Path: " + this.remoteIndexPath);
-            InputStream mainFile = this.getUrlStream(this.remoteIndexPath, dhc);
+            InputStream mainFile = null;
+            try {
+                mainFile = this.getUrlStream(this.remoteIndexPath);
 
-            if (mainFile == null) {
-                return "File '" + this.remoteIndexPath + "' doesn't appear to exist";
+                if (mainFile == null) {
+                    return "File '" + this.remoteIndexPath + "' doesn't appear to exist";
+                }
+
+                return null;
+            }
+            catch (FileNotFoundException e) {
+                Log.i("MobileOrg", "Got FNF");
+                throw e;
+            }
+            catch (Exception e) {
+                throw e;
             }
         }
         catch (Exception e) {
             Log.i("MobileOrg", "Test Exception: " + e.getMessage());
             return "Test Exception: " + e.getMessage();
         }
-        return null;
     }
 
 	public boolean isConfigured() {
@@ -101,89 +164,120 @@ public class WebDAVSynchronizer extends Synchronizer {
 	}
 
 	protected void putRemoteFile(String filename, String contents) throws IOException {
-		DefaultHttpClient httpC = this.createConnection();
 		String urlActual = this.getRootUrl() + filename;
-		putUrlFile(urlActual, httpC, contents);
+		putUrlFile(urlActual, contents);
 	}
 
-	protected BufferedReader getRemoteFile(String filename) throws IOException {
+	protected BufferedReader getRemoteFile(String filename) throws IOException, CertificateException {
 		String orgUrl = this.remotePath + filename;
-		DefaultHttpClient httpC = this.createConnection();
-		InputStream mainFile = this.getUrlStream(orgUrl, httpC);
+        InputStream mainFile = null;
+        try {
+            mainFile = this.getUrlStream(orgUrl);
 
-		if (mainFile == null) {
+            if (mainFile == null) {
+                return null;
+            } 
+
+            return new BufferedReader(new InputStreamReader(mainFile));
+        }
+        catch (CertificateException e) {
+            Log.w("MobileOrg", "Conflicting certificate found: " + e.toString());
+            throw e;
+        }
+        catch (SSLHandshakeException e) {
+            Log.e("MobileOrg", "SSLHandshakeException Exception in getUrlStream: " + e.toString());
+            throw e;
+        }
+        catch (Exception e) {
+            Log.e("MobileOrg", "Exception occurred in getRemoteFile: " + e.toString());
+            return null;
+        }
+	}
+
+    /* See: http://stackoverflow.com/questions/1217141/self-signed-ssl-acceptance-android */
+    private void handleTrustRelationship(Context c) {
+        try {
+            HttpsURLConnection.setDefaultHostnameVerifier(new HostnameVerifier(){
+                    public boolean verify(String hostname, SSLSession session) {
+                        return true;
+                    }});
+            SSLContext context = SSLContext.getInstance("TLS");
+            context.init(null, new X509TrustManager[]{new IntelligentX509TrustManager(c)}, new SecureRandom());
+            HttpsURLConnection.setDefaultSSLSocketFactory(
+                                                          context.getSocketFactory());
+        } catch (Exception e) { // should never happen
+            e.printStackTrace();
+        }
+    }
+
+	private HttpURLConnection createConnection(String url) {
+        URL newUrl = null;
+		try {
+            newUrl = new URL(url);
+		} catch (MalformedURLException e) {
 			return null;
 		}
-		return new BufferedReader(new InputStreamReader(mainFile));
+
+        HttpURLConnection con = null;
+        try {
+            con = (HttpURLConnection) newUrl.openConnection();
+        } catch (IOException e) {
+            return null;
+        }
+        con.setReadTimeout(4000);
+        con.setConnectTimeout(6000);
+        con.addRequestProperty("Expect", "100-continue");
+        con.addRequestProperty("Authorization",
+                               "Basic "+Base64.encodeToString((this.username + ":" + this.password).getBytes(),
+                                                      Base64.NO_WRAP));
+        return con;
 	}
 
-	private DefaultHttpClient createConnection() {
-		DefaultHttpClient httpClient = new DefaultHttpClient();
-		HttpParams params = httpClient.getParams();
-		SchemeRegistry schemeRegistry = new SchemeRegistry();
-		schemeRegistry.register(new Scheme("http", PlainSocketFactory
-				.getSocketFactory(), 80));
-		SSLSocketFactory sslSocketFactory = SSLSocketFactory.getSocketFactory();
-		sslSocketFactory
-				.setHostnameVerifier(SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
-		schemeRegistry.register(new Scheme("https", sslSocketFactory, 443));
-		ThreadSafeClientConnManager cm = new ThreadSafeClientConnManager(
-				params, schemeRegistry);
-
-		UsernamePasswordCredentials bCred = new UsernamePasswordCredentials(
-				username, password);
-		BasicCredentialsProvider cProvider = new BasicCredentialsProvider();
-		cProvider.setCredentials(AuthScope.ANY, bCred);
-
-		params.setBooleanParameter(CoreProtocolPNames.USE_EXPECT_CONTINUE,
-				false);
-		httpClient.setParams(params);
-
-		DefaultHttpClient nHttpClient = new DefaultHttpClient(cm, params);
-		nHttpClient.setCredentialsProvider(cProvider);
-		return nHttpClient;
-	}
-
-	private InputStream getUrlStream(String url, DefaultHttpClient httpClient)
-			throws IOException {
-		HttpResponse res = httpClient.execute(new HttpGet(url));
-		StatusLine status = res.getStatusLine();
-		if (status.getStatusCode() == 401) {
+	private InputStream getUrlStream(String url) throws IOException, CertificateException {
+        Log.i("MobileOrg", "Fetching " + url);
+        HttpURLConnection con = this.createConnection(url);
+        con.setRequestMethod("GET");
+        con.setDoInput(true);
+        con.connect();
+		if (con.getResponseCode() == HttpURLConnection.HTTP_UNAUTHORIZED) {
 			throw new FileNotFoundException(r.getString(
 					R.string.error_url_fetch_detail, url,
 					"Invalid username or password"));
 		}
-        if (status.getStatusCode() == 403) {
+		if (con.getResponseCode()== HttpURLConnection.HTTP_NOT_FOUND) {
+            throw new FileNotFoundException(r.getString(
+                            R.string.error_url_fetch_detail, url,
+                            "File not found: " + url));
+        }
+        if (con.getResponseCode() == HttpURLConnection.HTTP_FORBIDDEN) {
             throw new FileNotFoundException(r.getString(
                     R.string.error_url_fetch_detail, url,
                     "Server reported 'Forbidden'"));
-       }
-		if (status.getStatusCode() == 404) {
-			return null;
-		}
+        }
 
-		if (status.getStatusCode() < 200 || status.getStatusCode() > 299) {
+		if (con.getResponseCode() < HttpURLConnection.HTTP_OK || con.getResponseCode() > 299) {
 			throw new IOException(r.getString(R.string.error_url_fetch_detail,
-					url, status.getReasonPhrase()));
+                                              url, con.getResponseMessage()));
 		}
-		return res.getEntity().getContent();
+		return con.getInputStream();
 	}
 
-	private void putUrlFile(String url, DefaultHttpClient httpClient,
-			String content) throws IOException {
+	private void putUrlFile(String url, String content) throws IOException {
 		try {
-			HttpPut httpPut = new HttpPut(url);
-			httpPut.setEntity(new StringEntity(content, "UTF-8"));
-			HttpResponse response = httpClient.execute(httpPut);
-			StatusLine statResp = response.getStatusLine();
-			int statCode = statResp.getStatusCode();
-			if (statCode >= 400) {
-				throw new IOException(r.getString(
-						R.string.error_url_put_detail, url,
-						"Server returned code: " + Integer.toString(statCode)));
-			}
-			httpClient.getConnectionManager().shutdown();
-		} catch (UnsupportedEncodingException e) {
+            HttpURLConnection con = this.createConnection(url);
+            con.setRequestMethod("PUT");
+            con.setDoOutput(true);
+            OutputStreamWriter out = new OutputStreamWriter(
+                                              con.getOutputStream());
+            out.write(content);
+            out.flush();
+            out.close();
+            con.getInputStream();
+            if (con.getResponseCode() < HttpURLConnection.HTTP_OK || con.getResponseCode() > 299) {
+                throw new IOException(r.getString(R.string.error_url_fetch_detail,
+                                                  url, con.getResponseMessage()));
+            }
+        } catch (UnsupportedEncodingException e) {
 			throw new IOException(r.getString(
 					R.string.error_unsupported_encoding, OrgFile.CAPTURE_FILE));
 		}
