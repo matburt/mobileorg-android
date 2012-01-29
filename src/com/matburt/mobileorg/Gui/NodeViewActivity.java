@@ -2,18 +2,22 @@ package com.matburt.mobileorg.Gui;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import android.app.Activity;
+import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
@@ -40,7 +44,6 @@ public class NodeViewActivity extends Activity {
 		
 		this.display = (WebView) this.findViewById(R.id.viewnode_webview);
 		this.display.setWebViewClient(new InternalWebViewClient());
-		this.display.setWebChromeClient(new InternalWebChromeClient());
 		this.display.getSettings().setBuiltInZoomControls(true);
 
 		this.appInst = (MobileOrgApplication) this.getApplication();
@@ -59,8 +62,12 @@ public class NodeViewActivity extends Activity {
 	}
 	
 	private void refreshDisplay() {
-		String data = convertToHTML();
-		//this.display.loadData(data, "text/html", data);
+		String data;
+		
+		if(this.node_id == -1)
+			data = "<html><body>" + "Error loading node" + "</body></html>";
+		else
+			data = convertToHTML();
 		this.display.loadDataWithBaseURL(null, data, "text/html", "UTF-8", null);
 	}
 	
@@ -103,9 +110,6 @@ public class NodeViewActivity extends Activity {
 	}
 
 	private String convertToHTML() {
-
-//		this.setTitle(node.name);
-
 		int levelOfRecursion = Integer.parseInt(PreferenceManager
 				.getDefaultSharedPreferences(this).getString(
 						"viewRecursionMax", "0"));
@@ -128,6 +132,64 @@ public class NodeViewActivity extends Activity {
 
 		return text;
 	}
+	
+
+	private String convertLinks(String text) {
+		Pattern linkPattern = Pattern.compile("\\[\\[([^\\]]*)\\]\\[([^\\]]*)\\]\\]");
+		Matcher matcher = linkPattern.matcher(text);
+		text = matcher.replaceAll("<a href=\"$1\">$2</a>");
+		
+		Pattern urlPattern = Pattern.compile("[^(?:<a href=\"\\s*)](http[s]?://\\S+)");
+		matcher = urlPattern.matcher(text);
+		text = matcher.replaceAll("<a href=\"$1\">$1</a>");
+		
+		return text;
+	}
+
+	private class InternalWebViewClient extends WebViewClient {
+		@Override
+		public boolean shouldOverrideUrlLoading(WebView view, String url) {
+			try {
+				URL urlObj = new URL(url);
+				if (urlObj.getProtocol().equals("file")) {
+					handleInternalOrgUrl(url);
+					return true;
+				}
+			} catch (MalformedURLException e) {
+				Log.d("MobileOrg", "Malformed url :" + url);
+			}
+
+			Intent intent = new Intent(Intent.ACTION_VIEW);
+			intent.setData(Uri.parse(url));
+			try {
+				startActivity(intent);
+			} catch(ActivityNotFoundException e) {}
+			return true;
+		}
+
+		@Override
+		public void onReceivedError(WebView view, int errorCode,
+				String description, String failingUrl) {
+		}
+
+	}
+	
+	private void handleInternalOrgUrl(String url) {		
+		long nodeId = appInst.getDB().getNodeFromPath(url);
+				
+		Intent intent = new Intent(this, NodeViewActivity.class);
+		intent.putExtra("node_id", nodeId);
+		startActivity(intent);
+	}
+
+	private class SynchServiceReceiver extends BroadcastReceiver {
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			if (intent.getBooleanExtra(Synchronizer.SYNC_DONE, false)) {
+				refreshDisplay();
+			}
+		}
+	}
 
 	private String nodeToHTMLRecursive(NodeWrapper node, int level) {
 		StringBuilder result = new StringBuilder();
@@ -142,6 +204,7 @@ public class NodeViewActivity extends Activity {
 		}
 		return result.toString();
 	}
+	
 
 	private String nodeToHTML(NodeWrapper node, int headingLevel) {
 		StringBuilder result = new StringBuilder();
@@ -166,62 +229,4 @@ public class NodeViewActivity extends Activity {
 		return result.toString();
 	}
 
-	private String convertLinks(String text) {
-		int i1 = 0, i2 = 0;
-		while (true) {
-			i1 = text.indexOf("[[", i2 + 1);
-			if (i1 < 0)
-				break;
-			i2 = text.indexOf("]]", i1);
-			if (i2 < 0)
-				break;
-			int i3 = text.indexOf("][", i1);
-			String linkUrl;
-			String linkText;
-			if (i3 >= 0 && i3 < i2) {
-				linkUrl = text.substring(i1 + 2, i3);
-				linkText = text.substring(i3 + 2, i2);
-			} else {
-				linkUrl = text.substring(i1 + 2, i2);
-				linkText = linkUrl;
-
-			}
-			text = text.substring(0, i1) + "<a href=\"" + linkUrl + "\">"
-					+ linkText + "</a>" + text.substring(i2 + 2);
-		}
-		return text;
-	}
-
-	private static class InternalWebViewClient extends WebViewClient {
-
-		@Override
-		public boolean shouldOverrideUrlLoading(WebView view, String urlStr) {
-			try {
-				URL url = new URL(urlStr);
-				if ("file".equals(url.getProtocol())) {
-					return true;
-				}
-			} catch (MalformedURLException e) {
-			}
-			return false;
-		}
-
-		@Override
-		public void onReceivedError(WebView view, int errorCode,
-				String description, String failingUrl) {
-		}
-
-	}
-
-	private static class InternalWebChromeClient extends WebChromeClient {
-	}
-
-	private class SynchServiceReceiver extends BroadcastReceiver {
-		@Override
-		public void onReceive(Context context, Intent intent) {
-			if (intent.getBooleanExtra(Synchronizer.SYNC_DONE, false)) {
-				refreshDisplay();
-			}
-		}
-	}
 }

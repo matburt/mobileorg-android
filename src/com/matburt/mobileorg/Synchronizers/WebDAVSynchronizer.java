@@ -248,7 +248,12 @@ public class WebDAVSynchronizer extends Synchronizer {
             throw new FileNotFoundException(r.getString(
                             R.string.error_url_fetch_detail, url,
                             "File not found: " + url));
-		}
+        }
+        if (con.getResponseCode() == HttpURLConnection.HTTP_FORBIDDEN) {
+            throw new FileNotFoundException(r.getString(
+                    R.string.error_url_fetch_detail, url,
+                    "Server reported 'Forbidden'"));
+        }
 
 		if (con.getResponseCode() < HttpURLConnection.HTTP_OK || con.getResponseCode() > 299) {
 			throw new IOException(r.getString(R.string.error_url_fetch_detail,
