@@ -7,33 +7,33 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
-import java.util.regex.Pattern;
-
-import java.security.SecureRandom;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.Authenticator;
-import java.net.PasswordAuthentication;
+import java.security.SecureRandom;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import java.util.regex.Pattern;
+
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLHandshakeException;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.X509TrustManager;
-import javax.net.ssl.SSLHandshakeException;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.util.Base64;
+import android.util.Log;
+
 import com.matburt.mobileorg.R;
+import com.matburt.mobileorg.Gui.CertificateConflictActivity;
 import com.matburt.mobileorg.Parsing.MobileOrgApplication;
 import com.matburt.mobileorg.Parsing.OrgFile;
-import com.matburt.mobileorg.Parsing.OrgDatabase;
 
 public class WebDAVSynchronizer extends Synchronizer {
 
@@ -163,6 +163,13 @@ public class WebDAVSynchronizer extends Synchronizer {
 		return true;
 	}
 
+
+    private void handleChangedCertificate() {
+        Intent i = new Intent(this.context, CertificateConflictActivity.class);
+        i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        this.context.startActivity(i);
+    }
+	
 	protected void putRemoteFile(String filename, String contents) throws IOException {
 		String urlActual = this.getRootUrl() + filename;
 		putUrlFile(urlActual, contents);
@@ -182,10 +189,12 @@ public class WebDAVSynchronizer extends Synchronizer {
         }
         catch (CertificateException e) {
             Log.w("MobileOrg", "Conflicting certificate found: " + e.toString());
+            handleChangedCertificate();
             throw e;
         }
         catch (SSLHandshakeException e) {
             Log.e("MobileOrg", "SSLHandshakeException Exception in getUrlStream: " + e.toString());
+            handleChangedCertificate();
             throw e;
         }
         catch (Exception e) {

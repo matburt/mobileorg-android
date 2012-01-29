@@ -73,10 +73,7 @@ public class DropboxSynchronizer extends Synchronizer {
 		}
 
 		BufferedReader fileReader = new BufferedReader(new InputStreamReader(fd.is));
-		
-		if(fileReader == null)
-			throw new IOException("Error getting file " + filename);
-			
+
 		return fileReader;
 	}
 

@@ -73,9 +73,9 @@ public class SyncService extends Service implements
 		else if (syncSource.equals("dropbox"))
 			synchronizer = new DropboxSynchronizer(getApplicationContext(), this.appInst);
 		else if (syncSource.equals("scp"))
-			synchronizer = new SSHSynchronizer(this, this.appInst);
+			synchronizer = new SSHSynchronizer(getApplicationContext(), this.appInst);
         else if (syncSource.equals("none"))
-            synchronizer = new NullSynchronizer(this, this.appInst);
+            synchronizer = new NullSynchronizer(getApplicationContext(), this.appInst);
 		else
 			synchronizer = null;
         return synchronizer;
