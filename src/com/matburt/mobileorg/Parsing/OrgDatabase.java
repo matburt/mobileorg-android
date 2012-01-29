@@ -18,7 +18,7 @@ public class OrgDatabase extends SQLiteOpenHelper {
 	
 	private final static String[] nodeFields = {"_id", "name", "todo", "tags", "priority",
 		"payload", "parent_id"};
-	
+
 	@SuppressWarnings("unused")
 	private int orgdata_idColumn;
 	private int orgdata_nameColumn;
@@ -118,7 +118,7 @@ public class OrgDatabase extends SQLiteOpenHelper {
 	}
 	
 	SQLiteStatement addPayload;
-	
+
 	public void addNodePayload(Long id, final String payload) {
 		if(addPayload == null)
 			addPayload = this.db.compileStatement("UPDATE orgdata SET payload=? WHERE _id=?");
@@ -193,6 +193,35 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		
 		cursor.moveToFirst();
 		return cursor.getInt(0);
+	}
+	
+	/**
+	 * Handles the internal org file: links.
+	 */
+	public long getNodeFromPath(String path) {
+		String file = path.substring("file://".length(), path.length());
+				
+		Cursor cursor = getNode(getFileNodeId(file));
+		
+		if(cursor.getCount() == 0)
+			return -1;
+		
+		long nodeId = cursor.getLong(cursor.getColumnIndex("_id"));
+
+		return nodeId;
+	}
+	
+	/**
+	 * This method might be useful to implement the file+headline links.
+	 */
+	@SuppressWarnings("unused")
+	private long findNodeWithName(Cursor nodes, String name) {
+		while(nodes.isAfterLast() == false) {
+			String nodeName = nodes.getString(nodes.getColumnIndex("name"));
+			if(nodeName.equals(name))
+				return nodes.getLong(nodes.getColumnIndex("_id"));
+		}
+		return -1;
 	}
 	
 	public boolean isNodeEditable(Long node_id) {

@@ -55,6 +55,10 @@
   <string name="cancel">Cancel</string>
   <string name="save">Save</string>  
   <string name="search_hint">Search</string>
+  <string name="warning">WARNING!</string>
+  <string name="cert_changed">The WebDAV Certificate has changed, below are the details.  If you are okay with this click \'Accept\' otherwise click \'Deny\'.  If you accept the new certificate you will need to re-issue your Synchronize command</string>
+  <string name="accept">Accept</string>
+  <string name="deny">Deny</string>
 
   <!-- setup wizard strings -->
   <string name="up_one_level">Up one level</string>
