@@ -261,7 +261,7 @@ public class OutlineActivity extends ListActivity
 		public void onReceive(Context context, Intent intent) {
 			if (intent.getBooleanExtra(Synchronizer.SYNC_DONE, false)) {
 				if (intent.getBooleanExtra("showToast", true))
-					Toast.makeText(context, "Sychronization Successful",
+					Toast.makeText(context, "Synchronization Successful",
 							Toast.LENGTH_SHORT).show();
 				refreshDisplay();
 			}

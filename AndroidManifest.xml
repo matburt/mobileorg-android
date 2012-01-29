@@ -117,6 +117,10 @@
             android:label="MobileOrg Wizard" >
         </activity>
         <activity
+            android:name=".Gui.CertificateConflictActivity"
+            android:label="MobileOrg Certificate Conflict" >
+        </activity>
+        <activity
             android:name=".Synchronizers.DropboxAuthActivity"
             android:label="Dropbox Authentication" >
         </activity>

@@ -22,9 +22,11 @@ import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.X509TrustManager;
+import javax.net.ssl.SSLHandshakeException;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.util.Base64;
@@ -36,11 +38,34 @@ import com.matburt.mobileorg.Parsing.OrgDatabase;
 public class WebDAVSynchronizer extends Synchronizer {
 
     class IntelligentX509TrustManager implements X509TrustManager {
-        OrgDatabase db;
+        Context c;
 
-        public IntelligentX509TrustManager(OrgDatabase db) {
+        public IntelligentX509TrustManager(Context c) {
             super();
-            this.db = db;
+            this.c = c;
+        }
+
+        public boolean validateCertificate(int hash, String description) {
+            SharedPreferences appSettings = 
+                PreferenceManager.getDefaultSharedPreferences(this.c);
+            Editor edit = appSettings.edit();
+            int existingHash = appSettings.getInt("webCertHash", 0);
+            if (existingHash == 0) {
+                Log.i("MobileOrg", "Storing new certificate");
+                edit.putInt("webCertHash", hash);
+                edit.putString("webCertDescr", description);
+                edit.commit();
+                return true;
+            }
+            else if (existingHash != hash) {
+                Log.i("MobileOrg", "Conflicting Certificate Hash");
+                edit.putInt("webConflictHash", hash);
+                edit.putString("webConflictHashDesc", description);
+                edit.commit();
+                return false;
+            }
+            Log.i("MobileOrg", "Certificates match");
+            return true;
         }
 
         public void checkClientTrusted(X509Certificate[] chain,
@@ -51,16 +76,10 @@ public class WebDAVSynchronizer extends Synchronizer {
             for (int i = 0; i < chain.length; i++) {
                 String descr = chain[i].toString();
                 int hash = chain[i].hashCode();
-                if (!this.db.certificateExists(hash)) {
-                    Log.i("MobileOrg", "New Certificate Found: " + Integer.toString(chain[i].hashCode()));
-                    this.db.addCertificate(hash, descr);
-                    //We don't trust any certificates at first
-                    throw new CertificateException("Untrusted New Certificate: " + Integer.toString(hash));
-                }
-                else {
-                    if (!this.db.certificateTrusted(hash)) {
-                        throw new CertificateException("Untrusted Known Certificate: " + Integer.toString(hash));
-                    }
+                Log.i("MobileOrg", "Validating certificate hash");
+                if (!this.validateCertificate(hash, descr)) {
+                    throw new CertificateException("Conflicting certificate found with hash " + 
+                                                   Integer.toString(hash));
                 }
             }
         }
@@ -149,7 +168,7 @@ public class WebDAVSynchronizer extends Synchronizer {
 		putUrlFile(urlActual, contents);
 	}
 
-	protected BufferedReader getRemoteFile(String filename) throws IOException {
+	protected BufferedReader getRemoteFile(String filename) throws IOException, CertificateException {
 		String orgUrl = this.remotePath + filename;
         InputStream mainFile = null;
         try {
@@ -160,6 +179,14 @@ public class WebDAVSynchronizer extends Synchronizer {
             } 
 
             return new BufferedReader(new InputStreamReader(mainFile));
+        }
+        catch (CertificateException e) {
+            Log.w("MobileOrg", "Conflicting certificate found: " + e.toString());
+            throw e;
+        }
+        catch (SSLHandshakeException e) {
+            Log.e("MobileOrg", "SSLHandshakeException Exception in getUrlStream: " + e.toString());
+            throw e;
         }
         catch (Exception e) {
             Log.e("MobileOrg", "Exception occurred in getRemoteFile: " + e.toString());
@@ -175,7 +202,7 @@ public class WebDAVSynchronizer extends Synchronizer {
                         return true;
                     }});
             SSLContext context = SSLContext.getInstance("TLS");
-            context.init(null, new X509TrustManager[]{new IntelligentX509TrustManager(new OrgDatabase(c))}, new SecureRandom());
+            context.init(null, new X509TrustManager[]{new IntelligentX509TrustManager(c)}, new SecureRandom());
             HttpsURLConnection.setDefaultSSLSocketFactory(
                                                           context.getSocketFactory());
         } catch (Exception e) { // should never happen
@@ -206,7 +233,7 @@ public class WebDAVSynchronizer extends Synchronizer {
         return con;
 	}
 
-	private InputStream getUrlStream(String url) throws IOException {
+	private InputStream getUrlStream(String url) throws IOException, CertificateException {
         Log.i("MobileOrg", "Fetching " + url);
         HttpURLConnection con = this.createConnection(url);
         con.setRequestMethod("GET");
