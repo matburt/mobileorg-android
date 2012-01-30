@@ -175,7 +175,7 @@ public class WebDAVSynchronizer extends Synchronizer {
 		putUrlFile(urlActual, contents);
 	}
 
-	protected BufferedReader getRemoteFile(String filename) throws IOException, CertificateException {
+	protected BufferedReader getRemoteFile(String filename) throws IOException, CertificateException, SSLHandshakeException {
 		String orgUrl = this.remotePath + filename;
         InputStream mainFile = null;
         try {
@@ -193,7 +193,7 @@ public class WebDAVSynchronizer extends Synchronizer {
             throw e;
         }
         catch (SSLHandshakeException e) {
-            Log.e("MobileOrg", "SSLHandshakeException Exception in getUrlStream: " + e.toString());
+            Log.e("MobileOrg", "SSLHandshakeException Exception in getRemoteFile: " + e.toString());
             handleChangedCertificate();
             throw e;
         }

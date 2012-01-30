@@ -84,7 +84,7 @@ abstract public class Synchronizer {
 
 	public void sync() {
 		if (isConfigured() == false) {
-			displayErrorNotification("Sync not configured");
+			errorNotification("Sync not configured");
 			return;
 		}
 
@@ -94,12 +94,14 @@ abstract public class Synchronizer {
 			pushCaptures();
 			pull();
 		} catch (IOException e) {
-			displayErrorNotification("Error occured during sync: "
-					+ e.getLocalizedMessage());
+            finalizeNotification();
+			errorNotification("Error occured during sync: "
+                              + e.getLocalizedMessage());
 			return;
-		} catch(CertificateException e) {
-			displayErrorNotification("Error with server certificate: "
-					+ e.getLocalizedMessage());
+		} catch (CertificateException e) {
+            finalizeNotification();
+			errorNotification("Certificate Error occured during sync: "
+                              + e.getLocalizedMessage());
 			return;
 		}
 		finalizeNotification();
@@ -111,7 +113,7 @@ abstract public class Synchronizer {
 	 * file combine their content. This combined version is transfered to the
 	 * remote.
 	 */
-	private void pushCaptures() throws IOException, CertificateException {
+	private void pushCaptures() throws IOException, CertificateException, SSLHandshakeException {
 		final String filename = OrgFile.CAPTURE_FILE;
 		String localContents = this.appdb.fileToString(filename);
 		localContents += this.appdb.editsToString();
@@ -135,7 +137,7 @@ abstract public class Synchronizer {
 	 * host. Using those files, it determines the other files that need updating
 	 * and downloads them.
 	 */
-	private void pull() throws IOException, CertificateException {
+	private void pull() throws IOException, CertificateException, SSLHandshakeException {
 		updateNotification(20, "Downloading checksum file");
         String remoteChecksumContents = "";
 
@@ -197,6 +199,28 @@ abstract public class Synchronizer {
 	private NotificationManager notificationManager;
 	private Notification notification;
 	private int notifyRef = 1;
+
+    private void errorNotification(String errorMsg) {
+		this.notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+		Intent notifyIntent = new Intent(context, OutlineActivity.class);
+		notifyIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+
+		PendingIntent contentIntent = PendingIntent.getActivity(context, 0,
+				notifyIntent, 0);
+
+		notification = new Notification(R.drawable.icon,
+				"Synchronization Failed", System.currentTimeMillis());
+		
+		notification.contentIntent = contentIntent;
+		notification.flags = notification.flags;
+		notification.contentView = new RemoteViews(context
+				.getPackageName(), R.layout.sync_notification);
+		
+		notification.contentView.setImageViewResource(R.id.status_icon, R.drawable.icon);
+        notification.contentView.setTextViewText(R.id.status_text, errorMsg);
+        notification.contentView.setProgressBar(R.id.status_progress, 100, 100, false);
+		notificationManager.notify(notifyRef, notification);
+    }
 	
 	private void setupNotification() {
 		this.notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
@@ -242,12 +266,6 @@ abstract public class Synchronizer {
 		notificationManager.cancel(notifyRef);
 	}
 	
-	private void displayErrorNotification(String message) {
-        notification.contentView.setTextViewText(R.id.status_text, message);
-        // TODO Cancel old and create new notification
-        notificationManager.notify(notifyRef, notification);
-	}
-
 	public void announceSyncDone() {
 		Intent intent = new Intent(Synchronizer.SYNC_UPDATE);
 		intent.putExtra(SYNC_DONE, true);
