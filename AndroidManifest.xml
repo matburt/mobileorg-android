@@ -32,7 +32,6 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/widget_mobileorg" />
         </receiver>
-
         <service android:name=".Services.MobileOrgWidget$MobileOrgWidgetService" >
             <intent-filter>
                 <action android:name="com.matburt.mobileorg.Synchronizer.action.SYNC_UPDATE" />
@@ -45,6 +44,11 @@
                 <action android:name="com.matburt.mobileorg.SYNC_SERVICE" />
             </intent-filter>
         </service>
+        <receiver android:name="Plugin.SyncActivity" >
+          <intent-filter>
+            <action android:name="com.twofortyfouram.locale.intent.action.FIRE_SETTING" />
+          </intent-filter>
+        </receiver>
 
         <receiver android:name=".Services.MobileOrgStartupIntentReceiver" >
             <intent-filter>
@@ -107,6 +111,15 @@
             <meta-data
                 android:name="android.app.searchable"
                 android:resource="@xml/searchable" />
+        </activity>
+        <activity
+            android:name=".Plugin.SyncEditActivity"
+            android:label="@string/sync_plugin"
+            android:icon="@drawable/icon"
+            android:exported="true" >
+          <intent-filter>
+            <action android:name="com.twofortyfouram.locale.intent.action.EDIT_SETTING" />
+          </intent-filter>
         </activity>
         <activity
             android:name=".Settings.SettingsActivity"
