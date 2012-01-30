@@ -227,8 +227,8 @@ public class NodeViewActivity extends Activity {
 		
 		result.append("</b></font> <hr />");
 
-		if (!node.getCleanedPayload().equals("")) {
-			result.append(node.getCleanedPayload());
+		if (!node.getCleanedPayload(appInst.getDB()).equals("")) {
+			result.append(node.getCleanedPayload(appInst.getDB()));
 			result.append("\n<br/>\n");
 		}
 

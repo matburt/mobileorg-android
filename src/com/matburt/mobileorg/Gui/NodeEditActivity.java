@@ -27,6 +27,7 @@ import com.matburt.mobileorg.Synchronizers.Synchronizer;
 public class NodeEditActivity extends Activity {
 	public final static String ACTIONMODE_CREATE = "create";
 	public final static String ACTIONMODE_EDIT = "edit";
+	private final static int EDIT_BODY = 1;
 
 	private EditText titleView;
 	private TextView payloadView;
@@ -35,8 +36,8 @@ public class NodeEditActivity extends Activity {
 	private EditText tagsView;
 	private NodeWrapper node;
 	private String actionMode;
-
-	private static int EDIT_BODY = 1;
+	
+	private OrgDatabase orgDB;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -54,6 +55,9 @@ public class NodeEditActivity extends Activity {
 		Intent intent = getIntent();
 		this.actionMode = intent.getStringExtra("actionMode");
 
+		MobileOrgApplication appInst = (MobileOrgApplication) this.getApplication();
+		this.orgDB = appInst.getDB();
+		
 		initDisplay();
 
 		Button button = (Button) this.findViewById(R.id.cancel);
@@ -99,8 +103,8 @@ public class NodeEditActivity extends Activity {
 			node = new NodeWrapper(cursor);
 			
 			titleView.setText(node.getName());
-			payloadView.setText(node.getCleanedPayload());
-			//payloadView.setText(node.getRawPayload());
+			payloadView.setText(node.getCleanedPayload(this.orgDB));
+			//payloadView.setText(node.getRawPayload(this.orgDB));
 			tagsView.setText(node.getTags());
 
 			setSpinner(todoStateView, appInst.getDB().getTodos(), node.getTodo());
@@ -199,7 +203,7 @@ public class NodeEditActivity extends Activity {
 			if (newPayload.length() == 0 && newTitle.length() == 0)
 				return false;
 		} else if (this.actionMode.equals(ACTIONMODE_EDIT)) {
-			if (newPayload.equals(node.getCleanedPayload()) && newTitle.equals(node.getName())
+			if (newPayload.equals(node.getCleanedPayload(this.orgDB)) && newTitle.equals(node.getName())
 					&& newTodo.equals(node.getTodo())
 					&& newPriority.equals(node.getPriority()))
 				return false;
@@ -242,8 +246,7 @@ public class NodeEditActivity extends Activity {
 	 */
 	private void editNode(String newTitle, String newTodo,
 			String newPriority, String newPayload, String newTags) throws IOException {
-		MobileOrgApplication appInst = (MobileOrgApplication) this.getApplication();
-		OrgDatabase orgDB = appInst.getDB();
+
 		
 		if (!node.getName().equals(newTitle)) {
 			if(node.getFileName(orgDB).equals(OrgFile.CAPTURE_FILE) == false)
@@ -261,11 +264,11 @@ public class NodeEditActivity extends Activity {
 					newPriority);
 			node.setPriority(newPriority, orgDB);
 		}
-		if (!node.getCleanedPayload().equals(newPayload)) {
-			String newRawPayload = node.getPayloadResidue() + newPayload;
+		if (!node.getCleanedPayload(orgDB).equals(newPayload)) {
+			String newRawPayload = node.getPayloadResidue(orgDB) + newPayload;
 	
 			if(node.getFileName(orgDB).equals(OrgFile.CAPTURE_FILE) == false)
-				orgDB.addEdit("body", node.getNodeId(orgDB), newTitle, node.getRawPayload(), newRawPayload);
+				orgDB.addEdit("body", node.getNodeId(orgDB), newTitle, node.getRawPayload(orgDB), newRawPayload);
 			node.setPayload(newRawPayload, orgDB);
 		}
 		if(!node.getTags().equals(newTags)) {

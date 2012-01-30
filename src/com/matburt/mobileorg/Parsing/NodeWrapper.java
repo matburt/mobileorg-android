@@ -48,36 +48,65 @@ public class NodeWrapper {
 		return result;
 	}
 	
-	public String getPayloadResidue() {
-		if(this.cursor == null)
-			return "";
+	/**
+	 * This function prepares the payload field of this class. It will try to
+	 * replace payloads of agenda items with the real value of the original
+	 * node. We have to do this to guarantee that agenda items will have the
+	 * full payload and that those payload can be edited correctly.
+	 */
+	private void preparePayload(OrgDatabase db) {
+		if(this.payload != null) {
+			return;
+		}
 		
+		if(this.cursor == null) {
+			this.payload = new NodePayload("");
+			return;
+		}
+
 		String result = cursor.getString(cursor.getColumnIndex("payload"));
 
-		if(result == null)
-			return "";
-
-		if(this.payload == null)
-			payload = new NodePayload(result);
+		if(result == null) {
+			this.payload = new NodePayload("");
+			return;
+		}
 		
+		this.payload = new NodePayload(result);
+		
+		if(!this.getFileName(db).equals("agendas.org"))
+			return;
+		
+		String orgId = payload.getId();
+		
+		if(orgId == null || orgId.startsWith("olp:")) {
+			return;
+		}
+		
+		if(result.indexOf(":ORIGINAL_ID:") != -1) {
+			String realPayload = db.getNodePayloadReal(orgId);
+			if(realPayload == null)
+				return;
+			
+			db.updateNodeField(this, "payload", realPayload);
+			this.cursor = db.getNode(this.getId());
+			this.payload = new NodePayload(realPayload);
+			return;
+		}
+	}
+	
+	public String getPayloadResidue(OrgDatabase db) {
+		preparePayload(db);
 		return payload.getPayloadResidue();
 	}
 	
-	public String getCleanedPayload() {
-		if(this.cursor == null)
-			return "";
-		
-		String result = cursor.getString(cursor.getColumnIndex("payload"));
-
-		if(result == null)
-			return "";
-
-		if(this.payload == null)
-			payload = new NodePayload(result);
+	public String getCleanedPayload(OrgDatabase db) {
+		preparePayload(db);
 		return payload.getContent();
 	}
 	
-	public String getRawPayload() {
+	public String getRawPayload(OrgDatabase db) {
+		preparePayload(db);
+		
 		if(this.cursor == null)
 			return "";
 		
@@ -129,14 +158,9 @@ public class NodeWrapper {
 	 * @return The :ID: or :ORIGINAL_ID: field of the payload.
 	 */
 	public String getNodeId(OrgDatabase db) {
-		if(cursor == null)
-			return "";
-		
-		if(this.payload == null)
-			this.payload = new NodePayload(getRawPayload());
+		preparePayload(db);
 
-		String id = payload.getId();
-				
+		String id = payload.getId();				
 		if(id == null)
 			return constructOlpId(db);
 		

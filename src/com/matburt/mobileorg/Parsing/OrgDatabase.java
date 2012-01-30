@@ -328,9 +328,24 @@ public class OrgDatabase extends SQLiteOpenHelper {
 			db.update("orgdata", values, "_id=?",
 					new String[] { new Long(node.getId()).toString() });
 		} else { // Update all nodes that have this :ID:
-			nodeId = "%" + nodeId + "%";
-			db.update("orgdata", values, "payload LIKE ?", new String[]{nodeId});
+			String nodeIdQuery = "%" + nodeId + "%";
+			db.update("orgdata", values, "payload LIKE ?", new String[]{nodeIdQuery});
 		}
+	}
+	
+	/**
+	 * Utility function used to retrieve the full payload of agenda items.
+	 */
+	public String getNodePayloadReal(String nodeId) {
+		String nodeIdQuery = "%:ID:%" + nodeId + "%";
+		Cursor cursor = db.query("orgdata", nodeFields, "payload LIKE ?",
+				new String[] { nodeIdQuery }, null, null, null);
+		
+		if(cursor.getCount() == 0)
+			return null;
+		
+		cursor.moveToFirst();
+		return cursor.getString(cursor.getColumnIndex("payload"));
 	}
 	
 	public Cursor getNodeChildren(Long id) {
