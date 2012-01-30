@@ -20,7 +20,6 @@ import android.widget.RemoteViews;
 
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Gui.OutlineActivity;
-import com.matburt.mobileorg.Gui.CertificateConflictActivity;
 import com.matburt.mobileorg.Parsing.MobileOrgApplication;
 import com.matburt.mobileorg.Parsing.OrgDatabase;
 import com.matburt.mobileorg.Parsing.OrgFile;
@@ -83,12 +82,6 @@ abstract public class Synchronizer {
         return true;
     }
 
-    private void handleChangedCertificate() {
-        Intent i = new Intent(this.context, CertificateConflictActivity.class);
-        i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        this.context.startActivity(i);
-    }
-
 	public void sync() {
 		if (isConfigured() == false) {
 			displayErrorNotification("Sync not configured");
@@ -104,6 +97,10 @@ abstract public class Synchronizer {
 			displayErrorNotification("Error occured during sync: "
 					+ e.getLocalizedMessage());
 			return;
+		} catch(CertificateException e) {
+			displayErrorNotification("Error with server certificate: "
+					+ e.getLocalizedMessage());
+			return;
 		}
 		finalizeNotification();
 		announceSyncDone();
@@ -114,31 +111,21 @@ abstract public class Synchronizer {
 	 * file combine their content. This combined version is transfered to the
 	 * remote.
 	 */
-	private void pushCaptures() throws IOException {
+	private void pushCaptures() throws IOException, CertificateException {
 		final String filename = OrgFile.CAPTURE_FILE;
-    	String localContents = this.appdb.fileToString(filename);
-    	localContents += this.appdb.editsToString();
+		String localContents = this.appdb.fileToString(filename);
+		localContents += this.appdb.editsToString();
 
-        if(localContents.equals(""))
-        	return;
-    	try {
-            String remoteContent = OrgFile.read(getRemoteFile(filename));
-            updateNotification(10);
+		if (localContents.equals(""))
+			return;
+		String remoteContent = OrgFile.read(getRemoteFile(filename));
+		updateNotification(10);
 
-            if (remoteContent.indexOf("{\"error\":") == -1)
-                localContents = remoteContent + "\n" + localContents;
-        }
-        catch (CertificateException e) {
-            this.handleChangedCertificate();
-            return;
-        }
-        catch (SSLHandshakeException e) {
-            this.handleChangedCertificate();
-            return;
-        }
-		
+		if (remoteContent.indexOf("{\"error\":") == -1)
+			localContents = remoteContent + "\n" + localContents;
+
 		putRemoteFile(filename, localContents);
-		
+
 		this.appdb.clearEdits();
 		this.appdb.removeFile(filename);
 	}
@@ -148,20 +135,11 @@ abstract public class Synchronizer {
 	 * host. Using those files, it determines the other files that need updating
 	 * and downloads them.
 	 */
-	private void pull() throws IOException {
+	private void pull() throws IOException, CertificateException {
 		updateNotification(20, "Downloading checksum file");
         String remoteChecksumContents = "";
-        try {
-            remoteChecksumContents = OrgFile.read(getRemoteFile("checksums.dat"));
-        }
-        catch (CertificateException e) {
-            this.handleChangedCertificate();
-            return;
-        }
-        catch (SSLHandshakeException e) {
-            this.handleChangedCertificate();
-            return;
-        }
+
+		remoteChecksumContents = OrgFile.read(getRemoteFile("checksums.dat"));
 
 		updateNotification(40);
 
@@ -177,7 +155,7 @@ abstract public class Synchronizer {
             filesToGet.add(key);
         }
 
-        filesToGet.remove("mobileorg.org");
+        filesToGet.remove(OrgFile.CAPTURE_FILE);
 
         if(filesToGet.size() == 0)
         	return;
@@ -185,18 +163,8 @@ abstract public class Synchronizer {
 		filesToGet.remove("index.org");
 		updateNotification(60, "Downloading index file");
         String remoteIndexContents = "";
-        try {
-            remoteIndexContents = OrgFile.read(getRemoteFile("index.org"));
-        }
-        catch (CertificateException e) {
-            this.handleChangedCertificate();
-            return;
-        }
-        catch (SSLHandshakeException e) {
-            this.handleChangedCertificate();
-            return;
-        }
 
+        remoteIndexContents = OrgFile.read(getRemoteFile("index.org"));
         
         this.appdb.setTodos(OrgFileParser.getTodosFromIndex(remoteIndexContents));
         this.appdb.setPriorities(OrgFileParser.getPrioritiesFromIndex(remoteIndexContents));
@@ -210,27 +178,18 @@ abstract public class Synchronizer {
         	i++;
 			updateNotification(i, "Downloading " + filename, filesToGet.size());
 			Log.d("MobileOrg", "Getting " + filename + "/" + filenameMap.get(filename));
-			this.appdb.removeFile(filename);
-			long file_id = this.appdb.addOrUpdateFile(filename, filenameMap.get(filename), remoteChecksums.get(filename), true);
-            BufferedReader rfile = null;
-            try {
-                rfile = getRemoteFile(filename);
-            }
-            catch (CertificateException e) {
-                this.handleChangedCertificate();
-                return;
-            }
-            catch (SSLHandshakeException e) {
-                this.handleChangedCertificate();
-                return;
-            }
+           
+			BufferedReader rfile = getRemoteFile(filename);
 
             if (rfile == null) {
                 Log.w("MobileOrg", "File does not seem to exist: " + filename);
                 continue;
             }
+
+            this.appdb.removeFile(filename);
+			long file_id = this.appdb.addOrUpdateFile(filename, filenameMap.get(filename), remoteChecksums.get(filename), true);
 			// TODO Generate checksum of file and compare to remoteChecksum
-            parser.parse(filename, rfile, this.appdb, file_id);
+            parser.parse(filename, rfile, file_id, context);
         }
 	}
 

@@ -20,6 +20,8 @@
   <string name="error_dialog_title">Error</string>
   <string name="title_capture_with_timestamp">Capture with Timestamp</string>
   <string name="summary_capture_with_timestamp">Captured nodes will have a timestamp added</string>
+  <string name="title_agenda_title">Use agenda titles</string>
+  <string name="summary_agenda_title">Enables use of custom agenda titles. Needs resync of agenda file to take effect.</string>
   <string name="title_do_auto_sync">Background Sync</string>
   <string name="summary_do_auto_sync">Automatically synchronize MobileOrg database in the background</string>
   <string name="title_auto_sync_interval">Background Sync Interval</string>

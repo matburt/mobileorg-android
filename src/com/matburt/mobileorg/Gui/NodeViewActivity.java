@@ -58,6 +58,7 @@ public class NodeViewActivity extends Activity {
 	@Override
 	public void onDestroy() {
 		unregisterReceiver(this.syncReceiver);
+		this.display.destroy();
 		super.onDestroy();
 	}
 	
@@ -111,19 +112,23 @@ public class NodeViewActivity extends Activity {
 
 	private String convertToHTML() {
 		int levelOfRecursion = Integer.parseInt(PreferenceManager
-				.getDefaultSharedPreferences(this).getString(
+				.getDefaultSharedPreferences(getApplicationContext()).getString(
 						"viewRecursionMax", "0"));
 
 		String text = nodeToHTMLRecursive(
 				new NodeWrapper(node_id, appInst.getDB()), levelOfRecursion);
 		text = convertLinks(text);
 
-		boolean wrapLines = PreferenceManager.getDefaultSharedPreferences(this)
-				.getBoolean("viewWrapLines", false);
+		boolean wrapLines = PreferenceManager.getDefaultSharedPreferences(
+				getApplicationContext()).getBoolean("viewWrapLines", false);
 		if (wrapLines) {
-			// TODO Improve custom line wrapping
-			text = text.replaceAll("\\n\\n", "<br/>\n<br/>\n");
-			text = text.replaceAll("\\n-", "<br/>\n-");
+			text = text.replaceAll("\\n\\n", "<br/>\n<br/>\n");		// wrap "paragraphs"
+
+			text = text.replaceAll("\\n(\\s*[-\\+])", "<br/>\n$1");		// wrap unordered lists
+			text = text.replaceAll("\\n(\\s*\\d+[\\)\\.])", "<br/>\n$1"); // wrap ordered lists
+			
+			text = text.replaceAll("((\\s*\\|[^\\n]*\\|\\s*(?:<br/>)?\\n)+)", "<pre>$1</pre>");
+			
 			text = "<html><body>" + text + "</body></html>";
 		} else {
 			text = text.replaceAll("\\n", "<br/>\n");
@@ -201,11 +206,13 @@ public class NodeViewActivity extends Activity {
 
 		for (NodeWrapper child : node.getChildren(appInst.getDB())) {
 			result.append(nodeToHTMLRecursive(child, level));
+			child.close();
 		}
+		
+		node.close();
 		return result.toString();
 	}
 	
-
 	private String nodeToHTML(NodeWrapper node, int headingLevel) {
 		StringBuilder result = new StringBuilder();
 
@@ -222,7 +229,7 @@ public class NodeViewActivity extends Activity {
 
 		if (!node.getCleanedPayload().equals("")) {
 			result.append(node.getCleanedPayload());
-			result.append("<br/>\n");
+			result.append("\n<br/>\n");
 		}
 
 		result.append("<br/>\n");

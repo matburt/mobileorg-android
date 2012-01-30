@@ -8,6 +8,8 @@ import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import android.content.Context;
+import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -16,35 +18,44 @@ public class OrgFileParser {
 
     private static final String LT = "MobileOrg";
 
+    private OrgDatabase db;
+    
     private ArrayList<HashMap<String, Integer>> todos = null;
 
+	private long file_id;
 	private static Pattern titlePattern = null;
 	private Stack<Integer> starStack;
 	private Stack<Long> parentIdStack;
 	private StringBuilder payload;
 	
-	Pattern editTitlePattern = Pattern
-			.compile("F\\((edit:.*?)\\) \\[\\[(.*?)\\]\\[(.*?)\\]\\]");
-    
-	public OrgFileParser(OrgDatabase appdb) {
+	/**
+	 * This toggles the use of the <after>TITLE: </after> field. It is now
+	 * disabled, see https://github.com/matburt/mobileorg-android/issues/114
+	 */
+	private boolean useTitleField = false;
+	
+	public OrgFileParser(OrgDatabase db) {
+		this.db = db;
 	}
 
-	long file_id;
 	
-	public void parse(String filename, BufferedReader breader, OrgDatabase orgdb, long file_id) {
+	public void parse(String filename, BufferedReader breader, long file_id, Context context) {
+		useTitleField = PreferenceManager.getDefaultSharedPreferences(context)
+				.getBoolean("useAgendaTitle", false);
+		
 		this.file_id = file_id;
-		this.todos = orgdb.getGroupedTodos();
+		this.todos = db.getGroupedTodos();
 
 		this.starStack = new Stack<Integer>();
 		this.parentIdStack = new Stack<Long>();
 		
 		this.starStack.push(0);
-		Long fileID = orgdb.getFileNodeId(filename);
+		Long fileID = db.getFileNodeId(filename);
 		this.parentIdStack.push(fileID);
 
 		this.payload = new StringBuilder();
 		
-		orgdb.getDB().beginTransaction();
+		db.getDB().beginTransaction();
 		
 		try {
 			String currentLine;
@@ -57,17 +68,20 @@ public class OrgFileParser {
 				int lineLength = currentLine.length();
 				int numstars = numberOfStars(currentLine, lineLength);
 				if (numstars > 0) {
-					parseHeading(currentLine, numstars, orgdb);
+					parseHeading(currentLine, numstars);
 				} else {
 					payload.append(currentLine);
 					payload.append("\n");
 				}
 			}
+			
+			// Add payload to the final node
+			db.addNodePayload(this.parentIdStack.peek(), this.payload.toString());
 
 		} catch (IOException e) {}
 		
-		orgdb.getDB().setTransactionSuccessful();
-		orgdb.getDB().endTransaction();
+		db.getDB().setTransactionSuccessful();
+		db.getDB().endTransaction();
 	}
 
 	
@@ -86,8 +100,8 @@ public class OrgFileParser {
 		return numstars;
 	}
     
-	private void parseHeading(String thisLine, int numstars, OrgDatabase orgdb) {
-		orgdb.addNodePayload(this.parentIdStack.peek(), this.payload.toString());
+	private void parseHeading(String thisLine, int numstars) {
+		db.addNodePayload(this.parentIdStack.peek(), this.payload.toString());
 		
 		this.payload = new StringBuilder();
 		
@@ -101,12 +115,12 @@ public class OrgFileParser {
 			}
 		}
         
-		long newId = parseLineIntoNode(thisLine, numstars, orgdb);
+		long newId = parseLineIntoNode(thisLine, numstars);
         this.parentIdStack.push(newId);
         starStack.push(numstars);        
     }
     
-    private long parseLineIntoNode (String thisLine, int numstars, OrgDatabase orgdb) {
+    private long parseLineIntoNode (String thisLine, int numstars) {
         String heading = thisLine.substring(numstars+1);
 
         String name = "";
@@ -130,13 +144,14 @@ public class OrgFileParser {
 			
 			name += matcher.group(TITLE_GROUP);
 			
-			if(matcher.group(AFTER_GROUP) != null) {
+			if(this.useTitleField && matcher.group(AFTER_GROUP) != null) {
 				int start = matcher.group(AFTER_GROUP).indexOf("TITLE:");
 				int end = matcher.group(AFTER_GROUP).indexOf("</after>");
 				
 				if(start > -1 && end > -1) {
 					String title = matcher.group(AFTER_GROUP).substring(
 							start + 6, end);
+					
 					name = title + ">" + name;
 				}
 			}
@@ -150,15 +165,15 @@ public class OrgFileParser {
 			name = heading;
 		}
     	
-		long nodeId = orgdb.addNode(this.parentIdStack.peek(), name, todo, priority, tags, this.file_id);
+		long nodeId = db.addNode(this.parentIdStack.peek(), name, todo, priority, tags, this.file_id);
     	return nodeId;
     }
  
-    private final int TODO_GROUP = 1;
-    private final int PRIORITY_GROUP = 2;
-    private final int TITLE_GROUP = 3;
-    private final int TAGS_GROUP = 4;
-    private final int AFTER_GROUP = 7;
+    private static final int TODO_GROUP = 1;
+    private static final int PRIORITY_GROUP = 2;
+    private static final int TITLE_GROUP = 3;
+    private static final int TAGS_GROUP = 4;
+    private static final int AFTER_GROUP = 7;
     
     private Pattern prepareTitlePattern() {
     	if (OrgFileParser.titlePattern == null) {
@@ -184,6 +199,9 @@ public class OrgFileParser {
 	}
 
 
+//	private Pattern editTitlePattern = Pattern
+//			.compile("F\\((edit:.*?)\\) \\[\\[(.*?)\\]\\[(.*?)\\]\\]");
+//    
 //    public ArrayList<EditNode> parseEdits() {
 //        Pattern editTitlePattern = Pattern.compile("F\\((edit:.*?)\\) \\[\\[(.*?)\\]\\[(.*?)\\]\\]");
 //        Pattern createTitlePattern = Pattern.compile("^\\*\\s+(.*)");

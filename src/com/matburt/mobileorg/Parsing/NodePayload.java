@@ -7,6 +7,8 @@ import java.util.regex.Pattern;
 public class NodePayload {
 
 	private StringBuilder payload = new StringBuilder();
+	/** These are the remains of the cleaned payload. */
+	private StringBuilder payloadResidue = new StringBuilder();
 	
 	private String content = null;
 	private String scheduled = null;
@@ -31,6 +33,13 @@ public class NodePayload {
 			this.content = cleanPayload();
 
 		return this.content;
+	}
+	
+	public String getPayloadResidue() {
+		if(this.content == null)
+			cleanPayload();
+			
+		return this.payloadResidue.toString();
 	}
 		
 	public String getId() {
@@ -61,6 +70,7 @@ public class NodePayload {
 		
 		String date = payload.substring(start + 1, end);
 		
+		payloadResidue.append(payload.substring(index, end + 1) + "\n");
 		payload.delete(index, end + 1);
 		
 		return date;
@@ -90,6 +100,7 @@ public class NodePayload {
 					this.id = value.trim();
 				}
 			}
+			payloadResidue.append(payload.substring(start, end) + "\n");
 			payload.delete(start, end);
 			propm = propertiesLine.matcher(this.payload);
 		}
@@ -105,6 +116,7 @@ public class NodePayload {
 			if(end == -1)
 				break;
 			
+			payloadResidue.append(payload.substring(start, end + 1) + "\n");
 			payload.delete(start, end + 1);
 		}
 	}

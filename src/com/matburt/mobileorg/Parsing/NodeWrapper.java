@@ -7,6 +7,7 @@ import android.database.Cursor;
 public class NodeWrapper {
 
 	private Cursor cursor;
+	private NodePayload payload;
 	
 	public NodeWrapper(long node_id, OrgDatabase db) {
 		this.cursor = db.getNode(node_id);
@@ -47,6 +48,21 @@ public class NodeWrapper {
 		return result;
 	}
 	
+	public String getPayloadResidue() {
+		if(this.cursor == null)
+			return "";
+		
+		String result = cursor.getString(cursor.getColumnIndex("payload"));
+
+		if(result == null)
+			return "";
+
+		if(this.payload == null)
+			payload = new NodePayload(result);
+		
+		return payload.getPayloadResidue();
+	}
+	
 	public String getCleanedPayload() {
 		if(this.cursor == null)
 			return "";
@@ -56,7 +72,8 @@ public class NodeWrapper {
 		if(result == null)
 			return "";
 
-		NodePayload payload = new NodePayload(result);
+		if(this.payload == null)
+			payload = new NodePayload(result);
 		return payload.getContent();
 	}
 	
@@ -115,7 +132,9 @@ public class NodeWrapper {
 		if(cursor == null)
 			return "";
 		
-		NodePayload payload = new NodePayload(getRawPayload());
+		if(this.payload == null)
+			this.payload = new NodePayload(getRawPayload());
+
 		String id = payload.getId();
 				
 		if(id == null)
@@ -137,7 +156,7 @@ public class NodeWrapper {
 			if(parentId > 0)
 				result.insert(0, node.getName() + "/");
 			else { // Get file nodes real name
-				String filename = db.getFileName(node.getId());
+				String filename = db.getFilenameFromNodeId(node.getId());
 				result.insert(0, filename + ":");
 			}
 		}
@@ -151,6 +170,20 @@ public class NodeWrapper {
 			return -1;
 		
 		return cursor.getInt(cursor.getColumnIndex("parent_id"));
+	}
+	
+	public String getFileName(OrgDatabase db) {
+		if(cursor == null)
+			return "";
+		
+		int columnIndex = cursor.getColumnIndex("file_id");
+		
+		if(columnIndex == -1)
+			return "";
+		
+		long file_id = cursor.getLong(columnIndex);
+		
+		return db.getFilename(file_id);
 	}
 	
 	/**
@@ -176,6 +209,15 @@ public class NodeWrapper {
 
 	public void setPayload(String payload, OrgDatabase db) {
 		db.addNodePayload(getId(), payload);
+	}
+
+	public void setTags(String tags, OrgDatabase db) {
+		db.updateNodeField(getId(), "tags", tags);
+	}
+	
+	public void close() {
+		if(cursor != null)
+			this.cursor.close();
 	}
 }
 

@@ -90,6 +90,7 @@ public class OutlineActivity extends ListActivity
 	@Override
 	public void onDestroy() {
 		unregisterReceiver(this.syncReceiver);
+		this.appInst = null;
 		super.onDestroy();
 	}
 		

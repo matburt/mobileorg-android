@@ -1,21 +1,18 @@
 package com.matburt.mobileorg.Parsing;
 
-import java.util.ArrayList;
-
 import android.app.Application;
 import android.preference.PreferenceManager;
 
 import com.matburt.mobileorg.Services.SyncService;
 
 public class MobileOrgApplication extends Application {
-    public ArrayList<EditNode> edits;
     private OrgDatabase appdb;
     
     @Override
     public void onCreate() {
-    	this.appdb = new OrgDatabase(this);
+    	this.appdb = new OrgDatabase(getApplicationContext());
 		init();
-		SyncService.startAlarm(this);
+		SyncService.startAlarm(getApplicationContext());
     }
     
     private void init() {
@@ -29,7 +26,7 @@ public class MobileOrgApplication extends Application {
     }
     
     public boolean isSyncConfigured() {
-    	String syncSource = PreferenceManager.getDefaultSharedPreferences(this)
+    	String syncSource = PreferenceManager.getDefaultSharedPreferences(getApplicationContext())
 		.getString("syncSource", "");
     	
     	if(syncSource.isEmpty())

@@ -73,21 +73,21 @@ public class NodeEditActivity extends Activity {
 
 		if(this.actionMode == null) {
 			this.actionMode = ACTIONMODE_CREATE;
-			node = new NodeWrapper(null);
 
 			String subject = intent
 					.getStringExtra("android.intent.extra.SUBJECT");
 			String text = intent.getStringExtra("android.intent.extra.TEXT");
-
 			titleView.setText(subject);
+
+			node = new NodeWrapper(null);
 			payloadView.setText(text);
 			setSpinner(todoStateView, appInst.getDB().getTodos(), defaultTodo);
 			setSpinner(priorityView, appInst.getDB().getPriorities(), "");
 		}
 		else if (this.actionMode.equals(ACTIONMODE_CREATE)) {
+			titleView.setText("");
 			node = new NodeWrapper(null);
 
-			titleView.setText("");
 			payloadView.setText("");
 			setSpinner(todoStateView, appInst.getDB().getTodos(), defaultTodo);
 			setSpinner(priorityView, appInst.getDB().getPriorities(), "");
@@ -98,9 +98,9 @@ public class NodeEditActivity extends Activity {
 			cursor.moveToFirst();
 			node = new NodeWrapper(cursor);
 			
-			//titleView.setText(cursor.getString(cursor.getColumnIndex("name")));
 			titleView.setText(node.getName());
 			payloadView.setText(node.getCleanedPayload());
+			//payloadView.setText(node.getRawPayload());
 			tagsView.setText(node.getTags());
 
 			setSpinner(todoStateView, appInst.getDB().getTodos(), node.getTodo());
@@ -136,7 +136,7 @@ public class NodeEditActivity extends Activity {
 		public void onClick(View v) {
 			Intent intent = new Intent(v.getContext(),
 					NodeEditBodyActivity.class);
-			intent.putExtra(NodeEditBodyActivity.DISPLAY_STRING, node.getCleanedPayload());
+			intent.putExtra(NodeEditBodyActivity.DISPLAY_STRING, payloadView.getText().toString());
 			startActivityForResult(intent, EDIT_BODY);
 		}
 	};
@@ -158,7 +158,6 @@ public class NodeEditActivity extends Activity {
 			if (resultCode == RESULT_OK) {
 				String result = data
 						.getStringExtra(NodeEditBodyActivity.RESULT_STRING);
-				//node.payload.setContent(result);
 				payloadView.setText(result);
 			}
 		}
@@ -226,7 +225,7 @@ public class NodeEditActivity extends Activity {
 			
 		} else if (this.actionMode.equals(ACTIONMODE_EDIT)) {
 			try {
-				editNode(newTitle, newTodo, newPriority, newPayload);
+				editNode(newTitle, newTodo, newPriority, newPayload, newTags);
 			} catch (IOException e) {
 			}
 		}
@@ -242,26 +241,37 @@ public class NodeEditActivity extends Activity {
 	 * changed.
 	 */
 	private void editNode(String newTitle, String newTodo,
-			String newPriority, String newPayload) throws IOException {
+			String newPriority, String newPayload, String newTags) throws IOException {
 		MobileOrgApplication appInst = (MobileOrgApplication) this.getApplication();
 		OrgDatabase orgDB = appInst.getDB();
 		
 		if (!node.getName().equals(newTitle)) {
-			orgDB.addEdit("heading", node.getNodeId(orgDB), newTitle, node.getName(), newTitle);
+			if(node.getFileName(orgDB).equals(OrgFile.CAPTURE_FILE) == false)
+				orgDB.addEdit("heading", node.getNodeId(orgDB), newTitle, node.getName(), newTitle);
 			node.setName(newTitle, orgDB);
 		}
 		if (newTodo != null && !node.getTodo().equals(newTodo)) {
-			orgDB.addEdit("todo", node.getNodeId(orgDB), newTitle, node.getTodo(), newTodo);
+			if(node.getFileName(orgDB).equals(OrgFile.CAPTURE_FILE) == false)
+				orgDB.addEdit("todo", node.getNodeId(orgDB), newTitle, node.getTodo(), newTodo);
 			node.setTodo(newTodo, orgDB);
 		}
 		if (newPriority != null && !node.getPriority().equals(newPriority)) {
-			orgDB.addEdit("priority", node.getNodeId(orgDB), newTitle, node.getPriority(),
+			if(node.getFileName(orgDB).equals(OrgFile.CAPTURE_FILE) == false)
+				orgDB.addEdit("priority", node.getNodeId(orgDB), newTitle, node.getPriority(),
 					newPriority);
 			node.setPriority(newPriority, orgDB);
 		}
 		if (!node.getCleanedPayload().equals(newPayload)) {
-			orgDB.addEdit("body", node.getNodeId(orgDB), newTitle, node.getCleanedPayload(), newPayload);
-			node.setPayload(newPayload, orgDB);
+			String newRawPayload = node.getPayloadResidue() + newPayload;
+	
+			if(node.getFileName(orgDB).equals(OrgFile.CAPTURE_FILE) == false)
+				orgDB.addEdit("body", node.getNodeId(orgDB), newTitle, node.getRawPayload(), newRawPayload);
+			node.setPayload(newRawPayload, orgDB);
+		}
+		if(!node.getTags().equals(newTags)) {
+			if(node.getFileName(orgDB).equals(OrgFile.CAPTURE_FILE) == false)
+				orgDB.addEdit("tags", node.getNodeId(orgDB), newTitle, node.getTags(), newTags);
+			node.setTags(newTags, orgDB);
 		}
 	}
 }
