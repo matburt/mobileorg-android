@@ -33,18 +33,7 @@ public class SyncEditActivity extends Activity {
         }
         else {
             final Intent resultIntent = new Intent();
-            String message = r.getString(R.string.sync_plugin_message);
-            if (message.length() > getResources().getInteger(com.twofortyfouram.locale.platform.R.integer.twofortyfouram_locale_maximum_blurb_length))
-                {
-                    resultIntent.putExtra(com.twofortyfouram.locale.Intent.EXTRA_STRING_BLURB,
-                                          message.substring(0,
-                                                 getResources().getInteger(com.twofortyfouram.locale.platform.R.integer.twofortyfouram_locale_maximum_blurb_length)));
-                }
-            else {
-                    resultIntent.putExtra(com.twofortyfouram.locale.Intent.EXTRA_STRING_BLURB, message);
-                }
-
-                setResult(RESULT_OK, resultIntent); 
+            setResult(RESULT_OK, resultIntent); 
         } 
         super.finish();
     }
