@@ -19,9 +19,9 @@ public class SyncEditActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.pluginsyncedit);
 
-        this.accept_button = (Button) this.findViewById(R.id.cert_conflict_accept);
+        this.accept_button = (Button) this.findViewById(R.id.plugin_sync_accept);
         this.accept_button.setOnClickListener(acceptListener);
-        this.deny_button = (Button) this.findViewById(R.id.cert_conflict_deny);
+        this.deny_button = (Button) this.findViewById(R.id.plugin_sync_deny);
         this.deny_button.setOnClickListener(denyListener);
     }
 
