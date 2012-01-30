@@ -110,9 +110,14 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		}
 		
 		cursor.close();
-		
-		MergeCursor cursors = new MergeCursor(nodes);	
-		return cursors;
+
+        if (nodes.length > 0) {
+            MergeCursor cursors = new MergeCursor(nodes);
+            return cursors;
+        }
+        else {
+            return null;
+        }
 	}
 	
 	public long getFileNodeId(String filename) {

@@ -105,6 +105,10 @@ public class OutlineActivity extends ListActivity
 		else
 			cursor = appInst.getDB().getFileCursor();
 
+        if (cursor == null) {
+            return;
+        }
+
 		startManagingCursor(cursor);
 		this.outlineAdapter = new OutlineCursorAdapter(this, cursor, appInst.getDB());
 		this.setListAdapter(outlineAdapter);
