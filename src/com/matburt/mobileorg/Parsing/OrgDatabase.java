@@ -297,7 +297,8 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		
 	public void addNodePayload(Long id, final String payload) {
 		if(addPayloadStatement == null)
-			addPayloadStatement = this.db.compileStatement("UPDATE orgdata SET payload=? WHERE _id=?");
+			addPayloadStatement = this.db
+					.compileStatement("UPDATE orgdata SET payload=? WHERE _id=?");
 		
 		addPayloadStatement.bindString(1, payload);
 		addPayloadStatement.bindLong(2, id);
@@ -310,15 +311,26 @@ public class OrgDatabase extends SQLiteOpenHelper {
  ***************************/
 	
 	public Cursor getNode(Long id) {
-		Cursor cursor = db.query("orgdata", nodeFields, "_id=?", new String[] {id.toString()} , null, null, null);
+		Cursor cursor = db.query("orgdata", nodeFields, "_id=?",
+				new String[] { id.toString() }, null, null, null);
 		
 		cursor.moveToFirst();
 		return cursor;
 	}
 	
-	public void updateNodeField(Long id, String entry, String value) {
-		this.db.execSQL("UPDATE orgdata SET " + entry + "='" + value + "'"
-				+ " WHERE _id=" + id.toString());
+	public void updateNodeField(NodeWrapper node, String entry, String value) {
+		ContentValues values = new ContentValues();
+		values.put(entry, value);
+
+		String nodeId = node.getNodeId(this);
+		
+		if(nodeId.startsWith("olp:")) {
+			db.update("orgdata", values, "_id=?",
+					new String[] { new Long(node.getId()).toString() });
+		} else { // Update all nodes that have this :ID:
+			nodeId = "%" + nodeId + "%";
+			db.update("orgdata", values, "payload LIKE ?", new String[]{nodeId});
+		}
 	}
 	
 	public Cursor getNodeChildren(Long id) {
@@ -641,7 +653,7 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		cursor.moveToFirst();
 
 		while (cursor.isAfterLast() == false) {
-			list.add(cursor.getString(0));
+			list.add(cursor.getString(cursor.getColumnIndex("name")));
 			cursor.moveToNext();
 		}
 		return list;

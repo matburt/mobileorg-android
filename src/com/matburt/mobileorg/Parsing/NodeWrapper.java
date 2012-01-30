@@ -196,23 +196,23 @@ public class NodeWrapper {
 	}
 
 	public void setName(String name, OrgDatabase db) {
-		db.updateNodeField(getId(), "name", name);
+		db.updateNodeField(this, "name", name);
 	}
 
 	public void setTodo(String todo, OrgDatabase db) {
-		db.updateNodeField(getId(), "todo", todo);
+		db.updateNodeField(this, "todo", todo);
 	}
 
 	public void setPriority(String priority, OrgDatabase db) {
-		db.updateNodeField(getId(), "priority", priority);
+		db.updateNodeField(this, "priority", priority);
 	}
 
 	public void setPayload(String payload, OrgDatabase db) {
-		db.addNodePayload(getId(), payload);
+		db.updateNodeField(this, "payload", payload);
 	}
 
 	public void setTags(String tags, OrgDatabase db) {
-		db.updateNodeField(getId(), "tags", tags);
+		db.updateNodeField(this, "tags", tags);
 	}
 	
 	public void close() {
