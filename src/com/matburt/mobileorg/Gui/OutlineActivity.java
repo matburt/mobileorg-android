@@ -230,16 +230,16 @@ public class OutlineActivity extends ListActivity
 	
 	private void runDeleteNode(final long node_id) {	
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setMessage("Are you sure you want to delete?")
+		builder.setMessage(R.string.outline_delete_prompt)
 				.setCancelable(false)
-				.setPositiveButton("Yes",
+				.setPositiveButton(R.string.yes,
 						new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog, int id) {
 								appInst.getDB().removeFile(node_id);
 								refreshDisplay();
 							}
 						})
-				.setNegativeButton("No", new DialogInterface.OnClickListener() {
+				.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int id) {
 						dialog.cancel();
 					}
@@ -262,7 +262,8 @@ public class OutlineActivity extends ListActivity
 		public void onReceive(Context context, Intent intent) {
 			if (intent.getBooleanExtra(Synchronizer.SYNC_DONE, false)) {
 				if (intent.getBooleanExtra("showToast", true))
-					Toast.makeText(context, "Synchronization Successful",
+					Toast.makeText(context,
+							R.string.outline_synchronization_successful,
 							Toast.LENGTH_SHORT).show();
 				refreshDisplay();
 			}

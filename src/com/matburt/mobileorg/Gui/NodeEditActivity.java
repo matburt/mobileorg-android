@@ -176,16 +176,16 @@ public class NodeEditActivity extends Activity {
 		}
 		
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setMessage("Are you sure you want to discard changes?")
+		builder.setMessage(R.string.node_edit_prompt)
 				.setCancelable(false)
-				.setPositiveButton("Yes",
+				.setPositiveButton(R.string.yes,
 						new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog, int id) {
 								setResult(RESULT_CANCELED);
 								finish();
 							}
 						})
-				.setNegativeButton("No", new DialogInterface.OnClickListener() {
+				.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int id) {
 						dialog.cancel();
 					}
@@ -198,13 +198,16 @@ public class NodeEditActivity extends Activity {
 		String newTitle = titleView.getText().toString();
 		String newTodo = todoStateView.getSelectedItem().toString();
 		String newPriority = priorityView.getSelectedItem().toString();
+		String newTags = tagsView.getText().toString();
 		
 		if (this.actionMode.equals(ACTIONMODE_CREATE)) {
 			if (newPayload.length() == 0 && newTitle.length() == 0)
 				return false;
 		} else if (this.actionMode.equals(ACTIONMODE_EDIT)) {
-			if (newPayload.equals(node.getCleanedPayload(this.orgDB)) && newTitle.equals(node.getName())
+			if (newPayload.equals(node.getCleanedPayload(this.orgDB))
+					&& newTitle.equals(node.getName())
 					&& newTodo.equals(node.getTodo())
+					&& newTags.equals(node.getTags())
 					&& newPriority.equals(node.getPriority()))
 				return false;
 		}
