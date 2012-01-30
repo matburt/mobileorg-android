@@ -47,7 +47,7 @@
             </intent-filter>
         </service>
 
-        <receiver android:name="Plugin.Synchronize" >
+        <receiver android:name=".Plugin.Synchronize" >
           <intent-filter>
             <action android:name="com.twofortyfouram.locale.intent.action.FIRE_SETTING" />
           </intent-filter>
