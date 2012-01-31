@@ -314,6 +314,31 @@ public class WizardActivity extends Activity {
         loginThread.start();
     }
 
+    void loginSSH() {
+        final String pathActual = sshPath.getText().toString();
+        final String passActual = sshPass.getText().toString();
+        final String userActual = sshUser.getText().toString();
+        final Context ctxt = this;
+        progress.show();
+
+        Thread uiThread = new HandlerThread("UIHandler");
+        uiThread.start();
+        uiHandler = new UIHandler(((HandlerThread)uiThread).getLooper());
+
+        Thread loginThread = new Thread() {
+                public void run() {
+                    WebDAVSynchronizer wds = new WebDAVSynchronizer(ctxt, (MobileOrgApplication)getApplication());
+                    String extra = wds.testConnection(urlActual, userActual, passActual);
+                    if (extra != null) {
+                        showToastRemote("Login failed: " + extra);
+                        return;
+                    }
+                    showToastRemote("Login succeeded");
+                }
+            };
+        loginThread.start();
+    }
+
     void loginWebdav() {
         final String urlActual = webdavUrl.getText().toString();
         final String passActual = webdavPass.getText().toString();
