@@ -1,0 +1,1 @@
+This is a library project for the Locale Developer Platform.  For documentation on Android Library Projects, please visit <http://developer.android.com/guide/developing/eclipse-adt.html#libraryProject>.

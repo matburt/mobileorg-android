@@ -62,6 +62,10 @@
   <string name="accept">Accept</string>
   <string name="deny">Deny</string>
 
+  <string name="sync_plugin">MobileOrg Synchronization</string>
+  <string name="sync_plugin_info">This plugin allows you to trigger a MobileOrg Sync from Locale or Tasker.  If you are okay with this click \'Accept\' otherwise click \'Deny\'</string>
+  <string name="sync_plugin_message">Synchronize</string>
+
   <!-- setup wizard strings -->
   <string name="up_one_level">Up one level</string>
   <string name="please_wait">Please wait…</string>

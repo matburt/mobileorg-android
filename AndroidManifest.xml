@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    android:installLocation="auto"
     package="com.matburt.mobileorg"
     android:versionCode="72"
     android:versionName="0.7.2" >
@@ -38,6 +37,7 @@
                 <action android:name="com.matburt.mobileorg.Synchronizer.action.SYNC_UPDATE" />
             </intent-filter>
         </service>
+
         <service android:name=".Services.SyncService" >
             <intent-filter>
                 <category android:name="android.intent.category.DEFAULT" />
@@ -45,6 +45,12 @@
                 <action android:name="com.matburt.mobileorg.SYNC_SERVICE" />
             </intent-filter>
         </service>
+
+        <receiver android:name=".Plugin.Synchronize" >
+          <intent-filter>
+            <action android:name="com.twofortyfouram.locale.intent.action.FIRE_SETTING" />
+          </intent-filter>
+        </receiver>
 
         <receiver android:name=".Services.MobileOrgStartupIntentReceiver" >
             <intent-filter>
@@ -107,6 +113,15 @@
             <meta-data
                 android:name="android.app.searchable"
                 android:resource="@xml/searchable" />
+        </activity>
+        <activity
+            android:name=".Plugin.SyncEditActivity"
+            android:label="@string/sync_plugin"
+            android:icon="@drawable/icon"
+            android:exported="true" >
+          <intent-filter>
+            <action android:name="com.twofortyfouram.locale.intent.action.EDIT_SETTING" />
+          </intent-filter>
         </activity>
         <activity
             android:name=".Settings.SettingsActivity"
