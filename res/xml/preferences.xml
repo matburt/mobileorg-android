@@ -38,6 +38,11 @@
             android:summary="@string/summary_agenda_title"
             android:title="@string/title_agenda_title" />
         <CheckBoxPreference
+            android:key="combineBlockAgendas"
+            android:dependency="useAgendaTitle"
+            android:summary="@string/preference_combine_block_agenda_summary"
+            android:title="@string/preference_combine_block_agenda_title" />
+        <CheckBoxPreference
             android:key="viewWrapLines"
             android:summary="@string/summary_view_wrap_lines"
             android:title="@string/title_view_wrap_lines" />

@@ -116,7 +116,7 @@ public class OutlineActivity extends ListActivity
 				
 		this.outlineAdapter = new OutlineCursorAdapter(this, cursor, appInst.getDB());
 		this.setListAdapter(outlineAdapter);
-
+		
 		getListView().setSelection(this.lastSelection);
 	}
 

@@ -14,7 +14,6 @@ import android.widget.RemoteViews;
 
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Gui.NodeEditActivity;
-import com.matburt.mobileorg.Parsing.MobileOrgApplication;
 import com.matburt.mobileorg.Synchronizers.Synchronizer;
 
 public class MobileOrgWidget extends AppWidgetProvider {
@@ -58,7 +57,7 @@ public class MobileOrgWidget extends AppWidgetProvider {
         }
 
         private String getAgenda() {
-            MobileOrgApplication appInst = (MobileOrgApplication)this.getApplication();
+ //           MobileOrgApplication appInst = (MobileOrgApplication)this.getApplication();
             
 //            Node agendaNode = appInst.getDB().getFileNode("agendas.org");
 //            ArrayList<EditNode> parseEdits = appInst.getNodeEdits();
