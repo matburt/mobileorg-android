@@ -405,9 +405,10 @@ public class OrgDatabase extends SQLiteOpenHelper {
 					new_node_id, target_file_id);
 			children.moveToNext();
 		}
-		
 		children.close();
+		
 		this.addNodePayload(new_node_id, node.getRawPayload(this));
+		node.close();
 	}
 
 	

@@ -142,6 +142,7 @@ public class OrgFileParser {
 						children2.moveToFirst();
 						cloneChildren(children2, previousBlockNode,
 								agendaFileID, blockEntryName, filename);
+						children2.close();
 						children.moveToNext();
 					}
 				} else
@@ -150,10 +151,13 @@ public class OrgFileParser {
 				
 				previousBlockTitle = blockTitle;
 				db.deleteNode(cursor.getLong(cursor.getColumnIndex("_id")));
+				children.close();
 			}
 			
 			cursor.moveToNext();
 		}
+		
+		cursor.close();
 	}
 	
 	private void cloneChildren(Cursor children, long previousBlockNode,
