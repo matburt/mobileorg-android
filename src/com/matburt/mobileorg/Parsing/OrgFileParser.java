@@ -9,6 +9,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Log;
@@ -80,10 +81,97 @@ public class OrgFileParser {
 
 		} catch (IOException e) {}
 		
+		if(filename.equals("agendas.org") && PreferenceManager.getDefaultSharedPreferences(context)
+				.getBoolean("combineBlockAgendas", false)) {
+			combineBlockAgendas();
+		}
+		
 		db.getDB().setTransactionSuccessful();
 		db.getDB().endTransaction();
 	}
 
+	public static final String BLOCK_SEPARATOR_PREFIX = "#HEAD#";
+	
+	private void combineBlockAgendas() {
+		final String filename = "agendas.org";
+		long agendaFileID = db.getFileNodeId(filename);
+		Cursor cursor = db.getNodeChildren(agendaFileID);
+		
+		cursor.moveToFirst();
+		
+		String previousBlockTitle = "";
+		long previousBlockNode = -1;
+				
+		while(cursor.isAfterLast() == false) {
+			String name = cursor.getString(cursor.getColumnIndex("name"));
+			
+			if(name.indexOf(">") == -1)
+				continue;
+			
+			String blockTitle = name.substring(0, name.indexOf(">"));
+			
+			if(blockTitle.isEmpty() == false) { // Is a block agenda
+				
+				if(blockTitle.equals(previousBlockTitle) == false) { // Create new node to contain block agenda	
+					previousBlockNode = db.addNode(agendaFileID, blockTitle,
+							"", "", "", db.getFileId(filename));
+				}
+
+				String blockEntryName = name.substring(name.indexOf(">") + 1);
+
+				long nodeId = cursor.getLong(cursor.getColumnIndex("_id"));
+
+
+				Cursor children = db.getNodeChildren(nodeId);
+				children.moveToFirst();
+						
+				if(blockEntryName.startsWith("Day-agenda") && children.getCount() == 1) {
+					blockEntryName = children.getString(children
+							.getColumnIndex("name"));
+					children = db.getNodeChildren(children.getLong(children
+							.getColumnIndex("_id")));
+					children.moveToFirst();
+					cloneChildren(children, previousBlockNode, agendaFileID,
+							blockEntryName, filename);
+				} else if(blockEntryName.startsWith("Week-agenda")) {
+					while (children.isAfterLast() == false) {
+						blockEntryName = children.getString(children
+								.getColumnIndex("name"));
+						Cursor children2 = db.getNodeChildren(children
+								.getLong(children.getColumnIndex("_id")));
+						children2.moveToFirst();
+						cloneChildren(children2, previousBlockNode,
+								agendaFileID, blockEntryName, filename);
+						children2.close();
+						children.moveToNext();
+					}
+				} else
+					cloneChildren(children, previousBlockNode, agendaFileID,
+							blockEntryName, filename);
+				
+				previousBlockTitle = blockTitle;
+				db.deleteNode(cursor.getLong(cursor.getColumnIndex("_id")));
+				children.close();
+			}
+			
+			cursor.moveToNext();
+		}
+		
+		cursor.close();
+	}
+	
+	private void cloneChildren(Cursor children, long previousBlockNode,
+			Long agendaFileID, String blockEntryName, String filename) {
+		db.addNode(previousBlockNode, BLOCK_SEPARATOR_PREFIX
+				+ blockEntryName, "", "", "", db.getFileId(filename));
+		
+		while(children.isAfterLast() == false) {
+			db.cloneNode(
+					children.getLong(children.getColumnIndex("_id")),
+					previousBlockNode, agendaFileID);
+			children.moveToNext();
+		}
+	}
 	
 	private static int numberOfStars(String thisLine, int lineLength) {
 		int numstars = 0;

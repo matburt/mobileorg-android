@@ -355,7 +355,7 @@ public class OrgDatabase extends SQLiteOpenHelper {
 	
 	public Cursor getNodeChildren(Long id) {
 		Cursor cursor = db.query("orgdata", nodeFields, "parent_id=?",
-				new String[] { id.toString() }, null, null, null);
+				new String[] { id.toString() }, null, null, "_id ASC");
 		return cursor;
 	}
 	
@@ -389,6 +389,26 @@ public class OrgDatabase extends SQLiteOpenHelper {
 			return false;
 		else
 			return true;
+	}
+	
+	public void cloneNode(Long node_id, Long parent_id, Long target_file_id) {
+		NodeWrapper node = new NodeWrapper(this.getNode(node_id));
+		
+		long new_node_id = this.addNode(parent_id, node.getName(), node.getTodo(),
+				node.getPriority(), node.getTags(), target_file_id);
+		
+		Cursor children = this.getNodeChildren(node_id);
+		children.moveToFirst();
+		
+		while(children.isAfterLast() == false) {
+			cloneNode(children.getLong(children.getColumnIndex("_id")),
+					new_node_id, target_file_id);
+			children.moveToNext();
+		}
+		children.close();
+		
+		this.addNodePayload(new_node_id, node.getRawPayload(this));
+		node.close();
 	}
 
 	

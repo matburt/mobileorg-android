@@ -239,6 +239,10 @@ public class NodeWrapper {
 		db.updateNodeField(this, "tags", tags);
 	}
 	
+	public void setParent(Long parentId, OrgDatabase db) {
+		db.updateNodeField(this, "parent_id", parentId.toString());
+	}
+	
 	public void close() {
 		if(cursor != null)
 			this.cursor.close();
