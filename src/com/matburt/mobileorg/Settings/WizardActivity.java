@@ -77,7 +77,7 @@ public class WizardActivity extends Activity {
     PageFlipView wizard;
     //page 1 variables
     String syncSource;
-    int syncWebDav, syncDropBox, syncSdCard, syncNull;
+    int syncWebDav, syncDropBox, syncSdCard, syncNull, syncSSH;
     RadioGroup syncGroup; 
     //page 2 variables
     View loginPage;
@@ -99,6 +99,11 @@ public class WizardActivity extends Activity {
     EditText webdavPass;
     EditText webdavUrl;
     Button webdavLoginButton;
+    //ssh variables
+    EditText sshUser;
+    EditText sshPass;
+    EditText sshPath;
+    Button sshLoginButton;
     //page 3 variables
     ListView folderList;
     ArrayList<String> folders;
@@ -115,15 +120,12 @@ public class WizardActivity extends Activity {
     	wizard = (PageFlipView) findViewById(R.id.wizard_parent);
     	//setup page 1
     	//get ids and pointers to sync radio buttons
-    	syncGroup = (RadioGroup) findViewById(R.id.sync_group);
-    	syncWebDav = ( (RadioButton) 
-                       findViewById(R.id.sync_webdav) ).getId();
-    	syncDropBox = ( (RadioButton) 
-                        findViewById(R.id.sync_dropbox) ).getId();
-    	syncSdCard = ( (RadioButton) 
-                       findViewById(R.id.sync_sdcard) ).getId();
-        syncNull = ( (RadioButton)
-                     findViewById(R.id.sync_null) ).getId();
+    	syncGroup = (RadioGroup)findViewById(R.id.sync_group);
+    	syncWebDav = ((RadioButton)findViewById(R.id.sync_webdav)).getId();
+    	syncDropBox = ((RadioButton)findViewById(R.id.sync_dropbox)).getId();
+    	syncSdCard = ((RadioButton)findViewById(R.id.sync_sdcard)).getId();
+        syncNull = ((RadioButton)findViewById(R.id.sync_null)).getId();
+        syncSSH = ((RadioButton)findViewById(R.id.sync_ssh)).getId();
     	syncGroup.clearCheck();
     	syncGroup.setOnCheckedChangeListener(new Page1Listener());
     	//setup dropbox
@@ -163,19 +165,23 @@ public class WizardActivity extends Activity {
         
         @Override
             public void onCheckedChanged(RadioGroup arg, int checkedId) {
-            if ( checkedId == syncWebDav ) {
+            if (checkedId == syncWebDav) {
                 syncSource = "webdav";
                 createWebDAVConfig();
             }
-            else if ( checkedId == syncDropBox ) {
+            else if (checkedId == syncDropBox) {
                 syncSource = "dropbox";
                 createDropboxLogin();
             }
-            else if ( checkedId == syncSdCard) {
+            else if (checkedId == syncSdCard) {
                 syncSource = "sdcard";
                 createSDcardFolderSelector();
             }
-            else if ( checkedId == syncNull) {
+            else if (checkedId == syncSSH) {
+                syncSource = "scp";
+                createSSHConfig();
+            }
+            else if (checkedId == syncNull) {
                 syncSource = "null";
                 createNullConfig();
             }
@@ -196,6 +202,25 @@ public class WizardActivity extends Activity {
         wizard.enablePage(1);
     }
     
+    void createSSHConfig() {
+        wizard.removePagesAfter(1);
+        wizard.addPage(R.layout.wizard_ssh);
+        sshUser = (EditText) wizard.findViewById(R.id.wizard_ssh_username);
+        sshPass = (EditText) wizard.findViewById(R.id.wizard_ssh_password);
+        sshPath = (EditText) wizard.findViewById(R.id.wizard_ssh_path);
+        webdavLoginButton = (Button) wizard.findViewById(R.id.wizard_ssh_login_button);
+        doneButton = (Button) findViewById(R.id.wizard_done_button);
+        webdavLoginButton.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    loginSSH();
+                }
+            });
+        wizard.setNavButtonStateOnPage(1, true, PageFlipView.LAST_PAGE);
+        wizard.setDoneButtonOnClickListener(new FinishWizardButtonListener());
+        wizard.enablePage(1);
+    }
+
     void createWebDAVConfig() {
         wizard.removePagesAfter(1);
         wizard.addPage(R.layout.wizard_webdav);
@@ -264,6 +289,31 @@ public class WizardActivity extends Activity {
     	    });
     	//debug
     	dropboxEmail.setText("uri@frankandrobot.com");
+    }
+
+    void loginSSH() {
+        final String pathActual = sshPath.getText().toString();
+        final String passActual = sshPass.getText().toString();
+        final String userActual = sshUser.getText().toString();
+        final Context ctxt = this;
+        progress.show();
+
+        Thread uiThread = new HandlerThread("UIHandler");
+        uiThread.start();
+        uiHandler = new UIHandler(((HandlerThread)uiThread).getLooper());
+
+        Thread loginThread = new Thread() {
+                public void run() {
+                    WebDAVSynchronizer wds = new WebDAVSynchronizer(ctxt, (MobileOrgApplication)getApplication());
+                    String extra = wds.testConnection(urlActual, userActual, passActual);
+                    if (extra != null) {
+                        showToastRemote("Login failed: " + extra);
+                        return;
+                    }
+                    showToastRemote("Login succeeded");
+                }
+            };
+        loginThread.start();
     }
 
     void loginWebdav() {
