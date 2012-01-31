@@ -37,6 +37,7 @@ import com.matburt.mobileorg.Dropbox.Dropbox;
 import com.matburt.mobileorg.Dropbox.DropboxLoginListener;
 import com.matburt.mobileorg.Views.PageFlipView;
 import com.matburt.mobileorg.Synchronizers.WebDAVSynchronizer;
+import com.matburt.mobileorg.Synchronizers.NullSynchronizer;
 import com.matburt.mobileorg.Parsing.MobileOrgApplication;
 
 public class WizardActivity extends Activity {
@@ -76,7 +77,7 @@ public class WizardActivity extends Activity {
     PageFlipView wizard;
     //page 1 variables
     String syncSource;
-    int syncWebDav, syncDropBox, syncSdCard;
+    int syncWebDav, syncDropBox, syncSdCard, syncNull;
     RadioGroup syncGroup; 
     //page 2 variables
     View loginPage;
@@ -121,6 +122,8 @@ public class WizardActivity extends Activity {
                         findViewById(R.id.sync_dropbox) ).getId();
     	syncSdCard = ( (RadioButton) 
                        findViewById(R.id.sync_sdcard) ).getId();
+        syncNull = ( (RadioButton)
+                     findViewById(R.id.sync_null) ).getId();
     	syncGroup.clearCheck();
     	syncGroup.setOnCheckedChangeListener(new Page1Listener());
     	//setup dropbox
@@ -172,12 +175,25 @@ public class WizardActivity extends Activity {
                 syncSource = "sdcard";
                 createSDcardFolderSelector();
             }
+            else if ( checkedId == syncNull) {
+                syncSource = "null";
+                createNullConfig();
+            }
             //allow scrolling to next page
             wizard.enablePage( 0 );
             //debug
             //createDropboxList();
             //wizard.enablePage(1);
         }
+    }
+
+    void createNullConfig() {
+        wizard.removePagesAfter(1);
+        wizard.addPage(R.layout.wizard_null);
+        doneButton = (Button) findViewById(R.id.wizard_done_button);
+        wizard.setNavButtonStateOnPage(1, true, PageFlipView.LAST_PAGE);
+        wizard.setDoneButtonOnClickListener(new FinishWizardButtonListener());
+        wizard.enablePage(1);
     }
     
     void createWebDAVConfig() {

@@ -80,7 +80,9 @@
   <string name="wizard_webdav">a WebDAV server</string>
   <string name="wizard_dropbox">a Dropbox account</string>
   <string name="wizard_sdcard">my SD card</string>
+  <string name="wizard_null">nothing (capture only)</string>
   <string name="log_in_to_dropbox">Log in to Dropbox</string>
   <string name="log_in_to_webdav">Log in to your WebDAV server</string>
+  <string name="null_sync_description">This is a capture only synchronizer.  It will not attempt to synchronize to any source.</string>
   <string name="url">URL</string>
 </resources>

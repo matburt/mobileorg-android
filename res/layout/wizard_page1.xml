@@ -40,5 +40,12 @@
        android:layout_width="wrap_content"
        android:layout_height="wrap_content"
        android:text="@string/wizard_sdcard" />
+    <RadioButton
+       android:id="@+id/sync_null"
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       android:textSize="18dp"
+       android:text="@string/wizard_null"
+       android:checked="true"/>
   </RadioGroup>
 </LinearLayout>
