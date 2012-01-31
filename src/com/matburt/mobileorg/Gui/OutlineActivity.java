@@ -25,6 +25,8 @@ import com.markupartist.android.widget.ActionBar.Action;
 import com.markupartist.android.widget.ActionBar.IntentAction;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Parsing.MobileOrgApplication;
+import com.matburt.mobileorg.Parsing.NodeWrapper;
+import com.matburt.mobileorg.Parsing.OrgFile;
 import com.matburt.mobileorg.Services.SyncService;
 import com.matburt.mobileorg.Settings.SettingsActivity;
 import com.matburt.mobileorg.Settings.WizardActivity;
@@ -148,11 +150,17 @@ public class OutlineActivity extends ListActivity
 		super.onCreateContextMenu(menu, v, menuInfo);
 		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.outline_contextmenu, menu);
-
+		
+		AdapterContextMenuInfo info = (AdapterContextMenuInfo) menuInfo;
+		long clicked_node_id = getListAdapter().getItemId(info.position);
+		
 		// Prevents editing of file nodes.
 		if (this.node_id == -1) {
 			menu.findItem(R.id.contextmenu_edit).setVisible(false);
 		} else {
+			if(new NodeWrapper(clicked_node_id, appInst.getDB()).getFileName(appInst.getDB()).equals(OrgFile.CAPTURE_FILE)) {
+				menu.findItem(R.id.contextmenu_node_delete).setVisible(true);
+			}
 			menu.findItem(R.id.contextmenu_delete).setVisible(false);
 		}
 	}
@@ -174,6 +182,10 @@ public class OutlineActivity extends ListActivity
 			break;
 			
 		case R.id.contextmenu_delete:
+			runDeleteFileNode(node_id);
+			break;
+			
+		case R.id.contextmenu_node_delete:
 			runDeleteNode(node_id);
 			break;
 		}
@@ -228,7 +240,7 @@ public class OutlineActivity extends ListActivity
 		startActivity(intent);
 	}
 	
-	private void runDeleteNode(final long node_id) {	
+	private void runDeleteFileNode(final long node_id) {	
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		builder.setMessage(R.string.outline_delete_prompt)
 				.setCancelable(false)
@@ -236,6 +248,25 @@ public class OutlineActivity extends ListActivity
 						new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog, int id) {
 								appInst.getDB().removeFile(node_id);
+								refreshDisplay();
+							}
+						})
+				.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						dialog.cancel();
+					}
+				});
+		builder.create().show();
+	}
+	
+	private void runDeleteNode(final long node_id) {	
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setMessage(R.string.outline_delete_prompt)
+				.setCancelable(false)
+				.setPositiveButton(R.string.yes,
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int id) {
+								appInst.getDB().deleteNode(node_id);
 								refreshDisplay();
 							}
 						})

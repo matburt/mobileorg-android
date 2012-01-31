@@ -375,6 +375,16 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		else
 			return true;
 	}
+	
+	// TODO Make recursive
+	public boolean deleteNode(Long node_id) {
+		int result = db.delete("orgdata", "_id=?", new String[] {node_id.toString()});
+		
+		if(result == 0)
+			return false;
+		else
+			return true;
+	}
 
 	
 /***************************
