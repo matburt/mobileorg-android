@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.twofortyfouram.locale.platform" >
+
+    <uses-sdk
+        android:minSdkVersion="3"
+        android:targetSdkVersion="15" />
+
+    <uses-feature
+        android:name="android.hardware.touchscreen"
+        android:required="false" />
+
+    <application >
+
+        <!--
+            If a plug-in app does not stand alone (e.g. it is only a plug-in for Locale), including
+            this in the manifest will help when users tap the "Open" button in the Android Market.
+        -->
+        <activity
+            android:exported="true"
+            android:name="com.twofortyfouram.locale.MarketActivity"
+            android:theme="@style/Theme.Locale.Dialog" >
+            <intent-filter >
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.INFO" />
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>
