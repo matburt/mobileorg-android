@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
 
-   <!--  <item
+   <item
         android:id="@+id/menu_outline"
         android:icon="@drawable/ic_menu_agenda"
-        android:title="@string/menu_outline"/> -->
+        android:title="@string/menu_outline"/>
     <item
         android:id="@+id/menu_capture"
         android:icon="@drawable/ic_menu_compose"
@@ -14,12 +14,11 @@
         android:icon="@drawable/ic_menu_refresh"
         android:title="@string/menu_sync"/>
     <item
-        android:id="@+id/menu_settings"
-        android:icon="@drawable/ic_menu_preferences"
-        android:title="@string/menu_settings"/>
-    <item
         android:id="@+id/menu_search"
         android:icon="@drawable/ic_menu_search"
         android:title="@string/menu_search"/>
-
+    <item
+        android:id="@+id/menu_settings"
+        android:icon="@drawable/ic_menu_preferences"
+        android:title="@string/menu_settings"/>
 </menu>

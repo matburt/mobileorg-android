@@ -33,9 +33,7 @@ import com.matburt.mobileorg.Settings.WizardActivity;
 import com.matburt.mobileorg.Synchronizers.Synchronizer;
 
 public class OutlineActivity extends ListActivity
-{
-//	private static final int RESULT_DONTPOP = 1337;
-	
+{	
 	private MobileOrgApplication appInst;
 
 	private long node_id;
@@ -102,12 +100,16 @@ public class OutlineActivity extends ListActivity
 	 */
 	private void refreshDisplay() {
 		Cursor cursor;
-		if (node_id >= 0)
+		if (node_id >= 0) {
 			cursor = appInst.getDB().getNodeChildren(node_id);
+			if(cursor.getCount() == 0)
+				finish();
+		}
 		else
 			cursor = appInst.getDB().getFileCursor();
 
 		startManagingCursor(cursor);
+				
 		this.outlineAdapter = new OutlineCursorAdapter(this, cursor, appInst.getDB());
 		this.setListAdapter(outlineAdapter);
 
@@ -131,10 +133,10 @@ public class OutlineActivity extends ListActivity
 		case R.id.menu_settings:
 			return runShowSettings();
 		
-//		case R.id.menu_outline:
-//			refreshDisplay();
-//			return true;
-//		
+		case R.id.menu_outline:
+			runExpandSelection(-1);
+			return true;
+
 		case R.id.menu_capture:
 			return runEditNewNodeActivity();
 			
@@ -158,7 +160,8 @@ public class OutlineActivity extends ListActivity
 		if (this.node_id == -1) {
 			menu.findItem(R.id.contextmenu_edit).setVisible(false);
 		} else {
-			if(new NodeWrapper(clicked_node_id, appInst.getDB()).getFileName(appInst.getDB()).equals(OrgFile.CAPTURE_FILE)) {
+			if (new NodeWrapper(clicked_node_id, appInst.getDB()).getFileName(
+					appInst.getDB()).equals(OrgFile.CAPTURE_FILE)) {
 				menu.findItem(R.id.contextmenu_node_delete).setVisible(true);
 			}
 			menu.findItem(R.id.contextmenu_delete).setVisible(false);
