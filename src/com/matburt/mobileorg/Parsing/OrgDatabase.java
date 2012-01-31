@@ -396,6 +396,17 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		
 		long new_node_id = this.addNode(parent_id, node.getName(), node.getTodo(),
 				node.getPriority(), node.getTags(), target_file_id);
+		
+		Cursor children = this.getNodeChildren(node_id);
+		children.moveToFirst();
+		
+		while(children.isAfterLast() == false) {
+			cloneNode(children.getLong(children.getColumnIndex("_id")),
+					new_node_id, target_file_id);
+			children.moveToNext();
+		}
+		
+		children.close();
 		this.addNodePayload(new_node_id, node.getRawPayload(this));
 	}
 

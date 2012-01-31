@@ -124,31 +124,48 @@ public class OrgFileParser {
 
 				Cursor children = db.getNodeChildren(nodeId);
 				children.moveToFirst();
-		
-				// Hack to collapse day agendas properly
-				if(blockEntryName.equals("Today") && children.getCount() == 1) {
+						
+				if(blockEntryName.startsWith("Day-agenda") && children.getCount() == 1) {
 					blockEntryName = children.getString(children
 							.getColumnIndex("name"));
 					children = db.getNodeChildren(children.getLong(children
 							.getColumnIndex("_id")));
 					children.moveToFirst();
-				}
-				
-				db.addNode(previousBlockNode, BLOCK_SEPARATOR_PREFIX
-						+ blockEntryName, "", "", "", db.getFileId(filename));
-				
-				while(children.isAfterLast() == false) {
-					db.cloneNode(
-							children.getLong(children.getColumnIndex("_id")),
-							previousBlockNode, agendaFileID);
-					children.moveToNext();
-				}
+					cloneChildren(children, previousBlockNode, agendaFileID,
+							blockEntryName, filename);
+				} else if(blockEntryName.startsWith("Week-agenda")) {
+					while (children.isAfterLast() == false) {
+						blockEntryName = children.getString(children
+								.getColumnIndex("name"));
+						Cursor children2 = db.getNodeChildren(children
+								.getLong(children.getColumnIndex("_id")));
+						children2.moveToFirst();
+						cloneChildren(children2, previousBlockNode,
+								agendaFileID, blockEntryName, filename);
+						children.moveToNext();
+					}
+				} else
+					cloneChildren(children, previousBlockNode, agendaFileID,
+							blockEntryName, filename);
 				
 				previousBlockTitle = blockTitle;
 				db.deleteNode(cursor.getLong(cursor.getColumnIndex("_id")));
 			}
 			
 			cursor.moveToNext();
+		}
+	}
+	
+	private void cloneChildren(Cursor children, long previousBlockNode,
+			Long agendaFileID, String blockEntryName, String filename) {
+		db.addNode(previousBlockNode, BLOCK_SEPARATOR_PREFIX
+				+ blockEntryName, "", "", "", db.getFileId(filename));
+		
+		while(children.isAfterLast() == false) {
+			db.cloneNode(
+					children.getLong(children.getColumnIndex("_id")),
+					previousBlockNode, agendaFileID);
+			children.moveToNext();
 		}
 	}
 	
