@@ -35,6 +35,7 @@
 	      android:layout_height="wrap_content"
 	      android:textSize="20dp"
 	      android:inputType="textEmailAddress"
+	      android:hint="@string/wizard_dropbox_email_hint"
 	      android:singleLine="true"/>
 	   <TextView
 	      android:paddingTop="10dp"

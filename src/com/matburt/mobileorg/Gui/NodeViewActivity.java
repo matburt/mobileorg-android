@@ -66,7 +66,7 @@ public class NodeViewActivity extends Activity {
 		String data;
 		
 		if(this.node_id == -1)
-			data = "<html><body>" + "Error loading node" + "</body></html>";
+			data = "<html><body>" + getString(R.string.node_view_error_loading_node) + "</body></html>";
 		else
 			data = convertToHTML();
 		this.display.loadDataWithBaseURL(null, data, "text/html", "UTF-8", null);
@@ -227,8 +227,8 @@ public class NodeViewActivity extends Activity {
 		
 		result.append("</b></font> <hr />");
 
-		if (!node.getCleanedPayload().equals("")) {
-			result.append(node.getCleanedPayload());
+		if (!node.getCleanedPayload(appInst.getDB()).equals("")) {
+			result.append(node.getCleanedPayload(appInst.getDB()));
 			result.append("\n<br/>\n");
 		}
 

@@ -262,8 +262,6 @@ public class WizardActivity extends Activity {
                     }
                 }
     	    });
-    	//debug
-    	dropboxEmail.setText("uri@frankandrobot.com");
     }
 
     void loginWebdav() {

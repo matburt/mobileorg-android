@@ -43,9 +43,9 @@ public class SettingsActivity extends PreferenceActivity {
 		public boolean onPreferenceClick(Preference preference) {
 			new AlertDialog.Builder(SettingsActivity.this)
 					.setIcon(android.R.drawable.ic_dialog_alert)
-					.setTitle("Clear DB?")
-					.setMessage("Are you sure want to clear DB?")
-					.setPositiveButton("Yes",
+					.setTitle(R.string.preference_clear_db_dialog_title)
+					.setMessage(R.string.preference_clear_db_dialog_message)
+					.setPositiveButton(R.string.yes,
 							new DialogInterface.OnClickListener() {
 
 								@Override
@@ -54,7 +54,7 @@ public class SettingsActivity extends PreferenceActivity {
 									db.clearDB();
 								}
 
-							}).setNegativeButton("No", null).show();
+							}).setNegativeButton(R.string.no, null).show();
 			return false;
 		}
 	};

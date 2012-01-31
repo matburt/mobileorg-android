@@ -25,15 +25,15 @@ import com.markupartist.android.widget.ActionBar.Action;
 import com.markupartist.android.widget.ActionBar.IntentAction;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Parsing.MobileOrgApplication;
+import com.matburt.mobileorg.Parsing.NodeWrapper;
+import com.matburt.mobileorg.Parsing.OrgFile;
 import com.matburt.mobileorg.Services.SyncService;
 import com.matburt.mobileorg.Settings.SettingsActivity;
 import com.matburt.mobileorg.Settings.WizardActivity;
 import com.matburt.mobileorg.Synchronizers.Synchronizer;
 
 public class OutlineActivity extends ListActivity
-{
-//	private static final int RESULT_DONTPOP = 1337;
-	
+{	
 	private MobileOrgApplication appInst;
 
 	private long node_id;
@@ -100,8 +100,11 @@ public class OutlineActivity extends ListActivity
 	 */
 	private void refreshDisplay() {
 		Cursor cursor;
-		if (node_id >= 0)
+		if (node_id >= 0) {
 			cursor = appInst.getDB().getNodeChildren(node_id);
+			if(cursor.getCount() == 0)
+				finish();
+		}
 		else
 			cursor = appInst.getDB().getFileCursor();
 
@@ -110,6 +113,7 @@ public class OutlineActivity extends ListActivity
         }
 
 		startManagingCursor(cursor);
+				
 		this.outlineAdapter = new OutlineCursorAdapter(this, cursor, appInst.getDB());
 		this.setListAdapter(outlineAdapter);
 
@@ -133,10 +137,10 @@ public class OutlineActivity extends ListActivity
 		case R.id.menu_settings:
 			return runShowSettings();
 		
-//		case R.id.menu_outline:
-//			refreshDisplay();
-//			return true;
-//		
+		case R.id.menu_outline:
+			runExpandSelection(-1);
+			return true;
+
 		case R.id.menu_capture:
 			return runEditNewNodeActivity();
 			
@@ -152,11 +156,18 @@ public class OutlineActivity extends ListActivity
 		super.onCreateContextMenu(menu, v, menuInfo);
 		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.outline_contextmenu, menu);
-
+		
+		AdapterContextMenuInfo info = (AdapterContextMenuInfo) menuInfo;
+		long clicked_node_id = getListAdapter().getItemId(info.position);
+		
 		// Prevents editing of file nodes.
 		if (this.node_id == -1) {
 			menu.findItem(R.id.contextmenu_edit).setVisible(false);
 		} else {
+			if (new NodeWrapper(clicked_node_id, appInst.getDB()).getFileName(
+					appInst.getDB()).equals(OrgFile.CAPTURE_FILE)) {
+				menu.findItem(R.id.contextmenu_node_delete).setVisible(true);
+			}
 			menu.findItem(R.id.contextmenu_delete).setVisible(false);
 		}
 	}
@@ -178,6 +189,10 @@ public class OutlineActivity extends ListActivity
 			break;
 			
 		case R.id.contextmenu_delete:
+			runDeleteFileNode(node_id);
+			break;
+			
+		case R.id.contextmenu_node_delete:
 			runDeleteNode(node_id);
 			break;
 		}
@@ -232,18 +247,37 @@ public class OutlineActivity extends ListActivity
 		startActivity(intent);
 	}
 	
-	private void runDeleteNode(final long node_id) {	
+	private void runDeleteFileNode(final long node_id) {	
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setMessage("Are you sure you want to delete?")
+		builder.setMessage(R.string.outline_delete_prompt)
 				.setCancelable(false)
-				.setPositiveButton("Yes",
+				.setPositiveButton(R.string.yes,
 						new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog, int id) {
 								appInst.getDB().removeFile(node_id);
 								refreshDisplay();
 							}
 						})
-				.setNegativeButton("No", new DialogInterface.OnClickListener() {
+				.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						dialog.cancel();
+					}
+				});
+		builder.create().show();
+	}
+	
+	private void runDeleteNode(final long node_id) {	
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setMessage(R.string.outline_delete_prompt)
+				.setCancelable(false)
+				.setPositiveButton(R.string.yes,
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int id) {
+								appInst.getDB().deleteNode(node_id);
+								refreshDisplay();
+							}
+						})
+				.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int id) {
 						dialog.cancel();
 					}
@@ -266,7 +300,8 @@ public class OutlineActivity extends ListActivity
 		public void onReceive(Context context, Intent intent) {
 			if (intent.getBooleanExtra(Synchronizer.SYNC_DONE, false)) {
 				if (intent.getBooleanExtra("showToast", true))
-					Toast.makeText(context, "Synchronization Successful",
+					Toast.makeText(context,
+							R.string.outline_synchronization_successful,
 							Toast.LENGTH_SHORT).show();
 				refreshDisplay();
 			}

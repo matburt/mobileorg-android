@@ -7,10 +7,12 @@
   <string name="menu_sync">Sync</string>
   <string name="menu_edit">Edit</string>
   <string name="menu_search">Search</string>
-
   <string name="contextmenu_edit">Edit Node</string>
   <string name="contextmenu_view">View Node</string>
   <string name="contextmenu_delete">Delete File</string>
+  <string name="contextmenu_node_delete">Delete Node</string>
+  
+  
   <string name="sync_wait">Synchronizing, please wait…</string>
   <string name="sync_failed">Synchronization failed, try again?</string>
   <string name="yes">Yes</string>
@@ -18,16 +20,17 @@
   <string name="empty_main">You have not yet\nsynchronized your Org files</string>
   <string name="error_bad_url">The url %s is not properly formatted</string>
   <string name="error_dialog_title">Error</string>
-  <string name="title_capture_with_timestamp">Capture with Timestamp</string>
-  <string name="summary_capture_with_timestamp">Captured nodes will have a timestamp added</string>
-  <string name="title_agenda_title">Use agenda titles</string>
-  <string name="summary_agenda_title">Enables use of custom agenda titles. Needs resync of agenda file to take effect.</string>
-  <string name="title_do_auto_sync">Background Sync</string>
-  <string name="summary_do_auto_sync">Automatically synchronize MobileOrg database in the background</string>
-  <string name="title_auto_sync_interval">Background Sync Interval</string>
-  <string name="summary_auto_sync_interval">How often the background sync service should run</string>
-  <string name="title_view_wrap_lines">Wrap Lines</string>
-  <string name="summary_view_wrap_lines">Using custom line wrapping when viewing nodes</string>
+  
+  <string name="node_edit_prompt">Are you sure you want to discard changes?</string>
+  <string name="node_view_error_loading_node">Error loading node</string>
+  <string name="sync_not_configured">Sync not configured</string>
+  <string name="sync_error_occured">Error occured during sync:</string>
+  <string name="sync_synchronizing_changes">Synchronizing changes</string>
+  <string name="sync_error_server_certificate">Error with server certificate:</string>
+  <string name="downloading">Downloading</string>
+  <string name="outline_delete_prompt">Are you sure you want to delete?</string>
+  <string name="outline_synchronization_successful">Synchronization Successful</string>
+
   <string name="error_sqlio">There was a problem reading from the database, is your drive corrupted or is the SDCard mounted?</string>
   <string name="error_generic_database">Unhandled database error: %s</string>
   <string name="error_file_not_found">The file %s was not found</string>
@@ -36,7 +39,6 @@
   <string name="error_file_write">An error occurred while writing to file %s</string>
   <string name="error_invalid_url">URL Contains Invalid Characters: %s</string>
   <string name="error_synchronizer_type_unknown">Unknown Synchronizer Method %s"</string>
-  <string name="error_synchronizer_not_configured">You have not fully configured the synchronizer.  Make sure you visit the \'Configure Synchronizer Settings\' in the Settings menu</string>
   <string name="error_local_storage_method_unknown">Local storage method %s unknown</string>
   <string name="error_unsupported_encoding">Encountered unsupported encoding on file %s</string>
   <string name="error_url_fetch">An error occurred attempting to fetch the url %s</string>
@@ -85,4 +87,40 @@
   <string name="log_in_to_webdav">Log in to your WebDAV server</string>
   <string name="null_sync_description">This is a capture only synchronizer.  It will not attempt to synchronize to any source.</string>
   <string name="url">URL</string>
+  <string name="wizard_dropbox_email_hint">uri@frankandrobot.com</string>
+  
+    <!-- preference strings -->
+  <string name="title_capture_with_timestamp">Capture with Timestamp</string>
+  <string name="summary_capture_with_timestamp">Captured nodes will have a timestamp added</string>
+  <string name="title_agenda_title">Use agenda titles</string>
+  <string name="summary_agenda_title">Enables use of custom agenda titles. Needs resync of agenda file to take effect.</string>
+  <string name="title_do_auto_sync">Background Sync</string>
+  <string name="summary_do_auto_sync">Automatically synchronize MobileOrg database in the background</string>
+  <string name="title_auto_sync_interval">Background Sync Interval</string>
+  <string name="summary_auto_sync_interval">How often the background sync service should run</string>
+  <string name="title_view_wrap_lines">Wrap Lines</string>
+  <string name="summary_view_wrap_lines">Using custom line wrapping when viewing nodes</string>
+  <string name="preference_default_todo_summary">Default todo when capturing files</string>
+  <string name="preference_default_todo_title">Default todo</string>
+  <string name="preference_clean_up_db_summary">Clean up the storage database</string>
+  <string name="preference_clean_up_db_title">Clear Database</string>
+  <string name="preferences_widget_summary">Preferences for a Widget</string>
+  <string name="preference_widget_title">Widget Preferences</string>
+  <string name="preference_other">Other</string>
+  <string name="preference_version">Version</string>
+  <string name="preference_storage_summary">Where to store the org files</string>
+  <string name="preference_storage_title">Storage Mode</string>
+  <string name="preference_storage">Storage</string>
+  <string name="preference_recursion_level_title">Recursion Level</string>
+  <string name="preference_recursion_level_summary">How many levels of child nodes to display on view</string>
+  <string name="preference_viewing">Viewing</string>
+  <string name="preference_synchronization">Synchronization</string>
+  <string name="preference_sync_source_summary">Where to sync Org files from</string>
+  <string name="preference_sync_source_title">Synchronization Mode</string>
+  <string name="preference_dropbox_login">Login</string>
+  <string name="preference_dropbox_login_summary">Login to retrieve an OAuth token</string>
+  <string name="preference_dropbox_path">Path</string>
+  <string name="preference_dropbox_path_summary">Dropbox path to index.org file</string>
+  <string name="preference_clear_db_dialog_title">Clear DB?</string>
+  <string name="preference_clear_db_dialog_message">Are you sure want to clear DB?</string>
 </resources>

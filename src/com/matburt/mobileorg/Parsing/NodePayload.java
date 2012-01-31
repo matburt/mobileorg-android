@@ -4,7 +4,7 @@ import java.text.SimpleDateFormat;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class NodePayload {
+class NodePayload {
 
 	private StringBuilder payload = new StringBuilder();
 	/** These are the remains of the cleaned payload. */

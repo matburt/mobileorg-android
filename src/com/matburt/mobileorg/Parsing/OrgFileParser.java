@@ -150,7 +150,7 @@ public class OrgFileParser {
 				
 				if(start > -1 && end > -1) {
 					String title = matcher.group(AFTER_GROUP).substring(
-							start + 6, end);
+							start + 7, end);
 					
 					name = title + ">" + name;
 				}
