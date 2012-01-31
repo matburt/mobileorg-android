@@ -78,13 +78,16 @@
   <string name="password">Password</string>
   <string name="login">Log in</string>
   <string name="login_webdav">Check Login</string>
+  <string name="login_ssh">Check SSH Login</string>
   <string name="i_want_to_sync_using">I want to sync using:</string>
   <string name="wizard_webdav">a WebDAV server</string>
   <string name="wizard_dropbox">a Dropbox account</string>
   <string name="wizard_sdcard">my SD card</string>
+  <string name="wizard_ssh">an SSH server</string>
   <string name="wizard_null">nothing (capture only)</string>
   <string name="log_in_to_dropbox">Log in to Dropbox</string>
   <string name="log_in_to_webdav">Log in to your WebDAV server</string>
+  <string name="log_in_to_ssh">Log in to your SSH server</string>
   <string name="null_sync_description">This is a capture only synchronizer.  It will not attempt to synchronize to any source.</string>
   <string name="url">URL</string>
   <string name="wizard_dropbox_email_hint">uri@frankandrobot.com</string>

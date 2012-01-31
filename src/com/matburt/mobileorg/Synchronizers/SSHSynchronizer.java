@@ -44,11 +44,14 @@ public class SSHSynchronizer extends Synchronizer {
 			session.setConfig(config);
 
 			session.connect();
-			Log.d(LT, "Connected");
+			Log.d(LT, "SSH Connected");
 		} catch (JSchException e) {
 			Log.d(LT, e.getLocalizedMessage());
 		}
 	}
+
+    public String testConnection(String url, String user, String pass) {
+    }
 
 	@Override
 	protected boolean isConfigured() {

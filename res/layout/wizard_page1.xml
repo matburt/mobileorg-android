@@ -36,6 +36,12 @@
        android:text="@string/wizard_dropbox" />
     <RadioButton
        android:textSize="18dp"
+       android:id="@+id/sync_ssh"
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       android:text="@string/wizard_ssh" />
+    <RadioButton
+       android:textSize="18dp"
        android:id="@+id/sync_sdcard"
        android:layout_width="wrap_content"
        android:layout_height="wrap_content"
