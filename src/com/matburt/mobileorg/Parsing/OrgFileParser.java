@@ -14,7 +14,6 @@ import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Log;
 
-
 public class OrgFileParser {
 
     private static final String LT = "MobileOrg";
@@ -85,7 +84,7 @@ public class OrgFileParser {
 				.getBoolean("combineBlockAgendas", false)) {
 			combineBlockAgendas();
 		}
-		
+ 		
 		db.getDB().setTransactionSuccessful();
 		db.getDB().endTransaction();
 	}

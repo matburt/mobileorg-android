@@ -3,6 +3,8 @@ package com.matburt.mobileorg.Parsing;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import com.matburt.mobileorg.Services.CalendarSyncService;
+
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -190,6 +192,8 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		Log.d("MobileOrg", "Deleting file_id " + file_id);
 		db.delete("orgdata", "file_id = ?", new String[] { file_id.toString() });
 		db.delete("files", "filename = ?", new String[] { filename });
+		
+		CalendarSyncService.deleteFileEntries(filename, context);
 	}
 
 	public void removeFile(Long node_id) {
@@ -419,6 +423,14 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		return cursor;
 	}
 	
+	public Cursor getFileSchedule(String filename) {
+		long file_id = this.getFileId(filename);
+		Cursor cursor = db.query("orgdata", nodeFields,
+				"payload LIKE '%SCHEDULED:%' AND file_id=?",
+				new String[] { Long.toString(file_id) }, null, null, null);
+		cursor.moveToFirst();
+		return cursor;
+	}
 	
 /***************************
  * Functions with regards to edits. 

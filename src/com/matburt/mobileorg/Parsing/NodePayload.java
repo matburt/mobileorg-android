@@ -10,7 +10,10 @@ class NodePayload {
 	
 	private String content = null;
 	private String scheduled = null;
+	
+	@SuppressWarnings("unused")
 	private String deadline = null;
+	@SuppressWarnings("unused")
 	private String timestamp = null;
 	
 	private String id = null; // Can be :ID: (or :ORIGINAL_ID: for agendas.org)
@@ -58,9 +61,7 @@ class NodePayload {
 		
 		return payload.toString().trim();
 	}
-	
-	//private final static String weekdayPattern = "(:?[(?:Mon)(?:Tue)(?:Wed)(?:Thu)(?:Fri)(?:Sat)(?:Sun)])?";
-	
+		
 	private String stripDate(String scheduled) {		
 		final Pattern scheduledLine = Pattern.compile(scheduled
 				+ "\\s*<([^>]*)>(?:--<([^>]*)>)?");

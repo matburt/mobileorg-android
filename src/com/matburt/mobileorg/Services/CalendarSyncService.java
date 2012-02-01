@@ -50,7 +50,8 @@ public class CalendarSyncService {
 	}
 
 	// TODO Speed up by using bulkInserts
-	private String insertEntry(String name, String orgID, long beginTime, long endTime, int allDay) {
+	private String insertEntry(String name, String payload, String orgID, long beginTime,
+			long endTime, int allDay, String filename) {
 		int calId = getCalendarID("Personal");
 		
 		if(calId == -1)
@@ -59,9 +60,9 @@ public class CalendarSyncService {
 		ContentValues values = new ContentValues();
 		values.put("calendar_id", calId);
 		values.put("title", name);
-		values.put("description", orgID + "\n" + name);
+		values.put("description", payload);
 		//values.put("eventLocation", "");
-		values.put("organizer", CALENDAR_ORGANIZER);
+		values.put("organizer", CALENDAR_ORGANIZER + ":" + filename);
 		
 		values.put("dtstart", beginTime);
 		values.put("dtend", endTime);
@@ -74,16 +75,23 @@ public class CalendarSyncService {
 		return uri.getLastPathSegment();
 	}
 	
-	private int deleteEntry(String calendarID) {
+	public int deleteEntry(String calendarID) {
 		return context.getContentResolver().delete(
 				Uri.parse("content://" + CALENDAR_AUTH + "/events/"
 						+ calendarID), null, null);
 	}
 	
+	static public int deleteFileEntries(String filename, Context context) {
+		return context.getContentResolver().delete(
+				Uri.parse("content://" + CALENDAR_AUTH + "/events/"),
+				"organizer=?",
+				new String[] { CALENDAR_ORGANIZER + ":" + filename });
+	}
+	
 	static public int deleteAllEntries(Context context) {
 		return context.getContentResolver().delete(
 				Uri.parse("content://" + CALENDAR_AUTH + "/events/"),
-				"organizer=?", new String[] { CALENDAR_ORGANIZER });
+				"organizer LIKE ?", new String[] { CALENDAR_ORGANIZER + "%" });
 	}
 	
 	private Date getDateInMs(String date) throws ParseException {
@@ -97,7 +105,7 @@ public class CalendarSyncService {
 		return formatter.parse(time);
 	}
 	
-	private void insertNode(NodeWrapper node) {
+	private void insertNode(NodeWrapper node, String filename) {
 		final Pattern schedulePattern = Pattern
 				.compile("(\\d{4}-\\d{2}-\\d{2}\\s\\w{3})\\s?(\\d{1,2}\\:\\d{2})?\\-?(\\d{1,2}\\:\\d{2})?");
 		Matcher propm = schedulePattern.matcher(node.getScheduled(db));
@@ -124,17 +132,16 @@ public class CalendarSyncService {
 					endTime = DateUtils.DAY_IN_MILLIS;
 					allDay = 1;
 				}
-				
-				//if(new Date(beginTime).getMonth() == 1) {
-				{
-					Log.d("MobileOrg", "Inserting: " + node.getName());
-					String id = insertEntry(node.getName(), node.getNodeId(db), beginTime, endTime, allDay);
-				}
+
+				insertEntry(node.getName(), node.getCleanedPayload(db),
+						node.getNodeId(db), beginTime, endTime, allDay,
+						filename);
 
 			} catch (ParseException e) {
-				Log.w("MobileOrg", "Unable to parse: " + propm.toString());
+				Log.w("MobileOrg", "Unable to parse: " + node.getName());
 			}
-		}
+		} else
+			Log.w("MobileOrg", "Couln't parse schedule of " + node.getName());
 	}
 	
 	public void insertAllScheduled() {
@@ -143,15 +150,28 @@ public class CalendarSyncService {
 		if(allScheduled == null)
 			return;
 		
-		Log.d("MobileOrg", "Got " + allScheduled.getCount() + " scheduled items");
-		
 		while(allScheduled.isAfterLast() == false) {
 			NodeWrapper node = new NodeWrapper(allScheduled);
-			insertNode(node);
+			insertNode(node, node.getFileName(db));
 			allScheduled.moveToNext();
 		}
 		
 		allScheduled.close();
+	}
+	
+	public void insertFileEntries(String filename) {
+		Cursor scheduled = db.getFileSchedule(filename);
+		
+		if(scheduled == null)
+			return;
+		
+		while(scheduled.isAfterLast() == false) {
+			NodeWrapper node = new NodeWrapper(scheduled);
+			insertNode(node, filename);
+			scheduled.moveToNext();
+		}
+		
+		scheduled.close();
 	}
 	
 	public void runTest() {
@@ -160,7 +180,8 @@ public class CalendarSyncService {
 	}
 	
 
-	public void readCalendars() {
+	@SuppressWarnings("unused")
+	private void readCalendars() {
 		int calId = getCalendarID("Personal");
 		
 		if (calId != -1) {
@@ -177,6 +198,11 @@ public class CalendarSyncService {
 			}
 			query.close();
 		}
+	}
+	
+	public void syncFile(String filename) {
+		deleteFileEntries(filename, context);
+		insertFileEntries(filename);
 	}
 
 	
