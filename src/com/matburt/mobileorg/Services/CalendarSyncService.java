@@ -80,7 +80,7 @@ public class CalendarSyncService {
 	}
 
 	// TODO Speed up using bulkInserts
-	private String insertEntry(String name, String payload, String orgID, long beginTime,
+	private String insertEntry(String name, boolean isTodoActive, String payload, String orgID, long beginTime,
 			long endTime, int allDay, String filename) throws IllegalArgumentException {		
 		final String calendarName = PreferenceManager
 				.getDefaultSharedPreferences(context).getString("calendarName",
@@ -110,7 +110,7 @@ public class CalendarSyncService {
 				Uri.parse("content://" + CALENDAR_AUTH + "/events"), values);
 		String nodeID = uri.getLastPathSegment();
 		
-		if (allDay == 0 && PreferenceManager.getDefaultSharedPreferences(context).getBoolean(
+		if (allDay == 0 && isTodoActive == true && PreferenceManager.getDefaultSharedPreferences(context).getBoolean(
 				"calendarReminder", false))
 			addReminder(nodeID, beginTime, endTime);
 		
@@ -211,8 +211,10 @@ public class CalendarSyncService {
 					endTime = beginTime + DateUtils.DAY_IN_MILLIS;
 					allDay = 1;
 				}
-
-				insertEntry(node.getName(), node.getCleanedPayload(db),
+				
+				boolean isActive = db.isTodoActive(node.getTodo());
+				
+				insertEntry(node.getName(), isActive, node.getCleanedPayload(db),
 						node.getNodeId(db), beginTime, endTime, allDay,
 						filename);
 
