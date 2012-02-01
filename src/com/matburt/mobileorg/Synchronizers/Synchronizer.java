@@ -145,9 +145,10 @@ abstract public class Synchronizer {
 	 * host. Using those files, it determines the other files that need updating
 	 * and downloads them.
 	 */
-	private void pull() throws IOException, CertificateException, SSLHandshakeException {
-		updateNotification(20, context.getString(R.string.downloading) + " checksums.data");
-	        String remoteChecksumContents = "";
+	private void pull() throws SSLHandshakeException, CertificateException, IOException {
+		updateNotification(20, context.getString(R.string.downloading)
+				+ " checksums.dat");
+		String remoteChecksumContents = "";
 
 		remoteChecksumContents = OrgFile.read(getRemoteFile("checksums.dat"));
 
@@ -211,11 +212,16 @@ abstract public class Synchronizer {
 					true);
 			// TODO Generate checksum of file and compare to remoteChecksum
 			parser.parse(filename, rfile, file_id, context);
-			
+
 			if (filename.equals("agendas.org") == false
 					&& PreferenceManager.getDefaultSharedPreferences(context)
 							.getBoolean("enableCalendar", false)) {
-				cal.syncFile(filename);
+				try {
+					cal.syncFile(filename);
+				} catch(IllegalArgumentException e) {
+					Log.d("MobileOrg", "Failed to sync calendar");
+				}
+				
 			}
 		}
 	}

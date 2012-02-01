@@ -13,6 +13,7 @@ import android.database.MergeCursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
+import android.preference.PreferenceManager;
 
 public class OrgDatabase extends SQLiteOpenHelper {
 	private static final String DATABASE_NAME = "MobileOrg.db";
@@ -191,7 +192,11 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		db.delete("orgdata", "file_id = ?", new String[] { file_id.toString() });
 		db.delete("files", "filename = ?", new String[] { filename });
 		
-		CalendarSyncService.deleteFileEntries(filename, context);
+		boolean calendarEnabled = PreferenceManager
+				.getDefaultSharedPreferences(context).getBoolean(
+						"enableCalendar", false);
+		if(calendarEnabled)
+			CalendarSyncService.deleteFileEntries(filename, context);
 	}
 
 	public void removeFile(Long node_id) {

@@ -11,6 +11,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
+import android.preference.PreferenceManager;
 import android.text.format.DateUtils;
 import android.util.Log;
 
@@ -39,8 +40,9 @@ public class CalendarSyncService {
 				int calId = cursor.getInt(0);
 				String calName = cursor.getString(1);
 
-				if (calName.equals(calName)) {
+				if (calName.equals(calendarName)) {
 				    cursor.close();
+				    Log.d("MobileOrg", "Using Calendar: " + calName);
 					return calId;
 				}
 				cursor.moveToNext();
@@ -50,20 +52,27 @@ public class CalendarSyncService {
 		return -1;
 	}
 
-	// TODO Speed up by using bulkInserts
+	// TODO Speed up using bulkInserts
 	private String insertEntry(String name, String payload, String orgID, long beginTime,
-			long endTime, int allDay, String filename) {
-		int calId = getCalendarID("Personal");
+			long endTime, int allDay, String filename) throws IllegalArgumentException {
+		final String calendarName = PreferenceManager
+				.getDefaultSharedPreferences(context).getString("calendarName",
+						"");
+		int calId = getCalendarID(calendarName);
 		
 		if(calId == -1)
-			return null;
+			throw new IllegalArgumentException("Couldn't find selected calendar: " + calendarName);
 
+		final String embeddedNodeMetadata = CALENDAR_ORGANIZER + ":" + filename;
+		
 		ContentValues values = new ContentValues();
 		values.put("calendar_id", calId);
 		values.put("title", name);
-		values.put("description", payload);
+		values.put("description", embeddedNodeMetadata + "\n" + payload);
 		//values.put("eventLocation", "");
-		values.put("organizer", CALENDAR_ORGANIZER + ":" + filename);
+		
+		// Sync will with google will delete organizer
+		//values.put("organizer", embeddedNodeMetadata);
 		
 		values.put("dtstart", beginTime);
 		values.put("dtend", endTime);
@@ -85,14 +94,14 @@ public class CalendarSyncService {
 	static public int deleteFileEntries(String filename, Context context) {
 		return context.getContentResolver().delete(
 				Uri.parse("content://" + CALENDAR_AUTH + "/events/"),
-				"organizer=?",
-				new String[] { CALENDAR_ORGANIZER + ":" + filename });
+				"description LIKE ?",
+				new String[] { CALENDAR_ORGANIZER + ":" + filename + "%" });
 	}
 	
-	static public int deleteAllEntries(Context context) {
+	public static int deleteAllEntries(Context context) {
 		return context.getContentResolver().delete(
 				Uri.parse("content://" + CALENDAR_AUTH + "/events/"),
-				"organizer LIKE ?", new String[] { CALENDAR_ORGANIZER + "%" });
+				"description LIKE ?", new String[] { CALENDAR_ORGANIZER + "%" });
 	}
 	
 	private Date getDateInMs(String date) throws ParseException {
@@ -105,7 +114,7 @@ public class CalendarSyncService {
 		return formatter.parse(time);
 	}
 	
-	private void insertNode(NodeWrapper node, String filename) {
+	private void insertNode(NodeWrapper node, String filename) throws IllegalArgumentException {
 		final Pattern schedulePattern = Pattern
 				.compile("(\\d{4}-\\d{2}-\\d{2}\\s\\w{3})\\s?(\\d{1,2}\\:\\d{2})?\\-?(\\d{1,2}\\:\\d{2})?");
 		Matcher propm = schedulePattern.matcher(node.getScheduled(db));
@@ -140,93 +149,49 @@ public class CalendarSyncService {
 						filename);
 
 			} catch (ParseException e) {
-				Log.w("MobileOrg", "Unable to parse: " + node.getName());
+				Log.w("MobileOrg", "Unable to parse schedule of: " + node.getName());
 			}
 		} else
-			Log.w("MobileOrg", "Couln't parse schedule of " + node.getName());
+			Log.w("MobileOrg", "Unable to find time entry in schedule of: "
+					+ node.getName());
 	}
 
-	public void insertFileEntries(String filename) {
+	public void insertFileEntries(String filename) throws IllegalArgumentException {
 		Cursor scheduled = db.getFileSchedule(filename);
-		
-		if(scheduled == null)
+
+		if (scheduled == null)
 			return;
-		
-		while(scheduled.isAfterLast() == false) {
+		while (scheduled.isAfterLast() == false) {
 			NodeWrapper node = new NodeWrapper(scheduled);
+
 			insertNode(node, filename);
 			scheduled.moveToNext();
 		}
-		
+
 		scheduled.close();
 	}
 
-	@SuppressWarnings("unused")
-	private void readCalendars() {
-		int calId = getCalendarID("Personal");
+	public static CharSequence[] getCalendars(Context context) {
+		CharSequence[] result;
 		
-		if (calId != -1) {
-
-			Cursor query = context.getContentResolver().query(
-					Uri.parse("content://" + CALENDAR_AUTH + "/events"),
-					new String[] {"_id", "title"}, null, null, null);
-			
-			if(query != null && query.moveToFirst()) {
-				while(query.isAfterLast() == false) {
-					Log.d("MobileOrg", "" + query.getString(query.getColumnIndex("title")));
-					query.moveToNext();
-				}
+		Cursor cursor = context.getContentResolver()
+				.query(Uri.parse("content://" + CALENDAR_AUTH + "/calendars"),
+						new String[] { "_id", "displayName" }, "selected=1",
+						null, null);
+		result = new CharSequence[cursor.getCount()];
+		
+		if (cursor != null && cursor.moveToFirst()) {
+			for (int i = 0; i < cursor.getCount(); i++) {
+				result[i] = cursor.getString(1);
+				cursor.moveToNext();
 			}
-			query.close();
 		}
+		cursor.close();
+		return result;
 	}
 	
-	public void syncFile(String filename) {
+	public void syncFile(String filename) throws IllegalArgumentException {
 		deleteFileEntries(filename, context);
 		insertFileEntries(filename);
 	}
-
-	
-//	// Projection array. Creating indices for this array instead of doing
-//	  // dynamic lookups improves performance.
-//	  public static final String[] EVENT_PROJECTION = new String[] {
-//	    Calendars._ID,                           // 0
-//	    Calendars.ACCOUNT_NAME,                  // 1
-//	    Calendars.CALENDAR_DISPLAY_NAME          // 2
-//	  };
-//	  
-//	  // The indices for the projection array above.
-//	  private static final int PROJECTION_ID_INDEX = 0;
-//	  private static final int PROJECTION_ACCOUNT_NAME_INDEX = 1;
-//	  private static final int PROJECTION_DISPLAY_NAME_INDEX = 2;
-//	
-//	public void writeTest() {
-//		// Run query
-//		Cursor cur = null;
-//		ContentResolver cr = context.getContentResolver();
-//		Uri uri = Calendars.CONTENT_URI;
-//		String selection = "((" + Calendars.ACCOUNT_NAME + " = ?) AND (" 
-//		                        + Calendars.ACCOUNT_TYPE + " = ?))";
-//		String[] selectionArgs = new String[] {"hdweiss@gmail.com", "com.google"}; 
-//		// Submit the query and get a Cursor object back. 
-//		cur = cr.query(uri, EVENT_PROJECTION, selection, selectionArgs, null);
-//		
-//		Log.d("MobileOrg", "Starting to query calendar");
-//		
-//		// Use the cursor to step through the returned records
-//		while (cur.moveToNext()) {
-//		    long calID = 0;
-//		    String displayName = null;
-//		    String accountName = null;        
-//		      
-//		    // Get the field values
-//		    calID = cur.getLong(PROJECTION_ID_INDEX);
-//		    displayName = cur.getString(PROJECTION_DISPLAY_NAME_INDEX);
-//		    accountName = cur.getString(PROJECTION_ACCOUNT_NAME_INDEX);
-//		              
-//		    // Do something with the values...
-//		    Log.d("MobileOrg", calID + " " + displayName + " " + accountName);
-//		}
-//	}
-
 }

@@ -34,6 +34,7 @@ public class SettingsActivity extends PreferenceActivity {
 
 		populateSyncSources();
 		populateTodoKeywords();
+		populateCalendarNames();
 
 		findPreference("clearDB").setOnPreferenceClickListener(onClearDBClick);
 		findPreference("clearCalendar").setOnPreferenceClickListener(onClearCalendarClick);
@@ -67,8 +68,8 @@ public class SettingsActivity extends PreferenceActivity {
 		public boolean onPreferenceClick(Preference preference) {
 			new AlertDialog.Builder(SettingsActivity.this)
 					.setIcon(android.R.drawable.ic_dialog_alert)
-					.setTitle(R.string.preference_clear_db_dialog_title)
-					.setMessage(R.string.preference_clear_db_dialog_message)
+					.setTitle(R.string.preference_clear_calendar_promt)
+					.setMessage(R.string.preference_clear_calendar_promt_message)
 					.setPositiveButton(R.string.yes,
 							new DialogInterface.OnClickListener() {
 
@@ -82,6 +83,15 @@ public class SettingsActivity extends PreferenceActivity {
 			return false;
 		}
 	};
+	
+	private void populateCalendarNames() {
+		ListPreference defaultTodo = (ListPreference) findPreference("calendarName");
+		
+		CharSequence[] calendars = CalendarSyncService.getCalendars(getApplicationContext());
+		
+		defaultTodo.setEntries(calendars);
+		defaultTodo.setEntryValues(calendars);
+	}
 	
 	private void populateTodoKeywords() {
 		ListPreference defaultTodo = (ListPreference) findPreference("defaultTodo");

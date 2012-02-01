@@ -130,4 +130,8 @@
   <string name="preference_calendar_clear_summary">Clears the phones calendar of all entries inserted by MobileOrg.</string>
   <string name="preference_calendar_synch">Enables synchronization to calendar.</string>
   <string name="preference_calendar_synch_title">Calendar Synchronization</string>
+  <string name="preference_calendar_name_summary">Choose which calendar orgmode will use.</string>
+  <string name="preference_calendar_name">Calendar Name</string>
+  <string name="preference_clear_calendar_promt">Clear phone calendar</string>
+  <string name="preference_clear_calendar_promt_message">Are you sure you want to clear the phones calendar?</string>  
 </resources>
