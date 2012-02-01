@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="app_name">MobileOrgActivity</string>
+  <string name="menu_outline">Outline</string>
+  <string name="menu_capture">Capture</string>
+  <string name="menu_settings">Settings</string>
+  <string name="menu_sync">Sync</string>
+  <string name="menu_edit">Edit</string>
+  <string name="menu_search">Search</string>
+  <string name="contextmenu_edit">Edit Node</string>
+  <string name="contextmenu_view">View Node</string>
+  <string name="contextmenu_delete">Delete File</string>
+  <string name="contextmenu_node_delete">Delete Node</string>
+  
+  
+  <string name="sync_wait">Sincronizando, espere…</string>
+  <string name="sync_failed">Sincronización fallida, ¿intentarlo de nuevo?</string>
+  <string name="yes">Sí</string>
+  <string name="no">No</string>
+  <string name="empty_main">Aún no se han sincronizado\nsus datos de Org</string>
+  <string name="error_bad_url">La url %s no tiene el formato correcto</string>
+  <string name="error_dialog_title">Error</string>
+  
+  <string name="node_edit_prompt">¿Seguro que desea descartar los cambios?</string>
+  <string name="node_view_error_loading_node">Error al cargar nodo</string>
+  <string name="sync_not_configured">Sincronización no configurada</string>
+  <string name="sync_error_occured">Ha ocurrido un error durante la sincronización:</string>
+  <string name="sync_synchronizing_changes">Sincronizando cambios</string>
+  <string name="sync_error_server_certificate">Ha ocurrido un error con el certificado del servidor:</string>
+  <string name="downloading">Descargando</string>
+  <string name="outline_delete_prompt">¿Seguro que desea eliminar?</string>
+  <string name="outline_synchronization_successful">Sincronización exitosa</string>
+
+  <string name="error_sqlio">Ha ocurrido un problema leyendo de la base de datos. ¿Se ha corrompido el sistema de ficheros, se encuentra su tarjeta SD montada correctamente?</string>
+  <string name="error_generic_database">Error de la base de datos: %s</string>
+  <string name="error_file_not_found">El fichero %s no ha sido encontrado</string>
+  <string name="error_file_permissions">Error de permisos en el fichero %s</string>
+  <string name="error_file_read">Ha ocurrido un error al leer del fichero %s</string>
+  <string name="error_file_write">Ha ocurrido un error al escribir al fichero %s</string>
+  <string name="error_invalid_url">URL contiene caracteres inválidos: %s</string>
+  <string name="error_synchronizer_type_unknown">Método de sincronización desconocido: %s</string>
+  <string name="error_local_storage_method_unknown">Método de almacenamiento local desconocido: %s</string>
+  <string name="error_unsupported_encoding">Hallada codificación desconocida en el fichero %s</string>
+  <string name="error_url_fetch">Ha ocurrido un error intentando acceder a la url: %s</string>
+  <string name="error_url_fetch_detail">Ha ocurrido un error intentando acceder a la url %1$s: %2$s</string>
+  <string name="error_url_put_detail">Ha ocurrido un error intentando cargar a la url %1$s: %2$s</string>
+  <string name="error_opening_database">Ha ocurrido un error intentando crear la base de datos. Compruebe sus preferencias de almacenamiento en el menú de preferencias, y asegúrese de que su tarjeta SD se encuentra disponible.</string>
+  <string name="error_url_put">Ha ocurrido un error intentando cargar a la url %s</string>
+  <string name="dropbox_fetch_error">Ha ocurrido un error al leer la ruta de Dropbox %1$s: %2$s</string>
+  <string name="apg_not_found">APG no encontrado</string>
+  <string name="apg_version_not_supported">Versión de APG no soportada</string>
+  <string name="view_as_document">Ver como documento</string>
+  <string name="title">Título</string>
+  <string name="body">Tap aquí para editar el cuerpo del texto</string>
+  <string name="tags">Etiquetas</string>
+  <string name="priority">Prioridad</string>
+  <string name="todo_state">Estado</string>
+  <string name="back">Atrás</string>
+  <string name="cancel">Cancelar</string>
+  <string name="save">Guardar</string>  
+  <string name="search_hint">Buscar</string>
+  <string name="warning">ADVERTENCIA!</string>
+  <string name="cert_changed">El certificado de WebDAV ha cambiado, vea los detalles más abajo. Si está conforme, haga tap en \'Aceptar\', de lo contrario haga tap en \'Denegar\'. Si acepta el nuevo certificado, deberá reiniciar la sincronización manualmente.</string>
+  <string name="accept">Aceptar</string>
+  <string name="deny">Denegar</string>
+
+  <string name="sync_plugin">Sincronización MobileOrg</string>
+  <string name="sync_plugin_info">Este plugin le permite accionar la sincronización de MobileOrg desde Tasker y otros lugares. Si está conforme, haga tap en \'Aceptar\', de lo contrario haga tap en \'Denegar\'</string>
+  <string name="sync_plugin_message">Sincronizar</string>
+
+  <!-- setup wizard strings -->
+  <string name="up_one_level">Subir un nivel</string>
+  <string name="please_wait">Espere, por favor…</string>
+  <string name="signing_in">Iniciando sesión</string>
+  <string name="pick_folder">Elija una carpeta desde la cual sincronizar:</string>
+  <string name="email">Email</string>
+  <string name="username">Usuario</string>
+  <string name="password">Contraseña</string>
+  <string name="login">Iniciar sesión</string>
+  <string name="login_webdav">Comprobar login</string>
+  <string name="i_want_to_sync_using">Quiero sincronizar usando:</string>
+  <string name="wizard_webdav">un servidor WebDAV</string>
+  <string name="wizard_dropbox">una cuenta de Dropbox</string>
+  <string name="wizard_sdcard">mi tarjeta SD</string>
+  <string name="wizard_null">nada (sólo captura)</string>
+  <string name="log_in_to_dropbox">Iniciar sesión con Dropbox</string>
+  <string name="log_in_to_webdav">Iniciar sesión con su servidor WebDAV</string>
+  <string name="null_sync_description">No se ha configurado la sincronización, y sólo podrá capturar notas.</string>
+  <string name="url">URL</string>
+  <string name="wizard_dropbox_email_hint">uri@frankandrobot.com</string>
+  
+    <!-- preference strings -->
+  <string name="title_capture_with_timestamp">Capturar con fecha</string>
+  <string name="summary_capture_with_timestamp">Notas capturadas contendrán fecha y hora</string>
+  <string name="title_agenda_title">Usar títulos de la agenda</string>
+  <string name="summary_agenda_title">Habilita el uso de títulos de agenda personalizados. Requiere volver a sincronizar para entrar en vigor.</string>
+  <string name="title_do_auto_sync">Sincronización en segundo plano</string>
+  <string name="summary_do_auto_sync">Sincronizar la base de datos de MobileOrg automáticamente en segundo plano.</string>
+  <string name="title_auto_sync_interval">Intervalo de sincronización en segundo plano</string>
+  <string name="summary_auto_sync_interval">Cada cuánto tiempo se deberá iniciar la sincronización en segundo plano</string>
+  <string name="title_view_wrap_lines">Ajuste de línea</string>
+  <string name="summary_view_wrap_lines">Usar ajuste de línea adaptado al visualizar nodos</string>
+  <string name="preference_default_todo_summary">Estado por defecto al capturar notas</string>
+  <string name="preference_default_todo_title">Estado por defecto</string>
+  <string name="preference_clean_up_db_summary">Limpiar la base de datos de almacenamiento</string>
+  <string name="preference_clean_up_db_title">Limpiar base de datos</string>
+  <string name="preferences_widget_summary">Preferencias para un widget</string>
+  <string name="preference_widget_title">Preferencias del Widget</string>
+  <string name="preference_other">Otros</string>
+  <string name="preference_version">Versión</string>
+  <string name="preference_storage_summary">Dónde almacenar los datos de org</string>
+  <string name="preference_storage_title">Modo de almacenamiento</string>
+  <string name="preference_storage">Almacenamiento</string>
+  <string name="preference_recursion_level_title">Nivel de recursión</string>
+  <string name="preference_recursion_level_summary">Cuántos niveles de nodos-hijo mostrar en lista</string>
+  <string name="preference_viewing">Vista</string>
+  <string name="preference_synchronization">Sincronización</string>
+  <string name="preference_sync_source_summary">De dónde sincronizar los datos de org</string>
+  <string name="preference_sync_source_title">Modo de sincronización</string>
+  <string name="preference_dropbox_login">Sesión</string>
+  <string name="preference_dropbox_login_summary">Iniciar sesión para obtener el símbolo OAuth</string>
+  <string name="preference_dropbox_path">Ruta</string>
+  <string name="preference_dropbox_path_summary">Ruta de Dropbox al fichero index.org</string>
+  <string name="preference_clear_db_dialog_title">¿Borrar BBDD?</string>
+  <string name="preference_clear_db_dialog_message">¿Seguro que desea borrar la BBDD?</string>
+</resources>
