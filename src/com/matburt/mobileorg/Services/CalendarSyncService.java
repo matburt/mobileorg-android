@@ -19,7 +19,7 @@ import com.matburt.mobileorg.Parsing.NodeWrapper;
 import com.matburt.mobileorg.Parsing.OrgDatabase;
 
 public class CalendarSyncService {
-	private final static String CALENDAR_AUTH = "com.android.calendar";
+	private String CALENDAR_AUTH = null;
 	private final static String CALENDAR_ORGANIZER = "MobileOrg";
 
 	private OrgDatabase db;
@@ -28,6 +28,7 @@ public class CalendarSyncService {
 	public CalendarSyncService(OrgDatabase db, Context context) {
 		this.db = db;
 		this.context = context;
+		this.CALENDAR_AUTH = getCalendarUriBase();
 	}
 	
 	private int getCalendarID(String calendarName) {
@@ -42,7 +43,6 @@ public class CalendarSyncService {
 
 				if (calName.equals(calendarName)) {
 				    cursor.close();
-				    Log.d("MobileOrg", "Using Calendar: " + calName);
 					return calId;
 				}
 				cursor.moveToNext();
@@ -50,6 +50,33 @@ public class CalendarSyncService {
 		}
 		cursor.close();
 		return -1;
+	}
+	
+	/**
+	 * Hack to get the proper uri.
+	 */
+	private String getCalendarUriBase() {
+		String calendarUriBase = null;
+		Uri calendars = Uri.parse("content://com.android.calendar/calendars");
+		Cursor managedCursor = null;
+		try {
+			managedCursor = context.getContentResolver().query(calendars, null, null, null, null);
+		} catch (Exception e) {
+		}
+		if (managedCursor != null) {
+			calendarUriBase = "com.android.calendar";
+		} else {
+			calendars = Uri.parse("content://calendar/calendars");
+			try {
+				managedCursor = context.getContentResolver().query(calendars, null, null, null, null);
+			} catch (Exception e) {
+			}
+			if (managedCursor != null) {
+				calendarUriBase = "calendar";
+			}
+		}
+		
+		return calendarUriBase;
 	}
 
 	// TODO Speed up using bulkInserts
@@ -132,14 +159,14 @@ public class CalendarSyncService {
 						+ calendarID), null, null);
 	}
 	
-	static public int deleteFileEntries(String filename, Context context) {
+	public int deleteFileEntries(String filename, Context context) {
 		return context.getContentResolver().delete(
 				Uri.parse("content://" + CALENDAR_AUTH + "/events/"),
 				"description LIKE ?",
 				new String[] { CALENDAR_ORGANIZER + ":" + filename + "%" });
 	}
 	
-	public static int deleteAllEntries(Context context) {
+	public int deleteAllEntries(Context context) {
 		return context.getContentResolver().delete(
 				Uri.parse("content://" + CALENDAR_AUTH + "/events/"),
 				"description LIKE ?", new String[] { CALENDAR_ORGANIZER + "%" });
@@ -212,13 +239,14 @@ public class CalendarSyncService {
 		scheduled.close();
 	}
 
-	public static CharSequence[] getCalendars(Context context) {
+	public CharSequence[] getCalendars(Context context) {
 		CharSequence[] result;
 		
 		Cursor cursor = context.getContentResolver()
 				.query(Uri.parse("content://" + CALENDAR_AUTH + "/calendars"),
 						new String[] { "_id", "displayName" }, "selected=1",
 						null, null);
+		
 		result = new CharSequence[cursor.getCount()];
 		
 		if (cursor != null && cursor.moveToFirst()) {

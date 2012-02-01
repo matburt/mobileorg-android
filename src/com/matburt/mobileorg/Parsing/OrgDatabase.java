@@ -196,7 +196,7 @@ public class OrgDatabase extends SQLiteOpenHelper {
 				.getDefaultSharedPreferences(context).getBoolean(
 						"enableCalendar", false);
 		if(calendarEnabled)
-			CalendarSyncService.deleteFileEntries(filename, context);
+			new CalendarSyncService(this, context).deleteFileEntries(filename, context);
 	}
 
 	public void removeFile(Long node_id) {

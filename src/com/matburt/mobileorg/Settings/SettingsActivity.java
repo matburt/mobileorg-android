@@ -59,8 +59,12 @@ public class SettingsActivity extends PreferenceActivity {
 								public void onClick(DialogInterface dialog,
 										int which) {
 									db.clearDB();
-									if(getPreferenceManager().getSharedPreferences().getBoolean("enableCalendar", false))
-										CalendarSyncService.deleteAllEntries(getApplicationContext());
+									if (getPreferenceManager()
+											.getSharedPreferences().getBoolean(
+													"enableCalendar", false))
+										getCalendarSyncService()
+												.deleteAllEntries(
+														getApplicationContext());
 								}
 
 							}).setNegativeButton(R.string.no, null).show();
@@ -82,7 +86,7 @@ public class SettingsActivity extends PreferenceActivity {
 								@Override
 								public void onClick(DialogInterface dialog,
 										int which) {
-									CalendarSyncService.deleteAllEntries(getApplicationContext());
+									getCalendarSyncService().deleteAllEntries(getApplicationContext());
 								}
 
 							}).setNegativeButton(R.string.no, null).show();
@@ -90,13 +94,20 @@ public class SettingsActivity extends PreferenceActivity {
 		}
 	};
 	
+	private CalendarSyncService getCalendarSyncService() {
+		return new CalendarSyncService(
+				((MobileOrgApplication) getApplication())
+						.getDB(),
+				getApplicationContext());
+	}
+	
 	private void populateCalendarNames() {
-		ListPreference defaultTodo = (ListPreference) findPreference("calendarName");
+		ListPreference calendarName = (ListPreference) findPreference("calendarName");
 		
-		CharSequence[] calendars = CalendarSyncService.getCalendars(getApplicationContext());
+		CharSequence[] calendars = getCalendarSyncService().getCalendars(getApplicationContext());
 		
-		defaultTodo.setEntries(calendars);
-		defaultTodo.setEntryValues(calendars);
+		calendarName.setEntries(calendars);
+		calendarName.setEntryValues(calendars);
 	}
 	
 	private void populateTodoKeywords() {
