@@ -38,6 +38,7 @@ import com.matburt.mobileorg.Dropbox.DropboxLoginListener;
 import com.matburt.mobileorg.Views.PageFlipView;
 import com.matburt.mobileorg.Synchronizers.WebDAVSynchronizer;
 import com.matburt.mobileorg.Synchronizers.NullSynchronizer;
+import com.matburt.mobileorg.Synchronizers.SSHSynchronizer;
 import com.matburt.mobileorg.Parsing.MobileOrgApplication;
 
 public class WizardActivity extends Activity {
@@ -103,6 +104,8 @@ public class WizardActivity extends Activity {
     EditText sshUser;
     EditText sshPass;
     EditText sshPath;
+    EditText sshHost;
+    EditText sshPort;
     Button sshLoginButton;
     //page 3 variables
     ListView folderList;
@@ -208,6 +211,8 @@ public class WizardActivity extends Activity {
         sshUser = (EditText) wizard.findViewById(R.id.wizard_ssh_username);
         sshPass = (EditText) wizard.findViewById(R.id.wizard_ssh_password);
         sshPath = (EditText) wizard.findViewById(R.id.wizard_ssh_path);
+        sshHost = (EditText) wizard.findViewById(R.id.wizard_ssh_host);
+        sshPort = (EditText) wizard.findViewById(R.id.wizard_ssh_port);
         webdavLoginButton = (Button) wizard.findViewById(R.id.wizard_ssh_login_button);
         doneButton = (Button) findViewById(R.id.wizard_done_button);
         webdavLoginButton.setOnClickListener(new OnClickListener() {
@@ -293,6 +298,8 @@ public class WizardActivity extends Activity {
         final String pathActual = sshPath.getText().toString();
         final String passActual = sshPass.getText().toString();
         final String userActual = sshUser.getText().toString();
+        final String hostActual = sshHost.getText().toString();
+        final int portActual = Integer.parseInt(sshPort.getText().toString());
         final Context ctxt = this;
         progress.show();
 
@@ -302,8 +309,8 @@ public class WizardActivity extends Activity {
 
         Thread loginThread = new Thread() {
                 public void run() {
-                    WebDAVSynchronizer wds = new WebDAVSynchronizer(ctxt, (MobileOrgApplication)getApplication());
-                    String extra = wds.testConnection(urlActual, userActual, passActual);
+                    SSHSynchronizer sds = new SSHSynchronizer(ctxt, (MobileOrgApplication)getApplication());
+                    String extra = sds.testConnection(pathActual, userActual, passActual, hostActual, portActual);
                     if (extra != null) {
                         showToastRemote("Login failed: " + extra);
                         return;
@@ -477,6 +484,13 @@ public class WizardActivity extends Activity {
                 editor.putString("webUrl", webdavUrl.getText().toString());
                 editor.putString("webPass", webdavPass.getText().toString());
                 editor.putString("webUser", webdavUser.getText().toString());
+            }
+            else if ( syncSource.equals("scp") ) {
+                editor.putString("scpPath", sshPath.getText().toString());
+                editor.putString("scpUser", sshUser.getText().toString());
+                editor.putString("scpPass", sshPass.getText().toString());
+                editor.putString("scpHost", sshHost.getText().toString());
+                editor.putString("scpPort", sshPort.getText().toString());
             }
             else if ( syncSource.equals("dropbox") )
                 editor.putString("dropboxPath", directoryAdapter.getCheckedDirectory() + "/");

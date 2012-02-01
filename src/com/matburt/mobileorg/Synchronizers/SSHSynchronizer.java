@@ -22,22 +22,95 @@ public class SSHSynchronizer extends Synchronizer {
 
 	private String user;
 	private String host;
-	private String remotePath;
+	private String path;
+    private String pass;
+    private int port;
 
 	private Session session;
 
 	public SSHSynchronizer(Context context, MobileOrgApplication appInst) {
 		super(context, appInst);
 
-		String orgPath = appSettings.getString("scpUrl", "");
+		path = appSettings.getString("scpPath", "");
 		user = appSettings.getString("scpUser", "");
-		host = orgPath.substring(0, orgPath.indexOf(':'));
-		remotePath = orgPath.substring(orgPath.indexOf(':') + 1);
+        host = appSettings.getString("scpHost", "");
+        String tmpPort = appSettings.getString("scpPort", "");
+        if (tmpPort.equals("")) {
+            port = 22;
+        }
+        else {
+            port = Integer.parseInt(tmpPort);
+        }
+        pass = appSettings.getString("scpPass", "");
+	}
 
+    public String testConnection(String path, String user, String pass, String host, int port) {
+        this.path = path;
+        this.user = user;
+        this.pass = pass;
+        this.host = host;
+        this.port = port;
+
+        if (this.path.indexOf("index.org") < 0) {
+            Log.i("MobileOrg", "Invalid ssh path, must point to index.org");
+            return "Invalid ssh path, must point to index.org";
+        }
+
+        if (this.path.equals("") ||
+            this.user.equals("") ||
+            this.host.equals("") ||
+            this.pass.equals("")) {
+            Log.i("MobileOrg", "Test Connection Failed for not being configured");
+            return "Missing configuration values";
+        }
+
+        try {
+            this.connect();
+        }
+        catch (Exception e) {
+            Log.i("MobileOrg", "SSH Connection failed");
+            return e.toString();
+        }
+
+        try {
+            BufferedReader r = this.getRemoteFile(path);
+        }
+        catch (Exception e) {
+            Log.i("MobileOrg", "SSH Get index file failed");
+            return "Failed to find index file with error: " + e.toString();
+        }
+        this.postSynchronize();
+        return null;
+    }
+
+    private String getRootUrl() {
+        String[] pathElements = this.path.split("/");
+        String directoryActual = "/";
+        if (pathElements.length > 1) {
+            for (int i = 0; i < pathElements.length - 1; i++) {
+                if (pathElements[i].length() > 0) {
+                    directoryActual += pathElements[i] + "/";
+                }
+            }
+        }
+        return directoryActual;
+    }
+
+	@Override
+	protected boolean isConfigured() {
+		if (this.appSettings.getString("scpPath", "").equals("") ||
+            this.appSettings.getString("scpUser", "").equals("") ||
+            this.appSettings.getString("scpHost", "").equals("") ||
+            this.appSettings.getString("scpPass", "").equals(""))
+			return false;
+		return true;
+	}
+
+    public void connect() throws JSchException {
 		JSch jsch = new JSch();
 		try {
-			session = jsch.getSession(user, host, 22);
-			session.setPassword(appSettings.getString("scpPass", ""));
+			session = jsch.getSession(user, host, port);
+			session.setPassword(pass);
 
 			java.util.Properties config = new java.util.Properties();
 			config.put("StrictHostKeyChecking", "no");
@@ -47,27 +120,19 @@ public class SSHSynchronizer extends Synchronizer {
 			Log.d(LT, "SSH Connected");
 		} catch (JSchException e) {
 			Log.d(LT, e.getLocalizedMessage());
+            throw e;
 		}
-	}
-
-    public String testConnection(String url, String user, String pass) {
     }
-
-	@Override
-	protected boolean isConfigured() {
-		if (this.appSettings.getString("scpUrl", "").equals(""))
-			return false;
-		return true;
-	}
 
 	@Override
 	protected void putRemoteFile(String filename, String contents)
 			throws IOException {
 		try {
+            this.connect();
 			Log.d(LT, "Uploading: " + filename);
 
 			// exec 'scp -t rfile' remotely
-			String command = "scp -p -t " + remotePath + filename;
+			String command = "scp -p -t " + this.getRootUrl() + filename;
 			Channel channel = session.openChannel("exec");
 			((ChannelExec) channel).setCommand(command);
 
@@ -107,18 +172,19 @@ public class SSHSynchronizer extends Synchronizer {
 
 			out.close();
 			channel.disconnect();
+            this.postSynchronize();
 		} catch (Exception e) {
 			Log.d(LT, e.getLocalizedMessage());
 		}
 	}
 
 	@Override
-	protected BufferedReader getRemoteFile(String filename) {
+	protected BufferedReader getRemoteFile(String filename) throws Exception {
 		ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 
 		try {
-
-			final String command = "scp -f " + remotePath + filename;
+            this.connect();
+			final String command = "scp -f " + this.getRootUrl() + filename;
 			Log.d(LT, "Running: " + command);
 			ChannelExec channel = (ChannelExec) session.openChannel("exec");
 			channel.setCommand(command);
@@ -204,8 +270,10 @@ public class SSHSynchronizer extends Synchronizer {
 
 			Log.d(LT, "disconnecting...");
 			channel.disconnect();
+            this.postSynchronize();
 		} catch (Exception e) {
 			Log.d(LT, e.getMessage() + e.getLocalizedMessage());
+            throw e;
 		}
 
 		return new BufferedReader(new StringReader(buffer.toString()));

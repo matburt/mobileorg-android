@@ -53,7 +53,7 @@
           android:paddingTop="10dp"
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
-          android:text="@string/url"
+          android:text="@string/path"
           android:textSize="20dp"/>
       <EditText
           android:id="@+id/wizard_ssh_path"
@@ -62,6 +62,32 @@
           android:textSize="20dp"
           android:singleLine="true"
           android:inputType="textUri"/>
+      <TextView
+          android:paddingTop="10dp"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:text="@string/host"
+          android:textSize="20dp"/>
+      <EditText
+          android:id="@+id/wizard_ssh_host"
+          android:layout_width="fill_parent"
+          android:layout_height="wrap_content"
+          android:textSize="20dp"
+          android:singleLine="true"/>
+      <TextView
+          android:paddingTop="10dp"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:text="@string/port"
+          android:textSize="20dp"/>
+      <EditText
+          android:id="@+id/wizard_ssh_port"
+          android:layout_width="fill_parent"
+          android:layout_height="wrap_content"
+          android:textSize="20dp"
+          android:inputType="number"
+          android:defaultValue="22"
+          android:singleLine="true"/>
       <Button
           android:layout_marginTop="20dp"
           android:id="@+id/wizard_ssh_login_button"
