@@ -3,6 +3,7 @@ package com.matburt.mobileorg.Services;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -99,7 +100,6 @@ public class CalendarSyncService {
 		return formatter.parse(date);
 	}
 	
-	// TODO Fix timezone issue
 	private Date getTimeInMs(String time) throws ParseException {
 		SimpleDateFormat formatter = new SimpleDateFormat("HH:mm");
 		return formatter.parse(time);
@@ -117,19 +117,21 @@ public class CalendarSyncService {
 		if (propm.find()) {
 			try {
 				beginTime = getDateInMs(propm.group(1)).getTime();
-
+				beginTime += TimeZone.getDefault().getOffset(beginTime);
+				
 				long beginTimeOfDay;
 				if (propm.group(2) != null) { // has hh:mm entry
 					beginTimeOfDay = getTimeInMs(propm.group(2)).getTime();
 					beginTime += beginTimeOfDay;
 					allDay = 0;
 					
-					if (propm.group(3) != null) // has hh:mm-hh:mm entry
+					if (propm.group(3) != null) { // has hh:mm-hh:mm entry
 						endTime = beginTime + getTimeInMs(propm.group(3)).getTime() - beginTimeOfDay;
+					}
 					else // event is one hour per default
 						endTime = beginTime + DateUtils.HOUR_IN_MILLIS;
 				} else { // event is an entire day event
-					endTime = DateUtils.DAY_IN_MILLIS;
+					endTime = beginTime + DateUtils.DAY_IN_MILLIS;
 					allDay = 1;
 				}
 
@@ -143,22 +145,7 @@ public class CalendarSyncService {
 		} else
 			Log.w("MobileOrg", "Couln't parse schedule of " + node.getName());
 	}
-	
-	public void insertAllScheduled() {
-		Cursor allScheduled = db.getAllScheduled();
-		
-		if(allScheduled == null)
-			return;
-		
-		while(allScheduled.isAfterLast() == false) {
-			NodeWrapper node = new NodeWrapper(allScheduled);
-			insertNode(node, node.getFileName(db));
-			allScheduled.moveToNext();
-		}
-		
-		allScheduled.close();
-	}
-	
+
 	public void insertFileEntries(String filename) {
 		Cursor scheduled = db.getFileSchedule(filename);
 		
@@ -173,12 +160,6 @@ public class CalendarSyncService {
 		
 		scheduled.close();
 	}
-	
-	public void runTest() {
-		deleteAllEntries(context);
-		insertAllScheduled();
-	}
-	
 
 	@SuppressWarnings("unused")
 	private void readCalendars() {

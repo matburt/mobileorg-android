@@ -81,7 +81,7 @@ public class OrgFileParser {
 		} catch (IOException e) {}
 		
 		if(filename.equals("agendas.org") && PreferenceManager.getDefaultSharedPreferences(context)
-				.getBoolean("combineBlockAgendas", false)) {
+				.getBoolean("combineBlockAgendas", false) && useTitleField) {
 			combineBlockAgendas();
 		}
  		

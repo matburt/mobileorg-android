@@ -13,7 +13,6 @@ import android.database.MergeCursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
-import android.util.Log;
 
 public class OrgDatabase extends SQLiteOpenHelper {
 	private static final String DATABASE_NAME = "MobileOrg.db";
@@ -189,7 +188,6 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		orgfile.remove();
 		
 		Long file_id = this.getFileId(filename);
-		Log.d("MobileOrg", "Deleting file_id " + file_id);
 		db.delete("orgdata", "file_id = ?", new String[] { file_id.toString() });
 		db.delete("files", "filename = ?", new String[] { filename });
 		
@@ -413,14 +411,6 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		
 		this.addNodePayload(new_node_id, node.getRawPayload(this));
 		node.close();
-	}
-
-	public Cursor getAllScheduled() {
-		long file_id = this.getFileId("agendas.org");
-		Cursor cursor = db.query("orgdata", nodeFields,
-				"payload LIKE '%SCHEDULED:%' AND NOT file_id=?", new String[] {Long.toString(file_id)}, null, null, null);
-		cursor.moveToFirst();
-		return cursor;
 	}
 	
 	public Cursor getFileSchedule(String filename) {
