@@ -4,3 +4,4 @@ bin
 local.properties
 matburt-key.keystore
 dbprivate.xml
+proguard.cfg

@@ -27,6 +27,7 @@ import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Parsing.MobileOrgApplication;
 import com.matburt.mobileorg.Parsing.NodeWrapper;
 import com.matburt.mobileorg.Parsing.OrgFile;
+import com.matburt.mobileorg.Services.CalendarSyncService;
 import com.matburt.mobileorg.Services.SyncService;
 import com.matburt.mobileorg.Settings.SettingsActivity;
 import com.matburt.mobileorg.Settings.WizardActivity;
@@ -138,7 +139,8 @@ public class OutlineActivity extends ListActivity
 			return runShowSettings();
 		
 		case R.id.menu_outline:
-			runExpandSelection(-1);
+			//runExpandSelection(-1);
+			new CalendarSyncService(appInst.getDB(), getApplicationContext()).runTest();
 			return true;
 
 		case R.id.menu_capture:

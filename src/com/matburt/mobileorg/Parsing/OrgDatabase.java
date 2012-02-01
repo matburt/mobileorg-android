@@ -411,6 +411,14 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		node.close();
 	}
 
+	public Cursor getAllScheduled() {
+		long file_id = this.getFileId("agendas.org");
+		Cursor cursor = db.query("orgdata", nodeFields,
+				"payload LIKE '%SCHEDULED:%' AND NOT file_id=?", new String[] {Long.toString(file_id)}, null, null, null);
+		cursor.moveToFirst();
+		return cursor;
+	}
+	
 	
 /***************************
  * Functions with regards to edits. 

@@ -17,6 +17,7 @@ import android.preference.PreferenceActivity;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Parsing.MobileOrgApplication;
 import com.matburt.mobileorg.Parsing.OrgDatabase;
+import com.matburt.mobileorg.Services.CalendarSyncService;
 
 public class SettingsActivity extends PreferenceActivity {
 
@@ -35,6 +36,7 @@ public class SettingsActivity extends PreferenceActivity {
 		populateTodoKeywords();
 
 		findPreference("clearDB").setOnPreferenceClickListener(onClearDBClick);
+		findPreference("clearCalendar").setOnPreferenceClickListener(onClearCalendarClick);
 	}
 
 	private Preference.OnPreferenceClickListener onClearDBClick = new Preference.OnPreferenceClickListener() {
@@ -52,6 +54,28 @@ public class SettingsActivity extends PreferenceActivity {
 								public void onClick(DialogInterface dialog,
 										int which) {
 									db.clearDB();
+								}
+
+							}).setNegativeButton(R.string.no, null).show();
+			return false;
+		}
+	};
+	
+	private Preference.OnPreferenceClickListener onClearCalendarClick = new Preference.OnPreferenceClickListener() {
+
+		@Override
+		public boolean onPreferenceClick(Preference preference) {
+			new AlertDialog.Builder(SettingsActivity.this)
+					.setIcon(android.R.drawable.ic_dialog_alert)
+					.setTitle(R.string.preference_clear_db_dialog_title)
+					.setMessage(R.string.preference_clear_db_dialog_message)
+					.setPositiveButton(R.string.yes,
+							new DialogInterface.OnClickListener() {
+
+								@Override
+								public void onClick(DialogInterface dialog,
+										int which) {
+									CalendarSyncService.deleteAllEntries(getApplicationContext());
 								}
 
 							}).setNegativeButton(R.string.no, null).show();
