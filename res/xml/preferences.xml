@@ -92,7 +92,19 @@
             android:dependency="enableCalendar"
             android:summary="@string/preference_calendar_name_summary"
             android:title="@string/preference_calendar_name" />
-        
+        <CheckBoxPreference
+            android:key="calendarReminder"
+            android:dependency="enableCalendar"
+            android:summary="@string/preference_calendar_reminder_summary"
+            android:title="@string/preference_calendar_reminder" />
+        <EditTextPreference
+            android:key="calendarReminderInterval"
+            android:maxLength="3"
+            android:dependency="calendarReminder"
+            android:numeric="integer"
+            android:summary="@string/preference_calendar_reminder_interval_summary"
+            android:title="@string/preference_calendar_reminder_interval" />
+
         <Preference
             android:key="clearCalendar"
             android:summary="@string/preference_calendar_clear_summary"

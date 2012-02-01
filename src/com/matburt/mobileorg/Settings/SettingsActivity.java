@@ -34,7 +34,11 @@ public class SettingsActivity extends PreferenceActivity {
 
 		populateSyncSources();
 		populateTodoKeywords();
+		try {
 		populateCalendarNames();
+		} catch (Exception e) {
+			// Don't crash because of fault in calendar synchronizer!
+		}
 
 		findPreference("clearDB").setOnPreferenceClickListener(onClearDBClick);
 		findPreference("clearCalendar").setOnPreferenceClickListener(onClearCalendarClick);
@@ -55,6 +59,8 @@ public class SettingsActivity extends PreferenceActivity {
 								public void onClick(DialogInterface dialog,
 										int which) {
 									db.clearDB();
+									if(getPreferenceManager().getSharedPreferences().getBoolean("enableCalendar", false))
+										CalendarSyncService.deleteAllEntries(getApplicationContext());
 								}
 
 							}).setNegativeButton(R.string.no, null).show();

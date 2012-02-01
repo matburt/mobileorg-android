@@ -54,7 +54,7 @@ public class CalendarSyncService {
 
 	// TODO Speed up using bulkInserts
 	private String insertEntry(String name, String payload, String orgID, long beginTime,
-			long endTime, int allDay, String filename) throws IllegalArgumentException {
+			long endTime, int allDay, String filename) throws IllegalArgumentException {		
 		final String calendarName = PreferenceManager
 				.getDefaultSharedPreferences(context).getString("calendarName",
 						"");
@@ -69,20 +69,61 @@ public class CalendarSyncService {
 		values.put("calendar_id", calId);
 		values.put("title", name);
 		values.put("description", embeddedNodeMetadata + "\n" + payload);
-		//values.put("eventLocation", "");
+		values.put("eventLocation", "");
 		
-		// Sync will with google will delete organizer
+		// Sync will with google will delete organizer :(
 		//values.put("organizer", embeddedNodeMetadata);
 		
 		values.put("dtstart", beginTime);
 		values.put("dtend", endTime);
 		values.put("allDay", allDay);
-		values.put("hasAlarm", 1);
+		values.put("hasAlarm", 0);
 		
 		Uri uri = context.getContentResolver().insert(
 				Uri.parse("content://" + CALENDAR_AUTH + "/events"), values);
+		String nodeID = uri.getLastPathSegment();
 		
-		return uri.getLastPathSegment();
+		if (allDay == 0 && PreferenceManager.getDefaultSharedPreferences(context).getBoolean(
+				"calendarReminder", false))
+			addReminder(nodeID, beginTime, endTime);
+		
+		return nodeID;
+	}
+	
+	private void addReminder(String eventID, long beginTime, long endTime) {
+		if(beginTime < System.currentTimeMillis())
+			return;
+		
+		String intervalString = PreferenceManager.getDefaultSharedPreferences(
+				context).getString("calendarReminderInterval", null);
+		if(intervalString == null)
+			throw new IllegalArgumentException("Invalid calendar reminder interval");
+		long reminderTime = Integer.valueOf(intervalString);
+		
+		ContentValues values = new ContentValues();
+		values.put("minutes", reminderTime);
+		values.put("event_id", eventID);
+		values.put("method", 1);
+		context.getContentResolver().insert(
+				Uri.parse("content://" + CALENDAR_AUTH + "/reminders"), values);
+		
+        ContentValues alertvalues = new ContentValues(); 
+        alertvalues.put( "event_id", eventID ); 
+        alertvalues.put( "begin", beginTime ); 
+        alertvalues.put( "end", endTime ); 
+        alertvalues.put( "alarmTime", reminderTime ); 
+        alertvalues.put( "state", 0 ); 
+        alertvalues.put( "minutes", reminderTime ); 
+		context.getContentResolver().insert(
+				Uri.parse("content://" + CALENDAR_AUTH + "/calendar_alerts"),
+				alertvalues);
+        
+		ContentValues eventValues = new ContentValues();
+		eventValues.put("hasAlarm", 1);
+		context.getContentResolver().update(
+				Uri.parse("content://" + CALENDAR_AUTH + "/events/" + eventID),
+				eventValues, null, null);
+		
 	}
 	
 	public int deleteEntry(String calendarID) {
