@@ -9,6 +9,7 @@ import java.util.regex.Pattern;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.preference.PreferenceManager;
@@ -24,11 +25,13 @@ public class CalendarSyncService {
 
 	private OrgDatabase db;
 	private Context context;
+	private SharedPreferences sharedPreferences;
 	
 	public CalendarSyncService(OrgDatabase db, Context context) {
 		this.db = db;
 		this.context = context;
 		this.CALENDAR_AUTH = getCalendarUriBase();
+		this.sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
 	}
 	
 	private int getCalendarID(String calendarName) {
@@ -82,6 +85,11 @@ public class CalendarSyncService {
 	// TODO Speed up using bulkInserts
 	private String insertEntry(String name, boolean isTodoActive, String payload, String orgID, long beginTime,
 			long endTime, int allDay, String filename) throws IllegalArgumentException {		
+		
+		if (sharedPreferences.getBoolean("calendarShowDone", true) == false
+				&& isTodoActive == false)
+			return null;
+		
 		final String calendarName = PreferenceManager
 				.getDefaultSharedPreferences(context).getString("calendarName",
 						"");
@@ -110,7 +118,7 @@ public class CalendarSyncService {
 				Uri.parse("content://" + CALENDAR_AUTH + "/events"), values);
 		String nodeID = uri.getLastPathSegment();
 		
-		if (allDay == 0 && isTodoActive == true && PreferenceManager.getDefaultSharedPreferences(context).getBoolean(
+		if (allDay == 0 && isTodoActive == true && sharedPreferences.getBoolean(
 				"calendarReminder", false))
 			addReminder(nodeID, beginTime, endTime);
 		
@@ -121,8 +129,7 @@ public class CalendarSyncService {
 		if(beginTime < System.currentTimeMillis())
 			return;
 		
-		String intervalString = PreferenceManager.getDefaultSharedPreferences(
-				context).getString("calendarReminderInterval", null);
+		String intervalString = sharedPreferences.getString("calendarReminderInterval", null);
 		if(intervalString == null)
 			throw new IllegalArgumentException("Invalid calendar reminder interval");
 		long reminderTime = Integer.valueOf(intervalString);

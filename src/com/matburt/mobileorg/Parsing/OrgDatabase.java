@@ -582,6 +582,9 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		Cursor cursor = db.query("todos", new String[] {"isdone"}, "name = ?",
 				new String[] { todo }, null, null, null);		
 		
+		if(todo.isEmpty())
+			return true;
+		
 		if(cursor.getCount() > 0) {
 			cursor.moveToFirst();
 			int isdone = cursor.getInt(0);
