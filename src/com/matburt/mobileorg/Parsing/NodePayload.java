@@ -137,6 +137,11 @@ class NodePayload {
 		if(this.scheduled == null)
 			this.scheduled = stripDate("SCHEDULED:");
 		
+		if(this.scheduled.isEmpty() && this.deadline == null) {
+			this.deadline = stripDate("DEADLINE:");
+			return this.deadline;
+		}
+		
 		return this.scheduled;
 	}
 
