@@ -420,9 +420,17 @@ public class OrgDatabase extends SQLiteOpenHelper {
 	
 	public Cursor getFileSchedule(String filename) {
 		long file_id = this.getFileId(filename);
-		Cursor cursor = db.query("orgdata", nodeFields,
-				"payload LIKE '%SCHEDULED:%' AND file_id=?",
-				new String[] { Long.toString(file_id) }, null, null, null);
+		
+		Cursor cursor;
+		if(PreferenceManager.getDefaultSharedPreferences(context).getBoolean("calendarHabits", true))
+			cursor = db.query("orgdata", nodeFields,
+					"payload LIKE '%SCHEDULED:%' AND file_id=?",
+					new String[] { Long.toString(file_id) }, null, null, null);
+		else
+			cursor = db.query("orgdata", nodeFields,
+					"payload LIKE '%SCHEDULED:%' AND NOT payload LIKE '%:STYLE: habit%' AND file_id=?",
+					new String[] { Long.toString(file_id) }, null, null, null);
+		
 		cursor.moveToFirst();
 		return cursor;
 	}
