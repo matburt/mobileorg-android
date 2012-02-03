@@ -14,7 +14,6 @@ import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Log;
 
-
 public class OrgFileParser {
 
     private static final String LT = "MobileOrg";
@@ -82,10 +81,10 @@ public class OrgFileParser {
 		} catch (IOException e) {}
 		
 		if(filename.equals("agendas.org") && PreferenceManager.getDefaultSharedPreferences(context)
-				.getBoolean("combineBlockAgendas", false)) {
+				.getBoolean("combineBlockAgendas", false) && useTitleField) {
 			combineBlockAgendas();
 		}
-		
+ 		
 		db.getDB().setTransactionSuccessful();
 		db.getDB().endTransaction();
 	}
@@ -94,8 +93,8 @@ public class OrgFileParser {
 	
 	private void combineBlockAgendas() {
 		final String filename = "agendas.org";
-		long agendaFileID = db.getFileNodeId(filename);
-		Cursor cursor = db.getNodeChildren(agendaFileID);
+		long agendaFileNodeID = db.getFileNodeId(filename);
+		Cursor cursor = db.getNodeChildren(agendaFileNodeID);
 		
 		cursor.moveToFirst();
 		
@@ -113,7 +112,7 @@ public class OrgFileParser {
 			if(blockTitle.isEmpty() == false) { // Is a block agenda
 				
 				if(blockTitle.equals(previousBlockTitle) == false) { // Create new node to contain block agenda	
-					previousBlockNode = db.addNode(agendaFileID, blockTitle,
+					previousBlockNode = db.addNode(agendaFileNodeID, blockTitle,
 							"", "", "", db.getFileId(filename));
 				}
 
@@ -131,7 +130,7 @@ public class OrgFileParser {
 					children = db.getNodeChildren(children.getLong(children
 							.getColumnIndex("_id")));
 					children.moveToFirst();
-					cloneChildren(children, previousBlockNode, agendaFileID,
+					cloneChildren(children, previousBlockNode, agendaFileNodeID,
 							blockEntryName, filename);
 				} else if(blockEntryName.startsWith("Week-agenda")) {
 					while (children.isAfterLast() == false) {
@@ -141,12 +140,12 @@ public class OrgFileParser {
 								.getLong(children.getColumnIndex("_id")));
 						children2.moveToFirst();
 						cloneChildren(children2, previousBlockNode,
-								agendaFileID, blockEntryName, filename);
+								agendaFileNodeID, blockEntryName, filename);
 						children2.close();
 						children.moveToNext();
 					}
 				} else
-					cloneChildren(children, previousBlockNode, agendaFileID,
+					cloneChildren(children, previousBlockNode, agendaFileNodeID,
 							blockEntryName, filename);
 				
 				previousBlockTitle = blockTitle;
@@ -161,14 +160,14 @@ public class OrgFileParser {
 	}
 	
 	private void cloneChildren(Cursor children, long previousBlockNode,
-			Long agendaFileID, String blockEntryName, String filename) {
+			Long agendaNodeFileID, String blockEntryName, String filename) {
 		db.addNode(previousBlockNode, BLOCK_SEPARATOR_PREFIX
 				+ blockEntryName, "", "", "", db.getFileId(filename));
 		
 		while(children.isAfterLast() == false) {
 			db.cloneNode(
 					children.getLong(children.getColumnIndex("_id")),
-					previousBlockNode, agendaFileID);
+					previousBlockNode, db.getFileId("agendas.org"));
 			children.moveToNext();
 		}
 	}

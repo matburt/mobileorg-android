@@ -1,18 +1,20 @@
 package com.matburt.mobileorg.Parsing;
 
-import java.text.SimpleDateFormat;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 class NodePayload {
-
 	private StringBuilder payload = new StringBuilder();
 	/** These are the remains of the cleaned payload. */
 	private StringBuilder payloadResidue = new StringBuilder();
 	
 	private String content = null;
 	private String scheduled = null;
+	
+	@SuppressWarnings("unused")
 	private String deadline = null;
+	@SuppressWarnings("unused")
+	private String timestamp = null;
 	
 	private String id = null; // Can be :ID: (or :ORIGINAL_ID: for agendas.org)
 	
@@ -52,30 +54,36 @@ class NodePayload {
 	private String cleanPayload() {
 		this.scheduled = stripDate("SCHEDULED:");
 		this.deadline = stripDate("DEADLINE:");
+		this.timestamp = stripDate("");
 
 		stripTags();
 		stripFileProperties();
 		
 		return payload.toString().trim();
 	}
-	
-	private String stripDate(String scheduled) {
-		int index = payload.indexOf(scheduled);
 		
-		if(index == -1)
-			return "";
+	private String stripDate(String scheduled) {		
+		final Pattern scheduledLine = Pattern.compile(scheduled
+				+ "\\s*<([^>]*)>(?:--<([^>]*)>)?");
+		Matcher matcher = scheduledLine.matcher(payload.toString());
 		
-		int start = payload.indexOf("<", index);
-		int end = payload.indexOf(">", start);
+		String result = "";
 		
-		String date = payload.substring(start + 1, end);
+		if(matcher.find()) {
+			result = matcher.group(1);
+			
+			if(matcher.group(2) != null)
+				result += matcher.group(2);
+			
+			payloadResidue.append(payload.substring(matcher.start(),
+					matcher.end()) + "\n");
+			payload.delete(matcher.start(), matcher.end());
+		}	
 		
-		payloadResidue.append(payload.substring(index, end + 1) + "\n");
-		payload.delete(index, end + 1);
-		
-		return date;
+		return result;
 	}
 	
+	// TODO Convert to use pattern
 	private void stripTags() {
 		final Pattern propertiesLine = Pattern.compile(":[A-Za-z_]+:");
 		Matcher propm = propertiesLine.matcher(this.payload);
@@ -106,6 +114,7 @@ class NodePayload {
 		}
 	}
 	
+	// TODO Convert to use Pattern
 	private void stripFileProperties() {
 		while (true) {
 			int start = payload.indexOf("#+");
@@ -124,32 +133,30 @@ class NodePayload {
 	/**
 	 * Returns a string containing the time at which a todo is scheduled.
 	 */
-	public String getTime() {
-		String time = "            ";
-		
+	public String getScheduled() {		
 		if(this.scheduled == null)
 			this.scheduled = stripDate("SCHEDULED:");
 		
-		int start = this.scheduled.indexOf(":");
+		if(this.scheduled.isEmpty() && this.deadline == null) {
+			this.deadline = stripDate("DEADLINE:");
+			return this.deadline;
+		}
 		
-		if(start != -1)
-			time = this.scheduled.substring(start-2, start+3) + " ";
-		
-		return time;
+		return this.scheduled;
 	}
 
-	public String datesToString() {
-		String dateInfo = "";
-
-		try{
-		SimpleDateFormat formatter = new SimpleDateFormat("<yyyy-MM-dd EEE>");
-		if (this.deadline != null && this.deadline.length() > 0)
-			dateInfo += "DEADLINE: " + formatter.format(this.deadline) + " ";
-
-		if (this.scheduled != null && this.scheduled.length() > 0)
-			dateInfo += "SCHEDULED: " + formatter.format(this.scheduled) + " ";
-		} catch(IllegalArgumentException e) { dateInfo = "";}
-		
-		return dateInfo;
-	}
+//	public String datesToString() {
+//		String dateInfo = "";
+//
+//		try{
+//		SimpleDateFormat formatter = new SimpleDateFormat("<yyyy-MM-dd EEE>");
+//		if (this.deadline != null && this.deadline.length() > 0)
+//			dateInfo += "DEADLINE: " + formatter.format(this.deadline) + " ";
+//
+//		if (this.scheduled != null && this.scheduled.length() > 0)
+//			dateInfo += "SCHEDULED: " + formatter.format(this.scheduled) + " ";
+//		} catch(IllegalArgumentException e) { dateInfo = "";}
+//		
+//		return dateInfo;
+//	}
 }

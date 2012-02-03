@@ -17,6 +17,7 @@ import android.preference.PreferenceActivity;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Parsing.MobileOrgApplication;
 import com.matburt.mobileorg.Parsing.OrgDatabase;
+import com.matburt.mobileorg.Services.CalendarSyncService;
 
 public class SettingsActivity extends PreferenceActivity {
 
@@ -33,8 +34,14 @@ public class SettingsActivity extends PreferenceActivity {
 
 		populateSyncSources();
 		populateTodoKeywords();
+		try {
+		populateCalendarNames();
+		} catch (Exception e) {
+			// Don't crash because of fault in calendar synchronizer!
+		}
 
 		findPreference("clearDB").setOnPreferenceClickListener(onClearDBClick);
+		findPreference("clearCalendar").setOnPreferenceClickListener(onClearCalendarClick);
 	}
 
 	private Preference.OnPreferenceClickListener onClearDBClick = new Preference.OnPreferenceClickListener() {
@@ -52,12 +59,56 @@ public class SettingsActivity extends PreferenceActivity {
 								public void onClick(DialogInterface dialog,
 										int which) {
 									db.clearDB();
+									if (getPreferenceManager()
+											.getSharedPreferences().getBoolean(
+													"enableCalendar", false))
+										getCalendarSyncService()
+												.deleteAllEntries(
+														getApplicationContext());
 								}
 
 							}).setNegativeButton(R.string.no, null).show();
 			return false;
 		}
 	};
+	
+	private Preference.OnPreferenceClickListener onClearCalendarClick = new Preference.OnPreferenceClickListener() {
+
+		@Override
+		public boolean onPreferenceClick(Preference preference) {
+			new AlertDialog.Builder(SettingsActivity.this)
+					.setIcon(android.R.drawable.ic_dialog_alert)
+					.setTitle(R.string.preference_clear_calendar_promt)
+					.setMessage(R.string.preference_clear_calendar_promt_message)
+					.setPositiveButton(R.string.yes,
+							new DialogInterface.OnClickListener() {
+
+								@Override
+								public void onClick(DialogInterface dialog,
+										int which) {
+									getCalendarSyncService().deleteAllEntries(getApplicationContext());
+								}
+
+							}).setNegativeButton(R.string.no, null).show();
+			return false;
+		}
+	};
+	
+	private CalendarSyncService getCalendarSyncService() {
+		return new CalendarSyncService(
+				((MobileOrgApplication) getApplication())
+						.getDB(),
+				getApplicationContext());
+	}
+	
+	private void populateCalendarNames() {
+		ListPreference calendarName = (ListPreference) findPreference("calendarName");
+		
+		CharSequence[] calendars = getCalendarSyncService().getCalendars(getApplicationContext());
+		
+		calendarName.setEntries(calendars);
+		calendarName.setEntryValues(calendars);
+	}
 	
 	private void populateTodoKeywords() {
 		ListPreference defaultTodo = (ListPreference) findPreference("defaultTodo");

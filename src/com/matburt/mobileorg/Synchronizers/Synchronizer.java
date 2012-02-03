@@ -24,6 +24,7 @@ import com.matburt.mobileorg.Parsing.MobileOrgApplication;
 import com.matburt.mobileorg.Parsing.OrgDatabase;
 import com.matburt.mobileorg.Parsing.OrgFile;
 import com.matburt.mobileorg.Parsing.OrgFileParser;
+import com.matburt.mobileorg.Services.CalendarSyncService;
 
 /**
  * This class implements many of the operations that need to be done on
@@ -144,9 +145,10 @@ abstract public class Synchronizer {
 	 * host. Using those files, it determines the other files that need updating
 	 * and downloads them.
 	 */
-	private void pull() throws IOException, CertificateException, SSLHandshakeException {
-		updateNotification(20, context.getString(R.string.downloading) + " checksums.data");
-	        String remoteChecksumContents = "";
+	private void pull() throws SSLHandshakeException, CertificateException, IOException {
+		updateNotification(20, context.getString(R.string.downloading)
+				+ " checksums.dat");
+		String remoteChecksumContents = "";
 
 		remoteChecksumContents = OrgFile.read(getRemoteFile("checksums.dat"));
 
@@ -187,6 +189,8 @@ abstract public class Synchronizer {
 				remoteChecksums.get("index.org"), false);
 
 		OrgFileParser parser = new OrgFileParser(this.appdb);
+		CalendarSyncService cal = new CalendarSyncService(appdb, context);
+
 		int i = 0;
 		for (String filename : filesToGet) {
 			i++;
@@ -208,6 +212,17 @@ abstract public class Synchronizer {
 					true);
 			// TODO Generate checksum of file and compare to remoteChecksum
 			parser.parse(filename, rfile, file_id, context);
+
+			if (filename.equals("agendas.org") == false
+					&& PreferenceManager.getDefaultSharedPreferences(context)
+							.getBoolean("enableCalendar", false)) {
+				try {
+					cal.syncFile(filename);
+				} catch(IllegalArgumentException e) {
+					Log.d("MobileOrg", "Failed to sync calendar");
+				}
+				
+			}
 		}
 	}
 

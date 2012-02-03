@@ -3,6 +3,8 @@ package com.matburt.mobileorg.Parsing;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import com.matburt.mobileorg.Services.CalendarSyncService;
+
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -11,7 +13,7 @@ import android.database.MergeCursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
-import android.util.Log;
+import android.preference.PreferenceManager;
 
 public class OrgDatabase extends SQLiteOpenHelper {
 	private static final String DATABASE_NAME = "MobileOrg.db";
@@ -187,9 +189,14 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		orgfile.remove();
 		
 		Long file_id = this.getFileId(filename);
-		Log.d("MobileOrg", "Deleting file_id " + file_id);
 		db.delete("orgdata", "file_id = ?", new String[] { file_id.toString() });
 		db.delete("files", "filename = ?", new String[] { filename });
+		
+		boolean calendarEnabled = PreferenceManager
+				.getDefaultSharedPreferences(context).getBoolean(
+						"enableCalendar", false);
+		if(calendarEnabled)
+			new CalendarSyncService(this, context).deleteFileEntries(filename, context);
 	}
 
 	public void removeFile(Long node_id) {
@@ -410,7 +417,21 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		this.addNodePayload(new_node_id, node.getRawPayload(this));
 		node.close();
 	}
-
+	
+	public Cursor getFileSchedule(String filename) {
+		long file_id = this.getFileId(filename);
+		
+		String whereQuery = "file_id=? AND (payload LIKE '%SCHEDULED:%' OR payload LIKE '%DEADLINE:%')";
+		
+		if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean(
+				"calendarHabits", true) == false)
+			whereQuery += "AND NOT payload LIKE '%:STYLE: habit%'";
+			
+		Cursor cursor = db.query("orgdata", nodeFields, whereQuery,
+				new String[] { Long.toString(file_id) }, null, null, null);
+		cursor.moveToFirst();
+		return cursor;
+	}
 	
 /***************************
  * Functions with regards to edits. 
@@ -558,6 +579,9 @@ public class OrgDatabase extends SQLiteOpenHelper {
 	public boolean isTodoActive(String todo) {
 		Cursor cursor = db.query("todos", new String[] {"isdone"}, "name = ?",
 				new String[] { todo }, null, null, null);		
+		
+		if(todo.isEmpty())
+			return true;
 		
 		if(cursor.getCount() > 0) {
 			cursor.moveToFirst();

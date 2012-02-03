@@ -247,5 +247,10 @@ public class NodeWrapper {
 		if(cursor != null)
 			this.cursor.close();
 	}
+	
+	public String getScheduled(OrgDatabase db) {
+		preparePayload(db);
+		return payload.getScheduled();
+	}
 }
 
