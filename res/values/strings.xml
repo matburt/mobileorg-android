@@ -12,15 +12,14 @@
   <string name="contextmenu_delete">Delete File</string>
   <string name="contextmenu_node_delete">Delete Node</string>
   
-  
   <string name="sync_wait">Synchronizing, please wait…</string>
   <string name="sync_failed">Synchronization failed, try again?</string>
   <string name="yes">Yes</string>
   <string name="no">No</string>
+  <string name="ok">OK</string>
   <string name="empty_main">You have not yet\nsynchronized your Org files</string>
   <string name="error_bad_url">The url %s is not properly formatted</string>
   <string name="error_dialog_title">Error</string>
-  
   <string name="node_edit_prompt">Are you sure you want to discard changes?</string>
   <string name="node_view_error_loading_node">Error loading node</string>
   <string name="sync_not_configured">Sync not configured</string>
