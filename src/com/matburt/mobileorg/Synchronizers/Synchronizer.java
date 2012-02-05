@@ -51,7 +51,7 @@ abstract public class Synchronizer {
 	 * @param contents Content of the new file
 	 */
 	protected abstract void putRemoteFile(String filename, String contents)
-			throws IOException;
+        throws Exception, IOException;
 
 	/**
 	 * Returns a BufferedReader to the remote file.
@@ -60,7 +60,7 @@ abstract public class Synchronizer {
 	 *            Name of the file, without path
 	 */
 	protected abstract BufferedReader getRemoteFile(String filename)
-			throws IOException, CertificateException, SSLHandshakeException;
+        throws Exception, IOException, CertificateException, SSLHandshakeException;
 
 	/**
 	 * Use this to disconnect from any services and cleanup.
@@ -89,7 +89,7 @@ abstract public class Synchronizer {
 	}
 
 	public void sync() {
-		if (isConfigured() == false) {
+		if (!isConfigured()) {
 			errorNotification("Sync not configured");
 			return;
 		}
@@ -111,7 +111,10 @@ abstract public class Synchronizer {
 			errorNotification("Certificate Error occured during sync: "
                               + e.getLocalizedMessage());
 			return;
-		}
+		} catch (Exception e) {
+            finalizeNotification();
+            errorNotification("Error: " + e.toString());
+        }
 		finalizeNotification();
 		announceSyncDone();
 	}
@@ -121,7 +124,7 @@ abstract public class Synchronizer {
 	 * file combine their content. This combined version is transfered to the
 	 * remote.
 	 */
-	private void pushCaptures() throws IOException, CertificateException, SSLHandshakeException {
+	private void pushCaptures() throws Exception, IOException, CertificateException, SSLHandshakeException {
 		final String filename = OrgFile.CAPTURE_FILE;
 		String localContents = this.appdb.fileToString(filename);
 		localContents += this.appdb.editsToString();
