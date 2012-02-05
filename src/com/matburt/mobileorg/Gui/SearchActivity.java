@@ -42,7 +42,7 @@ public class SearchActivity extends ListActivity {
 		MobileOrgApplication appInst = (MobileOrgApplication) this
 				.getApplication();
 		
-		Cursor result = appInst.getDB().search("%"+ query + "%");
+		Cursor result = appInst.getDB().search("%"+ query.trim() + "%");
 		
 		adapter = new OutlineCursorAdapter(this, result, appInst.getDB());
 		this.setListAdapter(adapter);

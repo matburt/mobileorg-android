@@ -148,7 +148,7 @@ abstract public class Synchronizer {
 	 * host. Using those files, it determines the other files that need updating
 	 * and downloads them.
 	 */
-	private void pull() throws SSLHandshakeException, CertificateException, IOException {
+	private void pull() throws SSLHandshakeException, CertificateException, IOException, Exception {
 		updateNotification(20, context.getString(R.string.downloading)
 				+ " checksums.dat");
 		String remoteChecksumContents = "";
