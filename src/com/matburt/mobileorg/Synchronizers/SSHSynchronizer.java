@@ -2,16 +2,19 @@ package com.matburt.mobileorg.Synchronizers;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringReader;
-
+import java.io.InputStreamReader;
+import java.io.File;
+import java.io.FileInputStream;
 import android.content.Context;
 import android.util.Log;
 
 import com.jcraft.jsch.Channel;
-import com.jcraft.jsch.ChannelExec;
+import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
@@ -42,6 +45,12 @@ public class SSHSynchronizer extends Synchronizer {
             port = Integer.parseInt(tmpPort);
         }
         pass = appSettings.getString("scpPass", "");
+
+        try {
+            this.connect();
+        } catch (Exception e) {
+            Log.e("MobileOrg", "SSH Connection failed");
+        }
 	}
 
     public String testConnection(String path, String user, String pass, String host, int port) {
@@ -66,14 +75,7 @@ public class SSHSynchronizer extends Synchronizer {
 
         try {
             this.connect();
-        }
-        catch (Exception e) {
-            Log.i("MobileOrg", "SSH Connection failed");
-            return e.toString();
-        }
-
-        try {
-            BufferedReader r = this.getRemoteFile(path);
+            BufferedReader r = this.getRemoteFile(this.getFileName());
         }
         catch (Exception e) {
             Log.i("MobileOrg", "SSH Get index file failed");
@@ -81,6 +83,14 @@ public class SSHSynchronizer extends Synchronizer {
         }
         this.postSynchronize();
         return null;
+    }
+
+    private String getFileName() {
+        String[] pathElements = this.path.split("/");
+        if (pathElements.length > 0) {
+            return pathElements[pathElements.length-1];
+        }
+        return "";
     }
 
     private String getRootUrl() {
@@ -124,183 +134,43 @@ public class SSHSynchronizer extends Synchronizer {
 		}
     }
 
-	@Override
-	protected void putRemoteFile(String filename, String contents)
-			throws IOException {
-		try {
-            this.connect();
-			Log.d(LT, "Uploading: " + filename);
+    protected void putRemoteFile(String filename, String contents) throws Exception {
+        try {
+            Channel channel = session.openChannel("sftp");
+            channel.connect();
+            ChannelSftp sftpChannel = (ChannelSftp) channel;
+            ByteArrayInputStream bas = new ByteArrayInputStream(contents.getBytes());
 
-			// exec 'scp -t rfile' remotely
-			String command = "scp -p -t " + this.getRootUrl() + filename;
-			Channel channel = session.openChannel("exec");
-			((ChannelExec) channel).setCommand(command);
-
-			// get I/O streams for remote scp
-			OutputStream out = channel.getOutputStream();
-			InputStream in = channel.getInputStream();
-
-			channel.connect();
-
-			if (checkAck(in) != 0)
-				return;
-
-			// send "C0644 filesize filename", where filename should not include
-			// '/'
-			long filesize = contents.getBytes().length;
-			command = "C0644 " + filesize + " ";
-			command += filename;
-			command += "\n";
-
-			out.write(command.getBytes());
-			out.flush();
-
-			if (checkAck(in) != 0)
-				return;
-
-			// send content
-			out.write(contents.getBytes());
-
-			byte[] buf = new byte[1024];
-
-			// send '\0'
-			buf[0] = 0;
-			out.write(buf, 0, 1);
-			out.flush();
-			if (checkAck(in) != 0)
-				return;
-
-			out.close();
-			channel.disconnect();
-            this.postSynchronize();
-		} catch (Exception e) {
-			Log.d(LT, e.getLocalizedMessage());
-		}
-	}
-
-	@Override
-	protected BufferedReader getRemoteFile(String filename) throws Exception {
-		ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-
-		try {
-            this.connect();
-			final String command = "scp -f " + this.getRootUrl() + filename;
-			Log.d(LT, "Running: " + command);
-			ChannelExec channel = (ChannelExec) session.openChannel("exec");
-			channel.setCommand(command);
-
-			OutputStream out = channel.getOutputStream();
-			InputStream in = channel.getInputStream();
-
-			channel.connect();
-
-			byte[] buf = new byte[1024];
-
-			// send '\0'
-			buf[0] = 0;
-			out.write(buf, 0, 1);
-			out.flush();
-
-			while (true) {
-				int c = checkAck(in);
-				if (c != 'C') {
-					break;
-				}
-
-				// read '0644 '
-				in.read(buf, 0, 5);
-
-				// Read file size.
-				long filesize = 0L;
-				while (true) {
-					if (in.read(buf, 0, 1) < 0) {
-						// error
-						Log.e(LT, "Error reading file size.");
-						break;
-					}
-					if (buf[0] == ' ')
-						break;
-					filesize = filesize * 10L + (long) (buf[0] - '0');
-				}
-
-				// Read (and ignore) filename.
-				// TODO: to reduced to while not 0x0a.
-				for (int i = 0;; i++) {
-					in.read(buf, i, 1);
-					if (buf[i] == (byte) 0x0a)
-						break;
-				}
-
-				// send '\0'
-				buf[0] = 0;
-				out.write(buf, 0, 1);
-				out.flush();
-
-				// Fetch the file content.
-				int sizeRead;
-				while (true) {
-					if (buf.length < filesize)
-						sizeRead = buf.length;
-					else
-						sizeRead = (int) filesize;
-					sizeRead = in.read(buf, 0, sizeRead);
-					if (sizeRead < 0) {
-						// error
-						Log.e(LT, "Content fetching interrupted. Remaining "
-								+ filesize);
-						break;
-					}
-					buffer.write(buf, 0, sizeRead);
-					filesize -= sizeRead;
-					if (filesize == 0L)
-						break;
-				}
-
-				if (checkAck(in) != 0) {
-					// Error ?
-					Log.e(LT, "Failed to conclude copy");
-					break;
-				}
-
-				// send '\0'
-				buf[0] = 0;
-				out.write(buf, 0, 1);
-				out.flush();
-			}
-
-			Log.d(LT, "disconnecting...");
-			channel.disconnect();
-            this.postSynchronize();
-		} catch (Exception e) {
-			Log.d(LT, e.getMessage() + e.getLocalizedMessage());
+            sftpChannel.put(bas, this.getRootUrl() + filename);
+            sftpChannel.exit();
+        } catch (Exception e) {
+            Log.e("MobileOrg", "Exception in putRemoteFile: " + e.toString());
             throw e;
-		}
-
-		return new BufferedReader(new StringReader(buffer.toString()));
+        }
 	}
 
-	private static int checkAck(InputStream in) throws IOException {
-		int b = in.read();
-		// b may be 0 for success,
-		// 1 for error,
-		// 2 for fatal error,
-		// -1
-		if (b == 1 || b == 2) {
-			StringBuffer sb = new StringBuffer();
-			int c;
-			do {
-				c = in.read();
-				sb.append((char) c);
-			} while (c != '\n');
-			if (b == 1) { // error
-				// System.out.print(sb.toString());
-			}
-			if (b == 2) { // fatal error
-				// System.out.print(sb.toString());
-			}
-		}
-		return b;
-	}
+	protected BufferedReader getRemoteFile(String filename) throws Exception {
+        StringBuilder contents = null;
+        try {
+            Channel channel = session.openChannel( "sftp" );
+            channel.connect();
+            ChannelSftp sftpChannel = (ChannelSftp) channel;
+            Log.i("MobileOrg", "SFTP Getting: " + this.getRootUrl() + filename);
+            InputStream in = sftpChannel.get(this.getRootUrl() + filename);
+
+            BufferedReader r = new BufferedReader(new InputStreamReader(in));
+            contents = new StringBuilder();
+            String line;
+            while ((line = r.readLine()) != null) {
+                contents.append(line + "\n");
+            }
+            sftpChannel.exit();
+        } catch (Exception e) {
+            Log.e("MobileOrg", "Exception in getRemoteFile: " + e.toString());
+            throw e;
+        }
+        return new BufferedReader(new StringReader(contents.toString()));
+    }
 
 	@Override
 	protected void postSynchronize() {

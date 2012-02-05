@@ -50,7 +50,7 @@ abstract public class Synchronizer {
 	 * @param contents Content of the new file
 	 */
 	protected abstract void putRemoteFile(String filename, String contents)
-			throws IOException;
+        throws Exception, IOException;
 
 	/**
 	 * Returns a BufferedReader to the remote file.
