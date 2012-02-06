@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ListActivity;
+import android.net.Uri;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -56,6 +57,7 @@ public class OutlineActivity extends ListActivity
     private static final int SYNC_OPTION = 0;
     private static final int SETTINGS_OPTION = 1;
     private static final int CAPTURE_OPTION = 2;
+    private static final int WEBSITE_OPTION = 3;
 
     public class HashMapAdapter extends BaseAdapter {
         private LinkedHashMap<String, String> mData = new LinkedHashMap<String, String>();
@@ -256,6 +258,7 @@ public class OutlineActivity extends ListActivity
             lhm.put("Synchronize", "Fetch your org data");
             lhm.put("Settings", "Configure MobileOrg");
             lhm.put("Capture", "Capture a new note");
+            lhm.put("Website", "Visit the MobileOrg Wiki");
             setListAdapter(new HashMapAdapter(lhm, this));
         }
         else {
@@ -360,6 +363,12 @@ public class OutlineActivity extends ListActivity
             }
             else if (position == CAPTURE_OPTION) {
                 this.runEditNewNodeActivity();
+            }
+            else if (position == WEBSITE_OPTION) {
+                String url = "https://github.com/matburt/mobileorg-android/wiki";
+                Intent i = new Intent(Intent.ACTION_VIEW);
+                i.setData(Uri.parse(url));
+                startActivity(i);
             }
             return;
         }
