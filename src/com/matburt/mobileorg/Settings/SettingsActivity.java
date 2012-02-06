@@ -105,7 +105,7 @@ public class SettingsActivity extends PreferenceActivity {
 		ListPreference calendarName = (ListPreference) findPreference("calendarName");
 		
 		CharSequence[] calendars = getCalendarSyncService().getCalendars(getApplicationContext());
-		
+
 		calendarName.setEntries(calendars);
 		calendarName.setEntryValues(calendars);
 	}
