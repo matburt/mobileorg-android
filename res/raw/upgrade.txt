@@ -1,0 +1,22 @@
+MobileOrg Upgrade Notes
+
+MobileOrg has gone through a lot of changes recently. Because of this you will need to re-synchronize all of your org files.
+
+Some of the great new features:
+
+- New Storage System (org content is now stored in the database)
+- Search Support
+- Calendar Integration
+- Synchronize over SSH/SCP
+- Calendar Integration (with reminders)
+- Locale/Tasker Plugin
+- Self-signed ssl webdav certificates
+- Edit tags
+- Capture only mode
+- Complete UI revamp
+- Spanish translation
+- Improved synchronization system
+- Improved edit and capture modes
+- Full documentation in wiki
+
+Check out the "Settings" menu for new options.

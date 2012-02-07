@@ -15,7 +15,7 @@
         android:paddingTop="20dp"
         android:paddingLeft="20dp"
         android:paddingRight="20dp"
-        android:id="@+id/wizard_webdav">
+        android:id="@+id/wizard_null">
       <TextView
           android:layout_width="fill_parent"
           android:layout_height="wrap_content"

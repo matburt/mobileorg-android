@@ -24,6 +24,7 @@ import com.matburt.mobileorg.Parsing.MobileOrgApplication;
 import com.matburt.mobileorg.Parsing.OrgDatabase;
 import com.matburt.mobileorg.Parsing.OrgFile;
 import com.matburt.mobileorg.Parsing.OrgFileParser;
+import com.matburt.mobileorg.Services.CalendarSyncService;
 
 /**
  * This class implements many of the operations that need to be done on
@@ -50,7 +51,7 @@ abstract public class Synchronizer {
 	 * @param contents Content of the new file
 	 */
 	protected abstract void putRemoteFile(String filename, String contents)
-			throws IOException;
+        throws Exception, IOException;
 
 	/**
 	 * Returns a BufferedReader to the remote file.
@@ -59,7 +60,7 @@ abstract public class Synchronizer {
 	 *            Name of the file, without path
 	 */
 	protected abstract BufferedReader getRemoteFile(String filename)
-			throws IOException, CertificateException, SSLHandshakeException;
+        throws Exception, IOException, CertificateException, SSLHandshakeException;
 
 	/**
 	 * Use this to disconnect from any services and cleanup.
@@ -88,7 +89,7 @@ abstract public class Synchronizer {
 	}
 
 	public void sync() {
-		if (isConfigured() == false) {
+		if (!isConfigured()) {
 			errorNotification("Sync not configured");
 			return;
 		}
@@ -110,7 +111,10 @@ abstract public class Synchronizer {
 			errorNotification("Certificate Error occured during sync: "
                               + e.getLocalizedMessage());
 			return;
-		}
+		} catch (Exception e) {
+            finalizeNotification();
+            errorNotification("Error: " + e.toString());
+        }
 		finalizeNotification();
 		announceSyncDone();
 	}
@@ -120,7 +124,7 @@ abstract public class Synchronizer {
 	 * file combine their content. This combined version is transfered to the
 	 * remote.
 	 */
-	private void pushCaptures() throws IOException, CertificateException, SSLHandshakeException {
+	private void pushCaptures() throws Exception, IOException, CertificateException, SSLHandshakeException {
 		final String filename = OrgFile.CAPTURE_FILE;
 		String localContents = this.appdb.fileToString(filename);
 		localContents += this.appdb.editsToString();
@@ -144,9 +148,10 @@ abstract public class Synchronizer {
 	 * host. Using those files, it determines the other files that need updating
 	 * and downloads them.
 	 */
-	private void pull() throws IOException, CertificateException, SSLHandshakeException {
-		updateNotification(20, context.getString(R.string.downloading) + " checksums.data");
-	        String remoteChecksumContents = "";
+	private void pull() throws SSLHandshakeException, CertificateException, IOException, Exception {
+		updateNotification(20, context.getString(R.string.downloading)
+				+ " checksums.dat");
+		String remoteChecksumContents = "";
 
 		remoteChecksumContents = OrgFile.read(getRemoteFile("checksums.dat"));
 
@@ -187,6 +192,8 @@ abstract public class Synchronizer {
 				remoteChecksums.get("index.org"), false);
 
 		OrgFileParser parser = new OrgFileParser(this.appdb);
+		CalendarSyncService cal = new CalendarSyncService(appdb, context);
+
 		int i = 0;
 		for (String filename : filesToGet) {
 			i++;
@@ -208,6 +215,17 @@ abstract public class Synchronizer {
 					true);
 			// TODO Generate checksum of file and compare to remoteChecksum
 			parser.parse(filename, rfile, file_id, context);
+
+			if (filename.equals("agendas.org") == false
+					&& PreferenceManager.getDefaultSharedPreferences(context)
+							.getBoolean("enableCalendar", false)) {
+				try {
+					cal.syncFile(filename);
+				} catch(IllegalArgumentException e) {
+					Log.d("MobileOrg", "Failed to sync calendar");
+				}
+				
+			}
 		}
 	}
 
