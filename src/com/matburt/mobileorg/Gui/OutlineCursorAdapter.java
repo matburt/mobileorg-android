@@ -9,6 +9,7 @@ import android.graphics.Color;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
+import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -101,14 +102,14 @@ public class OutlineCursorAdapter extends SimpleCursorAdapter {
 			matcher = urlPattern.matcher(itemText);
 		}
 	
-		if (priority != null && priority.isEmpty() == false) {
+		if (priority != null && TextUtils.isEmpty(priority) == false) {
 			Spannable prioritySpan = new SpannableString(priority + " ");
 			prioritySpan.setSpan(new ForegroundColorSpan(Color.YELLOW), 0,
 					priority.length(), 0);
 			itemText.insert(0, prioritySpan);
 		}
 		
-		if(todo.isEmpty() == false) {
+		if(TextUtils.isEmpty(todo) == false) {
 			Spannable todoSpan = new SpannableString(todo + " ");
 			
 			if(db.isTodoActive(todo))
@@ -123,7 +124,7 @@ public class OutlineCursorAdapter extends SimpleCursorAdapter {
 		holder.orgItem.setText(itemText);
 
 		
-		if(tags != null && tags.isEmpty() == false) {
+		if(tags != null && TextUtils.isEmpty(tags) == false) {
 			holder.tagsLayout.setTextColor(Color.GRAY);
 			holder.tagsLayout.setText(tags);
 		} else

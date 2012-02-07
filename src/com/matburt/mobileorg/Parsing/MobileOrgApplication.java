@@ -2,6 +2,7 @@ package com.matburt.mobileorg.Parsing;
 
 import android.app.Application;
 import android.preference.PreferenceManager;
+import android.text.TextUtils;
 
 import com.matburt.mobileorg.Services.SyncService;
 
@@ -29,7 +30,7 @@ public class MobileOrgApplication extends Application {
     	String syncSource = PreferenceManager.getDefaultSharedPreferences(getApplicationContext())
 		.getString("syncSource", "");
     	
-    	if(syncSource.isEmpty())
+    	if(TextUtils.isEmpty(syncSource))
     		return false;
     	else
     		return true;

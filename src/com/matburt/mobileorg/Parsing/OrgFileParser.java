@@ -62,7 +62,7 @@ public class OrgFileParser {
 
 			while ((currentLine = breader.readLine()) != null) {
 
-				if (currentLine.isEmpty())
+				if (TextUtils.isEmpty(currentLine))
 					continue;
 
 				int lineLength = currentLine.length();
@@ -109,7 +109,7 @@ public class OrgFileParser {
 			
 			String blockTitle = name.substring(0, name.indexOf(">"));
 			
-			if(blockTitle.isEmpty() == false) { // Is a block agenda
+			if(TextUtils.isEmpty(blockTitle) == false) { // Is a block agenda
 				
 				if(blockTitle.equals(previousBlockTitle) == false) { // Create new node to contain block agenda	
 					previousBlockNode = db.addNode(agendaFileNodeID, blockTitle,

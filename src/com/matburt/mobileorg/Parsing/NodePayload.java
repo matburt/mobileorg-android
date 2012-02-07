@@ -3,6 +3,8 @@ package com.matburt.mobileorg.Parsing;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import android.text.TextUtils;
+
 class NodePayload {
 	private StringBuilder payload = new StringBuilder();
 	/** These are the remains of the cleaned payload. */
@@ -137,7 +139,7 @@ class NodePayload {
 		if(this.scheduled == null)
 			this.scheduled = stripDate("SCHEDULED:");
 		
-		if(this.scheduled.isEmpty() && this.deadline == null) {
+		if(TextUtils.isEmpty(this.scheduled) && this.deadline == null) {
 			this.deadline = stripDate("DEADLINE:");
 			return this.deadline;
 		}
