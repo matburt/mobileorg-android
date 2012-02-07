@@ -137,8 +137,14 @@ public class OutlineActivity extends ListActivity
 		node_id = intent.getLongExtra("node_id", -1);
 
 		if(this.node_id == -1) {
-			if(this.appInst.isSyncConfigured() == false)
+			if(this.appInst.isSyncConfigured() == false) {
                 this.showWizard();
+            }
+            else {
+                if (!this.checkVersionCode()) {
+                    this.showUpgradePopup();
+                }
+            }
 		}
         else {
             if (!this.checkVersionCode()) {
