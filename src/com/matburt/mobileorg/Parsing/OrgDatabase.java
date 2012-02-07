@@ -14,6 +14,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
 import android.preference.PreferenceManager;
+import android.text.TextUtils;
 
 public class OrgDatabase extends SQLiteOpenHelper {
 	private static final String DATABASE_NAME = "MobileOrg.db";
@@ -580,7 +581,7 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		Cursor cursor = db.query("todos", new String[] {"isdone"}, "name = ?",
 				new String[] { todo }, null, null, null);		
 		
-		if(todo.isEmpty())
+		if(TextUtils.isEmpty(todo))
 			return true;
 		
 		if(cursor.getCount() > 0) {
