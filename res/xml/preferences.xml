@@ -56,14 +56,14 @@
             android:title="@string/preference_recursion_level_title" />
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/preference_storage" >
-        <ListPreference
+       <!--  <ListPreference
             android:defaultValue="internal"
             android:entries="@array/storageModes"
             android:entryValues="@array/storageModesVals"
             android:key="storageMode"
             android:summary="@string/preference_storage_summary"
             android:title="@string/preference_storage_title" />
-
+		--> 
         <CheckBoxPreference
             android:key="captureWithTimestamp"
             android:summary="@string/summary_capture_with_timestamp"
@@ -124,11 +124,11 @@
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/preference_other" >
-        <PreferenceScreen
+         <!-- <PreferenceScreen
             android:key="Widget"
             android:summary="@string/preferences_widget_summary"
             android:title="@string/preference_widget_title" >
-        </PreferenceScreen>
+        </PreferenceScreen> -->
         <PreferenceScreen
             android:key="VersionDisp"
             android:summary="0.8.0"

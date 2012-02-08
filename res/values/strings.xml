@@ -7,6 +7,7 @@
   <string name="menu_sync">Sync</string>
   <string name="menu_edit">Edit</string>
   <string name="menu_search">Search</string>
+  <string name="menu_help">Help</string>
   <string name="contextmenu_edit">Edit Node</string>
   <string name="contextmenu_view">View Node</string>
   <string name="contextmenu_delete">Delete File</string>
@@ -133,7 +134,7 @@
   <string name="preference_calendar">Calendar</string>
   <string name="preference_calendar_clear">Clear phone calendar</string>
   <string name="preference_calendar_clear_summary">Clears the phones\' calendar of all entries inserted by MobileOrg</string>
-  <string name="preference_calendar_synch">Enables synchronization of scheduled items to phones\' calendar</string>
+  <string name="preference_calendar_synch">Enables synchronization of scheduled items to phones\' calendar. All calendar related items require a re-sync to take effect.</string>
   <string name="preference_calendar_synch_title">Calendar Synchronization</string>
   <string name="preference_calendar_name_summary">Choose calendar MobileOrg will use</string>
   <string name="preference_calendar_name">Calendar Name</string>

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
 
-   <item
+    <item
         android:id="@+id/menu_outline"
         android:icon="@drawable/ic_menu_agenda"
         android:title="@string/menu_outline"/>
@@ -18,7 +18,12 @@
         android:icon="@drawable/ic_menu_search"
         android:title="@string/menu_search"/>
     <item
+        android:id="@+id/menu_help"
+        android:icon="@drawable/ic_menu_help"
+        android:title="@string/menu_help"/>
+    <item
         android:id="@+id/menu_settings"
         android:icon="@drawable/ic_menu_preferences"
         android:title="@string/menu_settings"/>
+
 </menu>
