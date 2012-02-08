@@ -1,43 +1,39 @@
 package com.matburt.mobileorg.Gui;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.LinkedHashMap;
+
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.app.ListActivity;
-import android.net.Uri;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageInfo;
+import android.database.Cursor;
+import android.net.Uri;
+import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
-
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.BufferedReader;
-import java.io.IOException;
-
-import java.util.LinkedHashMap;
-
-import android.database.Cursor;
-import android.os.Bundle;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.LayoutInflater;
 import android.widget.AdapterView.AdapterContextMenuInfo;
-import android.widget.TextView;
-import android.widget.ListView;
-import android.widget.Toast;
 import android.widget.BaseAdapter;
+import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.markupartist.android.widget.ActionBar;
 import com.markupartist.android.widget.ActionBar.Action;
@@ -304,6 +300,11 @@ public class OutlineActivity extends ListActivity
 			
 		case R.id.menu_search:
 			return runSearch();
+			
+		case R.id.menu_help:
+			runHelp();
+			return true;
+			
 		}
 		return false;
 	}
@@ -395,6 +396,12 @@ public class OutlineActivity extends ListActivity
         if (!this.checkVersionCode()) {
             this.showUpgradePopup();
         }
+    }
+    
+    private void runHelp() {
+		Intent intent = new Intent(Intent.ACTION_VIEW,
+				Uri.parse("https://github.com/matburt/mobileorg-android/wiki"));
+    	startActivity(intent);
     }
     
     private void runSync() {
