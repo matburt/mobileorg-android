@@ -1,5 +1,11 @@
 MobileOrg Upgrade Notes
 
+Changes for 0.8.1:
+
+* Fix crashing on Android devices < 2.2
+* Fix for calendar, ignoring the day field from scheduled entries to
+  support people with other locales.
+
 MobileOrg has gone through a lot of changes recently. Because of this you will need to re-synchronize all of your org files.
 
 Some of the great new features:
