@@ -94,33 +94,33 @@ public class OrgDatabase extends SQLiteOpenHelper {
 	
 	public Cursor getFileCursor() {
 		// This gets all of the org file nodes
-//		return db.rawQuery("SELECT data.* FROM orgdata data JOIN" 
-//				+ "(SELECT f.node_id FROM files f) file on file.node_id = data._id;", null);
+		return db.rawQuery("SELECT data.* FROM orgdata data JOIN" 
+				+ "(SELECT f.node_id FROM files f) file on file.node_id = data._id;", null);
 
-		Cursor cursor = db.query("files", new String[] { "node_id" }, null,
-				null, null, null, "name ASC");
-		
-		cursor.moveToFirst();
-		
-		Cursor[] nodes = new Cursor[cursor.getCount()];
-		
-		for(int i = 0; i < cursor.getCount(); i++) {
-			Long id = cursor.getLong(cursor.getColumnIndex("node_id"));
-			Cursor node = db.query("orgdata", nodeFields, "_id=?",
-					new String[] { id.toString() }, null, null, null);
-			nodes[i] = node;
-			cursor.moveToNext();
-		}
-		
-		cursor.close();
-
-        if (nodes.length > 0) {
-            MergeCursor cursors = new MergeCursor(nodes);
-            return cursors;
-        }
-        else {
-            return null;
-        }
+//		Cursor cursor = db.query("files", new String[] { "node_id" }, null,
+//				null, null, null, "name ASC");
+//		
+//		cursor.moveToFirst();
+//		
+//		Cursor[] nodes = new Cursor[cursor.getCount()];
+//		
+//		for(int i = 0; i < cursor.getCount(); i++) {
+//			Long id = cursor.getLong(cursor.getColumnIndex("node_id"));
+//			Cursor node = db.query("orgdata", nodeFields, "_id=?",
+//					new String[] { id.toString() }, null, null, null);
+//			nodes[i] = node;
+//			cursor.moveToNext();
+//		}
+//		
+//		cursor.close();
+//
+//        if (nodes.length > 0) {
+//            MergeCursor cursors = new MergeCursor(nodes);
+//            return cursors;
+//        }
+//        else {
+//            return null;
+//        }
 	}
 	
 	public long getFileNodeId(String filename) {
