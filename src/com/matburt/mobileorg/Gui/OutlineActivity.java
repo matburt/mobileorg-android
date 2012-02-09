@@ -254,7 +254,7 @@ public class OutlineActivity extends ListActivity
 		else
 			cursor = appInst.getDB().getFileCursor();
 
-        if (cursor == null) {
+        if (cursor == null || cursor.getCount() < 1) {
             emptylist = true;
             LinkedHashMap<String, String> lhm = new LinkedHashMap<String, String>();
             lhm.put("Synchronize", "Fetch your org data");
