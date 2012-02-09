@@ -18,6 +18,8 @@ import android.view.ViewGroup;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 
+import android.database.StaleDataException;
+
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Parsing.NodeWrapper;
 import com.matburt.mobileorg.Parsing.OrgDatabase;
@@ -36,8 +38,13 @@ public class OutlineCursorAdapter extends SimpleCursorAdapter {
 	
 	@Override
 	public long getItemId(int position) {
-		cursor.moveToPosition(position);
-		return cursor.getInt(cursor.getColumnIndex("_id"));
+        try {
+            cursor.moveToPosition(position);
+            return cursor.getInt(cursor.getColumnIndex("_id"));
+        }
+        catch (StaleDataException e) {
+            return 0;
+        }
 	}
 
 	@Override
