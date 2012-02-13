@@ -1,4 +1,4 @@
-package com.matburt.mobileorg.Parsing;
+package com.matburt.mobileorg.Gui;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -14,19 +14,21 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.matburt.mobileorg.R;
+import com.matburt.mobileorg.Parsing.MobileOrgApplication;
+import com.matburt.mobileorg.Parsing.OrgFileParser;
 
-public class NodeDecryption extends Activity
+public class FileDecryptionActivity extends Activity
 {
     private static final String mApgPackageName = "org.thialfihar.android.apg";
     private static final int mMinRequiredVersion = 16;
     private static final String DECRYPT_AND_RETURN = "org.thialfihar.android.apg.intent.DECRYPT_AND_RETURN";
     private static final int DECRYPT_MESSAGE = 0x21070001;
-    private static final String EXTRA_TEXT = "text";
+    private static final String EXTRA_DATA = "data";
     private static final String EXTRA_DECRYPTED_MESSAGE = "decryptedMessage";
 
-
     private String filename;
-    private long file_id;
+    private String filenameAlias;
+    private String checksum;
     
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -38,19 +40,16 @@ public class NodeDecryption extends Activity
 		Intent intent = getIntent();
 		
 		this.filename = intent.getStringExtra("filename");
-		this.file_id = intent.getLongExtra("file_id", -1);
-		
-		if(this.file_id == -1)
-			return;
-		
-		String data = intent.getStringExtra("data");
+		this.filenameAlias = intent.getStringExtra("filenameAlias");
+		this.checksum = intent.getStringExtra("checksum");
+		byte[] data = intent.getByteArrayExtra("data");
 		
 		if (data == null)
 			return;
 		
 		Intent APGintent = new Intent(DECRYPT_AND_RETURN);
 		APGintent.setType("text/plain");
-		APGintent.putExtra(NodeDecryption.EXTRA_TEXT, data);
+		APGintent.putExtra(FileDecryptionActivity.EXTRA_DATA, data);
 
 		try {
 			startActivityForResult(APGintent, DECRYPT_MESSAGE);
@@ -63,22 +62,23 @@ public class NodeDecryption extends Activity
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent intent) {
 		switch (requestCode) {
-		case NodeDecryption.DECRYPT_MESSAGE:
+		case FileDecryptionActivity.DECRYPT_MESSAGE:
 			if (resultCode != RESULT_OK || intent == null)
 				return;
 
 			String decryptedData = intent
-					.getStringExtra(NodeDecryption.EXTRA_DECRYPTED_MESSAGE);
+					.getStringExtra(FileDecryptionActivity.EXTRA_DECRYPTED_MESSAGE);
 			BufferedReader reader = new BufferedReader(new InputStreamReader(
 					new ByteArrayInputStream(decryptedData.getBytes())));
 
 			OrgFileParser parser = new OrgFileParser(
 					((MobileOrgApplication) this.getApplication()).getDB());
-			parser.parse(filename, reader, file_id, getApplicationContext());
+			parser.parse(filename, filenameAlias, checksum, reader,
+					getApplicationContext());
 
-			finish();
 			break;
 		}
+		finish();
 	}
     
 	private boolean isAvailable() {
@@ -95,7 +95,6 @@ public class NodeDecryption extends Activity
 			Toast.makeText(this, R.string.apg_not_found, Toast.LENGTH_SHORT)
 					.show();
 		}
-
 		return false;
 	}
 }

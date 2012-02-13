@@ -19,13 +19,12 @@ import android.util.Log;
 import android.widget.RemoteViews;
 
 import com.matburt.mobileorg.R;
+import com.matburt.mobileorg.Gui.FileDecryptionActivity;
 import com.matburt.mobileorg.Gui.OutlineActivity;
 import com.matburt.mobileorg.Parsing.MobileOrgApplication;
-import com.matburt.mobileorg.Parsing.NodeDecryption;
 import com.matburt.mobileorg.Parsing.OrgDatabase;
 import com.matburt.mobileorg.Parsing.OrgFile;
 import com.matburt.mobileorg.Parsing.OrgFileParser;
-import com.matburt.mobileorg.Services.CalendarSyncService;
 
 /**
  * This class implements many of the operations that need to be done on
@@ -195,7 +194,6 @@ abstract public class Synchronizer {
 				remoteChecksums.get("index.org"), false);
 
 		OrgFileParser parser = new OrgFileParser(this.appdb);
-		CalendarSyncService cal = new CalendarSyncService(appdb, context);
 
 		int i = 0;
 		for (String filename : filesToGet) {
@@ -207,20 +205,10 @@ abstract public class Synchronizer {
 
 			getAndParseFile(filename, filenameMap.get(filename),
 					remoteChecksums.get(filename), parser);
-			
-			if (filename.equals("agendas.org") == false
-					&& PreferenceManager.getDefaultSharedPreferences(context)
-							.getBoolean("enableCalendar", false)) {
-				try {
-					cal.syncFile(filename);
-				} catch(IllegalArgumentException e) {
-					Log.d("MobileOrg", "Failed to sync calendar");
-				}	
-			}
 		}
 	}
 	
-	private boolean getAndParseFile(String filename, String filenameAlias,
+	private void getAndParseFile(String filename, String filenameAlias,
 			String remoteChecksum, OrgFileParser parser)
 			throws SSLHandshakeException, CertificateException, IOException,
 			Exception {
@@ -228,33 +216,28 @@ abstract public class Synchronizer {
 
 		if (rfile == null) {
 			Log.w("MobileOrg", "File does not seem to exist: " + filename);
-			return false;
+			return;
 		}
 
         String fileIdentActual = filenameAlias;
         if (fileIdentActual.equals("null"))
             fileIdentActual = filename;
 
-		this.appdb.removeFile(filename);
-		long file_id = this.appdb.addOrUpdateFile(filename, fileIdentActual,
-				remoteChecksum, true);
-
 		// TODO Generate checksum of file and compare to remoteChecksum
 		
         if(filename.endsWith(".gpg"))
-        	handleEncryptedFile(filename, rfile, file_id);
+        	decryptAndParseFile(filename, fileIdentActual, remoteChecksum, rfile);
         else
-        	parser.parse(filename, rfile, file_id, context);
-        
-        return true;
+        	parser.parse(filename, fileIdentActual, remoteChecksum, rfile, context);
 	}
 	
-	private void handleEncryptedFile(String filename, BufferedReader reader,
-			long file_id) throws IOException {
-		Intent intent = new Intent(context, NodeDecryption.class);
-		intent.putExtra("data", OrgFile.read(reader));
-		intent.putExtra("file_id", file_id);
+	private void decryptAndParseFile(String filename, String filenameAlias,
+			String checksum, BufferedReader reader) throws IOException {
+		Intent intent = new Intent(context, FileDecryptionActivity.class);
+		intent.putExtra("data", OrgFile.read(reader).getBytes());
 		intent.putExtra("filename",filename);
+		intent.putExtra("filenameAlias", filenameAlias);
+		intent.putExtra("checksum", checksum);
 		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		context.startActivity(intent);
 	}

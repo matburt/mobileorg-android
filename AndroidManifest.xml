@@ -137,11 +137,11 @@
             android:name=".Gui.CertificateConflictActivity"
             android:label="MobileOrg Certificate Conflict" >
         </activity>
-        <activity
+        <activity android:name=".Gui.FileDecryptionActivity"></activity><activity
             android:name=".Synchronizers.DropboxAuthActivity"
             android:label="Dropbox Authentication" >
         </activity>
-        <activity android:name=".Parsing.NodeDecryption"></activity><activity
+        <activity
             android:name=".Settings.WebDAVSettingsActivity"
             android:label="WebDAV Settings" >
         </activity>

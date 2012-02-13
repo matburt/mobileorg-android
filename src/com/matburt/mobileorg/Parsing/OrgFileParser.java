@@ -8,6 +8,8 @@ import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.matburt.mobileorg.Services.CalendarSyncService;
+
 import android.content.Context;
 import android.database.Cursor;
 import android.preference.PreferenceManager;
@@ -38,11 +40,20 @@ public class OrgFileParser {
 		this.db = db;
 	}
 	
-	public void parse(String filename, BufferedReader breader, long file_id, Context context) {
-		useTitleField = PreferenceManager.getDefaultSharedPreferences(context)
+	private long addNewFile(String filename, String fileIdentActual,
+				String remoteChecksum, boolean visable) {
+		db.removeFile(filename);
+		return db.addOrUpdateFile(filename, fileIdentActual, remoteChecksum,
+				visable);
+	}
+	
+	public void parse(String filename, String filenameAlias, String checksum,
+			BufferedReader breader, Context context) {
+		this.useTitleField = PreferenceManager.getDefaultSharedPreferences(context)
 				.getBoolean("useAgendaTitle", false);
 		
-		this.file_id = file_id;
+		this.file_id = addNewFile(filename, filenameAlias, checksum, true);
+
 		this.todos = db.getGroupedTodos();
 
 		this.starStack = new Stack<Integer>();
@@ -86,6 +97,21 @@ public class OrgFileParser {
  		
 		db.getDB().setTransactionSuccessful();
 		db.getDB().endTransaction();
+		
+		updateCalendar(filename, context);
+	}
+	
+	private void updateCalendar(String filename, Context context) {
+		if (filename.equals("agendas.org") == false
+				&& PreferenceManager.getDefaultSharedPreferences(context)
+						.getBoolean("enableCalendar", false)) {
+			try {
+				CalendarSyncService cal = new CalendarSyncService(this.db, context);
+				cal.syncFile(filename);
+			} catch(IllegalArgumentException e) {
+				Log.d("MobileOrg", "Failed to sync calendar");
+			}	
+		}
 	}
 
 	public static final String BLOCK_SEPARATOR_PREFIX = "#HEAD#";
