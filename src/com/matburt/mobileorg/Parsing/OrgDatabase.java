@@ -95,7 +95,7 @@ public class OrgDatabase extends SQLiteOpenHelper {
 	public Cursor getFileCursor() {
 		// This gets all of the org file nodes
 		return db.rawQuery("SELECT data.* FROM orgdata data JOIN" 
-				+ "(SELECT f.node_id FROM files f) file on file.node_id = data._id;", null);
+				+ "(SELECT f.node_id FROM files f) file on file.node_id = data._id ORDER BY data.name ASC;", null);
 
 //		Cursor cursor = db.query("files", new String[] { "node_id" }, null,
 //				null, null, null, "name ASC");
