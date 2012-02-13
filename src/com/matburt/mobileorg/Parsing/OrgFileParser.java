@@ -37,7 +37,6 @@ public class OrgFileParser {
 	public OrgFileParser(OrgDatabase db) {
 		this.db = db;
 	}
-
 	
 	public void parse(String filename, BufferedReader breader, long file_id, Context context) {
 		useTitleField = PreferenceManager.getDefaultSharedPreferences(context)

@@ -48,63 +48,8 @@ import com.matburt.mobileorg.Settings.WizardActivity;
 import com.matburt.mobileorg.Synchronizers.Synchronizer;
 
 public class OutlineActivity extends ListActivity
-{	
-
-    private static final int SYNC_OPTION = 0;
-    private static final int SETTINGS_OPTION = 1;
-    private static final int CAPTURE_OPTION = 2;
-    private static final int WEBSITE_OPTION = 3;
-
-    public class HashMapAdapter extends BaseAdapter {
-        private LinkedHashMap<String, String> mData = new LinkedHashMap<String, String>();
-        private OutlineActivity mAct;
-        private String[] mKeys;
-        private LayoutInflater mInflater;
-
-        public HashMapAdapter(LinkedHashMap<String, String> data, OutlineActivity act){
-            mData  = data;
-            mAct = act;
-            mKeys = mData.keySet().toArray(new String[data.size()]);
-            mInflater = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        }
-
-        @Override
-            public int getCount() {
-            return mData.size();
-        }
-
-        @Override
-            public Object getItem(int position) {
-            return mData.get(mKeys[position]);
-        }
-
-        @Override
-            public long getItemId(int arg0) {
-            return arg0;
-        }
-
-        @Override
-            public View getView(int pos, View convertView, ViewGroup parent) {
-            String key = mKeys[pos];
-            String value = getItem(pos).toString();
-
-            View row;
- 
-            row = mInflater.inflate(R.layout.simple_list_item, null);
- 
-            TextView slitem = (TextView) row.findViewById(R.id.sl_item);
-            slitem.setText(key);
-            TextView slinfo = (TextView) row.findViewById(R.id.sl_info);
-            slinfo.setText(value);
-            return row;
-        }
-    }
-
-
-    private static final int NEW_USER_DIALOG = 0;
-    private static final int UPGRADE_DIALOG = 1;
-
-	private MobileOrgApplication appInst;
+{
+    private MobileOrgApplication appInst;
 
 	private long node_id;
 	
@@ -156,69 +101,6 @@ public class OutlineActivity extends ListActivity
 				
 		refreshDisplay();
 	}
-
-    private void showUpgradePopup() {
-        Log.i("MobileOrg", "Showing upgrade");
-		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setMessage(this.getRawContents(R.raw.upgrade));
-        builder.setCancelable(false);
-		builder.setPositiveButton(R.string.ok,
-                                  new DialogInterface.OnClickListener() {
-                                      public void onClick(DialogInterface dialog, int id) {
-                                          dialog.dismiss();
-                                      }
-                                  });
-		builder.create().show();
-    }
-
-    private String getRawContents(int resource) {
-        InputStream is = this.getResources().openRawResource(resource);
-        BufferedReader br = new BufferedReader(new InputStreamReader(is));
-        String readLine = null;
-        String contents = "";
-
-        try {
-            // While the BufferedReader readLine is not null 
-            while ((readLine = br.readLine()) != null) {
-                contents += readLine + "\n";
-            }
-
-            // Close the InputStream and BufferedReader
-            is.close();
-            br.close();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return contents;
-    }
-
-    private boolean checkNewInstallation() {
-        SharedPreferences appSettings =
-            PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-        int versionCode = appSettings.getInt("appVersion", 0);
-        if (versionCode == 0) {
-            return false;
-        }
-        return true;
-    }
-
-    private boolean checkVersionCode() {
-        SharedPreferences appSettings =
-            PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-        SharedPreferences.Editor editor = appSettings.edit();
-        int versionCode = appSettings.getInt("appVersion", 0);
-        try {
-            PackageInfo pInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
-            int newVersion = pInfo.versionCode;
-            if (versionCode != newVersion) {
-                editor.putInt("appVersion", newVersion);
-                editor.commit();
-                return false;
-            }
-        } catch (Exception e) { };
-        return true;
-    }
 	
 	public static void setupActionbar(Activity activity) {
 		ActionBar actionBar = (ActionBar) activity.findViewById(R.id.actionbar);
@@ -359,35 +241,6 @@ public class OutlineActivity extends ListActivity
 		return false;
 	}
 
-	@Override
-	public void onListItemClick(ListView l, View v, int position, long id) {
-        if (emptylist) {
-            if (position == SYNC_OPTION) {
-                this.runSync();
-            }
-            else if (position == SETTINGS_OPTION) {
-                this.runShowSettings();
-            }
-            else if (position == CAPTURE_OPTION) {
-                this.runEditNewNodeActivity();
-            }
-            else if (position == WEBSITE_OPTION) {
-                String url = "https://github.com/matburt/mobileorg-android/wiki";
-                Intent i = new Intent(Intent.ACTION_VIEW);
-                i.setData(Uri.parse(url));
-                startActivity(i);
-            }
-            return;
-        }
-
-		Long node_id = l.getItemIdAtPosition(position);
-		this.lastSelection = position;
-		if (this.appInst.getDB().hasNodeChildren(node_id))
-			runExpandSelection(node_id);
-		else
-			runViewNodeActivity(node_id);
-	}
-
     private void showWizard() {
         startActivityForResult(new Intent(this, WizardActivity.class), 0);
     }
@@ -496,50 +349,136 @@ public class OutlineActivity extends ListActivity
 		}
 	}
 	
+	
 
-//	@Override
-//	public void onActivityResult(int requestCode, int resultCode, Intent intent) {
-//
-//		switch (requestCode) {
-//		case NodeEncryption.DECRYPT_MESSAGE:
-//			if (resultCode != RESULT_OK || intent == null)
-//				return;
-//			
-//			Node node = this.appInst.nodestackTop();
-//			this.appInst.popNodestack();
-//			parseEncryptedNode(intent, node);
-//			this.runExpandSelection(node);
-//			break;
-//		}
-//	}
-//	/**
-//	 * This calls startActivityForResult() with Encryption.DECRYPT_MESSAGE. The
-//	 * result is handled by onActivityResult() in this class, which calls a
-//	 * function to parse the resulting plain text file.
-//	 */
-//	private void runDecryptAndExpandNode(Node node) {
-//		// if suitable APG version is installed
-//		if (NodeEncryption.isAvailable((Context) this)) {
-//			// retrieve the encrypted file data
-//			OrgFile orgfile = new OrgFile(node.name, getBaseContext());
-//			byte[] rawData = orgfile.getRawFileData();
-//			// save node so parsing function knows which node to parse into.
-//			appInst.pushNodestack(node);
-//			// and send it to APG for decryption
-//			NodeEncryption.decrypt(this, rawData);
-//		}
-//	}
-//
-//	/**
-//	 * This function is called with the results of
-//	 * {@link #runDecryptAndExpandNode}.
-//	 */
-//	private void parseEncryptedNode(Intent data, Node node) {
-//		OrgFileParser ofp = new OrgFileParser(getBaseContext(), appInst);
-//
-//		String decryptedData = data
-//				.getStringExtra(NodeEncryption.EXTRA_DECRYPTED_MESSAGE);
-//
-//		//ofp.parse(node, new BufferedReader(new StringReader(decryptedData)));
-//	}
+    private void showUpgradePopup() {
+        Log.i("MobileOrg", "Showing upgrade");
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setMessage(this.getRawContents(R.raw.upgrade));
+        builder.setCancelable(false);
+		builder.setPositiveButton(R.string.ok,
+                                  new DialogInterface.OnClickListener() {
+                                      public void onClick(DialogInterface dialog, int id) {
+                                          dialog.dismiss();
+                                      }
+                                  });
+		builder.create().show();
+    }
+
+    private String getRawContents(int resource) {
+        InputStream is = this.getResources().openRawResource(resource);
+        BufferedReader br = new BufferedReader(new InputStreamReader(is));
+        String readLine = null;
+        String contents = "";
+
+        try {
+            // While the BufferedReader readLine is not null 
+            while ((readLine = br.readLine()) != null) {
+                contents += readLine + "\n";
+            }
+
+            // Close the InputStream and BufferedReader
+            is.close();
+            br.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return contents;
+    }
+
+    private boolean checkVersionCode() {
+        SharedPreferences appSettings =
+            PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+        SharedPreferences.Editor editor = appSettings.edit();
+        int versionCode = appSettings.getInt("appVersion", 0);
+        try {
+            PackageInfo pInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
+            int newVersion = pInfo.versionCode;
+            if (versionCode != newVersion) {
+                editor.putInt("appVersion", newVersion);
+                editor.commit();
+                return false;
+            }
+        } catch (Exception e) { };
+        return true;
+    }
+	
+
+	@Override
+	public void onListItemClick(ListView l, View v, int position, long id) {
+        if (emptylist) {
+            if (position == SYNC_OPTION) {
+                this.runSync();
+            }
+            else if (position == SETTINGS_OPTION) {
+                this.runShowSettings();
+            }
+            else if (position == CAPTURE_OPTION) {
+                this.runEditNewNodeActivity();
+            }
+            else if (position == WEBSITE_OPTION) {
+                String url = "https://github.com/matburt/mobileorg-android/wiki";
+                Intent i = new Intent(Intent.ACTION_VIEW);
+                i.setData(Uri.parse(url));
+                startActivity(i);
+            }
+            return;
+        }
+
+		Long node_id = l.getItemIdAtPosition(position);
+		this.lastSelection = position;
+		if (this.appInst.getDB().hasNodeChildren(node_id))
+			runExpandSelection(node_id);
+		else
+			runViewNodeActivity(node_id);
+	}
+	
+    private static final int SYNC_OPTION = 0;
+    private static final int SETTINGS_OPTION = 1;
+    private static final int CAPTURE_OPTION = 2;
+    private static final int WEBSITE_OPTION = 3;
+
+    private class HashMapAdapter extends BaseAdapter {
+        private LinkedHashMap<String, String> mData = new LinkedHashMap<String, String>();
+        private String[] mKeys;
+        private LayoutInflater mInflater;
+
+        public HashMapAdapter(LinkedHashMap<String, String> data, OutlineActivity act){
+            mData  = data;
+            mKeys = mData.keySet().toArray(new String[data.size()]);
+            mInflater = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        }
+
+        @Override
+            public int getCount() {
+            return mData.size();
+        }
+
+        @Override
+            public Object getItem(int position) {
+            return mData.get(mKeys[position]);
+        }
+
+        @Override
+            public long getItemId(int arg0) {
+            return arg0;
+        }
+
+        @Override
+            public View getView(int pos, View convertView, ViewGroup parent) {
+            String key = mKeys[pos];
+            String value = getItem(pos).toString();
+
+            View row;
+ 
+            row = mInflater.inflate(R.layout.simple_list_item, null);
+ 
+            TextView slitem = (TextView) row.findViewById(R.id.sl_item);
+            slitem.setText(key);
+            TextView slinfo = (TextView) row.findViewById(R.id.sl_info);
+            slinfo.setText(value);
+            return row;
+        }
+    }
 }
