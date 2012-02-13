@@ -141,7 +141,7 @@
             android:name=".Synchronizers.DropboxAuthActivity"
             android:label="Dropbox Authentication" >
         </activity>
-        <activity
+        <activity android:name=".Parsing.NodeDecryption"></activity><activity
             android:name=".Settings.WebDAVSettingsActivity"
             android:label="WebDAV Settings" >
         </activity>
@@ -157,6 +157,7 @@
             android:name=".Settings.ScpSettingsActivity"
             android:label="Scp Settings" >
         </activity>
+        
     </application>
 
 </manifest>

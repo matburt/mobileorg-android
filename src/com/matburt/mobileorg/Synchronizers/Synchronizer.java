@@ -21,6 +21,7 @@ import android.widget.RemoteViews;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Gui.OutlineActivity;
 import com.matburt.mobileorg.Parsing.MobileOrgApplication;
+import com.matburt.mobileorg.Parsing.NodeDecryption;
 import com.matburt.mobileorg.Parsing.OrgDatabase;
 import com.matburt.mobileorg.Parsing.OrgFile;
 import com.matburt.mobileorg.Parsing.OrgFileParser;
@@ -114,6 +115,7 @@ abstract public class Synchronizer {
 		} catch (Exception e) {
             finalizeNotification();
             errorNotification("Error: " + e.toString());
+            return;
         }
 		finalizeNotification();
 		announceSyncDone();
@@ -124,7 +126,8 @@ abstract public class Synchronizer {
 	 * file combine their content. This combined version is transfered to the
 	 * remote.
 	 */
-	private void pushCaptures() throws Exception, IOException, CertificateException, SSLHandshakeException {
+	private void pushCaptures() throws Exception, IOException,
+			CertificateException, SSLHandshakeException {
 		final String filename = OrgFile.CAPTURE_FILE;
 		String localContents = this.appdb.fileToString(filename);
 		localContents += this.appdb.editsToString();
@@ -202,25 +205,9 @@ abstract public class Synchronizer {
 			Log.d("MobileOrg",
 					"Getting " + filename + "/" + filenameMap.get(filename));
 
-			BufferedReader rfile = getRemoteFile(filename);
-
-			if (rfile == null) {
-				Log.w("MobileOrg", "File does not seem to exist: " + filename);
-				continue;
-			}
-
-            String fileIdentActual = filenameMap.get(filename);
-            if (fileIdentActual.equals("null")) {
-                fileIdentActual = filename;
-            }
-
-			this.appdb.removeFile(filename);
-			long file_id = this.appdb.addOrUpdateFile(filename,
-					fileIdentActual, remoteChecksums.get(filename),
-					true);
-			// TODO Generate checksum of file and compare to remoteChecksum
-			parser.parse(filename, rfile, file_id, context);
-
+			getAndParseFile(filename, filenameMap.get(filename),
+					remoteChecksums.get(filename), parser);
+			
 			if (filename.equals("agendas.org") == false
 					&& PreferenceManager.getDefaultSharedPreferences(context)
 							.getBoolean("enableCalendar", false)) {
@@ -228,10 +215,48 @@ abstract public class Synchronizer {
 					cal.syncFile(filename);
 				} catch(IllegalArgumentException e) {
 					Log.d("MobileOrg", "Failed to sync calendar");
-				}
-				
+				}	
 			}
 		}
+	}
+	
+	private boolean getAndParseFile(String filename, String filenameAlias,
+			String remoteChecksum, OrgFileParser parser)
+			throws SSLHandshakeException, CertificateException, IOException,
+			Exception {
+		BufferedReader rfile = getRemoteFile(filename);
+
+		if (rfile == null) {
+			Log.w("MobileOrg", "File does not seem to exist: " + filename);
+			return false;
+		}
+
+        String fileIdentActual = filenameAlias;
+        if (fileIdentActual.equals("null"))
+            fileIdentActual = filename;
+
+		this.appdb.removeFile(filename);
+		long file_id = this.appdb.addOrUpdateFile(filename, fileIdentActual,
+				remoteChecksum, true);
+
+		// TODO Generate checksum of file and compare to remoteChecksum
+		
+        if(filename.endsWith(".gpg"))
+        	handleEncryptedFile(filename, rfile, file_id);
+        else
+        	parser.parse(filename, rfile, file_id, context);
+        
+        return true;
+	}
+	
+	private void handleEncryptedFile(String filename, BufferedReader reader,
+			long file_id) throws IOException {
+		Intent intent = new Intent(context, NodeDecryption.class);
+		intent.putExtra("data", OrgFile.read(reader));
+		intent.putExtra("file_id", file_id);
+		intent.putExtra("filename",filename);
+		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		context.startActivity(intent);
 	}
 
 	private NotificationManager notificationManager;
@@ -239,7 +264,8 @@ abstract public class Synchronizer {
 	private int notifyRef = 1;
 
     private void errorNotification(String errorMsg) {
-		this.notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+		this.notificationManager = (NotificationManager) context
+				.getSystemService(Context.NOTIFICATION_SERVICE);
 		Intent notifyIntent = new Intent(context, OutlineActivity.class);
 		notifyIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
 
@@ -313,6 +339,7 @@ abstract public class Synchronizer {
 	private void finalizeNotification() {
 		notificationManager.cancel(notifyRef);
 	}
+	
 	public void announceSyncDone() {
 		Intent intent = new Intent(Synchronizer.SYNC_UPDATE);
 		intent.putExtra(SYNC_DONE, true);

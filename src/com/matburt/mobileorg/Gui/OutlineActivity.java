@@ -340,7 +340,7 @@ public class OutlineActivity extends ListActivity
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			if (intent.getBooleanExtra(Synchronizer.SYNC_DONE, false)) {
-				if (intent.getBooleanExtra("showToast", true))
+				if (intent.getBooleanExtra("showToast", false))
 					Toast.makeText(context,
 							R.string.outline_synchronization_successful,
 							Toast.LENGTH_SHORT).show();
@@ -348,7 +348,6 @@ public class OutlineActivity extends ListActivity
 			}
 		}
 	}
-	
 	
 
     private void showUpgradePopup() {
