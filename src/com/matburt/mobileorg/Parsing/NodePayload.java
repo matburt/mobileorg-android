@@ -13,7 +13,6 @@ class NodePayload {
 	private String content = null;
 	private String scheduled = null;
 	
-	@SuppressWarnings("unused")
 	private String deadline = null;
 	@SuppressWarnings("unused")
 	private String timestamp = null;
