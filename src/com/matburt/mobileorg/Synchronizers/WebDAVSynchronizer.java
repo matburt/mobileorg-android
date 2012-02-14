@@ -62,7 +62,11 @@ public class WebDAVSynchronizer extends Synchronizer {
                 edit.putInt("webConflictHash", hash);
                 edit.putString("webConflictHashDesc", description);
                 edit.commit();
-                return false;
+                return true;
+                //WARNING: NOTE: This disables the requirement to validate the certificate.
+                //               a better way is needed for those certs whose hash changes
+                //               all the time
+                //return false;
             }
             Log.i("MobileOrg", "Certificates match");
             return true;
