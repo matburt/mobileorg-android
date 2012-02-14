@@ -226,7 +226,7 @@ abstract public class Synchronizer {
 		// TODO Generate checksum of file and compare to remoteChecksum
 		
 		if (filename.endsWith(".gpg") || filename.endsWith(".pgp")
-				|| filename.endsWith(".enc"))
+            || filename.endsWith(".enc") || filename.endsWith(".asc"))
         	decryptAndParseFile(filename, fileIdentActual, remoteChecksum, rfile);
         else
         	parser.parse(filename, fileIdentActual, remoteChecksum, rfile, context);
