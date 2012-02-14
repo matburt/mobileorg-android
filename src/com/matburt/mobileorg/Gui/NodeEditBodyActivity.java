@@ -3,6 +3,9 @@ package com.matburt.mobileorg.Gui;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -31,6 +34,27 @@ public class NodeEditBodyActivity extends Activity
         button.setOnClickListener(cancelListener);
     }
     
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		MenuInflater inflater = getMenuInflater();
+	    inflater.inflate(R.menu.nodeeditbody_menu, menu);
+		return true;
+	}
+    
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case R.id.nodeeditbody_timestamp:
+			insertTimestamp();
+			return true;
+		}
+		return false;
+	}
+	
+	private void insertTimestamp() {
+		this.editDisplay.append(NodeEditActivity.getTimestamp());
+	}
+	
 	View.OnClickListener saveListener = new View.OnClickListener() {
 		public void onClick(View v) {
 			Intent result = new Intent();
