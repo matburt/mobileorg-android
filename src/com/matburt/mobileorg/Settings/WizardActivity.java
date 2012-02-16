@@ -299,7 +299,16 @@ public class WizardActivity extends Activity {
         final String passActual = sshPass.getText().toString();
         final String userActual = sshUser.getText().toString();
         final String hostActual = sshHost.getText().toString();
-        final int portActual = Integer.parseInt(sshPort.getText().toString());
+        String portNumGiven = sshPort.getText().toString();
+        int portNum;
+        if (portNumGiven.trim().equals("")) {
+            portNum = 22;
+        }
+        else {
+            portNum = Integer.parseInt(portNumGiven);
+        }
+        final int portActual = portNum;
+
         final Context ctxt = this;
         progress.show();
 
@@ -490,7 +499,12 @@ public class WizardActivity extends Activity {
                 editor.putString("scpUser", sshUser.getText().toString());
                 editor.putString("scpPass", sshPass.getText().toString());
                 editor.putString("scpHost", sshHost.getText().toString());
-                editor.putString("scpPort", sshPort.getText().toString());
+                if (sshPort.getText().toString().trim().equals("")) {
+                editor.putString("scpPort", "22");
+                }
+                else {
+                    editor.putString("scpPort", sshPort.getText().toString());
+                }
             }
             else if ( syncSource.equals("dropbox") )
                 editor.putString("dropboxPath", directoryAdapter.getCheckedDirectory() + "/");
