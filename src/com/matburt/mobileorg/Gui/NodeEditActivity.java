@@ -1,7 +1,9 @@
 package com.matburt.mobileorg.Gui;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -215,6 +217,11 @@ public class NodeEditActivity extends Activity {
 		return true;
 	}
 	
+	public static String getTimestamp() {
+		SimpleDateFormat sdf = new SimpleDateFormat("[yyyy-MM-dd EEE HH:mm]");		
+		return sdf.format(new Date());
+	}
+	
 	private void save() {
 		String newTitle = titleView.getText().toString();
 		String newTodo = todoStateView.getSelectedItem().toString();
@@ -228,6 +235,12 @@ public class NodeEditActivity extends Activity {
 			long file_id = orgDB.addOrUpdateFile(OrgFile.CAPTURE_FILE, "Captures", "", true);
 			Long parent = orgDB.getFileNodeId(OrgFile.CAPTURE_FILE);
 			long node_id = orgDB.addNode(parent, newTitle, newTodo, newPriority, newTags, file_id);
+			
+			boolean addTimestamp = PreferenceManager.getDefaultSharedPreferences(
+					this).getBoolean("captureWithTimestamp", false);
+			if(addTimestamp)
+				newPayload += "\n" + getTimestamp() + "\n";
+			
 			orgDB.addNodePayload(node_id, newPayload);
 			
 		} else if (this.actionMode.equals(ACTIONMODE_EDIT)) {
