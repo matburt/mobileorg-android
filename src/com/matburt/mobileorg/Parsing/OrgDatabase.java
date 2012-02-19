@@ -17,7 +17,7 @@ import android.text.TextUtils;
 
 public class OrgDatabase extends SQLiteOpenHelper {
 	private static final String DATABASE_NAME = "MobileOrg.db";
-	private static final int DATABASE_VERSION = 2;
+	private static final int DATABASE_VERSION = 3;
 	
 	private final static String[] nodeFields = {"_id", "name", "todo", "tags", "priority",
 		"payload", "parent_id", "file_id"};
@@ -64,6 +64,10 @@ public class OrgDatabase extends SQLiteOpenHelper {
 				+ "isdone integer default 0)");
 		db.execSQL("CREATE TABLE IF NOT EXISTS priorities("
 				+ "_id integer primary key autoincrement,"
+				+ "name text)");
+		db.execSQL("CREATE TABLE IF NOT EXISTS tags("
+				+ "_id integer primary key autoincrement,"
+				+ "taggroup integer,"
 				+ "name text)");
 		db.execSQL("CREATE TABLE IF NOT EXISTS edits("
 				+ "_id integer primary key autoincrement,"
@@ -541,7 +545,7 @@ public class OrgDatabase extends SQLiteOpenHelper {
 
 	
 /***************************
- * Functions to access priorities and todo table. 
+ * Functions to access priorities, tags and todo table. 
  ***************************/
 
 	public void setTodos(ArrayList<HashMap<String, Boolean>> todos) {
@@ -643,6 +647,30 @@ public class OrgDatabase extends SQLiteOpenHelper {
 			ContentValues values = new ContentValues();
 			values.put("name", priority);
 			db.insert("priorities", null, values);
+		}
+
+		db.setTransactionSuccessful();
+		db.endTransaction();
+	}
+	
+	public ArrayList<String> getTags() {
+		Cursor cursor = db.query("tags", new String[] { "name" },
+				null, null, null, null, "_id");
+
+		ArrayList<String> tags = cursorToArrayList(cursor);
+
+		cursor.close();
+		return tags;
+	}
+
+	public void setTags(ArrayList<String> priorities) {
+		db.beginTransaction();
+		db.delete("tags", null, null);
+
+		for (String priority : priorities) {
+			ContentValues values = new ContentValues();
+			values.put("name", priority);
+			db.insert("tags", null, values);
 		}
 
 		db.setTransactionSuccessful();

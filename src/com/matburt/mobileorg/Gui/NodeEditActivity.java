@@ -109,7 +109,8 @@ public class NodeEditActivity extends Activity {
 			//payloadView.setText(node.getRawPayload(this.orgDB));
 			tagsView.setText(node.getTags());
 
-			setSpinner(todoStateView, appInst.getDB().getTodos(), node.getTodo());
+			//setSpinner(todoStateView, appInst.getDB().getTodos(), node.getTodo());
+			setSpinner(todoStateView, appInst.getDB().getTags(), "");
 			setSpinner(priorityView, appInst.getDB().getPriorities(), node.getPriority());
 		}
 

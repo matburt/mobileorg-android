@@ -452,5 +452,24 @@ public class OrgFileParser {
 		return priorities;
 	}
 	
-	
+	public static ArrayList<String> getTagsFromIndex(String filecontents) {
+		Pattern getTags = Pattern.compile("#\\+TAGS:\\s+([^\\n]*)");
+		
+		Matcher matcher = getTags.matcher(filecontents);
+		ArrayList<String> tagList = new ArrayList<String>();
+		
+		if(matcher.find()) {
+			String tags = matcher.group(1).replaceAll("[\\{\\}]", "");
+			String[] split = tags.split("\\s+");
+			for(String tag: split)
+				tagList.add(tag);
+		}
+		
+		return tagList;
+	}
 }
+
+
+
+
+

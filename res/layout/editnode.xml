@@ -1,50 +1,95 @@
 <?xml version="1.0" encoding="utf-8"?>
 <TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	android:layout_width="fill_parent" android:layout_height="fill_parent"
-	android:stretchColumns="1">
-	<TableRow>
-		<EditText android:id="@+id/title" android:layout_span="4"
-		android:hint="@string/title"
-			android:layout_width="fill_parent" android:layout_height="wrap_content" 
-			android:inputType="text|textMultiLine|textAutoCorrect|textCapSentences" />
-	</TableRow>
-	<TableRow>
-		<TextView android:text="@string/todo_state" android:layout_width="wrap_content" android:layout_height="wrap_content" />
-		<Spinner android:id="@+id/todo_state"
-			android:layout_span="3"
-			android:prompt="@string/todo_state"
-			android:layout_width="fill_parent" 
-			android:layout_height="wrap_content" />
-	</TableRow>
-	<TableRow>
-		<TextView android:text="@string/priority" android:layout_width="wrap_content" android:layout_height="wrap_content" />
-		<Spinner android:id="@+id/priority"
-			android:layout_span="3"
-			android:prompt="@string/priority"
-			android:layout_width="fill_parent" android:layout_height="wrap_content" />
-	</TableRow>
-	<TableRow>
-		<TextView android:text="@string/tags" android:layout_width="wrap_content" android:layout_height="wrap_content" />
-		<EditText android:id="@+id/tags"
-		    android:hint=""
-			android:layout_span="3"
-			android:layout_width="fill_parent" android:layout_height="wrap_content" />
-	</TableRow>
-	<TableRow android:layout_weight="1">
-		<TextView android:id="@+id/body" android:layout_span="4"
-			android:hint="@string/body"
-			android:layout_width="fill_parent" 
-			android:layout_height="fill_parent"
-			android:gravity="top"
-		android:inputType="textMultiLine" />
-	</TableRow>
-	<LinearLayout android:orientation="horizontal"
-		android:layout_width="wrap_content" android:layout_height="52dp">
-		<Button android:id="@+id/cancel" android:text="@string/cancel"
-			android:layout_width="fill_parent" android:layout_height="fill_parent"
-			android:layout_weight="6" />
-		<Button android:id="@+id/save" android:text="@string/save"
-			android:layout_width="fill_parent" android:layout_height="fill_parent"
-			android:layout_weight="6" />
-	</LinearLayout>
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:stretchColumns="1" >
+
+    <TableRow>
+
+        <EditText
+            android:id="@+id/title"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_span="4"
+            android:hint="@string/title"
+            android:inputType="text|textMultiLine|textAutoCorrect|textCapSentences" />
+    </TableRow>
+
+    <TableRow>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/todo_state" />
+
+        <Spinner
+            android:id="@+id/todo_state"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_span="3"
+            android:prompt="@string/todo_state" />
+    </TableRow>
+
+    <TableRow>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/priority" />
+
+        <Spinner
+            android:id="@+id/priority"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_span="3"
+            android:prompt="@string/priority" />
+    </TableRow>
+
+    <TableRow android:id="@+id/tagsRow" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/tags" />
+
+        <EditText
+            android:id="@+id/tags"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_span="3"
+            android:hint="" />
+    </TableRow>
+
+    <TableRow android:layout_weight="1" >
+
+        <TextView
+            android:id="@+id/body"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_span="4"
+            android:gravity="top"
+            android:hint="@string/body"
+            android:inputType="textMultiLine" />
+    </TableRow>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="52dp"
+        android:orientation="horizontal" >
+
+        <Button
+            android:id="@+id/cancel"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="6"
+            android:text="@string/cancel" />
+
+        <Button
+            android:id="@+id/save"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="6"
+            android:text="@string/save" />
+    </LinearLayout>
+
 </TableLayout>
