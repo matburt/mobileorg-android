@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/editnodelayout"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:stretchColumns="1" >
@@ -45,20 +46,11 @@
             android:prompt="@string/priority" />
     </TableRow>
 
-    <TableRow android:id="@+id/tagsRow" >
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/tags" />
-
-        <EditText
-            android:id="@+id/tags"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_span="3"
-            android:hint="" />
-    </TableRow>
+    <TableLayout
+        android:id="@+id/tags"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" >
+    </TableLayout>
 
     <TableRow android:layout_weight="1" >
 

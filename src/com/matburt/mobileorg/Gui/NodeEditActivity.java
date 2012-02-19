@@ -7,16 +7,22 @@ import java.util.Date;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.text.TextUtils;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
+import android.widget.TableLayout;
+import android.widget.TableRow;
 import android.widget.TextView;
 
 import com.matburt.mobileorg.R;
@@ -35,7 +41,7 @@ public class NodeEditActivity extends Activity {
 	private TextView payloadView;
 	private Spinner priorityView;
 	private Spinner todoStateView;
-	private EditText tagsView;
+	private LinearLayout tagsView;
 	private NodeWrapper node;
 	private String actionMode;
 	
@@ -49,7 +55,7 @@ public class NodeEditActivity extends Activity {
 		this.titleView = (EditText) this.findViewById(R.id.title);
 		this.priorityView = (Spinner) this.findViewById(R.id.priority);
 		this.todoStateView = (Spinner) this.findViewById(R.id.todo_state);
-		this.tagsView = (EditText) this.findViewById(R.id.tags);
+		this.tagsView = (LinearLayout) this.findViewById(R.id.tags);
 
 		this.payloadView = (TextView) this.findViewById(R.id.body);
 		payloadView.setOnClickListener(editBodyListener);
@@ -107,14 +113,49 @@ public class NodeEditActivity extends Activity {
 			titleView.setText(node.getName());
 			payloadView.setText(node.getCleanedPayload(this.orgDB));
 			//payloadView.setText(node.getRawPayload(this.orgDB));
-			tagsView.setText(node.getTags());
+			
+			setupTags(appInst.getDB().getTags());
 
-			//setSpinner(todoStateView, appInst.getDB().getTodos(), node.getTodo());
-			setSpinner(todoStateView, appInst.getDB().getTags(), "");
+			setSpinner(todoStateView, appInst.getDB().getTodos(), node.getTodo());
 			setSpinner(priorityView, appInst.getDB().getPriorities(), node.getPriority());
 		}
-
 	}
+	
+	private void setupTags(ArrayList<String> tagList) {
+		TableLayout rootView = (TableLayout)this.findViewById(R.id.tags);
+		
+		String[] tags = node.getTags().split("\\:+");
+		
+		if(tags.length == 1 && TextUtils.isEmpty(tags[0]))
+			return;
+		
+		for(String tag: tags) {
+			TagEntry tagEntry = new TagEntry(this, rootView, tagList, tag);
+			rootView.addView(tagEntry);		
+		}
+	}
+	
+	private class TagEntry extends TableRow {
+		
+		TableLayout parent;
+		
+		public TagEntry(Context context, TableLayout parent, final ArrayList<String> tags, String selection) {
+			super(context);
+			
+			LayoutInflater layoutInflater = (LayoutInflater) context
+					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			TableRow row = (TableRow) layoutInflater.inflate(
+					R.layout.editnode_tagslayout, this);
+
+			Spinner spinner = (Spinner) row.findViewById(R.id.tagslist);
+			setSpinner(spinner, tags, selection);
+			this.parent = parent;
+		}
+		
+		public void remove() {
+			parent.removeView(this);
+		}
+	};
 
 	private void setSpinner(Spinner view, ArrayList<String> data,
 			String selection) {
@@ -201,7 +242,7 @@ public class NodeEditActivity extends Activity {
 		String newTitle = titleView.getText().toString();
 		String newTodo = todoStateView.getSelectedItem().toString();
 		String newPriority = priorityView.getSelectedItem().toString();
-		String newTags = tagsView.getText().toString();
+		String newTags = "";//tagsView.getText().toString();
 		
 		if (this.actionMode.equals(ACTIONMODE_CREATE)) {
 			if (newPayload.length() == 0 && newTitle.length() == 0)
@@ -228,7 +269,7 @@ public class NodeEditActivity extends Activity {
 		String newTodo = todoStateView.getSelectedItem().toString();
 		String newPriority = priorityView.getSelectedItem().toString();
 		String newPayload = payloadView.getText().toString();
-		String newTags = tagsView.getText().toString();
+		String newTags = "";//tagsView.getText().toString();
 		
 		if (this.actionMode.equals(ACTIONMODE_CREATE)) {
 			MobileOrgApplication appInst = (MobileOrgApplication) this.getApplication();
