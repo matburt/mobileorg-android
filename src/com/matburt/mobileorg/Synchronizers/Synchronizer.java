@@ -105,15 +105,18 @@ abstract public class Synchronizer {
             finalizeNotification();
 			errorNotification("Error occured during sync: "
                               + e.getLocalizedMessage());
+			Log.d("MobileOrg", e.getStackTrace().toString());
 			return;
 		} catch (CertificateException e) {
             finalizeNotification();
 			errorNotification("Certificate Error occured during sync: "
                               + e.getLocalizedMessage());
+			Log.d("MobileOrg", e.getStackTrace().toString());
 			return;
 		} catch (Exception e) {
             finalizeNotification();
             errorNotification("Error: " + e.toString());
+            Log.d("MobileOrg", e.getStackTrace().toString());
             return;
         }
 		finalizeNotification();
@@ -220,7 +223,7 @@ abstract public class Synchronizer {
 		}
 
         String fileIdentActual = filenameAlias;
-        if (fileIdentActual.equals("null"))
+        if (fileIdentActual == null || fileIdentActual.equals("null"))
             fileIdentActual = filename;
 
 		// TODO Generate checksum of file and compare to remoteChecksum
