@@ -1,12 +1,11 @@
 package com.matburt.mobileorg.Plugin;
 
 import android.app.Activity;
-import android.widget.Button;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
-import android.content.Intent;
+import android.widget.Button;
 
-import com.twofortyfouram.locale.BreadCrumber;
 import com.matburt.mobileorg.R;
 
 public class SyncEditActivity extends Activity {
@@ -15,7 +14,7 @@ public class SyncEditActivity extends Activity {
     private Button deny_button;
 
     private boolean canceled = true;
-    private static final String HELP_URL = "http://github.com/mobileorg/wiki";
+//    private static final String HELP_URL = "http://github.com/mobileorg/wiki";
 
 
     public void onCreate(Bundle savedInstanceState) {

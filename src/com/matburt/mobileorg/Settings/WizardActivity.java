@@ -37,7 +37,6 @@ import com.matburt.mobileorg.Dropbox.Dropbox;
 import com.matburt.mobileorg.Dropbox.DropboxLoginListener;
 import com.matburt.mobileorg.Views.PageFlipView;
 import com.matburt.mobileorg.Synchronizers.WebDAVSynchronizer;
-import com.matburt.mobileorg.Synchronizers.NullSynchronizer;
 import com.matburt.mobileorg.Synchronizers.SSHSynchronizer;
 import com.matburt.mobileorg.Parsing.MobileOrgApplication;
 
