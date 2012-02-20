@@ -50,7 +50,6 @@ public class NodeEditActivity extends Activity {
 	private NodeWrapper node;
 	private String actionMode;
 	
-	
 	private OrgDatabase orgDB;
 
 	@Override
@@ -324,24 +323,26 @@ public class NodeEditActivity extends Activity {
 	}
 	
 	/**
-	 * Takes a Node and four strings, representing edits to the node.
+	 * Takes a Node and five strings, representing edits to the node.
 	 * This function will generate a new edit entry for each value that was 
 	 * changed.
 	 */
 	private void editNode(String newTitle, String newTodo,
 			String newPriority, String newPayload, String newTags) throws IOException {
+		boolean generateEdits = !node.getFileName(orgDB).equals(OrgFile.CAPTURE_FILE);
+		
 		if (!node.getName().equals(newTitle)) {
-			if(node.getFileName(orgDB).equals(OrgFile.CAPTURE_FILE) == false)
+			if (generateEdits)
 				orgDB.addEdit("heading", node.getNodeId(orgDB), newTitle, node.getName(), newTitle);
 			node.setName(newTitle, orgDB);
 		}
 		if (newTodo != null && !node.getTodo().equals(newTodo)) {
-			if(node.getFileName(orgDB).equals(OrgFile.CAPTURE_FILE) == false)
+			if (generateEdits)
 				orgDB.addEdit("todo", node.getNodeId(orgDB), newTitle, node.getTodo(), newTodo);
 			node.setTodo(newTodo, orgDB);
 		}
 		if (newPriority != null && !node.getPriority().equals(newPriority)) {
-			if(node.getFileName(orgDB).equals(OrgFile.CAPTURE_FILE) == false)
+			if (generateEdits)
 				orgDB.addEdit("priority", node.getNodeId(orgDB), newTitle, node.getPriority(),
 					newPriority);
 			node.setPriority(newPriority, orgDB);
@@ -349,12 +350,12 @@ public class NodeEditActivity extends Activity {
 		if (!node.getCleanedPayload(orgDB).equals(newPayload)) {
 			String newRawPayload = node.getPayloadResidue(orgDB) + newPayload;
 	
-			if(node.getFileName(orgDB).equals(OrgFile.CAPTURE_FILE) == false)
+			if (generateEdits)
 				orgDB.addEdit("body", node.getNodeId(orgDB), newTitle, node.getRawPayload(orgDB), newRawPayload);
 			node.setPayload(newRawPayload, orgDB);
 		}
 		if(!node.getTags().equals(newTags)) {
-			if(node.getFileName(orgDB).equals(OrgFile.CAPTURE_FILE) == false) {
+			if (generateEdits) {
 				orgDB.addEdit("tags", node.getNodeId(orgDB), newTitle,
 						node.getTagsWithoutInheritet(),
 						NodeWrapper.getTagsWithoutInheritet(newTags));
