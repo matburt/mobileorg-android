@@ -14,12 +14,15 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TableLayout;
 import android.widget.TableRow;
@@ -41,9 +44,12 @@ public class NodeEditActivity extends Activity {
 	private TextView payloadView;
 	private Spinner priorityView;
 	private Spinner todoStateView;
-	private LinearLayout tagsView;
+	private TableLayout tagsView;
+	private ArrayList<TagEntry> tagEntries = new ArrayList<TagEntry>();
+
 	private NodeWrapper node;
 	private String actionMode;
+	
 	
 	private OrgDatabase orgDB;
 
@@ -55,7 +61,7 @@ public class NodeEditActivity extends Activity {
 		this.titleView = (EditText) this.findViewById(R.id.title);
 		this.priorityView = (Spinner) this.findViewById(R.id.priority);
 		this.todoStateView = (Spinner) this.findViewById(R.id.todo_state);
-		this.tagsView = (LinearLayout) this.findViewById(R.id.tags);
+		this.tagsView = (TableLayout) this.findViewById(R.id.tags);
 
 		this.payloadView = (TextView) this.findViewById(R.id.body);
 		payloadView.setOnClickListener(editBodyListener);
@@ -122,40 +128,25 @@ public class NodeEditActivity extends Activity {
 	}
 	
 	private void setupTags(ArrayList<String> tagList) {
-		TableLayout rootView = (TableLayout)this.findViewById(R.id.tags);
-		
-		String[] tags = node.getTags().split("\\:+");
-		
-		if(tags.length == 1 && TextUtils.isEmpty(tags[0]))
-			return;
+		ArrayList<String> tags = node.getTagList();
 		
 		for(String tag: tags) {
-			TagEntry tagEntry = new TagEntry(this, rootView, tagList, tag);
-			rootView.addView(tagEntry);		
+			if(TextUtils.isEmpty(tag)) { // NodeWrapper found a :: entry, meaning all tags so far where unmodifiable
+				for(TagEntry entry: tagEntries)
+					entry.setUnmodifiable();
+				if(tagEntries.size() > 0)
+					tagEntries.get(tagEntries.size() - 1).setLast();
+			}
+			else
+				addTag(tag);
 		}
 	}
 	
-	private class TagEntry extends TableRow {
-		
-		TableLayout parent;
-		
-		public TagEntry(Context context, TableLayout parent, final ArrayList<String> tags, String selection) {
-			super(context);
-			
-			LayoutInflater layoutInflater = (LayoutInflater) context
-					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-			TableRow row = (TableRow) layoutInflater.inflate(
-					R.layout.editnode_tagslayout, this);
-
-			Spinner spinner = (Spinner) row.findViewById(R.id.tagslist);
-			setSpinner(spinner, tags, selection);
-			this.parent = parent;
-		}
-		
-		public void remove() {
-			parent.removeView(this);
-		}
-	};
+	private void addTag(String tag) {
+		TagEntry tagEntry = new TagEntry(this, tagsView, orgDB.getTags(), tag);
+		tagsView.addView(tagEntry);
+		tagEntries.add(tagEntry);
+	}
 
 	private void setSpinner(Spinner view, ArrayList<String> data,
 			String selection) {
@@ -172,6 +163,23 @@ public class NodeEditActivity extends Activity {
 		view.setSelection(pos);
 	}
 
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		MenuInflater inflater = getMenuInflater();
+	    inflater.inflate(R.menu.nodeedit_menu, menu);
+		return true;
+	}
+    
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case R.id.nodeedit_tag:
+			addTag("");
+			return true;
+		}
+		return false;
+	}
+	
 	private View.OnClickListener saveNodeListener = new View.OnClickListener() {
 		public void onClick(View v) {
 			save();
@@ -237,12 +245,30 @@ public class NodeEditActivity extends Activity {
 		builder.create().show();
 	}
 	
+	private String getTagsSelection() {
+		StringBuilder result = new StringBuilder();
+		for(TagEntry entry: tagEntries) {
+			String selection = entry.getSelection();
+			if(TextUtils.isEmpty(selection) == false) {
+				result.append(selection);
+				result.append(":");
+			}
+		}
+		
+		if(TextUtils.isEmpty(result))
+			return "";
+		else
+			return result.deleteCharAt(result.lastIndexOf(":")).toString();
+	}
+	
 	private boolean hasEdits() {
 		String newPayload = payloadView.getText().toString();
 		String newTitle = titleView.getText().toString();
 		String newTodo = todoStateView.getSelectedItem().toString();
 		String newPriority = priorityView.getSelectedItem().toString();
-		String newTags = "";//tagsView.getText().toString();
+		String newTags = getTagsSelection();
+		
+		Log.d("MobileOrg", "Got tags: " + newTags + " | " + node.getTags());
 		
 		if (this.actionMode.equals(ACTIONMODE_CREATE)) {
 			if (newPayload.length() == 0 && newTitle.length() == 0)
@@ -269,7 +295,7 @@ public class NodeEditActivity extends Activity {
 		String newTodo = todoStateView.getSelectedItem().toString();
 		String newPriority = priorityView.getSelectedItem().toString();
 		String newPayload = payloadView.getText().toString();
-		String newTags = "";//tagsView.getText().toString();
+		String newTags = getTagsSelection();
 		
 		if (this.actionMode.equals(ACTIONMODE_CREATE)) {
 			MobileOrgApplication appInst = (MobileOrgApplication) this.getApplication();
@@ -304,8 +330,6 @@ public class NodeEditActivity extends Activity {
 	 */
 	private void editNode(String newTitle, String newTodo,
 			String newPriority, String newPayload, String newTags) throws IOException {
-
-		
 		if (!node.getName().equals(newTitle)) {
 			if(node.getFileName(orgDB).equals(OrgFile.CAPTURE_FILE) == false)
 				orgDB.addEdit("heading", node.getNodeId(orgDB), newTitle, node.getName(), newTitle);
@@ -330,9 +354,68 @@ public class NodeEditActivity extends Activity {
 			node.setPayload(newRawPayload, orgDB);
 		}
 		if(!node.getTags().equals(newTags)) {
-			if(node.getFileName(orgDB).equals(OrgFile.CAPTURE_FILE) == false)
-				orgDB.addEdit("tags", node.getNodeId(orgDB), newTitle, node.getTags(), newTags);
+			if(node.getFileName(orgDB).equals(OrgFile.CAPTURE_FILE) == false) {
+				orgDB.addEdit("tags", node.getNodeId(orgDB), newTitle,
+						node.getTagsWithoutInheritet(),
+						NodeWrapper.getTagsWithoutInheritet(newTags));
+			}
 			node.setTags(newTags, orgDB);
 		}
 	}
+	
+	
+	private class TagEntry extends TableRow {		
+		TableLayout parent;
+		Spinner spinner;
+		Button button;
+		
+		String selectionExtra = ""; // used to carry ::
+
+		public TagEntry(Context context, TableLayout parent,
+				final ArrayList<String> tags, String selection) {
+			super(context);
+
+			this.parent = parent;
+
+			LayoutInflater layoutInflater = (LayoutInflater) context
+					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			TableRow row = (TableRow) layoutInflater.inflate(
+					R.layout.editnode_tagslayout, this);
+
+			button = (Button) findViewById(R.id.editnode_remove);
+			button.setOnClickListener(removeListener);
+			
+			if(selection.endsWith(":")) {
+				selectionExtra = ":";
+				selection = selection.replace(":", "");
+			}
+
+			spinner = (Spinner) row.findViewById(R.id.tagslist);
+			setSpinner(spinner, tags, selection);
+		}
+		
+		public void setUnmodifiable() {
+			button.setVisibility(INVISIBLE);
+			spinner.setEnabled(false);
+		}
+		
+		public void setLast() {
+			selectionExtra = ":";
+		}
+		
+		public String getSelection() {
+			return spinner.getSelectedItem().toString() + selectionExtra;
+		}
+		
+		private void remove() {
+			parent.removeView(this);
+			tagEntries.remove(this);
+		}
+		
+		private View.OnClickListener removeListener = new View.OnClickListener() {
+			public void onClick(View v) {
+				remove();
+			}
+		};
+	};
 }
