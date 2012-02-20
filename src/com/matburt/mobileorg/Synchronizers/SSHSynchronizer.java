@@ -1,15 +1,11 @@
 package com.matburt.mobileorg.Synchronizers;
 
 import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.StringReader;
 import java.io.InputStreamReader;
-import java.io.File;
-import java.io.FileInputStream;
+import java.io.StringReader;
+
 import android.content.Context;
 import android.util.Log;
 
@@ -76,6 +72,7 @@ public class SSHSynchronizer extends Synchronizer {
         try {
             this.connect();
             BufferedReader r = this.getRemoteFile(this.getFileName());
+            r.close();
         }
         catch (Exception e) {
             Log.i("MobileOrg", "SSH Get index file failed");

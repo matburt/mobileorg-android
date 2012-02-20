@@ -35,7 +35,7 @@ public class SettingsActivity extends PreferenceActivity {
 		populateSyncSources();
 		populateTodoKeywords();
 		try {
-		populateCalendarNames();
+			populateCalendarNames();
 		} catch (Exception e) {
 			// Don't crash because of fault in calendar synchronizer!
 		}
