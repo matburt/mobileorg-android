@@ -72,7 +72,7 @@ public class NodeViewActivity extends FragmentActivity {
 	@Override
 	public boolean onCreateOptionsMenu(android.support.v4.view.Menu menu) {
 		MenuInflater inflater = getMenuInflater();
-	    inflater.inflate(R.menu.nodeview_menu, menu);
+	    inflater.inflate(R.menu.nodeview, menu);
 	    
 	    if(this.appInst.getDB().isNodeEditable(node_id) == false)
 	    	menu.findItem(R.id.viewmenu_edit).setVisible(false);

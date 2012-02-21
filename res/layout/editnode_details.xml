@@ -52,16 +52,4 @@
         android:layout_height="wrap_content" >
     </TableLayout>
 
-    <TableRow android:layout_weight="1" >
-
-        <TextView
-            android:id="@+id/body"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:layout_span="4"
-            android:gravity="top"
-            android:hint="@string/body"
-            android:inputType="textMultiLine" />
-    </TableRow>
-
 </TableLayout>

@@ -2,66 +2,43 @@ package com.matburt.mobileorg.Gui;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.database.Cursor;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v4.app.ActionBar;
 import android.support.v4.app.ActionBar.Tab;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.text.TextUtils;
-import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.MenuInflater;
-import android.view.View;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.Spinner;
-import android.widget.TableLayout;
-import android.widget.TableRow;
-import android.widget.TextView;
 
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Parsing.MobileOrgApplication;
 import com.matburt.mobileorg.Parsing.NodeWrapper;
 import com.matburt.mobileorg.Parsing.OrgDatabase;
 import com.matburt.mobileorg.Parsing.OrgFile;
-import com.matburt.mobileorg.Synchronizers.Synchronizer;
 
 public class NodeEditActivity extends FragmentActivity {
-	
 	public final static String ACTIONMODE_CREATE = "create";
 	public final static String ACTIONMODE_EDIT = "edit";
-	private final static int EDIT_BODY = 1;
-
-	private EditText titleView;
-	private TextView payloadView;
-	private Spinner priorityView;
-	private Spinner todoStateView;
-	private TableLayout tagsView;
-	private ArrayList<TagEntry> tagEntries = new ArrayList<TagEntry>();
 
 	private NodeWrapper node;
 	private String actionMode;
 	
 	private OrgDatabase orgDB;
 	private MobileOrgApplication appInst;
+	
+	private NodeEditDetailsFragment detailsFragment;
+	private NodeEditBodyFragment payloadFragment;
+	private NodeEditBodyFragment rawPayloadFragment;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
-
 
 		Intent intent = getIntent();
 		this.actionMode = intent.getStringExtra("actionMode");
@@ -69,41 +46,70 @@ public class NodeEditActivity extends FragmentActivity {
 		this.appInst = (MobileOrgApplication) this.getApplication();
 		this.orgDB = appInst.getDB();
 		
-		initDisplay();
-		//setupActionbar();
+		init();
+		setupActionbar();
+	}
+	
+	private void init() {
+		Intent intent = getIntent();
+		
+		if (this.actionMode == null) {
+			this.actionMode = ACTIONMODE_CREATE;
+
+			// TODO Support intents
+			String subject = intent
+					.getStringExtra("android.intent.extra.SUBJECT");
+			String text = intent.getStringExtra("android.intent.extra.TEXT");
+//			titleView.setText(subject);
+//
+//			node = new NodeWrapper(null);
+//			payloadView.setText(text);
+//			setSpinner(todoStateView, appInst.getDB().getTodos(), defaultTodo);
+//			setSpinner(priorityView, appInst.getDB().getPriorities(), "");
+		} else if (this.actionMode.equals(ACTIONMODE_CREATE)) {
+			node = new NodeWrapper(null);
+		} else if (this.actionMode.equals(ACTIONMODE_EDIT)) {
+			long nodeId = intent.getLongExtra("node_id", 0);
+			node = new NodeWrapper(appInst.getDB().getNode(nodeId));
+		}
 	}
 
+
 	private void setupActionbar() {
+		setContentView(R.layout.editnode);
 		ActionBar actionbar = getSupportActionBar();
-		actionbar.setTitle("MobileOrg");
-		
-		getSupportActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
-	    ActionBar.Tab tabA = actionbar.newTab().setText("Details");
-	    ActionBar.Tab tabB = actionbar.newTab().setText("Payload");
-	    ActionBar.Tab tabC = actionbar.newTab().setText("Raw Payload");
 
-	    Fragment editBody = new NodeEditBodyActivity();
-	    tabB.setTabListener(new TabListener(editBody));
+		actionbar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
 
-	    actionbar.addTab(tabA);
-	    actionbar.addTab(tabB);
-	    actionbar.addTab(tabC);
-
+		this.detailsFragment = new NodeEditDetailsFragment(node, actionMode);
+		ActionBar.Tab detailsTab = actionbar.newTab().setText("Details");
+		detailsTab.setTabListener(new TabListener(detailsFragment, "details"));
+		actionbar.addTab(detailsTab);
 	    
-		FragmentManager fragmentManager = getSupportFragmentManager();
-		FragmentTransaction fragmentTransaction = fragmentManager
-				.beginTransaction();
-	    
-	    fragmentTransaction.add(R.id.editnodelayout, editBody);
-	    fragmentTransaction.commit();
+		this.payloadFragment = new NodeEditBodyFragment(node.getCleanedPayload(orgDB));
+		ActionBar.Tab payloadTab = actionbar.newTab().setText("Payload");
+		payloadTab.setTabListener(new TabListener(payloadFragment, "payload"));
+		actionbar.addTab(payloadTab);
+
+	    this.rawPayloadFragment = new NodeEditBodyFragment(node.getRawPayload(orgDB));
+	    ActionBar.Tab rawPayloadTab = actionbar.newTab().setText("Raw Payload");
+	    rawPayloadTab.setTabListener(new TabListener(rawPayloadFragment, "raw_payload"));
+	    actionbar.addTab(rawPayloadTab);
 	}
 	
 
 	private class TabListener implements ActionBar.TabListener {
 		Fragment fragment;
 
-		public TabListener(Fragment fragment) {
+		public TabListener(Fragment fragment, String tag) {
 			this.fragment = fragment;
+			
+			FragmentManager fragmentManager = getSupportFragmentManager();
+			FragmentTransaction fragmentTransaction = fragmentManager
+					.beginTransaction();
+		    fragmentTransaction.add(R.id.editnode_fragment_container, fragment, tag);
+		    fragmentTransaction.hide(fragment);
+		    fragmentTransaction.commit();
 		}
 
 		@Override
@@ -111,114 +117,39 @@ public class NodeEditActivity extends FragmentActivity {
 		}
 
 		@Override
-		public void onTabSelected(Tab tab, FragmentTransaction ft) {
-			Log.d("MobileOrg", "Selected Nodeedit");
-			ft.replace(R.id.editnodelayout, fragment, "");
+		public void onTabSelected(Tab tab, FragmentTransaction ft) {			
+			// The line above throws a NullPointerException last time I tried...
+			//ft.add(R.id.editnode_fragment_container, fragment, null);
+			
+			FragmentManager fragmentManager = getSupportFragmentManager();
+			FragmentTransaction fragmentTransaction = fragmentManager
+					.beginTransaction();
+		    
+		    fragmentTransaction.show(fragment);
+		    fragmentTransaction.commit();
 		}
 
 		@Override
 		public void onTabUnselected(Tab tab, FragmentTransaction ft) {
-//			if (fragment != null) {
-//				// Detach the fragment, because another one is being attached
-//				ft.detach(fragment);
-//			}
+			if (fragment != null) {
+				// The line above throws a NullPointerException last time I tried...
+				//ft.detach(fragment);
+				
+				FragmentManager fragmentManager = getSupportFragmentManager();
+				FragmentTransaction fragmentTransaction = fragmentManager
+						.beginTransaction();
+			    
+				fragmentTransaction.hide(fragment);
+			    fragmentTransaction.commit();
+			}
 		}
 	};
 	
-	private void initDisplay() {
-		setContentView(R.layout.editnode_details);
-
-		this.titleView = (EditText) this.findViewById(R.id.title);
-		this.priorityView = (Spinner) this.findViewById(R.id.priority);
-		this.todoStateView = (Spinner) this.findViewById(R.id.todo_state);
-		this.tagsView = (TableLayout) this.findViewById(R.id.tags);
-
-		this.payloadView = (TextView) this.findViewById(R.id.body);
-		payloadView.setOnClickListener(editBodyListener);
-		
-		Intent intent = getIntent();
-		
-		String defaultTodo = PreferenceManager.getDefaultSharedPreferences(
-				getApplicationContext()).getString("defaultTodo", "");
-
-		if(this.actionMode == null) {
-			this.actionMode = ACTIONMODE_CREATE;
-
-			String subject = intent
-					.getStringExtra("android.intent.extra.SUBJECT");
-			String text = intent.getStringExtra("android.intent.extra.TEXT");
-			titleView.setText(subject);
-
-			node = new NodeWrapper(null);
-			payloadView.setText(text);
-			setSpinner(todoStateView, appInst.getDB().getTodos(), defaultTodo);
-			setSpinner(priorityView, appInst.getDB().getPriorities(), "");
-		}
-		else if (this.actionMode.equals(ACTIONMODE_CREATE)) {
-			titleView.setText("");
-			node = new NodeWrapper(null);
-
-			payloadView.setText("");
-			setSpinner(todoStateView, appInst.getDB().getTodos(), defaultTodo);
-			setSpinner(priorityView, appInst.getDB().getPriorities(), "");
-		} else if (this.actionMode.equals(ACTIONMODE_EDIT)) {
-			long nodeId = intent.getLongExtra("node_id", 0);
-
-			Cursor cursor = appInst.getDB().getNode(nodeId);
-			cursor.moveToFirst();
-			node = new NodeWrapper(cursor);
-			
-			titleView.setText(node.getName());
-			payloadView.setText(node.getCleanedPayload(this.orgDB));
-			//payloadView.setText(node.getRawPayload(this.orgDB));
-			
-			setupTags(appInst.getDB().getTags());
-
-			setSpinner(todoStateView, appInst.getDB().getTodos(), node.getTodo());
-			setSpinner(priorityView, appInst.getDB().getPriorities(), node.getPriority());
-		}
-	}
-	
-	private void setupTags(ArrayList<String> tagList) {
-		ArrayList<String> tags = node.getTagList();
-		
-		for(String tag: tags) {
-			if(TextUtils.isEmpty(tag)) { // NodeWrapper found a :: entry, meaning all tags so far where unmodifiable
-				for(TagEntry entry: tagEntries)
-					entry.setUnmodifiable();
-				if(tagEntries.size() > 0)
-					tagEntries.get(tagEntries.size() - 1).setLast();
-			}
-			else
-				addTag(tag);
-		}
-	}
-	
-	private void addTag(String tag) {
-		TagEntry tagEntry = new TagEntry(this, tagsView, orgDB.getTags(), tag);
-		tagsView.addView(tagEntry);
-		tagEntries.add(tagEntry);
-	}
-
-	private void setSpinner(Spinner view, ArrayList<String> data,
-			String selection) {
-		data.add("");
-
-		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
-				android.R.layout.simple_spinner_item, data);
-		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-		view.setAdapter(adapter);
-		int pos = data.indexOf(selection);
-		if (pos < 0) {
-			pos = 0;
-		}
-		view.setSelection(pos);
-	}
-
     @Override
 	public boolean onCreateOptionsMenu(android.support.v4.view.Menu menu) {
+    	super.onCreateOptionsMenu(menu);
 		MenuInflater inflater = getMenuInflater();
-	    inflater.inflate(R.menu.nodeedit_menu, menu);
+	    inflater.inflate(R.menu.nodeedit, menu);
 		return true;
 	}
 	
@@ -228,13 +159,9 @@ public class NodeEditActivity extends FragmentActivity {
 		case android.R.id.home:
 			// TODO do something
 			return true;
-		
-		case R.id.nodeedit_tag:
-			addTag("");
-			return true;
 			
 		case R.id.nodeedit_save:
-			save();
+			//save();
 			setResult(RESULT_OK);
 			finish();
 			return true;
@@ -245,36 +172,14 @@ public class NodeEditActivity extends FragmentActivity {
 		}
 		return false;
 	}
-
-
-	private View.OnClickListener editBodyListener = new View.OnClickListener() {
-		public void onClick(View v) {
-			Intent intent = new Intent(v.getContext(),
-					NodeEditBodyActivity.class);
-			intent.putExtra(NodeEditBodyActivity.DISPLAY_STRING, payloadView.getText().toString());
-			startActivityForResult(intent, EDIT_BODY);
-		}
-	};
 	
 	@Override
 	public void onBackPressed() {
 		doCancel();
 	}
 	
-	@Override
-	public void onActivityResult(int requestCode, int resultCode, Intent data) {
-		if (requestCode == EDIT_BODY) {
-			if (resultCode == RESULT_OK) {
-				String result = data
-						.getStringExtra(NodeEditBodyActivity.RESULT_STRING);
-				payloadView.setText(result);
-			}
-		}
-	}
-
-
 	private void doCancel() {
-		if(!hasEdits()) {
+		if(this.detailsFragment.hasEdits() == false) {
 			setResult(RESULT_CANCELED);
 			finish();
 			return;
@@ -297,51 +202,14 @@ public class NodeEditActivity extends FragmentActivity {
 				});
 		builder.create().show();
 	}
-	
-	private String getTagsSelection() {
-		StringBuilder result = new StringBuilder();
-		for(TagEntry entry: tagEntries) {
-			String selection = entry.getSelection();
-			if(TextUtils.isEmpty(selection) == false) {
-				result.append(selection);
-				result.append(":");
-			}
-		}
-		
-		if(TextUtils.isEmpty(result))
-			return "";
-		else
-			return result.deleteCharAt(result.lastIndexOf(":")).toString();
-	}
-	
-	private boolean hasEdits() {
-		String newPayload = payloadView.getText().toString();
-		String newTitle = titleView.getText().toString();
-		String newTodo = todoStateView.getSelectedItem().toString();
-		String newPriority = priorityView.getSelectedItem().toString();
-		String newTags = getTagsSelection();
-		
-		Log.d("MobileOrg", "Got tags: " + newTags + " | " + node.getTags());
-		
-		if (this.actionMode.equals(ACTIONMODE_CREATE)) {
-			if (newPayload.length() == 0 && newTitle.length() == 0)
-				return false;
-		} else if (this.actionMode.equals(ACTIONMODE_EDIT)) {
-			if (newPayload.equals(node.getCleanedPayload(this.orgDB))
-					&& newTitle.equals(node.getName())
-					&& newTodo.equals(node.getTodo())
-					&& newTags.equals(node.getTags())
-					&& newPriority.equals(node.getPriority()))
-				return false;
-		}
-		
-		return true;
-	}
+
 	
 	public static String getTimestamp() {
 		SimpleDateFormat sdf = new SimpleDateFormat("[yyyy-MM-dd EEE HH:mm]");		
 		return sdf.format(new Date());
 	}
+	
+	/*
 	
 	private void save() {
 		String newTitle = titleView.getText().toString();
@@ -375,12 +243,12 @@ public class NodeEditActivity extends FragmentActivity {
 		intent.putExtra("showToast", false);
 		sendBroadcast(intent);
 	}
-	
+	*/
 	/**
 	 * Takes a Node and five strings, representing edits to the node.
 	 * This function will generate a new edit entry for each value that was 
 	 * changed.
-	 */
+	 */ 
 	private void editNode(String newTitle, String newTodo,
 			String newPriority, String newPayload, String newTags) throws IOException {
 		boolean generateEdits = !node.getFileName(orgDB).equals(OrgFile.CAPTURE_FILE);
@@ -416,61 +284,5 @@ public class NodeEditActivity extends FragmentActivity {
 			}
 			node.setTags(newTags, orgDB);
 		}
-	}
-	
-	
-	private class TagEntry extends TableRow {		
-		TableLayout parent;
-		Spinner spinner;
-		Button button;
-		
-		String selectionExtra = ""; // used to carry ::
-
-		public TagEntry(Context context, TableLayout parent,
-				final ArrayList<String> tags, String selection) {
-			super(context);
-
-			this.parent = parent;
-
-			LayoutInflater layoutInflater = (LayoutInflater) context
-					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-			TableRow row = (TableRow) layoutInflater.inflate(
-					R.layout.editnode_tagslayout, this);
-
-			button = (Button) findViewById(R.id.editnode_remove);
-			button.setOnClickListener(removeListener);
-			
-			if(selection.endsWith(":")) {
-				selectionExtra = ":";
-				selection = selection.replace(":", "");
-			}
-
-			spinner = (Spinner) row.findViewById(R.id.tagslist);
-			setSpinner(spinner, tags, selection);
-		}
-		
-		public void setUnmodifiable() {
-			button.setVisibility(INVISIBLE);
-			spinner.setEnabled(false);
-		}
-		
-		public void setLast() {
-			selectionExtra = ":";
-		}
-		
-		public String getSelection() {
-			return spinner.getSelectedItem().toString() + selectionExtra;
-		}
-		
-		private void remove() {
-			parent.removeView(this);
-			tagEntries.remove(this);
-		}
-		
-		private View.OnClickListener removeListener = new View.OnClickListener() {
-			public void onClick(View v) {
-				remove();
-			}
-		};
 	}
 }
