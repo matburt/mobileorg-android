@@ -4,10 +4,12 @@
     <item
         android:id="@+id/viewmenu_capture"
         android:icon="@drawable/ic_menu_compose"
+        android:showAsAction="ifRoom"
         android:title="@string/menu_capture"/>
     <item
         android:id="@+id/viewmenu_edit"
         android:icon="@drawable/ic_menu_agenda"
+        android:showAsAction="ifRoom"
         android:title="@string/menu_edit"/>
 
 </menu>
