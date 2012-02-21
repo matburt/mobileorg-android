@@ -50,17 +50,18 @@ public class NodeEditActivity extends FragmentActivity {
 
 		init();
 		
-//		if (savedInstanceState != null) {
-//			this.detailsFragment = (NodeEditDetailsFragment) getSupportFragmentManager()
-//					.getFragment(savedInstanceState,
-//							NodeEditDetailsFragment.class.getName());
-//			this.payloadFragment = (NodeEditBodyFragment) getSupportFragmentManager()
-//					.getFragment(savedInstanceState,
-//							NodeEditBodyFragment.class.getName());
-//			this.rawPayloadFragment = (NodeEditBodyFragment) getSupportFragmentManager()
-//					.getFragment(savedInstanceState,
-//							NodeEditBodyFragment.class.getName() + "raw");
-//		}
+		if (savedInstanceState != null) {
+			this.detailsFragment = (NodeEditDetailsFragment) getSupportFragmentManager()
+					.getFragment(savedInstanceState,
+							NodeEditDetailsFragment.class.getName());
+			this.payloadFragment = (NodeEditBodyFragment) getSupportFragmentManager()
+					.getFragment(savedInstanceState,
+							NodeEditBodyFragment.class.getName());
+			this.rawPayloadFragment = (NodeEditBodyFragment) getSupportFragmentManager()
+					.getFragment(savedInstanceState,
+							NodeEditBodyFragment.class.getName() + "raw");
+		}
+		
 		if (this.detailsFragment == null) {
 			this.detailsFragment = new NodeEditDetailsFragment();
 			String defaultTodo = PreferenceManager.getDefaultSharedPreferences(
@@ -75,21 +76,22 @@ public class NodeEditActivity extends FragmentActivity {
 			this.rawPayloadFragment = new NodeEditBodyFragment();
 			this.rawPayloadFragment.init(node.getRawPayload(orgDB), false);
 		}
-
-		setupActionbar();
+		
+		setupActionbar(savedInstanceState);
 	}
 
 	
-//	@Override
-//	protected void onSaveInstanceState(Bundle outState) {
-//		super.onSaveInstanceState(outState);
-//		getSupportFragmentManager().putFragment(outState,
-//				NodeEditBodyFragment.class.getName(), payloadFragment);
-//		getSupportFragmentManager().putFragment(outState,
-//				NodeEditBodyFragment.class.getName() + "raw", rawPayloadFragment);
-//		getSupportFragmentManager().putFragment(outState,
-//				NodeEditDetailsFragment.class.getName(), detailsFragment);
-//	}
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+		getSupportFragmentManager().putFragment(outState,
+				NodeEditBodyFragment.class.getName(), payloadFragment);
+		getSupportFragmentManager().putFragment(outState,
+				NodeEditBodyFragment.class.getName() + "raw", rawPayloadFragment);
+		getSupportFragmentManager().putFragment(outState,
+				NodeEditDetailsFragment.class.getName(), detailsFragment);
+        outState.putInt("tab", getSupportActionBar().getSelectedNavigationIndex());
+	}
 	
 	private void init() {
 		Intent intent = getIntent();
@@ -115,8 +117,7 @@ public class NodeEditActivity extends FragmentActivity {
 		}
 	}
 
-
-	private void setupActionbar() {
+	private void setupActionbar(Bundle savedInstanceState) {
 		setContentView(R.layout.editnode);
 		ActionBar actionbar = getSupportActionBar();
 
@@ -133,6 +134,10 @@ public class NodeEditActivity extends FragmentActivity {
 	    ActionBar.Tab rawPayloadTab = actionbar.newTab().setText("Raw Payload");
 	    rawPayloadTab.setTabListener(new TabListener(rawPayloadFragment, "raw_payload"));
 	    actionbar.addTab(rawPayloadTab);
+	    
+		if (savedInstanceState != null) {
+            actionbar.setSelectedNavigationItem(savedInstanceState.getInt("tab", 0));
+        }
 	}
 	
 
@@ -142,12 +147,14 @@ public class NodeEditActivity extends FragmentActivity {
 		public TabListener(Fragment fragment, String tag) {
 			this.fragment = fragment;
 			
-			FragmentManager fragmentManager = getSupportFragmentManager();
-			FragmentTransaction fragmentTransaction = fragmentManager
-					.beginTransaction();
-		    fragmentTransaction.add(R.id.editnode_fragment_container, fragment, tag);
-		    fragmentTransaction.hide(fragment);
-		    fragmentTransaction.commit();
+			if (fragment != null && fragment.isAdded() == false) {
+				FragmentTransaction fragmentTransaction = getSupportFragmentManager()
+						.beginTransaction();
+				fragmentTransaction.add(R.id.editnode_fragment_container,
+						fragment, tag);
+				fragmentTransaction.hide(fragment);
+				fragmentTransaction.commit();
+			}
 		}
 
 		@Override
@@ -159,8 +166,7 @@ public class NodeEditActivity extends FragmentActivity {
 			// The line above throws a NullPointerException last time I tried...
 			//ft.add(R.id.editnode_fragment_container, fragment, null);
 			
-			FragmentManager fragmentManager = getSupportFragmentManager();
-			FragmentTransaction fragmentTransaction = fragmentManager
+			FragmentTransaction fragmentTransaction = getSupportFragmentManager()
 					.beginTransaction();
 		    
 		    fragmentTransaction.show(fragment);
