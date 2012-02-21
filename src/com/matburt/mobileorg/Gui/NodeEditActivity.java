@@ -8,6 +8,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.ActionBar;
 import android.support.v4.app.ActionBar.Tab;
 import android.support.v4.app.Fragment;
@@ -21,6 +22,7 @@ import com.matburt.mobileorg.Parsing.MobileOrgApplication;
 import com.matburt.mobileorg.Parsing.NodeWrapper;
 import com.matburt.mobileorg.Parsing.OrgDatabase;
 import com.matburt.mobileorg.Parsing.OrgFile;
+import com.matburt.mobileorg.Synchronizers.Synchronizer;
 
 public class NodeEditActivity extends FragmentActivity {
 	public final static String ACTIONMODE_CREATE = "create";
@@ -57,9 +59,9 @@ public class NodeEditActivity extends FragmentActivity {
 			this.actionMode = ACTIONMODE_CREATE;
 
 			// TODO Support intents
-			String subject = intent
-					.getStringExtra("android.intent.extra.SUBJECT");
-			String text = intent.getStringExtra("android.intent.extra.TEXT");
+//			String subject = intent
+//					.getStringExtra("android.intent.extra.SUBJECT");
+//			String text = intent.getStringExtra("android.intent.extra.TEXT");
 //			titleView.setText(subject);
 //
 //			node = new NodeWrapper(null);
@@ -86,12 +88,12 @@ public class NodeEditActivity extends FragmentActivity {
 		detailsTab.setTabListener(new TabListener(detailsFragment, "details"));
 		actionbar.addTab(detailsTab);
 	    
-		this.payloadFragment = new NodeEditBodyFragment(node.getCleanedPayload(orgDB));
+		this.payloadFragment = new NodeEditBodyFragment(node.getCleanedPayload(orgDB), true);
 		ActionBar.Tab payloadTab = actionbar.newTab().setText("Payload");
 		payloadTab.setTabListener(new TabListener(payloadFragment, "payload"));
 		actionbar.addTab(payloadTab);
 
-	    this.rawPayloadFragment = new NodeEditBodyFragment(node.getRawPayload(orgDB));
+	    this.rawPayloadFragment = new NodeEditBodyFragment(node.getRawPayload(orgDB), false);
 	    ActionBar.Tab rawPayloadTab = actionbar.newTab().setText("Raw Payload");
 	    rawPayloadTab.setTabListener(new TabListener(rawPayloadFragment, "raw_payload"));
 	    actionbar.addTab(rawPayloadTab);
@@ -161,7 +163,7 @@ public class NodeEditActivity extends FragmentActivity {
 			return true;
 			
 		case R.id.nodeedit_save:
-			//save();
+			save();
 			setResult(RESULT_OK);
 			finish();
 			return true;
@@ -204,19 +206,12 @@ public class NodeEditActivity extends FragmentActivity {
 	}
 
 	
-	public static String getTimestamp() {
-		SimpleDateFormat sdf = new SimpleDateFormat("[yyyy-MM-dd EEE HH:mm]");		
-		return sdf.format(new Date());
-	}
-	
-	/*
-	
 	private void save() {
-		String newTitle = titleView.getText().toString();
-		String newTodo = todoStateView.getSelectedItem().toString();
-		String newPriority = priorityView.getSelectedItem().toString();
-		String newPayload = payloadView.getText().toString();
-		String newTags = getTagsSelection();
+		String newTitle = this.detailsFragment.getTitle();
+		String newTodo = this.detailsFragment.getTodo();
+		String newPriority = this.detailsFragment.getPriority();
+		String newPayload = this.payloadFragment.getText();
+		String newTags = this.detailsFragment.getTagsSelection();
 		
 		if (this.actionMode.equals(ACTIONMODE_CREATE)) {
 			MobileOrgApplication appInst = (MobileOrgApplication) this.getApplication();
@@ -243,7 +238,7 @@ public class NodeEditActivity extends FragmentActivity {
 		intent.putExtra("showToast", false);
 		sendBroadcast(intent);
 	}
-	*/
+	
 	/**
 	 * Takes a Node and five strings, representing edits to the node.
 	 * This function will generate a new edit entry for each value that was 
@@ -284,5 +279,10 @@ public class NodeEditActivity extends FragmentActivity {
 			}
 			node.setTags(newTags, orgDB);
 		}
+	}
+	
+	public static String getTimestamp() {
+		SimpleDateFormat sdf = new SimpleDateFormat("[yyyy-MM-dd EEE HH:mm]");		
+		return sdf.format(new Date());
 	}
 }

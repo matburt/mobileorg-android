@@ -38,7 +38,6 @@ public class NodeEditDetailsFragment extends Fragment {
 	private String title;
 	private ArrayList<TagEntry> tagEntries = new ArrayList<TagEntry>();
 	
-	
 	public NodeEditDetailsFragment(String tile, String actionMode) {
 		this.title = tile;
 		this.node = new NodeWrapper(null);
@@ -146,7 +145,7 @@ public class NodeEditDetailsFragment extends Fragment {
 		view.setSelection(pos);
 	}
 	
-	private String getTagsSelection() {
+	public String getTagsSelection() {
 		StringBuilder result = new StringBuilder();
 		for(TagEntry entry: tagEntries) {
 			String selection = entry.getSelection();
@@ -180,6 +179,18 @@ public class NodeEditDetailsFragment extends Fragment {
 		}
 		
 		return true;
+	}
+	
+	public String getTitle() {
+		return this.titleView.getText().toString();
+	}
+	
+	public String getTodo() {
+		return todoStateView.getSelectedItem().toString();
+	}
+	
+	public String getPriority() {
+		return priorityView.getSelectedItem().toString();
 	}
 	
 	private class TagEntry extends TableRow {		

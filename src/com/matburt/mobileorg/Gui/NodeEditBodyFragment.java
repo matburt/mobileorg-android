@@ -16,9 +16,11 @@ public class NodeEditBodyFragment extends Fragment {
 	public static final String RESULT_STRING = "text";
     private EditText editDisplay;
 	private String content;
+	private boolean enabled;
 	
-    public NodeEditBodyFragment(String content) {
+    public NodeEditBodyFragment(String content, boolean enabled) {
     	this.content = content;
+    	this.enabled = enabled;
     }
     
     @Override
@@ -29,6 +31,8 @@ public class NodeEditBodyFragment extends Fragment {
         this.editDisplay = (EditText) view.findViewById(R.id.textDisplay);
         
         setText(content);
+        this.editDisplay.setEnabled(enabled);
+        
         setHasOptionsMenu(true);
         return view;
     }
