@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -13,7 +14,10 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ActionBar;
+import android.support.v4.app.ActionBar.Tab;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentTransaction;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -26,6 +30,7 @@ import android.widget.Spinner;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Parsing.MobileOrgApplication;
@@ -71,11 +76,6 @@ public class NodeEditActivity extends FragmentActivity {
 		this.orgDB = appInst.getDB();
 		
 		initDisplay();
-
-		Button button = (Button) this.findViewById(R.id.cancel);
-		button.setOnClickListener(cancelListener);
-		button = (Button) this.findViewById(R.id.save);
-		button.setOnClickListener(saveNodeListener);
 	}
 
 	private void initDisplay() {
@@ -84,6 +84,18 @@ public class NodeEditActivity extends FragmentActivity {
 
 		ActionBar actionbar = getSupportActionBar();
 		actionbar.setTitle("MobileOrg");
+		
+		getSupportActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+		ActionBar.Tab tab = getSupportActionBar().newTab();
+		tab.setText("Details");
+		//tab.setTabListener(this);
+		getSupportActionBar().addTab(tab);
+		
+		tab = getSupportActionBar().newTab();
+		tab.setText("Payload");
+		tab.setTabListener(new TabListener<NodeEditBodyActivity>(NodeEditBodyActivity.class, this));
+		getSupportActionBar().addTab(tab);
+		
 		
 		Intent intent = getIntent();
 		
@@ -174,6 +186,10 @@ public class NodeEditActivity extends FragmentActivity {
 	@Override
 	public boolean onOptionsItemSelected(android.support.v4.view.MenuItem item) {
 		switch (item.getItemId()) {
+		case android.R.id.home:
+			// TODO do something
+			return true;
+		
 		case R.id.nodeedit_tag:
 			addTag("");
 			return true;
@@ -183,17 +199,14 @@ public class NodeEditActivity extends FragmentActivity {
 			setResult(RESULT_OK);
 			finish();
 			return true;
+			
+		case R.id.nodeedit_cancel:
+			doCancel();
+			return true;
 		}
 		return false;
 	}
 
-	private View.OnClickListener saveNodeListener = new View.OnClickListener() {
-		public void onClick(View v) {
-			save();
-			setResult(RESULT_OK);
-			finish();
-		}
-	};
 
 	private View.OnClickListener editBodyListener = new View.OnClickListener() {
 		public void onClick(View v) {
@@ -201,12 +214,6 @@ public class NodeEditActivity extends FragmentActivity {
 					NodeEditBodyActivity.class);
 			intent.putExtra(NodeEditBodyActivity.DISPLAY_STRING, payloadView.getText().toString());
 			startActivityForResult(intent, EDIT_BODY);
-		}
-	};
-
-	private View.OnClickListener cancelListener = new View.OnClickListener() {
-		public void onClick(View v) {
-			doCancel();
 		}
 	};
 	
@@ -426,5 +433,42 @@ public class NodeEditActivity extends FragmentActivity {
 				remove();
 			}
 		};
-	};
+	}
+
+
+	private static class TabListener<T extends Fragment> implements ActionBar.TabListener {
+		Class<T> mclass;
+		Fragment fragment;
+		Activity activity;
+
+		public TabListener(Class<T> class1, Activity activity) {
+			this.mclass = class1;
+			this.activity = activity;
+		}
+
+		@Override
+		public void onTabReselected(Tab tab, FragmentTransaction ft) {
+		}
+
+		@Override
+		public void onTabSelected(Tab tab, FragmentTransaction ft) {
+			Log.d("MobileOrg", "Selected Nodeedit");
+			if (fragment == null) {
+				// If not, instantiate and add it to the activity
+				fragment = Fragment.instantiate(activity, mclass.getName());
+				ft.add(android.R.id.content, fragment, "Payload");
+			} else {
+				// If it exists, simply attach it in order to show it
+				ft.attach(fragment);
+			}
+		}
+
+		@Override
+		public void onTabUnselected(Tab tab, FragmentTransaction ft) {
+			if (fragment != null) {
+				// Detach the fragment, because another one is being attached
+				ft.detach(fragment);
+			}
+		};
+	}
 }

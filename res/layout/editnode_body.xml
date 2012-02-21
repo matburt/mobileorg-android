@@ -10,21 +10,6 @@
             android:layout_weight="1"
             android:gravity="top"
 			android:inputType="text|textMultiLine|textAutoCorrect|textCapSentences"/>
-  <LinearLayout
-      android:orientation="horizontal"
-      android:layout_width="fill_parent"
-      android:layout_height="fill_parent"
-      android:layout_weight="6">
-    <Button android:id="@+id/cancel"
-            android:text="@string/cancel"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:layout_weight="6"/>
-    <Button android:id="@+id/save"
-            android:text="@string/save"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:layout_weight="6"/>
-  </LinearLayout>
+  
 </LinearLayout>
 

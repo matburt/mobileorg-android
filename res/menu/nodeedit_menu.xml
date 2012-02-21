@@ -6,6 +6,11 @@
         android:icon="@drawable/ic_menu_add"
         android:title="@string/menu_addtag"/>
     <item
+        android:id="@+id/nodeedit_cancel"
+        android:title="@string/menu_cancel"
+        android:showAsAction="ifRoom"
+        android:icon="@drawable/ic_menu_close_clear_cancel"/>
+    <item
         android:id="@+id/nodeedit_save"
         android:showAsAction="ifRoom"
         android:title="Save"

@@ -106,7 +106,8 @@
         </activity>
         <activity
             android:name=".Gui.NodeEditBodyActivity"
-            android:windowSoftInputMode="adjustResize" >
+            android:windowSoftInputMode="adjustResize"
+            android:theme="@style/Theme.MobileOrgActionbar" >
         </activity>
         <activity android:name=".Gui.SearchActivity" >
             <intent-filter>
