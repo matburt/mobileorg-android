@@ -7,16 +7,25 @@ import java.util.Date;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.text.TextUtils;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.TableLayout;
+import android.widget.TableRow;
 import android.widget.TextView;
 
 import com.matburt.mobileorg.R;
@@ -35,7 +44,9 @@ public class NodeEditActivity extends Activity {
 	private TextView payloadView;
 	private Spinner priorityView;
 	private Spinner todoStateView;
-	private EditText tagsView;
+	private TableLayout tagsView;
+	private ArrayList<TagEntry> tagEntries = new ArrayList<TagEntry>();
+
 	private NodeWrapper node;
 	private String actionMode;
 	
@@ -49,7 +60,7 @@ public class NodeEditActivity extends Activity {
 		this.titleView = (EditText) this.findViewById(R.id.title);
 		this.priorityView = (Spinner) this.findViewById(R.id.priority);
 		this.todoStateView = (Spinner) this.findViewById(R.id.todo_state);
-		this.tagsView = (EditText) this.findViewById(R.id.tags);
+		this.tagsView = (TableLayout) this.findViewById(R.id.tags);
 
 		this.payloadView = (TextView) this.findViewById(R.id.body);
 		payloadView.setOnClickListener(editBodyListener);
@@ -107,12 +118,33 @@ public class NodeEditActivity extends Activity {
 			titleView.setText(node.getName());
 			payloadView.setText(node.getCleanedPayload(this.orgDB));
 			//payloadView.setText(node.getRawPayload(this.orgDB));
-			tagsView.setText(node.getTags());
+			
+			setupTags(appInst.getDB().getTags());
 
 			setSpinner(todoStateView, appInst.getDB().getTodos(), node.getTodo());
 			setSpinner(priorityView, appInst.getDB().getPriorities(), node.getPriority());
 		}
-
+	}
+	
+	private void setupTags(ArrayList<String> tagList) {
+		ArrayList<String> tags = node.getTagList();
+		
+		for(String tag: tags) {
+			if(TextUtils.isEmpty(tag)) { // NodeWrapper found a :: entry, meaning all tags so far where unmodifiable
+				for(TagEntry entry: tagEntries)
+					entry.setUnmodifiable();
+				if(tagEntries.size() > 0)
+					tagEntries.get(tagEntries.size() - 1).setLast();
+			}
+			else
+				addTag(tag);
+		}
+	}
+	
+	private void addTag(String tag) {
+		TagEntry tagEntry = new TagEntry(this, tagsView, orgDB.getTags(), tag);
+		tagsView.addView(tagEntry);
+		tagEntries.add(tagEntry);
 	}
 
 	private void setSpinner(Spinner view, ArrayList<String> data,
@@ -130,6 +162,23 @@ public class NodeEditActivity extends Activity {
 		view.setSelection(pos);
 	}
 
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		MenuInflater inflater = getMenuInflater();
+	    inflater.inflate(R.menu.nodeedit_menu, menu);
+		return true;
+	}
+    
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case R.id.nodeedit_tag:
+			addTag("");
+			return true;
+		}
+		return false;
+	}
+	
 	private View.OnClickListener saveNodeListener = new View.OnClickListener() {
 		public void onClick(View v) {
 			save();
@@ -195,12 +244,30 @@ public class NodeEditActivity extends Activity {
 		builder.create().show();
 	}
 	
+	private String getTagsSelection() {
+		StringBuilder result = new StringBuilder();
+		for(TagEntry entry: tagEntries) {
+			String selection = entry.getSelection();
+			if(TextUtils.isEmpty(selection) == false) {
+				result.append(selection);
+				result.append(":");
+			}
+		}
+		
+		if(TextUtils.isEmpty(result))
+			return "";
+		else
+			return result.deleteCharAt(result.lastIndexOf(":")).toString();
+	}
+	
 	private boolean hasEdits() {
 		String newPayload = payloadView.getText().toString();
 		String newTitle = titleView.getText().toString();
 		String newTodo = todoStateView.getSelectedItem().toString();
 		String newPriority = priorityView.getSelectedItem().toString();
-		String newTags = tagsView.getText().toString();
+		String newTags = getTagsSelection();
+		
+		Log.d("MobileOrg", "Got tags: " + newTags + " | " + node.getTags());
 		
 		if (this.actionMode.equals(ACTIONMODE_CREATE)) {
 			if (newPayload.length() == 0 && newTitle.length() == 0)
@@ -227,7 +294,7 @@ public class NodeEditActivity extends Activity {
 		String newTodo = todoStateView.getSelectedItem().toString();
 		String newPriority = priorityView.getSelectedItem().toString();
 		String newPayload = payloadView.getText().toString();
-		String newTags = tagsView.getText().toString();
+		String newTags = getTagsSelection();
 		
 		if (this.actionMode.equals(ACTIONMODE_CREATE)) {
 			MobileOrgApplication appInst = (MobileOrgApplication) this.getApplication();
@@ -256,26 +323,26 @@ public class NodeEditActivity extends Activity {
 	}
 	
 	/**
-	 * Takes a Node and four strings, representing edits to the node.
+	 * Takes a Node and five strings, representing edits to the node.
 	 * This function will generate a new edit entry for each value that was 
 	 * changed.
 	 */
 	private void editNode(String newTitle, String newTodo,
 			String newPriority, String newPayload, String newTags) throws IOException {
-
+		boolean generateEdits = !node.getFileName(orgDB).equals(OrgFile.CAPTURE_FILE);
 		
 		if (!node.getName().equals(newTitle)) {
-			if(node.getFileName(orgDB).equals(OrgFile.CAPTURE_FILE) == false)
+			if (generateEdits)
 				orgDB.addEdit("heading", node.getNodeId(orgDB), newTitle, node.getName(), newTitle);
 			node.setName(newTitle, orgDB);
 		}
 		if (newTodo != null && !node.getTodo().equals(newTodo)) {
-			if(node.getFileName(orgDB).equals(OrgFile.CAPTURE_FILE) == false)
+			if (generateEdits)
 				orgDB.addEdit("todo", node.getNodeId(orgDB), newTitle, node.getTodo(), newTodo);
 			node.setTodo(newTodo, orgDB);
 		}
 		if (newPriority != null && !node.getPriority().equals(newPriority)) {
-			if(node.getFileName(orgDB).equals(OrgFile.CAPTURE_FILE) == false)
+			if (generateEdits)
 				orgDB.addEdit("priority", node.getNodeId(orgDB), newTitle, node.getPriority(),
 					newPriority);
 			node.setPriority(newPriority, orgDB);
@@ -283,14 +350,73 @@ public class NodeEditActivity extends Activity {
 		if (!node.getCleanedPayload(orgDB).equals(newPayload)) {
 			String newRawPayload = node.getPayloadResidue(orgDB) + newPayload;
 	
-			if(node.getFileName(orgDB).equals(OrgFile.CAPTURE_FILE) == false)
+			if (generateEdits)
 				orgDB.addEdit("body", node.getNodeId(orgDB), newTitle, node.getRawPayload(orgDB), newRawPayload);
 			node.setPayload(newRawPayload, orgDB);
 		}
 		if(!node.getTags().equals(newTags)) {
-			if(node.getFileName(orgDB).equals(OrgFile.CAPTURE_FILE) == false)
-				orgDB.addEdit("tags", node.getNodeId(orgDB), newTitle, node.getTags(), newTags);
+			if (generateEdits) {
+				orgDB.addEdit("tags", node.getNodeId(orgDB), newTitle,
+						node.getTagsWithoutInheritet(),
+						NodeWrapper.getTagsWithoutInheritet(newTags));
+			}
 			node.setTags(newTags, orgDB);
 		}
 	}
+	
+	
+	private class TagEntry extends TableRow {		
+		TableLayout parent;
+		Spinner spinner;
+		Button button;
+		
+		String selectionExtra = ""; // used to carry ::
+
+		public TagEntry(Context context, TableLayout parent,
+				final ArrayList<String> tags, String selection) {
+			super(context);
+
+			this.parent = parent;
+
+			LayoutInflater layoutInflater = (LayoutInflater) context
+					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			TableRow row = (TableRow) layoutInflater.inflate(
+					R.layout.editnode_tagslayout, this);
+
+			button = (Button) findViewById(R.id.editnode_remove);
+			button.setOnClickListener(removeListener);
+			
+			if(selection.endsWith(":")) {
+				selectionExtra = ":";
+				selection = selection.replace(":", "");
+			}
+
+			spinner = (Spinner) row.findViewById(R.id.tagslist);
+			setSpinner(spinner, tags, selection);
+		}
+		
+		public void setUnmodifiable() {
+			button.setVisibility(INVISIBLE);
+			spinner.setEnabled(false);
+		}
+		
+		public void setLast() {
+			selectionExtra = ":";
+		}
+		
+		public String getSelection() {
+			return spinner.getSelectedItem().toString() + selectionExtra;
+		}
+		
+		private void remove() {
+			parent.removeView(this);
+			tagEntries.remove(this);
+		}
+		
+		private View.OnClickListener removeListener = new View.OnClickListener() {
+			public void onClick(View v) {
+				remove();
+			}
+		};
+	};
 }

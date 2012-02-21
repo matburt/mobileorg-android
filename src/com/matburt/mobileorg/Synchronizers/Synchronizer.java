@@ -191,6 +191,7 @@ abstract public class Synchronizer {
 				.getTodosFromIndex(remoteIndexContents));
 		this.appdb.setPriorities(OrgFileParser
 				.getPrioritiesFromIndex(remoteIndexContents));
+		this.appdb.setTags(OrgFileParser.getTagsFromIndex(remoteIndexContents));
 		HashMap<String, String> filenameMap = OrgFileParser
 				.getFilesFromIndex(remoteIndexContents);
 		this.appdb.addOrUpdateFile("index.org", filenameMap.get("index.org"),

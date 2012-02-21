@@ -130,6 +130,39 @@ public class NodeWrapper {
 		return cursor.getString(tagsColumn);
 	}
 	
+	/**
+	 * This will split up the tag string that it got from the tag entry in the
+	 * database. The leading and trailing : are stripped out from the tags by
+	 * the parser. A double colon (::) means that the tags before it are inherited.
+	 */
+	public ArrayList<String> getTagList() {
+		ArrayList<String> result = new ArrayList<String>();		
+		
+		String tags = getTags();
+		String[] split = tags.split("\\:");
+		
+		for(String tag: split)
+			result.add(tag);
+		
+		if(tags.endsWith(":"))
+			result.add("");
+		
+		return result;
+	}
+	
+	public String getTagsWithoutInheritet() {
+		return getTagsWithoutInheritet(getTags());
+	}
+	
+	public static String getTagsWithoutInheritet(String tags) {
+		int doubleColIndex = tags.indexOf("::");
+
+		if (doubleColIndex == -1)
+			return tags;
+		else
+			return tags.substring(doubleColIndex + "::".length());
+	}
+	
 	public String getTodo() {
 		if(cursor == null)
 			return "";
