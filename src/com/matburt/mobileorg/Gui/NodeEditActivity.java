@@ -47,10 +47,49 @@ public class NodeEditActivity extends FragmentActivity {
 
 		this.appInst = (MobileOrgApplication) this.getApplication();
 		this.orgDB = appInst.getDB();
-		
+
 		init();
+		
+//		if (savedInstanceState != null) {
+//			this.detailsFragment = (NodeEditDetailsFragment) getSupportFragmentManager()
+//					.getFragment(savedInstanceState,
+//							NodeEditDetailsFragment.class.getName());
+//			this.payloadFragment = (NodeEditBodyFragment) getSupportFragmentManager()
+//					.getFragment(savedInstanceState,
+//							NodeEditBodyFragment.class.getName());
+//			this.rawPayloadFragment = (NodeEditBodyFragment) getSupportFragmentManager()
+//					.getFragment(savedInstanceState,
+//							NodeEditBodyFragment.class.getName() + "raw");
+//		}
+		if (this.detailsFragment == null) {
+			this.detailsFragment = new NodeEditDetailsFragment();
+			String defaultTodo = PreferenceManager.getDefaultSharedPreferences(
+					this).getString("defaultTodo", "");
+			this.detailsFragment.init(this.node, this.actionMode, defaultTodo);
+		}
+		if (this.payloadFragment == null) {
+			this.payloadFragment = new NodeEditBodyFragment();
+			this.payloadFragment.init(node.getCleanedPayload(orgDB), true);
+		}
+		if (this.rawPayloadFragment == null) {
+			this.rawPayloadFragment = new NodeEditBodyFragment();
+			this.rawPayloadFragment.init(node.getRawPayload(orgDB), false);
+		}
+
 		setupActionbar();
 	}
+
+	
+//	@Override
+//	protected void onSaveInstanceState(Bundle outState) {
+//		super.onSaveInstanceState(outState);
+//		getSupportFragmentManager().putFragment(outState,
+//				NodeEditBodyFragment.class.getName(), payloadFragment);
+//		getSupportFragmentManager().putFragment(outState,
+//				NodeEditBodyFragment.class.getName() + "raw", rawPayloadFragment);
+//		getSupportFragmentManager().putFragment(outState,
+//				NodeEditDetailsFragment.class.getName(), detailsFragment);
+//	}
 	
 	private void init() {
 		Intent intent = getIntent();
@@ -83,17 +122,14 @@ public class NodeEditActivity extends FragmentActivity {
 
 		actionbar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
 
-		this.detailsFragment = new NodeEditDetailsFragment(node, actionMode);
 		ActionBar.Tab detailsTab = actionbar.newTab().setText("Details");
 		detailsTab.setTabListener(new TabListener(detailsFragment, "details"));
 		actionbar.addTab(detailsTab);
 	    
-		this.payloadFragment = new NodeEditBodyFragment(node.getCleanedPayload(orgDB), true);
 		ActionBar.Tab payloadTab = actionbar.newTab().setText("Payload");
 		payloadTab.setTabListener(new TabListener(payloadFragment, "payload"));
 		actionbar.addTab(payloadTab);
 
-	    this.rawPayloadFragment = new NodeEditBodyFragment(node.getRawPayload(orgDB), false);
 	    ActionBar.Tab rawPayloadTab = actionbar.newTab().setText("Raw Payload");
 	    rawPayloadTab.setTabListener(new TabListener(rawPayloadFragment, "raw_payload"));
 	    actionbar.addTab(rawPayloadTab);

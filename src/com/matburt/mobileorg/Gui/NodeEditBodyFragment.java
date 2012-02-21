@@ -15,25 +15,26 @@ public class NodeEditBodyFragment extends Fragment {
 	public static final String DISPLAY_STRING = "text";
 	public static final String RESULT_STRING = "text";
     private EditText editDisplay;
-	private String content;
+
+    private String content;
 	private boolean enabled;
-	
-    public NodeEditBodyFragment(String content, boolean enabled) {
+    
+    public void init(String content, boolean enabled) {
     	this.content = content;
     	this.enabled = enabled;
     }
-    
+	
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
     	super.onCreate(savedInstanceState);
         View view = inflater.inflate(R.layout.editnodebody, container, false);
         this.editDisplay = (EditText) view.findViewById(R.id.textDisplay);
-        
-        setText(content);
+
+        setText(this.content);
         this.editDisplay.setEnabled(enabled);
         
-        setHasOptionsMenu(true);
+        setHasOptionsMenu(enabled);
         return view;
     }
 

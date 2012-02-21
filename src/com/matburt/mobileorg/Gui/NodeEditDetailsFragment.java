@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.Menu;
 import android.text.TextUtils;
@@ -37,15 +36,12 @@ public class NodeEditDetailsFragment extends Fragment {
 	
 	private String title;
 	private ArrayList<TagEntry> tagEntries = new ArrayList<TagEntry>();
-	
-	public NodeEditDetailsFragment(String tile, String actionMode) {
-		this.title = tile;
-		this.node = new NodeWrapper(null);
-	}
-	
-	public NodeEditDetailsFragment(NodeWrapper node, String actionMode) {
+	private String defaultTodo;
+
+	public void init(NodeWrapper node, String actionMode, String defaultTodo) {
 		this.node = node;
 		this.actionMode = actionMode;
+		this.defaultTodo = defaultTodo;
 	}
 	
 	@Override
@@ -63,7 +59,7 @@ public class NodeEditDetailsFragment extends Fragment {
 		this.orgDB = ((MobileOrgApplication) getActivity().getApplication()).getDB();
 		
         setHasOptionsMenu(true);
-		initDisplay(view);
+        initDisplay();
 		return view;
 	}
      
@@ -84,10 +80,7 @@ public class NodeEditDetailsFragment extends Fragment {
 		return false;
 	}
 	
-	private void initDisplay(View view) {
-		String defaultTodo = PreferenceManager.getDefaultSharedPreferences(
-				getActivity().getApplicationContext()).getString("defaultTodo", "");
-
+	private void initDisplay() {
 		if(this.actionMode == null) {
 			this.actionMode = NodeEditActivity.ACTIONMODE_CREATE;
 			titleView.setText(title);
