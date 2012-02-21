@@ -5,7 +5,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -13,12 +12,12 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.v4.app.ActionBar;
+import android.support.v4.app.FragmentActivity;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
 import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -35,7 +34,7 @@ import com.matburt.mobileorg.Parsing.OrgDatabase;
 import com.matburt.mobileorg.Parsing.OrgFile;
 import com.matburt.mobileorg.Synchronizers.Synchronizer;
 
-public class NodeEditActivity extends Activity {
+public class NodeEditActivity extends FragmentActivity {
 	public final static String ACTIONMODE_CREATE = "create";
 	public final static String ACTIONMODE_EDIT = "edit";
 	private final static int EDIT_BODY = 1;
@@ -83,6 +82,9 @@ public class NodeEditActivity extends Activity {
 		MobileOrgApplication appInst = (MobileOrgApplication) this
 				.getApplication();
 
+		ActionBar actionbar = getSupportActionBar();
+		actionbar.setTitle("MobileOrg");
+		
 		Intent intent = getIntent();
 		
 		String defaultTodo = PreferenceManager.getDefaultSharedPreferences(
@@ -162,23 +164,29 @@ public class NodeEditActivity extends Activity {
 		view.setSelection(pos);
 	}
 
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
+    @Override
+	public boolean onCreateOptionsMenu(android.support.v4.view.Menu menu) {
 		MenuInflater inflater = getMenuInflater();
 	    inflater.inflate(R.menu.nodeedit_menu, menu);
 		return true;
 	}
-    
+	
 	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
+	public boolean onOptionsItemSelected(android.support.v4.view.MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.nodeedit_tag:
 			addTag("");
 			return true;
+			
+		case R.id.nodeedit_save:
+			save();
+			setResult(RESULT_OK);
+			finish();
+			return true;
 		}
 		return false;
 	}
-	
+
 	private View.OnClickListener saveNodeListener = new View.OnClickListener() {
 		public void onClick(View v) {
 			save();

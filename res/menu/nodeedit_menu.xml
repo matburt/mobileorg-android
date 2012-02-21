@@ -5,5 +5,11 @@
         android:id="@+id/nodeedit_tag"
         android:icon="@drawable/ic_menu_add"
         android:title="@string/menu_addtag"/>
+    <item
+        android:id="@+id/nodeedit_save"
+        android:showAsAction="ifRoom"
+        android:title="Save"
+        android:icon="@drawable/ic_menu_save">
+    </item>
 
 </menu>

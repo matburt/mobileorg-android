@@ -5,7 +5,6 @@ import java.net.URL;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -14,10 +13,9 @@ import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.v4.app.FragmentActivity;
 import android.util.Log;
-import android.view.Menu;
 import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
@@ -26,7 +24,7 @@ import com.matburt.mobileorg.Parsing.MobileOrgApplication;
 import com.matburt.mobileorg.Parsing.NodeWrapper;
 import com.matburt.mobileorg.Synchronizers.Synchronizer;
 
-public class NodeViewActivity extends Activity {
+public class NodeViewActivity extends FragmentActivity {
 	private WebView display;
 	private MobileOrgApplication appInst;
 	private SynchServiceReceiver syncReceiver;
@@ -37,7 +35,6 @@ public class NodeViewActivity extends Activity {
 		super.onCreate(savedInstanceState);
 
 		setContentView(R.layout.viewnode);
-		OutlineActivity.setupActionbar(this);
 		
 		Intent intent = getIntent();
 		this.node_id = intent.getLongExtra("node_id", -1);
@@ -73,7 +70,7 @@ public class NodeViewActivity extends Activity {
 	}
 	
 	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
+	public boolean onCreateOptionsMenu(android.support.v4.view.Menu menu) {
 		MenuInflater inflater = getMenuInflater();
 	    inflater.inflate(R.menu.nodeview_menu, menu);
 	    
@@ -84,7 +81,7 @@ public class NodeViewActivity extends Activity {
 	}
 
 	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
+	public boolean onOptionsItemSelected(android.support.v4.view.MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.viewmenu_edit:
 			runEditNodeActivity();

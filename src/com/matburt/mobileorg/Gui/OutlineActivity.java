@@ -6,9 +6,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.LinkedHashMap;
 
-import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.ListActivity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -20,24 +18,23 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
-import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.markupartist.android.widget.ActionBar;
-import com.markupartist.android.widget.ActionBar.Action;
-import com.markupartist.android.widget.ActionBar.IntentAction;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Parsing.MobileOrgApplication;
 import com.matburt.mobileorg.Parsing.NodeWrapper;
@@ -47,7 +44,7 @@ import com.matburt.mobileorg.Settings.SettingsActivity;
 import com.matburt.mobileorg.Settings.WizardActivity;
 import com.matburt.mobileorg.Synchronizers.Synchronizer;
 
-public class OutlineActivity extends ListActivity
+public class OutlineActivity extends FragmentActivity
 {
     private MobileOrgApplication appInst;
 
@@ -60,6 +57,7 @@ public class OutlineActivity extends ListActivity
 	 */
 	private int lastSelection = 0;
 	
+	private ListView listView;
 	private OutlineCursorAdapter outlineAdapter;
 	private SynchServiceReceiver syncReceiver;
 
@@ -70,7 +68,6 @@ public class OutlineActivity extends ListActivity
 		super.onCreate(savedInstanceState);
 		
 		setContentView(R.layout.outline);		
-		setupActionbar(this);
 		
 		this.appInst = (MobileOrgApplication) this.getApplication();
 		
@@ -93,26 +90,15 @@ public class OutlineActivity extends ListActivity
             }
         }
 
-		registerForContextMenu(getListView());	
+		listView = (ListView) this.findViewById(R.id.outline_list);
+		listView.setOnItemClickListener(outlineClickListener);
+		registerForContextMenu(listView);	
 		
 		this.syncReceiver = new SynchServiceReceiver();
 		registerReceiver(this.syncReceiver, new IntentFilter(
 				Synchronizer.SYNC_UPDATE));
 				
 		refreshDisplay();
-	}
-	
-	public static void setupActionbar(Activity activity) {
-		ActionBar actionBar = (ActionBar) activity.findViewById(R.id.actionbar);
-		actionBar.setTitle("MobileOrg");
-
-		actionBar.setHomeAction(new IntentAction(activity, new Intent(activity,
-				OutlineActivity.class), R.drawable.icon));
-        
-		Intent intent2 = new Intent(activity, NodeEditActivity.class);
-		intent2.putExtra("actionMode", NodeEditActivity.ACTIONMODE_CREATE);
-        final Action otherAction = new IntentAction(activity, intent2, R.drawable.ic_menu_compose);
-        actionBar.addAction(otherAction);
 	}
 	
 	@Override
@@ -143,50 +129,50 @@ public class OutlineActivity extends ListActivity
             lhm.put("Settings", "Configure MobileOrg");
             lhm.put("Capture", "Capture a new note");
             lhm.put("Website", "Visit the MobileOrg Wiki");
-            setListAdapter(new HashMapAdapter(lhm, this));
+            listView.setAdapter(new HashMapAdapter(lhm, this));
         }
         else {
             emptylist = false;
             startManagingCursor(cursor);
 				
             this.outlineAdapter = new OutlineCursorAdapter(this, cursor, appInst.getDB());
-            this.setListAdapter(outlineAdapter);
+            listView.setAdapter(outlineAdapter);
 		
-            getListView().setSelection(this.lastSelection);
+            listView.setSelection(lastSelection);
         }
 	}
 
 	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
+	public boolean onCreateOptionsMenu(android.support.v4.view.Menu menu) {
 		MenuInflater inflater = getMenuInflater();
 	    inflater.inflate(R.menu.outline_menu, menu);
 		return true;
 	}
 
 	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
+	public boolean onOptionsItemSelected(android.support.v4.view.MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.menu_sync:
 			runSync();
 			return true;
-		
+
 		case R.id.menu_settings:
 			return runShowSettings();
-		
+
 		case R.id.menu_outline:
 			runExpandSelection(-1);
 			return true;
 
 		case R.id.menu_capture:
 			return runEditNewNodeActivity();
-			
+
 		case R.id.menu_search:
 			return runSearch();
-			
+
 		case R.id.menu_help:
 			runHelp();
 			return true;
-			
+
 		}
 		return false;
 	}
@@ -199,7 +185,7 @@ public class OutlineActivity extends ListActivity
 		inflater.inflate(R.menu.outline_contextmenu, menu);
 		
 		AdapterContextMenuInfo info = (AdapterContextMenuInfo) menuInfo;
-		long clicked_node_id = getListAdapter().getItemId(info.position);
+		long clicked_node_id = listView.getItemIdAtPosition(info.position);
 		
 		// Prevents editing of file nodes.
 		if (this.node_id == -1) {
@@ -218,7 +204,7 @@ public class OutlineActivity extends ListActivity
 		AdapterContextMenuInfo info = (AdapterContextMenuInfo) item
 				.getMenuInfo();
 		
-		long node_id = getListAdapter().getItemId(info.position);
+		long node_id = listView.getItemIdAtPosition(info.position);
 
 		switch (item.getItemId()) {
 		case R.id.contextmenu_view:
@@ -404,34 +390,34 @@ public class OutlineActivity extends ListActivity
     }
 	
 
-	@Override
-	public void onListItemClick(ListView l, View v, int position, long id) {
-        if (emptylist) {
-            if (position == SYNC_OPTION) {
-                this.runSync();
-            }
-            else if (position == SETTINGS_OPTION) {
-                this.runShowSettings();
-            }
-            else if (position == CAPTURE_OPTION) {
-                this.runEditNewNodeActivity();
-            }
-            else if (position == WEBSITE_OPTION) {
-                String url = "https://github.com/matburt/mobileorg-android/wiki";
-                Intent i = new Intent(Intent.ACTION_VIEW);
-                i.setData(Uri.parse(url));
-                startActivity(i);
-            }
-            return;
-        }
+	private OnItemClickListener outlineClickListener = new OnItemClickListener() {
+		@Override
+		public void onItemClick(AdapterView<?> parent, View v, int position,
+				long id) {
+			if (emptylist) {
+				if (position == SYNC_OPTION) {
+					runSync();
+				} else if (position == SETTINGS_OPTION) {
+					runShowSettings();
+				} else if (position == CAPTURE_OPTION) {
+					runEditNewNodeActivity();
+				} else if (position == WEBSITE_OPTION) {
+					String url = "https://github.com/matburt/mobileorg-android/wiki";
+					Intent i = new Intent(Intent.ACTION_VIEW);
+					i.setData(Uri.parse(url));
+					startActivity(i);
+				}
+				return;
+			}
 
-		Long node_id = l.getItemIdAtPosition(position);
-		this.lastSelection = position;
-		if (this.appInst.getDB().hasNodeChildren(node_id))
-			runExpandSelection(node_id);
-		else
-			runViewNodeActivity(node_id);
-	}
+			Long node_id = listView.getItemIdAtPosition(position);
+			lastSelection = position;
+			if (appInst.getDB().hasNodeChildren(node_id))
+				runExpandSelection(node_id);
+			else
+				runViewNodeActivity(node_id);
+		}
+	};
 	
     private static final int SYNC_OPTION = 0;
     private static final int SETTINGS_OPTION = 1;
