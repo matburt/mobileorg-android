@@ -5,7 +5,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -17,6 +16,7 @@ import android.support.v4.app.ActionBar;
 import android.support.v4.app.ActionBar.Tab;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.text.TextUtils;
 import android.util.Log;
@@ -30,7 +30,6 @@ import android.widget.Spinner;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Parsing.MobileOrgApplication;
@@ -40,6 +39,7 @@ import com.matburt.mobileorg.Parsing.OrgFile;
 import com.matburt.mobileorg.Synchronizers.Synchronizer;
 
 public class NodeEditActivity extends FragmentActivity {
+	
 	public final static String ACTIONMODE_CREATE = "create";
 	public final static String ACTIONMODE_EDIT = "edit";
 	private final static int EDIT_BODY = 1;
@@ -55,11 +55,78 @@ public class NodeEditActivity extends FragmentActivity {
 	private String actionMode;
 	
 	private OrgDatabase orgDB;
+	private MobileOrgApplication appInst;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.editnode);
+
+
+
+		Intent intent = getIntent();
+		this.actionMode = intent.getStringExtra("actionMode");
+
+		this.appInst = (MobileOrgApplication) this.getApplication();
+		this.orgDB = appInst.getDB();
+		
+		initDisplay();
+		//setupActionbar();
+	}
+
+	private void setupActionbar() {
+		ActionBar actionbar = getSupportActionBar();
+		actionbar.setTitle("MobileOrg");
+		
+		getSupportActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+	    ActionBar.Tab tabA = actionbar.newTab().setText("Details");
+	    ActionBar.Tab tabB = actionbar.newTab().setText("Payload");
+	    ActionBar.Tab tabC = actionbar.newTab().setText("Raw Payload");
+
+	    Fragment editBody = new NodeEditBodyActivity();
+	    tabB.setTabListener(new TabListener(editBody));
+
+	    actionbar.addTab(tabA);
+	    actionbar.addTab(tabB);
+	    actionbar.addTab(tabC);
+
+	    
+		FragmentManager fragmentManager = getSupportFragmentManager();
+		FragmentTransaction fragmentTransaction = fragmentManager
+				.beginTransaction();
+	    
+	    fragmentTransaction.add(R.id.editnodelayout, editBody);
+	    fragmentTransaction.commit();
+	}
+	
+
+	private class TabListener implements ActionBar.TabListener {
+		Fragment fragment;
+
+		public TabListener(Fragment fragment) {
+			this.fragment = fragment;
+		}
+
+		@Override
+		public void onTabReselected(Tab tab, FragmentTransaction ft) {
+		}
+
+		@Override
+		public void onTabSelected(Tab tab, FragmentTransaction ft) {
+			Log.d("MobileOrg", "Selected Nodeedit");
+			ft.replace(R.id.editnodelayout, fragment, "");
+		}
+
+		@Override
+		public void onTabUnselected(Tab tab, FragmentTransaction ft) {
+//			if (fragment != null) {
+//				// Detach the fragment, because another one is being attached
+//				ft.detach(fragment);
+//			}
+		}
+	};
+	
+	private void initDisplay() {
+		setContentView(R.layout.editnode_details);
 
 		this.titleView = (EditText) this.findViewById(R.id.title);
 		this.priorityView = (Spinner) this.findViewById(R.id.priority);
@@ -68,34 +135,6 @@ public class NodeEditActivity extends FragmentActivity {
 
 		this.payloadView = (TextView) this.findViewById(R.id.body);
 		payloadView.setOnClickListener(editBodyListener);
-
-		Intent intent = getIntent();
-		this.actionMode = intent.getStringExtra("actionMode");
-
-		MobileOrgApplication appInst = (MobileOrgApplication) this.getApplication();
-		this.orgDB = appInst.getDB();
-		
-		initDisplay();
-	}
-
-	private void initDisplay() {
-		MobileOrgApplication appInst = (MobileOrgApplication) this
-				.getApplication();
-
-		ActionBar actionbar = getSupportActionBar();
-		actionbar.setTitle("MobileOrg");
-		
-		getSupportActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
-		ActionBar.Tab tab = getSupportActionBar().newTab();
-		tab.setText("Details");
-		//tab.setTabListener(this);
-		getSupportActionBar().addTab(tab);
-		
-		tab = getSupportActionBar().newTab();
-		tab.setText("Payload");
-		tab.setTabListener(new TabListener<NodeEditBodyActivity>(NodeEditBodyActivity.class, this));
-		getSupportActionBar().addTab(tab);
-		
 		
 		Intent intent = getIntent();
 		
@@ -431,43 +470,6 @@ public class NodeEditActivity extends FragmentActivity {
 		private View.OnClickListener removeListener = new View.OnClickListener() {
 			public void onClick(View v) {
 				remove();
-			}
-		};
-	}
-
-
-	private static class TabListener<T extends Fragment> implements ActionBar.TabListener {
-		Class<T> mclass;
-		Fragment fragment;
-		Activity activity;
-
-		public TabListener(Class<T> class1, Activity activity) {
-			this.mclass = class1;
-			this.activity = activity;
-		}
-
-		@Override
-		public void onTabReselected(Tab tab, FragmentTransaction ft) {
-		}
-
-		@Override
-		public void onTabSelected(Tab tab, FragmentTransaction ft) {
-			Log.d("MobileOrg", "Selected Nodeedit");
-			if (fragment == null) {
-				// If not, instantiate and add it to the activity
-				fragment = Fragment.instantiate(activity, mclass.getName());
-				ft.add(android.R.id.content, fragment, "Payload");
-			} else {
-				// If it exists, simply attach it in order to show it
-				ft.attach(fragment);
-			}
-		}
-
-		@Override
-		public void onTabUnselected(Tab tab, FragmentTransaction ft) {
-			if (fragment != null) {
-				// Detach the fragment, because another one is being attached
-				ft.detach(fragment);
 			}
 		};
 	}

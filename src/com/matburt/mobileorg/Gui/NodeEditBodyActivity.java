@@ -1,11 +1,7 @@
 package com.matburt.mobileorg.Gui;
 
 import android.os.Bundle;
-import android.support.v4.app.ActionBar;
-import android.support.v4.app.ActionBar.Tab;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,15 +13,24 @@ public class NodeEditBodyActivity extends Fragment {
 	public static final String DISPLAY_STRING = "text";
 	public static final String RESULT_STRING = "text";
     private EditText editDisplay;
-        
+      
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+	}
+	
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.editnode_body, container, false);
+    	super.onCreate(savedInstanceState);
+        View view = inflater.inflate(R.layout.editnodebody, container, false);
+        this.editDisplay = (EditText) view.findViewById(R.id.textDisplay);
+        
+        setText("W00t");
+        return view;
     }
 
     public void setText(String text) {
-        this.editDisplay = (EditText) getActivity().findViewById(R.id.textDisplay);
         this.editDisplay.setText(text);
     }
     
