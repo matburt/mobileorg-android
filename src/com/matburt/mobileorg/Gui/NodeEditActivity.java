@@ -13,7 +13,6 @@ import android.support.v4.app.ActionBar;
 import android.support.v4.app.ActionBar.Tab;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.view.MenuInflater;
 
@@ -47,8 +46,6 @@ public class NodeEditActivity extends FragmentActivity {
 
 		this.appInst = (MobileOrgApplication) this.getApplication();
 		this.orgDB = appInst.getDB();
-
-		init();
 		
 		if (savedInstanceState != null) {
 			this.detailsFragment = (NodeEditDetailsFragment) getSupportFragmentManager()
@@ -62,21 +59,7 @@ public class NodeEditActivity extends FragmentActivity {
 							NodeEditBodyFragment.class.getName() + "raw");
 		}
 		
-		if (this.detailsFragment == null) {
-			this.detailsFragment = new NodeEditDetailsFragment();
-			String defaultTodo = PreferenceManager.getDefaultSharedPreferences(
-					this).getString("defaultTodo", "");
-			this.detailsFragment.init(this.node, this.actionMode, defaultTodo);
-		}
-		if (this.payloadFragment == null) {
-			this.payloadFragment = new NodeEditBodyFragment();
-			this.payloadFragment.init(node.getCleanedPayload(orgDB), true);
-		}
-		if (this.rawPayloadFragment == null) {
-			this.rawPayloadFragment = new NodeEditBodyFragment();
-			this.rawPayloadFragment.init(node.getRawPayload(orgDB), false);
-		}
-		
+		init();
 		setupActionbar(savedInstanceState);
 	}
 
@@ -94,27 +77,38 @@ public class NodeEditActivity extends FragmentActivity {
 	}
 	
 	private void init() {
+		if (this.detailsFragment == null)
+			this.detailsFragment = new NodeEditDetailsFragment();
+		if (this.payloadFragment == null)
+			this.payloadFragment = new NodeEditBodyFragment();
+		if (this.rawPayloadFragment == null)
+			this.rawPayloadFragment = new NodeEditBodyFragment();
+		
+		String defaultTodo = PreferenceManager
+				.getDefaultSharedPreferences(this).getString("defaultTodo", "");
 		Intent intent = getIntent();
 		
 		if (this.actionMode == null) {
-			this.actionMode = ACTIONMODE_CREATE;
+			String subject = intent
+					.getStringExtra("android.intent.extra.SUBJECT");
+			String text = intent.getStringExtra("android.intent.extra.TEXT");
 
-			// TODO Support intents
-//			String subject = intent
-//					.getStringExtra("android.intent.extra.SUBJECT");
-//			String text = intent.getStringExtra("android.intent.extra.TEXT");
-//			titleView.setText(subject);
-//
-//			node = new NodeWrapper(null);
-//			payloadView.setText(text);
-//			setSpinner(todoStateView, appInst.getDB().getTodos(), defaultTodo);
-//			setSpinner(priorityView, appInst.getDB().getPriorities(), "");
+			node = new NodeWrapper(null);
+			this.detailsFragment.init(this.node, this.actionMode, defaultTodo, subject);
+			this.payloadFragment.init(text, true);
+			this.actionMode = ACTIONMODE_CREATE;
 		} else if (this.actionMode.equals(ACTIONMODE_CREATE)) {
 			node = new NodeWrapper(null);
+			this.detailsFragment.init(this.node, this.actionMode, defaultTodo);
+			this.payloadFragment.init("", true);
 		} else if (this.actionMode.equals(ACTIONMODE_EDIT)) {
 			long nodeId = intent.getLongExtra("node_id", 0);
 			node = new NodeWrapper(appInst.getDB().getNode(nodeId));
+			this.detailsFragment.init(this.node, this.actionMode, defaultTodo);
+			this.payloadFragment.init(node.getCleanedPayload(orgDB), true);
 		}
+
+		this.rawPayloadFragment.init(node.getRawPayload(orgDB), false);
 	}
 
 	private void setupActionbar(Bundle savedInstanceState) {
@@ -168,7 +162,6 @@ public class NodeEditActivity extends FragmentActivity {
 			
 			FragmentTransaction fragmentTransaction = getSupportFragmentManager()
 					.beginTransaction();
-		    
 		    fragmentTransaction.show(fragment);
 		    fragmentTransaction.commit();
 		}
@@ -179,10 +172,8 @@ public class NodeEditActivity extends FragmentActivity {
 				// The line above throws a NullPointerException last time I tried...
 				//ft.detach(fragment);
 				
-				FragmentManager fragmentManager = getSupportFragmentManager();
-				FragmentTransaction fragmentTransaction = fragmentManager
+				FragmentTransaction fragmentTransaction = getSupportFragmentManager()
 						.beginTransaction();
-			    
 				fragmentTransaction.hide(fragment);
 			    fragmentTransaction.commit();
 			}

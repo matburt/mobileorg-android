@@ -38,6 +38,11 @@ public class NodeEditDetailsFragment extends Fragment {
 	private ArrayList<TagEntry> tagEntries = new ArrayList<TagEntry>();
 	private String defaultTodo;
 
+	public void init(NodeWrapper node, String actionMode, String defaultTodo, String title) {
+		init(node, actionMode, defaultTodo);
+		this.title = title;
+	}
+	
 	public void init(NodeWrapper node, String actionMode, String defaultTodo) {
 		this.node = node;
 		this.actionMode = actionMode;
