@@ -2,6 +2,8 @@ package com.matburt.mobileorg.Gui;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import android.app.DatePickerDialog;
 import android.app.DatePickerDialog.OnDateSetListener;
@@ -128,8 +130,23 @@ public class NodeEditDetailsFragment extends Fragment {
 			titleView.setText(node.getName());
 			
 			setupTags(orgDB.getTags());
+			setupDates();
 			setSpinner(todoStateView, orgDB.getTodos(), node.getTodo());
 			setSpinner(priorityView, orgDB.getPriorities(), node.getPriority());
+		}
+	}
+	
+	private void setupDates() {
+		final Pattern schedulePattern = Pattern
+				.compile("((\\d{4})-(\\d{2})-(\\d{2}))(?:\\s+\\w+)?\\s*(\\d{1,2}\\:\\d{2})?\\-?(\\d{1,2}\\:\\d{2})?");
+		Matcher propm = schedulePattern.matcher(node.getScheduled(this.orgDB));
+		
+		if(propm.find()) {
+			DateEntry dateEntry = new DateEntry(getActivity(), datesView,
+					"SCHEDULED", Integer.parseInt(propm.group(2)),
+					Integer.parseInt(propm.group(3)), Integer.parseInt(propm
+							.group(4)));
+			this.scheduledEntry = dateEntry;
 		}
 	}
 	
@@ -149,9 +166,30 @@ public class NodeEditDetailsFragment extends Fragment {
 	private class DateEntry extends TableRow {
 		private TableLayout parent;
 		private Button dateButton;
-
+		
+		private int year;
+		private int monthOfYear;
+		private int dayOfMonth;
+		
 		public DateEntry(Context context, TableLayout parent, String title) {
 			super(context);
+			final Calendar c = Calendar.getInstance();
+			this.year = c.get(Calendar.YEAR);
+			this.monthOfYear = c.get(Calendar.MONTH);
+			this.dayOfMonth = c.get(Calendar.DAY_OF_MONTH);
+			init(context, parent, title);
+		}
+
+		public DateEntry(Context context, TableLayout parent, String title,
+				int year, int monthOfYear, int dayOfMonth) {
+			super(context);
+			this.year = year;
+			this.monthOfYear = monthOfYear;
+			this.dayOfMonth = dayOfMonth;
+			init(context, parent, title);
+		}
+		
+		private void init(Context context, TableLayout parent, String title) {
 			this.parent = parent;
 
 			LayoutInflater layoutInflater = (LayoutInflater) context
@@ -176,19 +214,28 @@ public class NodeEditDetailsFragment extends Fragment {
 					newFragment.show(ft, "dialog");
 				}
 			});
+			
+			setDate();
 		}
 		
 		public String getDate() {
 			return title + ": <" + dateButton.getText().toString() + ">";
 		}
+		
+		private void setDate() {
+			setDate(this.year, this.monthOfYear, this.dayOfMonth);
+		}
+		
+		private void setDate(int year, int monthOfYear, int dayOfMonth) {
+			dateButton.setText(year + "-" + monthOfYear + "-" + dayOfMonth);
+		}
 
 		private DatePickerDialog.OnDateSetListener dateChangeListener = new DatePickerDialog.OnDateSetListener() {
 			public void onDateSet(DatePicker view, int year, int monthOfYear,
 					int dayOfMonth) {
-				dateButton.setText(year + "-" + monthOfYear + "-" + dayOfMonth);
+				setDate(year, monthOfYear, dayOfMonth);
 			}
 		};
-
 
 		private class DatePickerDialogFragment extends DialogFragment {
 			private OnDateSetListener callback;
@@ -198,10 +245,8 @@ public class NodeEditDetailsFragment extends Fragment {
 			}
 
 			public Dialog onCreateDialog(Bundle savedInstanceState) {
-				final Calendar c = Calendar.getInstance();
-				return new DatePickerDialog(getActivity(), callback,
-						c.get(Calendar.YEAR), c.get(Calendar.MONTH),
-						c.get(Calendar.DAY_OF_MONTH));
+				return new DatePickerDialog(getActivity(), callback, year,
+						monthOfYear - 1, dayOfMonth);
 			}
 		}
 		

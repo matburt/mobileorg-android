@@ -46,12 +46,20 @@
             android:prompt="@string/priority" />
     </TableRow>
 
+     <View
+        android:layout_height="2dip"
+        android:background="#FF909090" />
+    
     <TableLayout
         android:id="@+id/tags"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content" >
     </TableLayout>
 
+     <View
+        android:layout_height="2dip"
+        android:background="#FF909090" />
+    
     <TableLayout
         android:id="@+id/dates"
         android:layout_width="fill_parent"
