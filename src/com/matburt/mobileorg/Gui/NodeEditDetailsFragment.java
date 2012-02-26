@@ -141,7 +141,7 @@ public class NodeEditDetailsFragment extends Fragment {
 	
 	private void setupDates() {
 		final Pattern schedulePattern = Pattern
-				.compile("((\\d{4})-(\\d{2})-(\\d{2}))(?:\\s+\\w+)?\\s*((\\d{1,2})\\:(\\d{2}))?");
+				.compile("((\\d{4})-(\\d{1,2})-(\\d{1,2}))(?:\\s+\\w+)?\\s*((\\d{1,2})\\:(\\d{2}))?");
 		Matcher propm = schedulePattern.matcher(node.getScheduled(this.orgDB));
 		
 		if(propm.find()) {
@@ -178,6 +178,12 @@ public class NodeEditDetailsFragment extends Fragment {
 		this.deadlineEntry = dateEntry;
 	}
 	
+	public String getScheduled() {
+		if(this.scheduledEntry == null)
+			return "";
+		else
+			return "SCHEDULED: <" + this.scheduledEntry.getDate() + ">";
+	}
 	
 	private class DateEntry extends TableRow {
 		private TableLayout parent;
@@ -194,10 +200,11 @@ public class NodeEditDetailsFragment extends Fragment {
 			super(context);
 			final Calendar c = Calendar.getInstance();
 			this.year = c.get(Calendar.YEAR);
-			this.monthOfYear = c.get(Calendar.MONTH);
+			this.monthOfYear = c.get(Calendar.MONTH) + 1;
 			this.dayOfMonth = c.get(Calendar.DAY_OF_MONTH);
-			this.minute = 0;
+			//this.timeOfDay =  c.get(Calendar.HOUR_OF_DAY);
 			this.timeOfDay = 0;
+			this.minute =  0;
 			init(context, parent, title);
 		}
 
@@ -207,8 +214,10 @@ public class NodeEditDetailsFragment extends Fragment {
 			this.year = year;
 			this.monthOfYear = monthOfYear;
 			this.dayOfMonth = dayOfMonth;
-			this.minute = 0;
+//			final Calendar c = Calendar.getInstance();
+//			this.timeOfDay =  c.get(Calendar.HOUR_OF_DAY);
 			this.timeOfDay = 0;
+			this.minute =  0;
 			init(context, parent, title);
 		}
 		
@@ -264,8 +273,17 @@ public class NodeEditDetailsFragment extends Fragment {
 			setTime();
 		}
 		
+		private String getTime() {
+			String time = timeButton.getText().toString();
+			
+			if(time.equals("00:00"))
+				return "";
+			else
+				return " " + time;
+		}
+		
 		public String getDate() {
-			return title + ": <" + dateButton.getText().toString() + ">";
+			return dateButton.getText().toString() + getTime();
 		}
 
 		

@@ -3,6 +3,8 @@ package com.matburt.mobileorg.Gui;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -14,6 +16,8 @@ import android.support.v4.app.ActionBar.Tab;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
+import android.text.TextUtils;
+import android.util.Log;
 import android.view.MenuInflater;
 
 import com.matburt.mobileorg.R;
@@ -239,13 +243,33 @@ public class NodeEditActivity extends FragmentActivity {
 		builder.create().show();
 	}
 
+	private StringBuilder insertOrReplace(StringBuilder payload, String key, String value) {
+		if(TextUtils.isEmpty(value))
+			return payload;
+		
+		final Pattern schedulePattern = Pattern
+				.compile("SCHEDULED\\:\\s*<[^>]+>");
+		Matcher matcher = schedulePattern.matcher(payload);
+		
+		if(matcher.find())
+			payload.replace(matcher.start(), matcher.end(), value);
+		else {
+			Log.d("MobileOrg", "Didn't replace scheduled!");
+			payload.insert(0, value).append("\n");
+		}
+		
+		return payload;
+	}
 	
 	private void save() {
 		String newTitle = this.detailsFragment.getTitle();
 		String newTodo = this.detailsFragment.getTodo();
 		String newPriority = this.detailsFragment.getPriority();
-		String newPayload = this.payloadFragment.getText();
+		StringBuilder newPayload = new StringBuilder(this.payloadFragment.getText());
 		String newTags = this.detailsFragment.getTagsSelection();
+		String newScheduled = this.detailsFragment.getScheduled();
+				
+		newPayload = insertOrReplace(newPayload, "SCHEDULED:", newScheduled);
 		
 		if (this.actionMode.equals(ACTIONMODE_CREATE)) {
 			MobileOrgApplication appInst = (MobileOrgApplication) this.getApplication();
@@ -257,13 +281,13 @@ public class NodeEditActivity extends FragmentActivity {
 			boolean addTimestamp = PreferenceManager.getDefaultSharedPreferences(
 					this).getBoolean("captureWithTimestamp", false);
 			if(addTimestamp)
-				newPayload += "\n" + getTimestamp() + "\n";
+				newPayload.append("\n").append(getTimestamp()).append("\n");
 			
-			orgDB.addNodePayload(node_id, newPayload);
+			orgDB.addNodePayload(node_id, newPayload.toString());
 			
 		} else if (this.actionMode.equals(ACTIONMODE_EDIT)) {
 			try {
-				editNode(newTitle, newTodo, newPriority, newPayload, newTags);
+				editNode(newTitle, newTodo, newPriority, newPayload.toString(), newTags);
 			} catch (IOException e) {
 			}
 		}
