@@ -1,26 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <TableRow xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:orientation="vertical" >
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/tags" />
-
     <Spinner
-        android:id="@+id/tagslist"
+        android:id="@+id/editnode_tag_list"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_span="3"
         android:hint="" />
 
     <Button
-        android:id="@+id/editnode_remove"
+        android:id="@+id/editnode_tag_remove"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="right"
+        android:layout_gravity="center_vertical"
         android:background="@drawable/ic_input_delete"
         android:padding="10dp" />
 

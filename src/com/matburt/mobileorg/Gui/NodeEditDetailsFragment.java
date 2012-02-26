@@ -8,6 +8,8 @@ import java.util.regex.Pattern;
 import android.app.DatePickerDialog;
 import android.app.DatePickerDialog.OnDateSetListener;
 import android.app.Dialog;
+import android.app.TimePickerDialog;
+import android.app.TimePickerDialog.OnTimeSetListener;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
@@ -27,6 +29,7 @@ import android.widget.Spinner;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
+import android.widget.TimePicker;
 
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Parsing.MobileOrgApplication;
@@ -138,14 +141,27 @@ public class NodeEditDetailsFragment extends Fragment {
 	
 	private void setupDates() {
 		final Pattern schedulePattern = Pattern
-				.compile("((\\d{4})-(\\d{2})-(\\d{2}))(?:\\s+\\w+)?\\s*(\\d{1,2}\\:\\d{2})?\\-?(\\d{1,2}\\:\\d{2})?");
+				.compile("((\\d{4})-(\\d{2})-(\\d{2}))(?:\\s+\\w+)?\\s*((\\d{1,2})\\:(\\d{2}))?");
 		Matcher propm = schedulePattern.matcher(node.getScheduled(this.orgDB));
 		
 		if(propm.find()) {
-			DateEntry dateEntry = new DateEntry(getActivity(), datesView,
+			DateEntry dateEntry = null;
+			// TODO Fix guards
+			
+			if(propm.group(6) != null && propm.group(7) != null) {
+				dateEntry = new DateEntry(getActivity(), datesView,
+						"SCHEDULED", Integer.parseInt(propm.group(2)),
+						Integer.parseInt(propm.group(3)),
+						Integer.parseInt(propm.group(4)),
+						Integer.parseInt(propm.group(6)),
+						Integer.parseInt(propm.group(7)));
+			} else if(propm.groupCount() >= 4) {
+			dateEntry = new DateEntry(getActivity(), datesView,
 					"SCHEDULED", Integer.parseInt(propm.group(2)),
 					Integer.parseInt(propm.group(3)), Integer.parseInt(propm
 							.group(4)));
+			}
+			
 			this.scheduledEntry = dateEntry;
 		}
 	}
@@ -166,10 +182,13 @@ public class NodeEditDetailsFragment extends Fragment {
 	private class DateEntry extends TableRow {
 		private TableLayout parent;
 		private Button dateButton;
+		private Button timeButton;
 		
 		private int year;
 		private int monthOfYear;
 		private int dayOfMonth;
+		private int timeOfDay;
+		private int minute;
 		
 		public DateEntry(Context context, TableLayout parent, String title) {
 			super(context);
@@ -177,6 +196,8 @@ public class NodeEditDetailsFragment extends Fragment {
 			this.year = c.get(Calendar.YEAR);
 			this.monthOfYear = c.get(Calendar.MONTH);
 			this.dayOfMonth = c.get(Calendar.DAY_OF_MONTH);
+			this.minute = 0;
+			this.timeOfDay = 0;
 			init(context, parent, title);
 		}
 
@@ -186,6 +207,19 @@ public class NodeEditDetailsFragment extends Fragment {
 			this.year = year;
 			this.monthOfYear = monthOfYear;
 			this.dayOfMonth = dayOfMonth;
+			this.minute = 0;
+			this.timeOfDay = 0;
+			init(context, parent, title);
+		}
+		
+		public DateEntry(Context context, TableLayout parent, String title,
+				int year, int monthOfYear, int dayOfMonth, int timeOfDay, int minute) {
+			super(context);
+			this.year = year;
+			this.monthOfYear = monthOfYear;
+			this.dayOfMonth = dayOfMonth;
+			this.timeOfDay = timeOfDay;
+			this.minute = minute;
 			init(context, parent, title);
 		}
 		
@@ -215,28 +249,74 @@ public class NodeEditDetailsFragment extends Fragment {
 				}
 			});
 			
+			timeButton = (Button) findViewById(R.id.dateTimeButton);
+			timeButton.setOnClickListener(new View.OnClickListener() {
+				public void onClick(View v) {
+					FragmentTransaction ft = getSupportFragmentManager()
+							.beginTransaction();
+					DialogFragment newFragment = new TimePickerDialogFragment(
+							timeChangeListener);
+					newFragment.show(ft, "dialog");
+				}
+			});
+			
 			setDate();
+			setTime();
 		}
 		
 		public String getDate() {
 			return title + ": <" + dateButton.getText().toString() + ">";
 		}
+
+		
+		private void setTime(int timeOfDay, int minute) {
+			this.timeOfDay = timeOfDay;
+			this.minute = minute;
+			timeButton.setText(timeOfDay + ":" + minute);
+		}
+		
+		private void setTime() {
+			timeButton.setText(timeOfDay + ":" + minute);
+		}
 		
 		private void setDate() {
-			setDate(this.year, this.monthOfYear, this.dayOfMonth);
+			dateButton.setText(year + "-" + monthOfYear + "-" + dayOfMonth);
 		}
 		
 		private void setDate(int year, int monthOfYear, int dayOfMonth) {
+			this.year = year;
+			this.monthOfYear = monthOfYear;
+			this.dayOfMonth = dayOfMonth;
+			
 			dateButton.setText(year + "-" + monthOfYear + "-" + dayOfMonth);
 		}
 
 		private DatePickerDialog.OnDateSetListener dateChangeListener = new DatePickerDialog.OnDateSetListener() {
 			public void onDateSet(DatePicker view, int year, int monthOfYear,
 					int dayOfMonth) {
-				setDate(year, monthOfYear, dayOfMonth);
+				setDate(year, monthOfYear + 1, dayOfMonth);
+			}
+		};
+		
+		private TimePickerDialog.OnTimeSetListener timeChangeListener = new TimePickerDialog.OnTimeSetListener() {
+			public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+				setTime(hourOfDay, minute);
 			}
 		};
 
+		
+		private class TimePickerDialogFragment extends DialogFragment {
+			private OnTimeSetListener callback;
+
+			public TimePickerDialogFragment(OnTimeSetListener callback) {
+				this.callback = callback;
+			}
+
+			public Dialog onCreateDialog(Bundle savedInstanceState) {
+				return new TimePickerDialog(getActivity(), callback, timeOfDay, minute, true);
+			}
+		}
+		
 		private class DatePickerDialogFragment extends DialogFragment {
 			private OnDateSetListener callback;
 
@@ -366,7 +446,7 @@ public class NodeEditDetailsFragment extends Fragment {
 			TableRow row = (TableRow) layoutInflater.inflate(
 					R.layout.editnode_tagslayout, this);
 
-			button = (Button) findViewById(R.id.editnode_remove);
+			button = (Button) findViewById(R.id.editnode_tag_remove);
 			button.setOnClickListener(removeListener);
 			
 			if(selection.endsWith(":")) {
@@ -374,7 +454,7 @@ public class NodeEditDetailsFragment extends Fragment {
 				selection = selection.replace(":", "");
 			}
 
-			spinner = (Spinner) row.findViewById(R.id.tagslist);
+			spinner = (Spinner) row.findViewById(R.id.editnode_tag_list);
 			setSpinner(spinner, tags, selection);
 		}
 		
