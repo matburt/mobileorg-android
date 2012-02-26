@@ -272,15 +272,15 @@ public class NodeEditDetailsFragment extends Fragment {
 		private void setTime(int timeOfDay, int minute) {
 			this.timeOfDay = timeOfDay;
 			this.minute = minute;
-			timeButton.setText(timeOfDay + ":" + minute);
+			timeButton.setText(String.format("%02d:%02d", timeOfDay, minute));
 		}
 		
 		private void setTime() {
-			timeButton.setText(timeOfDay + ":" + minute);
+			timeButton.setText(String.format("%02d:%02d", timeOfDay, minute));
 		}
 		
 		private void setDate() {
-			dateButton.setText(year + "-" + monthOfYear + "-" + dayOfMonth);
+			dateButton.setText(String.format("%d-%02d-%02d", year, monthOfYear, dayOfMonth));
 		}
 		
 		private void setDate(int year, int monthOfYear, int dayOfMonth) {
