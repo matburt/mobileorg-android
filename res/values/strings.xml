@@ -10,6 +10,8 @@
   <string name="menu_help">Help</string>
   <string name="menu_cancel">Cancel</string>
   <string name="menu_addtag">Add Tag</string>
+  <string name="menu_adddeadline">Add Deadline</string>
+  <string name="menu_addscheduled">Add Scheduled</string>
   <string name="menu_timestamp">Add Timestamp</string>
   <string name="contextmenu_edit">Edit Node</string>
   <string name="contextmenu_view">View Node</string>

@@ -52,4 +52,10 @@
         android:layout_height="wrap_content" >
     </TableLayout>
 
+    <TableLayout
+        android:id="@+id/dates"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" >
+    </TableLayout>
+
 </TableLayout>

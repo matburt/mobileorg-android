@@ -111,6 +111,7 @@ public class NodeEditActivity extends FragmentActivity {
 		this.rawPayloadFragment.init(node.getRawPayload(orgDB), false);
 	}
 
+
 	private void setupActionbar(Bundle savedInstanceState) {
 		setContentView(R.layout.editnode);
 		ActionBar actionbar = getSupportActionBar();

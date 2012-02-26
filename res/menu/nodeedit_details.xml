@@ -2,8 +2,16 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
 
     <item
-        android:id="@+id/nodeedit_tag"
+        android:id="@+id/menu_nodeedit_tag"
         android:icon="@drawable/ic_menu_add"
         android:title="@string/menu_addtag"/>
+    <item
+        android:id="@+id/menu_nodeedit_scheduled"
+        android:icon="@drawable/ic_dialog_time"
+        android:title="@string/menu_addscheduled"/>
+    <item
+        android:id="@+id/menu_nodeedit_deadline"
+        android:icon="@drawable/ic_dialog_time"
+        android:title="@string/menu_adddeadline"/>
 
 </menu>

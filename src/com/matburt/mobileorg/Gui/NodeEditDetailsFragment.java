@@ -1,10 +1,16 @@
 package com.matburt.mobileorg.Gui;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 
+import android.app.DatePickerDialog;
+import android.app.DatePickerDialog.OnDateSetListener;
+import android.app.Dialog;
 import android.content.Context;
 import android.os.Bundle;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.Menu;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -13,10 +19,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TableLayout;
 import android.widget.TableRow;
+import android.widget.TextView;
 
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Parsing.MobileOrgApplication;
@@ -28,6 +36,7 @@ public class NodeEditDetailsFragment extends Fragment {
 	private Spinner priorityView;
 	private Spinner todoStateView;
 	private TableLayout tagsView;
+	private TableLayout datesView;
 
 	private OrgDatabase orgDB;
 
@@ -37,6 +46,8 @@ public class NodeEditDetailsFragment extends Fragment {
 	private String title;
 	private ArrayList<TagEntry> tagEntries = new ArrayList<TagEntry>();
 	private String defaultTodo;
+	private DateEntry scheduledEntry = null;
+	private DateEntry deadlineEntry = null;
 
 	public void init(NodeWrapper node, String actionMode, String defaultTodo, String title) {
 		init(node, actionMode, defaultTodo);
@@ -60,7 +71,8 @@ public class NodeEditDetailsFragment extends Fragment {
 		this.priorityView = (Spinner) view.findViewById(R.id.priority);
 		this.todoStateView = (Spinner) view.findViewById(R.id.todo_state);
 		this.tagsView = (TableLayout) view.findViewById(R.id.tags);
-		
+		this.datesView = (TableLayout) view.findViewById(R.id.dates);
+
 		this.orgDB = ((MobileOrgApplication) getActivity().getApplication()).getDB();
 		
         setHasOptionsMenu(true);
@@ -72,14 +84,28 @@ public class NodeEditDetailsFragment extends Fragment {
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
 		super.onCreateOptionsMenu(menu, inflater);
 		inflater.inflate(R.menu.nodeedit_details, menu);
+		
+		if(this.scheduledEntry != null)
+			menu.findItem(R.id.menu_nodeedit_scheduled).setVisible(false);
+		
+		if(this.deadlineEntry != null)
+			menu.findItem(R.id.menu_nodeedit_deadline).setVisible(false);
 	}
 
 	@Override
 	public boolean onOptionsItemSelected(android.support.v4.view.MenuItem item) {
 		switch (item.getItemId()) {
 
-		case R.id.nodeedit_tag:
+		case R.id.menu_nodeedit_tag:
 			addTag("");
+			return true;
+
+		case R.id.menu_nodeedit_scheduled:
+			addDateScheduled();
+			return true;
+
+		case R.id.menu_nodeedit_deadline:
+			addDateDeadline();
 			return true;
 		}
 		return false;
@@ -106,6 +132,90 @@ public class NodeEditDetailsFragment extends Fragment {
 			setSpinner(priorityView, orgDB.getPriorities(), node.getPriority());
 		}
 	}
+	
+	private void addDateScheduled() {
+		DateEntry dateEntry = new DateEntry(getActivity(), datesView,
+				"SCHEDULED");
+		this.scheduledEntry = dateEntry;
+	}
+	
+	private void addDateDeadline() {
+		DateEntry dateEntry = new DateEntry(getActivity(), datesView,
+				"DEADLINE");
+		this.deadlineEntry = dateEntry;
+	}
+	
+	
+	private class DateEntry extends TableRow {
+		private TableLayout parent;
+		private Button dateButton;
+
+		public DateEntry(Context context, TableLayout parent, String title) {
+			super(context);
+			this.parent = parent;
+
+			LayoutInflater layoutInflater = (LayoutInflater) context
+					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			TableRow row = (TableRow) layoutInflater.inflate(
+					R.layout.editnode_datelayout, this);
+			parent.addView(row);
+
+			Button removeButton = (Button) findViewById(R.id.dateRemove);
+			removeButton.setOnClickListener(removeListener);
+			
+			TextView textView = (TextView) findViewById(R.id.dateText);
+			textView.setText(title);
+
+			dateButton = (Button) findViewById(R.id.dateButton);
+			dateButton.setOnClickListener(new View.OnClickListener() {
+				public void onClick(View v) {
+					FragmentTransaction ft = getSupportFragmentManager()
+							.beginTransaction();
+					DialogFragment newFragment = new DatePickerDialogFragment(
+							dateChangeListener);
+					newFragment.show(ft, "dialog");
+				}
+			});
+		}
+		
+		public String getDate() {
+			return title + ": <" + dateButton.getText().toString() + ">";
+		}
+
+		private DatePickerDialog.OnDateSetListener dateChangeListener = new DatePickerDialog.OnDateSetListener() {
+			public void onDateSet(DatePicker view, int year, int monthOfYear,
+					int dayOfMonth) {
+				dateButton.setText(year + "-" + monthOfYear + "-" + dayOfMonth);
+			}
+		};
+
+
+		private class DatePickerDialogFragment extends DialogFragment {
+			private OnDateSetListener callback;
+
+			public DatePickerDialogFragment(OnDateSetListener callback) {
+				this.callback = callback;
+			}
+
+			public Dialog onCreateDialog(Bundle savedInstanceState) {
+				final Calendar c = Calendar.getInstance();
+				return new DatePickerDialog(getActivity(), callback,
+						c.get(Calendar.YEAR), c.get(Calendar.MONTH),
+						c.get(Calendar.DAY_OF_MONTH));
+			}
+		}
+		
+		private void remove() {
+			parent.removeView(this);
+		}
+
+		private View.OnClickListener removeListener = new View.OnClickListener() {
+			public void onClick(View v) {
+				remove();
+			}
+		};
+	}
+	
 	
 	private void setupTags(ArrayList<String> tagList) {
 		ArrayList<String> tags = node.getTagList();
@@ -190,6 +300,8 @@ public class NodeEditDetailsFragment extends Fragment {
 	public String getPriority() {
 		return priorityView.getSelectedItem().toString();
 	}
+	
+	
 	
 	private class TagEntry extends TableRow {		
 		TableLayout parent;
