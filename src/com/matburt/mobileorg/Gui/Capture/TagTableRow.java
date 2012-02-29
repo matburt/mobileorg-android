@@ -30,7 +30,7 @@ class TagTableRow extends TableRow {
 		LayoutInflater layoutInflater = (LayoutInflater) context
 				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		TableRow row = (TableRow) layoutInflater.inflate(
-				R.layout.edit_tagslayout, this);
+				R.layout.edit_tagsrow, this);
 
 		button = (Button) findViewById(R.id.editnode_tag_remove);
 		button.setOnClickListener(removeListener);

@@ -23,7 +23,6 @@ import android.widget.TimePicker;
 import com.matburt.mobileorg.R;
 
 class DateTableRow extends TableRow {
-	private TableLayout parentTable;
 	private Button dateButton;
 	private Button startTimeButton;
 
@@ -36,34 +35,33 @@ class DateTableRow extends TableRow {
 	private Button endTimeButton;
 
 	public DateTableRow(Context context, EditDetailsFragment parentFragment,
-			TableLayout parentTable, String title) {
+			TableLayout parentTable, View.OnClickListener removeListener, String title) {
 		super(context);
 		this.activity = parentFragment;
 		final Calendar c = Calendar.getInstance();
-		init(context, parentFragment, parentTable, title, c.get(Calendar.YEAR),
+		init(context, parentFragment, parentTable, removeListener, title, c.get(Calendar.YEAR),
 				c.get(Calendar.MONTH) + 1, c.get(Calendar.DAY_OF_MONTH), 0, 0);
 	}
 
 	public DateTableRow(Context context, EditDetailsFragment parentFragment,
-			TableLayout parentTable, String title, int year, int monthOfYear,
+			TableLayout parentTable, View.OnClickListener removeListener, String title, int year, int monthOfYear,
 			int dayOfMonth) {
 		super(context);
-		init(context, parentFragment, parentTable, title, year, monthOfYear,
+		init(context, parentFragment, parentTable, removeListener, title, year, monthOfYear,
 				dayOfMonth, 0, 0);
 	}
 
 	public DateTableRow(Context context, EditDetailsFragment parentFragment,
-			TableLayout parentTable, String title, int year, int monthOfYear,
+			TableLayout parentTable, View.OnClickListener removeListener, String title, int year, int monthOfYear,
 			int dayOfMonth, int timeOfDay, int minute) {
 		super(context);
-		init(context, parentFragment, parentTable, title, year, monthOfYear,
+		init(context, parentFragment, parentTable, removeListener, title, year, monthOfYear,
 				dayOfMonth, timeOfDay, minute);
 	}
 
 	private void init(Context context, EditDetailsFragment parentFragment,
-			TableLayout parentTable, String title, int year, int monthOfYear,
+			TableLayout parentTable, View.OnClickListener removeListener, String title, int year, int monthOfYear,
 			int dayOfMonth, int timeOfDay, int minute) {
-		this.parentTable = parentTable;
 		this.activity = parentFragment;
 		this.year = year;
 		this.monthOfYear = monthOfYear;
@@ -74,7 +72,7 @@ class DateTableRow extends TableRow {
 		LayoutInflater layoutInflater = (LayoutInflater) context
 				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		TableRow row = (TableRow) layoutInflater.inflate(
-				R.layout.edit_datelayout, this);
+				R.layout.edit_daterow, this);
 		parentTable.addView(row);
 
 		Button removeButton = (Button) findViewById(R.id.dateRemove);
@@ -115,7 +113,7 @@ class DateTableRow extends TableRow {
 				newFragment.show(ft, "dialog");
 			}
 		});
-
+		
 		setDate();
 		setTime();
 	}
@@ -196,17 +194,6 @@ class DateTableRow extends TableRow {
 					monthOfYear - 1, dayOfMonth);
 		}
 	}
-
-	private View.OnClickListener removeListener = new View.OnClickListener() {
-		public void onClick(View v) {
-			remove();
-		}
-	};
-
-	private void remove() {
-		parentTable.removeView(this);
-	}
-	
 
 	public String getDate() {
 		return dateButton.getText().toString() + getTime();

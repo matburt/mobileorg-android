@@ -114,19 +114,21 @@ public class EditDetailsFragment extends Fragment {
 				.compile("((\\d{4})-(\\d{1,2})-(\\d{1,2}))(?:\\s+\\w+)?\\s*((\\d{1,2})\\:(\\d{2}))?");
 		Matcher propm = schedulePattern.matcher(node.getScheduled(this.orgDB));
 		
+		
+		
 		if(propm.find()) {
 			DateTableRow dateEntry = null;
 			// TODO Fix guards
 			
 			if(propm.group(6) != null && propm.group(7) != null) {
-				dateEntry = new DateTableRow(getActivity(), this, datesView,
+				dateEntry = new DateTableRow(getActivity(), this, datesView, scheduledRemoveListener,
 						"SCHEDULED", Integer.parseInt(propm.group(2)),
 						Integer.parseInt(propm.group(3)),
 						Integer.parseInt(propm.group(4)),
 						Integer.parseInt(propm.group(6)),
 						Integer.parseInt(propm.group(7)));
 			} else if(propm.groupCount() >= 4) {
-			dateEntry = new DateTableRow(getActivity(), this, datesView,
+			dateEntry = new DateTableRow(getActivity(), this, datesView, scheduledRemoveListener,
 					"SCHEDULED", Integer.parseInt(propm.group(2)),
 					Integer.parseInt(propm.group(3)), Integer.parseInt(propm
 							.group(4)));
@@ -135,6 +137,21 @@ public class EditDetailsFragment extends Fragment {
 			this.scheduledEntry = dateEntry;
 		}
 	}
+	
+	private View.OnClickListener scheduledRemoveListener = new View.OnClickListener() {
+		public void onClick(View v) {
+			datesView.removeView(scheduledEntry);
+			scheduledEntry = null;
+		}
+	};
+	
+	private View.OnClickListener deadlineRemoveListener = new View.OnClickListener() {
+		public void onClick(View v) {
+			datesView.removeView(deadlineEntry);
+			deadlineEntry = null;
+		}
+	};
+	
 	
 	static void setupSpinner(Context context, Spinner view, ArrayList<String> data,
 			String selection) {
@@ -156,10 +173,15 @@ public class EditDetailsFragment extends Fragment {
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
 		super.onCreateOptionsMenu(menu, inflater);
 		inflater.inflate(R.menu.edit_details, menu);
+	}
+	
+	@Override
+	public void onPrepareOptionsMenu(Menu menu) {
+		super.onPrepareOptionsMenu(menu);
 		
 		if(this.scheduledEntry != null)
 			menu.findItem(R.id.menu_nodeedit_scheduled).setVisible(false);
-		
+						
 		if(this.deadlineEntry != null)
 			menu.findItem(R.id.menu_nodeedit_deadline).setVisible(false);
 	}
@@ -184,13 +206,13 @@ public class EditDetailsFragment extends Fragment {
 	}
 	
 	private void addDateScheduled() {
-		DateTableRow dateEntry = new DateTableRow(getActivity(), this, datesView,
+		DateTableRow dateEntry = new DateTableRow(getActivity(), this, datesView, scheduledRemoveListener,
 				"SCHEDULED");
 		this.scheduledEntry = dateEntry;
 	}
 	
 	private void addDateDeadline() {
-		DateTableRow dateEntry = new DateTableRow(getActivity(), this, datesView,
+		DateTableRow dateEntry = new DateTableRow(getActivity(), this, datesView, deadlineRemoveListener,
 				"DEADLINE");
 		this.deadlineEntry = dateEntry;
 	}

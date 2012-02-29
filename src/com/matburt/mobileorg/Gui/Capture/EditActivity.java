@@ -62,7 +62,7 @@ public class EditActivity extends FragmentActivity {
 							EditPayloadFragment.class.getName());
 			this.rawPayloadFragment = (EditPayloadFragment) getSupportFragmentManager()
 					.getFragment(savedInstanceState,
-							EditPayloadFragment.class.getName());
+							EditPayloadFragment.class.getName() + "raw");
 		}
 		
 		init();
@@ -76,7 +76,7 @@ public class EditActivity extends FragmentActivity {
 		getSupportFragmentManager().putFragment(outState,
 				EditPayloadFragment.class.getName(), payloadFragment);
 		getSupportFragmentManager().putFragment(outState,
-				EditPayloadFragment.class.getName(), rawPayloadFragment);
+				EditPayloadFragment.class.getName() + "raw", rawPayloadFragment);
 		getSupportFragmentManager().putFragment(outState,
 				EditDetailsFragment.class.getName(), detailsFragment);
         outState.putInt("tab", getSupportActionBar().getSelectedNavigationIndex());
