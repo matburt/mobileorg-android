@@ -45,6 +45,8 @@ public class EditActivity extends FragmentActivity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
+		setContentView(R.layout.edit);
+
 		Intent intent = getIntent();
 		this.actionMode = intent.getStringExtra("actionMode");
 
@@ -60,11 +62,11 @@ public class EditActivity extends FragmentActivity {
 							EditPayloadFragment.class.getName());
 			this.rawPayloadFragment = (EditPayloadFragment) getSupportFragmentManager()
 					.getFragment(savedInstanceState,
-							EditPayloadFragment.class.getName() + "raw");
+							EditPayloadFragment.class.getName());
 		}
 		
 		init();
-		setupActionbar(savedInstanceState);
+		setupActionbarTabs(savedInstanceState);
 	}
 
 	
@@ -74,7 +76,7 @@ public class EditActivity extends FragmentActivity {
 		getSupportFragmentManager().putFragment(outState,
 				EditPayloadFragment.class.getName(), payloadFragment);
 		getSupportFragmentManager().putFragment(outState,
-				EditPayloadFragment.class.getName() + "raw", rawPayloadFragment);
+				EditPayloadFragment.class.getName(), rawPayloadFragment);
 		getSupportFragmentManager().putFragment(outState,
 				EditDetailsFragment.class.getName(), detailsFragment);
         outState.putInt("tab", getSupportActionBar().getSelectedNavigationIndex());
@@ -116,8 +118,7 @@ public class EditActivity extends FragmentActivity {
 	}
 
 
-	private void setupActionbar(Bundle savedInstanceState) {
-		setContentView(R.layout.edit);
+	private void setupActionbarTabs(Bundle savedInstanceState) {
 		ActionBar actionbar = getSupportActionBar();
 
 		actionbar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
@@ -145,43 +146,36 @@ public class EditActivity extends FragmentActivity {
 
 		public TabListener(Fragment fragment, String tag) {
 			this.fragment = fragment;
-			
+
+			FragmentTransaction fragmentTransaction = getSupportFragmentManager()
+					.beginTransaction();
+
 			if (fragment != null && fragment.isAdded() == false) {
-				FragmentTransaction fragmentTransaction = getSupportFragmentManager()
-						.beginTransaction();
 				fragmentTransaction.add(R.id.editnode_fragment_container,
 						fragment, tag);
-				fragmentTransaction.hide(fragment);
-				fragmentTransaction.commit();
 			}
-		}
 
-		@Override
-		public void onTabReselected(Tab tab, FragmentTransaction ft) {
+			fragmentTransaction.hide(fragment).commit();
 		}
 
 		@Override
 		public void onTabSelected(Tab tab, FragmentTransaction ft) {			
-			// The line above throws a NullPointerException last time I tried...
-			//ft.add(R.id.editnode_fragment_container, fragment, null);
-			
 			FragmentTransaction fragmentTransaction = getSupportFragmentManager()
 					.beginTransaction();
-		    fragmentTransaction.show(fragment);
-		    fragmentTransaction.commit();
+		    fragmentTransaction.show(fragment).commit();
 		}
 
 		@Override
 		public void onTabUnselected(Tab tab, FragmentTransaction ft) {
 			if (fragment != null) {
-				// The line above throws a NullPointerException last time I tried...
-				//ft.detach(fragment);
-				
 				FragmentTransaction fragmentTransaction = getSupportFragmentManager()
 						.beginTransaction();
-				fragmentTransaction.hide(fragment);
-			    fragmentTransaction.commit();
+				fragmentTransaction.hide(fragment).commit();
 			}
+		}
+
+		@Override
+		public void onTabReselected(Tab tab, FragmentTransaction ft) {
 		}
 	};
 	

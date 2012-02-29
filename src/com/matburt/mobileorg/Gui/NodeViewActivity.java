@@ -96,6 +96,7 @@ public class NodeViewActivity extends FragmentActivity {
 	}
 	
 	private void runEditNodeActivity() {
+		Log.d("MobileOrg", "runEditNodeActivity() with " + this.node_id);
 		Intent intent = new Intent(this, EditActivity.class);
 		intent.putExtra("actionMode", EditActivity.ACTIONMODE_EDIT);
 		intent.putExtra("node_id", this.node_id);
