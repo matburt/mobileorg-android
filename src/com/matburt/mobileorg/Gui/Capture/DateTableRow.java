@@ -11,6 +11,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentTransaction;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -25,49 +26,100 @@ import com.matburt.mobileorg.R;
 class DateTableRow extends TableRow {
 	private Button dateButton;
 	private Button startTimeButton;
-
-	private int year;
-	private int monthOfYear;
-	private int dayOfMonth;
-	private int timeOfDay;
-	private int minute;
-	private EditDetailsFragment activity;
 	private Button endTimeButton;
 
+	private OrgTimeDate timeDateContainer;
+	
+	public class OrgTimeDate {
+		public int year;
+		public int monthOfYear;
+		public int dayOfMonth;
+		public int startTimeOfDay = -1;
+		public int startMinute = -1;
+		public int endTimeOfDay = -1;
+		public int endMinute = -1;
+		
+		OrgTimeDate() {
+			final Calendar c = Calendar.getInstance();
+			this.year = c.get(Calendar.YEAR);
+			this.monthOfYear = c.get(Calendar.MONTH) + 1;
+			this.dayOfMonth = c.get(Calendar.DAY_OF_MONTH);
+		}
+
+		public OrgTimeDate(int year, int monthOfYear, int dayOfMonth) {
+			this.year = year;
+			this.monthOfYear = monthOfYear;
+			this.dayOfMonth = dayOfMonth;
+		}
+
+		public OrgTimeDate(int year, int monthOfYear, int dayOfMonth,
+				int timeOfDay, int minute) {
+			this.year = year;
+			this.monthOfYear = monthOfYear;
+			this.dayOfMonth = dayOfMonth;
+			this.startTimeOfDay = timeOfDay;
+			this.startMinute = minute;
+		}
+
+		public OrgTimeDate(int year, int monthOfYear, int dayOfMonth,
+				int startTimeOfDay, int startMinute, int endTimeOfDay, int endMinute) {
+			this.year = year;
+			this.monthOfYear = monthOfYear;
+			this.dayOfMonth = dayOfMonth;
+			this.startTimeOfDay = startTimeOfDay;
+			this.startMinute = startMinute;
+			this.endTimeOfDay = endTimeOfDay;
+			this.endMinute = endMinute;
+		}
+	};
+	
+	
 	public DateTableRow(Context context, EditDetailsFragment parentFragment,
-			TableLayout parentTable, View.OnClickListener removeListener, String title) {
+			TableLayout parentTable, View.OnClickListener removeListener,
+			String title) {
 		super(context);
-		this.activity = parentFragment;
-		final Calendar c = Calendar.getInstance();
-		init(context, parentFragment, parentTable, removeListener, title, c.get(Calendar.YEAR),
-				c.get(Calendar.MONTH) + 1, c.get(Calendar.DAY_OF_MONTH), 0, 0);
+		this.timeDateContainer = new OrgTimeDate();
+		init(context, parentFragment, parentTable, removeListener, title);
 	}
 
 	public DateTableRow(Context context, EditDetailsFragment parentFragment,
-			TableLayout parentTable, View.OnClickListener removeListener, String title, int year, int monthOfYear,
-			int dayOfMonth) {
+			TableLayout parentTable, View.OnClickListener removeListener,
+			String title, int year, int monthOfYear, int dayOfMonth) {
 		super(context);
-		init(context, parentFragment, parentTable, removeListener, title, year, monthOfYear,
-				dayOfMonth, 0, 0);
+		this.timeDateContainer = new OrgTimeDate(year, monthOfYear, dayOfMonth);
+		init(context, parentFragment, parentTable, removeListener, title);
+		updateDate();
 	}
 
 	public DateTableRow(Context context, EditDetailsFragment parentFragment,
-			TableLayout parentTable, View.OnClickListener removeListener, String title, int year, int monthOfYear,
-			int dayOfMonth, int timeOfDay, int minute) {
+			TableLayout parentTable, View.OnClickListener removeListener,
+			String title, int year, int monthOfYear, int dayOfMonth,
+			int timeOfDay, int minute) {
 		super(context);
-		init(context, parentFragment, parentTable, removeListener, title, year, monthOfYear,
-				dayOfMonth, timeOfDay, minute);
+		this.timeDateContainer = new OrgTimeDate(year,
+				monthOfYear, dayOfMonth, timeOfDay, minute);
+		init(context, parentFragment, parentTable, removeListener, title);
+		updateDate();
+		updateStartTime();
 	}
 
-	private void init(Context context, EditDetailsFragment parentFragment,
-			TableLayout parentTable, View.OnClickListener removeListener, String title, int year, int monthOfYear,
-			int dayOfMonth, int timeOfDay, int minute) {
-		this.activity = parentFragment;
-		this.year = year;
-		this.monthOfYear = monthOfYear;
-		this.dayOfMonth = dayOfMonth;
-		this.timeOfDay = timeOfDay;
-		this.minute = minute;
+	public DateTableRow(Context context, EditDetailsFragment parentFragment,
+			TableLayout parentTable, View.OnClickListener removeListener,
+			String title, int year, int monthOfYear, int dayOfMonth,
+			int timeOfDay, int minute, int endTimeOfDay, int endMinute) {
+		super(context);
+		this.timeDateContainer = new OrgTimeDate( year,
+				monthOfYear, dayOfMonth, timeOfDay, minute, endTimeOfDay, endMinute);
+		init(context, parentFragment, parentTable, removeListener, title);
+
+		updateDate();
+		updateStartTime();
+		updateEndTime();
+	}
+
+	private void init(Context context,
+			final EditDetailsFragment parentFragment, TableLayout parentTable,
+			View.OnClickListener removeListener, String title) {
 
 		LayoutInflater layoutInflater = (LayoutInflater) context
 				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -84,7 +136,7 @@ class DateTableRow extends TableRow {
 		dateButton = (Button) findViewById(R.id.dateButton);
 		dateButton.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				FragmentTransaction ft = activity.getSupportFragmentManager()
+				FragmentTransaction ft = parentFragment.getSupportFragmentManager()
 						.beginTransaction();
 				DialogFragment newFragment = new DatePickerDialogFragment(
 						dateChangeListener);
@@ -95,7 +147,7 @@ class DateTableRow extends TableRow {
 		startTimeButton = (Button) findViewById(R.id.dateTimeStartButton);
 		startTimeButton.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				FragmentTransaction ft = activity.getSupportFragmentManager()
+				FragmentTransaction ft = parentFragment.getSupportFragmentManager()
 						.beginTransaction();
 				DialogFragment newFragment = new TimePickerDialogFragment(
 						startTimeChangeListener);
@@ -106,48 +158,46 @@ class DateTableRow extends TableRow {
 		endTimeButton = (Button) findViewById(R.id.dateTimeEndButton);
 		endTimeButton.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				FragmentTransaction ft = activity.getSupportFragmentManager()
+				FragmentTransaction ft = parentFragment.getSupportFragmentManager()
 						.beginTransaction();
 				DialogFragment newFragment = new TimePickerDialogFragment(
 						endTimeChangeListener);
 				newFragment.show(ft, "dialog");
 			}
 		});
-		
-		setDate();
-		setTime();
 	}
 
-	private String getTime() {
-		String time = startTimeButton.getText().toString();
-
-		if (time.equals("00:00"))
-			return "";
-		else
-			return " " + time;
+	private void setStartTime(int timeOfDay, int minute) {
+		this.timeDateContainer.startTimeOfDay = timeOfDay;
+		this.timeDateContainer.startMinute = minute;
+		updateStartTime();
 	}
 
-	private void setTime(int timeOfDay, int minute) {
-		this.timeOfDay = timeOfDay;
-		this.minute = minute;
-		startTimeButton.setText(String.format("%02d:%02d", timeOfDay, minute));
+	private void updateStartTime() {
+		startTimeButton.setText(String.format("%02d:%02d", this.timeDateContainer.startTimeOfDay, this.timeDateContainer.startMinute));
+	}
+	
+	private void setEndTime(int timeOfDay, int minute) {
+		this.timeDateContainer.endTimeOfDay = timeOfDay;
+		this.timeDateContainer.endMinute = minute;
+		updateEndTime();
 	}
 
-	private void setTime() {
-		startTimeButton.setText(String.format("%02d:%02d", timeOfDay, minute));
-	}
-
-	private void setDate() {
-		dateButton.setText(String.format("%d-%02d-%02d", year, monthOfYear,
-				dayOfMonth));
+	private void updateEndTime() {
+		startTimeButton.setText(String.format("%02d:%02d", this.timeDateContainer.endTimeOfDay, this.timeDateContainer.endMinute));
 	}
 
 	private void setDate(int year, int monthOfYear, int dayOfMonth) {
-		this.year = year;
-		this.monthOfYear = monthOfYear;
-		this.dayOfMonth = dayOfMonth;
+		this.timeDateContainer.year = year;
+		this.timeDateContainer.monthOfYear = monthOfYear;
+		this.timeDateContainer.dayOfMonth = dayOfMonth;
 
-		setDate();
+		updateDate();
+	}
+
+	private void updateDate() {
+		dateButton.setText(String.format("%d-%02d-%02d", this.timeDateContainer.year, this.timeDateContainer.monthOfYear,
+				this.timeDateContainer.dayOfMonth));
 	}
 
 	private DatePickerDialog.OnDateSetListener dateChangeListener = new DatePickerDialog.OnDateSetListener() {
@@ -159,13 +209,13 @@ class DateTableRow extends TableRow {
 
 	private TimePickerDialog.OnTimeSetListener startTimeChangeListener = new TimePickerDialog.OnTimeSetListener() {
 		public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-			setTime(hourOfDay, minute);
+			setStartTime(hourOfDay, minute);
 		}
 	};
 	
 	private TimePickerDialog.OnTimeSetListener endTimeChangeListener = new TimePickerDialog.OnTimeSetListener() {
 		public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-			endTimeButton.setText(String.format("%02d:%02d", timeOfDay, minute));		
+			setEndTime(hourOfDay, minute);		
 		}
 	};
 
@@ -177,8 +227,8 @@ class DateTableRow extends TableRow {
 		}
 
 		public Dialog onCreateDialog(Bundle savedInstanceState) {
-			return new TimePickerDialog(getActivity(), callback, timeOfDay,
-					minute, true);
+			return new TimePickerDialog(getActivity(), callback, timeDateContainer.startTimeOfDay,
+					timeDateContainer.startMinute, true);
 		}
 	}
 
@@ -190,12 +240,31 @@ class DateTableRow extends TableRow {
 		}
 
 		public Dialog onCreateDialog(Bundle savedInstanceState) {
-			return new DatePickerDialog(getActivity(), callback, year,
-					monthOfYear - 1, dayOfMonth);
+			return new DatePickerDialog(getActivity(), callback, timeDateContainer.year,
+					timeDateContainer.monthOfYear - 1, timeDateContainer.dayOfMonth);
 		}
 	}
 
+	
 	public String getDate() {
-		return dateButton.getText().toString() + getTime();
+		return dateButton.getText().toString() + getStartTime() + getEndTime();
+	}
+	
+	private String getStartTime() {
+		String time = startTimeButton.getText().toString();
+
+		if (time.equals("00:00") || TextUtils.isEmpty(time))
+			return "";
+		else
+			return " " + time;
+	}
+	
+	private String getEndTime() {
+		String time = endTimeButton.getText().toString();
+
+		if (time.equals("00:00") || TextUtils.isEmpty(time))
+			return "";
+		else
+			return "-" + time;
 	}
 }

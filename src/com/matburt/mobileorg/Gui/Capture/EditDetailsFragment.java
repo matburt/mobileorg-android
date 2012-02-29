@@ -89,7 +89,7 @@ public class EditDetailsFragment extends Fragment {
 			titleView.setText(node.getName());
 			
 			setupTags(orgDB.getTags());
-			setupScheduled();
+			setupDates();
 			setupSpinner(getActivity(), todoStateView, orgDB.getTodos(), node.getTodo());
 			setupSpinner(getActivity(), priorityView, orgDB.getPriorities(), node.getPriority());
 		}
@@ -109,33 +109,35 @@ public class EditDetailsFragment extends Fragment {
 		}
 	}
 	
-	private void setupScheduled() {
+	private void setupDates() {
+		this.scheduledEntry = setupDate(node.getScheduled(this.orgDB), "SCHEDULED", scheduledRemoveListener);
+		this.deadlineEntry = setupDate(node.getDeadline(this.orgDB), "DEADLINE", deadlineRemoveListener);
+	}
+	
+	private DateTableRow setupDate(String date, String title, View.OnClickListener removeListener) {
 		final Pattern schedulePattern = Pattern
 				.compile("((\\d{4})-(\\d{1,2})-(\\d{1,2}))(?:\\s+\\w+)?\\s*((\\d{1,2})\\:(\\d{2}))?");
-		Matcher propm = schedulePattern.matcher(node.getScheduled(this.orgDB));
-		
-		
-		
+		Matcher propm = schedulePattern.matcher(date);
+		DateTableRow dateEntry = null;
+
 		if(propm.find()) {
-			DateTableRow dateEntry = null;
 			// TODO Fix guards
 			
 			if(propm.group(6) != null && propm.group(7) != null) {
-				dateEntry = new DateTableRow(getActivity(), this, datesView, scheduledRemoveListener,
-						"SCHEDULED", Integer.parseInt(propm.group(2)),
+				dateEntry = new DateTableRow(getActivity(), this, datesView, removeListener,
+						title, Integer.parseInt(propm.group(2)),
 						Integer.parseInt(propm.group(3)),
 						Integer.parseInt(propm.group(4)),
 						Integer.parseInt(propm.group(6)),
 						Integer.parseInt(propm.group(7)));
 			} else if(propm.groupCount() >= 4) {
-			dateEntry = new DateTableRow(getActivity(), this, datesView, scheduledRemoveListener,
-					"SCHEDULED", Integer.parseInt(propm.group(2)),
+			dateEntry = new DateTableRow(getActivity(), this, datesView, removeListener,
+					title, Integer.parseInt(propm.group(2)),
 					Integer.parseInt(propm.group(3)), Integer.parseInt(propm
 							.group(4)));
 			}
-			
-			this.scheduledEntry = dateEntry;
 		}
+		return dateEntry;
 	}
 	
 	private View.OnClickListener scheduledRemoveListener = new View.OnClickListener() {
@@ -152,22 +154,6 @@ public class EditDetailsFragment extends Fragment {
 		}
 	};
 	
-	
-	static void setupSpinner(Context context, Spinner view, ArrayList<String> data,
-			String selection) {
-		data.add("");
-
-		ArrayAdapter<String> adapter = new ArrayAdapter<String>(context,
-				android.R.layout.simple_spinner_item, data);
-		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-		view.setAdapter(adapter);
-		int pos = data.indexOf(selection);
-		if (pos < 0) {
-			pos = 0;
-		}
-		view.setSelection(pos);
-	}
-	
     
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -181,9 +167,13 @@ public class EditDetailsFragment extends Fragment {
 		
 		if(this.scheduledEntry != null)
 			menu.findItem(R.id.menu_nodeedit_scheduled).setVisible(false);
+		else
+			menu.findItem(R.id.menu_nodeedit_scheduled).setVisible(true);
 						
 		if(this.deadlineEntry != null)
 			menu.findItem(R.id.menu_nodeedit_deadline).setVisible(false);
+		else
+			menu.findItem(R.id.menu_nodeedit_deadline).setVisible(true);
 	}
 
 	@Override
@@ -284,5 +274,20 @@ public class EditDetailsFragment extends Fragment {
 	
 	public String getPriority() {
 		return priorityView.getSelectedItem().toString();
+	}
+	
+	static void setupSpinner(Context context, Spinner view, ArrayList<String> data,
+			String selection) {
+		data.add("");
+
+		ArrayAdapter<String> adapter = new ArrayAdapter<String>(context,
+				android.R.layout.simple_spinner_item, data);
+		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		view.setAdapter(adapter);
+		int pos = data.indexOf(selection);
+		if (pos < 0) {
+			pos = 0;
+		}
+		view.setSelection(pos);
 	}
 }

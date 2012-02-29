@@ -281,9 +281,19 @@ public class NodeWrapper {
 			this.cursor.close();
 	}
 	
+	public String getDate(OrgDatabase db) {
+		preparePayload(db);
+		return payload.getDate();
+	}
+	
 	public String getScheduled(OrgDatabase db) {
 		preparePayload(db);
 		return payload.getScheduled();
+	}
+	
+	public String getDeadline(OrgDatabase db) {
+		preparePayload(db);
+		return payload.getDeadline();
 	}
 }
 
