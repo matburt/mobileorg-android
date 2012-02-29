@@ -1,4 +1,4 @@
-package com.matburt.mobileorg.Gui;
+package com.matburt.mobileorg.Gui.Capture;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -27,7 +27,7 @@ import com.matburt.mobileorg.Parsing.OrgDatabase;
 import com.matburt.mobileorg.Parsing.OrgFile;
 import com.matburt.mobileorg.Synchronizers.Synchronizer;
 
-public class NodeEditActivity extends FragmentActivity {
+public class EditActivity extends FragmentActivity {
 	public final static String ACTIONMODE_CREATE = "create";
 	public final static String ACTIONMODE_EDIT = "edit";
 
@@ -37,9 +37,9 @@ public class NodeEditActivity extends FragmentActivity {
 	private OrgDatabase orgDB;
 	private MobileOrgApplication appInst;
 	
-	private NodeEditDetailsFragment detailsFragment;
-	private NodeEditBodyFragment payloadFragment;
-	private NodeEditBodyFragment rawPayloadFragment;
+	private EditDetailsFragment detailsFragment;
+	private EditPayloadFragment payloadFragment;
+	private EditPayloadFragment rawPayloadFragment;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -52,15 +52,15 @@ public class NodeEditActivity extends FragmentActivity {
 		this.orgDB = appInst.getDB();
 		
 		if (savedInstanceState != null) {
-			this.detailsFragment = (NodeEditDetailsFragment) getSupportFragmentManager()
+			this.detailsFragment = (EditDetailsFragment) getSupportFragmentManager()
 					.getFragment(savedInstanceState,
-							NodeEditDetailsFragment.class.getName());
-			this.payloadFragment = (NodeEditBodyFragment) getSupportFragmentManager()
+							EditDetailsFragment.class.getName());
+			this.payloadFragment = (EditPayloadFragment) getSupportFragmentManager()
 					.getFragment(savedInstanceState,
-							NodeEditBodyFragment.class.getName());
-			this.rawPayloadFragment = (NodeEditBodyFragment) getSupportFragmentManager()
+							EditPayloadFragment.class.getName());
+			this.rawPayloadFragment = (EditPayloadFragment) getSupportFragmentManager()
 					.getFragment(savedInstanceState,
-							NodeEditBodyFragment.class.getName() + "raw");
+							EditPayloadFragment.class.getName() + "raw");
 		}
 		
 		init();
@@ -72,21 +72,21 @@ public class NodeEditActivity extends FragmentActivity {
 	protected void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
 		getSupportFragmentManager().putFragment(outState,
-				NodeEditBodyFragment.class.getName(), payloadFragment);
+				EditPayloadFragment.class.getName(), payloadFragment);
 		getSupportFragmentManager().putFragment(outState,
-				NodeEditBodyFragment.class.getName() + "raw", rawPayloadFragment);
+				EditPayloadFragment.class.getName() + "raw", rawPayloadFragment);
 		getSupportFragmentManager().putFragment(outState,
-				NodeEditDetailsFragment.class.getName(), detailsFragment);
+				EditDetailsFragment.class.getName(), detailsFragment);
         outState.putInt("tab", getSupportActionBar().getSelectedNavigationIndex());
 	}
 	
 	private void init() {
 		if (this.detailsFragment == null)
-			this.detailsFragment = new NodeEditDetailsFragment();
+			this.detailsFragment = new EditDetailsFragment();
 		if (this.payloadFragment == null)
-			this.payloadFragment = new NodeEditBodyFragment();
+			this.payloadFragment = new EditPayloadFragment();
 		if (this.rawPayloadFragment == null)
-			this.rawPayloadFragment = new NodeEditBodyFragment();
+			this.rawPayloadFragment = new EditPayloadFragment();
 		
 		String defaultTodo = PreferenceManager
 				.getDefaultSharedPreferences(this).getString("defaultTodo", "");
@@ -117,7 +117,7 @@ public class NodeEditActivity extends FragmentActivity {
 
 
 	private void setupActionbar(Bundle savedInstanceState) {
-		setContentView(R.layout.editnode);
+		setContentView(R.layout.edit);
 		ActionBar actionbar = getSupportActionBar();
 
 		actionbar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
@@ -189,7 +189,7 @@ public class NodeEditActivity extends FragmentActivity {
 	public boolean onCreateOptionsMenu(android.support.v4.view.Menu menu) {
     	super.onCreateOptionsMenu(menu);
 		MenuInflater inflater = getMenuInflater();
-	    inflater.inflate(R.menu.nodeedit, menu);
+	    inflater.inflate(R.menu.edit, menu);
 		return true;
 	}
 	
@@ -197,7 +197,6 @@ public class NodeEditActivity extends FragmentActivity {
 	public boolean onOptionsItemSelected(android.support.v4.view.MenuItem item) {
 		switch (item.getItemId()) {
 		case android.R.id.home:
-			// TODO do something
 			return true;
 			
 		case R.id.nodeedit_save:
@@ -243,22 +242,25 @@ public class NodeEditActivity extends FragmentActivity {
 		builder.create().show();
 	}
 
-	private StringBuilder insertOrReplace(StringBuilder payload, String key, String value) {
-		if(TextUtils.isEmpty(value))
-			return payload;
-		
-		final Pattern schedulePattern = Pattern
-				.compile("SCHEDULED\\:\\s*<[^>]+>");
-		Matcher matcher = schedulePattern.matcher(payload);
-		
-		if(matcher.find())
-			payload.replace(matcher.start(), matcher.end(), value);
+	private StringBuilder insertOrReplace(StringBuilder payloadResidue,
+			String key, String value) {
+		Log.d("MobileOrg", "Payload: " + payloadResidue);
+		Log.d("MobileOrg", "Value: " + value);
+
+		if (TextUtils.isEmpty(value))
+			return payloadResidue;
+
+		final Pattern schedulePattern = Pattern.compile(key + "\\s*<[^>]+>");
+		Matcher matcher = schedulePattern.matcher(payloadResidue);
+
+		if (matcher.find())
+			payloadResidue.replace(matcher.start(), matcher.end(), value);
 		else {
 			Log.d("MobileOrg", "Didn't replace scheduled!");
-			payload.insert(0, value).append("\n");
+			payloadResidue.insert(0, value).append("\n");
 		}
-		
-		return payload;
+
+		return payloadResidue;
 	}
 	
 	private void save() {
@@ -266,11 +268,9 @@ public class NodeEditActivity extends FragmentActivity {
 		String newTodo = this.detailsFragment.getTodo();
 		String newPriority = this.detailsFragment.getPriority();
 		StringBuilder newPayload = new StringBuilder(this.payloadFragment.getText());
-		String newTags = this.detailsFragment.getTagsSelection();
+		String newTags = this.detailsFragment.getTags();
 		String newScheduled = this.detailsFragment.getScheduled();
-				
-		newPayload = insertOrReplace(newPayload, "SCHEDULED:", newScheduled);
-		
+						
 		if (this.actionMode.equals(ACTIONMODE_CREATE)) {
 			MobileOrgApplication appInst = (MobileOrgApplication) this.getApplication();
 			OrgDatabase orgDB = appInst.getDB();
@@ -286,6 +286,11 @@ public class NodeEditActivity extends FragmentActivity {
 			orgDB.addNodePayload(node_id, newPayload.toString());
 			
 		} else if (this.actionMode.equals(ACTIONMODE_EDIT)) {
+			//StringBuilder newPayloadResidue = 
+			insertOrReplace(
+					new StringBuilder(node.getPayloadResidue(orgDB)),
+					"SCHEDULED:", newScheduled);
+
 			try {
 				editNode(newTitle, newTodo, newPriority, newPayload.toString(), newTags);
 			} catch (IOException e) {

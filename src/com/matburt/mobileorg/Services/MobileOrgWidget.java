@@ -13,7 +13,7 @@ import android.os.IBinder;
 import android.widget.RemoteViews;
 
 import com.matburt.mobileorg.R;
-import com.matburt.mobileorg.Gui.NodeEditActivity;
+import com.matburt.mobileorg.Gui.Capture.EditActivity;
 import com.matburt.mobileorg.Synchronizers.Synchronizer;
 
 public class MobileOrgWidget extends AppWidgetProvider {
@@ -47,8 +47,8 @@ public class MobileOrgWidget extends AppWidgetProvider {
             updateViews = new RemoteViews(context.getPackageName(),
                                           R.layout.widget);
             
-            Intent intent = new Intent(context, NodeEditActivity.class);
-            intent.setAction(NodeEditActivity.ACTIONMODE_CREATE);
+            Intent intent = new Intent(context, EditActivity.class);
+            intent.setAction(EditActivity.ACTIONMODE_CREATE);
             PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
             updateViews.setOnClickPendingIntent(R.id.widget, pendingIntent);
 

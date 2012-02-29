@@ -20,6 +20,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 import com.matburt.mobileorg.R;
+import com.matburt.mobileorg.Gui.Capture.EditActivity;
 import com.matburt.mobileorg.Parsing.MobileOrgApplication;
 import com.matburt.mobileorg.Parsing.NodeWrapper;
 import com.matburt.mobileorg.Synchronizers.Synchronizer;
@@ -95,15 +96,15 @@ public class NodeViewActivity extends FragmentActivity {
 	}
 	
 	private void runEditNodeActivity() {
-		Intent intent = new Intent(this, NodeEditActivity.class);
-		intent.putExtra("actionMode", NodeEditActivity.ACTIONMODE_EDIT);
+		Intent intent = new Intent(this, EditActivity.class);
+		intent.putExtra("actionMode", EditActivity.ACTIONMODE_EDIT);
 		intent.putExtra("node_id", this.node_id);
 		startActivity(intent);
 	}
 	
 	private void runEditNewNodeActivity() {
-		Intent intent = new Intent(this, NodeEditActivity.class);
-		intent.putExtra("actionMode", NodeEditActivity.ACTIONMODE_CREATE);
+		Intent intent = new Intent(this, EditActivity.class);
+		intent.putExtra("actionMode", EditActivity.ACTIONMODE_CREATE);
 		startActivity(intent);
 	}
 

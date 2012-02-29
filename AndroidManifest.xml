@@ -85,7 +85,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".Gui.NodeEditActivity"
+            android:name=".Gui.Capture.EditActivity"
             android:exported="true"
             android:label="Org Capture"
             android:theme="@style/Theme.MobileOrgActionbar"

@@ -36,6 +36,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.matburt.mobileorg.R;
+import com.matburt.mobileorg.Gui.Capture.EditActivity;
 import com.matburt.mobileorg.Parsing.MobileOrgApplication;
 import com.matburt.mobileorg.Parsing.NodeWrapper;
 import com.matburt.mobileorg.Parsing.OrgFile;
@@ -248,16 +249,16 @@ public class OutlineActivity extends FragmentActivity
     }
 	
 	private boolean runEditNewNodeActivity() {
-		Intent intent = new Intent(this, NodeEditActivity.class);
-		intent.putExtra("actionMode", NodeEditActivity.ACTIONMODE_CREATE);
+		Intent intent = new Intent(this, EditActivity.class);
+		intent.putExtra("actionMode", EditActivity.ACTIONMODE_CREATE);
 		startActivity(intent);
 		return true;
 	}
 	
 	private void runEditNodeActivity(long nodeId) {
 		Intent intent = new Intent(this,
-				NodeEditActivity.class);
-		intent.putExtra("actionMode", NodeEditActivity.ACTIONMODE_EDIT);
+				EditActivity.class);
+		intent.putExtra("actionMode", EditActivity.ACTIONMODE_EDIT);
 		intent.putExtra("node_id", nodeId);
 		startActivity(intent);
 	}

@@ -1,4 +1,4 @@
-package com.matburt.mobileorg.Gui;
+package com.matburt.mobileorg.Gui.Capture;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -11,7 +11,7 @@ import android.widget.EditText;
 
 import com.matburt.mobileorg.R;
 
-public class NodeEditBodyFragment extends Fragment {
+public class EditPayloadFragment extends Fragment {
 	public static final String DISPLAY_STRING = "text";
 	public static final String RESULT_STRING = "text";
     private EditText editDisplay;
@@ -28,7 +28,7 @@ public class NodeEditBodyFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
     	super.onCreate(savedInstanceState);
-        View view = inflater.inflate(R.layout.editnodebody, container, false);
+        View view = inflater.inflate(R.layout.edit_body, container, false);
         this.editDisplay = (EditText) view.findViewById(R.id.textDisplay);
 
         setText(this.content);
@@ -49,7 +49,7 @@ public class NodeEditBodyFragment extends Fragment {
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
 		super.onCreateOptionsMenu(menu, inflater);
-		inflater.inflate(R.menu.nodeeditbody, menu);
+		inflater.inflate(R.menu.edit_body, menu);
 	}
 
 	@Override
@@ -63,6 +63,6 @@ public class NodeEditBodyFragment extends Fragment {
 	}
 	
 	public void insertTimestamp() {
-		this.editDisplay.append(NodeEditActivity.getTimestamp());
+		this.editDisplay.append(EditActivity.getTimestamp());
 	}
 }

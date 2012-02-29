@@ -153,5 +153,7 @@
   <string name="preference_calendar_show_habits_summary">Shows habits in the calendar</string>
   <string name="preference_calendar_show_habits">Show habits</string>
   <string name="preference_calendar_show_done_summary">Show done items in the calendar</string>
-  <string name="preference_calendar_show_done">Show done</string>  
+  <string name="preference_calendar_show_done">Show done</string>
+  <string name="edit_date_start">Start</string>
+  <string name="edit_date_end">End</string>  
 </resources>

@@ -18,11 +18,18 @@
         android:hint="" />
 
     <Button
-        android:id="@+id/dateTimeButton"
+        android:id="@+id/dateTimeStartButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_span="3"
-        android:hint="" />
+        android:hint="@string/edit_date_start" />
+
+    <Button
+        android:id="@+id/dateTimeEndButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_span="3"
+        android:hint="@string/edit_date_end" />
 
     <Button
         android:id="@+id/dateRemove"
