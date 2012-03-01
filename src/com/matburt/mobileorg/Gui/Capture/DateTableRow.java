@@ -20,7 +20,6 @@ import android.widget.DatePicker;
 import android.widget.ImageView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
-import android.widget.TextView;
 import android.widget.TimePicker;
 
 import com.matburt.mobileorg.R;
@@ -89,9 +88,6 @@ public class DateTableRow extends TableRow {
 		Button removeButton = (Button) findViewById(R.id.dateRemove);
 		removeButton.setOnClickListener(removeListener);
 
-//		TextView textView = (TextView) findViewById(R.id.dateText);
-//		textView.setText(title);
-		
 		ImageView imageView = (ImageView) findViewById(R.id.dateImage);
 		
 		if(title.equals("DEADLINE"))
