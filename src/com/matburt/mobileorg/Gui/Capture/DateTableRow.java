@@ -17,6 +17,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.DatePicker;
+import android.widget.ImageView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -31,7 +32,7 @@ public class DateTableRow extends TableRow {
 
 	private OrgTimeDate timeDateContainer;
 	
-	public class OrgTimeDate {
+	public static class OrgTimeDate {
 		public int year;
 		public int monthOfYear;
 		public int dayOfMonth;
@@ -46,32 +47,6 @@ public class DateTableRow extends TableRow {
 			this.monthOfYear = c.get(Calendar.MONTH) + 1;
 			this.dayOfMonth = c.get(Calendar.DAY_OF_MONTH);
 		}
-
-		public OrgTimeDate(int year, int monthOfYear, int dayOfMonth) {
-			this.year = year;
-			this.monthOfYear = monthOfYear;
-			this.dayOfMonth = dayOfMonth;
-		}
-
-		public OrgTimeDate(int year, int monthOfYear, int dayOfMonth,
-				int timeOfDay, int minute) {
-			this.year = year;
-			this.monthOfYear = monthOfYear;
-			this.dayOfMonth = dayOfMonth;
-			this.startTimeOfDay = timeOfDay;
-			this.startMinute = minute;
-		}
-
-		public OrgTimeDate(int year, int monthOfYear, int dayOfMonth,
-				int startTimeOfDay, int startMinute, int endTimeOfDay, int endMinute) {
-			this.year = year;
-			this.monthOfYear = monthOfYear;
-			this.dayOfMonth = dayOfMonth;
-			this.startTimeOfDay = startTimeOfDay;
-			this.startMinute = startMinute;
-			this.endTimeOfDay = endTimeOfDay;
-			this.endMinute = endMinute;
-		}
 	};
 	
 	
@@ -82,40 +57,23 @@ public class DateTableRow extends TableRow {
 		this.timeDateContainer = new OrgTimeDate();
 		init(context, parentFragment, parentTable, removeListener, title);
 	}
-
+	
 	public DateTableRow(Context context, EditDetailsFragment parentFragment,
 			TableLayout parentTable, View.OnClickListener removeListener,
-			String title, int year, int monthOfYear, int dayOfMonth) {
+			String title, OrgTimeDate timeDateContainer) {
 		super(context);
-		this.timeDateContainer = new OrgTimeDate(year, monthOfYear, dayOfMonth);
-		init(context, parentFragment, parentTable, removeListener, title);
-		updateDate();
-	}
-
-	public DateTableRow(Context context, EditDetailsFragment parentFragment,
-			TableLayout parentTable, View.OnClickListener removeListener,
-			String title, int year, int monthOfYear, int dayOfMonth,
-			int timeOfDay, int minute) {
-		super(context);
-		this.timeDateContainer = new OrgTimeDate(year,
-				monthOfYear, dayOfMonth, timeOfDay, minute);
-		init(context, parentFragment, parentTable, removeListener, title);
-		updateDate();
-		updateStartTime();
-	}
-
-	public DateTableRow(Context context, EditDetailsFragment parentFragment,
-			TableLayout parentTable, View.OnClickListener removeListener,
-			String title, int year, int monthOfYear, int dayOfMonth,
-			int timeOfDay, int minute, int endTimeOfDay, int endMinute) {
-		super(context);
-		this.timeDateContainer = new OrgTimeDate( year,
-				monthOfYear, dayOfMonth, timeOfDay, minute, endTimeOfDay, endMinute);
+		this.timeDateContainer = timeDateContainer;
 		init(context, parentFragment, parentTable, removeListener, title);
 
 		updateDate();
-		updateStartTime();
-		updateEndTime();
+		
+		if (timeDateContainer.startTimeOfDay != 0
+				|| timeDateContainer.startMinute != 0)
+			updateStartTime();
+		
+		if (timeDateContainer.endTimeOfDay != 0
+				|| timeDateContainer.endMinute != 0)
+			updateEndTime();
 	}
 
 	private void init(Context context,
@@ -131,8 +89,16 @@ public class DateTableRow extends TableRow {
 		Button removeButton = (Button) findViewById(R.id.dateRemove);
 		removeButton.setOnClickListener(removeListener);
 
-		TextView textView = (TextView) findViewById(R.id.dateText);
-		textView.setText(title);
+//		TextView textView = (TextView) findViewById(R.id.dateText);
+//		textView.setText(title);
+		
+		ImageView imageView = (ImageView) findViewById(R.id.dateImage);
+		
+		if(title.equals("DEADLINE"))
+			imageView.setImageResource(R.drawable.ic_menu_today);
+		else
+			imageView.setImageResource(R.drawable.ic_menu_month);
+
 
 		dateButton = (Button) findViewById(R.id.dateButton);
 		dateButton.setOnClickListener(new View.OnClickListener() {

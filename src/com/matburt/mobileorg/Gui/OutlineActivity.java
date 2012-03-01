@@ -75,21 +75,19 @@ public class OutlineActivity extends FragmentActivity
 		Intent intent = getIntent();
 		node_id = intent.getLongExtra("node_id", -1);
 
-		if(this.node_id == -1) {
-			if(this.appInst.isSyncConfigured() == false) {
-                this.showWizard();
-            }
-            else {
-                if (!this.checkVersionCode()) {
-                    this.showUpgradePopup();
-                }
-            }
+		if (this.node_id == -1) {
+			if (this.appInst.isSyncConfigured() == false) {
+				this.showWizard();
+			} else {
+				if (!this.checkVersionCode()) {
+					this.showUpgradePopup();
+				}
+			}
+		} else {
+			if (!this.checkVersionCode()) {
+				this.showUpgradePopup();
+			}
 		}
-        else {
-            if (!this.checkVersionCode()) {
-                  this.showUpgradePopup();
-            }
-        }
 
 		listView = (ListView) this.findViewById(R.id.outline_list);
 		listView.setOnItemClickListener(outlineClickListener);
@@ -416,7 +414,7 @@ public class OutlineActivity extends FragmentActivity
 			if (appInst.getDB().hasNodeChildren(node_id))
 				runExpandSelection(node_id);
 			else
-				runViewNodeActivity(node_id);
+				runEditNodeActivity(node_id);
 		}
 	};
 	

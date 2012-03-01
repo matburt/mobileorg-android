@@ -238,21 +238,17 @@ public class EditActivity extends FragmentActivity {
 
 	private StringBuilder insertOrReplace(StringBuilder payloadResidue,
 			String key, String value) {
-		Log.d("MobileOrg", "Payload: " + payloadResidue);
-		Log.d("MobileOrg", "Value: " + value);
-
-		if (TextUtils.isEmpty(value))
-			return payloadResidue;
-
 		final Pattern schedulePattern = Pattern.compile(key + "\\s*<[^>]+>");
 		Matcher matcher = schedulePattern.matcher(payloadResidue);
 
-		if (matcher.find())
-			payloadResidue.replace(matcher.start(), matcher.end(), value);
-		else {
-			Log.d("MobileOrg", "Didn't replace scheduled!");
-			payloadResidue.insert(0, value).append("\n");
+		if (matcher.find()) {
+			if (TextUtils.isEmpty(value))
+				payloadResidue.delete(matcher.start(), matcher.end());
+			else
+				payloadResidue.replace(matcher.start(), matcher.end(), value);
 		}
+		else
+			payloadResidue.insert(0, value).append("\n");
 
 		return payloadResidue;
 	}

@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.Menu;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
 import android.view.View;
@@ -19,6 +20,7 @@ import android.widget.Spinner;
 import android.widget.TableLayout;
 
 import com.matburt.mobileorg.R;
+import com.matburt.mobileorg.Gui.Capture.DateTableRow.OrgTimeDate;
 import com.matburt.mobileorg.Parsing.MobileOrgApplication;
 import com.matburt.mobileorg.Parsing.NodeWrapper;
 import com.matburt.mobileorg.Parsing.OrgDatabase;
@@ -116,27 +118,33 @@ public class EditDetailsFragment extends Fragment {
 	
 	private DateTableRow setupDate(String date, String title, View.OnClickListener removeListener) {
 		final Pattern schedulePattern = Pattern
-				.compile("((\\d{4})-(\\d{1,2})-(\\d{1,2}))(?:\\s+\\w+)?\\s*((\\d{1,2})\\:(\\d{2}))?");
+				.compile("((\\d{4})-(\\d{1,2})-(\\d{1,2}))(?:\\s+\\w+)?\\s*" 
+						+ "((\\d{1,2})\\:(\\d{2}))?(\\-((\\d{1,2})\\:(\\d{2})))?");
 		Matcher propm = schedulePattern.matcher(date);
 		DateTableRow dateEntry = null;
 
-		if(propm.find()) {
-			// TODO Fix guards
-			
-			if(propm.group(6) != null && propm.group(7) != null) {
-				dateEntry = new DateTableRow(getActivity(), this, datesView, removeListener,
-						title, Integer.parseInt(propm.group(2)),
-						Integer.parseInt(propm.group(3)),
-						Integer.parseInt(propm.group(4)),
-						Integer.parseInt(propm.group(6)),
-						Integer.parseInt(propm.group(7)));
-			} else if(propm.groupCount() >= 4) {
-			dateEntry = new DateTableRow(getActivity(), this, datesView, removeListener,
-					title, Integer.parseInt(propm.group(2)),
-					Integer.parseInt(propm.group(3)), Integer.parseInt(propm
-							.group(4)));
+		Log.d("MobileOrg", "Called setupDate() with " + title);
+		if (propm.find()) {
+			Log.d("MobileOrg", "Found " + title);
+
+			OrgTimeDate timeDate = new OrgTimeDate();
+
+			try {
+				timeDate.year = Integer.parseInt(propm.group(2));
+				timeDate.monthOfYear = Integer.parseInt(propm.group(3));
+				timeDate.dayOfMonth = Integer.parseInt(propm.group(4));
+
+				timeDate.startTimeOfDay = Integer.parseInt(propm.group(6));
+				timeDate.startMinute = Integer.parseInt(propm.group(7));
+
+				timeDate.endTimeOfDay = Integer.parseInt(propm.group(10));
+				timeDate.endMinute = Integer.parseInt(propm.group(11));
+			} catch (NumberFormatException e) {
 			}
+			dateEntry = new DateTableRow(getActivity(), this, datesView,
+					removeListener, title, timeDate);
 		}
+		
 		return dateEntry;
 	}
 	

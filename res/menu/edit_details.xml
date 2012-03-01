@@ -7,11 +7,11 @@
         android:title="@string/menu_addtag"/>
     <item
         android:id="@+id/menu_nodeedit_scheduled"
-        android:icon="@drawable/ic_dialog_time"
+        android:icon="@drawable/ic_menu_month"
         android:title="@string/menu_addscheduled"/>
     <item
         android:id="@+id/menu_nodeedit_deadline"
-        android:icon="@drawable/ic_dialog_time"
+        android:icon="@drawable/ic_menu_today"
         android:title="@string/menu_adddeadline"/>
 
 </menu>
