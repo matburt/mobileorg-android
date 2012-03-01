@@ -257,13 +257,27 @@ public class EditActivity extends FragmentActivity {
 		return payloadResidue;
 	}
 	
+	private StringBuilder getNewPayloadResidue() {
+		StringBuilder result = new StringBuilder();
+		
+		StringBuilder originalPayloadResidue = new StringBuilder(node.getPayloadResidue(orgDB));
+		
+		String newScheduled = this.detailsFragment.getScheduled();
+		String newDeadline = this.detailsFragment.getDeadline();
+
+		result = insertOrReplace(originalPayloadResidue, "SCHEDULED:", newScheduled);
+		result = insertOrReplace(result, "DEADLINE:", newDeadline);
+		
+		return result;
+	}
+	
 	private void save() {
 		String newTitle = this.detailsFragment.getTitle();
 		String newTodo = this.detailsFragment.getTodo();
 		String newPriority = this.detailsFragment.getPriority();
-		StringBuilder newPayload = new StringBuilder(this.payloadFragment.getText());
 		String newTags = this.detailsFragment.getTags();
-		String newScheduled = this.detailsFragment.getScheduled();
+		StringBuilder newCleanedPayload = new StringBuilder(this.payloadFragment.getText());
+		StringBuilder newPayloadResidue = getNewPayloadResidue();
 						
 		if (this.actionMode.equals(ACTIONMODE_CREATE)) {
 			MobileOrgApplication appInst = (MobileOrgApplication) this.getApplication();
@@ -275,18 +289,14 @@ public class EditActivity extends FragmentActivity {
 			boolean addTimestamp = PreferenceManager.getDefaultSharedPreferences(
 					this).getBoolean("captureWithTimestamp", false);
 			if(addTimestamp)
-				newPayload.append("\n").append(getTimestamp()).append("\n");
+				newCleanedPayload.append("\n").append(getTimestamp()).append("\n");
 			
-			orgDB.addNodePayload(node_id, newPayload.toString());
+			orgDB.addNodePayload(node_id, newCleanedPayload.toString());
 			
 		} else if (this.actionMode.equals(ACTIONMODE_EDIT)) {
-			//StringBuilder newPayloadResidue = 
-			insertOrReplace(
-					new StringBuilder(node.getPayloadResidue(orgDB)),
-					"SCHEDULED:", newScheduled);
 
 			try {
-				editNode(newTitle, newTodo, newPriority, newPayload.toString(), newTags);
+				editNode(newTitle, newTodo, newPriority, newCleanedPayload.toString(), newTags);
 			} catch (IOException e) {
 			}
 		}

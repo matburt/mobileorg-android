@@ -251,14 +251,14 @@ public class EditDetailsFragment extends Fragment {
 	}
 	
 	public String getScheduled() {
-		if(this.scheduledEntry == null)
+		if(this.scheduledEntry == null || TextUtils.isEmpty(this.scheduledEntry.getDate()))
 			return "";
 		else
 			return "SCHEDULED: <" + this.scheduledEntry.getDate() + ">";
 	}
 
 	public String getDeadline() {
-		if(this.scheduledEntry == null)
+		if(this.deadlineEntry == null || TextUtils.isEmpty(this.deadlineEntry.getDate()))
 			return "";
 		else
 			return "DEADLINE: <" + this.deadlineEntry.getDate() + ">";

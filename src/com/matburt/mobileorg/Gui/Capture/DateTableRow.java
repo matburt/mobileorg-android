@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentTransaction;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -23,7 +24,7 @@ import android.widget.TimePicker;
 
 import com.matburt.mobileorg.R;
 
-class DateTableRow extends TableRow {
+public class DateTableRow extends TableRow {
 	private Button dateButton;
 	private Button startTimeButton;
 	private Button endTimeButton;
@@ -34,10 +35,10 @@ class DateTableRow extends TableRow {
 		public int year;
 		public int monthOfYear;
 		public int dayOfMonth;
-		public int startTimeOfDay = -1;
-		public int startMinute = -1;
-		public int endTimeOfDay = -1;
-		public int endMinute = -1;
+		public int startTimeOfDay = 0;
+		public int startMinute = 0;
+		public int endTimeOfDay = 0;
+		public int endMinute = 0;
 		
 		OrgTimeDate() {
 			final Calendar c = Calendar.getInstance();
@@ -140,7 +141,7 @@ class DateTableRow extends TableRow {
 						.beginTransaction();
 				DialogFragment newFragment = new DatePickerDialogFragment(
 						dateChangeListener);
-				newFragment.show(ft, "dialog");
+				newFragment.show(ft, "dateialog");
 			}
 		});
 
@@ -149,9 +150,9 @@ class DateTableRow extends TableRow {
 			public void onClick(View v) {
 				FragmentTransaction ft = parentFragment.getSupportFragmentManager()
 						.beginTransaction();
-				DialogFragment newFragment = new TimePickerDialogFragment(
+				DialogFragment newFragment = new StartTimePickerDialogFragment(
 						startTimeChangeListener);
-				newFragment.show(ft, "dialog");
+				newFragment.show(ft, "startTimeDialog");
 			}
 		});
 		
@@ -160,9 +161,9 @@ class DateTableRow extends TableRow {
 			public void onClick(View v) {
 				FragmentTransaction ft = parentFragment.getSupportFragmentManager()
 						.beginTransaction();
-				DialogFragment newFragment = new TimePickerDialogFragment(
+				DialogFragment newFragment = new EndTimePickerDialogFragment(
 						endTimeChangeListener);
-				newFragment.show(ft, "dialog");
+				newFragment.show(ft, "endTimeDialog");
 			}
 		});
 	}
@@ -184,7 +185,7 @@ class DateTableRow extends TableRow {
 	}
 
 	private void updateEndTime() {
-		startTimeButton.setText(String.format("%02d:%02d", this.timeDateContainer.endTimeOfDay, this.timeDateContainer.endMinute));
+		endTimeButton.setText(String.format("%02d:%02d", this.timeDateContainer.endTimeOfDay, this.timeDateContainer.endMinute));
 	}
 
 	private void setDate(int year, int monthOfYear, int dayOfMonth) {
@@ -209,26 +210,41 @@ class DateTableRow extends TableRow {
 
 	private TimePickerDialog.OnTimeSetListener startTimeChangeListener = new TimePickerDialog.OnTimeSetListener() {
 		public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+			Log.d("MobileOrg", "startTime Listener");
 			setStartTime(hourOfDay, minute);
 		}
 	};
 	
 	private TimePickerDialog.OnTimeSetListener endTimeChangeListener = new TimePickerDialog.OnTimeSetListener() {
 		public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+			Log.d("MobileOrg", "endTime Listener");
 			setEndTime(hourOfDay, minute);		
 		}
 	};
 
-	private class TimePickerDialogFragment extends DialogFragment {
+	private class StartTimePickerDialogFragment extends DialogFragment {
 		private OnTimeSetListener callback;
 
-		public TimePickerDialogFragment(OnTimeSetListener callback) {
+		public StartTimePickerDialogFragment(OnTimeSetListener callback) {
 			this.callback = callback;
 		}
 
 		public Dialog onCreateDialog(Bundle savedInstanceState) {
 			return new TimePickerDialog(getActivity(), callback, timeDateContainer.startTimeOfDay,
 					timeDateContainer.startMinute, true);
+		}
+	}
+	
+	private class EndTimePickerDialogFragment extends DialogFragment {
+		private OnTimeSetListener callback;
+
+		public EndTimePickerDialogFragment(OnTimeSetListener callback) {
+			this.callback = callback;
+		}
+
+		public Dialog onCreateDialog(Bundle savedInstanceState) {
+			return new TimePickerDialog(getActivity(), callback, timeDateContainer.endTimeOfDay,
+					timeDateContainer.endMinute, true);
 		}
 	}
 
