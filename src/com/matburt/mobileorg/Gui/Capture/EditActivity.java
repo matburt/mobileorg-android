@@ -291,12 +291,14 @@ public class EditActivity extends FragmentActivity {
 			if(addTimestamp)
 				newCleanedPayload.append("\n").append(getTimestamp()).append("\n");
 			
-			orgDB.addNodePayload(node_id, newCleanedPayload.toString());
+			orgDB.addNodePayload(node_id, newCleanedPayload.toString() + newPayloadResidue.toString());
 			
 		} else if (this.actionMode.equals(ACTIONMODE_EDIT)) {
 
 			try {
-				editNode(newTitle, newTodo, newPriority, newCleanedPayload.toString(), newTags);
+				editNode(newTitle, newTodo, newPriority,
+						newCleanedPayload.toString(),
+						newPayloadResidue.toString(), newTags);
 			} catch (IOException e) {
 			}
 		}
@@ -312,7 +314,7 @@ public class EditActivity extends FragmentActivity {
 	 * changed.
 	 */ 
 	private void editNode(String newTitle, String newTodo,
-			String newPriority, String newPayload, String newTags) throws IOException {
+			String newPriority, String newCleanedPayload, String newPayloadResidue, String newTags) throws IOException {
 		boolean generateEdits = !node.getFileName(orgDB).equals(OrgFile.CAPTURE_FILE);
 		
 		if (!node.getName().equals(newTitle)) {
@@ -331,8 +333,9 @@ public class EditActivity extends FragmentActivity {
 					newPriority);
 			node.setPriority(newPriority, orgDB);
 		}
-		if (!node.getCleanedPayload(orgDB).equals(newPayload)) {
-			String newRawPayload = node.getPayloadResidue(orgDB) + newPayload;
+		if (!node.getCleanedPayload(orgDB).equals(newCleanedPayload)
+				|| !node.getPayloadResidue(orgDB).equals(newPayloadResidue)) {
+			String newRawPayload = newPayloadResidue + newCleanedPayload;
 	
 			if (generateEdits)
 				orgDB.addEdit("body", node.getNodeId(orgDB), newTitle, node.getRawPayload(orgDB), newRawPayload);
