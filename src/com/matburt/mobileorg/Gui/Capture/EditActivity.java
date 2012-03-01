@@ -246,7 +246,7 @@ public class EditActivity extends FragmentActivity {
 			else
 				payloadResidue.replace(matcher.start(), matcher.end(), value);
 		}
-		else
+		else if(TextUtils.isEmpty(value) == false)
 			payloadResidue.insert(0, value).append("\n");
 
 		return payloadResidue;

@@ -40,6 +40,7 @@ public class EditPayloadFragment extends Fragment {
 
     public void setText(String text) {
         this.editDisplay.setText(text);
+        this.editDisplay.setSelection(text.length());
     }
     
     public String getText() {

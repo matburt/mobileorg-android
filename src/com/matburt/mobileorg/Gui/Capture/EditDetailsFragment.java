@@ -78,6 +78,7 @@ public class EditDetailsFragment extends Fragment {
 		if(this.actionMode == null) {
 			this.actionMode = EditActivity.ACTIONMODE_CREATE;
 			titleView.setText(title);
+			titleView.setSelection(title.length());
 
 			setupSpinner(getActivity(), todoStateView, orgDB.getTodos(), defaultTodo);
 			setupSpinner(getActivity(), priorityView, orgDB.getPriorities(), "");
@@ -89,6 +90,7 @@ public class EditDetailsFragment extends Fragment {
 			setupSpinner(getActivity(), priorityView, orgDB.getPriorities(), "");
 		} else if (this.actionMode.equals(EditActivity.ACTIONMODE_EDIT)) {
 			titleView.setText(node.getName());
+			titleView.setSelection(node.getName().length());
 			
 			setupTags(orgDB.getTags());
 			setupDates();
