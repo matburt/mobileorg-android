@@ -9,7 +9,6 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.Menu;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
 import android.view.View;
@@ -120,15 +119,12 @@ public class EditDetailsFragment extends Fragment {
 	
 	private DateTableRow setupDate(String date, String title, View.OnClickListener removeListener) {
 		final Pattern schedulePattern = Pattern
-				.compile("((\\d{4})-(\\d{1,2})-(\\d{1,2}))(?:\\s+\\w+)?\\s*" 
-						+ "((\\d{1,2})\\:(\\d{2}))?(\\-((\\d{1,2})\\:(\\d{2})))?");
+				.compile("((\\d{4})-(\\d{1,2})-(\\d{1,2}))(?:[^\\d]*)" 
+						+ "((\\d{1,2})\\:(\\d{2}))?(-((\\d{1,2})\\:(\\d{2})))?");
 		Matcher propm = schedulePattern.matcher(date);
 		DateTableRow dateEntry = null;
 
-		Log.d("MobileOrg", "Called setupDate() with " + title);
 		if (propm.find()) {
-			Log.d("MobileOrg", "Found " + title);
-
 			OrgTimeDate timeDate = new OrgTimeDate();
 
 			try {

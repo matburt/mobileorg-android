@@ -35,10 +35,10 @@ public class DateTableRow extends TableRow {
 		public int year;
 		public int monthOfYear;
 		public int dayOfMonth;
-		public int startTimeOfDay = 0;
-		public int startMinute = 0;
-		public int endTimeOfDay = 0;
-		public int endMinute = 0;
+		public int startTimeOfDay = -1;
+		public int startMinute = -1;
+		public int endTimeOfDay = -1;
+		public int endMinute = -1;
 		
 		OrgTimeDate() {
 			final Calendar c = Calendar.getInstance();
@@ -66,12 +66,12 @@ public class DateTableRow extends TableRow {
 
 		updateDate();
 		
-		if (timeDateContainer.startTimeOfDay != 0
-				|| timeDateContainer.startMinute != 0)
+		if (timeDateContainer.startTimeOfDay != -1
+				|| timeDateContainer.startMinute != -1)
 			updateStartTime();
 		
-		if (timeDateContainer.endTimeOfDay != 0
-				|| timeDateContainer.endMinute != 0)
+		if (timeDateContainer.endTimeOfDay != -1
+				|| timeDateContainer.endMinute != -1)
 			updateEndTime();
 	}
 
@@ -192,8 +192,16 @@ public class DateTableRow extends TableRow {
 		}
 
 		public Dialog onCreateDialog(Bundle savedInstanceState) {
-			return new TimePickerDialog(getActivity(), callback, timeDateContainer.startTimeOfDay,
-					timeDateContainer.startMinute, true);
+			int timeOfDay= timeDateContainer.startTimeOfDay;
+			int minute = timeDateContainer.startMinute;
+			
+			if(timeOfDay == -1 || minute == -1) {
+				timeOfDay = 12;
+				minute = 0;
+			}
+				
+			return new TimePickerDialog(getActivity(), callback, timeOfDay,
+					minute, true);
 		}
 	}
 	
@@ -205,8 +213,25 @@ public class DateTableRow extends TableRow {
 		}
 
 		public Dialog onCreateDialog(Bundle savedInstanceState) {
-			return new TimePickerDialog(getActivity(), callback, timeDateContainer.endTimeOfDay,
-					timeDateContainer.endMinute, true);
+			int timeOfDay= timeDateContainer.endTimeOfDay;
+			int minute = timeDateContainer.endMinute;
+			int startTimeOfDay = timeDateContainer.startTimeOfDay;
+			int startMinute = timeDateContainer.startMinute;
+			
+			if ((timeOfDay == -1 || minute == -1)
+					&& (startTimeOfDay != -1 && startMinute != -1)) {
+				timeOfDay = startTimeOfDay + 1;
+				minute = startMinute;
+				
+				if(timeOfDay > 23)
+					timeOfDay = 0;
+			} else {
+				timeOfDay = 12;
+				minute = 0;
+			}
+				
+			return new TimePickerDialog(getActivity(), callback, timeOfDay,
+					minute, true);
 		}
 	}
 
@@ -231,7 +256,8 @@ public class DateTableRow extends TableRow {
 	private String getStartTime() {
 		String time = startTimeButton.getText().toString();
 
-		if (time.equals("00:00") || TextUtils.isEmpty(time))
+		if (timeDateContainer.startTimeOfDay == -1
+				|| timeDateContainer.startMinute == -1 || TextUtils.isEmpty(time))
 			return "";
 		else
 			return " " + time;
@@ -240,7 +266,8 @@ public class DateTableRow extends TableRow {
 	private String getEndTime() {
 		String time = endTimeButton.getText().toString();
 
-		if (time.equals("00:00") || TextUtils.isEmpty(time))
+		if (timeDateContainer.endTimeOfDay == -1
+				|| timeDateContainer.endMinute == -1 || TextUtils.isEmpty(time))
 			return "";
 		else
 			return "-" + time;
