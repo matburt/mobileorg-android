@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:layout_weight="1"
+    android:scrollbars="vertical" >
+
+    <TableLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/editnodelayout"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:stretchColumns="1" >
+
+        <TableRow android:paddingTop="3dip" >
+
+            <EditText
+                android:id="@+id/title"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_span="4"
+                android:hint="@string/title"
+                android:inputType="text|textMultiLine|textAutoCorrect|textCapSentences" />
+        </TableRow>
+
+        <TableRow>
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:contentDescription=""
+                android:src="@drawable/ic_menu_agenda" />
+
+            <Spinner
+                android:id="@+id/todo_state"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:prompt="@string/todo_state" />
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:contentDescription=""
+                android:src="@drawable/ic_menu_star" />
+
+            <Spinner
+                android:id="@+id/priority"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:paddingRight="2dip"
+                android:prompt="@string/priority" />
+        </TableRow>
+
+        <View
+            android:layout_height="2dip"
+            android:background="#FF909090"
+            android:paddingBottom="3dip" />
+
+        <TableLayout
+            android:id="@+id/dates"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content" >
+        </TableLayout>
+
+        <View
+            android:layout_height="2dip"
+            android:background="#FF909090" />
+
+        <TableLayout
+            android:id="@+id/tags"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content" >
+        </TableLayout>
+    </TableLayout>
+
+</ScrollView>

@@ -94,12 +94,14 @@ public class OrgDatabase extends SQLiteOpenHelper {
 /***************************
  * Functions for accessing the files table.
  ***************************/
-	
+
 	public Cursor getFileCursor() {
 		// This gets all of the org file nodes
-		return db.rawQuery("SELECT data.* FROM orgdata data JOIN" 
-				+ "(SELECT f.node_id FROM files f) file on file.node_id = data._id ORDER BY data.name ASC;", null);
-
+//		return db.rawQuery("SELECT data.* FROM orgdata data JOIN" 
+//				+ "(SELECT node_id AS file_node_id FROM files) file on file_node_id = data._id ORDER BY data.name ASC;", null);
+		return db
+				.query("orgdata JOIN files ON (orgdata._id = files.node_id)",
+						nodeJoinFields, null, null, null, null, "orgdata.name ASC");	
 //		Cursor cursor = db.query("files", new String[] { "node_id" }, null,
 //				null, null, null, "name ASC");
 //		
@@ -125,6 +127,10 @@ public class OrgDatabase extends SQLiteOpenHelper {
 //            return null;
 //        }
 	}
+	
+	private final static String[] nodeJoinFields = {"orgdata._id", "orgdata.name", "orgdata.todo", "orgdata.tags", "orgdata.priority",
+		"orgdata.payload", "orgdata.parent_id", "orgdata.file_id"};
+	
 	
 	public long getFileNodeId(String filename) {
 		Cursor cursor = db.query("files", new String[] { "node_id" },
