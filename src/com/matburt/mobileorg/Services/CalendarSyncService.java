@@ -49,7 +49,7 @@ public class CalendarSyncService {
 		Cursor cursor = context.getContentResolver().query(
 				intCalendars.CONTENT_URI,
 				new String[] { intCalendars._ID,
-						intCalendars.CALENDAR_DISPLAY_NAME }, intCalendars.VISIBLE + "=1",
+						intCalendars.CALENDAR_DISPLAY_NAME }, null,
 				null, null);
 		if (cursor != null && cursor.moveToFirst()) {
 			for (int i = 0; i < cursor.getCount(); i++) {
@@ -239,8 +239,8 @@ public class CalendarSyncService {
 			Cursor cursor = context.getContentResolver().query(
 					intCalendars.CONTENT_URI,
 					new String[] { intCalendars._ID,
-							intCalendars.CALENDAR_DISPLAY_NAME }, "selected=1",
-					null, null);
+							intCalendars.CALENDAR_DISPLAY_NAME }, null, null,
+					null);
 
 			if (cursor.getCount() == 0) {
 				result = new CharSequence[1];
