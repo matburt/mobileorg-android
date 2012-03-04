@@ -11,6 +11,10 @@
         android:id="@+id/contextmenu_delete"
         android:title="@string/contextmenu_delete"/>
     <item
+        android:id="@+id/contextmenu_capturechild"
+        android:visible="false"
+        android:title="Capture child"/>
+    <item
         android:id="@+id/contextmenu_node_delete"
         android:title="@string/contextmenu_node_delete"
         android:visible="false"/>
