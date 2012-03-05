@@ -8,7 +8,10 @@
   <string name="menu_edit">Edit</string>
   <string name="menu_search">Search</string>
   <string name="menu_help">Help</string>
+  <string name="menu_cancel">Cancel</string>
   <string name="menu_addtag">Add Tag</string>
+  <string name="menu_adddeadline">Add Deadline</string>
+  <string name="menu_addscheduled">Add Scheduled</string>
   <string name="menu_timestamp">Add Timestamp</string>
   <string name="contextmenu_edit">Edit Node</string>
   <string name="contextmenu_view">View Node</string>
@@ -150,5 +153,8 @@
   <string name="preference_calendar_show_habits_summary">Shows habits in the calendar</string>
   <string name="preference_calendar_show_habits">Show habits</string>
   <string name="preference_calendar_show_done_summary">Show done items in the calendar</string>
-  <string name="preference_calendar_show_done">Show done</string>  
+  <string name="preference_calendar_show_done">Show done</string>
+  <string name="edit_date_start">Start</string>
+  <string name="edit_date_end">End</string>
+  <string name="edit_date_date">Date</string>  
 </resources>

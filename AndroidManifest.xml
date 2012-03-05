@@ -65,7 +65,7 @@
         <activity
             android:name=".Gui.OutlineActivity"
             android:label="MobileOrg" 
-            android:theme="@android:style/Theme.Black.NoTitleBar" >
+            android:theme="@style/Theme.MobileOrgActionbar" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -77,7 +77,7 @@
         <activity
             android:name=".Gui.NodeViewActivity"
             android:label="Org View" 
-            android:theme="@android:style/Theme.Black.NoTitleBar" >
+            android:theme="@style/Theme.MobileOrgActionbar" >
             <intent-filter>
                 <category android:name="android.intent.category.DEFAULT" />
 
@@ -85,9 +85,10 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".Gui.NodeEditActivity"
+            android:name=".Gui.Capture.EditActivity"
             android:exported="true"
             android:label="Org Capture"
+            android:theme="@style/Theme.MobileOrgActionbar"
             android:windowSoftInputMode="adjustPan" >
             <intent-filter>
                 <action android:name="com.matburt.mobileorg.CAPTURE" />
@@ -102,10 +103,6 @@
 
                 <data android:mimeType="text/*" />
             </intent-filter>
-        </activity>
-        <activity
-            android:name=".Gui.NodeEditBodyActivity"
-            android:windowSoftInputMode="adjustResize" >
         </activity>
         <activity android:name=".Gui.SearchActivity" >
             <intent-filter>
