@@ -404,11 +404,10 @@ public class OrgFileParser {
 
 		return allOrgFiles;
 	}
-
-
+	
 	public static ArrayList<HashMap<String, Boolean>> getTodosFromIndex(String filecontents) {
 		Pattern getTodos = Pattern
-				.compile("#\\+TODO:\\s+([\\s\\w-]*)(\\| ([\\s\\w-]*))*");
+				.compile("#\\+TODO:\\s+([^\\|]*)(\\| ([^\\n]*))*");
 		Matcher m = getTodos.matcher(filecontents);
 		ArrayList<HashMap<String, Boolean>> todoList = new ArrayList<HashMap<String, Boolean>>();
 		while (m.find()) {
