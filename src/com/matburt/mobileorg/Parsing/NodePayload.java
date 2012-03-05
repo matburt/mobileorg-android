@@ -132,9 +132,9 @@ class NodePayload {
 	}
 
 	/**
-	 * Returns a string containing the time at which a todo is scheduled.
+	 * Returns a string containing the time at which a todo is scheduled or deadlined.
 	 */
-	public String getScheduled() {		
+	public String getDate() {		
 		if(this.scheduled == null)
 			this.scheduled = stripDate("SCHEDULED:");
 		
@@ -144,6 +144,20 @@ class NodePayload {
 		}
 		
 		return this.scheduled;
+	}
+	
+	public String getScheduled() {
+		if(this.scheduled == null)
+			this.scheduled = stripDate("SCHEDULED:");
+		
+		return this.scheduled;
+	}
+	
+	public String getDeadline() {
+		if(this.deadline == null)
+			this.deadline = stripDate("DEADLINE:");
+		
+		return this.deadline;
 	}
 
 //	public String datesToString() {

@@ -211,7 +211,7 @@ public class NodeWrapper {
 			parentId = node.getParentId();
 
 			if(parentId > 0)
-				result.insert(0, node.getName() + "/");
+				result.insert(0, node.getOlpName() + "/");
 			else { // Get file nodes real name
 				String filename = db.getFilenameFromNodeId(node.getId());
 				result.insert(0, filename + ":");
@@ -220,6 +220,16 @@ public class NodeWrapper {
 		
 		result.insert(0, "olp:");
 		return result.toString();
+	}
+	
+	/**
+	 * This is called when generating the olp link to the node. This path can't
+	 * have any "[" or "]" in it's path. For example having [1/3] in the title
+	 * will prevent org-mode from applying the edit. This method will strip that
+	 * out of the name.
+	 */
+	private String getOlpName() {
+		return getName().replaceAll("\\[[^\\]]*\\]", "");
 	}
 
 	private long getParentId() {
@@ -281,9 +291,19 @@ public class NodeWrapper {
 			this.cursor.close();
 	}
 	
+	public String getDate(OrgDatabase db) {
+		preparePayload(db);
+		return payload.getDate();
+	}
+	
 	public String getScheduled(OrgDatabase db) {
 		preparePayload(db);
 		return payload.getScheduled();
+	}
+	
+	public String getDeadline(OrgDatabase db) {
+		preparePayload(db);
+		return payload.getDeadline();
 	}
 }
 

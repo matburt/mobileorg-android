@@ -6,13 +6,15 @@
         android:icon="@drawable/ic_menu_agenda"
         android:title="@string/menu_outline"/>
     <item
-        android:id="@+id/menu_capture"
-        android:icon="@drawable/ic_menu_compose"
-        android:title="@string/menu_capture"/>
-    <item
         android:id="@+id/menu_sync"
         android:icon="@drawable/ic_menu_refresh"
+        android:showAsAction="ifRoom"
         android:title="@string/menu_sync"/>
+    <item
+        android:id="@+id/menu_capture"
+        android:icon="@drawable/ic_menu_add"
+        android:showAsAction="ifRoom"
+        android:title="@string/menu_capture"/>
     <item
         android:id="@+id/menu_search"
         android:icon="@drawable/ic_menu_search"
