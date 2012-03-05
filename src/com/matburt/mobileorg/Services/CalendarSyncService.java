@@ -292,6 +292,7 @@ public class CalendarSyncService {
 		public String CALENDAR_DISPLAY_NAME = "displayName";
 		@SuppressWarnings("unused")
 		public String ACCOUNT_NAME = "accountName";
+		@SuppressWarnings("unused")
 		public String VISIBLE = "selected";
 	};
 	
