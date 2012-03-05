@@ -276,6 +276,7 @@ public class CalendarSyncService {
 		this.deleteAllEntries(context);
 		
 		HashMap<String,String> files = this.db.getFiles();
+		files.remove("agendas.org");
 		for(String filename: files.keySet())
 			insertFileEntries(filename);
 	}
