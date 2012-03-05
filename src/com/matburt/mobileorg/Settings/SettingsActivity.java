@@ -7,25 +7,31 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageItemInfo;
 import android.content.pm.ResolveInfo;
 import android.os.Bundle;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
+import android.preference.PreferenceManager;
+import android.util.Log;
 
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Parsing.MobileOrgApplication;
 import com.matburt.mobileorg.Parsing.OrgDatabase;
 import com.matburt.mobileorg.Services.CalendarSyncService;
 
-public class SettingsActivity extends PreferenceActivity {
+public class SettingsActivity extends PreferenceActivity implements
+		SharedPreferences.OnSharedPreferenceChangeListener {
 
 	OrgDatabase db;
+	private boolean updateCalendar = false;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+
 		Intent prefsIntent = getIntent();
 		int resourceID = prefsIntent.getIntExtra("prefs", R.xml.preferences);
 		addPreferencesFromResource(resourceID);
@@ -41,7 +47,36 @@ public class SettingsActivity extends PreferenceActivity {
 		}
 
 		findPreference("clearDB").setOnPreferenceClickListener(onClearDBClick);
-		findPreference("clearCalendar").setOnPreferenceClickListener(onClearCalendarClick);
+		
+		SharedPreferences appSettings = PreferenceManager
+				.getDefaultSharedPreferences(getApplicationContext());
+		appSettings.registerOnSharedPreferenceChangeListener(this);
+	}
+	
+	@Override
+	public void onPause() {
+		if (this.updateCalendar) {
+			this.updateCalendar = false;
+
+			if (isCalendarEnabled()) {
+				Log.d("MobileOrg", "onPause(): syncFiles");
+				getCalendarSyncService().syncFiles();
+			} else {
+				Log.d("MobileOrg", "onPause(): deleteAllEntries");
+				getCalendarSyncService().deleteAllEntries(
+						getApplicationContext());
+			}
+		}
+		super.onPause();
+	}
+	
+	@Override
+	public void onSharedPreferenceChanged(SharedPreferences sharedPreferences,
+			String key) {
+		if(key.startsWith("calendar")) {
+			Log.d("MobileOrg", "Set to update calendar");
+			this.updateCalendar = true;
+		}
 	}
 
 	private Preference.OnPreferenceClickListener onClearDBClick = new Preference.OnPreferenceClickListener() {
@@ -59,9 +94,7 @@ public class SettingsActivity extends PreferenceActivity {
 								public void onClick(DialogInterface dialog,
 										int which) {
 									db.clearDB();
-									if (getPreferenceManager()
-											.getSharedPreferences().getBoolean(
-													"enableCalendar", false))
+									if (isCalendarEnabled())
 										getCalendarSyncService()
 												.deleteAllEntries(
 														getApplicationContext());
@@ -71,59 +104,42 @@ public class SettingsActivity extends PreferenceActivity {
 			return false;
 		}
 	};
-	
-	private Preference.OnPreferenceClickListener onClearCalendarClick = new Preference.OnPreferenceClickListener() {
 
-		@Override
-		public boolean onPreferenceClick(Preference preference) {
-			new AlertDialog.Builder(SettingsActivity.this)
-					.setIcon(android.R.drawable.ic_dialog_alert)
-					.setTitle(R.string.preference_clear_calendar_promt)
-					.setMessage(R.string.preference_clear_calendar_promt_message)
-					.setPositiveButton(R.string.yes,
-							new DialogInterface.OnClickListener() {
-
-								@Override
-								public void onClick(DialogInterface dialog,
-										int which) {
-									getCalendarSyncService().deleteAllEntries(getApplicationContext());
-								}
-
-							}).setNegativeButton(R.string.no, null).show();
-			return false;
-		}
-	};
-	
 	private CalendarSyncService getCalendarSyncService() {
 		return new CalendarSyncService(
-				((MobileOrgApplication) getApplication())
-						.getDB(),
+				((MobileOrgApplication) getApplication()).getDB(),
 				getApplicationContext());
 	}
 	
+	private boolean isCalendarEnabled() {
+		return getPreferenceManager().getSharedPreferences().getBoolean(
+				"calendarEnabled", false);
+	}
+
 	private void populateCalendarNames() {
 		ListPreference calendarName = (ListPreference) findPreference("calendarName");
-		
-		CharSequence[] calendars = getCalendarSyncService().getCalendars(getApplicationContext());
+
+		CharSequence[] calendars = getCalendarSyncService().getCalendars(
+				getApplicationContext());
 
 		calendarName.setEntries(calendars);
 		calendarName.setEntryValues(calendars);
 	}
-	
+
 	private void populateTodoKeywords() {
 		ListPreference defaultTodo = (ListPreference) findPreference("defaultTodo");
-		
+
 		ArrayList<String> todoList = db.getTodos();
-		
+
 		CharSequence[] todos = new CharSequence[todoList.size() + 1];
 		int i = 0;
-		for(String todo: todoList) {
+		for (String todo : todoList) {
 			todos[i] = todo;
 			i++;
 		}
-		
+
 		todos[i] = "";
-		
+
 		defaultTodo.setEntries(todos);
 		defaultTodo.setEntryValues(todos);
 	}
@@ -157,16 +173,20 @@ public class SettingsActivity extends PreferenceActivity {
 		}
 
 		// fill in the Intents for built-in synchronizers
-		Intent synchroIntent = new Intent(getApplicationContext(), WebDAVSettingsActivity.class);
+		Intent synchroIntent = new Intent(getApplicationContext(),
+				WebDAVSettingsActivity.class);
 		SynchronizerPreferences.syncIntents.put("webdav", synchroIntent);
 
-		synchroIntent = new Intent(getApplicationContext(), SDCardSettingsActivity.class);
+		synchroIntent = new Intent(getApplicationContext(),
+				SDCardSettingsActivity.class);
 		SynchronizerPreferences.syncIntents.put("sdcard", synchroIntent);
 
-		synchroIntent = new Intent(getApplicationContext(), DropboxSettingsActivity.class);
+		synchroIntent = new Intent(getApplicationContext(),
+				DropboxSettingsActivity.class);
 		SynchronizerPreferences.syncIntents.put("dropbox", synchroIntent);
 
-		synchroIntent = new Intent(getApplicationContext(), ScpSettingsActivity.class);
+		synchroIntent = new Intent(getApplicationContext(),
+				ScpSettingsActivity.class);
 		SynchronizerPreferences.syncIntents.put("scp", synchroIntent);
 
 		// populate the sync source list with updated data

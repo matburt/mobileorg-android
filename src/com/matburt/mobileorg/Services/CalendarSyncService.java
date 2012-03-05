@@ -3,6 +3,7 @@ package com.matburt.mobileorg.Services;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -269,6 +270,14 @@ public class CalendarSyncService {
 	public void syncFile(String filename) throws IllegalArgumentException {
 		deleteFileEntries(filename, context);
 		insertFileEntries(filename);
+	}
+	
+	public void syncFiles() {
+		this.deleteAllEntries(context);
+		
+		HashMap<String,String> files = this.db.getFiles();
+		for(String filename: files.keySet())
+			insertFileEntries(filename);
 	}
 	
 	

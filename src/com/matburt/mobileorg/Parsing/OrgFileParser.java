@@ -104,7 +104,7 @@ public class OrgFileParser {
 	private void updateCalendar(String filename, Context context) {
 		if (filename.equals("agendas.org") == false
 				&& PreferenceManager.getDefaultSharedPreferences(context)
-						.getBoolean("enableCalendar", false)) {
+						.getBoolean("calendarEnabled", false)) {
 			try {
 				CalendarSyncService cal = new CalendarSyncService(this.db, context);
 				cal.syncFile(filename);
