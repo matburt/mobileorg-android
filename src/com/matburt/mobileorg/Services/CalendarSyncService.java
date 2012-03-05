@@ -21,6 +21,7 @@ import android.provider.CalendarContract.Calendars;
 import android.provider.CalendarContract.Events;
 import android.provider.CalendarContract.Reminders;
 import android.text.format.DateUtils;
+import android.text.format.Time;
 import android.util.Log;
 
 import com.matburt.mobileorg.R;
@@ -99,6 +100,7 @@ public class CalendarSyncService {
 		values.put(intEvents.DTEND, endTime);
 		values.put(intEvents.ALL_DAY, allDay);
 		values.put(intEvents.HAS_ALARM, 0);
+		values.put(intEvents.EVENT_TIMEZONE, Time.getCurrentTimezone());
 		
 		Uri uri = context.getContentResolver().insert(
 				intEvents.CONTENT_URI, values);
@@ -294,6 +296,7 @@ public class CalendarSyncService {
 		public String HAS_ALARM = "hasAlarm";	
 		@SuppressWarnings("unused")
 		public String ORGANIZER = "organizer";
+		public String EVENT_TIMEZONE = "eventTimezone";
 	};
 	
 	private class intCalendars {
@@ -346,6 +349,7 @@ public class CalendarSyncService {
 			intEvents.DTEND = Events.DTEND;
 			intEvents.DTSTART = Events.DTSTART;
 			intEvents.HAS_ALARM = Events.HAS_ALARM;
+			intEvents.EVENT_TIMEZONE = Events.EVENT_TIMEZONE;
 
 			intReminders.CONTENT_URI = Reminders.CONTENT_URI;
 			intReminders.MINUTES = Reminders.MINUTES;
