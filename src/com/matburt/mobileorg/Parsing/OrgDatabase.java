@@ -94,37 +94,17 @@ public class OrgDatabase extends SQLiteOpenHelper {
 /***************************
  * Functions for accessing the files table.
  ***************************/
-	
+
 	public Cursor getFileCursor() {
 		// This gets all of the org file nodes
-		return db.rawQuery("SELECT data.* FROM orgdata data JOIN" 
-				+ "(SELECT f.node_id FROM files f) file on file.node_id = data._id ORDER BY data.name ASC;", null);
-
-//		Cursor cursor = db.query("files", new String[] { "node_id" }, null,
-//				null, null, null, "name ASC");
-//		
-//		cursor.moveToFirst();
-//		
-//		Cursor[] nodes = new Cursor[cursor.getCount()];
-//		
-//		for(int i = 0; i < cursor.getCount(); i++) {
-//			Long id = cursor.getLong(cursor.getColumnIndex("node_id"));
-//			Cursor node = db.query("orgdata", nodeFields, "_id=?",
-//					new String[] { id.toString() }, null, null, null);
-//			nodes[i] = node;
-//			cursor.moveToNext();
-//		}
-//		
-//		cursor.close();
-//
-//        if (nodes.length > 0) {
-//            MergeCursor cursors = new MergeCursor(nodes);
-//            return cursors;
-//        }
-//        else {
-//            return null;
-//        }
+		return db
+				.query("orgdata JOIN files ON (orgdata._id = files.node_id)",
+						nodeJoinFields, null, null, null, null, "orgdata.name ASC");
 	}
+	
+	private final static String[] nodeJoinFields = {"orgdata._id", "orgdata.name", "orgdata.todo", "orgdata.tags", "orgdata.priority",
+		"orgdata.payload", "orgdata.parent_id", "orgdata.file_id"};
+	
 	
 	public long getFileNodeId(String filename) {
 		Cursor cursor = db.query("files", new String[] { "node_id" },
@@ -198,7 +178,7 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		
 		boolean calendarEnabled = PreferenceManager
 				.getDefaultSharedPreferences(context).getBoolean(
-						"enableCalendar", false);
+						"calendarEnabled", false);
 		if(calendarEnabled)
 			new CalendarSyncService(this, context).deleteFileEntries(filename, context);
 	}
@@ -454,50 +434,65 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		db.insert("edits", null, values);
 	}
 
-	// TODO Make recursive to support capturing of sub-heading nodes
-	public String fileToString(String filename) {
-		StringBuilder result = new StringBuilder();
+	public String fileToString(String filename) {		
+		long fileNodeId = getFileNodeId(filename);
 		
-		long file_id = getFileNodeId(filename);
-		
-		if(file_id < 0)
+		if(fileNodeId < 0)
 			return "";
 		
-		Cursor cursor = getNodeChildren(file_id);
+		return nodesToString(fileNodeId, 0).toString();
+	}
+	
+	private StringBuilder nodesToString(long node_id, long level) {
+		StringBuilder result = new StringBuilder();
+		
+		result.append(nodeToString(node_id, level));
+		
+		Cursor cursor = getNodeChildren(node_id);
 		cursor.moveToFirst();
 		
 		while(cursor.isAfterLast() == false) {
-			result.append(nodeToString(cursor));
+			result.append(nodesToString(cursor.getLong(cursor
+					.getColumnIndex("_id")), level + 1));
 			cursor.moveToNext();
 		}
-		
-		return result.toString();
+		cursor.close();
+		return result;
 	}
 	
-	private String nodeToString(Cursor cursor) {
+	private String nodeToString(long node_id, long level) {
+		// TODO Maybe add payload of file node
+		if(level == 0) // This is a file node
+			return "";
+		
+		Cursor cursor = getNode(node_id);
 		final String todo = cursor.getString(cursor.getColumnIndex("todo"));
 		final String name = cursor.getString(cursor.getColumnIndex("name"));
 		final String priority = cursor.getString(cursor.getColumnIndex("priority"));
 		final String payload = cursor.getString(cursor.getColumnIndex("payload"));
 		final String tags = cursor.getString(cursor.getColumnIndex("tags"));
+		cursor.close();
 		
 		StringBuilder result = new StringBuilder();
-		result.append("* ");
+		
+		for(int i = 0; i < level; i++)
+			result.append("*");
+		result.append(" ");
 
-		if (!todo.equals(""))
+		if (TextUtils.isEmpty(todo) == false)
 			result.append(todo + " ");
 
-		if (!priority.equals(""))
+		if (TextUtils.isEmpty(priority) == false)
 			result.append("[#" + priority + "] ");
 
 		result.append(name + " ");
 		
-		if(tags != null && !tags.equals(""))
+		if(tags != null && TextUtils.isEmpty(tags) == false)
 			result.append(":" + tags + ":");
 		
 		result.append("\n");
 
-		if (payload != null && payload.length() > 0)
+		if (payload != null && TextUtils.isEmpty(payload) == false)
 			result.append(payload + "\n");
 
 		result.append("\n");

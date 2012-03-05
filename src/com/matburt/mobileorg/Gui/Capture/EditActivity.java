@@ -29,6 +29,8 @@ import com.matburt.mobileorg.Synchronizers.Synchronizer;
 public class EditActivity extends FragmentActivity {
 	public final static String ACTIONMODE_CREATE = "create";
 	public final static String ACTIONMODE_EDIT = "edit";
+	public final static String ACTIONMODE_ADDCHILD = "add_child";
+
 
 	private NodeWrapper node;
 	private String actionMode;
@@ -39,6 +41,7 @@ public class EditActivity extends FragmentActivity {
 	private EditDetailsFragment detailsFragment;
 	private EditPayloadFragment payloadFragment;
 	private EditPayloadFragment rawPayloadFragment;
+	private long node_id;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -48,6 +51,7 @@ public class EditActivity extends FragmentActivity {
 
 		Intent intent = getIntent();
 		this.actionMode = intent.getStringExtra("actionMode");
+		this.node_id = intent.getLongExtra("node_id", -1);
 
 		this.appInst = (MobileOrgApplication) this.getApplication();
 		this.orgDB = appInst.getDB();
@@ -111,6 +115,10 @@ public class EditActivity extends FragmentActivity {
 			node = new NodeWrapper(appInst.getDB().getNode(nodeId));
 			this.detailsFragment.init(this.node, this.actionMode, defaultTodo);
 			this.payloadFragment.init(node.getCleanedPayload(orgDB), true);
+		} else if (this.actionMode.equals(ACTIONMODE_ADDCHILD)) {
+			node = new NodeWrapper(null);
+			this.detailsFragment.init(this.node, this.actionMode, defaultTodo);
+			this.payloadFragment.init("", true);
 		}
 
 		this.rawPayloadFragment.init(node.getRawPayload(orgDB), false);
@@ -279,6 +287,20 @@ public class EditActivity extends FragmentActivity {
 			OrgDatabase orgDB = appInst.getDB();
 			long file_id = orgDB.addOrUpdateFile(OrgFile.CAPTURE_FILE, "Captures", "", true);
 			Long parent = orgDB.getFileNodeId(OrgFile.CAPTURE_FILE);
+			long node_id = orgDB.addNode(parent, newTitle, newTodo, newPriority, newTags, file_id);
+			
+			boolean addTimestamp = PreferenceManager.getDefaultSharedPreferences(
+					this).getBoolean("captureWithTimestamp", false);
+			if(addTimestamp)
+				newCleanedPayload.append("\n").append(getTimestamp()).append("\n");
+			
+			orgDB.addNodePayload(node_id, newCleanedPayload.toString() + newPayloadResidue.toString());
+			
+		} else if (this.actionMode.equals(ACTIONMODE_ADDCHILD)) {
+			MobileOrgApplication appInst = (MobileOrgApplication) this.getApplication();
+			OrgDatabase orgDB = appInst.getDB();
+			long file_id = orgDB.addOrUpdateFile(OrgFile.CAPTURE_FILE, "Captures", "", true);
+			Long parent = this.node_id;
 			long node_id = orgDB.addNode(parent, newTitle, newTodo, newPriority, newTags, file_id);
 			
 			boolean addTimestamp = PreferenceManager.getDefaultSharedPreferences(
