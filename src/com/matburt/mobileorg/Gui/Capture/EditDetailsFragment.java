@@ -42,7 +42,7 @@ public class EditDetailsFragment extends Fragment {
 	private DateTableRow scheduledEntry = null;
 	private DateTableRow deadlineEntry = null;
 	
-	private ArrayList<String> tagsToRestore = new ArrayList<String>();
+	private ArrayList<String> tagsToRestore = null;
 
 	public void init(NodeWrapper node, String actionMode, String defaultTodo, String title) {
 		init(node, actionMode, defaultTodo);
@@ -86,8 +86,12 @@ public class EditDetailsFragment extends Fragment {
 	public void onStart() {
 		super.onStart();
 		
-		if(tagsToRestore != null)
+		if(tagsToRestore != null) {
+			tagsView.removeAllViews();
+			tagEntries.clear();
 			setupTags(tagsToRestore);
+			tagsToRestore = null;
+		}
 	}
 	
 	@Override
