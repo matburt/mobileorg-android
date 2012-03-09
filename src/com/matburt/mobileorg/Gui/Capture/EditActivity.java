@@ -274,6 +274,10 @@ public class EditActivity extends FragmentActivity {
 			
 			orgDB.addNodePayload(node_id, newCleanedPayload.toString() + newPayloadResidue);
 			
+			if(PreferenceManager.getDefaultSharedPreferences(
+					this).getBoolean("calendarEnabled", false))
+				appInst.getCalendarSyncService().insertNode(node_id);
+			
 		} else if (this.actionMode.equals(ACTIONMODE_ADDCHILD)) {
 			MobileOrgApplication appInst = (MobileOrgApplication) this.getApplication();
 			OrgDatabase orgDB = appInst.getDB();
@@ -288,8 +292,11 @@ public class EditActivity extends FragmentActivity {
 			
 			orgDB.addNodePayload(node_id, newCleanedPayload.toString() + newPayloadResidue);
 			
-		} else if (this.actionMode.equals(ACTIONMODE_EDIT)) {
+			if(PreferenceManager.getDefaultSharedPreferences(
+					this).getBoolean("calendarEnabled", false))
+				appInst.getCalendarSyncService().insertNode(node_id);
 
+		} else if (this.actionMode.equals(ACTIONMODE_EDIT)) {
 			try {
 				editNode(newTitle, newTodo, newPriority,
 						newCleanedPayload.toString(), newTags);

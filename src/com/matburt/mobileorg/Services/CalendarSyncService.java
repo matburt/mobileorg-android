@@ -176,6 +176,11 @@ public class CalendarSyncService {
 		return formatter.parse(time);
 	}
 	
+	public void insertNode(long node_id) {
+		NodeWrapper node = new NodeWrapper(this.db.getNode(node_id));
+		insertNode(node, node.getFileName(db));
+	}
+	
 	private void insertNode(NodeWrapper node, String filename) throws IllegalArgumentException {
 		final Pattern schedulePattern = Pattern
 				.compile("(\\d{4}-\\d{2}-\\d{2})(?:[^\\d]*)(\\d{1,2}\\:\\d{2})?\\-?(\\d{1,2}\\:\\d{2})?");

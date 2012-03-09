@@ -152,7 +152,7 @@ public class OrgDatabase extends SQLiteOpenHelper {
 	}
 	
 	
-	public long getFileId(String filename) {
+	public long getFilenameId(String filename) {
 		Cursor cursor = db.query("files", new String[] { "_id" },
 				"filename=?", new String[] {filename}, null, null, null);
 		
@@ -172,7 +172,7 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		OrgFile orgfile = new OrgFile(filename, context);
 		orgfile.remove();
 		
-		Long file_id = this.getFileId(filename);
+		Long file_id = this.getFilenameId(filename);
 		db.delete("orgdata", "file_id = ?", new String[] { file_id.toString() });
 		db.delete("files", "filename = ?", new String[] { filename });
 		
@@ -195,7 +195,7 @@ public class OrgDatabase extends SQLiteOpenHelper {
 	}
 	
 	public long addOrUpdateFile(String filename, String name, String checksum, boolean includeInOutline) {
-		long file_id = this.getFileId(filename);
+		long file_id = this.getFilenameId(filename);
 	
 		if(file_id >= 0)
 			return file_id;
@@ -403,7 +403,7 @@ public class OrgDatabase extends SQLiteOpenHelper {
 	}
 	
 	public Cursor getFileSchedule(String filename) {
-		long file_id = this.getFileId(filename);
+		long file_id = this.getFilenameId(filename);
 		
 		String whereQuery = "file_id=? AND (payload LIKE '%SCHEDULED:%' OR payload LIKE '%DEADLINE:%')";
 		
