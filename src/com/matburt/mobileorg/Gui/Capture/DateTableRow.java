@@ -218,13 +218,18 @@ public class DateTableRow extends TableRow {
 			int startTimeOfDay = timeDateContainer.startTimeOfDay;
 			int startMinute = timeDateContainer.startMinute;
 			
-			if ((timeOfDay == -1 || minute == -1)
-					&& (startTimeOfDay != -1 && startMinute != -1)) {
+			if ((timeOfDay == -1 || minute == -1)) {
+				if (startTimeOfDay != -1 && startMinute != -1) {
 				timeOfDay = startTimeOfDay + 1;
 				minute = startMinute;
 				
 				if(timeOfDay > 23)
 					timeOfDay = 0;
+				}
+				else {
+					timeOfDay = 12;
+					minute = 0;
+				}
 			}
 				
 			return new TimePickerDialog(getActivity(), callback, timeOfDay,

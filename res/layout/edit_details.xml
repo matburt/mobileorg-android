@@ -29,7 +29,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
-                android:contentDescription=""
+                android:contentDescription="@string/todo_state"
                 android:src="@drawable/ic_menu_agenda" />
 
             <Spinner
@@ -37,13 +37,14 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
+                android:layout_marginTop="0dp"
                 android:prompt="@string/todo_state" />
 
             <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
-                android:contentDescription=""
+                android:contentDescription="@string/todo_state"
                 android:src="@drawable/ic_menu_star" />
 
             <Spinner

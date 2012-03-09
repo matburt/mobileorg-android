@@ -328,7 +328,6 @@ public class EditDetailsFragment extends Fragment {
 
 		ArrayAdapter<String> adapter = new ArrayAdapter<String>(context,
 				android.R.layout.simple_spinner_item, data);
-		// TODO Find a more compact view for spinners
 		adapter.setDropDownViewResource(R.layout.edit_spinner_layout);
 		view.setAdapter(adapter);
 		int pos = data.indexOf(selection);
