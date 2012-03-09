@@ -225,9 +225,6 @@ public class DateTableRow extends TableRow {
 				
 				if(timeOfDay > 23)
 					timeOfDay = 0;
-			} else {
-				timeOfDay = 12;
-				minute = 0;
 			}
 				
 			return new TimePickerDialog(getActivity(), callback, timeOfDay,
