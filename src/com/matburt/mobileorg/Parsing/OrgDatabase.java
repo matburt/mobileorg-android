@@ -423,7 +423,6 @@ public class OrgDatabase extends SQLiteOpenHelper {
 	
 	public void addEdit(String edittype, String nodeId, String nodeTitle,
 			String oldValue, String newValue) {
-
 		ContentValues values = new ContentValues();
 		values.put("type", edittype);
 		values.put("data_id", nodeId);

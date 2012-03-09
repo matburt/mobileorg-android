@@ -5,10 +5,12 @@ import java.util.regex.Pattern;
 
 import android.text.TextUtils;
 
-class NodePayload {
+public class NodePayload {
 	private StringBuilder payload = new StringBuilder();
 	/** These are the remains of the cleaned payload. */
 	private StringBuilder payloadResidue = new StringBuilder();
+	private StringBuilder newPayloadResidue = null;
+
 	
 	private String content = null;
 	private String scheduled = null;
@@ -41,8 +43,15 @@ class NodePayload {
 	public String getPayloadResidue() {
 		if(this.content == null)
 			cleanPayload();
-			
+
 		return this.payloadResidue.toString();
+	}
+	
+	public String getNewPayloadResidue() {
+		if(this.newPayloadResidue == null)
+			return this.payloadResidue.toString();
+		else
+			return this.newPayloadResidue.toString();
 	}
 		
 	public String getId() {
@@ -159,19 +168,21 @@ class NodePayload {
 		
 		return this.deadline;
 	}
+	
+	public void insertOrReplace(String key, String value) {
+		if(newPayloadResidue == null)
+			newPayloadResidue = new StringBuilder(payloadResidue);
+		
+		final Pattern schedulePattern = Pattern.compile(key + "\\s*<[^>]+>");
+		Matcher matcher = schedulePattern.matcher(newPayloadResidue);
 
-//	public String datesToString() {
-//		String dateInfo = "";
-//
-//		try{
-//		SimpleDateFormat formatter = new SimpleDateFormat("<yyyy-MM-dd EEE>");
-//		if (this.deadline != null && this.deadline.length() > 0)
-//			dateInfo += "DEADLINE: " + formatter.format(this.deadline) + " ";
-//
-//		if (this.scheduled != null && this.scheduled.length() > 0)
-//			dateInfo += "SCHEDULED: " + formatter.format(this.scheduled) + " ";
-//		} catch(IllegalArgumentException e) { dateInfo = "";}
-//		
-//		return dateInfo;
-//	}
+		if (matcher.find()) {
+			if (TextUtils.isEmpty(value))
+				newPayloadResidue.delete(matcher.start(), matcher.end());
+			else
+				newPayloadResidue.replace(matcher.start(), matcher.end(), value);
+		}
+		else if(TextUtils.isEmpty(value) == false)
+			newPayloadResidue.insert(0, value).append("\n");
+	}
 }

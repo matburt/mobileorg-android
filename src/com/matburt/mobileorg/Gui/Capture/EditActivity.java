@@ -3,8 +3,6 @@ package com.matburt.mobileorg.Gui.Capture;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -16,7 +14,6 @@ import android.support.v4.app.ActionBar.Tab;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
-import android.text.TextUtils;
 import android.view.MenuInflater;
 
 import com.matburt.mobileorg.R;
@@ -247,36 +244,11 @@ public class EditActivity extends FragmentActivity {
 				});
 		builder.create().show();
 	}
-
-	private StringBuilder insertOrReplace(StringBuilder payloadResidue,
-			String key, String value) {
-		final Pattern schedulePattern = Pattern.compile(key + "\\s*<[^>]+>");
-		Matcher matcher = schedulePattern.matcher(payloadResidue);
-
-		if (matcher.find()) {
-			if (TextUtils.isEmpty(value))
-				payloadResidue.delete(matcher.start(), matcher.end());
-			else
-				payloadResidue.replace(matcher.start(), matcher.end(), value);
-		}
-		else if(TextUtils.isEmpty(value) == false)
-			payloadResidue.insert(0, value).append("\n");
-
-		return payloadResidue;
-	}
 	
-	private StringBuilder getNewPayloadResidue() {
-		StringBuilder result = new StringBuilder();
-		
-		StringBuilder originalPayloadResidue = new StringBuilder(node.getPayloadResidue(orgDB));
-		
-		String newScheduled = this.detailsFragment.getScheduled();
-		String newDeadline = this.detailsFragment.getDeadline();
-
-		result = insertOrReplace(originalPayloadResidue, "SCHEDULED:", newScheduled);
-		result = insertOrReplace(result, "DEADLINE:", newDeadline);
-		
-		return result;
+	
+	private void insertChangesIntoPayloadResidue() {
+		node.getPayload(orgDB).insertOrReplace("SCHEDULED:", detailsFragment.getScheduled());
+		node.getPayload(orgDB).insertOrReplace("DEADLINE:", detailsFragment.getDeadline());
 	}
 	
 	private void save() {
@@ -285,7 +257,8 @@ public class EditActivity extends FragmentActivity {
 		String newPriority = this.detailsFragment.getPriority();
 		String newTags = this.detailsFragment.getTags();
 		StringBuilder newCleanedPayload = new StringBuilder(this.payloadFragment.getText());
-		StringBuilder newPayloadResidue = getNewPayloadResidue();
+		insertChangesIntoPayloadResidue();
+		String newPayloadResidue = node.getPayload(orgDB).getNewPayloadResidue();
 						
 		if (this.actionMode.equals(ACTIONMODE_CREATE)) {
 			MobileOrgApplication appInst = (MobileOrgApplication) this.getApplication();
@@ -299,7 +272,7 @@ public class EditActivity extends FragmentActivity {
 			if(addTimestamp)
 				newCleanedPayload.append("\n").append(getTimestamp()).append("\n");
 			
-			orgDB.addNodePayload(node_id, newCleanedPayload.toString() + newPayloadResidue.toString());
+			orgDB.addNodePayload(node_id, newCleanedPayload.toString() + newPayloadResidue);
 			
 		} else if (this.actionMode.equals(ACTIONMODE_ADDCHILD)) {
 			MobileOrgApplication appInst = (MobileOrgApplication) this.getApplication();
@@ -313,14 +286,13 @@ public class EditActivity extends FragmentActivity {
 			if(addTimestamp)
 				newCleanedPayload.append("\n").append(getTimestamp()).append("\n");
 			
-			orgDB.addNodePayload(node_id, newCleanedPayload.toString() + newPayloadResidue.toString());
+			orgDB.addNodePayload(node_id, newCleanedPayload.toString() + newPayloadResidue);
 			
 		} else if (this.actionMode.equals(ACTIONMODE_EDIT)) {
 
 			try {
 				editNode(newTitle, newTodo, newPriority,
-						newCleanedPayload.toString(),
-						newPayloadResidue.toString(), newTags);
+						newCleanedPayload.toString(), newTags);
 			} catch (IOException e) {
 			}
 		}
@@ -336,7 +308,7 @@ public class EditActivity extends FragmentActivity {
 	 * changed.
 	 */ 
 	private void editNode(String newTitle, String newTodo,
-			String newPriority, String newCleanedPayload, String newPayloadResidue, String newTags) throws IOException {
+			String newPriority, String newCleanedPayload, String newTags) throws IOException {
 		boolean generateEdits = !node.getFileName(orgDB).equals(OrgFile.CAPTURE_FILE);
 		
 		if (!node.getName().equals(newTitle)) {
@@ -356,9 +328,11 @@ public class EditActivity extends FragmentActivity {
 			node.setPriority(newPriority, orgDB);
 		}
 		if (!node.getCleanedPayload(orgDB).equals(newCleanedPayload)
-				|| !node.getPayloadResidue(orgDB).equals(newPayloadResidue)) {
-			String newRawPayload = newPayloadResidue + newCleanedPayload;
-	
+				|| !node.getPayload(orgDB).getPayloadResidue()
+						.equals(node.getPayload(orgDB).getNewPayloadResidue())) {
+			String newRawPayload = node.getPayload(orgDB)
+					.getNewPayloadResidue() + newCleanedPayload;
+
 			if (generateEdits)
 				orgDB.addEdit("body", node.getNodeId(orgDB), newTitle, node.getRawPayload(orgDB), newRawPayload);
 			node.setPayload(newRawPayload, orgDB);

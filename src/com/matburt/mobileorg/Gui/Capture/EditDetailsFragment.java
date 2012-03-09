@@ -157,8 +157,8 @@ public class EditDetailsFragment extends Fragment {
 	}
 	
 	private void setupDates() {
-		this.scheduledEntry = setupDate(node.getScheduled(this.orgDB), "SCHEDULED", scheduledRemoveListener);
-		this.deadlineEntry = setupDate(node.getDeadline(this.orgDB), "DEADLINE", deadlineRemoveListener);
+		this.scheduledEntry = setupDate(node.getPayload(this.orgDB).getScheduled(), "SCHEDULED", scheduledRemoveListener);
+		this.deadlineEntry = setupDate(node.getPayload(this.orgDB).getDeadline(), "DEADLINE", deadlineRemoveListener);
 	}
 	
 	private DateTableRow setupDate(String date, String title, View.OnClickListener removeListener) {
