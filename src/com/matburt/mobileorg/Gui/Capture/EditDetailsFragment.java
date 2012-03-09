@@ -41,6 +41,8 @@ public class EditDetailsFragment extends Fragment {
 	private String defaultTodo;
 	private DateTableRow scheduledEntry = null;
 	private DateTableRow deadlineEntry = null;
+	
+	private ArrayList<String> tagsToRestore = new ArrayList<String>();
 
 	public void init(NodeWrapper node, String actionMode, String defaultTodo, String title) {
 		init(node, actionMode, defaultTodo);
@@ -70,9 +72,37 @@ public class EditDetailsFragment extends Fragment {
 		
         setHasOptionsMenu(true);
         initDisplay();
+        
+		if (savedInstanceState != null) {
+			setupScheduled(savedInstanceState.getString("scheduled"));
+			setupDeadline(savedInstanceState.getString("deadline"));
+			tagsToRestore = savedInstanceState.getStringArrayList("tags");
+		}
+        
 		return view;
 	}
+
+	@Override
+	public void onStart() {
+		super.onStart();
+		
+		if(tagsToRestore != null)
+			setupTags(tagsToRestore);
+	}
 	
+	@Override
+	public void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+        outState.putString("scheduled", getScheduled());
+        outState.putString("deadline", getDeadline());
+        
+        ArrayList<String> tags = new ArrayList<String>();
+        for(TagTableRow tag: tagEntries) {
+        	tags.add(tag.getSelection());
+        }
+        outState.putStringArrayList("tags", tags);
+	}
+
 	private void initDisplay() {
 		if(this.actionMode == null) {
 			this.actionMode = EditActivity.ACTIONMODE_CREATE;
@@ -86,7 +116,7 @@ public class EditDetailsFragment extends Fragment {
 			titleView.setText(node.getName());
 			titleView.setSelection(node.getName().length());
 			
-			setupTags(orgDB.getTags());
+			setupTags(node.getTagList());
 			setupDates();
 			setupSpinner(getActivity(), todoStateView, orgDB.getTodos(), node.getTodo());
 			setupSpinner(getActivity(), priorityView, orgDB.getPriorities(), node.getPriority());
@@ -99,7 +129,7 @@ public class EditDetailsFragment extends Fragment {
 	}
 	
 	private void setupTags(ArrayList<String> tagList) {		
-		for(String tag: node.getTagList()) {
+		for(String tag: tagList) {
 			if(TextUtils.isEmpty(tag)) { 
 				// NodeWrapper found a :: entry, meaning all tags so far where unmodifiable
 				for(TagTableRow entry: tagEntries)
@@ -110,6 +140,16 @@ public class EditDetailsFragment extends Fragment {
 			else
 				addTag(tag);
 		}
+	}
+	
+	private void setupScheduled(String scheduled) {
+		if(scheduled != null)
+			this.scheduledEntry = setupDate(scheduled, "SCHEDULED", scheduledRemoveListener);
+	}
+	
+	private void setupDeadline(String deadline) {
+		if(deadline != null)
+			this.deadlineEntry = setupDate(deadline, "DEADLINE", deadlineRemoveListener);
 	}
 	
 	private void setupDates() {
@@ -282,13 +322,14 @@ public class EditDetailsFragment extends Fragment {
 		return priorityView.getSelectedItem().toString();
 	}
 	
-	static void setupSpinner(Context context, Spinner view, ArrayList<String> data,
+	public static void setupSpinner(Context context, Spinner view, ArrayList<String> data,
 			String selection) {
 		data.add("");
 
 		ArrayAdapter<String> adapter = new ArrayAdapter<String>(context,
 				android.R.layout.simple_spinner_item, data);
-		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		// TODO Find a more compact view for spinners
+		adapter.setDropDownViewResource(R.layout.edit_spinner_layout);
 		view.setAdapter(adapter);
 		int pos = data.indexOf(selection);
 		if (pos < 0) {

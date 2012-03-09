@@ -69,9 +69,9 @@ public class EditActivity extends FragmentActivity {
 		}
 		
 		init();
+		
 		setupActionbarTabs(savedInstanceState);
 	}
-
 	
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
