@@ -100,7 +100,11 @@ public class EditActivity extends FragmentActivity {
 		if (this.actionMode == null) {
 			String subject = intent
 					.getStringExtra("android.intent.extra.SUBJECT");
+			if(subject == null)
+				subject = "";
 			String text = intent.getStringExtra("android.intent.extra.TEXT");
+			if(text == null)
+				text = "";
 
 			node = new NodeWrapper(null);
 			this.detailsFragment.init(this.node, this.actionMode, defaultTodo, subject);
@@ -198,6 +202,7 @@ public class EditActivity extends FragmentActivity {
 	public boolean onOptionsItemSelected(android.support.v4.view.MenuItem item) {
 		switch (item.getItemId()) {
 		case android.R.id.home:
+			doCancel();
 			return true;
 			
 		case R.id.nodeedit_save:

@@ -156,6 +156,11 @@ public class OutlineActivity extends FragmentActivity
 	@Override
 	public boolean onOptionsItemSelected(android.support.v4.view.MenuItem item) {
 		switch (item.getItemId()) {
+		case android.R.id.home:
+			if(this.node_id != -1)
+				finish();
+			return true;
+			
 		case R.id.menu_sync:
 			runSync();
 			return true;

@@ -84,6 +84,9 @@ public class NodeViewActivity extends FragmentActivity {
 	@Override
 	public boolean onOptionsItemSelected(android.support.v4.view.MenuItem item) {
 		switch (item.getItemId()) {
+		case android.R.id.home:
+			finish();
+			break;
 		case R.id.viewmenu_edit:
 			runEditNodeActivity();
 			break;
