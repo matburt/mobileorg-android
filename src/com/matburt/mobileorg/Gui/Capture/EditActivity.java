@@ -291,6 +291,8 @@ public class EditActivity extends FragmentActivity {
 				newCleanedPayload.append("\n").append(getTimestamp()).append("\n");
 			
 			orgDB.addNodePayload(node_id, newCleanedPayload.toString() + newPayloadResidue);
+						
+			makeNewheadingEditNode(node_id, new NodeWrapper(parent, orgDB));
 			
 			if(PreferenceManager.getDefaultSharedPreferences(
 					this).getBoolean("calendarEnabled", false))
@@ -298,7 +300,7 @@ public class EditActivity extends FragmentActivity {
 
 		} else if (this.actionMode.equals(ACTIONMODE_EDIT)) {
 			try {
-				editNode(newTitle, newTodo, newPriority,
+				makeEditNodes(newTitle, newTodo, newPriority,
 						newCleanedPayload.toString(), newTags);
 			} catch (IOException e) {
 			}
@@ -309,12 +311,22 @@ public class EditActivity extends FragmentActivity {
 		sendBroadcast(intent);
 	}
 	
+	private void makeNewheadingEditNode(long node_id, NodeWrapper parent) {
+		boolean generateEdits = !parent.getFileName(orgDB).equals(OrgFile.CAPTURE_FILE);
+		if(generateEdits == false)
+			return;
+
+		// Add new heading nodes need the entire content of node without star headings
+		String newContent = orgDB.nodeToString(node_id, 1).replaceFirst("[\\*]*", "");
+		orgDB.addEdit("newheading", parent.getNodeId(orgDB), parent.getName(), "", newContent);
+	}
+	
 	/**
 	 * Takes a Node and five strings, representing edits to the node.
 	 * This function will generate a new edit entry for each value that was 
 	 * changed.
 	 */ 
-	private void editNode(String newTitle, String newTodo,
+	private void makeEditNodes(String newTitle, String newTodo,
 			String newPriority, String newCleanedPayload, String newTags) throws IOException {
 		boolean generateEdits = !node.getFileName(orgDB).equals(OrgFile.CAPTURE_FILE);
 		

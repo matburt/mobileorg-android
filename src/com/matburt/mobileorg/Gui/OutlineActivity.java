@@ -146,9 +146,8 @@ public class OutlineActivity extends FragmentActivity
 		MenuInflater inflater = getMenuInflater();
 	    inflater.inflate(R.menu.outline_menu, menu);
 	    
-	    if(this.node_id != -1 && new NodeWrapper(this.node_id, appInst.getDB()).getFileName(
-					appInst.getDB()).equals(OrgFile.CAPTURE_FILE))
-			menu.findItem(R.id.menu_capturechild).setVisible(true);
+	    if(this.node_id == -1 || isNodeInFile(this.node_id, "agendas.org"))
+			menu.findItem(R.id.menu_capturechild).setVisible(false);
 	    
 		return true;
 	}
@@ -206,14 +205,21 @@ public class OutlineActivity extends FragmentActivity
 			menu.findItem(R.id.contextmenu_edit).setVisible(false);
 			menu.findItem(R.id.contextmenu_capturechild).setVisible(false);
 		} else {
-			if (new NodeWrapper(clicked_node_id, appInst.getDB()).getFileName(
-					appInst.getDB()).equals(OrgFile.CAPTURE_FILE)) {
+			if (isNodeInFile(clicked_node_id, OrgFile.CAPTURE_FILE)) {
 				menu.findItem(R.id.contextmenu_node_delete).setVisible(true);
-				menu.findItem(R.id.contextmenu_capturechild).setVisible(true);
+			}
+			
+			if(isNodeInFile(clicked_node_id, "agendas.org")) {
+				menu.findItem(R.id.contextmenu_capturechild).setVisible(false);
 			}
 			
 			menu.findItem(R.id.contextmenu_delete).setVisible(false);
 		}
+	}
+	
+	private boolean isNodeInFile(long node_id, String filename) {
+		return new NodeWrapper(node_id, appInst.getDB()).getFileName(
+				appInst.getDB()).equals(filename);
 	}
 	
 	@Override

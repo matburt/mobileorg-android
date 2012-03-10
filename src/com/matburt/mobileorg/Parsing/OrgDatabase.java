@@ -459,7 +459,7 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		return result;
 	}
 	
-	private String nodeToString(long node_id, long level) {
+	public String nodeToString(long node_id, long level) {
 		// TODO Maybe add payload of file node
 		if(level == 0) // This is a file node
 			return "";
