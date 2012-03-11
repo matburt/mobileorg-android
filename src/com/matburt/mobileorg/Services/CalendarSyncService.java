@@ -3,6 +3,7 @@ package com.matburt.mobileorg.Services;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -20,6 +21,7 @@ import android.provider.CalendarContract.Calendars;
 import android.provider.CalendarContract.Events;
 import android.provider.CalendarContract.Reminders;
 import android.text.format.DateUtils;
+import android.text.format.Time;
 import android.util.Log;
 
 import com.matburt.mobileorg.R;
@@ -49,7 +51,7 @@ public class CalendarSyncService {
 		Cursor cursor = context.getContentResolver().query(
 				intCalendars.CONTENT_URI,
 				new String[] { intCalendars._ID,
-						intCalendars.CALENDAR_DISPLAY_NAME }, intCalendars.VISIBLE + "=1",
+						intCalendars.CALENDAR_DISPLAY_NAME }, null,
 				null, null);
 		if (cursor != null && cursor.moveToFirst()) {
 			for (int i = 0; i < cursor.getCount(); i++) {
@@ -98,6 +100,7 @@ public class CalendarSyncService {
 		values.put(intEvents.DTEND, endTime);
 		values.put(intEvents.ALL_DAY, allDay);
 		values.put(intEvents.HAS_ALARM, 0);
+		values.put(intEvents.EVENT_TIMEZONE, Time.getCurrentTimezone());
 		
 		Uri uri = context.getContentResolver().insert(
 				intEvents.CONTENT_URI, values);
@@ -239,8 +242,8 @@ public class CalendarSyncService {
 			Cursor cursor = context.getContentResolver().query(
 					intCalendars.CONTENT_URI,
 					new String[] { intCalendars._ID,
-							intCalendars.CALENDAR_DISPLAY_NAME }, "selected=1",
-					null, null);
+							intCalendars.CALENDAR_DISPLAY_NAME }, null, null,
+					null);
 
 			if (cursor.getCount() == 0) {
 				result = new CharSequence[1];
@@ -271,6 +274,15 @@ public class CalendarSyncService {
 		insertFileEntries(filename);
 	}
 	
+	public void syncFiles() {
+		this.deleteAllEntries(context);
+		
+		HashMap<String,String> files = this.db.getFiles();
+		files.remove("agendas.org");
+		for(String filename: files.keySet())
+			insertFileEntries(filename);
+	}
+	
 	
 	private class intEvents {
 		public Uri CONTENT_URI;
@@ -284,6 +296,7 @@ public class CalendarSyncService {
 		public String HAS_ALARM = "hasAlarm";	
 		@SuppressWarnings("unused")
 		public String ORGANIZER = "organizer";
+		public String EVENT_TIMEZONE = "eventTimezone";
 	};
 	
 	private class intCalendars {
@@ -292,6 +305,7 @@ public class CalendarSyncService {
 		public String CALENDAR_DISPLAY_NAME = "displayName";
 		@SuppressWarnings("unused")
 		public String ACCOUNT_NAME = "accountName";
+		@SuppressWarnings("unused")
 		public String VISIBLE = "selected";
 	};
 	
@@ -335,6 +349,7 @@ public class CalendarSyncService {
 			intEvents.DTEND = Events.DTEND;
 			intEvents.DTSTART = Events.DTSTART;
 			intEvents.HAS_ALARM = Events.HAS_ALARM;
+			intEvents.EVENT_TIMEZONE = Events.EVENT_TIMEZONE;
 
 			intReminders.CONTENT_URI = Reminders.CONTENT_URI;
 			intReminders.MINUTES = Reminders.MINUTES;

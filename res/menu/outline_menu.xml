@@ -16,6 +16,11 @@
         android:showAsAction="ifRoom"
         android:title="@string/menu_capture"/>
     <item
+        android:id="@+id/menu_capturechild"
+        android:icon="@drawable/ic_menu_add"
+        android:visible="false"
+        android:title="Capture node as child"/>
+    <item
         android:id="@+id/menu_search"
         android:icon="@drawable/ic_menu_search"
         android:title="@string/menu_search"/>
