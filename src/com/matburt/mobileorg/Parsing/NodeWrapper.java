@@ -94,9 +94,9 @@ public class NodeWrapper {
 		}
 	}
 	
-	public String getPayloadResidue(OrgDatabase db) {
+	public NodePayload getPayload(OrgDatabase db) {
 		preparePayload(db);
-		return payload.getPayloadResidue();
+		return this.payload;
 	}
 	
 	public String getCleanedPayload(OrgDatabase db) {
@@ -289,21 +289,6 @@ public class NodeWrapper {
 	public void close() {
 		if(cursor != null)
 			this.cursor.close();
-	}
-	
-	public String getDate(OrgDatabase db) {
-		preparePayload(db);
-		return payload.getDate();
-	}
-	
-	public String getScheduled(OrgDatabase db) {
-		preparePayload(db);
-		return payload.getScheduled();
-	}
-	
-	public String getDeadline(OrgDatabase db) {
-		preparePayload(db);
-		return payload.getDeadline();
 	}
 }
 

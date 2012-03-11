@@ -138,7 +138,7 @@ public class OrgFileParser {
 				
 				if(blockTitle.equals(previousBlockTitle) == false) { // Create new node to contain block agenda	
 					previousBlockNode = db.addNode(agendaFileNodeID, blockTitle,
-							"", "", "", db.getFileId(filename));
+							"", "", "", db.getFilenameId(filename));
 				}
 
 				String blockEntryName = name.substring(name.indexOf(">") + 1);
@@ -187,12 +187,12 @@ public class OrgFileParser {
 	private void cloneChildren(Cursor children, long previousBlockNode,
 			Long agendaNodeFileID, String blockEntryName, String filename) {
 		db.addNode(previousBlockNode, BLOCK_SEPARATOR_PREFIX
-				+ blockEntryName, "", "", "", db.getFileId(filename));
+				+ blockEntryName, "", "", "", db.getFilenameId(filename));
 		
 		while(children.isAfterLast() == false) {
 			db.cloneNode(
 					children.getLong(children.getColumnIndex("_id")),
-					previousBlockNode, db.getFileId("agendas.org"));
+					previousBlockNode, db.getFilenameId("agendas.org"));
 			children.moveToNext();
 		}
 	}
