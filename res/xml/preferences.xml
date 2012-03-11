@@ -82,31 +82,31 @@
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/preference_calendar" >
         <CheckBoxPreference
-            android:key="enableCalendar"
+            android:key="calendarEnabled"
             android:summary="@string/preference_calendar_synch"
             android:title="@string/preference_calendar_synch_title" />
         
         <ListPreference
             android:defaultValue=""
             android:key="calendarName"
-            android:dependency="enableCalendar"
+            android:dependency="calendarEnabled"
             android:summary="@string/preference_calendar_name_summary"
             android:title="@string/preference_calendar_name" />
         <CheckBoxPreference
             android:key="calendarShowDone"
             android:defaultValue="true"
-            android:dependency="enableCalendar"
+            android:dependency="calendarEnabled"
             android:summary="@string/preference_calendar_show_done_summary"
             android:title="@string/preference_calendar_show_done" />        
         <CheckBoxPreference
             android:key="calendarHabits"
             android:defaultValue="true"
-            android:dependency="enableCalendar"
+            android:dependency="calendarEnabled"
             android:summary="@string/preference_calendar_show_habits_summary"
             android:title="@string/preference_calendar_show_habits" />
         <CheckBoxPreference
             android:key="calendarReminder"
-            android:dependency="enableCalendar"
+            android:dependency="calendarEnabled"
             android:summary="@string/preference_calendar_reminder_summary"
             android:title="@string/preference_calendar_reminder" />
         <EditTextPreference
@@ -117,10 +117,6 @@
             android:summary="@string/preference_calendar_reminder_interval_summary"
             android:title="@string/preference_calendar_reminder_interval" />
 
-        <Preference
-            android:key="clearCalendar"
-            android:summary="@string/preference_calendar_clear_summary"
-            android:title="@string/preference_calendar_clear" />
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/preference_other" >

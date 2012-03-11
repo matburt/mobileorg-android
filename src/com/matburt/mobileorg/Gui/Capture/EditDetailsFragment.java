@@ -82,12 +82,7 @@ public class EditDetailsFragment extends Fragment {
 			setupSpinner(getActivity(), todoStateView, orgDB.getTodos(), defaultTodo);
 			setupSpinner(getActivity(), priorityView, orgDB.getPriorities(), "");
 		}
-		else if (this.actionMode.equals(EditActivity.ACTIONMODE_CREATE)) {
-			titleView.setText("");
-
-			setupSpinner(getActivity(), todoStateView, orgDB.getTodos(), defaultTodo);
-			setupSpinner(getActivity(), priorityView, orgDB.getPriorities(), "");
-		} else if (this.actionMode.equals(EditActivity.ACTIONMODE_EDIT)) {
+		else if (this.actionMode.equals(EditActivity.ACTIONMODE_EDIT)) {
 			titleView.setText(node.getName());
 			titleView.setSelection(node.getName().length());
 			
@@ -95,6 +90,11 @@ public class EditDetailsFragment extends Fragment {
 			setupDates();
 			setupSpinner(getActivity(), todoStateView, orgDB.getTodos(), node.getTodo());
 			setupSpinner(getActivity(), priorityView, orgDB.getPriorities(), node.getPriority());
+		} else { //if (this.actionMode.equals(EditActivity.ACTIONMODE_CREATE)) { // or ACTIONMODE_ADDPARENT
+			titleView.setText("");
+
+			setupSpinner(getActivity(), todoStateView, orgDB.getTodos(), defaultTodo);
+			setupSpinner(getActivity(), priorityView, orgDB.getPriorities(), "");
 		}
 	}
 	

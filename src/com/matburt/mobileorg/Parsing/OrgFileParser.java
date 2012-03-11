@@ -104,7 +104,7 @@ public class OrgFileParser {
 	private void updateCalendar(String filename, Context context) {
 		if (filename.equals("agendas.org") == false
 				&& PreferenceManager.getDefaultSharedPreferences(context)
-						.getBoolean("enableCalendar", false)) {
+						.getBoolean("calendarEnabled", false)) {
 			try {
 				CalendarSyncService cal = new CalendarSyncService(this.db, context);
 				cal.syncFile(filename);
@@ -404,11 +404,10 @@ public class OrgFileParser {
 
 		return allOrgFiles;
 	}
-
-
+	
 	public static ArrayList<HashMap<String, Boolean>> getTodosFromIndex(String filecontents) {
 		Pattern getTodos = Pattern
-				.compile("#\\+TODO:\\s+([\\s\\w-]*)(\\| ([\\s\\w-]*))*");
+				.compile("#\\+TODO:\\s+([^\\|]*)(\\| ([^\\n]*))*");
 		Matcher m = getTodos.matcher(filecontents);
 		ArrayList<HashMap<String, Boolean>> todoList = new ArrayList<HashMap<String, Boolean>>();
 		while (m.find()) {

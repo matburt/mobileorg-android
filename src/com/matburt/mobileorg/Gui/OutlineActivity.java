@@ -145,6 +145,11 @@ public class OutlineActivity extends FragmentActivity
 	public boolean onCreateOptionsMenu(android.support.v4.view.Menu menu) {
 		MenuInflater inflater = getMenuInflater();
 	    inflater.inflate(R.menu.outline_menu, menu);
+	    
+	    if(this.node_id != -1 && new NodeWrapper(this.node_id, appInst.getDB()).getFileName(
+					appInst.getDB()).equals(OrgFile.CAPTURE_FILE))
+			menu.findItem(R.id.menu_capturechild).setVisible(true);
+	    
 		return true;
 	}
 
@@ -162,6 +167,10 @@ public class OutlineActivity extends FragmentActivity
 			runExpandSelection(-1);
 			return true;
 
+		case R.id.menu_capturechild:
+			runEditCaptureNodeChildActivity(this.node_id);
+			return true;
+			
 		case R.id.menu_capture:
 			return runEditNewNodeActivity();
 
@@ -176,6 +185,7 @@ public class OutlineActivity extends FragmentActivity
 		return false;
 	}
 
+
 	@Override
 	public void onCreateContextMenu(ContextMenu menu, View v,
 			ContextMenuInfo menuInfo) {
@@ -189,11 +199,14 @@ public class OutlineActivity extends FragmentActivity
 		// Prevents editing of file nodes.
 		if (this.node_id == -1) {
 			menu.findItem(R.id.contextmenu_edit).setVisible(false);
+			menu.findItem(R.id.contextmenu_capturechild).setVisible(false);
 		} else {
 			if (new NodeWrapper(clicked_node_id, appInst.getDB()).getFileName(
 					appInst.getDB()).equals(OrgFile.CAPTURE_FILE)) {
 				menu.findItem(R.id.contextmenu_node_delete).setVisible(true);
+				menu.findItem(R.id.contextmenu_capturechild).setVisible(true);
 			}
+			
 			menu.findItem(R.id.contextmenu_delete).setVisible(false);
 		}
 	}
@@ -213,6 +226,10 @@ public class OutlineActivity extends FragmentActivity
 		case R.id.contextmenu_edit:
 			runEditNodeActivity(node_id);
 			break;
+			
+		case R.id.contextmenu_capturechild:
+			runEditCaptureNodeChildActivity(node_id);
+			return true;
 			
 		case R.id.contextmenu_delete:
 			runDeleteFileNode(node_id);
@@ -258,6 +275,13 @@ public class OutlineActivity extends FragmentActivity
 				EditActivity.class);
 		intent.putExtra("actionMode", EditActivity.ACTIONMODE_EDIT);
 		intent.putExtra("node_id", nodeId);
+		startActivity(intent);
+	}
+
+	private void runEditCaptureNodeChildActivity(long node_id) {
+		Intent intent = new Intent(this, EditActivity.class);
+		intent.putExtra("actionMode", EditActivity.ACTIONMODE_ADDCHILD);
+		intent.putExtra("node_id", node_id);
 		startActivity(intent);
 	}
 
