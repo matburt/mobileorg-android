@@ -106,9 +106,7 @@ public class SettingsActivity extends PreferenceActivity implements
 	};
 
 	private CalendarSyncService getCalendarSyncService() {
-		return new CalendarSyncService(
-				((MobileOrgApplication) getApplication()).getDB(),
-				getApplicationContext());
+		return ((MobileOrgApplication) getApplication()).getCalendarSyncService();
 	}
 	
 	private boolean isCalendarEnabled() {
