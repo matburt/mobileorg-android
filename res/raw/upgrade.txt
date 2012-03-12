@@ -1,10 +1,14 @@
 MobileOrg Upgrade Notes
 
-Changes for 0.8.1:
+Changes for 0.8.4:
 
-* Fix crashing on Android devices < 2.2
-* Fix for calendar, ignoring the day field from scheduled entries to
-  support people with other locales.
+- "Schedule" and "Deadline" support in capture and edit
+- Revamped Capture/Edit Display
+- Calendar Support Bug fixes
+- Add ability to add sub-nodes to capture (require org-mode patch)
+- Edit Dialog Improvements
+- Bug fixes
+- Better support for Android 4.0
 
 MobileOrg has gone through a lot of changes recently. Because of this you will need to re-synchronize all of your org files.
 
