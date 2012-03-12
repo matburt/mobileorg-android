@@ -176,10 +176,15 @@ public class CalendarSyncService {
 		return formatter.parse(time);
 	}
 	
+	public void insertNode(long node_id) {
+		NodeWrapper node = new NodeWrapper(this.db.getNode(node_id));
+		insertNode(node, node.getFileName(db));
+	}
+	
 	private void insertNode(NodeWrapper node, String filename) throws IllegalArgumentException {
 		final Pattern schedulePattern = Pattern
 				.compile("(\\d{4}-\\d{2}-\\d{2})(?:[^\\d]*)(\\d{1,2}\\:\\d{2})?\\-?(\\d{1,2}\\:\\d{2})?");
-		Matcher propm = schedulePattern.matcher(node.getDate(db));
+		Matcher propm = schedulePattern.matcher(node.getPayload(db).getDate());
 
 		long beginTime;
 		long endTime;
@@ -213,7 +218,7 @@ public class CalendarSyncService {
 						filename);
 
 			} catch (ParseException e) {
-				Log.w("MobileOrg", "Unable to parse schedule of: " + node.getName() + " " + node.getDate(db));
+				Log.w("MobileOrg", "Unable to parse schedule of: " + node.getName() + " " + node.getPayload(db).getDate());
 			}
 		} else
 			Log.w("MobileOrg", "Unable to find time entry in schedule of: "

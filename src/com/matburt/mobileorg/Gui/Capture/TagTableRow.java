@@ -3,7 +3,6 @@ package com.matburt.mobileorg.Gui.Capture;
 import java.util.ArrayList;
 
 import android.content.Context;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Spinner;
@@ -27,11 +26,8 @@ class TagTableRow extends TableRow {
 		this.parent = parent;
 		this.activity = activity;
 
-		LayoutInflater layoutInflater = (LayoutInflater) context
-				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		TableRow row = (TableRow) layoutInflater.inflate(
-				R.layout.edit_tagsrow, this);
-
+		View.inflate(context, R.layout.edit_tagsrow, this);
+		
 		button = (Button) findViewById(R.id.editnode_tag_remove);
 		button.setOnClickListener(removeListener);
 		
@@ -40,8 +36,8 @@ class TagTableRow extends TableRow {
 			selection = selection.replace(":", "");
 		}
 
-		spinner = (Spinner) row.findViewById(R.id.editnode_tag_list);
-		EditDetailsFragment.setupSpinner(context, spinner, tags, selection);
+		spinner = (Spinner) findViewById(R.id.editnode_tag_list);
+		EditDetailsFragment.setupSpinner(this.getContext(), spinner, tags, selection);
 	}
 	
 	public void setUnmodifiable() {
