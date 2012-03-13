@@ -263,8 +263,8 @@ public class EditActivity extends FragmentActivity {
 		if (this.actionMode.equals(ACTIONMODE_CREATE)) {
 			MobileOrgApplication appInst = (MobileOrgApplication) this.getApplication();
 			OrgDatabase orgDB = appInst.getDB();
-			long file_id = orgDB.addOrUpdateFile(OrgFile.CAPTURE_FILE, "Captures", "", true);
-			Long parent = orgDB.getFileNodeId(OrgFile.CAPTURE_FILE);
+			long file_id = orgDB.addOrUpdateFile(OrgFile.CAPTURE_FILE, OrgFile.CAPTURE_FILE_ALIAS, "", true);
+			Long parent = orgDB.getFileId(OrgFile.CAPTURE_FILE);
 			long node_id = orgDB.addNode(parent, newTitle, newTodo, newPriority, newTags, file_id);
 			
 			boolean addTimestamp = PreferenceManager.getDefaultSharedPreferences(
@@ -281,7 +281,7 @@ public class EditActivity extends FragmentActivity {
 		} else if (this.actionMode.equals(ACTIONMODE_ADDCHILD)) {
 			MobileOrgApplication appInst = (MobileOrgApplication) this.getApplication();
 			OrgDatabase orgDB = appInst.getDB();
-			long file_id = orgDB.addOrUpdateFile(OrgFile.CAPTURE_FILE, "Captures", "", true);
+			long file_id = orgDB.addOrUpdateFile(OrgFile.CAPTURE_FILE, OrgFile.CAPTURE_FILE_ALIAS, "", true);
 			Long parent = this.node_id;
 			long node_id = orgDB.addNode(parent, newTitle, newTodo, newPriority, newTags, file_id);
 			
