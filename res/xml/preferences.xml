@@ -47,10 +47,15 @@
             android:summary="@string/summary_view_wrap_lines"
             android:title="@string/title_view_wrap_lines" />
         <CheckBoxPreference
-            android:key="viewDefaultEdit"
             android:defaultValue="true"
+            android:key="viewDefaultEdit"
             android:summary="When checked, the default behaviour for clicking on nodes without children will be editing. Else it will be viewing."
             android:title="Edit on click" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="viewApplyFormating"
+            android:summary="Apply formating of orgmode emphasis, bold, underline and strike-through when viewing."
+            android:title="Apply view formating" />
 
         <ListPreference
             android:defaultValue="0"

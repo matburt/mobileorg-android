@@ -129,7 +129,8 @@ public class NodeViewActivity extends FragmentActivity {
 			text = text.replaceAll("\\n(\\s*\\d+[\\)\\.])", "<br/>\n$1"); // wrap ordered lists
 			
 			text = text.replaceAll("((\\s*\\|[^\\n]*\\|\\s*(?:<br/>)?\\n)+)", "<pre>$1</pre>");
-			
+
+			Log.d("MobileOrg", text);
 			text = "<html><body>" + text + "</body></html>";
 		} else {
 			text = text.replaceAll("\\n", "<br/>\n");
@@ -138,7 +139,6 @@ public class NodeViewActivity extends FragmentActivity {
 
 		return text;
 	}
-	
 
 	private String convertLinks(String text) {
 		Pattern linkPattern = Pattern.compile("\\[\\[([^\\]]*)\\]\\[([^\\]]*)\\]\\]");
@@ -229,12 +229,33 @@ public class NodeViewActivity extends FragmentActivity {
 		result.append("</b></font> <hr />");
 
 		if (!node.getCleanedPayload(appInst.getDB()).equals("")) {
-			result.append(node.getCleanedPayload(appInst.getDB()));
+			String payload = node.getCleanedPayload(appInst.getDB());
+			if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(
+					"viewApplyFormating", true))
+				payload = applyFormating(payload);
+			result.append(payload);
 			result.append("\n<br/>\n");
 		}
 
 		result.append("<br/>\n");
 		return result.toString();
+	}
+	
+	private String getFormatingRegex(String character, String tag, String text) {
+		return text.replaceAll(
+				"(\\s)\\" + character + 
+				"(\\S[\\S\\s]*\\S)" + 
+				"\\" + character + "(\\s)"
+				, "$1<" + tag + ">$2</" + tag + ">$3");
+	}
+	
+	private String applyFormating(String text) {
+		text = getFormatingRegex("*", "b", text);
+		text = getFormatingRegex("/", "i", text);
+		text = getFormatingRegex("_", "u", text);
+		text = getFormatingRegex("+", "strike", text);
+
+		return text;
 	}
 
 }
