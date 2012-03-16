@@ -60,7 +60,7 @@ public class OrgFileParser {
 		this.parentIdStack = new Stack<Long>();
 		
 		this.starStack.push(0);
-		Long fileID = db.getFileNodeId(filename);
+		Long fileID = db.getFileId(filename);
 		this.parentIdStack.push(fileID);
 
 		this.payload = new StringBuilder();
@@ -118,7 +118,7 @@ public class OrgFileParser {
 	
 	private void combineBlockAgendas() {
 		final String filename = "agendas.org";
-		long agendaFileNodeID = db.getFileNodeId(filename);
+		long agendaFileNodeID = db.getFileId(filename);
 		Cursor cursor = db.getNodeChildren(agendaFileNodeID);
 		
 		cursor.moveToFirst();

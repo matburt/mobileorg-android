@@ -20,6 +20,7 @@ import android.preference.PreferenceManager;
 public class OrgFile {
 
 	public static final String CAPTURE_FILE = "mobileorg.org";
+	public static final String CAPTURE_FILE_ALIAS = "Captures";
 
 	private Context context;
 	private String fileName;

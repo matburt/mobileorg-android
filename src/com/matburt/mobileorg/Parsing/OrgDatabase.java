@@ -106,7 +106,7 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		"orgdata.payload", "orgdata.parent_id", "orgdata.file_id"};
 	
 	
-	public long getFileNodeId(String filename) {
+	public long getFileId(String filename) {
 		Cursor cursor = db.query("files", new String[] { "node_id" },
 				"filename=?", new String[] {filename}, null, null, null);
 		
@@ -434,7 +434,7 @@ public class OrgDatabase extends SQLiteOpenHelper {
 	}
 
 	public String fileToString(String filename) {		
-		long fileNodeId = getFileNodeId(filename);
+		long fileNodeId = getFileId(filename);
 		
 		if(fileNodeId < 0)
 			return "";
@@ -702,7 +702,7 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		if(file.indexOf(":") > -1)
 			file = file.substring(0, file.indexOf(":"));
 				
-		Cursor cursor = getNode(getFileNodeId(file));
+		Cursor cursor = getNode(getFileId(file));
 		
 		if(cursor.getCount() == 0) {
 			cursor.close();
