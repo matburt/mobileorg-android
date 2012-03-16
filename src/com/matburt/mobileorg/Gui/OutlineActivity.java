@@ -444,12 +444,18 @@ public class OutlineActivity extends FragmentActivity
 				return;
 			}
 
-			Long node_id = listView.getItemIdAtPosition(position);
+			Long clicked_node_id = listView.getItemIdAtPosition(position);
 			lastSelection = position;
-			if (appInst.getDB().hasNodeChildren(node_id))
-				runExpandSelection(node_id);
-			else
-				runEditNodeActivity(node_id);
+			if (appInst.getDB().hasNodeChildren(clicked_node_id) || node_id == -1)
+				runExpandSelection(clicked_node_id);
+			else {
+				if (PreferenceManager.getDefaultSharedPreferences(
+						parent.getContext())
+						.getBoolean("viewDefaultEdit", true))
+					runEditNodeActivity(clicked_node_id);
+				else
+					runViewNodeActivity(clicked_node_id);
+			}
 		}
 	};
 	

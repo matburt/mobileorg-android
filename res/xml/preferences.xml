@@ -38,14 +38,24 @@
             android:summary="@string/summary_agenda_title"
             android:title="@string/title_agenda_title" />
         <CheckBoxPreference
-            android:key="combineBlockAgendas"
             android:dependency="useAgendaTitle"
+            android:key="combineBlockAgendas"
             android:summary="@string/preference_combine_block_agenda_summary"
             android:title="@string/preference_combine_block_agenda_title" />
         <CheckBoxPreference
             android:key="viewWrapLines"
             android:summary="@string/summary_view_wrap_lines"
             android:title="@string/title_view_wrap_lines" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="viewDefaultEdit"
+            android:summary="When checked, the default behaviour for clicking on nodes without children will be editing. Else it will be viewing."
+            android:title="Edit on click" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="viewApplyFormating"
+            android:summary="Apply formating of orgmode emphasis, bold, underline and strike-through when viewing."
+            android:title="Apply view formating" />
 
         <ListPreference
             android:defaultValue="0"
@@ -56,14 +66,16 @@
             android:title="@string/preference_recursion_level_title" />
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/preference_storage" >
-       <!--  <ListPreference
+
+        <!--
+             <ListPreference
             android:defaultValue="internal"
             android:entries="@array/storageModes"
             android:entryValues="@array/storageModesVals"
             android:key="storageMode"
             android:summary="@string/preference_storage_summary"
             android:title="@string/preference_storage_title" />
-		--> 
+        -->
         <CheckBoxPreference
             android:key="captureWithTimestamp"
             android:summary="@string/summary_capture_with_timestamp"
@@ -85,46 +97,49 @@
             android:key="calendarEnabled"
             android:summary="@string/preference_calendar_synch"
             android:title="@string/preference_calendar_synch_title" />
-        
+
         <ListPreference
             android:defaultValue=""
-            android:key="calendarName"
             android:dependency="calendarEnabled"
+            android:key="calendarName"
             android:summary="@string/preference_calendar_name_summary"
             android:title="@string/preference_calendar_name" />
+
         <CheckBoxPreference
+            android:defaultValue="true"
+            android:dependency="calendarEnabled"
             android:key="calendarShowDone"
-            android:defaultValue="true"
-            android:dependency="calendarEnabled"
             android:summary="@string/preference_calendar_show_done_summary"
-            android:title="@string/preference_calendar_show_done" />        
+            android:title="@string/preference_calendar_show_done" />
         <CheckBoxPreference
-            android:key="calendarHabits"
             android:defaultValue="true"
             android:dependency="calendarEnabled"
+            android:key="calendarHabits"
             android:summary="@string/preference_calendar_show_habits_summary"
             android:title="@string/preference_calendar_show_habits" />
         <CheckBoxPreference
-            android:key="calendarReminder"
             android:dependency="calendarEnabled"
+            android:key="calendarReminder"
             android:summary="@string/preference_calendar_reminder_summary"
             android:title="@string/preference_calendar_reminder" />
+
         <EditTextPreference
+            android:dependency="calendarReminder"
             android:key="calendarReminderInterval"
             android:maxLength="3"
-            android:dependency="calendarReminder"
             android:numeric="integer"
             android:summary="@string/preference_calendar_reminder_interval_summary"
             android:title="@string/preference_calendar_reminder_interval" />
-
     </PreferenceCategory>
-
     <PreferenceCategory android:title="@string/preference_other" >
-         <!-- <PreferenceScreen
+
+        <!--
+        <PreferenceScreen
             android:key="Widget"
             android:summary="@string/preferences_widget_summary"
             android:title="@string/preference_widget_title" >
-        </PreferenceScreen> -->
+        </PreferenceScreen>
+        -->
         <PreferenceScreen
             android:key="VersionDisp"
             android:summary="0.8.4"

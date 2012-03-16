@@ -127,7 +127,11 @@ public class NodeWrapper {
 		if(tagsColumn == -1)
 			return "";
 		
-		return cursor.getString(tagsColumn);
+		String tags = cursor.getString(tagsColumn);
+		if(tags == null)
+			return "";
+			
+		return tags;
 	}
 	
 	/**
