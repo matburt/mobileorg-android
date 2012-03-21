@@ -1,9 +1,16 @@
 package com.matburt.mobileorg.Parsing;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import android.text.TextUtils;
+import android.text.format.DateUtils;
+import android.util.Log;
 
 public class NodePayload {
 	private StringBuilder payload = new StringBuilder();
@@ -14,10 +21,8 @@ public class NodePayload {
 	
 	private String content = null;
 	private String scheduled = null;
-	
 	private String deadline = null;
-	@SuppressWarnings("unused")
-	private String timestamp = null;
+	private ArrayList<String> timestamps = new ArrayList<String>();
 	
 	private String id = null; // Can be :ID: (or :ORIGINAL_ID: for agendas.org)
 	
@@ -35,7 +40,7 @@ public class NodePayload {
 	
 	public String getContent() {
 		if(this.content == null)
-			this.content = cleanPayload();
+			cleanPayload();
 
 		return this.content;
 	}
@@ -61,15 +66,22 @@ public class NodePayload {
 		return this.id;
 	}
 	
-	private String cleanPayload() {
+	private void cleanPayload() {
 		this.scheduled = stripDate("SCHEDULED:");
 		this.deadline = stripDate("DEADLINE:");
-		this.timestamp = stripDate("");
+		stripTimestamps();
 
 		stripTags();
 		stripFileProperties();
 		
-		return payload.toString().trim();
+		this.content = payload.toString().trim();
+	}
+	
+	private void stripTimestamps() {
+		String date = "";
+		while((date = stripDate("")).equals("") == false) {
+			this.timestamps.add(date); 
+		}
 	}
 		
 	private String stripDate(String scheduled) {		
@@ -109,7 +121,6 @@ public class NodePayload {
 			} else
 				end = payload.indexOf("\n", propm.end());
 
-			
 			if(end == -1)
 				end = propm.end();
 			else {
@@ -140,19 +151,92 @@ public class NodePayload {
 		}
 	}
 
+	
 	/**
 	 * Returns a string containing the time at which a todo is scheduled or deadlined.
 	 */
-	public String getDate() {		
-		if(this.scheduled == null)
-			this.scheduled = stripDate("SCHEDULED:");
+	public ArrayList<DateEntry> getDates() {
+		ArrayList<DateEntry> result = new ArrayList<DateEntry>();
 		
-		if(TextUtils.isEmpty(this.scheduled) && this.deadline == null) {
-			this.deadline = stripDate("DEADLINE:");
-			return this.deadline;
+		if(this.scheduled == null) {
+			this.scheduled = stripDate("SCHEDULED:");
+			DateEntry scheduledEntry = getDateEntry(this.scheduled);
+			if(scheduledEntry != null)
+				result.add(scheduledEntry);
 		}
 		
-		return this.scheduled;
+		if(this.deadline == null) {
+			this.deadline = stripDate("DEADLINE:");
+			DateEntry deadlineEntry = getDateEntry(this.deadline);
+			if(deadlineEntry != null)
+				result.add(deadlineEntry);
+		}
+		
+		stripTimestamps();
+		for(String timestamp: this.timestamps) {
+			DateEntry timestampEntry = getDateEntry(timestamp);
+			if(timestampEntry != null)
+				result.add(timestampEntry);
+		}
+		
+		return result;
+	}
+	
+	public class DateEntry {
+		public long beginTime;
+		public long endTime;
+		public int allDay;
+	}
+	
+	private DateEntry getDateEntry(String date)
+			throws IllegalArgumentException {
+		final Pattern schedulePattern = Pattern
+				.compile("(\\d{4}-\\d{2}-\\d{2})(?:[^\\d]*)(\\d{1,2}\\:\\d{2})?\\-?(\\d{1,2}\\:\\d{2})?");
+		
+		Matcher propm = schedulePattern.matcher(date);
+		DateEntry result = new DateEntry();
+
+		if (propm.find()) {
+			try {
+				result.beginTime = getDateInMs(propm.group(1)).getTime();
+				result.beginTime += TimeZone.getDefault().getOffset(result.beginTime);
+
+				long beginTimeOfDay;
+				if (propm.group(2) != null) { // has hh:mm entry
+					beginTimeOfDay = getTimeInMs(propm.group(2)).getTime();
+					result.beginTime += beginTimeOfDay;
+					result.allDay = 0;
+
+					if (propm.group(3) != null) { // has hh:mm-hh:mm entry
+						result.endTime = result.beginTime
+								+ getTimeInMs(propm.group(3)).getTime()
+								- beginTimeOfDay;
+					} else
+						// event is one hour per default
+						result.endTime = result.beginTime + DateUtils.HOUR_IN_MILLIS;
+				} else { // event is an entire day event
+					result.endTime = result.beginTime + DateUtils.DAY_IN_MILLIS;
+					result.allDay = 1;
+				}
+
+				return result;
+			} catch (ParseException e) {
+				Log.w("MobileOrg",
+						"Unable to parse schedule: " + date);
+			}
+		} else
+			Log.w("MobileOrg", "Unable to find time entry of entry");
+		return null;
+	}
+	
+	private Date getDateInMs(String date) throws ParseException {
+		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+		return formatter.parse(date);
+	}
+	
+	private Date getTimeInMs(String time) throws ParseException {
+		SimpleDateFormat formatter = new SimpleDateFormat("HH:mm");
+		return formatter.parse(time);
 	}
 	
 	public String getScheduled() {

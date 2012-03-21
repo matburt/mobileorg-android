@@ -1,12 +1,6 @@
 package com.matburt.mobileorg.Services;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.TimeZone;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import android.content.ContentUris;
 import android.content.ContentValues;
@@ -20,11 +14,10 @@ import android.provider.CalendarContract.CalendarAlerts;
 import android.provider.CalendarContract.Calendars;
 import android.provider.CalendarContract.Events;
 import android.provider.CalendarContract.Reminders;
-import android.text.format.DateUtils;
 import android.text.format.Time;
-import android.util.Log;
 
 import com.matburt.mobileorg.R;
+import com.matburt.mobileorg.Parsing.NodePayload.DateEntry;
 import com.matburt.mobileorg.Parsing.NodeWrapper;
 import com.matburt.mobileorg.Parsing.OrgDatabase;
 
@@ -47,26 +40,96 @@ public class CalendarSyncService {
 		setupCalendar();
 	}
 	
-	private int getCalendarID(String calendarName) {
-		Cursor cursor = context.getContentResolver().query(
-				intCalendars.CONTENT_URI,
-				new String[] { intCalendars._ID,
-						intCalendars.CALENDAR_DISPLAY_NAME }, null,
-				null, null);
-		if (cursor != null && cursor.moveToFirst()) {
-			for (int i = 0; i < cursor.getCount(); i++) {
-				int calId = cursor.getInt(0);
-				String calName = cursor.getString(1);
+	public void syncFiles() {
+		this.deleteAllEntries(context);
+		
+		HashMap<String,String> files = this.db.getFiles();
+		files.remove("agendas.org");
+		for(String filename: files.keySet())
+			insertFileEntries(filename);
+	}	
+	
+	public void syncFile(String filename) throws IllegalArgumentException {
+		deleteFileEntries(filename, context);
+		insertFileEntries(filename);
+	}
+	
+	public int deleteAllEntries(Context context) {
+		return context.getContentResolver()
+				.delete(intEvents.CONTENT_URI, "description LIKE ?",
+						new String[] { CALENDAR_ORGANIZER + "%" });
+	}
 
-				if (calName.equals(calendarName)) {
-				    cursor.close();
-					return calId;
-				}
-				cursor.moveToNext();
+	public int deleteFileEntries(String filename, Context context) {
+		return context.getContentResolver().delete(intEvents.CONTENT_URI,
+				"description LIKE ?",
+				new String[] { CALENDAR_ORGANIZER + ":" + filename + "%" });
+	}
+
+	
+	public CharSequence[] getCalendars(Context context) {
+		CharSequence[] result;
+
+		try {
+			Cursor cursor = context.getContentResolver().query(
+					intCalendars.CONTENT_URI,
+					new String[] { intCalendars._ID,
+							intCalendars.CALENDAR_DISPLAY_NAME }, null, null,
+					null);
+
+			if (cursor.getCount() == 0) {
+				result = new CharSequence[1];
+				result[0] = context
+						.getString(R.string.error_setting_no_calendar);
+				return result;
 			}
+
+			result = new CharSequence[cursor.getCount()];
+
+			if (cursor != null && cursor.moveToFirst()) {
+				for (int i = 0; i < cursor.getCount(); i++) {
+					result[i] = cursor.getString(1);
+					cursor.moveToNext();
+				}
+			}
+			cursor.close();
+		} catch (SQLException e) {
+			result = new CharSequence[1];
+			result[0] = context.getString(R.string.error_setting_no_calendar);
 		}
-		cursor.close();
-		return -1;
+
+		return result;
+	}
+	
+	
+	public void insertNode(long node_id) {
+		NodeWrapper node = new NodeWrapper(this.db.getNode(node_id));
+		insertNode(node, node.getFileName(db));
+	}
+	
+	private void insertFileEntries(String filename) throws IllegalArgumentException {
+		Cursor scheduled = db.getFileSchedule(filename);
+
+		if (scheduled == null)
+			return;
+		while (scheduled.isAfterLast() == false) {
+			NodeWrapper node = new NodeWrapper(scheduled);
+			insertNode(node, filename);
+			scheduled.moveToNext();
+		}
+
+		scheduled.close();
+	}
+	
+	private void insertNode(NodeWrapper node, String filename)
+			throws IllegalArgumentException {
+		boolean isActive = db.isTodoActive(node.getTodo());
+
+		for (DateEntry date : node.getPayload(db).getDates()) {
+			insertEntry(node.getName(), isActive, node.getCleanedPayload(db),
+					node.getNodeId(db), date.beginTime, date.endTime,
+					date.allDay, filename);
+		}
 	}
 
 	// TODO Speed up using bulkInserts
@@ -112,7 +175,7 @@ public class CalendarSyncService {
 		
 		return nodeID;
 	}
-	
+
 	private void addReminder(String eventID, long beginTime, long endTime) {
 		if(beginTime < System.currentTimeMillis())
 			return;
@@ -144,150 +207,39 @@ public class CalendarSyncService {
 		eventValues.put(intEvents.HAS_ALARM, 1);
 		context.getContentResolver().update(
 				ContentUris.withAppendedId(intEvents.CONTENT_URI,
-						Long.valueOf(eventID)), eventValues, null, null);
-		
+						Long.valueOf(eventID)), eventValues, null, null);	
 	}
 	
-	public int deleteEntry(String calendarID) {
+	private int getCalendarID(String calendarName) {
+		Cursor cursor = context.getContentResolver().query(
+				intCalendars.CONTENT_URI,
+				new String[] { intCalendars._ID,
+						intCalendars.CALENDAR_DISPLAY_NAME }, null,
+				null, null);
+		if (cursor != null && cursor.moveToFirst()) {
+			for (int i = 0; i < cursor.getCount(); i++) {
+				int calId = cursor.getInt(0);
+				String calName = cursor.getString(1);
+
+				if (calName.equals(calendarName)) {
+				    cursor.close();
+					return calId;
+				}
+				cursor.moveToNext();
+			}
+		}
+		cursor.close();
+		return -1;
+	}
+
+	@SuppressWarnings("unused")
+	private int deleteEntry(String nodeCalendarID) {
 		return context.getContentResolver().delete(
 				ContentUris.withAppendedId(intEvents.CONTENT_URI,
-						Long.valueOf(calendarID)), null, null);
+						Long.valueOf(nodeCalendarID)), null, null);
 	}
 	
-	public int deleteFileEntries(String filename, Context context) {
-		return context.getContentResolver().delete(intEvents.CONTENT_URI,
-				"description LIKE ?",
-				new String[] { CALENDAR_ORGANIZER + ":" + filename + "%" });
-	}
-	
-	public int deleteAllEntries(Context context) {
-		return context.getContentResolver()
-				.delete(intEvents.CONTENT_URI, "description LIKE ?",
-						new String[] { CALENDAR_ORGANIZER + "%" });
-	}
-	
-	private Date getDateInMs(String date) throws ParseException {
-		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-		return formatter.parse(date);
-	}
-	
-	private Date getTimeInMs(String time) throws ParseException {
-		SimpleDateFormat formatter = new SimpleDateFormat("HH:mm");
-		return formatter.parse(time);
-	}
-	
-	public void insertNode(long node_id) {
-		NodeWrapper node = new NodeWrapper(this.db.getNode(node_id));
-		insertNode(node, node.getFileName(db));
-	}
-	
-	private void insertNode(NodeWrapper node, String filename) throws IllegalArgumentException {
-		final Pattern schedulePattern = Pattern
-				.compile("(\\d{4}-\\d{2}-\\d{2})(?:[^\\d]*)(\\d{1,2}\\:\\d{2})?\\-?(\\d{1,2}\\:\\d{2})?");
-		Matcher propm = schedulePattern.matcher(node.getPayload(db).getDate());
-
-		long beginTime;
-		long endTime;
-		int allDay;
-
-		if (propm.find()) {
-			try {
-				beginTime = getDateInMs(propm.group(1)).getTime();
-				beginTime += TimeZone.getDefault().getOffset(beginTime);
-				
-				long beginTimeOfDay;
-				if (propm.group(2) != null) { // has hh:mm entry
-					beginTimeOfDay = getTimeInMs(propm.group(2)).getTime();
-					beginTime += beginTimeOfDay;
-					allDay = 0;
-					
-					if (propm.group(3) != null) { // has hh:mm-hh:mm entry
-						endTime = beginTime + getTimeInMs(propm.group(3)).getTime() - beginTimeOfDay;
-					}
-					else // event is one hour per default
-						endTime = beginTime + DateUtils.HOUR_IN_MILLIS;
-				} else { // event is an entire day event
-					endTime = beginTime + DateUtils.DAY_IN_MILLIS;
-					allDay = 1;
-				}
-				
-				boolean isActive = db.isTodoActive(node.getTodo());
-				
-				insertEntry(node.getName(), isActive, node.getCleanedPayload(db),
-						node.getNodeId(db), beginTime, endTime, allDay,
-						filename);
-
-			} catch (ParseException e) {
-				Log.w("MobileOrg", "Unable to parse schedule of: " + node.getName() + " " + node.getPayload(db).getDate());
-			}
-		} else
-			Log.w("MobileOrg", "Unable to find time entry in schedule of: "
-					+ node.getName());
-	}
-
-	public void insertFileEntries(String filename) throws IllegalArgumentException {
-		Cursor scheduled = db.getFileSchedule(filename);
-
-		if (scheduled == null)
-			return;
-		while (scheduled.isAfterLast() == false) {
-			NodeWrapper node = new NodeWrapper(scheduled);
-
-			insertNode(node, filename);
-			scheduled.moveToNext();
-		}
-
-		scheduled.close();
-	}
-
-	public CharSequence[] getCalendars(Context context) {
-		CharSequence[] result;
-
-		try {
-			Cursor cursor = context.getContentResolver().query(
-					intCalendars.CONTENT_URI,
-					new String[] { intCalendars._ID,
-							intCalendars.CALENDAR_DISPLAY_NAME }, null, null,
-					null);
-
-			if (cursor.getCount() == 0) {
-				result = new CharSequence[1];
-				result[0] = context
-						.getString(R.string.error_setting_no_calendar);
-				return result;
-			}
-
-			result = new CharSequence[cursor.getCount()];
-
-			if (cursor != null && cursor.moveToFirst()) {
-				for (int i = 0; i < cursor.getCount(); i++) {
-					result[i] = cursor.getString(1);
-					cursor.moveToNext();
-				}
-			}
-			cursor.close();
-		} catch (SQLException e) {
-			result = new CharSequence[1];
-			result[0] = context.getString(R.string.error_setting_no_calendar);
-		}
-
-		return result;
-	}
-	
-	public void syncFile(String filename) throws IllegalArgumentException {
-		deleteFileEntries(filename, context);
-		insertFileEntries(filename);
-	}
-	
-	public void syncFiles() {
-		this.deleteAllEntries(context);
-		
-		HashMap<String,String> files = this.db.getFiles();
-		files.remove("agendas.org");
-		for(String filename: files.keySet())
-			insertFileEntries(filename);
-	}
-	
+/*** Compatibility with Android 4.0 *****/
 	
 	private class intEvents {
 		public Uri CONTENT_URI;
@@ -371,6 +323,7 @@ public class CalendarSyncService {
 			intCalendarAlerts.STATE = CalendarAlerts.STATE;
 			intCalendarAlerts.MINUTES = CalendarAlerts.MINUTES;
 		} catch (NoClassDefFoundError e) {
+			// The classes referenced above are not available on pre 4.0 phones.
 			setupBaseUris();
 		}
 	}
@@ -385,7 +338,7 @@ public class CalendarSyncService {
 	}
 	
 	/**
-	 * Hack to get the proper uri.
+	 * Hack to get the proper calendar uri for pre 4.0 phones. 
 	 */
 	private String getCalendarUriBase() {
 		String calendarUriBase = null;
