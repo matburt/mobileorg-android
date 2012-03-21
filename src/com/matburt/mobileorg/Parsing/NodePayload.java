@@ -61,9 +61,20 @@ public class NodePayload {
 		
 	public String getId() {
 		if(this.id == null)
-			this.stripTags();
+			this.stripProperties();
 		
 		return this.id;
+	}
+	
+	public String getProperty(String property) {
+		String residue = getPayloadResidue();
+		final Pattern propertiesLine = Pattern.compile(":"+property+":([^\\n]+)");
+		Matcher propm = propertiesLine.matcher(residue);
+		
+		if(propm.find())
+			return propm.group(1).trim();
+		else
+			return "";
 	}
 	
 	private void cleanPayload() {
@@ -71,7 +82,7 @@ public class NodePayload {
 		this.deadline = stripDate("DEADLINE:");
 		stripTimestamps();
 
-		stripTags();
+		stripProperties();
 		stripFileProperties();
 		
 		this.content = payload.toString().trim();
@@ -106,7 +117,7 @@ public class NodePayload {
 	}
 	
 	// TODO Convert to use pattern
-	private void stripTags() {
+	private void stripProperties() {
 		final Pattern propertiesLine = Pattern.compile(":[A-Za-z_]+:");
 		Matcher propm = propertiesLine.matcher(this.payload);
 
@@ -135,7 +146,6 @@ public class NodePayload {
 		}
 	}
 	
-	// TODO Convert to use Pattern
 	private void stripFileProperties() {
 		while (true) {
 			int start = payload.indexOf("#+");

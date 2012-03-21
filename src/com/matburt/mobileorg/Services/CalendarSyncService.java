@@ -128,13 +128,14 @@ public class CalendarSyncService {
 		for (DateEntry date : node.getPayload(db).getDates()) {
 			insertEntry(node.getName(), isActive, node.getCleanedPayload(db),
 					node.getNodeId(db), date.beginTime, date.endTime,
-					date.allDay, filename);
+					date.allDay, filename,
+					node.getPayload(db).getProperty("LOCATION"));
 		}
 	}
 
 	// TODO Speed up using bulkInserts
 	private String insertEntry(String name, boolean isTodoActive, String payload, String orgID, long beginTime,
-			long endTime, int allDay, String filename) throws IllegalArgumentException {		
+			long endTime, int allDay, String filename, String location) throws IllegalArgumentException {		
 		
 		if (sharedPreferences.getBoolean("calendarShowDone", true) == false
 				&& isTodoActive == false)
@@ -154,7 +155,7 @@ public class CalendarSyncService {
 		values.put(intEvents.CALENDAR_ID, calId);
 		values.put(intEvents.TITLE, name);
 		values.put(intEvents.DESCRIPTION, embeddedNodeMetadata + "\n" + payload);
-		values.put(intEvents.EVENT_LOCATION, "");
+		values.put(intEvents.EVENT_LOCATION, location);
 		
 		// Sync with google will delete organizer :(
 		//values.put(intEvents.ORGANIZER, embeddedNodeMetadata);
