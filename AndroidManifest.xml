@@ -9,7 +9,7 @@
         android:targetSdkVersion="8" />
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />  
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_CALENDAR" />
     <uses-permission android:name="android.permission.WRITE_CALENDAR" />
 
@@ -39,7 +39,6 @@
                 <action android:name="com.matburt.mobileorg.Synchronizer.action.SYNC_UPDATE" />
             </intent-filter>
         </service>
-
         <service android:name=".Services.SyncService" >
             <intent-filter>
                 <category android:name="android.intent.category.DEFAULT" />
@@ -49,11 +48,10 @@
         </service>
 
         <receiver android:name=".Plugin.Synchronize" >
-          <intent-filter>
-            <action android:name="com.twofortyfouram.locale.intent.action.FIRE_SETTING" />
-          </intent-filter>
+            <intent-filter>
+                <action android:name="com.twofortyfouram.locale.intent.action.FIRE_SETTING" />
+            </intent-filter>
         </receiver>
-
         <receiver android:name=".Services.MobileOrgStartupIntentReceiver" >
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
@@ -64,7 +62,7 @@
 
         <activity
             android:name=".Gui.OutlineActivity"
-            android:label="MobileOrg" 
+            android:label="MobileOrg"
             android:theme="@style/Theme.MobileOrgActionbar" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -76,7 +74,7 @@
         </activity>
         <activity
             android:name=".Gui.NodeViewActivity"
-            android:label="Org View" 
+            android:label="Org View"
             android:theme="@style/Theme.MobileOrgActionbar" >
             <intent-filter>
                 <category android:name="android.intent.category.DEFAULT" />
@@ -115,12 +113,12 @@
         </activity>
         <activity
             android:name=".Plugin.SyncEditActivity"
-            android:label="@string/sync_plugin"
+            android:exported="true"
             android:icon="@drawable/icon"
-            android:exported="true" >
-          <intent-filter>
-            <action android:name="com.twofortyfouram.locale.intent.action.EDIT_SETTING" />
-          </intent-filter>
+            android:label="@string/sync_plugin" >
+            <intent-filter>
+                <action android:name="com.twofortyfouram.locale.intent.action.EDIT_SETTING" />
+            </intent-filter>
         </activity>
         <activity
             android:name=".Settings.SettingsActivity"
@@ -134,7 +132,9 @@
             android:name=".Gui.CertificateConflictActivity"
             android:label="MobileOrg Certificate Conflict" >
         </activity>
-        <activity android:name=".Gui.FileDecryptionActivity"></activity><activity
+        <activity android:name=".Gui.FileDecryptionActivity" >
+        </activity>
+        <activity
             android:name=".Synchronizers.DropboxAuthActivity"
             android:label="Dropbox Authentication" >
         </activity>
@@ -154,8 +154,14 @@
             android:name=".Settings.ScpSettingsActivity"
             android:label="Scp Settings" >
         </activity>
-        <service android:name=".Services.TimeclockService"></service>
-        
+
+        <service android:name=".Services.TimeclockService" >
+        </service>
+
+        <activity
+            android:name=".Services.TimeclockDialog"
+            android:theme="@android:style/Theme.Dialog" >
+        </activity>
     </application>
 
 </manifest>

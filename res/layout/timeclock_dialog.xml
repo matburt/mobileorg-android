@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <TextView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/timeclock_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical|center_horizontal"
+        android:text=""
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:paddingBottom="20dp"
+         />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_below="@id/timeclock_text"
+        android:gravity="center" >
+
+        <Button
+            android:id="@+id/timeclock_save"
+            android:layout_width="70dp"
+            android:layout_height="wrap_content"
+            android:paddingRight="10dp"
+            android:text="Save" />
+
+        <Button
+            android:id="@+id/timeclock_edit"
+            android:layout_width="70dp"
+            android:layout_height="wrap_content"
+            android:paddingRight="10dp"
+            android:text="Edit" />
+
+        <Button
+            android:id="@+id/timeclock_cancel"
+            android:layout_width="70dp"
+            android:layout_height="wrap_content"
+            android:text="Cancel" />
+    </LinearLayout>
+</RelativeLayout>

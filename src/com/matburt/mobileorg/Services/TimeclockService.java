@@ -8,7 +8,6 @@ import android.content.Intent;
 import android.os.IBinder;
 
 import com.matburt.mobileorg.R;
-import com.matburt.mobileorg.Gui.OutlineActivity;
 import com.matburt.mobileorg.Parsing.MobileOrgApplication;
 import com.matburt.mobileorg.Parsing.NodeWrapper;
 import com.matburt.mobileorg.Parsing.OrgDatabase;
@@ -50,15 +49,19 @@ public class TimeclockService extends Service {
 		Notification notification = new Notification(R.drawable.icon, node.getName(),
 				System.currentTimeMillis());
 
+		Intent intent = new Intent(this, TimeclockDialog.class);
+		intent.putExtra(NODE_ID, node_id);
 		PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
-				new Intent(this, OutlineActivity.class), 0);
+				intent, 0);
 
 		notification.setLatestEventInfo(this, getText(R.string.app_name), node.getName(),
 				contentIntent);
 
+		node.close();
 		mNM.notify(notificationID, notification);
 	}
 	
+	@SuppressWarnings("unused")
 	private void cancelNotification() {
 		mNM.cancel(notificationID);
 	}
