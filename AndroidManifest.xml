@@ -154,6 +154,7 @@
             android:name=".Settings.ScpSettingsActivity"
             android:label="Scp Settings" >
         </activity>
+        <service android:name=".Services.TimeclockService"></service>
         
     </application>
 
