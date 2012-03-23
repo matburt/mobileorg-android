@@ -4,7 +4,10 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.IBinder;
 
 import com.matburt.mobileorg.R;
@@ -14,12 +17,17 @@ import com.matburt.mobileorg.Parsing.OrgDatabase;
 
 public class TimeclockService extends Service {
 	public static final String NODE_ID = "node_id";
+	public static final String CLOCK_HOUR = "clock_hour";
+	public static final String CLOCK_MINUTE = "clock_minute";
+
+	public static final String TIMECLOCK_CANCEL = "com.matburt.mobileorg.Timeclock.action.TIMECLOCK_CANCEL";
 	
 	private final int notificationID = 1337;
 	private NotificationManager mNM;
 	private long node_id;
 
 	private OrgDatabase db;
+	private TimeclockReceiver receiver;
 	
 	@Override
 	public void onCreate() {
@@ -28,11 +36,14 @@ public class TimeclockService extends Service {
 		
 		MobileOrgApplication appInst = (MobileOrgApplication) getApplication();
 		this.db = appInst.getDB();
+		this.receiver = new TimeclockReceiver();
+		registerReceiver(receiver, new IntentFilter(TIMECLOCK_CANCEL));
 	}
 
 	@Override
 	public void onDestroy() {
 		this.mNM.cancel(notificationID);
+		unregisterReceiver(receiver);
 		super.onDestroy();
 	}
 
@@ -51,7 +62,9 @@ public class TimeclockService extends Service {
 
 		Intent intent = new Intent(this, TimeclockDialog.class);
 		intent.putExtra(NODE_ID, node_id);
-		PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
+		intent.putExtra(CLOCK_HOUR, 4);
+		intent.putExtra(CLOCK_MINUTE, 2);
+		PendingIntent contentIntent = PendingIntent.getActivity(this, 1,
 				intent, 0);
 
 		notification.setLatestEventInfo(this, getText(R.string.app_name), node.getName(),
@@ -61,11 +74,16 @@ public class TimeclockService extends Service {
 		mNM.notify(notificationID, notification);
 	}
 	
-	@SuppressWarnings("unused")
 	private void cancelNotification() {
 		mNM.cancel(notificationID);
 	}
 	
+	private class TimeclockReceiver extends BroadcastReceiver {
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			cancelNotification();
+		}
+	}
 
 	@Override
 	public IBinder onBind(Intent intent) {

@@ -294,5 +294,9 @@ public class NodeWrapper {
 		if(cursor != null)
 			this.cursor.close();
 	}
+
+	public void addLogbook(int hour, int minute) {
+		// TODO Write new logbook drawer
+	}
 }
 

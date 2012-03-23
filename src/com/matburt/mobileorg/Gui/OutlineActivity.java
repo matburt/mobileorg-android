@@ -66,7 +66,7 @@ public class OutlineActivity extends FragmentActivity
     private boolean emptylist = false;
 
 	@Override
-	public void onCreate(Bundle savedInstanceState) {
+	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
 		setContentView(R.layout.outline);		
@@ -102,7 +102,7 @@ public class OutlineActivity extends FragmentActivity
 	}
 	
 	@Override
-	public void onDestroy() {
+	protected void onDestroy() {
 		unregisterReceiver(this.syncReceiver);
 		this.appInst = null;
 		super.onDestroy();
