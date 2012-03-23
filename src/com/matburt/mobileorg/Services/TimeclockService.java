@@ -23,12 +23,9 @@ import com.matburt.mobileorg.Parsing.OrgDatabase;
 
 public class TimeclockService extends Service {
 	public static final String NODE_ID = "node_id";
-	public static final String CLOCK_HOUR = "clock_hour";
-	public static final String CLOCK_MINUTE = "clock_minute";
 	public static final String TIMECLOCK_UPDATE = "timeclock_update";
 	public static final String TIMECLOCK_TIMEOUT = "timeclock_timeout";
 
-	
 	private final int notificationID = 1337;
 	private OrgDatabase db;
 	private NotificationManager mNM;
@@ -66,7 +63,6 @@ public class TimeclockService extends Service {
 	@Override
 	public void onDestroy() {
 		cancelNotification();
-		node.close();
 		super.onDestroy();
 	}
 
@@ -113,13 +109,9 @@ public class TimeclockService extends Service {
 	private void showNotification(long node_id) {		
 		this.notification = new Notification(R.drawable.icon, node.getName(),
 				System.currentTimeMillis());
-
-		Intent intent = new Intent(this, TimeclockDialog.class);
-		intent.putExtra(NODE_ID, node_id);
-		intent.putExtra(CLOCK_HOUR, 4);
-		intent.putExtra(CLOCK_MINUTE, 2);
+		
 		PendingIntent contentIntent = PendingIntent.getActivity(this, 1,
-				intent, 0);
+				new Intent(this, TimeclockDialog.class), 0);
 		
 		notification.contentIntent = contentIntent;
 		notification.flags = notification.flags
@@ -175,6 +167,8 @@ public class TimeclockService extends Service {
 	}
 	
 	private void doTimeout() {
+		if(notification == null)
+			return;
 		notification.defaults = Notification.DEFAULT_ALL;
 		mNM.notify(notificationID, notification);
 		notification.defaults = 0;
@@ -199,22 +193,22 @@ public class TimeclockService extends Service {
 	public String getElapsedTimeString() {
 		long difference = System.currentTimeMillis() - this.startTime;
 		if(difference >= 0) {
-			String elapsed = String.format("%02d:%02d",
+			String elapsed = String.format("%d:%02d",
 					(int) ((difference / (1000 * 60 * 60)) % 24),
 					(int) ((difference / (1000 * 60)) % 60));
 			
 			return elapsed;
 		}
 		else
-			return "00:00";
+			return "0:00";
 	}
 	
 	private String getEstimatedTimeString() {
-		if(this.estimatedHour <= 0 && this.estimatedMinute <= 0)
+		if (this.estimatedHour <= 0 && this.estimatedMinute <= 0)
 			return "";
 		else
 			return "/"
-					+ String.format("%02d:%02d", this.estimatedHour,
+					+ String.format("%d:%02d", this.estimatedHour,
 							this.estimatedMinute);
 	}
 	
@@ -222,9 +216,20 @@ public class TimeclockService extends Service {
 		return this.startTime;
 	}
 	
+	public long getEndTime() {
+		return System.currentTimeMillis();
+	}
+	
+	public long getNodeID() {
+		return this.node_id;
+	}
+	
 	public void cancelNotification() {
 		unsetAlarms();
 		mNM.cancel(notificationID);
+		if(node != null)
+			node.close();
+		this.stopSelf();
 	}
 
 	@Override

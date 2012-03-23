@@ -295,8 +295,15 @@ public class NodeWrapper {
 			this.cursor.close();
 	}
 
-	public void addLogbook(long startTime, int hour, int minute) {
-		// TODO Write new logbook drawer
+	public void addLogbook(long startTime, long endTime, OrgDatabase db) {
+		StringBuilder rawPayload = new StringBuilder(getRawPayload(db));
+		rawPayload = NodePayload.addLogbook(rawPayload, startTime, endTime);
+		
+		boolean generateEdits = !getFileName(db).equals(OrgFile.CAPTURE_FILE);
+
+		if(generateEdits)
+			db.addEdit("body", getNodeId(db), getName(), getRawPayload(db), rawPayload.toString());
+		setPayload(rawPayload.toString(), db);
 	}
 }
 

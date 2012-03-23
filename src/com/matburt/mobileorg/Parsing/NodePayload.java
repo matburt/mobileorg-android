@@ -278,4 +278,30 @@ public class NodePayload {
 		else if(TextUtils.isEmpty(value) == false)
 			newPayloadResidue.insert(0, value).append("\n");
 	}
+	
+	public long sumClocks() {
+		// TODO implement
+		return 0;
+	}
+	
+	private static String formatClockEntry(long time) {
+		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd EEE HH:mm");
+		return "[" + formatter.format(new Date(time)) + "]";
+	}
+
+	public static StringBuilder addLogbook(StringBuilder payload, long startTime, long endTime) {
+		// TODO Add => total to end
+		String line = "CLOCK: " + formatClockEntry(startTime) + "--"
+				+ formatClockEntry(endTime);
+		
+		int logbookIndex = payload.indexOf(":LOGBOOK:");
+		if(logbookIndex == -1)
+			payload.insert(0, ":LOGBOOK:\n" + line + "\n:END:\n");
+		else
+			payload.insert(logbookIndex + ":LOGBOOK:".length(), "\n" + line);
+		return payload;
+	}
+	
+	
 }
+

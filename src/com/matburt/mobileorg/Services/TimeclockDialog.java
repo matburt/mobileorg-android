@@ -2,7 +2,6 @@ package com.matburt.mobileorg.Services;
 
 import android.app.Dialog;
 import android.app.TimePickerDialog;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
@@ -23,6 +22,7 @@ public class TimeclockDialog extends FragmentActivity {
 	private NodeWrapper node;
 	private int hour = 0;
 	private int minute = 0;
+	private OrgDatabase db;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -32,21 +32,9 @@ public class TimeclockDialog extends FragmentActivity {
         setContentView(R.layout.timeclock_dialog);
         getWindow().setFeatureDrawableResource(Window.FEATURE_LEFT_ICON, 
                 android.R.drawable.ic_dialog_alert);
-        
-        Intent intent = getIntent();
-        long node_id = intent.getLongExtra(TimeclockService.NODE_ID, -1);
 
         MobileOrgApplication appInst = (MobileOrgApplication) getApplication();
-        OrgDatabase db = appInst.getDB();
-		this.node = new NodeWrapper(db.getNode(node_id));
-
-		String elapsedTime = TimeclockService.getInstance().getElapsedTimeString();
-		parseElapsedTime(elapsedTime);
-        
-		setTitle("MobileOrg Timeclock");
-		TextView textView = (TextView) findViewById(R.id.timeclock_text);
-		textView.setText(node.getName() + "@" + elapsedTime);
-		node.close();
+        this.db = appInst.getDB();
         
         Button button = (Button) findViewById(R.id.timeclock_cancel);
         button.setOnClickListener(cancelListener);
@@ -54,6 +42,28 @@ public class TimeclockDialog extends FragmentActivity {
         button.setOnClickListener(editListener);
         button = (Button) findViewById(R.id.timeclock_save);
         button.setOnClickListener(saveListener);
+	}
+	
+	@Override
+	protected void onStart() {
+		super.onStart();
+		
+		String elapsedTime = TimeclockService.getInstance().getElapsedTimeString();
+		parseElapsedTime(elapsedTime);
+		
+		setTitle("MobileOrg Timeclock");
+		TextView textView = (TextView) findViewById(R.id.timeclock_text);
+		
+		long node_id = TimeclockService.getInstance().getNodeID();
+		this.node = new NodeWrapper(db.getNode(node_id));
+		textView.setText(node.getName() + "@" + elapsedTime);
+
+	}
+	
+	@Override
+	protected void onStop() {
+		node.close();
+		super.onStop();
 	}
 	
 	private void parseElapsedTime(String elapsedTime) {
@@ -67,7 +77,8 @@ public class TimeclockDialog extends FragmentActivity {
 
 	private void saveClock(int hour, int minute) {
 		long startTime = TimeclockService.getInstance().getStartTime();
-		node.addLogbook(startTime, hour, minute);
+		long endTime = TimeclockService.getInstance().getEndTime();
+		node.addLogbook(startTime, endTime, db);
 	}
 	
 	private void endTimeclock() {
