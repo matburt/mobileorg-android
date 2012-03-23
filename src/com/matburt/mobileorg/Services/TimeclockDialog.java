@@ -21,8 +21,8 @@ import com.matburt.mobileorg.Parsing.OrgDatabase;
 public class TimeclockDialog extends FragmentActivity {
 
 	private NodeWrapper node;
-	private int hour;
-	private int minute;
+	private int hour = 0;
+	private int minute = 0;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -35,18 +35,18 @@ public class TimeclockDialog extends FragmentActivity {
         
         Intent intent = getIntent();
         long node_id = intent.getLongExtra(TimeclockService.NODE_ID, -1);
-        this.hour = intent.getIntExtra(TimeclockService.CLOCK_HOUR, 0);
-        this.minute = intent.getIntExtra(TimeclockService.CLOCK_MINUTE, 0);
 
         MobileOrgApplication appInst = (MobileOrgApplication) getApplication();
         OrgDatabase db = appInst.getDB();
 		this.node = new NodeWrapper(db.getNode(node_id));
 
+		String elapsedTime = TimeclockService.getInstance().getElapsedTimeString();
+		parseElapsedTime(elapsedTime);
         
-        setTitle("MobileOrg Timeclock");
-        TextView textView = (TextView) findViewById(R.id.timeclock_text);
-        textView.setText(node.getName());
-        node.close();
+		setTitle("MobileOrg Timeclock");
+		TextView textView = (TextView) findViewById(R.id.timeclock_text);
+		textView.setText(node.getName() + "@" + elapsedTime);
+		node.close();
         
         Button button = (Button) findViewById(R.id.timeclock_cancel);
         button.setOnClickListener(cancelListener);
@@ -55,13 +55,23 @@ public class TimeclockDialog extends FragmentActivity {
         button = (Button) findViewById(R.id.timeclock_save);
         button.setOnClickListener(saveListener);
 	}
+	
+	private void parseElapsedTime(String elapsedTime) {
+		String[] split = elapsedTime.trim().split(":");
+		try {
+			this.hour = Integer.parseInt(split[0]);
+			this.minute = Integer.parseInt(split[1]);
+		} catch(NumberFormatException e) {
+		}
+	}
 
 	private void saveClock(int hour, int minute) {
-		node.addLogbook(hour, minute);
+		long startTime = TimeclockService.getInstance().getStartTime();
+		node.addLogbook(startTime, hour, minute);
 	}
 	
 	private void endTimeclock() {
-		sendBroadcast(new Intent(TimeclockService.TIMECLOCK_CANCEL));
+		TimeclockService.getInstance().cancelNotification();
 		finish();
 	}
 
@@ -85,14 +95,18 @@ public class TimeclockDialog extends FragmentActivity {
 			FragmentTransaction ft = getSupportFragmentManager()
 					.beginTransaction();
 			DialogFragment newFragment = new EditTimePickerFragment();
-			newFragment.show(ft, "TimeDialog");
+			if(newFragment != null)
+				newFragment.show(ft, "TimeDialog");
 		}
 	};
 	
 	private class EditTimePickerFragment extends DialogFragment {
 		public Dialog onCreateDialog(Bundle savedInstanceState) {
-			return new TimePickerDialog(getActivity(), timeEditListener, hour,
-					minute, true);
+			if(hour <= 23 && minute <= 59)
+				return new TimePickerDialog(getActivity(), timeEditListener, hour,
+						minute, true);
+			else
+				return null;
 		}
 
 		private TimePickerDialog.OnTimeSetListener timeEditListener = new TimePickerDialog.OnTimeSetListener() {
