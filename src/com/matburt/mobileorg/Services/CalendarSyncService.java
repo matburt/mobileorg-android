@@ -171,9 +171,9 @@ public class CalendarSyncService {
 		return formatter.parse(date);
 	}
 	
-	private Date getTimeInMs(String time) throws ParseException {
-		SimpleDateFormat formatter = new SimpleDateFormat("HH:mm");
-		return formatter.parse(time);
+	private Date getTimeInMs(String date, String time) throws ParseException {
+		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+		return formatter.parse(date + " " + time);
 	}
 	
 	public void insertNode(long node_id) {
@@ -193,16 +193,13 @@ public class CalendarSyncService {
 		if (propm.find()) {
 			try {
 				beginTime = getDateInMs(propm.group(1)).getTime();
-				beginTime += TimeZone.getDefault().getOffset(beginTime);
 				
-				long beginTimeOfDay;
 				if (propm.group(2) != null) { // has hh:mm entry
-					beginTimeOfDay = getTimeInMs(propm.group(2)).getTime();
-					beginTime += beginTimeOfDay;
+					beginTime = getTimeInMs(propm.group(1), propm.group(2)).getTime();
 					allDay = 0;
 					
 					if (propm.group(3) != null) { // has hh:mm-hh:mm entry
-						endTime = beginTime + getTimeInMs(propm.group(3)).getTime() - beginTimeOfDay;
+						endTime = getTimeInMs(propm.group(1), propm.group(3)).getTime();
 					}
 					else // event is one hour per default
 						endTime = beginTime + DateUtils.HOUR_IN_MILLIS;
