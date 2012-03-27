@@ -4,7 +4,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -209,18 +208,13 @@ public class NodePayload {
 		if (propm.find()) {
 			try {
 				result.beginTime = getDateInMs(propm.group(1)).getTime();
-				result.beginTime += TimeZone.getDefault().getOffset(result.beginTime);
 
-				long beginTimeOfDay;
 				if (propm.group(2) != null) { // has hh:mm entry
-					beginTimeOfDay = getTimeInMs(propm.group(2)).getTime();
-					result.beginTime += beginTimeOfDay;
+					result.beginTime = getTimeInMs(propm.group(1), propm.group(2)).getTime();
 					result.allDay = 0;
 
 					if (propm.group(3) != null) { // has hh:mm-hh:mm entry
-						result.endTime = result.beginTime
-								+ getTimeInMs(propm.group(3)).getTime()
-								- beginTimeOfDay;
+						result.endTime = getTimeInMs(propm.group(1), propm.group(3)).getTime();
 					} else
 						// event is one hour per default
 						result.endTime = result.beginTime + DateUtils.HOUR_IN_MILLIS;
@@ -244,9 +238,9 @@ public class NodePayload {
 		return formatter.parse(date);
 	}
 	
-	private Date getTimeInMs(String time) throws ParseException {
-		SimpleDateFormat formatter = new SimpleDateFormat("HH:mm");
-		return formatter.parse(time);
+	private Date getTimeInMs(String date, String time) throws ParseException {
+		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+		return formatter.parse(date + " " + time);
 	}
 	
 	public String getScheduled() {
