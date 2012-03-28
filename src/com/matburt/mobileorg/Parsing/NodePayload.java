@@ -4,11 +4,13 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import android.text.TextUtils;
 import android.text.format.DateUtils;
+import android.text.format.Time;
 import android.util.Log;
 
 public class NodePayload {
@@ -170,15 +172,19 @@ public class NodePayload {
 		if(this.scheduled == null) {
 			this.scheduled = stripDate("SCHEDULED:");
 			DateEntry scheduledEntry = getDateEntry(this.scheduled);
-			if(scheduledEntry != null)
+			if(scheduledEntry != null) {
+				scheduledEntry.type = "SC: ";
 				result.add(scheduledEntry);
+			}
 		}
 		
 		if(this.deadline == null) {
 			this.deadline = stripDate("DEADLINE:");
 			DateEntry deadlineEntry = getDateEntry(this.deadline);
-			if(deadlineEntry != null)
+			if(deadlineEntry != null) {
+				deadlineEntry.type = "DL: ";
 				result.add(deadlineEntry);
+			}
 		}
 		
 		stripTimestamps();
@@ -195,6 +201,7 @@ public class NodePayload {
 		public long beginTime;
 		public long endTime;
 		public int allDay;
+		public String type = "";
 	}
 	
 	private DateEntry getDateEntry(String date)
@@ -207,20 +214,23 @@ public class NodePayload {
 
 		if (propm.find()) {
 			try {
-				result.beginTime = getDateInMs(propm.group(1)).getTime();
+				if(propm.group(2) == null) { // event is an entire day event
+					result.beginTime = getTimeInMs(propm.group(1), "00:00").getTime();
+					result.beginTime += TimeZone.getTimeZone(
+							Time.getCurrentTimezone()).getOffset(
+							result.beginTime);
 
-				if (propm.group(2) != null) { // has hh:mm entry
+					result.endTime = result.beginTime; // + DateUtils.DAY_IN_MILLIS;
+					result.allDay = 1;
+				}
+				else if (propm.group(2) != null) { // has hh:mm entry
 					result.beginTime = getTimeInMs(propm.group(1), propm.group(2)).getTime();
 					result.allDay = 0;
 
 					if (propm.group(3) != null) { // has hh:mm-hh:mm entry
 						result.endTime = getTimeInMs(propm.group(1), propm.group(3)).getTime();
-					} else
-						// event is one hour per default
+					} else // event is one hour per default
 						result.endTime = result.beginTime + DateUtils.HOUR_IN_MILLIS;
-				} else { // event is an entire day event
-					result.endTime = result.beginTime + DateUtils.DAY_IN_MILLIS;
-					result.allDay = 1;
 				}
 
 				return result;
@@ -231,11 +241,6 @@ public class NodePayload {
 		} else
 			Log.w("MobileOrg", "Unable to find time entry of entry");
 		return null;
-	}
-	
-	private Date getDateInMs(String date) throws ParseException {
-		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-		return formatter.parse(date);
 	}
 	
 	private Date getTimeInMs(String date, String time) throws ParseException {

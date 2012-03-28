@@ -127,15 +127,14 @@ public class CalendarSyncService {
 
 		for (DateEntry date : node.getPayload(db).getDates()) {
 			insertEntry(node.getName(), isActive, node.getCleanedPayload(db),
-					node.getNodeId(db), date.beginTime, date.endTime,
-					date.allDay, filename,
+					node.getNodeId(db), date, filename,
 					node.getPayload(db).getProperty("LOCATION"));
 		}
 	}
 
 	// TODO Speed up using bulkInserts
-	private String insertEntry(String name, boolean isTodoActive, String payload, String orgID, long beginTime,
-			long endTime, int allDay, String filename, String location) throws IllegalArgumentException {		
+	private String insertEntry(String name, boolean isTodoActive, String payload, 
+			String orgID, DateEntry date, String filename, String location) throws IllegalArgumentException {
 		
 		if (sharedPreferences.getBoolean("calendarShowDone", true) == false
 				&& isTodoActive == false)
@@ -153,16 +152,16 @@ public class CalendarSyncService {
 		
 		ContentValues values = new ContentValues();
 		values.put(intEvents.CALENDAR_ID, calId);
-		values.put(intEvents.TITLE, name);
+		values.put(intEvents.TITLE, date.type + name);
 		values.put(intEvents.DESCRIPTION, embeddedNodeMetadata + "\n" + payload);
 		values.put(intEvents.EVENT_LOCATION, location);
 		
-		// Sync with google will delete organizer :(
+		// Sync with google will overwrite organizer :(
 		//values.put(intEvents.ORGANIZER, embeddedNodeMetadata);
 		
-		values.put(intEvents.DTSTART, beginTime);
-		values.put(intEvents.DTEND, endTime);
-		values.put(intEvents.ALL_DAY, allDay);
+		values.put(intEvents.DTSTART, date.beginTime);
+		values.put(intEvents.DTEND, date.endTime);
+		values.put(intEvents.ALL_DAY, date.allDay);
 		values.put(intEvents.HAS_ALARM, 0);
 		values.put(intEvents.EVENT_TIMEZONE, Time.getCurrentTimezone());
 		
@@ -170,9 +169,9 @@ public class CalendarSyncService {
 				intEvents.CONTENT_URI, values);
 		String nodeID = uri.getLastPathSegment();
 		
-		if (allDay == 0 && isTodoActive == true && sharedPreferences.getBoolean(
+		if (date.allDay == 0 && isTodoActive == true && sharedPreferences.getBoolean(
 				"calendarReminder", false))
-			addReminder(nodeID, beginTime, endTime);
+			addReminder(nodeID, date.beginTime, date.endTime);
 		
 		return nodeID;
 	}
