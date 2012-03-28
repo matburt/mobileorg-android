@@ -281,8 +281,8 @@ public class EditActivity extends FragmentActivity {
 		} else if (this.actionMode.equals(ACTIONMODE_ADDCHILD)) {
 			MobileOrgApplication appInst = (MobileOrgApplication) this.getApplication();
 			OrgDatabase orgDB = appInst.getDB();
-			long file_id = orgDB.addOrUpdateFile(OrgFile.CAPTURE_FILE, OrgFile.CAPTURE_FILE_ALIAS, "", true);
 			Long parent = this.node_id;
+			long file_id = this.orgDB.getFileId(this.orgDB.getFilenameFromNodeId(parent));
 			long node_id = orgDB.addNode(parent, newTitle, newTodo, newPriority, newTags, file_id);
 			
 			boolean addTimestamp = PreferenceManager.getDefaultSharedPreferences(
