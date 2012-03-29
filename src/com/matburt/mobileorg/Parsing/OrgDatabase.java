@@ -405,7 +405,7 @@ public class OrgDatabase extends SQLiteOpenHelper {
 	public Cursor getFileSchedule(String filename) {
 		long file_id = this.getFilenameId(filename);
 		
-		String whereQuery = "file_id=? AND (payload LIKE '%SCHEDULED:%' OR payload LIKE '%DEADLINE:%')";
+		String whereQuery = "file_id=? AND (payload LIKE '%<%>%')";
 		
 		if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean(
 				"calendarHabits", true) == false)
