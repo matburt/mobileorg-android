@@ -142,7 +142,7 @@
         -->
         <PreferenceScreen
             android:key="VersionDisp"
-            android:summary="0.8.4"
+            android:summary="0.8.5"
             android:title="@string/preference_version" >
         </PreferenceScreen>
     </PreferenceCategory>
