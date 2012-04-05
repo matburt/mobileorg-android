@@ -295,9 +295,9 @@ public class NodeWrapper {
 			this.cursor.close();
 	}
 
-	public void addLogbook(long startTime, long endTime, OrgDatabase db) {
+	public void addLogbook(long startTime, long endTime, String elapsedTime, OrgDatabase db) {
 		StringBuilder rawPayload = new StringBuilder(getRawPayload(db));
-		rawPayload = NodePayload.addLogbook(rawPayload, startTime, endTime);
+		rawPayload = NodePayload.addLogbook(rawPayload, startTime, endTime, elapsedTime);
 		
 		boolean generateEdits = !getFileName(db).equals(OrgFile.CAPTURE_FILE);
 

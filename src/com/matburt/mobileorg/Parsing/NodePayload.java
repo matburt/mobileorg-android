@@ -289,10 +289,10 @@ public class NodePayload {
 		return "[" + formatter.format(new Date(time)) + "]";
 	}
 
-	public static StringBuilder addLogbook(StringBuilder payload, long startTime, long endTime) {
+	public static StringBuilder addLogbook(StringBuilder payload, long startTime, long endTime, String elapsedTime) {
 		// TODO Add => total to end
 		String line = "CLOCK: " + formatClockEntry(startTime) + "--"
-				+ formatClockEntry(endTime);
+				+ formatClockEntry(endTime) + " =>  " + elapsedTime;
 		
 		int logbookIndex = payload.indexOf(":LOGBOOK:");
 		if(logbookIndex == -1)
@@ -301,7 +301,6 @@ public class NodePayload {
 			payload.insert(logbookIndex + ":LOGBOOK:".length(), "\n" + line);
 		return payload;
 	}
-	
 	
 }
 

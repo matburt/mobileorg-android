@@ -78,7 +78,8 @@ public class TimeclockDialog extends FragmentActivity {
 	private void saveClock(int hour, int minute) {
 		long startTime = TimeclockService.getInstance().getStartTime();
 		long endTime = TimeclockService.getInstance().getEndTime();
-		node.addLogbook(startTime, endTime, db);
+		String elapsedTime = TimeclockService.getInstance().getElapsedTimeString();
+		node.addLogbook(startTime, endTime, elapsedTime, db);
 	}
 	
 	private void endTimeclock() {
