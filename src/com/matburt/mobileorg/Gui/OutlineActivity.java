@@ -41,6 +41,7 @@ import com.matburt.mobileorg.Parsing.MobileOrgApplication;
 import com.matburt.mobileorg.Parsing.NodeWrapper;
 import com.matburt.mobileorg.Parsing.OrgFile;
 import com.matburt.mobileorg.Services.SyncService;
+import com.matburt.mobileorg.Services.TimeclockService;
 import com.matburt.mobileorg.Settings.SettingsActivity;
 import com.matburt.mobileorg.Settings.WizardActivity;
 import com.matburt.mobileorg.Synchronizers.Synchronizer;
@@ -65,7 +66,7 @@ public class OutlineActivity extends FragmentActivity
     private boolean emptylist = false;
 
 	@Override
-	public void onCreate(Bundle savedInstanceState) {
+	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
 		setContentView(R.layout.outline);		
@@ -101,7 +102,7 @@ public class OutlineActivity extends FragmentActivity
 	}
 	
 	@Override
-	public void onDestroy() {
+	protected void onDestroy() {
 		unregisterReceiver(this.syncReceiver);
 		this.appInst = null;
 		super.onDestroy();
@@ -249,6 +250,10 @@ public class OutlineActivity extends FragmentActivity
 		case R.id.contextmenu_node_delete:
 			runDeleteNode(node_id);
 			break;
+			
+		case R.id.contextmenu_startclock:
+			startTimeClockingService(node_id);
+			break;
 		}
 
 		return false;
@@ -273,6 +278,13 @@ public class OutlineActivity extends FragmentActivity
     private void runSync() {
 		startService(new Intent(this, SyncService.class));
     }
+    
+	
+	private void startTimeClockingService(long nodeId) {
+		Intent intent = new Intent(OutlineActivity.this, TimeclockService.class);
+		intent.putExtra(TimeclockService.NODE_ID, nodeId);
+		startService(intent);
+	}
 	
 	private boolean runEditNewNodeActivity() {
 		Intent intent = new Intent(this, EditActivity.class);
