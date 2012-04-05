@@ -97,9 +97,15 @@ public class EditActivity extends FragmentActivity {
 		if (this.actionMode == null) {
 			String subject = intent
 					.getStringExtra("android.intent.extra.SUBJECT");
+			String text = intent.getStringExtra("android.intent.extra.TEXT");
+
+			if(text != null && subject != null) {
+				subject = "[[" + text + "][" + subject + "]]";
+				text = "";
+			}
+			
 			if(subject == null)
 				subject = "";
-			String text = intent.getStringExtra("android.intent.extra.TEXT");
 			if(text == null)
 				text = "";
 
