@@ -327,7 +327,9 @@ public class EditDetailsFragment extends Fragment {
 	}
 	
 	public static void setupSpinner(Context context, Spinner view, ArrayList<String> data,
-			String selection) {
+			String selection) {		
+		if(!TextUtils.isEmpty(selection) && !data.contains(selection))
+			data.add(selection);
 		data.add("");
 
 		ArrayAdapter<String> adapter = new ArrayAdapter<String>(context,
