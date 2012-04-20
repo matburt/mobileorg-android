@@ -49,8 +49,8 @@
         <CheckBoxPreference
             android:defaultValue="true"
             android:key="viewDefaultEdit"
-            android:summary="When checked, the default behaviour for clicking on nodes without children will be editing. Else it will be viewing."
-            android:title="Edit on click" />
+            android:summary="When checked, the default behaviour for long clicking on nodes will be editing. Else it will be viewing."
+            android:title="Edit on long click" />
         <CheckBoxPreference
             android:defaultValue="true"
             android:key="viewApplyFormating"

@@ -17,7 +17,10 @@
   <string name="contextmenu_view">View Node</string>
   <string name="contextmenu_delete">Delete File</string>
   <string name="contextmenu_node_delete">Delete Node</string>
-
+  <string name="menu_delete">Delete</string>
+  <string name="menu_advanced">Advanced</string>
+  <string name="menu_clockin">Clock in</string>
+  
   <string name="sync_wait">Synchronizing, please wait…</string>
   <string name="sync_failed">Synchronization failed, try again?</string>
   <string name="yes">Yes</string>

@@ -14,6 +14,8 @@ import android.support.v4.app.ActionBar.Tab;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.view.MenuItem;
+import android.support.v4.view.SubMenu;
 import android.view.MenuInflater;
 
 import com.matburt.mobileorg.R;
@@ -21,6 +23,7 @@ import com.matburt.mobileorg.Parsing.MobileOrgApplication;
 import com.matburt.mobileorg.Parsing.NodeWrapper;
 import com.matburt.mobileorg.Parsing.OrgDatabase;
 import com.matburt.mobileorg.Parsing.OrgFile;
+import com.matburt.mobileorg.Services.TimeclockService;
 import com.matburt.mobileorg.Synchronizers.Synchronizer;
 
 public class EditActivity extends FragmentActivity {
@@ -198,6 +201,21 @@ public class EditActivity extends FragmentActivity {
     	super.onCreateOptionsMenu(menu);
 		MenuInflater inflater = getMenuInflater();
 	    inflater.inflate(R.menu.edit, menu);
+	    
+		if (this.node_id > -1) {
+			SubMenu subMenu = menu.addSubMenu(R.string.menu_advanced);
+			MenuItem item = subMenu.add(R.string.menu_advanced,
+					R.string.menu_delete, 0, R.string.menu_delete);
+			item.setIcon(R.drawable.ic_input_delete);
+
+			item = subMenu.add(R.string.menu_advanced, R.string.menu_clockin,
+					1, R.string.menu_clockin);
+			item.setIcon(R.drawable.ic_menu_today);
+
+			MenuItem subMenuItem = subMenu.getItem();
+			subMenuItem.setIcon(R.drawable.ic_menu_moreoverflow);
+			subMenuItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+		}
 		return true;
 	}
 	
@@ -217,8 +235,41 @@ public class EditActivity extends FragmentActivity {
 		case R.id.nodeedit_cancel:
 			doCancel();
 			return true;
+			
+		case R.string.menu_delete:
+			runDeleteNode(this.node_id);
+			return true;
+			
+		case R.string.menu_clockin:
+			startTimeClockingService(this.node_id);
+			return true;
 		}
 		return false;
+	}
+	
+	private void runDeleteNode(final long node_id) {	
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setMessage(R.string.outline_delete_prompt)
+				.setCancelable(false)
+				.setPositiveButton(R.string.yes,
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int id) {
+								appInst.getDB().deleteNode(node_id);
+								finish();
+							}
+						})
+				.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						dialog.cancel();
+					}
+				});
+		builder.create().show();
+	}
+	
+	private void startTimeClockingService(long nodeId) {
+		Intent intent = new Intent(EditActivity.this, TimeclockService.class);
+		intent.putExtra(TimeclockService.NODE_ID, nodeId);
+		startService(intent);
 	}
 	
 	@Override
