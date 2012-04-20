@@ -98,6 +98,12 @@ public class OutlineActivity extends FragmentActivity
 	}
 	
 	@Override
+	protected void onResume() {
+		setTitle();
+		super.onResume();
+	}
+
+	@Override
 	protected void onDestroy() {
 		unregisterReceiver(this.syncReceiver);
 		this.appInst = null;
@@ -136,6 +142,11 @@ public class OutlineActivity extends FragmentActivity
 		
             listView.setSelection(lastSelection);
         }
+        setTitle();
+	}
+	
+	private void setTitle() {
+		this.getSupportActionBar().setTitle("MobileOrg " + appInst.getChangesString());
 	}
 
 	@Override
@@ -385,14 +396,8 @@ public class OutlineActivity extends FragmentActivity
 			lastSelection = position;
 			if (appInst.getDB().hasNodeChildren(clicked_node_id) || node_id == -1)
 				runExpandSelection(clicked_node_id);
-			else {
-				if (PreferenceManager.getDefaultSharedPreferences(
-						parent.getContext())
-						.getBoolean("viewDefaultEdit", true))
-					runEditNodeActivity(clicked_node_id);
-				else
-					runViewNodeActivity(clicked_node_id);
-			}
+			else 
+				runEditNodeActivity(clicked_node_id);
 		}
 	};
 	

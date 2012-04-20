@@ -44,4 +44,12 @@ public class MobileOrgApplication extends Application {
     	else
     		return true;
     }
+    
+    public String getChangesString() {
+    	int changes = appdb.getChangesCount();
+    	if(changes > 0)
+    		return "[" + changes + "]";
+    	else
+    		return "";
+    }
 }

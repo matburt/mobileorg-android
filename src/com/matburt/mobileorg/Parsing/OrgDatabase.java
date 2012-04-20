@@ -692,6 +692,27 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		return cursor;
 	}
 	
+	public int getChangesCount() {
+		int changes = 0;
+		Cursor cursor = db.query("edits", new String[] { "_id" }, null, null,
+				null, null, null);
+		if(cursor != null)
+			changes += cursor.getCount();
+		cursor.close();
+		
+		long file_id = this.getFilenameId(OrgFile.CAPTURE_FILE);
+		cursor = db.query("orgdata", new String[] { "_id" }, "file_id=?",
+				new String[] { Long.toString(file_id) }, null, null, null);
+		if(cursor != null) {
+			int captures = cursor.getCount();
+			if(captures > 0)
+				changes += captures;
+		}
+		cursor.close();
+		
+		return changes;
+	}
+	
 
 	/**
 	 * Handles the internal org file: links.
