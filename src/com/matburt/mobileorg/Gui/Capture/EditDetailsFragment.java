@@ -15,6 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TableLayout;
 
@@ -30,6 +31,7 @@ public class EditDetailsFragment extends Fragment {
 	private Spinner todoStateView;
 	private TableLayout tagsView;
 	private TableLayout datesView;
+	private LinearLayout locationView;
 
 	private OrgDatabase orgDB;
 
@@ -67,6 +69,7 @@ public class EditDetailsFragment extends Fragment {
 		this.todoStateView = (Spinner) view.findViewById(R.id.todo_state);
 		this.tagsView = (TableLayout) view.findViewById(R.id.tags);
 		this.datesView = (TableLayout) view.findViewById(R.id.dates);
+		this.locationView = (LinearLayout) view.findViewById(R.id.location);
 
 		this.orgDB = ((MobileOrgApplication) getActivity().getApplication()).getDB();
 		
@@ -108,6 +111,8 @@ public class EditDetailsFragment extends Fragment {
 	}
 
 	private void initDisplay() {
+		this.locationView.addView(new LocationTableRow(this.getActivity(), node.getParentId()));
+		
 		if(this.actionMode == null) {
 			this.actionMode = EditActivity.ACTIONMODE_CREATE;
 			titleView.setText(title);

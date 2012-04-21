@@ -23,6 +23,11 @@
                 android:inputType="text|textMultiLine|textAutoCorrect|textCapSentences" />
         </TableRow>
 
+        <LinearLayout
+            android:id="@+id/location"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
         <TableRow>
 
             <ImageView

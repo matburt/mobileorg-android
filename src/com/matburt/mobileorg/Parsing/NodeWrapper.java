@@ -236,11 +236,11 @@ public class NodeWrapper {
 		return getName().replaceAll("\\[[^\\]]*\\]", "");
 	}
 
-	private long getParentId() {
+	public long getParentId() {
 		if(cursor == null)
 			return -1;
 		
-		return cursor.getInt(cursor.getColumnIndex("parent_id"));
+		return cursor.getLong(cursor.getColumnIndex("parent_id"));
 	}
 	
 	public String getFileName(OrgDatabase db) {

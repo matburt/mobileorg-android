@@ -417,6 +417,19 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		return cursor;
 	}
 	
+	public long getParentId(long node) {
+		Cursor cursor = db.query("orgdata", nodeFields, "_id=?",
+				new String[] { Long.toString(node) }, null, null, null);
+		
+		if(cursor != null && cursor.getCount() > 0) {
+			long parentId = cursor.getLong(cursor.getColumnIndex("parent_id"));
+			cursor.close();
+			return parentId;
+		}
+		// TODO Fix leak
+		return -1;
+	}
+	
 /***************************
  * Functions with regards to edits. 
 ***************************/	
