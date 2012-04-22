@@ -32,6 +32,7 @@ public class EditDetailsFragment extends Fragment {
 	private TableLayout tagsView;
 	private TableLayout datesView;
 	private LinearLayout locationView;
+	private LocationTableRow locationTableRow;
 
 	private OrgDatabase orgDB;
 
@@ -111,7 +112,7 @@ public class EditDetailsFragment extends Fragment {
 	}
 
 	private void initDisplay() {
-		this.locationView.addView(new LocationTableRow(this.getActivity(), node));
+		this.locationTableRow = new LocationTableRow(this.getActivity(), node, locationView);
 		
 		if(this.actionMode == null) {
 			this.actionMode = EditActivity.ACTIONMODE_CREATE;

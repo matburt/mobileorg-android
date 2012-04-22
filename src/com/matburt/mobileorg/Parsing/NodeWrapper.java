@@ -304,16 +304,17 @@ public class NodeWrapper {
 		return result;
 	}
 	
-	public NodeWrapper getSilbing(String name) {
-		if(cursor == null)
-			return null;
+	public NodeWrapper getChild(String name) {
+		if(getId() == -1) {
+			long filenodeId = db.getFileId(name);
+			if(filenodeId > -1) {
+				return new NodeWrapper(filenodeId, db);
+			}
+		}
 		
-		NodeWrapper parent = getParent();
-		
-		if(parent == null)
-			parent = new NodeWrapper(db.getFileCursor(), db);
-		
-		for(NodeWrapper child: parent.getChildren()) {
+		ArrayList<NodeWrapper> children = getChildren();
+						
+		for(NodeWrapper child: children) {
 			if(child.getName().equals(name))
 				return child;
 		}
@@ -336,13 +337,16 @@ public class NodeWrapper {
 	 * @return The internal id of the node. Used for mapping to database.
 	 */
 	public long getId() {
-		if(cursor == null)
+		if(cursor == null || cursor.getCount() < 1)
 			return -1;
 		
 		int column = cursor.getColumnIndex("_id");
 		
 		if(column < 0)
 			return -1;
+		
+		Log.d("MobileOrg", "getID() : " + column);
+		Log.d("MobileOrg", "name:" + getName());
 		
 		return cursor.getInt(column);
 	}

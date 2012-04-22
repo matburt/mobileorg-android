@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.util.Log;
 import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TableRow;
 
@@ -14,36 +15,36 @@ import com.matburt.mobileorg.Parsing.NodeWrapper;
 import com.matburt.mobileorg.Parsing.OrgDatabase;
 import com.matburt.mobileorg.Parsing.OrgFile;
 
-public class LocationTableRow extends TableRow {
+public class LocationTableRow {
 	private NodeWrapper node;
 	private OrgDatabase db;
+	private LinearLayout locationView;
 	
-	public LocationTableRow(Context context, NodeWrapper node) {
-		super(context);
-		this.setOrientation(HORIZONTAL);
+	public LocationTableRow(Context context, NodeWrapper node, LinearLayout locationView) {
+		this.locationView = locationView;
 		
 		MobileOrgApplication appInst = (MobileOrgApplication) context.getApplicationContext();
 		this.db = appInst.getDB();
 		this.node = node;
 		
-		initLocationView();
+		initLocationView(context);
 	}
 	
-	private void initLocationView() {
+	private void initLocationView(Context context) {
 		if(node.getId() < 0) {
-			LocationEntry entry = new LocationEntry(getContext(),
-					new NodeWrapper(db.getFileCursor(), db), null);
+			LocationEntry entry = new LocationEntry(context,
+					new NodeWrapper(-1, db), null);
 			entry.setupSpinner2(OrgFile.CAPTURE_FILE);
-			addView(entry);
+			locationView.addView(entry);
 			return;
 		}
 		
 		NodeWrapper node = this.node.getParent();
 		LocationEntry entry = null;
 		while(node != null) {
-			entry = new LocationEntry(getContext(), node, entry);
+			entry = new LocationEntry(context, node, entry);
 			entry.setupSpinner(node.getName());
-			this.addView(entry, 0);
+			locationView.addView(entry, 0);
 			node = node.getParent();
 		}	
 	}
@@ -51,15 +52,7 @@ public class LocationTableRow extends TableRow {
 	public long getParentNodeId() {
 		return -1;
 	}
-	
-	public void addEntry(View v) {
-		addView(v);
-	}
-	
-	public void removeEntry(View v) {
-		removeView(v);
-	}
-	
+		
 	private class LocationEntry extends Spinner {
 		private LocationEntry child = null;
 		private NodeWrapper node;
@@ -76,13 +69,15 @@ public class LocationTableRow extends TableRow {
 		}
 		
 		public void setupSpinner2(String name) {
-			ArrayList<String> children = node.getChildrenStringArray();
-			EditDetailsFragment.setupSpinner(getContext(), this, children, name);
+			if (node != null) {
+				Log.d("MobileOrg", "setupSpinner2() :" + node.getName());
+				ArrayList<String> children = node.getChildrenStringArray();
+				EditDetailsFragment.setupSpinner(getContext(), this, children, name);
+			}
 		}
 
-
 		public void removeChild() {
-			removeEntry(child);
+			locationView.removeView(child);
 			
 			if(child != null) {
 				child.removeChild();
@@ -94,14 +89,14 @@ public class LocationTableRow extends TableRow {
 		public void onClick(DialogInterface dialog, int which) {
 			super.onClick(dialog, which);
 			String selectedItem = (String) this.getItemAtPosition(which);
-			node = node.getSilbing(selectedItem);
+			node = node.getChild(selectedItem);
 			
 			if(child != null)
 				removeChild();
 			
 			child = new LocationEntry(getContext(), node, null);
 			child.setupSpinner2("");
-			addEntry(child);
+			locationView.addView(child);
 		}
 	}
 }
