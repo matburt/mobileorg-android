@@ -17,7 +17,7 @@ import android.text.TextUtils;
 
 public class OrgDatabase extends SQLiteOpenHelper {
 	private static final String DATABASE_NAME = "MobileOrg.db";
-	private static final int DATABASE_VERSION = 3;
+	private static final int DATABASE_VERSION = 4;
 	
 	private final static String[] nodeFields = {"_id", "name", "todo", "tags", "priority",
 		"payload", "parent_id", "file_id"};
@@ -97,13 +97,14 @@ public class OrgDatabase extends SQLiteOpenHelper {
 
 	public Cursor getFileCursor() {
 		// This gets all of the org file nodes
-		return db
-				.query("orgdata JOIN files ON (orgdata._id = files.node_id)",
-						nodeJoinFields, null, null, null, null, "orgdata.name ASC");
+//		return db
+//				.query("orgdata JOIN files ON (orgdata._id = files.node_id)",
+//						nodeJoinFields, null, null, null, null, "orgdata.name ASC");
+		return db.query("orgdata", nodeFields, "parent_id=-1", null, null, null, "name ASC");
 	}
 	
-	private final static String[] nodeJoinFields = {"orgdata._id", "orgdata.name", "orgdata.todo", "orgdata.tags", "orgdata.priority",
-		"orgdata.payload", "orgdata.parent_id", "orgdata.file_id"};
+//	private final static String[] nodeJoinFields = {"orgdata._id", "orgdata.name", "orgdata.todo", "orgdata.tags", "orgdata.priority",
+//		"orgdata.payload", "orgdata.parent_id", "orgdata.file_id"};
 	
 	
 	public long getFileId(String filename) {

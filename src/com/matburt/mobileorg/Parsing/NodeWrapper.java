@@ -252,7 +252,12 @@ public class NodeWrapper {
 		if(cursor == null)
 			return -1;
 		
-		return cursor.getLong(cursor.getColumnIndex("parent_id"));
+		int column = cursor.getColumnIndex("parent_id");
+		
+		if(column == -1)
+			return -1;
+		
+		return cursor.getLong(column);
 	}
 	
 	public NodeWrapper getParent() {
@@ -272,6 +277,17 @@ public class NodeWrapper {
 		return new NodeWrapper(node, db);
 	}
 	
+	public boolean hasChild(NodeWrapper node) {
+		long id = node.getId();
+		
+		for(NodeWrapper child: getChildren()) {
+			if(child.getId() == id)
+				return true;
+		}
+		
+		return false;
+	}
+	
 	public ArrayList<String> getSiblings() {
 		ArrayList<String> result = new ArrayList<String>();
 		
@@ -282,12 +298,26 @@ public class NodeWrapper {
 		
 		if(parent != null)
 			result = parent.getChildrenStringArray();
-		else {
-			Log.d("MobileOrg", "Filecursor : " + db.getFileCursor().getCount());
+		else
 			result = db.cursorToArrayList(db.getFileCursor());
-		}
 		
 		return result;
+	}
+	
+	public NodeWrapper getSilbing(String name) {
+		if(cursor == null)
+			return null;
+		
+		NodeWrapper parent = getParent();
+		
+		if(parent == null)
+			parent = new NodeWrapper(db.getFileCursor(), db);
+		
+		for(NodeWrapper child: parent.getChildren()) {
+			if(child.getName().equals(name))
+				return child;
+		}
+		return null;
 	}
 	
 	public String getFileName() {
@@ -308,7 +338,13 @@ public class NodeWrapper {
 	public long getId() {
 		if(cursor == null)
 			return -1;
-		return cursor.getInt(cursor.getColumnIndex("_id"));
+		
+		int column = cursor.getColumnIndex("_id");
+		
+		if(column < 0)
+			return -1;
+		
+		return cursor.getInt(column);
 	}
 
 	public void setName(String name) {
