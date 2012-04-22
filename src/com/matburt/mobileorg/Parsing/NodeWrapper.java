@@ -3,6 +3,7 @@ package com.matburt.mobileorg.Parsing;
 import java.util.ArrayList;
 
 import android.database.Cursor;
+import android.util.Log;
 
 public class NodeWrapper {
 
@@ -16,6 +17,7 @@ public class NodeWrapper {
 	}
 	
 	public NodeWrapper(Cursor cursor, OrgDatabase db) {
+		this.db = db;
 		this.cursor = cursor;
 	}
 	
@@ -47,6 +49,14 @@ public class NodeWrapper {
 			nodeChildren.moveToNext();
 		}
 		
+		return result;
+	}
+	
+	public ArrayList<String> getChildrenStringArray() {
+		ArrayList<String> result = new ArrayList<String>();
+		for (NodeWrapper wrapper : getChildren())
+			result.add(wrapper.getName());
+
 		return result;
 	}
 	
@@ -254,7 +264,30 @@ public class NodeWrapper {
 		if(parentId < 0)
 			return null;
 		
-		return new NodeWrapper(db.getNode(parentId), db);
+		Cursor node = db.getNode(parentId);
+		
+		if(node == null)
+			return null;
+		
+		return new NodeWrapper(node, db);
+	}
+	
+	public ArrayList<String> getSiblings() {
+		ArrayList<String> result = new ArrayList<String>();
+		
+		if(cursor == null)
+			return result;
+		
+		NodeWrapper parent = getParent();
+		
+		if(parent != null)
+			result = parent.getChildrenStringArray();
+		else {
+			Log.d("MobileOrg", "Filecursor : " + db.getFileCursor().getCount());
+			result = db.cursorToArrayList(db.getFileCursor());
+		}
+		
+		return result;
 	}
 	
 	public String getFileName() {
@@ -266,9 +299,7 @@ public class NodeWrapper {
 		if(columnIndex == -1)
 			return "";
 		
-		long file_id = cursor.getLong(columnIndex);
-		
-		return db.getFilename(file_id);
+		return db.getFilename(cursor.getLong(columnIndex));
 	}
 	
 	/**

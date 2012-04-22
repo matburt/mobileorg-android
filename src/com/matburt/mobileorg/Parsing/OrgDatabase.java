@@ -79,7 +79,7 @@ public class OrgDatabase extends SQLiteOpenHelper {
 				+ "changed integer)");
 		db.execSQL("CREATE TABLE IF NOT EXISTS orgdata ("
 				+ "_id integer primary key autoincrement,"
-				+ "parent_id integer," // orgdata:_id of parent node
+				+ "parent_id integer default -1," // orgdata:_id of parent node
 				+ "file_id integer," // files:_id of file node
 //				+ "node_id text," // Org data id
 				+ "level integer default 0,"
@@ -419,19 +419,6 @@ public class OrgDatabase extends SQLiteOpenHelper {
 				new String[] { Long.toString(file_id) }, null, null, null);
 		cursor.moveToFirst();
 		return cursor;
-	}
-	
-	public long getParentId(long node) {
-		Cursor cursor = db.query("orgdata", nodeFields, "_id=?",
-				new String[] { Long.toString(node) }, null, null, null);
-		
-		if(cursor != null && cursor.getCount() > 0) {
-			long parentId = cursor.getLong(cursor.getColumnIndex("parent_id"));
-			cursor.close();
-			return parentId;
-		}
-		// TODO Fix leak
-		return -1;
 	}
 	
 /***************************
@@ -783,7 +770,7 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		onCreate(db);
 	}
 
-	private ArrayList<String> cursorToArrayList(Cursor cursor) {
+	public ArrayList<String> cursorToArrayList(Cursor cursor) {
 		ArrayList<String> list = new ArrayList<String>();
 		cursor.moveToFirst();
 

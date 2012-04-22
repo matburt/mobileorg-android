@@ -124,7 +124,7 @@ public class EditActivity extends FragmentActivity {
 			long nodeId = intent.getLongExtra("node_id", 0);
 			node = new NodeWrapper(appInst.getDB().getNode(nodeId), orgDB);
 			this.detailsFragment.init(this.node, this.actionMode, defaultTodo);
-			this.payloadFragment.init(node.getCleanedPayload(), true);
+			this.payloadFragment.init(this.node.getCleanedPayload(), true);
 		} else if (this.actionMode.equals(ACTIONMODE_ADDCHILD)) {
 			node = new NodeWrapper(null, orgDB);
 			this.detailsFragment.init(this.node, this.actionMode, defaultTodo);
