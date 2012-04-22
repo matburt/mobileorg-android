@@ -8,12 +8,14 @@ public class NodeWrapper {
 
 	private Cursor cursor;
 	private NodePayload payload;
+	private OrgDatabase db;
 	
 	public NodeWrapper(long node_id, OrgDatabase db) {
+		this.db = db;
 		this.cursor = db.getNode(node_id);
 	}
 	
-	public NodeWrapper(Cursor cursor) {
+	public NodeWrapper(Cursor cursor, OrgDatabase db) {
 		this.cursor = cursor;
 	}
 	
@@ -29,7 +31,7 @@ public class NodeWrapper {
 			return name;
 	}
 	
-	public ArrayList<NodeWrapper> getChildren(OrgDatabase db) {
+	public ArrayList<NodeWrapper> getChildren() {
 		ArrayList<NodeWrapper> result = new ArrayList<NodeWrapper>();
 		
 		if(!db.hasNodeChildren(this.getId()))
@@ -40,7 +42,7 @@ public class NodeWrapper {
 		
 		
 		while(nodeChildren.isAfterLast() == false) {
-			long id = (new NodeWrapper(nodeChildren)).getId();
+			long id = (new NodeWrapper(nodeChildren, db)).getId();
 			result.add(new NodeWrapper(id, db));
 			nodeChildren.moveToNext();
 		}
@@ -54,7 +56,7 @@ public class NodeWrapper {
 	 * node. We have to do this to guarantee that agenda items will have the
 	 * full payload and that those payload can be edited correctly.
 	 */
-	private void preparePayload(OrgDatabase db) {
+	private void preparePayload() {
 		if(this.payload != null) {
 			return;
 		}
@@ -73,7 +75,7 @@ public class NodeWrapper {
 		
 		this.payload = new NodePayload(result);
 		
-		if(!this.getFileName(db).equals("agendas.org"))
+		if(!this.getFileName().equals("agendas.org"))
 			return;
 		
 		String orgId = payload.getId();
@@ -94,18 +96,18 @@ public class NodeWrapper {
 		}
 	}
 	
-	public NodePayload getPayload(OrgDatabase db) {
-		preparePayload(db);
+	public NodePayload getPayload() {
+		preparePayload();
 		return this.payload;
 	}
 	
-	public String getCleanedPayload(OrgDatabase db) {
-		preparePayload(db);
+	public String getCleanedPayload() {
+		preparePayload();
 		return payload.getContent();
 	}
 	
-	public String getRawPayload(OrgDatabase db) {
-		preparePayload(db);
+	public String getRawPayload() {
+		preparePayload();
 		
 		if(this.cursor == null)
 			return "";
@@ -194,24 +196,24 @@ public class NodeWrapper {
 	/**
 	 * @return The :ID: or :ORIGINAL_ID: field of the payload.
 	 */
-	public String getNodeId(OrgDatabase db) {
-		preparePayload(db);
+	public String getNodeId() {
+		preparePayload();
 
 		String id = payload.getId();				
 		if(id == null)
-			return constructOlpId(db);
+			return constructOlpId();
 		
 		return id;
 	}
 	
-	private String constructOlpId(OrgDatabase db) {
+	private String constructOlpId() {
 		StringBuilder result = new StringBuilder();
 		result.insert(0, getName());
 		
 		long parentId = getParentId();
 
 		while(parentId > 0) {
-			NodeWrapper node = new NodeWrapper(db.getNode(parentId));
+			NodeWrapper node = new NodeWrapper(db.getNode(parentId), db);
 			parentId = node.getParentId();
 
 			if(parentId > 0)
@@ -243,7 +245,19 @@ public class NodeWrapper {
 		return cursor.getLong(cursor.getColumnIndex("parent_id"));
 	}
 	
-	public String getFileName(OrgDatabase db) {
+	public NodeWrapper getParent() {
+		if(cursor == null)
+			return null;
+		
+		long parentId = getParentId();
+		
+		if(parentId < 0)
+			return null;
+		
+		return new NodeWrapper(db.getNode(parentId), db);
+	}
+	
+	public String getFileName() {
 		if(cursor == null)
 			return "";
 		
@@ -266,27 +280,27 @@ public class NodeWrapper {
 		return cursor.getInt(cursor.getColumnIndex("_id"));
 	}
 
-	public void setName(String name, OrgDatabase db) {
+	public void setName(String name) {
 		db.updateNodeField(this, "name", name);
 	}
 
-	public void setTodo(String todo, OrgDatabase db) {
+	public void setTodo(String todo) {
 		db.updateNodeField(this, "todo", todo);
 	}
 
-	public void setPriority(String priority, OrgDatabase db) {
+	public void setPriority(String priority) {
 		db.updateNodeField(this, "priority", priority);
 	}
 
-	public void setPayload(String payload, OrgDatabase db) {
+	public void setPayload(String payload) {
 		db.updateNodeField(this, "payload", payload);
 	}
 
-	public void setTags(String tags, OrgDatabase db) {
+	public void setTags(String tags) {
 		db.updateNodeField(this, "tags", tags);
 	}
 	
-	public void setParent(Long parentId, OrgDatabase db) {
+	public void setParent(Long parentId) {
 		db.updateNodeField(this, "parent_id", parentId.toString());
 	}
 	
@@ -295,15 +309,15 @@ public class NodeWrapper {
 			this.cursor.close();
 	}
 
-	public void addLogbook(long startTime, long endTime, String elapsedTime, OrgDatabase db) {
-		StringBuilder rawPayload = new StringBuilder(getRawPayload(db));
+	public void addLogbook(long startTime, long endTime, String elapsedTime) {
+		StringBuilder rawPayload = new StringBuilder(getRawPayload());
 		rawPayload = NodePayload.addLogbook(rawPayload, startTime, endTime, elapsedTime);
 		
-		boolean generateEdits = !getFileName(db).equals(OrgFile.CAPTURE_FILE);
+		boolean generateEdits = !getFileName().equals(OrgFile.CAPTURE_FILE);
 
 		if(generateEdits)
-			db.addEdit("body", getNodeId(db), getName(), getRawPayload(db), rawPayload.toString());
-		setPayload(rawPayload.toString(), db);
+			db.addEdit("body", getNodeId(), getName(), getRawPayload(), rawPayload.toString());
+		setPayload(rawPayload.toString());
 	}
 }
 

@@ -205,7 +205,7 @@ public class NodeViewActivity extends FragmentActivity {
 			return result.toString();
 		level--;
 
-		for (NodeWrapper child : node.getChildren(appInst.getDB())) {
+		for (NodeWrapper child : node.getChildren()) {
 			result.append(nodeToHTMLRecursive(child, level));
 			child.close();
 		}
@@ -228,8 +228,8 @@ public class NodeViewActivity extends FragmentActivity {
 		
 		result.append("</b></font> <hr />");
 
-		if (!node.getCleanedPayload(appInst.getDB()).equals("")) {
-			String payload = node.getCleanedPayload(appInst.getDB());
+		if (!node.getCleanedPayload().equals("")) {
+			String payload = node.getCleanedPayload();
 			if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(
 					"viewApplyFormating", true))
 				payload = applyFormating(payload);

@@ -103,8 +103,8 @@ public class CalendarSyncService {
 	
 	
 	public void insertNode(long node_id) {
-		NodeWrapper node = new NodeWrapper(this.db.getNode(node_id));
-		insertNode(node, node.getFileName(db));
+		NodeWrapper node = new NodeWrapper(this.db.getNode(node_id), db);
+		insertNode(node, node.getFileName());
 	}
 	
 	private void insertFileEntries(String filename) throws IllegalArgumentException {
@@ -113,7 +113,7 @@ public class CalendarSyncService {
 		if (scheduled == null)
 			return;
 		while (scheduled.isAfterLast() == false) {
-			NodeWrapper node = new NodeWrapper(scheduled);
+			NodeWrapper node = new NodeWrapper(scheduled, db);
 			insertNode(node, filename);
 			scheduled.moveToNext();
 		}
@@ -125,10 +125,10 @@ public class CalendarSyncService {
 			throws IllegalArgumentException {
 		boolean isActive = db.isTodoActive(node.getTodo());
 
-		for (DateEntry date : node.getPayload(db).getDates()) {
-			insertEntry(node.getName(), isActive, node.getCleanedPayload(db),
-					node.getNodeId(db), date, filename,
-					node.getPayload(db).getProperty("LOCATION"));
+		for (DateEntry date : node.getPayload().getDates()) {
+			insertEntry(node.getName(), isActive, node.getCleanedPayload(),
+					node.getNodeId(), date, filename,
+					node.getPayload().getProperty("LOCATION"));
 		}
 	}
 

@@ -216,8 +216,8 @@ public class OutlineActivity extends FragmentActivity
 	
 	
 	private boolean isNodeInFile(long node_id, String filename) {
-		return new NodeWrapper(node_id, appInst.getDB()).getFileName(
-				appInst.getDB()).equals(filename);
+		return new NodeWrapper(node_id, appInst.getDB()).getFileName().equals(
+				filename);
 	}
 
     private void showWizard() {

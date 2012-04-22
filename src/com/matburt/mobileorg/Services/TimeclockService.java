@@ -72,7 +72,7 @@ public class TimeclockService extends Service {
 		Log.d("MobileOrg", "Called onStartCommand() with :" + action);
 		if(action == null) {
 			this.node_id = intent.getLongExtra(NODE_ID, -1);
-			this.node = new NodeWrapper(db.getNode(node_id));
+			this.node = new NodeWrapper(db.getNode(node_id), db);
 			this.startTime = System.currentTimeMillis();
 			
 			getEstimated();
@@ -90,7 +90,7 @@ public class TimeclockService extends Service {
 	}
 	
 	private void getEstimated() {
-		String estimated = node.getPayload(db).getProperty("Effort").trim();
+		String estimated = node.getPayload().getProperty("Effort").trim();
 
 		if (TextUtils.isEmpty(estimated) == false) {
 			String[] split = estimated.split(":");

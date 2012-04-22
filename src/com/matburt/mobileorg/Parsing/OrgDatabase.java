@@ -310,15 +310,19 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		Cursor cursor = db.query("orgdata", nodeFields, "_id=?",
 				new String[] { id.toString() }, null, null, null);
 		
-		cursor.moveToFirst();
-		return cursor;
+		if(cursor.getCount() > 0) {
+			cursor.moveToFirst();
+			return cursor;
+		}
+		else
+			return null;
 	}
 	
 	public void updateNodeField(NodeWrapper node, String entry, String value) {
 		ContentValues values = new ContentValues();
 		values.put(entry, value);
 
-		String nodeId = node.getNodeId(this);
+		String nodeId = node.getNodeId();
 		
 		if(nodeId.startsWith("olp:")) {
 			db.update("orgdata", values, "_id=?",
@@ -383,7 +387,7 @@ public class OrgDatabase extends SQLiteOpenHelper {
 	}
 	
 	public void cloneNode(Long node_id, Long parent_id, Long target_file_id) {
-		NodeWrapper node = new NodeWrapper(this.getNode(node_id));
+		NodeWrapper node = new NodeWrapper(this.getNode(node_id), this);
 		
 		long new_node_id = this.addNode(parent_id, node.getName(), node.getTodo(),
 				node.getPriority(), node.getTags(), target_file_id);
@@ -398,7 +402,7 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		}
 		children.close();
 		
-		this.addNodePayload(new_node_id, node.getRawPayload(this));
+		this.addNodePayload(new_node_id, node.getRawPayload());
 		node.close();
 	}
 	

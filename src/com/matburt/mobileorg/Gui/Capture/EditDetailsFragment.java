@@ -111,7 +111,7 @@ public class EditDetailsFragment extends Fragment {
 	}
 
 	private void initDisplay() {
-		this.locationView.addView(new LocationTableRow(this.getActivity(), node.getParentId()));
+		this.locationView.addView(new LocationTableRow(this.getActivity(), node));
 		
 		if(this.actionMode == null) {
 			this.actionMode = EditActivity.ACTIONMODE_CREATE;
@@ -162,8 +162,8 @@ public class EditDetailsFragment extends Fragment {
 	}
 	
 	private void setupDates() {
-		this.scheduledEntry = setupDate(node.getPayload(this.orgDB).getScheduled(), "SCHEDULED", scheduledRemoveListener);
-		this.deadlineEntry = setupDate(node.getPayload(this.orgDB).getDeadline(), "DEADLINE", deadlineRemoveListener);
+		this.scheduledEntry = setupDate(node.getPayload().getScheduled(), "SCHEDULED", scheduledRemoveListener);
+		this.deadlineEntry = setupDate(node.getPayload().getDeadline(), "DEADLINE", deadlineRemoveListener);
 	}
 	
 	private DateTableRow setupDate(String date, String title, View.OnClickListener removeListener) {

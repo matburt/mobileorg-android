@@ -71,7 +71,7 @@ public class OutlineCursorAdapter extends SimpleCursorAdapter {
 			holder.tagsLayout = (TextView) v.findViewById(R.id.tagsLayout);
 		}
 
-		NodeWrapper node = new NodeWrapper(c);
+		NodeWrapper node = new NodeWrapper(c, db);
 
 		String todo = node.getTodo();
 		String name = node.getName();
