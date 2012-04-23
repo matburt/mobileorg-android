@@ -265,7 +265,7 @@ public class EditActivity extends FragmentActivity {
 				.setPositiveButton(R.string.yes,
 						new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog, int id) {
-								appInst.getDB().deleteNode(node_id);
+								deleteNode(node_id);
 								finish();
 							}
 						})
@@ -275,6 +275,14 @@ public class EditActivity extends FragmentActivity {
 					}
 				});
 		builder.create().show();
+	}
+	
+	private void deleteNode(long node_id) {
+		NodeWrapper node = new NodeWrapper(node_id, appInst.getDB());
+		appInst.getDB().addEdit("delete", node.getNodeId(),
+				node.getName(), "", "");
+		node.close();
+		appInst.getDB().deleteNode(node_id); // TODO make recursive
 	}
 	
 	private void startTimeClockingService(long nodeId) {
