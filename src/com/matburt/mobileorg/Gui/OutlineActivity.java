@@ -147,6 +147,11 @@ public class OutlineActivity extends FragmentActivity
 	
 	private void setTitle() {
 		this.getSupportActionBar().setTitle("MobileOrg " + appInst.getChangesString());
+		if(this.node_id > -1) {
+			NodeWrapper node = new NodeWrapper(this.node_id, appInst.getDB());
+			final String subTitle = node.constructOlpId().substring("olp:".length());
+			this.getSupportActionBar().setSubtitle(subTitle);
+		}
 	}
 
 	@Override

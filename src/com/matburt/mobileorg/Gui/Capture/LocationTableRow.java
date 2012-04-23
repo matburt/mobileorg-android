@@ -5,10 +5,8 @@ import java.util.ArrayList;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.util.Log;
-import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
-import android.widget.TableRow;
 
 import com.matburt.mobileorg.Parsing.MobileOrgApplication;
 import com.matburt.mobileorg.Parsing.NodeWrapper;

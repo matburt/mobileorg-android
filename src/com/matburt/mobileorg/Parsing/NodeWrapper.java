@@ -216,7 +216,10 @@ public class NodeWrapper {
 		return id;
 	}
 	
-	private String constructOlpId() {
+	public String constructOlpId() {
+		if(cursor == null)
+			return "";
+		
 		StringBuilder result = new StringBuilder();
 		result.insert(0, getName());
 		
