@@ -324,7 +324,7 @@ public class EditActivity extends FragmentActivity {
 		String newTodo = this.detailsFragment.getTodo();
 		String newPriority = this.detailsFragment.getPriority();
 		String newTags = this.detailsFragment.getTags();
-		NodeWrapper parent = this.detailsFragment.getLocation();
+		NodeWrapper newParent = this.detailsFragment.getLocation();
 		StringBuilder newCleanedPayload = new StringBuilder(this.payloadFragment.getText());
 		insertChangesIntoPayloadResidue();
 		String newPayloadResidue = node.getPayload().getNewPayloadResidue();
@@ -335,7 +335,7 @@ public class EditActivity extends FragmentActivity {
 			
 			//long file_id = orgDB.addOrUpdateFile(OrgFile.CAPTURE_FILE, OrgFile.CAPTURE_FILE_ALIAS, "", true);
 
-			long node_id = orgDB.addNode(parent.getId(), newTitle, newTodo, newPriority, newTags, parent.getFileId());
+			long node_id = orgDB.addNode(newParent.getId(), newTitle, newTodo, newPriority, newTags, newParent.getFileId());
 			
 			boolean addTimestamp = PreferenceManager.getDefaultSharedPreferences(
 					this).getBoolean("captureWithTimestamp", false);
@@ -344,7 +344,7 @@ public class EditActivity extends FragmentActivity {
 			
 			orgDB.addNodePayload(node_id, newCleanedPayload.toString() + newPayloadResidue);
 			
-			makeNewheadingEditNode(node_id, parent);
+			makeNewheadingEditNode(node_id, newParent);
 	
 			if(PreferenceManager.getDefaultSharedPreferences(
 					this).getBoolean("calendarEnabled", false))
@@ -353,7 +353,7 @@ public class EditActivity extends FragmentActivity {
 		} else if (this.actionMode.equals(ACTIONMODE_EDIT)) {
 			try {
 				makeEditNodes(newTitle, newTodo, newPriority,
-						newCleanedPayload.toString(), newTags);
+						newCleanedPayload.toString(), newTags, newParent);
 			} catch (IOException e) {
 			}
 		}
@@ -379,7 +379,7 @@ public class EditActivity extends FragmentActivity {
 	 * changed.
 	 */ 
 	private void makeEditNodes(String newTitle, String newTodo,
-			String newPriority, String newCleanedPayload, String newTags) throws IOException {
+			String newPriority, String newCleanedPayload, String newTags, NodeWrapper newParent) throws IOException {
 		boolean generateEdits = !node.getFileName().equals(OrgFile.CAPTURE_FILE);
 		
 		if (!node.getName().equals(newTitle)) {
@@ -415,6 +415,12 @@ public class EditActivity extends FragmentActivity {
 						NodeWrapper.getTagsWithoutInheritet(newTags));
 			}
 			node.setTags(newTags);
+		}
+		if(newParent.getId() != node.getParentId()) {
+			if(generateEdits) {
+				orgDB.addEdit("refile", node.getNodeId(), newTitle, "", newParent.constructOlpId());
+			}
+			node.setParent(newParent);
 		}
 	}
 	

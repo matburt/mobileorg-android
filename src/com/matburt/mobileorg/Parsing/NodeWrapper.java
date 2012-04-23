@@ -392,6 +392,10 @@ public class NodeWrapper {
 		db.updateNodeField(this, "parent_id", parentId.toString());
 	}
 	
+	public void setFileId(Long fileId) {
+		db.updateNodeField(this, "file_id", fileId.toString());
+	}
+	
 	public void close() {
 		if(cursor != null)
 			this.cursor.close();
@@ -406,6 +410,14 @@ public class NodeWrapper {
 		if(generateEdits)
 			db.addEdit("body", getNodeId(), getName(), getRawPayload(), rawPayload.toString());
 		setPayload(rawPayload.toString());
+	}
+
+	public void setParent(NodeWrapper newParent) {
+		if(cursor == null)
+			return;
+
+		setParent(newParent.getId());
+		setFileId(newParent.getFileId());
 	}
 }
 
