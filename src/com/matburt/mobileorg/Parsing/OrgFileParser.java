@@ -60,7 +60,7 @@ public class OrgFileParser {
 		this.parentIdStack = new Stack<Long>();
 		
 		this.starStack.push(0);
-		Long fileID = db.getFileId(filename);
+		Long fileID = db.getFileNodeId(filename);
 		this.parentIdStack.push(fileID);
 
 		this.payload = new StringBuilder();
@@ -118,7 +118,7 @@ public class OrgFileParser {
 	
 	private void combineBlockAgendas() {
 		final String filename = "agendas.org";
-		long agendaFileNodeID = db.getFileId(filename);
+		long agendaFileNodeID = db.getFileNodeId(filename);
 		Cursor cursor = db.getNodeChildren(agendaFileNodeID);
 		
 		cursor.moveToFirst();
@@ -138,7 +138,7 @@ public class OrgFileParser {
 				
 				if(blockTitle.equals(previousBlockTitle) == false) { // Create new node to contain block agenda	
 					previousBlockNode = db.addNode(agendaFileNodeID, blockTitle,
-							"", "", "", db.getFilenameId(filename));
+							"", "", "", db.getFileId(filename));
 				}
 
 				String blockEntryName = name.substring(name.indexOf(">") + 1);
@@ -187,12 +187,12 @@ public class OrgFileParser {
 	private void cloneChildren(Cursor children, long previousBlockNode,
 			Long agendaNodeFileID, String blockEntryName, String filename) {
 		db.addNode(previousBlockNode, BLOCK_SEPARATOR_PREFIX
-				+ blockEntryName, "", "", "", db.getFilenameId(filename));
+				+ blockEntryName, "", "", "", db.getFileId(filename));
 		
 		while(children.isAfterLast() == false) {
 			db.cloneNode(
 					children.getLong(children.getColumnIndex("_id")),
-					previousBlockNode, db.getFilenameId("agendas.org"));
+					previousBlockNode, db.getFileId("agendas.org"));
 			children.moveToNext();
 		}
 	}

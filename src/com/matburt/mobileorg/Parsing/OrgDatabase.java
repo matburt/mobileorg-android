@@ -107,7 +107,7 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		"orgdata.payload", "orgdata.parent_id", "orgdata.file_id"};
 	
 	
-	public long getFileId(String filename) {
+	public long getFileNodeId(String filename) {
 		Cursor cursor = db.query("files", new String[] { "node_id" },
 				"filename=?", new String[] {filename}, null, null, null);
 		
@@ -153,7 +153,7 @@ public class OrgDatabase extends SQLiteOpenHelper {
 	}
 	
 	
-	public long getFilenameId(String filename) {
+	public long getFileId(String filename) {
 		Cursor cursor = db.query("files", new String[] { "_id" },
 				"filename=?", new String[] {filename}, null, null, null);
 		
@@ -173,7 +173,7 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		OrgFile orgfile = new OrgFile(filename, context);
 		orgfile.remove();
 		
-		Long file_id = this.getFilenameId(filename);
+		Long file_id = this.getFileId(filename);
 		db.delete("orgdata", "file_id = ?", new String[] { file_id.toString() });
 		db.delete("files", "filename = ?", new String[] { filename });
 		
@@ -196,7 +196,7 @@ public class OrgDatabase extends SQLiteOpenHelper {
 	}
 	
 	public long addOrUpdateFile(String filename, String name, String checksum, boolean includeInOutline) {
-		long file_id = this.getFilenameId(filename);
+		long file_id = this.getFileId(filename);
 	
 		if(file_id >= 0)
 			return file_id;
@@ -408,7 +408,7 @@ public class OrgDatabase extends SQLiteOpenHelper {
 	}
 	
 	public Cursor getFileSchedule(String filename) {
-		long file_id = this.getFilenameId(filename);
+		long file_id = this.getFileId(filename);
 		
 		String whereQuery = "file_id=? AND (payload LIKE '%<%>%')";
 		
@@ -440,7 +440,7 @@ public class OrgDatabase extends SQLiteOpenHelper {
 	}
 
 	public String fileToString(String filename) {		
-		long fileNodeId = getFileId(filename);
+		long fileNodeId = getFileNodeId(filename);
 		
 		if(fileNodeId < 0)
 			return "";
@@ -705,7 +705,7 @@ public class OrgDatabase extends SQLiteOpenHelper {
 			changes += cursor.getCount();
 		cursor.close();
 		
-		long file_id = this.getFilenameId(OrgFile.CAPTURE_FILE);
+		long file_id = this.getFileId(OrgFile.CAPTURE_FILE);
 		cursor = db.query("orgdata", new String[] { "_id" }, "file_id=?",
 				new String[] { Long.toString(file_id) }, null, null, null);
 		if(cursor != null) {
@@ -729,7 +729,7 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		if(file.indexOf(":") > -1)
 			file = file.substring(0, file.indexOf(":"));
 				
-		Cursor cursor = getNode(getFileId(file));
+		Cursor cursor = getNode(getFileNodeId(file));
 		
 		if(cursor.getCount() == 0) {
 			cursor.close();

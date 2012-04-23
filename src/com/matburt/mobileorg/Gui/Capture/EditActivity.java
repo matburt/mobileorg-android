@@ -137,7 +137,7 @@ public class EditActivity extends FragmentActivity {
 			this.detailsFragment.init(this.node, this.actionMode, defaultTodo);
 			this.payloadFragment.init(this.node.getCleanedPayload(), true);
 		} else if (this.actionMode.equals(ACTIONMODE_ADDCHILD)) {
-			node = new NodeWrapper(null, orgDB);
+			node = new NodeWrapper(this.node_id, orgDB);
 			this.detailsFragment.init(this.node, this.actionMode, defaultTodo);
 			this.payloadFragment.init("", true);
 		}
@@ -332,7 +332,7 @@ public class EditActivity extends FragmentActivity {
 			MobileOrgApplication appInst = (MobileOrgApplication) this.getApplication();
 			OrgDatabase orgDB = appInst.getDB();
 			long file_id = orgDB.addOrUpdateFile(OrgFile.CAPTURE_FILE, OrgFile.CAPTURE_FILE_ALIAS, "", true);
-			Long parent = orgDB.getFileId(OrgFile.CAPTURE_FILE);
+			Long parent = orgDB.getFileNodeId(OrgFile.CAPTURE_FILE);
 			long node_id = orgDB.addNode(parent, newTitle, newTodo, newPriority, newTags, file_id);
 			
 			boolean addTimestamp = PreferenceManager.getDefaultSharedPreferences(
@@ -350,7 +350,7 @@ public class EditActivity extends FragmentActivity {
 			MobileOrgApplication appInst = (MobileOrgApplication) this.getApplication();
 			OrgDatabase orgDB = appInst.getDB();
 			Long parent = this.node_id;
-			long file_id = this.orgDB.getFileId(this.orgDB.getFilenameFromNodeId(parent));
+			long file_id = this.orgDB.getFileNodeId(this.orgDB.getFilenameFromNodeId(parent));
 			long node_id = orgDB.addNode(parent, newTitle, newTodo, newPriority, newTags, file_id);
 			
 			boolean addTimestamp = PreferenceManager.getDefaultSharedPreferences(

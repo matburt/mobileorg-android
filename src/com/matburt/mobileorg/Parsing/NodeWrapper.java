@@ -3,7 +3,6 @@ package com.matburt.mobileorg.Parsing;
 import java.util.ArrayList;
 
 import android.database.Cursor;
-import android.util.Log;
 
 public class NodeWrapper {
 
@@ -307,16 +306,22 @@ public class NodeWrapper {
 		return result;
 	}
 	
-	public NodeWrapper getChild(String name) {
-		if(getId() == -1) {
-			long filenodeId = db.getFileId(name);
-			if(filenodeId > -1) {
-				return new NodeWrapper(filenodeId, db);
-			}
-		}
+	public NodeWrapper getSibling(String name) {
+		if(getParent() == null)
+			return null;
 		
+		ArrayList<NodeWrapper> children = getParent().getChildren();
+								
+		for(NodeWrapper child: children) {
+			if(child.getName().equals(name))
+				return child;
+		}
+		return null;
+	}
+	
+	public NodeWrapper getChild(String name) {
 		ArrayList<NodeWrapper> children = getChildren();
-						
+		
 		for(NodeWrapper child: children) {
 			if(child.getName().equals(name))
 				return child;
@@ -347,9 +352,6 @@ public class NodeWrapper {
 		
 		if(column < 0)
 			return -1;
-		
-		Log.d("MobileOrg", "getID() : " + column);
-		Log.d("MobileOrg", "name:" + getName());
 		
 		return cursor.getInt(column);
 	}
