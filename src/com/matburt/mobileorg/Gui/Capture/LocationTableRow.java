@@ -148,7 +148,15 @@ public class LocationTableRow {
 		}
 		
 		public NodeWrapper getNode() {
-			return this.node;
+			String selection = (String) this.getSelectedItem();
+			
+			if(TextUtils.isEmpty(selection))
+				return this.node;
+			
+			if(this.node == null)
+				return new NodeWrapper(db.getFileNodeId(selection), db);
+			else
+				return this.node.getChild(selection);
 		}
 	}
 }

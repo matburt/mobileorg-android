@@ -341,6 +341,18 @@ public class NodeWrapper {
 		return db.getFilename(cursor.getLong(columnIndex));
 	}
 	
+	public long getFileId() {
+		if(cursor == null)
+			return -1;
+		
+		int columnIndex = cursor.getColumnIndex("file_id");
+		
+		if(columnIndex == -1)
+			return -1;
+		
+		return cursor.getLong(columnIndex);
+	}
+	
 	/**
 	 * @return The internal id of the node. Used for mapping to database.
 	 */

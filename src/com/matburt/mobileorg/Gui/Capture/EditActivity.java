@@ -324,16 +324,18 @@ public class EditActivity extends FragmentActivity {
 		String newTodo = this.detailsFragment.getTodo();
 		String newPriority = this.detailsFragment.getPriority();
 		String newTags = this.detailsFragment.getTags();
+		NodeWrapper parent = this.detailsFragment.getLocation();
 		StringBuilder newCleanedPayload = new StringBuilder(this.payloadFragment.getText());
 		insertChangesIntoPayloadResidue();
 		String newPayloadResidue = node.getPayload().getNewPayloadResidue();
 						
-		if (this.actionMode.equals(ACTIONMODE_CREATE)) {
+		if (this.actionMode.equals(ACTIONMODE_CREATE) || this.actionMode.equals(ACTIONMODE_ADDCHILD)) {
 			MobileOrgApplication appInst = (MobileOrgApplication) this.getApplication();
 			OrgDatabase orgDB = appInst.getDB();
-			long file_id = orgDB.addOrUpdateFile(OrgFile.CAPTURE_FILE, OrgFile.CAPTURE_FILE_ALIAS, "", true);
-			Long parent = orgDB.getFileNodeId(OrgFile.CAPTURE_FILE);
-			long node_id = orgDB.addNode(parent, newTitle, newTodo, newPriority, newTags, file_id);
+			
+			//long file_id = orgDB.addOrUpdateFile(OrgFile.CAPTURE_FILE, OrgFile.CAPTURE_FILE_ALIAS, "", true);
+
+			long node_id = orgDB.addNode(parent.getId(), newTitle, newTodo, newPriority, newTags, parent.getFileId());
 			
 			boolean addTimestamp = PreferenceManager.getDefaultSharedPreferences(
 					this).getBoolean("captureWithTimestamp", false);
@@ -342,26 +344,8 @@ public class EditActivity extends FragmentActivity {
 			
 			orgDB.addNodePayload(node_id, newCleanedPayload.toString() + newPayloadResidue);
 			
-			if(PreferenceManager.getDefaultSharedPreferences(
-					this).getBoolean("calendarEnabled", false))
-				appInst.getCalendarSyncService().insertNode(node_id);
-			
-		} else if (this.actionMode.equals(ACTIONMODE_ADDCHILD)) {
-			MobileOrgApplication appInst = (MobileOrgApplication) this.getApplication();
-			OrgDatabase orgDB = appInst.getDB();
-			Long parent = this.node_id;
-			long file_id = this.orgDB.getFileNodeId(this.orgDB.getFilenameFromNodeId(parent));
-			long node_id = orgDB.addNode(parent, newTitle, newTodo, newPriority, newTags, file_id);
-			
-			boolean addTimestamp = PreferenceManager.getDefaultSharedPreferences(
-					this).getBoolean("captureWithTimestamp", false);
-			if(addTimestamp)
-				newCleanedPayload.append("\n").append(getTimestamp()).append("\n");
-			
-			orgDB.addNodePayload(node_id, newCleanedPayload.toString() + newPayloadResidue);
-						
-			makeNewheadingEditNode(node_id, new NodeWrapper(parent, orgDB));
-			
+			makeNewheadingEditNode(node_id, parent);
+	
 			if(PreferenceManager.getDefaultSharedPreferences(
 					this).getBoolean("calendarEnabled", false))
 				appInst.getCalendarSyncService().insertNode(node_id);

@@ -335,6 +335,10 @@ public class EditDetailsFragment extends Fragment {
 		return priorityView.getSelectedItem().toString();
 	}
 	
+	public NodeWrapper getLocation() {
+		return locationTableRow.getParentNodeId();
+	}
+	
 	public static void setupSpinner(Context context, Spinner view, ArrayList<String> data,
 			String selection) {		
 		if(!TextUtils.isEmpty(selection) && !data.contains(selection))
