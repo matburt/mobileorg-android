@@ -17,6 +17,7 @@ public class LocationTableRow {
 	private NodeWrapper node;
 	private OrgDatabase db;
 	private LinearLayout locationView;
+	private LocationEntry lastEntry;
 	
 	public LocationTableRow(Context context, NodeWrapper node, LinearLayout locationView) {
 		this.locationView = locationView;
@@ -34,6 +35,7 @@ public class LocationTableRow {
 					new NodeWrapper(-1, db), null);
 			entry.setupSpinner2(OrgFile.CAPTURE_FILE);
 			locationView.addView(entry);
+			this.lastEntry = entry;
 			return;
 		}
 		
@@ -43,12 +45,16 @@ public class LocationTableRow {
 			entry = new LocationEntry(context, node, entry);
 			entry.setupSpinner(node.getName());
 			locationView.addView(entry, 0);
+			
+			if(this.lastEntry == null)
+				this.lastEntry = entry;
+			
 			node = node.getParent();
 		}	
 	}
 	
 	public long getParentNodeId() {
-		return -1;
+		return this.lastEntry.getNode().getId();
 	}
 		
 	private class LocationEntry extends Spinner {
@@ -95,6 +101,10 @@ public class LocationTableRow {
 			child = new LocationEntry(getContext(), node, null);
 			child.setupSpinner2("");
 			locationView.addView(child);
+		}
+		
+		public NodeWrapper getNode() {
+			return this.node;
 		}
 	}
 }

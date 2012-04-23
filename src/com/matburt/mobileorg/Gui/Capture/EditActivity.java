@@ -7,6 +7,7 @@ import java.util.Date;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ActionBar;
@@ -16,7 +17,9 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.MenuItem;
 import android.support.v4.view.SubMenu;
+import android.support.v4.view.Window;
 import android.view.MenuInflater;
+import android.view.WindowManager;
 
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Parsing.MobileOrgApplication;
@@ -47,6 +50,14 @@ public class EditActivity extends FragmentActivity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
+		SharedPreferences appSettings = PreferenceManager
+				.getDefaultSharedPreferences(getBaseContext());
+		if (appSettings.getBoolean("fullscreen", true)) {
+			requestWindowFeature(Window.FEATURE_NO_TITLE);
+			getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+					WindowManager.LayoutParams.FLAG_FULLSCREEN);
+		}
+		
 		setContentView(R.layout.edit);
 
 		Intent intent = getIntent();

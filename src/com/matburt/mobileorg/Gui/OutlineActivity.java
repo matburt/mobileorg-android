@@ -19,11 +19,13 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.view.Window;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
@@ -64,6 +66,13 @@ public class OutlineActivity extends FragmentActivity
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
+		SharedPreferences appSettings = PreferenceManager
+				.getDefaultSharedPreferences(getBaseContext());
+		if (appSettings.getBoolean("fullscreen", true)) {
+			requestWindowFeature(Window.FEATURE_NO_TITLE);
+			getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+					WindowManager.LayoutParams.FLAG_FULLSCREEN);
+		}
 		setContentView(R.layout.outline);		
 		
 		this.appInst = (MobileOrgApplication) this.getApplication();
@@ -93,7 +102,7 @@ public class OutlineActivity extends FragmentActivity
 		this.syncReceiver = new SynchServiceReceiver();
 		registerReceiver(this.syncReceiver, new IntentFilter(
 				Synchronizer.SYNC_UPDATE));
-				
+		
 		refreshDisplay();
 	}
 	
@@ -197,11 +206,9 @@ public class OutlineActivity extends FragmentActivity
 		case R.id.menu_help:
 			runHelp();
 			return true;
-
 		}
 		return false;
 	}
-	
 
 	private OnItemLongClickListener outlineLongClickListener = new OnItemLongClickListener() {
 		@Override

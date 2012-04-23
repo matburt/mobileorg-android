@@ -56,6 +56,12 @@
             android:key="viewApplyFormating"
             android:summary="Apply formating of orgmode emphasis, bold, underline and strike-through when viewing."
             android:title="Apply view formating" />
+        
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="fullscreen"
+            android:summary="@string/preference_fullscreen_summary"
+            android:title="@string/preference_fullscreen_title" />
 
         <ListPreference
             android:defaultValue="0"
