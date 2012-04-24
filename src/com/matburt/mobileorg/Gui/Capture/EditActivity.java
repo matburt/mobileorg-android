@@ -340,10 +340,17 @@ public class EditActivity extends FragmentActivity {
 		if (this.actionMode.equals(ACTIONMODE_CREATE) || this.actionMode.equals(ACTIONMODE_ADDCHILD)) {
 			MobileOrgApplication appInst = (MobileOrgApplication) this.getApplication();
 			OrgDatabase orgDB = appInst.getDB();
-			
-			//long file_id = orgDB.addOrUpdateFile(OrgFile.CAPTURE_FILE, OrgFile.CAPTURE_FILE_ALIAS, "", true);
+			long node_id, parent_id;
+                        long file_id;
 
-			long node_id = orgDB.addNode(newParent.getId(), newTitle, newTodo, newPriority, newTags, newParent.getFileId());
+                        if (newParent == null) {
+                                file_id = orgDB.addOrUpdateFile(OrgFile.CAPTURE_FILE, OrgFile.CAPTURE_FILE_ALIAS, "", true);
+                                parent_id = orgDB.getFileNodeId(orgDB.getFilename(file_id));
+                        } else {
+                                file_id = newParent.getFileId();
+                                parent_id = newParent.getId();
+                        }
+			node_id = orgDB.addNode(parent_id, newTitle, newTodo, newPriority, newTags, file_id);
 			
 			boolean addTimestamp = PreferenceManager.getDefaultSharedPreferences(
 					this).getBoolean("captureWithTimestamp", false);
@@ -372,7 +379,7 @@ public class EditActivity extends FragmentActivity {
 	}
 	
 	private void makeNewheadingEditNode(long node_id, NodeWrapper parent) {
-		boolean generateEdits = !parent.getFileName().equals(OrgFile.CAPTURE_FILE);
+		boolean generateEdits = parent != null && !parent.getFileName().equals(OrgFile.CAPTURE_FILE);
 		if(generateEdits == false)
 			return;
 
