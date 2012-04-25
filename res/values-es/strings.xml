@@ -1,26 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
   <string name="app_name">MobileOrgActivity</string>
-  <string name="menu_outline">Outline</string>
-  <string name="menu_capture">Capture</string>
-  <string name="menu_settings">Settings</string>
-  <string name="menu_sync">Sync</string>
-  <string name="menu_edit">Edit</string>
-  <string name="menu_search">Search</string>
-  <string name="contextmenu_edit">Edit Node</string>
-  <string name="contextmenu_view">View Node</string>
-  <string name="contextmenu_delete">Delete File</string>
-  <string name="contextmenu_node_delete">Delete Node</string>
-  
-  
+  <string name="menu_outline">Esquema</string>
+  <string name="menu_capture">Capturar</string>
+  <string name="menu_settings">Ajustes</string>
+  <string name="menu_sync">Sincronizar</string>
+  <string name="menu_edit">Editar</string>
+  <string name="menu_search">Buscar</string>
+  <string name="menu_help">Ayuda</string>
+  <string name="menu_cancel">Cancelar</string>
+  <string name="menu_addtag">Añadir etiqueta</string>
+  <string name="menu_adddeadline">Agregar plazo</string>
+  <string name="menu_addscheduled">Programar</string>
+  <string name="menu_timestamp">Añadir fecha y hora</string>
+  <string name="contextmenu_edit">Modificar nodo</string>
+  <string name="contextmenu_view">Ver nodo</string>
+  <string name="contextmenu_delete">Eliminar archivo</string>
+  <string name="contextmenu_node_delete">Eliminar nodo</string>
+
   <string name="sync_wait">Sincronizando, espere…</string>
   <string name="sync_failed">Sincronización fallida, ¿intentarlo de nuevo?</string>
   <string name="yes">Sí</string>
   <string name="no">No</string>
+  <string name="ok">OK</string>
   <string name="empty_main">Aún no se han sincronizado\nsus datos de Org</string>
   <string name="error_bad_url">La url %s no tiene el formato correcto</string>
   <string name="error_dialog_title">Error</string>
-  
   <string name="node_edit_prompt">¿Seguro que desea descartar los cambios?</string>
   <string name="node_view_error_loading_node">Error al cargar nodo</string>
   <string name="sync_not_configured">Sincronización no configurada</string>
@@ -46,6 +51,7 @@
   <string name="error_url_put_detail">Ha ocurrido un error intentando cargar a la url %1$s: %2$s</string>
   <string name="error_opening_database">Ha ocurrido un error intentando crear la base de datos. Compruebe sus preferencias de almacenamiento en el menú de preferencias, y asegúrese de que su tarjeta SD se encuentra disponible.</string>
   <string name="error_url_put">Ha ocurrido un error intentando cargar a la url %s</string>
+  <string name="error_setting_no_calendar">NO HAY UN CALENDARIO</string>
   <string name="dropbox_fetch_error">Ha ocurrido un error al leer la ruta de Dropbox %1$s: %2$s</string>
   <string name="apg_not_found">APG no encontrado</string>
   <string name="apg_version_not_supported">Versión de APG no soportada</string>
@@ -57,7 +63,7 @@
   <string name="todo_state">Estado</string>
   <string name="back">Atrás</string>
   <string name="cancel">Cancelar</string>
-  <string name="save">Guardar</string>  
+  <string name="save">Guardar</string>
   <string name="search_hint">Buscar</string>
   <string name="warning">ADVERTENCIA!</string>
   <string name="cert_changed">El certificado de WebDAV ha cambiado, vea los detalles más abajo. Si está conforme, haga tap en \'Aceptar\', de lo contrario haga tap en \'Denegar\'. Si acepta el nuevo certificado, deberá reiniciar la sincronización manualmente.</string>
@@ -76,21 +82,27 @@
   <string name="email">Email</string>
   <string name="username">Usuario</string>
   <string name="password">Contraseña</string>
+  <string name="host">Host</string>
+  <string name="port">Puerto</string>
+  <string name="path">Ruta</string>
   <string name="login">Iniciar sesión</string>
   <string name="login_webdav">Comprobar login</string>
+  <string name="login_ssh">Comprobar login SSH</string>
   <string name="i_want_to_sync_using">Quiero sincronizar usando:</string>
   <string name="wizard_webdav">un servidor WebDAV</string>
   <string name="wizard_dropbox">una cuenta de Dropbox</string>
   <string name="wizard_sdcard">mi tarjeta SD</string>
+  <string name="wizard_ssh">un servidor SSH</string>
   <string name="wizard_null">nada (sólo captura)</string>
   <string name="log_in_to_dropbox">Iniciar sesión con Dropbox</string>
   <string name="log_in_to_webdav">Iniciar sesión con su servidor WebDAV</string>
+  <string name="log_in_to_ssh">Iniciar sesión con su servidor SSH</string>
   <string name="null_sync_description">No se ha configurado la sincronización, y sólo podrá capturar notas.</string>
   <string name="url">URL</string>
   <string name="wizard_dropbox_email_hint">uri@frankandrobot.com</string>
-  
+
     <!-- preference strings -->
-  <string name="title_capture_with_timestamp">Capturar con fecha</string>
+  <string name="title_capture_with_timestamp">Capturar con fecha y hora</string>
   <string name="summary_capture_with_timestamp">Notas capturadas contendrán fecha y hora</string>
   <string name="title_agenda_title">Usar títulos de la agenda</string>
   <string name="summary_agenda_title">Habilita el uso de títulos de agenda personalizados. Requiere volver a sincronizar para entrar en vigor.</string>
@@ -123,4 +135,26 @@
   <string name="preference_dropbox_path_summary">Ruta de Dropbox al fichero index.org</string>
   <string name="preference_clear_db_dialog_title">¿Borrar BBDD?</string>
   <string name="preference_clear_db_dialog_message">¿Seguro que desea borrar la BBDD?</string>
+  <string name="preference_combine_block_agenda_summary">Combina las agendas en un nodo, con separadores. Necesita volver a sincronizar el archivo de la agenda para que el cambio sea efectivo</string>
+  <string name="preference_combine_block_agenda_title">Combinar agendas</string>
+  <string name="preference_calendar">Calendario</string>
+  <string name="preference_calendar_clear">Limpiar el calendario del teléfono</string>
+  <string name="preference_calendar_clear_summary">Limpiar el calendario del teléfono de todas las entradas insertadas por MobileOrg</string>
+  <string name="preference_calendar_synch">Habilitar la sincronización de los elementos programados al calendario del teléfono.</string>
+  <string name="preference_calendar_synch_title">Sincronización del calendario</string>
+  <string name="preference_calendar_name_summary">Elegir el calendario que usará MobileOrg</string>
+  <string name="preference_calendar_name">Nombre del calendario</string>
+  <string name="preference_clear_calendar_promt">Limpiar calendario del telefono</string>
+  <string name="preference_clear_calendar_promt_message">¿Esta seguro de querer limpiar el calendario del teléfono?</string>
+  <string name="preference_calendar_reminder_summary">Agregar recordatorios para los elementos programados al calendario</string>
+  <string name="preference_calendar_reminder">Recordatorios</string>
+  <string name="preference_calendar_reminder_interval_summary">Establece el intervalo en el que se activa un recordatorio</string>
+  <string name="preference_calendar_reminder_interval">Intervalo del recordatorio</string>
+  <string name="preference_calendar_show_habits_summary">Mostrar habitos en el calendario</string>
+  <string name="preference_calendar_show_habits">Mostrar habitos</string>
+  <string name="preference_calendar_show_done_summary">Mostrar elementos completados en el calendario</string>
+  <string name="preference_calendar_show_done">Mostrar completados</string>
+  <string name="edit_date_start">Comienzo</string>
+  <string name="edit_date_end">Fin</string>
+  <string name="edit_date_date">Fecha</string>
 </resources>
