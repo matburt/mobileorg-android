@@ -433,7 +433,7 @@ public class EditActivity extends FragmentActivity {
 		}
 		if(newParent.getId() != node.getParentId()) {
 			if(generateEdits) {
-				orgDB.addEdit("refile", node.getNodeId(), newTitle, "", newParent.constructOlpId());
+				orgDB.addEdit("refile", node.getNodeId(), newTitle, "", newParent.getNodeId());
 			}
 			node.setParent(newParent);
 		}
