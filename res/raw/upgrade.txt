@@ -1,7 +1,15 @@
 MobileOrg Upgrade Notes
 
-Changes for 0.8.4:
+Changes for 0.8.5:
 
+- Chinese Translation
+- Fix crash on empty files bug
+- Change default between View Node and Edit Node
+- Add timestamped entries to calendar
+- Add location to calendar entries (from LOCATION property)
+- Fix timezone and scheduling bugs
+
+Changes for 0.8.4:
 - "Schedule" and "Deadline" support in capture and edit
 - Revamped Capture/Edit Display
 - Calendar Support Bug fixes

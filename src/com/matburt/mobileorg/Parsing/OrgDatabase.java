@@ -405,7 +405,7 @@ public class OrgDatabase extends SQLiteOpenHelper {
 	public Cursor getFileSchedule(String filename) {
 		long file_id = this.getFilenameId(filename);
 		
-		String whereQuery = "file_id=? AND (payload LIKE '%SCHEDULED:%' OR payload LIKE '%DEADLINE:%')";
+		String whereQuery = "file_id=? AND (payload LIKE '%<%>%')";
 		
 		if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean(
 				"calendarHabits", true) == false)
@@ -423,6 +423,7 @@ public class OrgDatabase extends SQLiteOpenHelper {
 	
 	public void addEdit(String edittype, String nodeId, String nodeTitle,
 			String oldValue, String newValue) {
+		// TODO Check whether to generate edits here
 		ContentValues values = new ContentValues();
 		values.put("type", edittype);
 		values.put("data_id", nodeId);
