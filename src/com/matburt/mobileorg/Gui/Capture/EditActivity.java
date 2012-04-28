@@ -222,6 +222,12 @@ public class EditActivity extends FragmentActivity {
 			item = subMenu.add(R.string.menu_advanced, R.string.menu_clockin,
 					1, R.string.menu_clockin);
 			item.setIcon(R.drawable.ic_menu_today);
+			
+			item = subMenu.add(R.string.menu_advanced, R.string.menu_archive,
+					1, R.string.menu_archive);
+			
+			item = subMenu.add(R.string.menu_advanced, R.string.menu_archive_tosibling,
+					1, R.string.menu_archive_tosibling);
 
 			MenuItem subMenuItem = subMenu.getItem();
 			subMenuItem.setIcon(R.drawable.ic_menu_moreoverflow);
@@ -254,6 +260,14 @@ public class EditActivity extends FragmentActivity {
 		case R.string.menu_clockin:
 			startTimeClockingService(this.node_id);
 			return true;
+			
+		case R.string.menu_archive:
+			runArchiveNode(this.node_id, "archive");
+			return true;
+			
+		case R.string.menu_archive_tosibling:
+			runArchiveNode(this.node_id, "archive-sibling");
+			return true;		
 		}
 		return false;
 	}
@@ -275,6 +289,59 @@ public class EditActivity extends FragmentActivity {
 					}
 				});
 		builder.create().show();
+	}
+	
+	private void runArchiveNode(final long node_id, final String editString) {	
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setMessage(R.string.outline_archive_prompt)
+				.setCancelable(false)
+				.setPositiveButton(R.string.yes,
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int id) {
+								if(editString.equals("archive"))
+									archiveNode(node_id);
+								else
+									archiveNodeToSibling(node_id);
+								finish();
+							}
+						})
+				.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						dialog.cancel();
+					}
+				});
+		builder.create().show();
+	}
+	
+	private void archiveNode(long node_id) {
+		NodeWrapper node = new NodeWrapper(node_id, appInst.getDB());
+		appInst.getDB().addEdit("archive", node.getNodeId(),
+				node.getName(), "", "");
+		node.close();
+		appInst.getDB().deleteNode(node_id);
+	}
+	
+	private void archiveNodeToSibling(long node_id) {
+		NodeWrapper node = new NodeWrapper(node_id, appInst.getDB());
+		appInst.getDB().addEdit("archive-sibling", node.getNodeId(),
+				node.getName(), "", "");
+		
+		NodeWrapper parent = node.getParent();
+		if(parent != null) {
+			NodeWrapper child = parent.getChild("Archive");
+			if(child != null) {
+				node.setParent(child.getId());
+				child.close();
+			} else {
+				long child_id = appInst.getDB().addNode(parent.getId(), "Archive", "", "", "", parent.getFileId());
+				node.setParent(child_id);
+			}
+			parent.close();
+			node.close();
+		} else {
+			node.close();
+			appInst.getDB().deleteNode(node_id);
+		}
 	}
 	
 	private void deleteNode(long node_id) {
@@ -385,7 +452,7 @@ public class EditActivity extends FragmentActivity {
 
 		// Add new heading nodes need the entire content of node without star headings
 		String newContent = orgDB.nodeToString(node_id, 1).replaceFirst("[\\*]*", "");
-		orgDB.addEdit("newheading", parent.getNodeId(), parent.getName(), "", newContent);
+		orgDB.addEdit("addheading", parent.getNodeId(), parent.getName(), "", newContent);
 	}
 	
 	/**
