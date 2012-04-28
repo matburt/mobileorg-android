@@ -333,6 +333,13 @@ public class OrgDatabase extends SQLiteOpenHelper {
 			db.update("orgdata", values, "payload LIKE ?", new String[]{nodeIdQuery});
 		}
 	}
+
+	public void updateNodeField(long id, String entry, String value) {
+		ContentValues values = new ContentValues();
+		values.put(entry, value);
+
+		db.update("orgdata", values, "_id=?", new String[] { Long.toString(id) });
+	}
 	
 	/**
 	 * Utility function used to retrieve the full payload of agenda items.

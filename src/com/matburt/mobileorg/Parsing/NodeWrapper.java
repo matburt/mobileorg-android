@@ -389,11 +389,11 @@ public class NodeWrapper {
 	}
 	
 	public void setParent(Long parentId) {
-		db.updateNodeField(this, "parent_id", parentId.toString());
+		db.updateNodeField(getId(), "parent_id", parentId.toString());
 	}
 	
 	public void setFileId(Long fileId) {
-		db.updateNodeField(this, "file_id", fileId.toString());
+		db.updateNodeField(getId(), "file_id", fileId.toString());
 	}
 	
 	public void close() {
