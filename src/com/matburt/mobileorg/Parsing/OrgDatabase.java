@@ -394,18 +394,18 @@ public class OrgDatabase extends SQLiteOpenHelper {
 			return true;
 	}
 	
-	public void cloneNode(Long node_id, Long parent_id, Long target_file_id) {
-		NodeWrapper node = new NodeWrapper(this.getNode(node_id), this);
+	public void cloneNode(Long nodeId, Long newParentId, Long newFileId) {
+		NodeWrapper node = new NodeWrapper(this.getNode(nodeId), this);
 		
-		long new_node_id = this.addNode(parent_id, node.getName(), node.getTodo(),
-				node.getPriority(), node.getTags(), target_file_id);
+		long new_node_id = this.addNode(newParentId, node.getName(), node.getTodo(),
+				node.getPriority(), node.getTags(), newFileId);
 		
-		Cursor children = this.getNodeChildren(node_id);
+		Cursor children = this.getNodeChildren(nodeId);
 		children.moveToFirst();
 		
 		while(children.isAfterLast() == false) {
 			cloneNode(children.getLong(children.getColumnIndex("_id")),
-					new_node_id, target_file_id);
+					new_node_id, newFileId);
 			children.moveToNext();
 		}
 		children.close();
@@ -748,25 +748,12 @@ public class OrgDatabase extends SQLiteOpenHelper {
 
 		return nodeId;
 	}
-	
-	/**
-	 * This method might be useful to implement the file+headline links.
-	 */
-	@SuppressWarnings("unused")
-	private long findNodeWithName(Cursor nodes, String name) {
-		while(nodes.isAfterLast() == false) {
-			String nodeName = nodes.getString(nodes.getColumnIndex("name"));
-			if(nodeName.equals(name))
-				return nodes.getLong(nodes.getColumnIndex("_id"));
-		}
-		return -1;
-	}
 
 	
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 		switch (newVersion) {
-		case 2:
+		case 4:
 			db.execSQL("DROP TABLE IF EXISTS priorities");
 			db.execSQL("DROP TABLE IF EXISTS files");
 			db.execSQL("DROP TABLE IF EXISTS todos");
