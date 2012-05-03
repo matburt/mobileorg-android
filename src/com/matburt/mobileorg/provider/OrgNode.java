@@ -3,7 +3,7 @@ package com.matburt.mobileorg.provider;
 import android.database.Cursor;
 
 import com.matburt.mobileorg.Parsing.NodePayload;
-import com.matburt.mobileorg.provider.OrgContracts.OrgData;
+import com.matburt.mobileorg.provider.OrgContract.OrgData;
 
 public class OrgNode {
 	public long id = -1;

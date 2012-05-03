@@ -1,12 +1,30 @@
 package com.matburt.mobileorg.provider;
 
+import com.matburt.mobileorg.provider.OrgContract.OrgData;
+
 import android.content.Context;
+import android.database.DatabaseUtils.InsertHelper;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.database.sqlite.SQLiteStatement;
 
 public class OrgDatabase extends SQLiteOpenHelper {
 	private static final String DATABASE_NAME = "MobileOrg.db";
 	private static final int DATABASE_VERSION = 4;
+	
+	@SuppressWarnings("unused")
+	private int orgdata_idColumn;
+	private int orgdata_nameColumn;
+	private int orgdata_todoColumn;
+	private int orgdata_tagsColumn;
+	private int orgdata_priorityColumn;
+	@SuppressWarnings("unused")
+	private int orgdata_payloadColumn;
+	private int orgdata_parentidColumn;
+	private int orgdata_fileidColumn;
+	
+	private InsertHelper orgdataInsertHelper;
+	private SQLiteStatement addPayloadStatement;
 	
 	public interface Tables {
 		String EDITS = "edits";
@@ -74,5 +92,42 @@ public class OrgDatabase extends SQLiteOpenHelper {
 			break;
 		}
 		onCreate(db);
-	}	
+	}
+	
+	public long addNode(Long parentid, String name, String todo,
+			String priority, String tags, long file_id) {
+		prepareOrgdataInsert();
+		orgdataInsertHelper.bind(orgdata_parentidColumn, parentid);
+		orgdataInsertHelper.bind(orgdata_nameColumn, name);
+		orgdataInsertHelper.bind(orgdata_todoColumn, todo);
+		orgdataInsertHelper.bind(orgdata_priorityColumn, priority);
+		orgdataInsertHelper.bind(orgdata_fileidColumn, file_id);
+		orgdataInsertHelper.bind(orgdata_tagsColumn, tags);
+		return orgdataInsertHelper.execute();
+	}
+
+	private void prepareOrgdataInsert() {
+		if(this.orgdataInsertHelper == null) {
+			this.orgdataInsertHelper = new InsertHelper(getWritableDatabase(), Tables.ORGDATA);
+			this.orgdata_idColumn = orgdataInsertHelper.getColumnIndex(OrgData.ID);
+			this.orgdata_nameColumn = orgdataInsertHelper.getColumnIndex(OrgData.NAME);
+			this.orgdata_todoColumn = orgdataInsertHelper.getColumnIndex(OrgData.TODO);
+			this.orgdata_priorityColumn = orgdataInsertHelper.getColumnIndex(OrgData.PRIORITY);
+			this.orgdata_payloadColumn = orgdataInsertHelper.getColumnIndex(OrgData.PAYLOAD);
+			this.orgdata_parentidColumn = orgdataInsertHelper.getColumnIndex(OrgData.PARENT_ID);
+			this.orgdata_fileidColumn = orgdataInsertHelper.getColumnIndex(OrgData.FILE_ID);
+			this.orgdata_tagsColumn = orgdataInsertHelper.getColumnIndex(OrgData.TAGS);
+		}
+		orgdataInsertHelper.prepareForInsert();
+	}
+		
+	public void addNodePayload(Long id, final String payload) {
+		if(addPayloadStatement == null)
+			addPayloadStatement = getWritableDatabase()
+					.compileStatement("UPDATE orgdata SET payload=? WHERE _id=?");
+		
+		addPayloadStatement.bindString(1, payload);
+		addPayloadStatement.bindLong(2, id);
+		addPayloadStatement.execute();
+	}
 }

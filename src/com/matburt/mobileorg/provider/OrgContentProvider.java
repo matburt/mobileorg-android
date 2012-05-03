@@ -1,6 +1,5 @@
 package com.matburt.mobileorg.provider;
 
-import util.SelectionBuilder;
 import android.content.ContentProvider;
 import android.content.ContentUris;
 import android.content.ContentValues;
@@ -10,9 +9,11 @@ import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 
-import com.matburt.mobileorg.Parsing.OrgDatabase;
-import com.matburt.mobileorg.provider.OrgContracts.OrgData;
+import com.matburt.mobileorg.provider.OrgContract.Files;
+import com.matburt.mobileorg.provider.OrgContract.OrgData;
+import com.matburt.mobileorg.provider.OrgContract.Search;
 import com.matburt.mobileorg.provider.OrgDatabase.Tables;
+import com.matburt.mobileorg.util.SelectionBuilder;
 
 public class OrgContentProvider extends ContentProvider {
 	public static final String AUTHORITY = "com.matburt.mobileorg.provider.OrgContentProvider";
@@ -32,6 +33,8 @@ public class OrgContentProvider extends ContentProvider {
 	private static final int TAGS = 400;
 	private static final int TODOS = 500;
 	private static final int PRIORITIES = 600;
+	private static final int SEARCH = 700;
+	private static final int TIMED = 710;
 
 	private static UriMatcher buildUriMatcher() {
 		final UriMatcher uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
@@ -48,6 +51,10 @@ public class OrgContentProvider extends ContentProvider {
 		uriMatcher.addURI(AUTHORITY, "tags", TAGS);
 		uriMatcher.addURI(AUTHORITY, "todos", TODOS);
 		uriMatcher.addURI(AUTHORITY, "priorities", PRIORITIES);
+		
+		uriMatcher.addURI(AUTHORITY, "search/*", SEARCH);
+		uriMatcher.addURI(AUTHORITY, "timed/*", TIMED);
+
 		return uriMatcher;
 	}
 	
@@ -61,24 +68,10 @@ public class OrgContentProvider extends ContentProvider {
 	@Override
 	public Cursor query(Uri uri, String[] projection, String selection,
 			String[] selectionArgs, String sortOrder) {
-		final String tableName = getTableNameFromUri(uri);
+       final SQLiteDatabase db = dbHelper.getReadableDatabase();
 
-        SQLiteDatabase db = dbHelper.getReadableDatabase();
-		Cursor cursor = db.query(tableName, projection, selection,
-				selectionArgs, null, null, sortOrder);
-
-        cursor.setNotificationUri(getContext().getContentResolver(), uri);
-        return cursor;
-	}
-	
-	@Override
-	public int delete(Uri uri, String selection, String[] selectionArgs) {
-		final String tableName = getTableNameFromUri(uri);
-		
-		SQLiteDatabase db = dbHelper.getWritableDatabase();
-		int count = db.delete(tableName, selection, selectionArgs);
-		getContext().getContentResolver().notifyChange(uri, null);
-		return count;
+       final SelectionBuilder builder = buildSelectionFromUri(uri);
+       return builder.where(selection, selectionArgs).query(db, projection, sortOrder);
 	}
 
 	@Override
@@ -99,13 +92,22 @@ public class OrgContentProvider extends ContentProvider {
 			throw new SQLException("Failed to insert row into " + uri);
 	}
 
+	
+	@Override
+	public int delete(Uri uri, String selection, String[] selectionArgs) {		
+		final SQLiteDatabase db = dbHelper.getWritableDatabase();
+		final SelectionBuilder builder = buildSelectionFromUri(uri);
+		int count = builder.where(selection, selectionArgs).delete(db);
+		getContext().getContentResolver().notifyChange(uri, null);
+		return count;
+	}
+	
 	@Override
 	public int update(Uri uri, ContentValues values, String selection,
 			String[] selectionArgs) {
-		final String tableName = getTableNameFromUri(uri);
-		
-		SQLiteDatabase db = dbHelper.getWritableDatabase();
-		int count = db.update(tableName, values, selection, selectionArgs);
+		final SQLiteDatabase db = dbHelper.getWritableDatabase();
+		final SelectionBuilder builder = buildSelectionFromUri(uri);
+		int count = builder.where(selection, selectionArgs).update(db, values);
 		getContext().getContentResolver().notifyChange(uri, null);
 		return count;
 	}
@@ -121,33 +123,37 @@ public class OrgContentProvider extends ContentProvider {
 
 		switch (uriMatcher.match(uri)) {
 		case ORGDATA:
-			builder.table(Tables.ORGDATA);
-			break;
-
+			return builder.table(Tables.ORGDATA);
 		case ORGDATA_ID:
-			builder.table(Tables.ORGDATA).where(OrgData.ID, OrgData.getId(uri));
-			break;
+			return builder.table(Tables.ORGDATA).where(OrgData.ID, OrgData.getId(uri));
+		case ORGDATA_PARENT:
+			return builder.table(Tables.ORGDATA).where(OrgData.ID, OrgData.getId(uri));
+		case ORGDATA_CHILDREN:
+			return builder.table(Tables.ORGDATA).where(OrgData.PARENT_ID, OrgData.getId(uri));
 		case FILES:
-			builder.table(Tables.FILES);
-			break;
+			return builder.table(Tables.FILES);
+		case FILES_ID:
+			return builder.table(Tables.FILES).where(Files.ID, Files.getId(uri));
+		case FILES_NAME:
+			return builder.table(Tables.FILES).where(Files.NAME, Files.getName(uri));
 		case EDITS:
-			builder.table(Tables.EDITS);
-			break;
+			return builder.table(Tables.EDITS);
 		case TAGS:
-			builder.table(Tables.TAGS);
-			break;
+			return builder.table(Tables.TAGS);
 		case TODOS:
-			builder.table(Tables.TODOS);
-			break;
+			return builder.table(Tables.TODOS);
 		case PRIORITIES:
-			builder.table(Tables.PRIORITIES);
-			break;
-
+			return builder.table(Tables.PRIORITIES);
+		case SEARCH:
+			final String search = Search.getSearchTerm(uri);
+			return builder.table(Tables.ORGDATA).where("name LIKE %?%", search);
+//		case TIMED:
+//			//builder.table(Tables.ORGDATA).where(selection, selectionArgs)
+//			break;
+			
 		default:
 			throw new IllegalArgumentException("Unknown URI " + uri);
 		}
-
-		return builder;
 	}
 	
 	private String getTableNameFromUri(Uri uri) {

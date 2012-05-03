@@ -2,7 +2,7 @@ package com.matburt.mobileorg.provider;
 
 import android.net.Uri;
 
-public class OrgContracts {
+public class OrgContract {
 	
 	interface EditsColumns {
 		String ID = "_id";
@@ -60,6 +60,7 @@ public class OrgContracts {
 	private static final String PATH_TAGS = "tags";
 	private static final String PATH_PRIORITIES = "priorities";
 	private static final String PATH_FILES = "files";
+	private static final String PATH_SEARCH = "search";
 	
 	
 	public static class OrgData implements OrgDataColumns {
@@ -79,6 +80,14 @@ public class OrgContracts {
 	public static class Files implements FilesColumns {
 		public static final Uri CONTENT_URI = 
 				BASE_CONTENT_URI.buildUpon().appendPath(PATH_FILES).build();
+
+		public static String getId(Uri uri) {
+			return uri.getLastPathSegment();
+		}
+
+		public static String getName(Uri uri) {
+			return uri.getLastPathSegment();
+		}
 	}
 	
 	public static class Todos implements TodosColumns {
@@ -94,5 +103,14 @@ public class OrgContracts {
 	public static class Priorities implements PrioritiesColumns {
 		public static final Uri CONTENT_URI = 
 				BASE_CONTENT_URI.buildUpon().appendPath(PATH_PRIORITIES).build();
+	}
+	
+	public static class Search implements OrgDataColumns {
+		public static final Uri CONTENT_URI = 
+				BASE_CONTENT_URI.buildUpon().appendPath(PATH_SEARCH).build();
+		
+		public static String getSearchTerm(Uri uri) {
+			return uri.getLastPathSegment();
+		}
 	}
 }

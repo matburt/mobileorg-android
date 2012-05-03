@@ -20,7 +20,7 @@
  * -Changed package name
  */
 
-package util;
+package com.matburt.mobileorg.util;
 
 import android.content.ContentValues;
 import android.database.Cursor;
