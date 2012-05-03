@@ -48,8 +48,8 @@
         </service>
 
         <provider
-            android:name=".providers.OrgContentProvider"
-            android:authorities="com.matburt.mobileorg.providers.OrgContentProvider" />
+            android:name=".provider.OrgContentProvider"
+            android:authorities="com.matburt.mobileorg.provider.OrgContentProvider" />
 
         <receiver android:name=".Plugin.Synchronize" >
             <intent-filter>
