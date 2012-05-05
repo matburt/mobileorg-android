@@ -38,6 +38,7 @@ import com.matburt.mobileorg.Dropbox.DropboxLoginListener;
 import com.matburt.mobileorg.Views.PageFlipView;
 import com.matburt.mobileorg.Synchronizers.WebDAVSynchronizer;
 import com.matburt.mobileorg.Synchronizers.SSHSynchronizer;
+import com.matburt.mobileorg.Synchronizers.UbuntuOneSynchronizer;
 import com.matburt.mobileorg.Parsing.MobileOrgApplication;
 
 public class WizardActivity extends Activity {
@@ -302,7 +303,32 @@ public class WizardActivity extends Activity {
     }
 
     void createUbuntuLogin() {
-
+        wizard.removePagesAfter( 1 );
+        //add login page to wizard
+        wizard.addPage( R.layout.wizard_ubuntuone );
+        //enable nav buttons on that page
+        wizard.setNavButtonStateOnPage(1, true, PageFlipView.MIDDLE_PAGE);
+        wizard.disableAllNextActions( 1 );
+        //get references to login forms
+    	ubuntuoneEmail = (EditText) wizard
+    	    .findViewById(R.id.wizard_ubuntu_email);
+    	ubuntuonePass = (EditText) wizard
+    	    .findViewById(R.id.wizard_ubuntu_password);
+    	//setup listener for buttons
+    	loginButton = (Button) wizard
+    	    .findViewById(R.id.wizard_ubuntu_login_button);
+    	loginButton.setOnClickListener(new OnClickListener() {
+                @Override
+                    public void onClick(View v) {
+                    if (isLoggedIn) {
+                        // We're going to log out
+                        //dropbox.deauthenticate();
+                    } else {
+                        // Try to log in
+                        loginUbuntuOne();
+                    }
+                }
+    	    });
     }
 
     void loginSSH() {
@@ -396,6 +422,13 @@ public class WizardActivity extends Activity {
             progress.show();
             dropbox.login(dropboxListener, email, password);
         }
+    }
+
+    void loginUbuntuOne() {
+        UbuntuOneSynchronizer uos = new UbuntuOneSynchronizer((Context)this, (MobileOrgApplication)getApplication());
+        uos.username = ubuntuoneEmail.getText().toString();
+        uos.password = ubuntuonePass.getText().toString();
+        uos.login();
     }
     
     //convience function

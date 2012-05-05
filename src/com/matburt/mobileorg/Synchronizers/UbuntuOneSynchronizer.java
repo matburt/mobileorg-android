@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.preference.PreferenceManager;
+import android.util.Log;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -65,15 +66,15 @@ private static final String BASE_TOKEN_NAME = "Ubuntu One @ ";
 	private static final String PING_URL = "https://one.ubuntu.com/oauth/sso-finished-so-get-tokens/";
 	private static final String UTF8 = "UTF-8";
 
-	private String remoteIndexPath;
-	private String remotePath;
-    private String username;
-    private String password;
+	public String remoteIndexPath;
+	public String remotePath;
+    public String username;
+    public String password;
 
-    private String consumer_key;
-    private String consumer_secret;
-    private String access_token;
-    private String token_secret;
+    public String consumer_key;
+    public String consumer_secret;
+    public String access_token;
+    public String token_secret;
 
     private CommonsHttpOAuthConsumer consumer;
 
@@ -86,6 +87,11 @@ private static final String BASE_TOKEN_NAME = "Ubuntu One @ ";
 
 		this.username = sharedPreferences.getString("webUser", "");
 		this.password = sharedPreferences.getString("webPass", "");
+
+        consumer_key = sharedPreferences.getString("ubuntuConsumerKey", "");
+        consumer_secret = sharedPreferences.getString("ubuntuConsumerSecret", "");
+        access_token = sharedPreferences.getString("ubuntuAccessToken", "");
+        token_secret = sharedPreferences.getString("ubuntuTokenSecret", "");
     }
 
     public void invalidate() {
@@ -135,9 +141,10 @@ private static final String BASE_TOKEN_NAME = "Ubuntu One @ ";
     protected void postSynchronize() {
     }
 
-	private void login() {
+	public void login() {
 		invalidate();
 		try {
+            Log.i("MobileOrg", "Logging into Ubuntu One");
 			DefaultHttpClient httpClient = new DefaultHttpClient();
 			httpClient.getCredentialsProvider().setCredentials(
 					new AuthScope(LOGIN_HOST, LOGIN_PORT),
@@ -150,14 +157,24 @@ private static final String BASE_TOKEN_NAME = "Ubuntu One @ ";
             consumer_secret = loginData.getString(CONSUMER_SECRET);
             access_token = loginData.getString(ACCESS_TOKEN);
             token_secret = loginData.getString(TOKEN_SECRET);
+
+            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+            Editor edit = sharedPreferences.edit();
+            edit.putString("ubuntuConsumerKey", consumer_key);
+            edit.putString("ubuntuConsumerSecret", consumer_secret);
+            edit.putString("ubuntuAccessToken", access_token);
+            edit.putString("ubuntuTokenSecret", token_secret);
+            Log.i("MobileOrg", "Logged in to Ubuntu One: " + consumer_key);
+            edit.commit();
+
 			buildConsumer();
             ping_u1_url(this.username);
 		} catch (ClientProtocolException e) {
-			e.printStackTrace();
+            Log.e("MobileOrg", "Protocol Exception: " + e.toString());
 		} catch (IOException e) {
-			e.printStackTrace();
+			Log.e("MobileOrg", "IO Exception: " + e.toString());
 		} catch (JSONException e) {
-			e.printStackTrace();
+            Log.e("MobileOrg", "JSONException: " + e.toString());
 		// } catch (InterruptedException e) {
 		// 	e.printStackTrace();
 		}
@@ -256,13 +273,16 @@ private static final String BASE_TOKEN_NAME = "Ubuntu One @ ";
 					return;
 				}
 			}
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-		} catch (ClientProtocolException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+        } catch (Exception e) {
+            Log.e("MobileOrg", "Exception in Ubuntu One Ping: " + e.toString());
+        }
+		// } catch (UnsupportedEncodingException e) {
+		// 	e.printStackTrace();
+		// } catch (ClientProtocolException e) {
+		// 	e.printStackTrace();
+		// } catch (IOException e) {
+		// 	e.printStackTrace();
+		// }
 	}
 }
 		
