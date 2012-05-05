@@ -2,11 +2,11 @@
 <resources>
 
     <string-array name="storageModes">
-        <item>internal</item>
+        <item>interno</item>
         <item>sdcard</item>
     </string-array>
     <string-array name="storageModesVals">
-        <item>internal</item>
+        <item>interno</item>
         <item>sdcard</item>
     </string-array>
     <string-array name="fileSources">
@@ -14,7 +14,7 @@
         <item>Dropbox</item>
         <item>SDCard</item>
         <item>SSH/SCP</item>
-        <item>Capture Only</item>
+        <item>Sólo capturar</item>
     </string-array>
     <string-array name="fileSourcesVals">
         <item>webdav</item>
@@ -29,10 +29,10 @@
         <item>15 min</item>
         <item>30 min</item>
         <item>45 min</item>
-        <item>1 hour</item>
-        <item>3 hours</item>
-        <item>6 hours</item>
-        <item>12 hours</item>
+        <item>1 hora</item>
+        <item>3 horas</item>
+        <item>6 horas</item>
+        <item>12 horas</item>
     </string-array>
     <string-array name="syncIntervalsVals">
         <item>300000</item>
@@ -53,11 +53,11 @@
         <item>4</item>
     </string-array>
     <string-array name="viewRecursionLevels">
-        <item>Current node only</item>
-        <item>Node and all its children</item>
-        <item>Node, its children and their children</item>
-        <item>3 Levels of recursion</item>
-        <item>4 Levels of recursion</item>
+        <item>Sólo el nodo actual</item>
+        <item>El nodo actual y el siguiente nivel</item>
+        <item>El nodo actual y los dos siguientes niveles</item>
+        <item>3 niveles de recursión</item>
+        <item>4 niveles recursión</item>
     </string-array>
 
 </resources>
