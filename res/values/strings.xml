@@ -91,6 +91,7 @@
   <string name="i_want_to_sync_using">I want to sync using:</string>
   <string name="wizard_webdav">a WebDAV server</string>
   <string name="wizard_dropbox">a Dropbox account</string>
+  <string name="wizard_ubuntuone">an UbuntuOne account</string>
   <string name="wizard_sdcard">my SD card</string>
   <string name="wizard_ssh">an SSH server</string>
   <string name="wizard_null">nothing (capture only)</string>

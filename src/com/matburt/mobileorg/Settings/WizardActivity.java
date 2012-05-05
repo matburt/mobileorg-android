@@ -77,7 +77,7 @@ public class WizardActivity extends Activity {
     PageFlipView wizard;
     //page 1 variables
     String syncSource;
-    int syncWebDav, syncDropBox, syncSdCard, syncNull, syncSSH;
+    int syncWebDav, syncDropBox, syncUbuntuOne, syncSdCard, syncNull, syncSSH;
     RadioGroup syncGroup; 
     //page 2 variables
     View loginPage;
@@ -90,6 +90,9 @@ public class WizardActivity extends Activity {
     EditText dropboxPass;
     boolean isLoggedIn=false;
     ArrayAdapter<String> dropboxFolders;
+    //ubuntuone variables
+    EditText ubuntuoneEmail;
+    EditText ubuntuonePass;
     //sd card variables
 	DirectoryBrowser directory;
 	FolderAdapter directoryAdapter;
@@ -125,6 +128,7 @@ public class WizardActivity extends Activity {
     	syncGroup = (RadioGroup)findViewById(R.id.sync_group);
     	syncWebDav = ((RadioButton)findViewById(R.id.sync_webdav)).getId();
     	syncDropBox = ((RadioButton)findViewById(R.id.sync_dropbox)).getId();
+        syncUbuntuOne = ((RadioButton)findViewById(R.id.sync_ubuntuone)).getId();
     	syncSdCard = ((RadioButton)findViewById(R.id.sync_sdcard)).getId();
         syncNull = ((RadioButton)findViewById(R.id.sync_null)).getId();
         syncSSH = ((RadioButton)findViewById(R.id.sync_ssh)).getId();
@@ -174,6 +178,10 @@ public class WizardActivity extends Activity {
             else if (checkedId == syncDropBox) {
                 syncSource = "dropbox";
                 createDropboxLogin();
+            }
+            else if (checkedId == syncUbuntuOne) {
+                syncSource = "ubuntu";
+                createUbuntuLogin();
             }
             else if (checkedId == syncSdCard) {
                 syncSource = "sdcard";
@@ -291,6 +299,10 @@ public class WizardActivity extends Activity {
                     }
                 }
     	    });
+    }
+
+    void createUbuntuLogin() {
+
     }
 
     void loginSSH() {
