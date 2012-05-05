@@ -52,7 +52,7 @@ import oauth.signpost.exception.OAuthMessageSignerException;
 
 public class UbuntuOneSynchronizer extends Synchronizer {
 
-private static final String BASE_TOKEN_NAME = "Ubuntu One @ ";
+private static final String BASE_TOKEN_NAME = "MobileOrg on ";
 	private static final String CONSUMER_KEY = "consumer_key";
 	private static final String CONSUMER_SECRET = "consumer_secret";
 	private static final String ACCESS_TOKEN = "token";
@@ -82,11 +82,11 @@ private static final String BASE_TOKEN_NAME = "Ubuntu One @ ";
         super(parentContext, appInst);
 
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-		this.remoteIndexPath = sharedPreferences.getString("webUrl", "");
+		this.remoteIndexPath = sharedPreferences.getString("ubuntuOnePath", "");
         //		this.remotePath = getRootUrl();
 
-		this.username = sharedPreferences.getString("webUser", "");
-		this.password = sharedPreferences.getString("webPass", "");
+		this.username = sharedPreferences.getString("ubuntuOneUser", "");
+		this.password = ""; //we don't store this, it's just set to be populated by wizard
 
         consumer_key = sharedPreferences.getString("ubuntuConsumerKey", "");
         consumer_secret = sharedPreferences.getString("ubuntuConsumerSecret", "");
@@ -141,7 +141,7 @@ private static final String BASE_TOKEN_NAME = "Ubuntu One @ ";
     protected void postSynchronize() {
     }
 
-	public void login() {
+	public boolean login() {
 		invalidate();
 		try {
             Log.i("MobileOrg", "Logging into Ubuntu One");
@@ -169,15 +169,15 @@ private static final String BASE_TOKEN_NAME = "Ubuntu One @ ";
 
 			buildConsumer();
             ping_u1_url(this.username);
+            return true;
 		} catch (ClientProtocolException e) {
             Log.e("MobileOrg", "Protocol Exception: " + e.toString());
 		} catch (IOException e) {
 			Log.e("MobileOrg", "IO Exception: " + e.toString());
 		} catch (JSONException e) {
             Log.e("MobileOrg", "JSONException: " + e.toString());
-		// } catch (InterruptedException e) {
-		// 	e.printStackTrace();
 		}
+        return false;
 	}
 
 	private InputStream getUrl(String url) throws Exception {
@@ -229,7 +229,7 @@ private static final String BASE_TOKEN_NAME = "Ubuntu One @ ";
 	private void verifyResponse(HttpResponse response) throws IOException {
 		int statusCode = response.getStatusLine().getStatusCode();
 		if (statusCode < 200 || statusCode > 299) {
-			throw new IOException(response.toString());
+			throw new IOException("Bad Auth Response: " + Integer.toString(statusCode));
 		}
 	}
 
@@ -252,6 +252,7 @@ private static final String BASE_TOKEN_NAME = "Ubuntu One @ ";
 		} catch (UnsupportedEncodingException e) {
 			login_url += "Android";
 		}
+        Log.i("MobileOrg", "Login Url: " + login_url);
 		return login_url;
 	}
 

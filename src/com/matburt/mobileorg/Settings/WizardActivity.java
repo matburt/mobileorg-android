@@ -428,10 +428,21 @@ public class WizardActivity extends Activity {
         UbuntuOneSynchronizer uos = new UbuntuOneSynchronizer((Context)this, (MobileOrgApplication)getApplication());
         uos.username = ubuntuoneEmail.getText().toString();
         uos.password = ubuntuonePass.getText().toString();
-        uos.login();
+
+        //move this into another thread, so we don't get an ANR if the network is unavailable
+        if (uos.login()) {
+            showToast("Login Successfull");
+            loginButton.setEnabled(false);
+            //createDropboxList();
+            //allow scrolling to next page
+            wizard.enablePage( 1 );
+            //display account info
+        }
+        else {
+            showToast("Login Failed");
+        }
     }
     
-    //convience function
     void showToast(String msg) {
         Toast error = Toast.makeText(this, msg, Toast.LENGTH_LONG);
         error.show();
@@ -444,7 +455,6 @@ public class WizardActivity extends Activity {
         uiHandler.sendMessage(msg);
     }
     
-    //ditto
     void shake(View b) {
         Animation shake = AnimationUtils
             .loadAnimation(this, R.anim.shake);
@@ -512,6 +522,10 @@ public class WizardActivity extends Activity {
         //TODO Technically, this should be an async task app may crash
         //when list of root items is very long and network connection
         //is slow
+    }
+
+    void createUbuntuOneList() {
+
     }
     
     class FolderListListener 
