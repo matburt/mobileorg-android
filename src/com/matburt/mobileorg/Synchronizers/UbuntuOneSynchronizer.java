@@ -23,7 +23,7 @@ import java.net.MalformedURLException;
 import java.net.PasswordAuthentication;
 import java.net.URL;
 import java.net.URLEncoder;
-
+import java.util.ArrayList;
 import javax.net.ssl.HttpsURLConnection;
 
 import org.json.JSONException;
@@ -52,7 +52,7 @@ import oauth.signpost.exception.OAuthMessageSignerException;
 
 public class UbuntuOneSynchronizer extends Synchronizer {
 
-private static final String BASE_TOKEN_NAME = "MobileOrg on ";
+private static final String BASE_TOKEN_NAME = "Ubuntu One @ ";
 	private static final String CONSUMER_KEY = "consumer_key";
 	private static final String CONSUMER_SECRET = "consumer_secret";
 	private static final String ACCESS_TOKEN = "token";
@@ -63,6 +63,7 @@ private static final String BASE_TOKEN_NAME = "MobileOrg on ";
 	private static final String LOGIN_URL = "https://" + LOGIN_HOST + ":"
 			+ LOGIN_PORT + "/api/1.0/authentications"
 			+ "?ws.op=authenticate&token_name=";
+    private static final String FILES_URL = "https://one.ubuntu.com/api/file_storage/v1";
 	private static final String PING_URL = "https://one.ubuntu.com/oauth/sso-finished-so-get-tokens/";
 	private static final String UTF8 = "UTF-8";
 
@@ -76,9 +77,7 @@ private static final String BASE_TOKEN_NAME = "MobileOrg on ";
     public String access_token;
     public String token_secret;
 
-    private CommonsHttpOAuthConsumer consumer;
-
-    public UbuntuOneSynchronizer(Context parentContext, MobileOrgApplication appInst) {
+    private CommonsHttpOAuthConsumer consumer;    public UbuntuOneSynchronizer(Context parentContext, MobileOrgApplication appInst) {
         super(parentContext, appInst);
 
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
@@ -134,6 +133,23 @@ private static final String BASE_TOKEN_NAME = "MobileOrg on ";
     }
 
     protected BufferedReader getRemoteFile(String filename) {
+        return null;
+    }
+
+    public ArrayList<String> getDirectoryList(String directory) {
+		try {
+            buildConsumer();
+			String files_url = FILES_URL;
+			HttpGet request = new HttpGet(files_url);
+			DefaultHttpClient httpClient = new DefaultHttpClient();
+            signRequest(request);
+            HttpResponse response = httpClient.execute(request);
+            verifyResponse(response);
+            JSONObject dirData = responseToJson(response);
+            Log.i("MobileOrg", "Response: " + dirData.toString());
+        } catch (Exception e) {
+            Log.e("MobileOrg", "Exception in Ubuntu One Fetch Directories: " + e.toString());
+        }
         return null;
     }
 
@@ -219,8 +235,7 @@ private static final String BASE_TOKEN_NAME = "MobileOrg on ";
 	private void buildConsumer() {
 		if (consumer_key != null && consumer_secret != null
 				&& access_token != null && token_secret != null) {
-			consumer = new CommonsHttpOAuthConsumer(consumer_key,
-					consumer_secret);
+			consumer = new CommonsHttpOAuthConsumer(consumer_key, consumer_secret);
 			consumer.setMessageSigner(new HmacSha1MessageSigner());
 			consumer.setTokenWithSecret(access_token, token_secret);
 		}
@@ -252,7 +267,6 @@ private static final String BASE_TOKEN_NAME = "MobileOrg on ";
 		} catch (UnsupportedEncodingException e) {
 			login_url += "Android";
 		}
-        Log.i("MobileOrg", "Login Url: " + login_url);
 		return login_url;
 	}
 
@@ -269,6 +283,7 @@ private static final String BASE_TOKEN_NAME = "MobileOrg on ";
 				response = httpClient.execute(request);
 				int statusCode = response.getStatusLine().getStatusCode();
 				if (statusCode == 400 || statusCode == 401) {
+                    Log.e("MobileOrg", "Ping failed");
 					invalidate();
 				} else {
 					return;

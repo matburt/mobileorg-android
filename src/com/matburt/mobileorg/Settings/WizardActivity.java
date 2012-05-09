@@ -260,6 +260,7 @@ public class WizardActivity extends Activity {
         //enable nav buttons on that page
         wizard.setNavButtonStateOnPage(1,true,PageFlipView.LAST_PAGE);
         wizard.setDoneButtonOnClickListener(new FinishWizardButtonListener());
+
         //setup directory browser
         directory = new DirectoryBrowser.LocalDirectoryBrowser(this);
         //setup directory browser adapter
@@ -267,6 +268,7 @@ public class WizardActivity extends Activity {
         directoryAdapter.setDoneButton( (Button) findViewById(R.id.wizard_done_button) );
         //bind adapter to browser
         directoryAdapter.setDirectoryBrowser( directory );
+
         //bind adapter to listview
         folderList = (ListView) wizard.findViewById(R.id.wizard_folder_list);
         folderList.setAdapter( directoryAdapter );
@@ -436,6 +438,8 @@ public class WizardActivity extends Activity {
             //createDropboxList();
             //allow scrolling to next page
             wizard.enablePage( 1 );
+            uos.getDirectoryList("");
+            //createUbuntuOneList();
             //display account info
         }
         else {
@@ -525,7 +529,32 @@ public class WizardActivity extends Activity {
     }
 
     void createUbuntuOneList() {
+        wizard.addPage(R.layout.wizard_folder_pick_list);
+        wizard.enablePage(1);
 
+        //enable nav buttons on that page
+        wizard.setNavButtonStateOnPage(2, true, PageFlipView.LAST_PAGE);
+        wizard.setDoneButtonOnClickListener(new FinishWizardButtonListener());
+
+        //setup directory browser
+        UbuntuOneSynchronizer uos = new UbuntuOneSynchronizer((Context)this, (MobileOrgApplication)getApplication());
+        directory = new DirectoryBrowser.UbuntuOneDirectoryBrowser(this, uos);
+
+        //setup directory browser adapter
+        directoryAdapter = new FolderAdapter( this, R.layout.folder_adapter_row, directory.list() );
+        directoryAdapter.setDoneButton( (Button) findViewById(R.id.wizard_done_button) );
+
+        //bind adapter to browser
+        directoryAdapter.setDirectoryBrowser( directory );
+
+        //bind adapter to listview
+        folderList = (ListView) wizard.findViewById(R.id.wizard_folder_list);
+        folderList.setAdapter( directoryAdapter );
+        directoryAdapter.notifyDataSetChanged();
+        //debug
+        //TODO Technically, this should be an async task app may crash
+        //when list of root items is very long and network connection
+        //is slow
     }
     
     class FolderListListener 
