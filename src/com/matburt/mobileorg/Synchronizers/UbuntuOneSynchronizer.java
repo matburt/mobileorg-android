@@ -22,12 +22,14 @@ import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.PasswordAuthentication;
 import java.net.URL;
+import java.net.URI;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import javax.net.ssl.HttpsURLConnection;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONArray;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpEntity;
@@ -58,6 +60,10 @@ private static final String BASE_TOKEN_NAME = "Ubuntu One @ ";
 	private static final String ACCESS_TOKEN = "token";
 	private static final String TOKEN_SECRET = "token_secret";
 
+    private static final String BASE_PATH = "root_node_path";
+    private static final String BYTES_USED = "used_bytes";
+    private static final String MAX_BYTES = "max_bytes";
+
 	private static final String LOGIN_HOST = "login.ubuntu.com";
 	private static final int LOGIN_PORT = 443;
 	private static final String LOGIN_URL = "https://" + LOGIN_HOST + ":"
@@ -76,6 +82,10 @@ private static final String BASE_TOKEN_NAME = "Ubuntu One @ ";
     public String consumer_secret;
     public String access_token;
     public String token_secret;
+
+    public String root_path;
+    public long bytes_used;
+    public long max_bytes;
 
     private CommonsHttpOAuthConsumer consumer;    public UbuntuOneSynchronizer(Context parentContext, MobileOrgApplication appInst) {
         super(parentContext, appInst);
@@ -136,7 +146,67 @@ private static final String BASE_TOKEN_NAME = "Ubuntu One @ ";
         return null;
     }
 
+    public boolean isDirectory(String name) {
+		try {
+            Log.d("MobileOrg", "isDirectory for : " + name);
+            name = name.replaceAll("//", "/");
+            buildConsumer();
+			String files_url = FILES_URL + root_path + name + "?include_children=true";
+            Log.d("MobileOrg", "Url : " + files_url);
+            URL url = new URL(files_url);
+            URI uri = new URI(url.getProtocol(), url.getUserInfo(), url.getHost(),
+                              url.getPort(), url.getPath(), url.getQuery(), url.getRef());
+            url = uri.toURL();
+			HttpGet request = new HttpGet(url.toString());
+			DefaultHttpClient httpClient = new DefaultHttpClient();
+            signRequest(request);
+            HttpResponse response = httpClient.execute(request);
+            verifyResponse(response);
+            JSONObject dirData = responseToJson(response);
+            if (dirData.getString("kind").equals("directory")) {
+                return true;
+            }
+            return false;
+        } catch (Exception e) {
+            Log.e("MobileOrg", "Exception in Ubuntu One isDirectory: " + e.toString());
+        }
+        return false;
+    }
+
     public ArrayList<String> getDirectoryList(String directory) {
+		try {
+            Log.d("MobileOrg", "Fetching directory list for: " + directory);
+            buildConsumer();
+			String files_url = FILES_URL + root_path + directory + "?include_children=true";
+            URL url = new URL(files_url);
+            URI uri = new URI(url.getProtocol(), url.getUserInfo(), url.getHost(),
+                              url.getPort(), url.getPath(), url.getQuery(), url.getRef());
+            url = uri.toURL();
+			HttpGet request = new HttpGet(url.toString());
+			DefaultHttpClient httpClient = new DefaultHttpClient();
+            signRequest(request);
+            HttpResponse response = httpClient.execute(request);
+            verifyResponse(response);
+            JSONObject dirData = responseToJson(response);
+            Log.d("MobileOrg", "Data: " + dirData.toString());
+            ArrayList<String> directories = new ArrayList<String>();
+            JSONArray jsA = dirData.getJSONArray("children");
+            if (jsA != null) { 
+                for (int i = 0; i < jsA.length(); i++){
+                    JSONObject node = jsA.getJSONObject(i);
+                    if (this.isDirectory(directory + node.getString("path"))) {
+                        directories.add(node.getString("path"));
+                    }
+                } 
+            }
+            return directories;
+        } catch (Exception e) {
+            Log.e("MobileOrg", "Exception in Ubuntu One Fetch Directories: " + e.toString());
+        }
+        return null;
+    }
+
+    public void getBaseUser() {
 		try {
             buildConsumer();
 			String files_url = FILES_URL;
@@ -146,11 +216,13 @@ private static final String BASE_TOKEN_NAME = "Ubuntu One @ ";
             HttpResponse response = httpClient.execute(request);
             verifyResponse(response);
             JSONObject dirData = responseToJson(response);
+            root_path = dirData.getString(BASE_PATH);
+            max_bytes = dirData.getLong(MAX_BYTES);
+            bytes_used = dirData.getLong(BYTES_USED);
             Log.i("MobileOrg", "Response: " + dirData.toString());
         } catch (Exception e) {
             Log.e("MobileOrg", "Exception in Ubuntu One Fetch Directories: " + e.toString());
         }
-        return null;
     }
 
     @Override

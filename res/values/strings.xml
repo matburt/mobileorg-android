@@ -101,8 +101,8 @@
   <string name="log_in_to_ssh">Log in to your SSH server</string>
   <string name="null_sync_description">This is a capture only synchronizer.  It will not attempt to synchronize to any source.</string>
   <string name="url">URL</string>
-  <string name="wizard_dropbox_email_hint">uri@frankandrobot.com</string>
-  <string name="wizard_ubuntu_email_hint">username</string>
+  <string name="wizard_dropbox_email_hint">user@host.com</string>
+  <string name="wizard_ubuntu_email_hint">user@host.com</string>
   
     <!-- preference strings -->
   <string name="title_capture_with_timestamp">Capture with Timestamp</string>

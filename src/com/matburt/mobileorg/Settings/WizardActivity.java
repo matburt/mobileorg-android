@@ -438,8 +438,8 @@ public class WizardActivity extends Activity {
             //createDropboxList();
             //allow scrolling to next page
             wizard.enablePage( 1 );
-            uos.getDirectoryList("");
-            //createUbuntuOneList();
+            uos.getBaseUser();
+            createUbuntuOneList();
             //display account info
         }
         else {
@@ -538,6 +538,7 @@ public class WizardActivity extends Activity {
 
         //setup directory browser
         UbuntuOneSynchronizer uos = new UbuntuOneSynchronizer((Context)this, (MobileOrgApplication)getApplication());
+        uos.getBaseUser();
         directory = new DirectoryBrowser.UbuntuOneDirectoryBrowser(this, uos);
 
         //setup directory browser adapter
@@ -595,6 +596,8 @@ public class WizardActivity extends Activity {
             }
             else if ( syncSource.equals("dropbox") )
                 editor.putString("dropboxPath", directoryAdapter.getCheckedDirectory() + "/");
+            else if ( syncSource.equals("ubuntu") )
+                editor.putString("ubuntuOnePath", directoryAdapter.getCheckedDirectory() + "/");
             else if ( syncSource.equals("sdcard") ) 
                 editor.putString("indexFilePath", directoryAdapter.getCheckedDirectory() );
             editor.putString("storageMode", "sdcard");

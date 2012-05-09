@@ -98,6 +98,9 @@ public interface DirectoryBrowser {
 
         UbuntuOneDirectoryBrowser(Context context, UbuntuOneSynchronizer uos) {
             onesync = uos;
+            setContext(context);
+            setLocale();
+            browseTo("/");
         }
 
 		public void setContext(Context context) { this.context = context; }
@@ -131,12 +134,10 @@ public interface DirectoryBrowser {
 				directoryNames.add( upOneLevel );
 				directoryListing.add( getParentPath(curDirectory) );
 			}
-			/* for(DropboxAPI.Entry dir:dropbox.listDirectory(directory)) {
-				if ( dir.is_dir ) {
-					directoryNames.add( dir.fileName() );
-					directoryListing.add( dir.path );
-				}
-                } */
+            for (String item : onesync.getDirectoryList(directory)) {
+                directoryNames.add(item);
+                directoryListing.add(getParentPath(curDirectory) + "/" + item);
+            }
 		}
     }
 	
