@@ -87,7 +87,9 @@ private static final String BASE_TOKEN_NAME = "Ubuntu One @ ";
     public long bytes_used;
     public long max_bytes;
 
-    private CommonsHttpOAuthConsumer consumer;    public UbuntuOneSynchronizer(Context parentContext, MobileOrgApplication appInst) {
+    private CommonsHttpOAuthConsumer consumer;    
+
+    public UbuntuOneSynchronizer(Context parentContext, MobileOrgApplication appInst) {
         super(parentContext, appInst);
 
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
@@ -139,10 +141,27 @@ private static final String BASE_TOKEN_NAME = "Ubuntu One @ ";
 	}
 
     protected void putRemoteFile(String filename, String contents) throws IOException {
-
     }
 
     protected BufferedReader getRemoteFile(String filename) {
+        try { 
+            Log.d("MobileOrg", "Fetching file : " + filename);
+            buildConsumer();
+            String latterPart = remoteIndexPath + filename;
+            latterPart.replaceAll("/{2,}", "/");
+            String files_url = FILES_URL + root_path + latterPart;
+            URL url = new URL(files_url);
+            URI uri = new URI(url.getProtocol(), url.getUserInfo(), url.getHost(),
+                              url.getPort(), url.getPath(), url.getQuery(), url.getRef());
+            url = uri.toURL();
+            HttpGet request = new HttpGet(url.toString());
+            DefaultHttpClient httpClient = new DefaultHttpClient();
+            signRequest(request);
+            HttpResponse response = httpClient.execute(request);
+            return new BufferedReader(new InputStreamReader(response.getEntity().getContent(), "UTF-8"));
+        } catch (Exception e) {
+            Log.e("MobileOrg", "Exception in Ubuntu One Fetch File: " + e.toString());
+        }
         return null;
     }
 
