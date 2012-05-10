@@ -116,7 +116,8 @@ abstract public class Synchronizer {
 		} catch (Exception e) {
             finalizeNotification();
             errorNotification("Error: " + e.toString());
-            Log.d("MobileOrg", e.getStackTrace().toString());
+            e.printStackTrace();
+            Log.d("MobileOrg", e.toString());
             return;
         }
 		finalizeNotification();
@@ -186,7 +187,6 @@ abstract public class Synchronizer {
 		String remoteIndexContents = "";
 
 		remoteIndexContents = OrgFile.read(getRemoteFile("index.org"));
-
 		this.appdb.setTodos(OrgFileParser
 				.getTodosFromIndex(remoteIndexContents));
 		this.appdb.setPriorities(OrgFileParser

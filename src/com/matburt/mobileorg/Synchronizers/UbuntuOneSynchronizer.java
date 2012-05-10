@@ -69,6 +69,7 @@ private static final String BASE_TOKEN_NAME = "Ubuntu One @ ";
 	private static final String LOGIN_URL = "https://" + LOGIN_HOST + ":"
 			+ LOGIN_PORT + "/api/1.0/authentications"
 			+ "?ws.op=authenticate&token_name=";
+    private static final String FILES_BASE = "https://files.one.ubuntu.com";
     private static final String FILES_URL = "https://one.ubuntu.com/api/file_storage/v1";
 	private static final String PING_URL = "https://one.ubuntu.com/oauth/sso-finished-so-get-tokens/";
 	private static final String UTF8 = "UTF-8";
@@ -114,6 +115,8 @@ private static final String BASE_TOKEN_NAME = "Ubuntu One @ ";
     }
 
     public boolean isConfigured() {
+        if (this.consumer_key.equals(""))
+            return false;
         return true;
     }
 
@@ -145,10 +148,9 @@ private static final String BASE_TOKEN_NAME = "Ubuntu One @ ";
 
     protected BufferedReader getRemoteFile(String filename) {
         try { 
-            Log.d("MobileOrg", "Fetching file : " + filename);
             buildConsumer();
             String latterPart = remoteIndexPath + filename;
-            latterPart.replaceAll("/{2,}", "/");
+            latterPart = latterPart.replaceAll("/{2,}", "/");
             String files_url = FILES_URL + root_path + latterPart;
             URL url = new URL(files_url);
             URI uri = new URI(url.getProtocol(), url.getUserInfo(), url.getHost(),
@@ -158,7 +160,21 @@ private static final String BASE_TOKEN_NAME = "Ubuntu One @ ";
             DefaultHttpClient httpClient = new DefaultHttpClient();
             signRequest(request);
             HttpResponse response = httpClient.execute(request);
-            return new BufferedReader(new InputStreamReader(response.getEntity().getContent(), "UTF-8"));
+            verifyResponse(response);
+            JSONObject fileData = responseToJson(response);
+
+            String content_path = fileData.getString("content_path");
+            String content_url = FILES_BASE + content_path;
+            url = new URL(content_url);
+            uri = new URI(url.getProtocol(), url.getUserInfo(), url.getHost(),
+                              url.getPort(), url.getPath(), url.getQuery(), url.getRef());
+            url = uri.toURL();
+            request = new HttpGet(url.toString());
+            httpClient = new DefaultHttpClient();
+            signRequest(request);
+            response = httpClient.execute(request);
+            verifyResponse(response);
+            return new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
         } catch (Exception e) {
             Log.e("MobileOrg", "Exception in Ubuntu One Fetch File: " + e.toString());
         }
@@ -167,11 +183,9 @@ private static final String BASE_TOKEN_NAME = "Ubuntu One @ ";
 
     public boolean isDirectory(String name) {
 		try {
-            Log.d("MobileOrg", "isDirectory for : " + name);
-            name = name.replaceAll("//", "/");
+            name = name.replaceAll("/{2,}", "/");
             buildConsumer();
 			String files_url = FILES_URL + root_path + name + "?include_children=true";
-            Log.d("MobileOrg", "Url : " + files_url);
             URL url = new URL(files_url);
             URI uri = new URI(url.getProtocol(), url.getUserInfo(), url.getHost(),
                               url.getPort(), url.getPath(), url.getQuery(), url.getRef());
@@ -194,7 +208,6 @@ private static final String BASE_TOKEN_NAME = "Ubuntu One @ ";
 
     public ArrayList<String> getDirectoryList(String directory) {
 		try {
-            Log.d("MobileOrg", "Fetching directory list for: " + directory);
             buildConsumer();
 			String files_url = FILES_URL + root_path + directory + "?include_children=true";
             URL url = new URL(files_url);
@@ -207,7 +220,6 @@ private static final String BASE_TOKEN_NAME = "Ubuntu One @ ";
             HttpResponse response = httpClient.execute(request);
             verifyResponse(response);
             JSONObject dirData = responseToJson(response);
-            Log.d("MobileOrg", "Data: " + dirData.toString());
             ArrayList<String> directories = new ArrayList<String>();
             JSONArray jsA = dirData.getJSONArray("children");
             if (jsA != null) { 
@@ -238,7 +250,6 @@ private static final String BASE_TOKEN_NAME = "Ubuntu One @ ";
             root_path = dirData.getString(BASE_PATH);
             max_bytes = dirData.getLong(MAX_BYTES);
             bytes_used = dirData.getLong(BYTES_USED);
-            Log.i("MobileOrg", "Response: " + dirData.toString());
         } catch (Exception e) {
             Log.e("MobileOrg", "Exception in Ubuntu One Fetch Directories: " + e.toString());
         }
