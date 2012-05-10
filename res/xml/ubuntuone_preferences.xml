@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+  <PreferenceCategory android:title="Ubuntu One">
+    <PreferenceScreen
+        android:name="Login"
+        android:summary="@string/preference_ubuntuone_login_summary"
+        android:title="@string/preference_ubuntuone_login"
+        android:key="ubuntuoneLogin"/>
+    <EditTextPreference
+        android:name="Path"
+        android:summary="@string/preference_ubuntuone_path_summary"
+        android:title="@string/preference_ubuntuone_path"
+        android:key="ubuntuonePath"/>
+  </PreferenceCategory>
+</PreferenceScreen>

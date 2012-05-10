@@ -7,6 +7,7 @@ import java.util.Arrays;
 import android.content.Context;
 
 import com.dropbox.client.DropboxAPI;
+import com.matburt.mobileorg.Synchronizers.UbuntuOneSynchronizer;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Dropbox.*;
 
@@ -85,6 +86,60 @@ public interface DirectoryBrowser {
 			}
 		}
 	}
+
+    public class UbuntuOneDirectoryBrowser implements DirectoryBrowser {
+        UbuntuOneSynchronizer onesync;
+
+		ArrayList<String> directoryNames = new ArrayList<String>();
+		ArrayList<String> directoryListing = new ArrayList<String>();
+		String curDirectory;
+		Context context;
+		String upOneLevel = "Up one level";
+
+        UbuntuOneDirectoryBrowser(Context context, UbuntuOneSynchronizer uos) {
+            onesync = uos;
+            setContext(context);
+            setLocale();
+            browseTo("/");
+        }
+
+		public void setContext(Context context) { this.context = context; }
+
+		public void setLocale() { 
+			upOneLevel = context.getString(R.string.up_one_level); 
+		}
+
+		public ArrayList<String> list() { return directoryNames; }
+
+		public String get(int position) { return directoryNames.get(position); }
+
+		public String getDirectory(int position) { return directoryListing.get(position); } 
+
+		public String getAbsolutePath(int position) { return directoryListing.get(position); } 
+
+		public boolean isCurrentDirectoryRoot() { return curDirectory.equals("/"); }
+
+		static public String getParentPath(String path) {
+			int ind = path.lastIndexOf('/');
+			return path.substring(0, ind+1);
+		}
+		
+		public void browseTo(int position) { browseTo( getDirectory(position) ); }
+
+		public void browseTo(String directory) {
+			curDirectory = directory;
+			directoryNames.clear();
+			directoryListing.clear();
+			if ( !isCurrentDirectoryRoot() ) {
+				directoryNames.add( upOneLevel );
+				directoryListing.add( getParentPath(curDirectory) );
+			}
+            for (String item : onesync.getDirectoryList(directory)) {
+                directoryNames.add(item);
+                directoryListing.add(getParentPath(curDirectory) + "/" + item);
+            }
+		}
+    }
 	
 	public class DropboxDirectoryBrowser implements DirectoryBrowser {
 		Dropbox dropbox;

@@ -12,6 +12,7 @@
     <string-array name="fileSources">
         <item>WebDAV</item>
         <item>Dropbox</item>
+        <item>Ubuntu One</item>
         <item>SDCard</item>
         <item>SSH/SCP</item>
         <item>Capture Only</item>
@@ -19,6 +20,7 @@
     <string-array name="fileSourcesVals">
         <item>webdav</item>
         <item>dropbox</item>
+        <item>ubuntu</item>
         <item>sdcard</item>
         <item>scp</item>
         <item>null</item>
