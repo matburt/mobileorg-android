@@ -54,7 +54,7 @@ import oauth.signpost.exception.OAuthMessageSignerException;
 
 public class UbuntuOneSynchronizer extends Synchronizer {
 
-private static final String BASE_TOKEN_NAME = "Ubuntu One @ ";
+private static final String BASE_TOKEN_NAME = "Ubuntu One @ MobileOrg:";
 	private static final String CONSUMER_KEY = "consumer_key";
 	private static final String CONSUMER_SECRET = "consumer_secret";
 	private static final String ACCESS_TOKEN = "token";
