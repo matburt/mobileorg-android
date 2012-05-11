@@ -181,60 +181,37 @@ private static final String BASE_TOKEN_NAME = "Ubuntu One @ MobileOrg:";
         return null;
     }
 
-    public boolean isDirectory(String name) {
-		try {
-            name = name.replaceAll("/{2,}", "/");
-            buildConsumer();
-			String files_url = FILES_URL + root_path + name + "?include_children=true";
-            URL url = new URL(files_url);
-            URI uri = new URI(url.getProtocol(), url.getUserInfo(), url.getHost(),
-                              url.getPort(), url.getPath(), url.getQuery(), url.getRef());
-            url = uri.toURL();
-			HttpGet request = new HttpGet(url.toString());
-			DefaultHttpClient httpClient = new DefaultHttpClient();
-            signRequest(request);
-            HttpResponse response = httpClient.execute(request);
-            verifyResponse(response);
-            JSONObject dirData = responseToJson(response);
-            if (dirData.getString("kind").equals("directory")) {
-                return true;
-            }
-            return false;
-        } catch (Exception e) {
-            Log.e("MobileOrg", "Exception in Ubuntu One isDirectory: " + e.toString());
-        }
-        return false;
-    }
-
     public ArrayList<String> getDirectoryList(String directory) {
+        ArrayList<String> directories = new ArrayList<String>();
 		try {
             buildConsumer();
-			String files_url = FILES_URL + root_path + directory + "?include_children=true";
+            String latterPart = root_path + directory + "?include_children=true";
+            latterPart = latterPart.replaceAll("/{2,}", "/");
+			String files_url = FILES_URL + latterPart;
             URL url = new URL(files_url);
             URI uri = new URI(url.getProtocol(), url.getUserInfo(), url.getHost(),
                               url.getPort(), url.getPath(), url.getQuery(), url.getRef());
             url = uri.toURL();
+            Log.d("MobileOrg", "Getting directory list for: " + url.toString());
 			HttpGet request = new HttpGet(url.toString());
 			DefaultHttpClient httpClient = new DefaultHttpClient();
             signRequest(request);
             HttpResponse response = httpClient.execute(request);
             verifyResponse(response);
             JSONObject dirData = responseToJson(response);
-            ArrayList<String> directories = new ArrayList<String>();
             JSONArray jsA = dirData.getJSONArray("children");
             if (jsA != null) { 
                 for (int i = 0; i < jsA.length(); i++){
                     JSONObject node = jsA.getJSONObject(i);
-                    if (this.isDirectory(directory + node.getString("path"))) {
+                    if (node.getString("kind").equals("directory")) {
                         directories.add(node.getString("path"));
                     }
                 } 
             }
-            return directories;
         } catch (Exception e) {
             Log.e("MobileOrg", "Exception in Ubuntu One Fetch Directories: " + e.toString());
         }
-        return null;
+        return directories;
     }
 
     public void getBaseUser() {

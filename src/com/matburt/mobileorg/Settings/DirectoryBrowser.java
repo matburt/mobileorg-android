@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.dropbox.client.DropboxAPI;
 import com.matburt.mobileorg.Synchronizers.UbuntuOneSynchronizer;
@@ -120,6 +121,9 @@ public interface DirectoryBrowser {
 		public boolean isCurrentDirectoryRoot() { return curDirectory.equals("/"); }
 
 		static public String getParentPath(String path) {
+            if (path.charAt(path.length()-1) == '/') {
+                path = path.substring(0, path.length()-1);
+            }
 			int ind = path.lastIndexOf('/');
 			return path.substring(0, ind+1);
 		}
@@ -133,10 +137,12 @@ public interface DirectoryBrowser {
 			if ( !isCurrentDirectoryRoot() ) {
 				directoryNames.add( upOneLevel );
 				directoryListing.add( getParentPath(curDirectory) );
+                Log.d("MobileOrg", "Current directory: " + curDirectory);
+                Log.d("MobileOrg", "Parent path: " + getParentPath(curDirectory));
 			}
             for (String item : onesync.getDirectoryList(directory)) {
                 directoryNames.add(item);
-                directoryListing.add(getParentPath(curDirectory) + "/" + item);
+                directoryListing.add(item);
             }
 		}
     }
