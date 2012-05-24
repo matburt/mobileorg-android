@@ -1,6 +1,7 @@
 package com.matburt.mobileorg.provider;
 
 import android.net.Uri;
+import android.util.Log;
 
 public class OrgContract {
 	
@@ -70,6 +71,16 @@ public class OrgContract {
 		public static String getId(Uri uri) {
 			return uri.getPathSegments().get(1);
 		}
+		
+		public static Uri buildChildrenUri(String parentId) {
+			return CONTENT_URI.buildUpon().appendPath(parentId).appendPath("children").build();
+		}
+		
+		public static final String DEFAULT_SORT = NAME + " ASC";
+		
+		public static final String[] DEFAULT_COLUMNS = {OrgData.ID, 
+			OrgData.NAME, OrgData.TODO, OrgData.TAGS, OrgData.PARENT_ID, 
+			OrgData.PAYLOAD, OrgData.LEVEL, OrgData.PRIORITY, OrgData.FILE_ID};
 	}
 	
 	public static class Edits implements EditsColumns {

@@ -206,6 +206,7 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		ContentValues orgdata = new ContentValues();
 		orgdata.put("name", name);
 		orgdata.put("todo", "");
+		orgdata.put("parent_id", -1);
 		
 		ContentValues values = new ContentValues();
 

@@ -8,7 +8,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
 
-public class OrgDatabase extends SQLiteOpenHelper {
+public class OrgDatabaseNew extends SQLiteOpenHelper {
 	private static final String DATABASE_NAME = "MobileOrg.db";
 	private static final int DATABASE_VERSION = 4;
 	
@@ -35,7 +35,7 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		String ORGDATA = "orgdata";
 	}
 	
-	public OrgDatabase(Context context) {
+	public OrgDatabaseNew(Context context) {
 		super(context, DATABASE_NAME, null, DATABASE_VERSION);
 	}
 	
@@ -105,7 +105,17 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		orgdataInsertHelper.bind(orgdata_tagsColumn, tags);
 		return orgdataInsertHelper.execute();
 	}
-
+		
+	public void addNodePayload(Long id, final String payload) {
+		if(addPayloadStatement == null)
+			addPayloadStatement = getWritableDatabase()
+					.compileStatement("UPDATE orgdata SET payload=? WHERE _id=?");
+		
+		addPayloadStatement.bindString(1, payload);
+		addPayloadStatement.bindLong(2, id);
+		addPayloadStatement.execute();
+	}
+	
 	private void prepareOrgdataInsert() {
 		if(this.orgdataInsertHelper == null) {
 			this.orgdataInsertHelper = new InsertHelper(getWritableDatabase(), Tables.ORGDATA);
@@ -119,15 +129,5 @@ public class OrgDatabase extends SQLiteOpenHelper {
 			this.orgdata_tagsColumn = orgdataInsertHelper.getColumnIndex(OrgData.TAGS);
 		}
 		orgdataInsertHelper.prepareForInsert();
-	}
-		
-	public void addNodePayload(Long id, final String payload) {
-		if(addPayloadStatement == null)
-			addPayloadStatement = getWritableDatabase()
-					.compileStatement("UPDATE orgdata SET payload=? WHERE _id=?");
-		
-		addPayloadStatement.bindString(1, payload);
-		addPayloadStatement.bindLong(2, id);
-		addPayloadStatement.execute();
 	}
 }

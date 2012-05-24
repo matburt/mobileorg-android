@@ -80,8 +80,7 @@ public class OrgFileParser {
 				if (numstars > 0) {
 					parseHeading(currentLine, numstars);
 				} else {
-					payload.append(currentLine);
-					payload.append("\n");
+					payload.append(currentLine).append("\n");
 				}
 			}
 			

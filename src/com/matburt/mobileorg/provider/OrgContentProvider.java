@@ -12,12 +12,12 @@ import android.net.Uri;
 import com.matburt.mobileorg.provider.OrgContract.Files;
 import com.matburt.mobileorg.provider.OrgContract.OrgData;
 import com.matburt.mobileorg.provider.OrgContract.Search;
-import com.matburt.mobileorg.provider.OrgDatabase.Tables;
+import com.matburt.mobileorg.provider.OrgDatabaseNew.Tables;
 import com.matburt.mobileorg.util.SelectionBuilder;
 
 public class OrgContentProvider extends ContentProvider {
 	public static final String AUTHORITY = "com.matburt.mobileorg.provider.OrgContentProvider";
-	private OrgDatabase dbHelper;
+	private OrgDatabaseNew dbHelper;
 	private static final UriMatcher uriMatcher = buildUriMatcher();
 	
 	private static final int ORGDATA = 100;
@@ -60,7 +60,7 @@ public class OrgContentProvider extends ContentProvider {
 	
 	@Override
 	public boolean onCreate() {
-		this.dbHelper = new OrgDatabase(getContext());
+		this.dbHelper = new OrgDatabaseNew(getContext());
 		return false;
 	}
 	
@@ -120,22 +120,21 @@ public class OrgContentProvider extends ContentProvider {
 	
 	private SelectionBuilder buildSelectionFromUri(Uri uri) {
 		final SelectionBuilder builder = new SelectionBuilder();
-
 		switch (uriMatcher.match(uri)) {
 		case ORGDATA:
 			return builder.table(Tables.ORGDATA);
 		case ORGDATA_ID:
-			return builder.table(Tables.ORGDATA).where(OrgData.ID, OrgData.getId(uri));
+			return builder.table(Tables.ORGDATA).where(OrgData.ID + "=?", OrgData.getId(uri));
 		case ORGDATA_PARENT:
-			return builder.table(Tables.ORGDATA).where(OrgData.ID, OrgData.getId(uri));
+			return builder.table(Tables.ORGDATA).where(OrgData.ID + "=?", OrgData.getId(uri));
 		case ORGDATA_CHILDREN:
-			return builder.table(Tables.ORGDATA).where(OrgData.PARENT_ID, OrgData.getId(uri));
+			return builder.table(Tables.ORGDATA).where(OrgData.PARENT_ID + "=?", OrgData.getId(uri));
 		case FILES:
 			return builder.table(Tables.FILES);
 		case FILES_ID:
-			return builder.table(Tables.FILES).where(Files.ID, Files.getId(uri));
+			return builder.table(Tables.FILES).where(Files.ID + "=?", Files.getId(uri));
 		case FILES_NAME:
-			return builder.table(Tables.FILES).where(Files.NAME, Files.getName(uri));
+			return builder.table(Tables.FILES).where(Files.NAME + "=?", Files.getName(uri));
 		case EDITS:
 			return builder.table(Tables.EDITS);
 		case TAGS:
@@ -147,10 +146,6 @@ public class OrgContentProvider extends ContentProvider {
 		case SEARCH:
 			final String search = Search.getSearchTerm(uri);
 			return builder.table(Tables.ORGDATA).where("name LIKE %?%", search);
-//		case TIMED:
-//			//builder.table(Tables.ORGDATA).where(selection, selectionArgs)
-//			break;
-			
 		default:
 			throw new IllegalArgumentException("Unknown URI " + uri);
 		}

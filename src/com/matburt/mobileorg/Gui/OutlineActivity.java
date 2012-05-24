@@ -42,12 +42,13 @@ import com.matburt.mobileorg.Services.SyncService;
 import com.matburt.mobileorg.Settings.SettingsActivity;
 import com.matburt.mobileorg.Settings.WizardActivity;
 import com.matburt.mobileorg.Synchronizers.Synchronizer;
+import com.matburt.mobileorg.provider.OrgContract.OrgData;
 
 public class OutlineActivity extends FragmentActivity
 {
     private MobileOrgApplication appInst;
 
-	private long node_id;
+	private Long node_id;
 	
 	/**
 	 * Keeps track of the last selected item chosen from the outline. When the
@@ -125,13 +126,17 @@ public class OutlineActivity extends FragmentActivity
 	 */
 	private void refreshDisplay() {
 		Cursor cursor;
+		cursor = getContentResolver().query(
+				OrgData.buildChildrenUri(node_id.toString()),
+				OrgData.DEFAULT_COLUMNS, null, null, OrgData.DEFAULT_SORT);
+
 		if (node_id >= 0) {
-			cursor = appInst.getDB().getNodeChildren(node_id);
+			//cursor = appInst.getDB().getNodeChildren(node_id);
 			if(cursor.getCount() == 0)
 				finish();
 		}
-		else
-			cursor = appInst.getDB().getFileCursor();
+		//else
+			//cursor = appInst.getDB().getFileCursor();
 
         if (cursor == null || cursor.getCount() < 1) {
             emptylist = true;
