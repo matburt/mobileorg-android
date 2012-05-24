@@ -1,7 +1,6 @@
 package com.matburt.mobileorg.provider;
 
 import android.net.Uri;
-import android.util.Log;
 
 public class OrgContract {
 	
@@ -70,6 +69,14 @@ public class OrgContract {
 		
 		public static String getId(Uri uri) {
 			return uri.getPathSegments().get(1);
+		}
+		
+		public static Uri buildIdUri(String id) {
+			return CONTENT_URI.buildUpon().appendPath(id).build();
+		}
+		
+		public static Uri buildIdUri(Long id) {
+			return CONTENT_URI.buildUpon().appendPath(id.toString()).build();
 		}
 		
 		public static Uri buildChildrenUri(String parentId) {

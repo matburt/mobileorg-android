@@ -11,15 +11,11 @@ import android.database.sqlite.SQLiteStatement;
 public class OrgDatabaseNew extends SQLiteOpenHelper {
 	private static final String DATABASE_NAME = "MobileOrg.db";
 	private static final int DATABASE_VERSION = 4;
-	
-	@SuppressWarnings("unused")
-	private int orgdata_idColumn;
+
 	private int orgdata_nameColumn;
 	private int orgdata_todoColumn;
 	private int orgdata_tagsColumn;
 	private int orgdata_priorityColumn;
-	@SuppressWarnings("unused")
-	private int orgdata_payloadColumn;
 	private int orgdata_parentidColumn;
 	private int orgdata_fileidColumn;
 	
@@ -43,7 +39,7 @@ public class OrgDatabaseNew extends SQLiteOpenHelper {
 	public void onCreate(SQLiteDatabase db) {
 		db.execSQL("CREATE TABLE IF NOT EXISTS files("
 				+ "_id integer primary key autoincrement,"
-				+ "node_id integer," //orgdata:_id of files' root node
+				+ "node_id integer,"
 				+ "filename text,"
 				+ "name text,"
 				+ "checksum text)");
@@ -69,9 +65,8 @@ public class OrgDatabaseNew extends SQLiteOpenHelper {
 				+ "changed integer)");
 		db.execSQL("CREATE TABLE IF NOT EXISTS orgdata ("
 				+ "_id integer primary key autoincrement,"
-				+ "parent_id integer default -1," // orgdata:_id of parent node
-				+ "file_id integer," // files:_id of file node
-//				+ "node_id text," // Org data id
+				+ "parent_id integer default -1,"
+				+ "file_id integer,"
 				+ "level integer default 0,"
 				+ "priority text,"
 				+ "todo text,"
@@ -94,19 +89,18 @@ public class OrgDatabaseNew extends SQLiteOpenHelper {
 		onCreate(db);
 	}
 	
-	public long addNode(Long parentid, String name, String todo,
-			String priority, String tags, long file_id) {
+	public long fastInsertNode(OrgNode node) {
 		prepareOrgdataInsert();
-		orgdataInsertHelper.bind(orgdata_parentidColumn, parentid);
-		orgdataInsertHelper.bind(orgdata_nameColumn, name);
-		orgdataInsertHelper.bind(orgdata_todoColumn, todo);
-		orgdataInsertHelper.bind(orgdata_priorityColumn, priority);
-		orgdataInsertHelper.bind(orgdata_fileidColumn, file_id);
-		orgdataInsertHelper.bind(orgdata_tagsColumn, tags);
+		orgdataInsertHelper.bind(orgdata_parentidColumn, node.parentId);
+		orgdataInsertHelper.bind(orgdata_nameColumn, node.name);
+		orgdataInsertHelper.bind(orgdata_todoColumn, node.todo);
+		orgdataInsertHelper.bind(orgdata_priorityColumn, node.priority);
+		orgdataInsertHelper.bind(orgdata_fileidColumn, node.fileId);
+		orgdataInsertHelper.bind(orgdata_tagsColumn, node.tags);
 		return orgdataInsertHelper.execute();
 	}
 		
-	public void addNodePayload(Long id, final String payload) {
+	public void fastInsertNodePayload(Long id, final String payload) {
 		if(addPayloadStatement == null)
 			addPayloadStatement = getWritableDatabase()
 					.compileStatement("UPDATE orgdata SET payload=? WHERE _id=?");
@@ -119,11 +113,9 @@ public class OrgDatabaseNew extends SQLiteOpenHelper {
 	private void prepareOrgdataInsert() {
 		if(this.orgdataInsertHelper == null) {
 			this.orgdataInsertHelper = new InsertHelper(getWritableDatabase(), Tables.ORGDATA);
-			this.orgdata_idColumn = orgdataInsertHelper.getColumnIndex(OrgData.ID);
 			this.orgdata_nameColumn = orgdataInsertHelper.getColumnIndex(OrgData.NAME);
 			this.orgdata_todoColumn = orgdataInsertHelper.getColumnIndex(OrgData.TODO);
 			this.orgdata_priorityColumn = orgdataInsertHelper.getColumnIndex(OrgData.PRIORITY);
-			this.orgdata_payloadColumn = orgdataInsertHelper.getColumnIndex(OrgData.PAYLOAD);
 			this.orgdata_parentidColumn = orgdataInsertHelper.getColumnIndex(OrgData.PARENT_ID);
 			this.orgdata_fileidColumn = orgdataInsertHelper.getColumnIndex(OrgData.FILE_ID);
 			this.orgdata_tagsColumn = orgdataInsertHelper.getColumnIndex(OrgData.TAGS);
