@@ -33,7 +33,7 @@ import android.util.Log;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Gui.CertificateConflictActivity;
 import com.matburt.mobileorg.Parsing.MobileOrgApplication;
-import com.matburt.mobileorg.Parsing.OrgFile;
+import com.matburt.mobileorg.Parsing.OrgFileOld;
 
 public class WebDAVSynchronizer extends Synchronizer {
 
@@ -293,7 +293,7 @@ public class WebDAVSynchronizer extends Synchronizer {
             }
         } catch (UnsupportedEncodingException e) {
 			throw new IOException(r.getString(
-					R.string.error_unsupported_encoding, OrgFile.CAPTURE_FILE));
+					R.string.error_unsupported_encoding, OrgFileOld.CAPTURE_FILE));
 		}
 	}
 

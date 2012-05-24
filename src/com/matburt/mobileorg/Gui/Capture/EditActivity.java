@@ -25,7 +25,7 @@ import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Parsing.MobileOrgApplication;
 import com.matburt.mobileorg.Parsing.NodeWrapper;
 import com.matburt.mobileorg.Parsing.OrgDatabase;
-import com.matburt.mobileorg.Parsing.OrgFile;
+import com.matburt.mobileorg.Parsing.OrgFileOld;
 import com.matburt.mobileorg.Services.TimeclockService;
 import com.matburt.mobileorg.Synchronizers.Synchronizer;
 
@@ -411,7 +411,7 @@ public class EditActivity extends FragmentActivity {
                         long file_id;
 
                         if (newParent == null) {
-                                file_id = orgDB.addOrUpdateFile(OrgFile.CAPTURE_FILE, OrgFile.CAPTURE_FILE_ALIAS, "", true);
+                                file_id = orgDB.addOrUpdateFile(OrgFileOld.CAPTURE_FILE, OrgFileOld.CAPTURE_FILE_ALIAS, "", true);
                                 parent_id = orgDB.getFileNodeId(orgDB.getFilename(file_id));
                         } else {
                                 file_id = newParent.getFileId();
@@ -446,7 +446,7 @@ public class EditActivity extends FragmentActivity {
 	}
 	
 	private void makeNewheadingEditNode(long node_id, NodeWrapper parent) {
-		boolean generateEdits = parent != null && !parent.getFileName().equals(OrgFile.CAPTURE_FILE);
+		boolean generateEdits = parent != null && !parent.getFileName().equals(OrgFileOld.CAPTURE_FILE);
 		if(generateEdits == false)
 			return;
 
@@ -462,7 +462,7 @@ public class EditActivity extends FragmentActivity {
 	 */ 
 	private void makeEditNodes(String newTitle, String newTodo,
 			String newPriority, String newCleanedPayload, String newTags, NodeWrapper newParent) throws IOException {
-		boolean generateEdits = !node.getFileName().equals(OrgFile.CAPTURE_FILE);
+		boolean generateEdits = !node.getFileName().equals(OrgFileOld.CAPTURE_FILE);
 		
 		if (!node.getName().equals(newTitle)) {
 			if (generateEdits)

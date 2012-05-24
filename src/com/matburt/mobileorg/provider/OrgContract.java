@@ -99,6 +99,9 @@ public class OrgContract {
 		public static final Uri CONTENT_URI = 
 				BASE_CONTENT_URI.buildUpon().appendPath(PATH_FILES).build();
 
+		public static final String[] DEFAULT_COLUMNS = {Files.ID,
+			Files.NAME, Files.FILENAME, Files.CHECKSUM};
+		
 		public static String getId(Uri uri) {
 			return uri.getLastPathSegment();
 		}
@@ -116,6 +119,8 @@ public class OrgContract {
 	public static class Todos implements TodosColumns {
 		public static final Uri CONTENT_URI = 
 				BASE_CONTENT_URI.buildUpon().appendPath(PATH_TODOS).build();
+		
+		public static final String[] DEFAULT_COLUMNS = {NAME, ID, GROUP, ISDONE};
 	}
 	
 	public static class Tags implements TagsColumns {

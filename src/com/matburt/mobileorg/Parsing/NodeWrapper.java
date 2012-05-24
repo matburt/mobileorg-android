@@ -405,7 +405,7 @@ public class NodeWrapper {
 		StringBuilder rawPayload = new StringBuilder(getRawPayload());
 		rawPayload = NodePayload.addLogbook(rawPayload, startTime, endTime, elapsedTime);
 		
-		boolean generateEdits = !getFileName().equals(OrgFile.CAPTURE_FILE);
+		boolean generateEdits = !getFileName().equals(OrgFileOld.CAPTURE_FILE);
 
 		if(generateEdits)
 			db.addEdit("body", getNodeId(), getName(), getRawPayload(), rawPayload.toString());

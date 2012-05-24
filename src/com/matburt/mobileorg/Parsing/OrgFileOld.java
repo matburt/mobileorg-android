@@ -17,7 +17,7 @@ import android.content.SharedPreferences;
 import android.os.Environment;
 import android.preference.PreferenceManager;
 
-public class OrgFile {
+public class OrgFileOld {
 
 	public static final String CAPTURE_FILE = "mobileorg.org";
 	public static final String CAPTURE_FILE_ALIAS = "Captures";
@@ -25,7 +25,7 @@ public class OrgFile {
 	private Context context;
 	private String fileName;
 
-	public OrgFile(String file, Context context) {
+	public OrgFileOld(String file, Context context) {
 		this.context = context;
 		this.fileName = file.replace("/", "_");
 	}

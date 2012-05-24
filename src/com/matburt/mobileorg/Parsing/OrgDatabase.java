@@ -170,7 +170,7 @@ public class OrgDatabase extends SQLiteOpenHelper {
 	
 
 	public void removeFile(String filename) {
-		OrgFile orgfile = new OrgFile(filename, context);
+		OrgFileOld orgfile = new OrgFileOld(filename, context);
 		orgfile.remove();
 		
 		Long file_id = this.getFileId(filename);
@@ -713,7 +713,7 @@ public class OrgDatabase extends SQLiteOpenHelper {
 			changes += cursor.getCount();
 		cursor.close();
 		
-		long file_id = this.getFileId(OrgFile.CAPTURE_FILE);
+		long file_id = this.getFileId(OrgFileOld.CAPTURE_FILE);
 		cursor = db.query("orgdata", new String[] { "_id" }, "file_id=?",
 				new String[] { Long.toString(file_id) }, null, null, null);
 		if(cursor != null) {

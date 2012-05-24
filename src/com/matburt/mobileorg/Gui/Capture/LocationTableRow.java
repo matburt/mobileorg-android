@@ -12,7 +12,7 @@ import android.widget.Spinner;
 import com.matburt.mobileorg.Parsing.MobileOrgApplication;
 import com.matburt.mobileorg.Parsing.NodeWrapper;
 import com.matburt.mobileorg.Parsing.OrgDatabase;
-import com.matburt.mobileorg.Parsing.OrgFile;
+import com.matburt.mobileorg.Parsing.OrgFileOld;
 
 public class LocationTableRow {
 	private NodeWrapper node;
@@ -77,7 +77,7 @@ public class LocationTableRow {
 		
 		public void setupSpinner() {
 			if(this.node == null && this.child == null)
-				setupSpinner(OrgFile.CAPTURE_FILE);
+				setupSpinner(OrgFileOld.CAPTURE_FILE);
 			else
 				setupSpinner(this.node.getName());
 		}

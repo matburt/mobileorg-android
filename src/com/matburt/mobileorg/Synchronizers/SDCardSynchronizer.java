@@ -11,7 +11,7 @@ import android.content.Context;
 import android.preference.PreferenceManager;
 
 import com.matburt.mobileorg.Parsing.MobileOrgApplication;
-import com.matburt.mobileorg.Parsing.OrgFile;
+import com.matburt.mobileorg.Parsing.OrgFileOld;
 
 public class SDCardSynchronizer extends Synchronizer {	
 
@@ -36,7 +36,7 @@ public class SDCardSynchronizer extends Synchronizer {
 	protected void putRemoteFile(String filename, String contents) throws IOException {
 		String outfilePath = this.remotePath + filename;
 		
-		OrgFile orgfileOut = new OrgFile(outfilePath, context);
+		OrgFileOld orgfileOut = new OrgFileOld(outfilePath, context);
 		orgfileOut.write(outfilePath, contents);
 	}
 

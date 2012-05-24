@@ -23,7 +23,7 @@ import com.matburt.mobileorg.Gui.FileDecryptionActivity;
 import com.matburt.mobileorg.Gui.OutlineActivity;
 import com.matburt.mobileorg.Parsing.MobileOrgApplication;
 import com.matburt.mobileorg.Parsing.OrgDatabase;
-import com.matburt.mobileorg.Parsing.OrgFile;
+import com.matburt.mobileorg.Parsing.OrgFileOld;
 import com.matburt.mobileorg.Parsing.OrgFileParser;
 
 /**
@@ -97,7 +97,7 @@ abstract public class Synchronizer {
 		setupNotification();
 		updateNotification(0,
 				context.getString(R.string.sync_synchronizing_changes) + " "
-						+ OrgFile.CAPTURE_FILE);
+						+ OrgFileOld.CAPTURE_FILE);
 		try {
 			pushCaptures();
 			pull();
@@ -130,13 +130,13 @@ abstract public class Synchronizer {
 	 */
 	private void pushCaptures() throws Exception, IOException,
 			CertificateException, SSLHandshakeException {
-		final String filename = OrgFile.CAPTURE_FILE;
+		final String filename = OrgFileOld.CAPTURE_FILE;
 		String localContents = this.appdb.fileToString(filename);
 		localContents += this.appdb.editsToString();
 
 		if (localContents.equals(""))
 			return;
-		String remoteContent = OrgFile.read(getRemoteFile(filename));
+		String remoteContent = OrgFileOld.read(getRemoteFile(filename));
 		updateNotification(10);
 
 		if (remoteContent.indexOf("{\"error\":") == -1)
@@ -158,7 +158,7 @@ abstract public class Synchronizer {
 				+ " checksums.dat");
 		String remoteChecksumContents = "";
 
-		remoteChecksumContents = OrgFile.read(getRemoteFile("checksums.dat"));
+		remoteChecksumContents = OrgFileOld.read(getRemoteFile("checksums.dat"));
 
 		updateNotification(40);
 
@@ -175,7 +175,7 @@ abstract public class Synchronizer {
 			filesToGet.add(key);
 		}
 
-		filesToGet.remove(OrgFile.CAPTURE_FILE);
+		filesToGet.remove(OrgFileOld.CAPTURE_FILE);
 
 		if (filesToGet.size() == 0)
 			return;
@@ -185,7 +185,7 @@ abstract public class Synchronizer {
 				+ " index.org");
 		String remoteIndexContents = "";
 
-		remoteIndexContents = OrgFile.read(getRemoteFile("index.org"));
+		remoteIndexContents = OrgFileOld.read(getRemoteFile("index.org"));
 
 		this.appdb.setTodos(OrgFileParser
 				.getTodosFromIndex(remoteIndexContents));
@@ -240,7 +240,7 @@ abstract public class Synchronizer {
 	private void decryptAndParseFile(String filename, String filenameAlias,
 			String checksum, BufferedReader reader) throws IOException {
 		Intent intent = new Intent(context, FileDecryptionActivity.class);
-		intent.putExtra("data", OrgFile.read(reader).getBytes());
+		intent.putExtra("data", OrgFileOld.read(reader).getBytes());
 		intent.putExtra("filename",filename);
 		intent.putExtra("filenameAlias", filenameAlias);
 		intent.putExtra("checksum", checksum);
