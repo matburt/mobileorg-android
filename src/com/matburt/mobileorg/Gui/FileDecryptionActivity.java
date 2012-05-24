@@ -16,6 +16,7 @@ import android.widget.Toast;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Parsing.MobileOrgApplication;
 import com.matburt.mobileorg.Parsing.OrgFileParser;
+import com.matburt.mobileorg.provider.OrgDatabaseNew;
 
 public class FileDecryptionActivity extends Activity
 {
@@ -72,7 +73,7 @@ public class FileDecryptionActivity extends Activity
 					new ByteArrayInputStream(decryptedData.getBytes())));
 
 			OrgFileParser parser = new OrgFileParser(
-					((MobileOrgApplication) this.getApplication()).getDB());
+					new OrgDatabaseNew(this), getContentResolver());
 			parser.parse(filename, filenameAlias, checksum, reader,
 					getApplicationContext());
 

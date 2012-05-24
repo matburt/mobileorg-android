@@ -197,19 +197,20 @@ abstract public class Synchronizer {
 		this.appdb.addOrUpdateFile("index.org", filenameMap.get("index.org"),
 				remoteChecksums.get("index.org"), false);
 
-		OrgFileParser parser = new OrgFileParser(this.appdb);
-
-		int i = 0;
-		for (String filename : filesToGet) {
-			i++;
-			updateNotification(i, context.getString(R.string.downloading) + " "
-					+ filename, filesToGet.size());
-			Log.d("MobileOrg",
-					"Getting " + filename + "/" + filenameMap.get(filename));
-
-			getAndParseFile(filename, filenameMap.get(filename),
-					remoteChecksums.get(filename), parser);
-		}
+		// TODO Enable again with new parser
+//		OrgFileParser parser = new OrgFileParser(this.appdb);
+//
+//		int i = 0;
+//		for (String filename : filesToGet) {
+//			i++;
+//			updateNotification(i, context.getString(R.string.downloading) + " "
+//					+ filename, filesToGet.size());
+//			Log.d("MobileOrg",
+//					"Getting " + filename + "/" + filenameMap.get(filename));
+//
+//			getAndParseFile(filename, filenameMap.get(filename),
+//					remoteChecksums.get(filename), parser);
+//		}
 	}
 	
 	private void getAndParseFile(String filename, String filenameAlias,

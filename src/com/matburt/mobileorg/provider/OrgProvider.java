@@ -15,8 +15,8 @@ import com.matburt.mobileorg.provider.OrgContract.Search;
 import com.matburt.mobileorg.provider.OrgDatabaseNew.Tables;
 import com.matburt.mobileorg.util.SelectionBuilder;
 
-public class OrgContentProvider extends ContentProvider {
-	public static final String AUTHORITY = "com.matburt.mobileorg.provider.OrgContentProvider";
+public class OrgProvider extends ContentProvider {
+	public static final String AUTHORITY = "com.matburt.mobileorg.provider.OrgProvider";
 	private OrgDatabaseNew dbHelper;
 	private static final UriMatcher uriMatcher = buildUriMatcher();
 	
@@ -42,7 +42,7 @@ public class OrgContentProvider extends ContentProvider {
 		uriMatcher.addURI(AUTHORITY, "orgdata/*", ORGDATA_ID);
 		uriMatcher.addURI(AUTHORITY, "orgdata/*/parent", ORGDATA_PARENT);
 		uriMatcher.addURI(AUTHORITY, "orgdata/*/children", ORGDATA_CHILDREN);
-
+		
 		uriMatcher.addURI(AUTHORITY, "files", FILES);
 		uriMatcher.addURI(AUTHORITY, "files/*", FILES_ID);
 		uriMatcher.addURI(AUTHORITY, "files/name/*", FILES_NAME);

@@ -51,7 +51,7 @@ public class OrgContract {
 		String NAME = "name";
 	}
 
-	public static final String CONTENT_AUTHORITY = "com.matburt.mobileorg.provider.OrgContentProvider";
+	public static final String CONTENT_AUTHORITY = "com.matburt.mobileorg.provider.OrgProvider";
 	private static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
 
 	private static final String PATH_ORGDATA = "orgdata";
@@ -76,7 +76,7 @@ public class OrgContract {
 		}
 		
 		public static Uri buildIdUri(Long id) {
-			return CONTENT_URI.buildUpon().appendPath(id.toString()).build();
+			return buildIdUri(id.toString());
 		}
 		
 		public static Uri buildChildrenUri(String parentId) {
@@ -105,6 +105,11 @@ public class OrgContract {
 
 		public static String getName(Uri uri) {
 			return uri.getLastPathSegment();
+		}
+		
+		public static Uri buildFilenameUri(String filename) {
+			return CONTENT_URI.buildUpon().appendPath("name")
+					.appendPath(filename).build();
 		}
 	}
 	
