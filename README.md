@@ -6,7 +6,7 @@ for installation instructions see the wiki page:
 
 We have a Google+ Page:
 
-[https://plus.google.com/u/0/101083268903948579162](MobileOrg on Google+)
+[MobileOrg on Google+](https://plus.google.com/u/0/101083268903948579162)
 
 And a dedicated Google Group for discussions and announcements:
 
