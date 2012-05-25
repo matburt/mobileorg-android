@@ -20,6 +20,10 @@ public class OrgNode {
 	}
 
 	public OrgNode(Cursor cursor) {
+		set(cursor);
+	}
+	
+	public void set(Cursor cursor) {
 		if (cursor != null && cursor.moveToFirst()) {
 			id = cursor.getLong(cursor.getColumnIndexOrThrow("_id"));
 			parentId = cursor.getLong(cursor
@@ -37,7 +41,7 @@ public class OrgNode {
 		} else {
 			throw new IllegalArgumentException(
 					"Failed to create OrgNode from cursor");
-		}
+		}	
 	}
 
 	public String getPayload() {

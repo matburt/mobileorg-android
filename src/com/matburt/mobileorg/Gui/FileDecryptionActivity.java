@@ -17,6 +17,7 @@ import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Parsing.MobileOrgApplication;
 import com.matburt.mobileorg.Parsing.OrgFileParser;
 import com.matburt.mobileorg.provider.OrgDatabaseNew;
+import com.matburt.mobileorg.provider.OrgFile;
 
 public class FileDecryptionActivity extends Activity
 {
@@ -28,7 +29,7 @@ public class FileDecryptionActivity extends Activity
     private static final String EXTRA_DECRYPTED_MESSAGE = "decryptedMessage";
 
     private String filename;
-    private String filenameAlias;
+    private String name;
     private String checksum;
     
 	@Override
@@ -41,7 +42,7 @@ public class FileDecryptionActivity extends Activity
 		Intent intent = getIntent();
 		
 		this.filename = intent.getStringExtra("filename");
-		this.filenameAlias = intent.getStringExtra("filenameAlias");
+		this.name = intent.getStringExtra("filenameAlias");
 		this.checksum = intent.getStringExtra("checksum");
 		byte[] data = intent.getByteArrayExtra("data");
 		
@@ -74,7 +75,7 @@ public class FileDecryptionActivity extends Activity
 
 			OrgFileParser parser = new OrgFileParser(
 					new OrgDatabaseNew(this), getContentResolver());
-			parser.parse(filename, filenameAlias, checksum, reader,
+			parser.parse(new OrgFile(filename, name, checksum), reader,
 					getApplicationContext());
 
 			break;

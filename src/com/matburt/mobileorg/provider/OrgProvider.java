@@ -45,7 +45,7 @@ public class OrgProvider extends ContentProvider {
 		
 		uriMatcher.addURI(AUTHORITY, "files", FILES);
 		uriMatcher.addURI(AUTHORITY, "files/*", FILES_ID);
-		uriMatcher.addURI(AUTHORITY, "files/name/*", FILES_NAME);
+		uriMatcher.addURI(AUTHORITY, "files/*/name", FILES_NAME);
 		
 		uriMatcher.addURI(AUTHORITY, "edits", EDITS);
 		uriMatcher.addURI(AUTHORITY, "tags", TAGS);

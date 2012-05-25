@@ -25,6 +25,7 @@ import com.matburt.mobileorg.Parsing.MobileOrgApplication;
 import com.matburt.mobileorg.Parsing.OrgDatabase;
 import com.matburt.mobileorg.Parsing.OrgFileOld;
 import com.matburt.mobileorg.Parsing.OrgFileParser;
+import com.matburt.mobileorg.provider.OrgFile;
 
 /**
  * This class implements many of the operations that need to be done on
@@ -233,8 +234,10 @@ abstract public class Synchronizer {
 		if (filename.endsWith(".gpg") || filename.endsWith(".pgp")
             || filename.endsWith(".enc") || filename.endsWith(".asc"))
         	decryptAndParseFile(filename, fileIdentActual, remoteChecksum, rfile);
-        else
-        	parser.parse(filename, fileIdentActual, remoteChecksum, rfile, context);
+        else {
+        	OrgFile file = new OrgFile(filename, fileIdentActual, remoteChecksum);
+        	parser.parse(file, rfile, context);
+        }
 	}
 	
 	private void decryptAndParseFile(String filename, String filenameAlias,

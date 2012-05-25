@@ -100,7 +100,7 @@ public class OrgContract {
 				BASE_CONTENT_URI.buildUpon().appendPath(PATH_FILES).build();
 
 		public static final String[] DEFAULT_COLUMNS = {Files.ID,
-			Files.NAME, Files.FILENAME, Files.CHECKSUM};
+			Files.NAME, Files.FILENAME, Files.CHECKSUM, Files.NODE_ID};
 		
 		public static String getId(Uri uri) {
 			return uri.getLastPathSegment();
@@ -111,8 +111,12 @@ public class OrgContract {
 		}
 		
 		public static Uri buildFilenameUri(String filename) {
-			return CONTENT_URI.buildUpon().appendPath("name")
-					.appendPath(filename).build();
+			return CONTENT_URI.buildUpon().appendPath(filename)
+					.appendPath("name").build();
+		}
+		
+		public static Uri buildFileIdUri(Long fileId) {
+			return CONTENT_URI.buildUpon().appendPath(fileId.toString()).build();
 		}
 	}
 	

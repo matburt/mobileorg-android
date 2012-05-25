@@ -8,17 +8,15 @@ import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.matburt.mobileorg.Services.CalendarSyncService;
-import com.matburt.mobileorg.provider.OrgContract.Files;
-import com.matburt.mobileorg.provider.OrgDatabaseNew;
-import com.matburt.mobileorg.provider.OrgProviderUtil;
-
 import android.content.ContentResolver;
 import android.content.Context;
-import android.database.Cursor;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Log;
+
+import com.matburt.mobileorg.provider.OrgDatabaseNew;
+import com.matburt.mobileorg.provider.OrgFile;
+import com.matburt.mobileorg.provider.OrgNode;
 
 public class OrgFileParser {
 
@@ -26,100 +24,189 @@ public class OrgFileParser {
 
     private OrgDatabaseNew db;
     private ContentResolver resolver;    
-    
+        
     private ArrayList<HashMap<String, Integer>> todos = null;
 
-	private long file_id;
-	private static Pattern titlePattern = null;
 	private Stack<Integer> starStack;
 	private Stack<Long> parentIdStack;
 	private StringBuilder payload;
-	
-	/**
-	 * This toggles the use of the <after>TITLE: </after> field. It is now
-	 * disabled, see https://github.com/matburt/mobileorg-android/issues/114
-	 */
-	private boolean useTitleField = false;
 
 	public OrgFileParser(OrgDatabaseNew db, ContentResolver resolver) {
 		this.db = db;
 		this.resolver = resolver;
 	}
-	
-//	private long addNewFile(String filename, String fileIdentActual,
-//				String remoteChecksum, boolean visable) {
-//		resolver.delete(Files.buildFilenameUri(filename), null, null);
-////		db.removeFile(filename);
-////		return db.addOrUpdateFile(filename, fileIdentActual, remoteChecksum,
-////				visable);
-//	}
-	
-	public void parse(String filename, String filenameAlias, String checksum,
-			BufferedReader breader, Context context) {
-		this.useTitleField = PreferenceManager.getDefaultSharedPreferences(context)
-				.getBoolean("useAgendaTitle", false);
-		
-		//this.file_id = addNewFile(filename, filenameAlias, checksum, true);
 
-		this.todos = OrgProviderUtil.getGroupedTodos(resolver);
+	private void init(OrgFile orgFile) {
+		orgFile.setResolver(resolver);
+		orgFile.removeFile();
+		orgFile.addFile();
+
+	//	this.todos = OrgProviderUtil.getGroupedTodos(resolver);
 
 		this.starStack = new Stack<Integer>();
 		this.parentIdStack = new Stack<Long>();
 		
 		this.starStack.push(0);
-		Long fileID = new Long(0); //db.getFileNodeId(filename);
-		this.parentIdStack.push(fileID);
+		this.parentIdStack.push(orgFile.id);
 
 		this.payload = new StringBuilder();
-		
-		//db.getDB().beginTransaction();
+	}
+	
+	public void parse(OrgFile orgFile, BufferedReader breader, Context context) {
+		init(orgFile);
 		
 		try {
 			String currentLine;
+			while ((currentLine = breader.readLine()) != null)
+				parseLine(currentLine);
+			
+			// Add payload to the final node
+			db.fastInsertNodePayload(this.parentIdStack.peek(), this.payload.toString());
 
-			while ((currentLine = breader.readLine()) != null) {
+		} catch (IOException e) {}
+	}
 
-				if (TextUtils.isEmpty(currentLine))
-					continue;
+	private void parseLine(String line) {
+		if (TextUtils.isEmpty(line))
+			return;
 
-				int lineLength = currentLine.length();
-				int numstars = numberOfStars(currentLine, lineLength);
-				if (numstars > 0) {
-					parseHeading(currentLine, numstars);
+		int numstars = numberOfStars(line);
+		if (numstars > 0) {
+			db.fastInsertNodePayload(this.parentIdStack.peek(), this.payload.toString());
+			this.payload = new StringBuilder();
+			parseHeading(line, numstars);
+		} else {
+			payload.append(line).append("\n");
+		}
+	}
+
+	// TODO Replace with Regex matching
+	private static int numberOfStars(String thisLine) {
+		int numstars = 0;
+		int lineLength = thisLine.length();
+
+		for (int idx = 0; idx < lineLength; idx++) {
+			if (thisLine.charAt(idx) != '*')
+				break;
+			numstars++;
+		}
+
+		if (numstars >= lineLength || thisLine.charAt(numstars) != ' ')
+			numstars = 0;
+
+		return numstars;
+	}
+    
+	private void parseHeading(String thisLine, int numstars) {
+		if (numstars == starStack.peek()) { // Node on same level
+			starStack.pop();
+			parentIdStack.pop();
+		} else if (numstars < starStack.peek()) { // Node on lower level
+			while (numstars <= starStack.peek()) {
+				starStack.pop();
+				parentIdStack.pop();
+			}
+		}
+        
+		OrgNode node = parseLineIntoNode(thisLine, numstars);
+		long newId = db.fastInsertNode(node);
+        this.parentIdStack.push(newId);
+        starStack.push(numstars);        
+    }
+    
+	private OrgNode parseLineIntoNode(String thisLine, int numstars) {
+        String heading = thisLine.substring(numstars+1);
+        final OrgNode node = new OrgNode();
+        
+    	Matcher matcher = titlePattern.matcher(heading);
+		if (matcher.find()) {
+			if (matcher.group(TODO_GROUP) != null) {
+				String tempTodo = matcher.group(TODO_GROUP).trim();
+				if (TextUtils.isEmpty(tempTodo) == false && isValidTodo(tempTodo)) {
+					node.todo = tempTodo;
 				} else {
-					payload.append(currentLine).append("\n");
+					node.name = tempTodo + " ";
+				}
+			}
+			if (matcher.group(PRIORITY_GROUP) != null)
+				node.priority = matcher.group(PRIORITY_GROUP);
+			
+			node.name += matcher.group(TITLE_GROUP);
+			
+			if(this.useTitleField && matcher.group(AFTER_GROUP) != null) {
+				int start = matcher.group(AFTER_GROUP).indexOf("TITLE:");
+				int end = matcher.group(AFTER_GROUP).indexOf("</after>");
+				
+				if(start > -1 && end > -1) {
+					String title = matcher.group(AFTER_GROUP).substring(
+							start + 7, end);
+					
+					node.name = title + ">" + node.name;
 				}
 			}
 			
-			// Add payload to the final node
-			//db.addNodePayload(this.parentIdStack.peek(), this.payload.toString());
-
-		} catch (IOException e) {}
-		
-		if(filename.equals("agendas.org") && PreferenceManager.getDefaultSharedPreferences(context)
-				.getBoolean("combineBlockAgendas", false) && useTitleField) {
-			//combineBlockAgendas();
+			node.tags = matcher.group(TAGS_GROUP);
+			if (node.tags == null)
+					node.tags = "";
+			
+		} else {
+			Log.w(LT, "Title not matched: " + heading);
+			node.name = heading;
 		}
- 		
-		//db.getDB().setTransactionSuccessful();
-		//db.getDB().endTransaction();
-		
-		updateCalendar(filename, context);
-	}
+    	
+		return node;
+    }
+ 
+    private static final int TODO_GROUP = 1;
+    private static final int PRIORITY_GROUP = 2;
+    private static final int TITLE_GROUP = 3;
+    private static final int TAGS_GROUP = 4;
+    private static final int AFTER_GROUP = 7;
+    
+	private static final Pattern titlePattern = Pattern
+			.compile("^\\s?(?:([A-Z]{2,}:?\\s+)\\s*)?" + "(?:\\[\\#(.*)\\])?" + // Priority
+					"(.*?)" + 											// Title
+					"\\s*(?::([^\\s]+):)?" + 							// Tags
+					"(\\s*[!\\*])*" + 									// Habits
+					"(<before>.*</before>)?" + 							// Before
+					"(<after>.*</after>)?" + 							// After
+					"$");												// End of line
 	
-	private void updateCalendar(String filename, Context context) {
-		if (filename.equals("agendas.org") == false
-				&& PreferenceManager.getDefaultSharedPreferences(context)
-						.getBoolean("calendarEnabled", false)) {
-			try {
-				//CalendarSyncService cal = new CalendarSyncService(this.db, context);
-				//cal.syncFile(filename);
-			} catch(IllegalArgumentException e) {
-				Log.d("MobileOrg", "Failed to sync calendar");
-			}	
+	private boolean isValidTodo(String todo) {
+		for(HashMap<String, Integer> aTodo : this.todos) {
+			if(aTodo.containsKey(todo)) return true;
 		}
+		return false;
 	}
 
+	
+	
+	
+//	/**
+//	 * This toggles the use of the <after>TITLE: </after> field. It is now
+//	 * disabled, see https://github.com/matburt/mobileorg-android/issues/114
+//	 */
+	private boolean useTitleField = false;
+//	this.useTitleField = PreferenceManager.getDefaultSharedPreferences(context)
+//	.getBoolean("useAgendaTitle", false);
+	
+//	private void updateCalendar(String filename, Context context) {
+//	if (filename.equals("agendas.org") == false
+//			&& PreferenceManager.getDefaultSharedPreferences(context)
+//					.getBoolean("calendarEnabled", false)) {
+//		try {
+//			//CalendarSyncService cal = new CalendarSyncService(this.db, context);
+//			//cal.syncFile(filename);
+//		} catch(IllegalArgumentException e) {
+//			Log.d("MobileOrg", "Failed to sync calendar");
+//		}	
+//	}
+//}
+	
+	
+//	if(orgFile.filename.equals("agendas.org") && PreferenceManager.getDefaultSharedPreferences(context)
+//			.getBoolean("combineBlockAgendas", false) && useTitleField) {
+//		//combineBlockAgendas();
 	public static final String BLOCK_SEPARATOR_PREFIX = "#HEAD#";
 	
 //	private void combineBlockAgendas() {
@@ -203,119 +290,6 @@ public class OrgFileParser {
 //		}
 //	}
 	
-	private static int numberOfStars(String thisLine, int lineLength) {
-		int numstars = 0;
-
-		for (int idx = 0; idx < lineLength; idx++) {
-			if (thisLine.charAt(idx) != '*')
-				break;
-			numstars++;
-		}
-
-		if (numstars >= lineLength || thisLine.charAt(numstars) != ' ')
-			numstars = 0;
-
-		return numstars;
-	}
-    
-	private void parseHeading(String thisLine, int numstars) {
-		//db.addNodePayload(this.parentIdStack.peek(), this.payload.toString());
-		
-		this.payload = new StringBuilder();
-		
-		if (numstars == starStack.peek()) { // Node on same level
-			starStack.pop();
-			parentIdStack.pop();
-		} else if (numstars < starStack.peek()) { // Node on lower level
-			while (numstars <= starStack.peek()) {
-				starStack.pop();
-				parentIdStack.pop();
-			}
-		}
-        
-		long newId = parseLineIntoNode(thisLine, numstars);
-        this.parentIdStack.push(newId);
-        starStack.push(numstars);        
-    }
-    
-    private long parseLineIntoNode (String thisLine, int numstars) {
-        String heading = thisLine.substring(numstars+1);
-
-        String name = "";
-        String priority = "";
-        String todo = "";
-        String tags = "";
-        
-    	Pattern pattern = prepareTitlePattern();
-    	Matcher matcher = pattern.matcher(heading);
-		if (matcher.find()) {
-			if (matcher.group(TODO_GROUP) != null) {
-				String tempTodo = matcher.group(TODO_GROUP).trim();
-				if (tempTodo.length() > 0 && isValidTodo(tempTodo)) {
-					todo = tempTodo;
-				} else {
-					name = tempTodo + " ";
-				}
-			}
-			if (matcher.group(PRIORITY_GROUP) != null)
-				priority = matcher.group(PRIORITY_GROUP);
-			
-			name += matcher.group(TITLE_GROUP);
-			
-			if(this.useTitleField && matcher.group(AFTER_GROUP) != null) {
-				int start = matcher.group(AFTER_GROUP).indexOf("TITLE:");
-				int end = matcher.group(AFTER_GROUP).indexOf("</after>");
-				
-				if(start > -1 && end > -1) {
-					String title = matcher.group(AFTER_GROUP).substring(
-							start + 7, end);
-					
-					name = title + ">" + name;
-				}
-			}
-			
-			tags = matcher.group(TAGS_GROUP);
-			if (tags == null)
-					tags = "";
-			
-		} else {
-			Log.w(LT, "Title not matched: " + heading);
-			name = heading;
-		}
-    	
-		//long nodeId = db.addNode(this.parentIdStack.peek(), name, todo, priority, tags, this.file_id);
-    	//return nodeId;
-		return -1;
-    }
- 
-    private static final int TODO_GROUP = 1;
-    private static final int PRIORITY_GROUP = 2;
-    private static final int TITLE_GROUP = 3;
-    private static final int TAGS_GROUP = 4;
-    private static final int AFTER_GROUP = 7;
-    
-    private Pattern prepareTitlePattern() {
-    	if (OrgFileParser.titlePattern == null) {
-    		StringBuffer pattern = new StringBuffer();
-    		pattern.append("^\\s?(?:([A-Z]{2,}:?\\s+)\\s*)?"); 	// Todo
-    		pattern.append("(?:\\[\\#(.*)\\])?"); 				// Priority
-    		pattern.append("(.*?)"); 						// Title
-    		pattern.append("\\s*(?::([^\\s]+):)?"); 		// Tags
-    		pattern.append("(\\s*[!\\*])*"); 				// Habits
-    		pattern.append("(<before>.*</before>)?");		// Before
-    		pattern.append("(<after>.*</after>)?");			// After
-    		pattern.append("$");							// End of line
-    		OrgFileParser.titlePattern = Pattern.compile(pattern.toString());
-    	}
-		return OrgFileParser.titlePattern;
-    }
-	
-	private boolean isValidTodo(String todo) {
-		for(HashMap<String, Integer> aTodo : this.todos) {
-			if(aTodo.containsKey(todo)) return true;
-		}
-		return false;
-	}
 
 
 //	private Pattern editTitlePattern = Pattern
