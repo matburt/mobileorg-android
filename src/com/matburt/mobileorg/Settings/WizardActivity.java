@@ -427,24 +427,26 @@ public class WizardActivity extends Activity {
     }
 
     void loginUbuntuOne() {
-        UbuntuOneSynchronizer uos = new UbuntuOneSynchronizer((Context)this, (MobileOrgApplication)getApplication());
+        final UbuntuOneSynchronizer uos = new UbuntuOneSynchronizer((Context)this, (MobileOrgApplication)getApplication());
         uos.username = ubuntuoneEmail.getText().toString();
         uos.password = ubuntuonePass.getText().toString();
 
         //move this into another thread, so we don't get an ANR if the network is unavailable
+        Thread uiThread = new HandlerThread("UIHandler");
+        uiThread.start();
+        uiHandler = new UIHandler(((HandlerThread)uiThread).getLooper());
+        showToast("Logging in, please wait");
         if (uos.login()) {
-            showToast("Login Successfull");
+            showToastRemote("Login Successfull");
             loginButton.setEnabled(false);
-            //createDropboxList();
-            //allow scrolling to next page
             wizard.enablePage( 1 );
             uos.getBaseUser();
             createUbuntuOneList();
-            //display account info
         }
         else {
-            showToast("Login Failed");
+            showToastRemote("Login Failed");
         }
+
     }
     
     void showToast(String msg) {
@@ -495,6 +497,7 @@ public class WizardActivity extends Activity {
             }
             
         };
+
     
     void storeKeys(String key, String secret) {
         // Save the access key for later

@@ -40,6 +40,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPut;
+import org.apache.http.message.BasicHeader;
 import org.apache.http.client.ClientProtocolException;
 import android.os.Build;
 
@@ -144,6 +145,48 @@ private static final String BASE_TOKEN_NAME = "Ubuntu One @ MobileOrg:";
 	}
 
     protected void putRemoteFile(String filename, String contents) throws IOException {
+        try {
+            buildConsumer();
+            String latterPart = remoteIndexPath + filename;
+            latterPart = latterPart.replaceAll("/{2,}", "/");
+            String files_url = FILES_URL + root_path + latterPart;
+
+            URL url = new URL(files_url);
+            URI uri = new URI(url.getProtocol(), url.getUserInfo(), url.getHost(),
+                              url.getPort(), url.getPath(), url.getQuery(), url.getRef());
+            url = uri.toURL();
+
+            HttpPut request = new HttpPut(url.toString());
+            JSONObject createFile = new JSONObject();
+            createFile.put("kind", "file");
+            StringEntity se = new StringEntity(createFile.toString());  
+            //se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, "application/json"));
+            request.setEntity(se);
+            DefaultHttpClient httpClient = new DefaultHttpClient();
+            signRequest(request);
+            HttpResponse response = httpClient.execute(request);
+            verifyResponse(response);
+            JSONObject fileData = responseToJson(response);
+
+            String content_path = fileData.getString("content_path");
+            String content_url = FILES_BASE + content_path;
+
+            url = new URL(content_url);
+            uri = new URI(url.getProtocol(), url.getUserInfo(), url.getHost(),
+                              url.getPort(), url.getPath(), url.getQuery(), url.getRef());
+            url = uri.toURL();
+
+            request = new HttpPut(url.toString());
+            request.setEntity(new StringEntity(contents));
+            httpClient = new DefaultHttpClient();
+
+            signRequest(request);
+            response = httpClient.execute(request);
+            verifyResponse(response);
+
+        } catch (Exception e) {
+            Log.e("MobileOrg", "Exception in Ubuntu One Put File: " + e.toString());
+        }
     }
 
     protected BufferedReader getRemoteFile(String filename) {

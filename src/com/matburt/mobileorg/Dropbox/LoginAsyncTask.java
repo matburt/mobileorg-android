@@ -51,7 +51,7 @@ public class LoginAsyncTask extends AsyncTask<Void, Void, Integer> {
     DropboxLoginListener mLoginListener;
     Context mContext;
     
-    // Will just log in
+    //NOTE: Rename and refactor
     public LoginAsyncTask(Context context, DropboxLoginListener loginListener, Dropbox api, String user, String password) {
         super();
         mContext = context;
