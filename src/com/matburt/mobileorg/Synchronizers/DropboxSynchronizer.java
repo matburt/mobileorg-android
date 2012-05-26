@@ -15,7 +15,6 @@ import com.dropbox.client.DropboxAPI;
 import com.dropbox.client.DropboxAPI.Config;
 import com.dropbox.client.DropboxAPI.FileDownload;
 import com.matburt.mobileorg.R;
-import com.matburt.mobileorg.Parsing.MobileOrgApplication;
 import com.matburt.mobileorg.Parsing.OrgFileOld;
 
 public class DropboxSynchronizer extends Synchronizer {
@@ -26,8 +25,8 @@ public class DropboxSynchronizer extends Synchronizer {
 	private DropboxAPI dropboxAPI = new DropboxAPI();
     private com.dropbox.client.DropboxAPI.Config dropboxConfig;
     
-    public DropboxSynchronizer(Context context, MobileOrgApplication appInst) {
-    	super(context, appInst);
+    public DropboxSynchronizer(Context context) {
+    	super(context);
 
 		SharedPreferences sharedPreferences = PreferenceManager
 				.getDefaultSharedPreferences(context);
@@ -52,7 +51,7 @@ public class DropboxSynchronizer extends Synchronizer {
 
     
     protected void putRemoteFile(String filename, String contents) throws IOException {
-        this.appdb.removeFile(filename);
+    	//this.appdb.removeFile(filename);
        
 		OrgFileOld orgFile = new OrgFileOld(filename, context);
         BufferedWriter writer =  orgFile.getWriter();
@@ -63,7 +62,7 @@ public class DropboxSynchronizer extends Synchronizer {
         this.dropboxAPI.putFile("dropbox", this.remotePath, uploadFile);
     }
 
-	protected BufferedReader getRemoteFile(String filename) throws IOException {
+	public BufferedReader getRemoteFile(String filename) throws IOException {
 		String filePath = this.remotePath + filename;
 		FileDownload fd = dropboxAPI.getFileStream("dropbox", filePath, null);
 

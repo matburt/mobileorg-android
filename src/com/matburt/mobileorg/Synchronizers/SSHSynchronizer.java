@@ -14,7 +14,6 @@ import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
-import com.matburt.mobileorg.Parsing.MobileOrgApplication;
 
 public class SSHSynchronizer extends Synchronizer {
 	private final String LT = "MobileOrg";
@@ -27,8 +26,8 @@ public class SSHSynchronizer extends Synchronizer {
 
 	private Session session;
 
-	public SSHSynchronizer(Context context, MobileOrgApplication appInst) {
-		super(context, appInst);
+	public SSHSynchronizer(Context context) {
+		super(context);
 
 		path = appSettings.getString("scpPath", "");
 		user = appSettings.getString("scpUser", "");
@@ -146,7 +145,7 @@ public class SSHSynchronizer extends Synchronizer {
         }
 	}
 
-	protected BufferedReader getRemoteFile(String filename) throws Exception {
+	public BufferedReader getRemoteFile(String filename) throws Exception {
         StringBuilder contents = null;
         try {
             Channel channel = session.openChannel( "sftp" );

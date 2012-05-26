@@ -83,24 +83,29 @@ public class OrgContract {
 			return CONTENT_URI.buildUpon().appendPath(parentId).appendPath("children").build();
 		}
 		
+		public static Uri buildChildrenUri(long node_id) {
+			return buildChildrenUri(Long.toString(node_id));
+		}
 		public static final String DEFAULT_SORT = NAME + " ASC";
 		
-		public static final String[] DEFAULT_COLUMNS = {OrgData.ID, 
-			OrgData.NAME, OrgData.TODO, OrgData.TAGS, OrgData.PARENT_ID, 
-			OrgData.PAYLOAD, OrgData.LEVEL, OrgData.PRIORITY, OrgData.FILE_ID};
+		public static final String[] DEFAULT_COLUMNS = { ID, NAME, TODO, TAGS,
+				PARENT_ID, PAYLOAD, LEVEL, PRIORITY, FILE_ID };
 	}
 	
 	public static class Edits implements EditsColumns {
 		public static final Uri CONTENT_URI = 
 				BASE_CONTENT_URI.buildUpon().appendPath(PATH_EDITS).build();
+		
+		public static final String[] DEFAULT_COLUMNS = { ID, DATA_ID, TITLE,
+				TYPE, OLD_VALUE, NEW_VALUE };
 	}
 	
 	public static class Files implements FilesColumns {
 		public static final Uri CONTENT_URI = 
 				BASE_CONTENT_URI.buildUpon().appendPath(PATH_FILES).build();
 
-		public static final String[] DEFAULT_COLUMNS = {Files.ID,
-			Files.NAME, Files.FILENAME, Files.CHECKSUM, Files.NODE_ID};
+		public static final String[] DEFAULT_COLUMNS = { ID, NAME, FILENAME,
+				CHECKSUM, NODE_ID };
 		
 		public static String getId(Uri uri) {
 			return uri.getLastPathSegment();
@@ -115,7 +120,7 @@ public class OrgContract {
 					.appendPath("name").build();
 		}
 		
-		public static Uri buildFileIdUri(Long fileId) {
+		public static Uri buildIdUri(Long fileId) {
 			return CONTENT_URI.buildUpon().appendPath(fileId.toString()).build();
 		}
 	}

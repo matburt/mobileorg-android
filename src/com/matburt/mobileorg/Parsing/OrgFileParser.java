@@ -9,10 +9,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import android.content.ContentResolver;
-import android.content.Context;
-import android.preference.PreferenceManager;
 import android.text.TextUtils;
-import android.util.Log;
+import android.util.Pair;
 
 import com.matburt.mobileorg.provider.OrgDatabaseNew;
 import com.matburt.mobileorg.provider.OrgFile;
@@ -20,17 +18,12 @@ import com.matburt.mobileorg.provider.OrgNode;
 
 public class OrgFileParser {
 
-    private static final String LT = "MobileOrg";
-
     private OrgDatabaseNew db;
     private ContentResolver resolver;    
-        
-    private ArrayList<HashMap<String, Integer>> todos = null;
-
-	private Stack<Integer> starStack;
-	private Stack<Long> parentIdStack;
+ 
+    private ParseStack parseStack;
 	private StringBuilder payload;
-
+	
 	public OrgFileParser(OrgDatabaseNew db, ContentResolver resolver) {
 		this.db = db;
 		this.resolver = resolver;
@@ -41,18 +34,13 @@ public class OrgFileParser {
 		orgFile.removeFile();
 		orgFile.addFile();
 
-	//	this.todos = OrgProviderUtil.getGroupedTodos(resolver);
-
-		this.starStack = new Stack<Integer>();
-		this.parentIdStack = new Stack<Long>();
-		
-		this.starStack.push(0);
-		this.parentIdStack.push(orgFile.id);
+		this.parseStack = new ParseStack();
+		this.parseStack.add(0, orgFile.id);
 
 		this.payload = new StringBuilder();
 	}
 	
-	public void parse(OrgFile orgFile, BufferedReader breader, Context context) {
+	public void parse(OrgFile orgFile, BufferedReader breader) {
 		init(orgFile);
 		
 		try {
@@ -61,7 +49,7 @@ public class OrgFileParser {
 				parseLine(currentLine);
 			
 			// Add payload to the final node
-			db.fastInsertNodePayload(this.parentIdStack.peek(), this.payload.toString());
+			db.fastInsertNodePayload(parseStack.getCurrentNodeId(), this.payload.toString());
 
 		} catch (IOException e) {}
 	}
@@ -72,13 +60,28 @@ public class OrgFileParser {
 
 		int numstars = numberOfStars(line);
 		if (numstars > 0) {
-			db.fastInsertNodePayload(this.parentIdStack.peek(), this.payload.toString());
+			db.fastInsertNodePayload(parseStack.getCurrentNodeId(), this.payload.toString());
 			this.payload = new StringBuilder();
 			parseHeading(line, numstars);
 		} else {
 			payload.append(line).append("\n");
 		}
 	}
+	
+    
+	private void parseHeading(String thisLine, int numstars) {
+		if (numstars == parseStack.getCurrentLevel()) { // Node on same level
+			parseStack.pop();
+		} else if (numstars < parseStack.getCurrentLevel()) { // Node on lower level
+			while (numstars <= parseStack.getCurrentLevel())
+				parseStack.pop();
+		}
+        
+		final OrgNode node = new OrgNode();
+		node.parseLine(thisLine, numstars, useTitleField);
+		long newId = db.fastInsertNode(node);
+		parseStack.add(numstars, newId);      
+    }
 
 	// TODO Replace with Regex matching
 	private static int numberOfStars(String thisLine) {
@@ -97,90 +100,29 @@ public class OrgFileParser {
 		return numstars;
 	}
     
-	private void parseHeading(String thisLine, int numstars) {
-		if (numstars == starStack.peek()) { // Node on same level
-			starStack.pop();
-			parentIdStack.pop();
-		} else if (numstars < starStack.peek()) { // Node on lower level
-			while (numstars <= starStack.peek()) {
-				starStack.pop();
-				parentIdStack.pop();
-			}
-		}
-        
-		OrgNode node = parseLineIntoNode(thisLine, numstars);
-		long newId = db.fastInsertNode(node);
-        this.parentIdStack.push(newId);
-        starStack.push(numstars);        
-    }
-    
-	private OrgNode parseLineIntoNode(String thisLine, int numstars) {
-        String heading = thisLine.substring(numstars+1);
-        final OrgNode node = new OrgNode();
-        
-    	Matcher matcher = titlePattern.matcher(heading);
-		if (matcher.find()) {
-			if (matcher.group(TODO_GROUP) != null) {
-				String tempTodo = matcher.group(TODO_GROUP).trim();
-				if (TextUtils.isEmpty(tempTodo) == false && isValidTodo(tempTodo)) {
-					node.todo = tempTodo;
-				} else {
-					node.name = tempTodo + " ";
-				}
-			}
-			if (matcher.group(PRIORITY_GROUP) != null)
-				node.priority = matcher.group(PRIORITY_GROUP);
-			
-			node.name += matcher.group(TITLE_GROUP);
-			
-			if(this.useTitleField && matcher.group(AFTER_GROUP) != null) {
-				int start = matcher.group(AFTER_GROUP).indexOf("TITLE:");
-				int end = matcher.group(AFTER_GROUP).indexOf("</after>");
-				
-				if(start > -1 && end > -1) {
-					String title = matcher.group(AFTER_GROUP).substring(
-							start + 7, end);
-					
-					node.name = title + ">" + node.name;
-				}
-			}
-			
-			node.tags = matcher.group(TAGS_GROUP);
-			if (node.tags == null)
-					node.tags = "";
-			
-		} else {
-			Log.w(LT, "Title not matched: " + heading);
-			node.name = heading;
-		}
-    	
-		return node;
-    }
- 
-    private static final int TODO_GROUP = 1;
-    private static final int PRIORITY_GROUP = 2;
-    private static final int TITLE_GROUP = 3;
-    private static final int TAGS_GROUP = 4;
-    private static final int AFTER_GROUP = 7;
-    
-	private static final Pattern titlePattern = Pattern
-			.compile("^\\s?(?:([A-Z]{2,}:?\\s+)\\s*)?" + "(?:\\[\\#(.*)\\])?" + // Priority
-					"(.*?)" + 											// Title
-					"\\s*(?::([^\\s]+):)?" + 							// Tags
-					"(\\s*[!\\*])*" + 									// Habits
-					"(<before>.*</before>)?" + 							// Before
-					"(<after>.*</after>)?" + 							// After
-					"$");												// End of line
-	
-	private boolean isValidTodo(String todo) {
-		for(HashMap<String, Integer> aTodo : this.todos) {
-			if(aTodo.containsKey(todo)) return true;
-		}
-		return false;
-	}
+	private class ParseStack {
+		private Stack<Pair<Integer, Long>> parseStack;
 
-	
-	
+		public ParseStack() {
+			this.parseStack = new Stack<Pair<Integer, Long>>();
+		}
+		
+		public void add(int level, long nodeId) {
+			parseStack.push(new Pair<Integer, Long>(level, nodeId));
+		}
+		
+		public void pop() {
+			this.parseStack.pop();
+		}
+		
+		public int getCurrentLevel() {
+			return parseStack.peek().first;
+		}
+		
+		public long getCurrentNodeId() {
+			return parseStack.peek().second;
+		}
+	}
 	
 //	/**
 //	 * This toggles the use of the <after>TITLE: </after> field. It is now

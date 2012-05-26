@@ -2,10 +2,6 @@ package com.matburt.mobileorg.Settings;
 
 import java.util.ArrayList;
 
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
-import android.os.HandlerThread;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -13,6 +9,10 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.res.Resources;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.Looper;
+import android.os.Message;
 import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -35,10 +35,9 @@ import android.widget.Toast;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Dropbox.Dropbox;
 import com.matburt.mobileorg.Dropbox.DropboxLoginListener;
-import com.matburt.mobileorg.Views.PageFlipView;
-import com.matburt.mobileorg.Synchronizers.WebDAVSynchronizer;
 import com.matburt.mobileorg.Synchronizers.SSHSynchronizer;
-import com.matburt.mobileorg.Parsing.MobileOrgApplication;
+import com.matburt.mobileorg.Synchronizers.WebDAVSynchronizer;
+import com.matburt.mobileorg.Views.PageFlipView;
 
 public class WizardActivity extends Activity {
 
@@ -317,7 +316,7 @@ public class WizardActivity extends Activity {
 
         Thread loginThread = new Thread() {
                 public void run() {
-                    SSHSynchronizer sds = new SSHSynchronizer(ctxt, (MobileOrgApplication)getApplication());
+                    SSHSynchronizer sds = new SSHSynchronizer(ctxt);
                     String extra = sds.testConnection(pathActual, userActual, passActual, hostActual, portActual);
                     if (extra != null) {
                         showToastRemote("Login failed: " + extra);
@@ -342,7 +341,7 @@ public class WizardActivity extends Activity {
 
         Thread loginThread = new Thread() {
                 public void run() {
-                    WebDAVSynchronizer wds = new WebDAVSynchronizer(ctxt, (MobileOrgApplication)getApplication());
+                    WebDAVSynchronizer wds = new WebDAVSynchronizer(ctxt);
                     String extra = wds.testConnection(urlActual, userActual, passActual);
                     if (extra != null) {
                         showToastRemote("Login failed: " + extra);

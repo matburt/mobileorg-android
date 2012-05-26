@@ -1,13 +1,15 @@
 package com.matburt.mobileorg.Synchronizers;
 
 import java.io.BufferedReader;
+
 import android.content.Context;
-import com.matburt.mobileorg.Parsing.MobileOrgApplication;
+
+import com.matburt.mobileorg.Parsing.OrgFileParser;
 
 public class NullSynchronizer extends Synchronizer {
 
-    public NullSynchronizer(Context parentContext, MobileOrgApplication appInst) {
-        super(parentContext, appInst);
+    public NullSynchronizer(Context parentContext) {
+        super(parentContext);
     }
 
     public boolean isConfigured() {
@@ -17,12 +19,12 @@ public class NullSynchronizer extends Synchronizer {
     protected void putRemoteFile(String filename, String contents) {
     }
 
-    protected BufferedReader getRemoteFile(String filename) {
+    public BufferedReader getRemoteFile(String filename) {
         return null;
     }
 
     @Override
-    public void sync() {
+    public void sync(OrgFileParser parser) {
         announceSyncDone();
     }
 

@@ -22,18 +22,34 @@ public class OrgFile {
 	}
 	
 	public OrgFile(String filename, String name, String checksum) {
-		this.filename = filename;
-		this.name = name;
 		this.checksum = checksum;
+		this.filename = filename;
+		
+        if (name == null || name.equals("null"))
+            this.name = filename;
+        else
+        	this.name = name;
 	}
 	
 	public OrgFile(Cursor cursor) {
 		set(cursor);
 	}
 	
-	public OrgFile(long fileId, ContentResolver resolver) {
-		Cursor cursor = resolver.query(Files.buildFileIdUri(fileId),
+	public OrgFile(long id, ContentResolver resolver) {
+		Cursor cursor = resolver.query(Files.buildIdUri(id),
 				Files.DEFAULT_COLUMNS, null, null, null);
+		if(cursor == null || cursor.getCount() < 1)
+			throw new IllegalArgumentException("File with id \"" + id + "\" not found");
+		set(cursor);
+		cursor.close();
+		this.resolver = resolver;
+	}
+	
+	public OrgFile(String filename, ContentResolver resolver) {
+		Cursor cursor = resolver.query(Files.CONTENT_URI,
+				Files.DEFAULT_COLUMNS, Files.FILENAME + "=?", new String[] {filename}, null);
+		if(cursor == null || cursor.getCount() < 1)
+			throw new IllegalArgumentException("File \"" + filename + "\" not found");
 		set(cursor);
 		cursor.close();
 		this.resolver = resolver;
@@ -60,13 +76,11 @@ public class OrgFile {
 			updateFile();
 	}
 	
-	public long addFile() {
-		long nodeId = -1;
+	public void addFile() {
 		if(includeInOutline)
 			this.nodeId = addFileOrgDataNode(); 
 		
 		this.id = addFileNode(nodeId);
-		return id;
 	}
 	
 	private long addFileNode(long nodeId) {
@@ -87,8 +101,8 @@ public class OrgFile {
 		orgdata.put(OrgData.PARENT_ID, -1);
 		assert(resolver != null);
 		Uri uri = resolver.insert(OrgData.CONTENT_URI, orgdata);
-		long id = Long.parseLong(OrgData.getId(uri));
-		return id;
+		long nodeId = Long.parseLong(OrgData.getId(uri));
+		return nodeId;
 	}
 	
 	public long updateFile() {
@@ -102,14 +116,21 @@ public class OrgFile {
 	
 	private long removeFileNode() {
 		assert(resolver != null);
-		return resolver.delete(Files.buildFileIdUri(id), Files.NAME + "=? AND "
+		return resolver.delete(Files.buildIdUri(id), Files.NAME + "=? AND "
 				+ Files.FILENAME + "=?", new String[] { name, filename });
 	}
 	
 	private long removeFileOrgDataNodes() {
 		assert(resolver != null);
-		return resolver.delete(OrgData.CONTENT_URI, OrgData.FILE_ID + "=?",
-				new String[] { Long.toString(id) });
+		int total = resolver.delete(OrgData.CONTENT_URI, OrgData.FILE_ID + "=?",
+				new String[] { Long.toString(nodeId) });
+		total += resolver.delete(OrgData.buildIdUri(nodeId), null, null);
+		return total;
+	}
+	
+	public boolean isEncrypted() {
+		return filename.endsWith(".gpg") || filename.endsWith(".pgp")
+				|| filename.endsWith(".enc") || filename.endsWith(".asc");
 	}
 	
 	public boolean equals(OrgFile file) {

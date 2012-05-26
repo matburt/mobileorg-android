@@ -32,7 +32,6 @@ import android.util.Log;
 
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Gui.CertificateConflictActivity;
-import com.matburt.mobileorg.Parsing.MobileOrgApplication;
 import com.matburt.mobileorg.Parsing.OrgFileOld;
 
 public class WebDAVSynchronizer extends Synchronizer {
@@ -98,8 +97,8 @@ public class WebDAVSynchronizer extends Synchronizer {
     private String username;
     private String password;
 	
-	public WebDAVSynchronizer(Context parentContext, MobileOrgApplication appInst) {
-		super(parentContext, appInst);
+	public WebDAVSynchronizer(Context parentContext) {
+		super(parentContext);
 
 		SharedPreferences sharedPreferences = PreferenceManager
 				.getDefaultSharedPreferences(context);
@@ -179,7 +178,7 @@ public class WebDAVSynchronizer extends Synchronizer {
 		putUrlFile(urlActual, contents);
 	}
 
-	protected BufferedReader getRemoteFile(String filename) throws IOException, CertificateException,
+	public BufferedReader getRemoteFile(String filename) throws IOException, CertificateException,
                                                                    SSLHandshakeException, Exception {
 		String orgUrl = this.remotePath + filename;
         InputStream mainFile = null;

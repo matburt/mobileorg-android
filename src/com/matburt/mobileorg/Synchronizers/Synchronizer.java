@@ -2,14 +2,16 @@ package com.matburt.mobileorg.Synchronizers;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.security.cert.CertificateException;
+
 import javax.net.ssl.SSLHandshakeException;
 
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -21,11 +23,12 @@ import android.widget.RemoteViews;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Gui.FileDecryptionActivity;
 import com.matburt.mobileorg.Gui.OutlineActivity;
-import com.matburt.mobileorg.Parsing.MobileOrgApplication;
-import com.matburt.mobileorg.Parsing.OrgDatabase;
 import com.matburt.mobileorg.Parsing.OrgFileOld;
 import com.matburt.mobileorg.Parsing.OrgFileParser;
+import com.matburt.mobileorg.provider.OrgContract.Files;
 import com.matburt.mobileorg.provider.OrgFile;
+import com.matburt.mobileorg.provider.OrgProviderUtil;
+import com.matburt.mobileorg.provider.OrgContract.Edits;
 
 /**
  * This class implements many of the operations that need to be done on
@@ -38,6 +41,8 @@ import com.matburt.mobileorg.provider.OrgFile;
 abstract public class Synchronizer {
 	public static final String SYNC_UPDATE = "com.matburt.mobileorg.Synchronizer.action.SYNC_UPDATE";
 	public final static String SYNC_DONE = "sync_done";
+	
+	public static final String CAPTURE_FILE = "mobileorg.org";
 
 	/**
 	 * Called before running the synchronizer to ensure that it's configuration
@@ -60,7 +65,7 @@ abstract public class Synchronizer {
 	 * @param filename
 	 *            Name of the file, without path
 	 */
-	protected abstract BufferedReader getRemoteFile(String filename)
+	public abstract BufferedReader getRemoteFile(String filename)
         throws Exception, IOException, CertificateException, SSLHandshakeException;
 
 	/**
@@ -69,16 +74,17 @@ abstract public class Synchronizer {
 	protected abstract void postSynchronize();
 
 	protected Context context;
-	protected OrgDatabase appdb;
 	protected SharedPreferences appSettings;
 	protected Resources r;
+	private OrgFileParser parser;
+	private ContentResolver resolver;
 
-	Synchronizer(Context context, MobileOrgApplication appInst) {
+	protected Synchronizer(Context context) {
 		this.context = context;
+		this.resolver = context.getContentResolver();
 		this.r = this.context.getResources();
 		this.appSettings = PreferenceManager
 				.getDefaultSharedPreferences(context.getApplicationContext());
-		this.appdb = appInst.getDB();
 	}
 
 	/**
@@ -89,7 +95,8 @@ abstract public class Synchronizer {
 		return true;
 	}
 
-	public void sync() {
+	public void sync(OrgFileParser parser) {
+		this.parser = parser;
 		if (!isConfigured()) {
 			errorNotification("Sync not configured");
 			return;
@@ -98,7 +105,7 @@ abstract public class Synchronizer {
 		setupNotification();
 		updateNotification(0,
 				context.getString(R.string.sync_synchronizing_changes) + " "
-						+ OrgFileOld.CAPTURE_FILE);
+						+ CAPTURE_FILE);
 		try {
 			pushCaptures();
 			pull();
@@ -129,11 +136,11 @@ abstract public class Synchronizer {
 	 * file combine their content. This combined version is transfered to the
 	 * remote.
 	 */
-	private void pushCaptures() throws Exception, IOException,
+	public void pushCaptures() throws Exception, IOException,
 			CertificateException, SSLHandshakeException {
-		final String filename = OrgFileOld.CAPTURE_FILE;
-		String localContents = this.appdb.fileToString(filename);
-		localContents += this.appdb.editsToString();
+		final String filename = CAPTURE_FILE;
+		String localContents = OrgProviderUtil.fileToString(filename, resolver);
+		localContents += OrgProviderUtil.editsToString(resolver);
 
 		if (localContents.equals(""))
 			return;
@@ -145,8 +152,8 @@ abstract public class Synchronizer {
 
 		putRemoteFile(filename, localContents);
 
-		this.appdb.clearEdits();
-		this.appdb.removeFile(filename);
+		resolver.delete(Edits.CONTENT_URI, null, null);
+		resolver.delete(Files.buildFilenameUri(filename), null, null);
 	}
 
 	/**
@@ -154,7 +161,7 @@ abstract public class Synchronizer {
 	 * host. Using those files, it determines the other files that need updating
 	 * and downloads them.
 	 */
-	private void pull() throws SSLHandshakeException, CertificateException, IOException, Exception {
+	public void pull() throws SSLHandshakeException, CertificateException, IOException, Exception {
 		updateNotification(20, context.getString(R.string.downloading)
 				+ " checksums.dat");
 		String remoteChecksumContents = "";
@@ -165,7 +172,7 @@ abstract public class Synchronizer {
 
 		HashMap<String, String> remoteChecksums = OrgFileParser
 				.getChecksums(remoteChecksumContents);
-		HashMap<String, String> localChecksums = this.appdb.getFileChecksums();
+		HashMap<String, String> localChecksums = OrgProviderUtil.getFileChecksums(resolver);
 
 		ArrayList<String> filesToGet = new ArrayList<String>();
 
@@ -176,7 +183,7 @@ abstract public class Synchronizer {
 			filesToGet.add(key);
 		}
 
-		filesToGet.remove(OrgFileOld.CAPTURE_FILE);
+		filesToGet.remove(CAPTURE_FILE);
 
 		if (filesToGet.size() == 0)
 			return;
@@ -188,69 +195,58 @@ abstract public class Synchronizer {
 
 		remoteIndexContents = OrgFileOld.read(getRemoteFile("index.org"));
 
-		this.appdb.setTodos(OrgFileParser
-				.getTodosFromIndex(remoteIndexContents));
-		this.appdb.setPriorities(OrgFileParser
-				.getPrioritiesFromIndex(remoteIndexContents));
-		this.appdb.setTags(OrgFileParser.getTagsFromIndex(remoteIndexContents));
+		OrgProviderUtil.setTodos(OrgFileParser.getTodosFromIndex(remoteIndexContents), resolver);
+		OrgProviderUtil.setPriorities(OrgFileParser
+				.getPrioritiesFromIndex(remoteIndexContents), resolver);
+		OrgProviderUtil.setTags(OrgFileParser.getTagsFromIndex(remoteIndexContents), resolver);
 		HashMap<String, String> filenameMap = OrgFileParser
 				.getFilesFromIndex(remoteIndexContents);
-		this.appdb.addOrUpdateFile("index.org", filenameMap.get("index.org"),
-				remoteChecksums.get("index.org"), false);
 
-		// TODO Enable again with new parser
-//		OrgFileParser parser = new OrgFileParser(this.appdb);
-//
-//		int i = 0;
-//		for (String filename : filesToGet) {
-//			i++;
-//			updateNotification(i, context.getString(R.string.downloading) + " "
-//					+ filename, filesToGet.size());
-//			Log.d("MobileOrg",
-//					"Getting " + filename + "/" + filenameMap.get(filename));
-//
-//			getAndParseFile(filename, filenameMap.get(filename),
-//					remoteChecksums.get(filename), parser);
-//		}
+		int i = 0;
+		for (String filename : filesToGet) {
+			i++;
+			updateNotification(i, context.getString(R.string.downloading) + " "
+					+ filename, filesToGet.size());
+			Log.d("MobileOrg",
+					"Getting " + filename + "/" + filenameMap.get(filename));
+
+			OrgFile orgFile = new OrgFile(filename, filenameMap.get(filename), remoteChecksums.get(filename));
+			getAndParseFile(orgFile);
+		}
 	}
 	
-	private void getAndParseFile(String filename, String filenameAlias,
-			String remoteChecksum, OrgFileParser parser)
+	private void getAndParseFile(OrgFile orgFile)
 			throws SSLHandshakeException, CertificateException, IOException,
 			Exception {
-		BufferedReader rfile = getRemoteFile(filename);
+		BufferedReader breader = getRemoteFile(orgFile.filename);
 
-		if (rfile == null) {
-			Log.w("MobileOrg", "File does not seem to exist: " + filename);
+		if (breader == null) {
+			Log.w("MobileOrg", "File does not seem to exist: " + orgFile.filename);
 			return;
 		}
 
-        String fileIdentActual = filenameAlias;
-        if (fileIdentActual == null || fileIdentActual.equals("null"))
-            fileIdentActual = filename;
-
 		// TODO Generate checksum of file and compare to remoteChecksum
 		
-		if (filename.endsWith(".gpg") || filename.endsWith(".pgp")
-            || filename.endsWith(".enc") || filename.endsWith(".asc"))
-        	decryptAndParseFile(filename, fileIdentActual, remoteChecksum, rfile);
+		if (orgFile.isEncrypted())
+        	decryptAndParseFile(orgFile, breader);
         else {
-        	OrgFile file = new OrgFile(filename, fileIdentActual, remoteChecksum);
-        	parser.parse(file, rfile, context);
+        	parser.parse(orgFile, breader);
         }
 	}
 	
-	private void decryptAndParseFile(String filename, String filenameAlias,
-			String checksum, BufferedReader reader) throws IOException {
+	private void decryptAndParseFile(OrgFile orgFile, BufferedReader reader) throws IOException {
 		Intent intent = new Intent(context, FileDecryptionActivity.class);
 		intent.putExtra("data", OrgFileOld.read(reader).getBytes());
-		intent.putExtra("filename",filename);
-		intent.putExtra("filenameAlias", filenameAlias);
-		intent.putExtra("checksum", checksum);
+		intent.putExtra("filename", orgFile.filename);
+		intent.putExtra("filenameAlias", orgFile.name);
+		intent.putExtra("checksum", orgFile.checksum);
 		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		context.startActivity(intent);
 	}
 
+	
+	
+	
 	private NotificationManager notificationManager;
 	private Notification notification;
 	private int notifyRef = 1;
