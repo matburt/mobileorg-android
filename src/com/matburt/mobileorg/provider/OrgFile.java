@@ -81,6 +81,9 @@ public class OrgFile {
 			this.nodeId = addFileOrgDataNode(); 
 		
 		this.id = addFileNode(nodeId);
+		ContentValues values = new ContentValues();
+		values.put(OrgData.FILE_ID, id);
+		resolver.update(OrgData.buildIdUri(nodeId), values, null, null);
 	}
 	
 	private long addFileNode(long nodeId) {

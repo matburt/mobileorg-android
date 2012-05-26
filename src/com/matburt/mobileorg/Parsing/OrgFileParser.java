@@ -23,6 +23,7 @@ public class OrgFileParser {
  
     private ParseStack parseStack;
 	private StringBuilder payload;
+	private OrgFile orgFile;
 	
 	public OrgFileParser(OrgDatabase db, ContentResolver resolver) {
 		this.db = db;
@@ -33,9 +34,10 @@ public class OrgFileParser {
 		orgFile.setResolver(resolver);
 		orgFile.removeFile();
 		orgFile.addFile();
+		this.orgFile = orgFile;
 
 		this.parseStack = new ParseStack();
-		this.parseStack.add(0, orgFile.id);
+		this.parseStack.add(0, orgFile.nodeId);
 
 		this.payload = new StringBuilder();
 	}
@@ -80,6 +82,8 @@ public class OrgFileParser {
         
 		final OrgNode node = new OrgNode();
 		node.parseLine(thisLine, numstars, useTitleField);
+		node.fileId = orgFile.id;
+		node.parentId = parseStack.getCurrentNodeId();
 		long newId = db.fastInsertNode(node);
 		parseStack.add(numstars, newId);      
     }
@@ -391,8 +395,3 @@ public class OrgFileParser {
 		return tagList;
 	}
 }
-
-
-
-
-
