@@ -1,24 +1,23 @@
 package com.matburt.mobileorg.Synchronizers;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
 import android.content.Context;
 import android.preference.PreferenceManager;
 
-import com.matburt.mobileorg.Parsing.OrgFileOld;
-
-public class SDCardSynchronizer extends Synchronizer {	
+public class SDCardSynchronizer implements SynchronizerInterface {	
 
 	private String remoteIndexPath;
 	private String remotePath;
 
     public SDCardSynchronizer(Context context) {
-    	super(context);
 		this.remoteIndexPath = PreferenceManager.getDefaultSharedPreferences(
 				context).getString("indexFilePath", "");
 	
@@ -32,11 +31,13 @@ public class SDCardSynchronizer extends Synchronizer {
         return true;
     }
 
-	protected void putRemoteFile(String filename, String contents) throws IOException {
+	public void putRemoteFile(String filename, String contents) throws IOException {
 		String outfilePath = this.remotePath + filename;
 		
-		OrgFileOld orgfileOut = new OrgFileOld(outfilePath, context);
-		orgfileOut.write(outfilePath, contents);
+		File file = new File(outfilePath);
+		BufferedWriter writer = new BufferedWriter(new FileWriter(file, true));
+		writer.write(contents);
+		writer.close();
 	}
 
 	public BufferedReader getRemoteFile(String filename) throws FileNotFoundException {
@@ -48,6 +49,6 @@ public class SDCardSynchronizer extends Synchronizer {
 
 
 	@Override
-	protected void postSynchronize() {		
+	public void postSynchronize() {		
 	}
 }

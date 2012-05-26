@@ -38,53 +38,24 @@ import com.matburt.mobileorg.provider.OrgContract.Edits;
  * {@link #putRemoteFile(String, String)} and {@link #getRemoteFile(String)} are
  * needed.
  */
-abstract public class Synchronizer {
+public class Synchronizer {
 	public static final String SYNC_UPDATE = "com.matburt.mobileorg.Synchronizer.action.SYNC_UPDATE";
 	public final static String SYNC_DONE = "sync_done";
 	
 	public static final String CAPTURE_FILE = "mobileorg.org";
 
-	/**
-	 * Called before running the synchronizer to ensure that it's configuration
-	 * is in a valid state.
-	 */
-	protected abstract boolean isConfigured();
-
-	/**
-	 * Replaces the file on the remote end with the given content.
-	 * 
-	 * @param filename Name of the file, without path
-	 * @param contents Content of the new file
-	 */
-	protected abstract void putRemoteFile(String filename, String contents)
-        throws Exception, IOException;
-
-	/**
-	 * Returns a BufferedReader to the remote file.
-	 * 
-	 * @param filename
-	 *            Name of the file, without path
-	 */
-	public abstract BufferedReader getRemoteFile(String filename)
-        throws Exception, IOException, CertificateException, SSLHandshakeException;
-
-	/**
-	 * Use this to disconnect from any services and cleanup.
-	 */
-	protected abstract void postSynchronize();
-
 	protected Context context;
 	protected SharedPreferences appSettings;
-	protected Resources r;
 	private OrgFileParser parser;
 	private ContentResolver resolver;
+	private SynchronizerInterface syncher;
 
-	protected Synchronizer(Context context) {
+	public Synchronizer(Context context, SynchronizerInterface syncher) {
 		this.context = context;
 		this.resolver = context.getContentResolver();
-		this.r = this.context.getResources();
 		this.appSettings = PreferenceManager
 				.getDefaultSharedPreferences(context.getApplicationContext());
+		this.syncher = syncher;
 	}
 
 	/**
@@ -97,7 +68,7 @@ abstract public class Synchronizer {
 
 	public void sync(OrgFileParser parser) {
 		this.parser = parser;
-		if (!isConfigured()) {
+		if (!syncher.isConfigured()) {
 			errorNotification("Sync not configured");
 			return;
 		}
@@ -144,13 +115,13 @@ abstract public class Synchronizer {
 
 		if (localContents.equals(""))
 			return;
-		String remoteContent = OrgFileOld.read(getRemoteFile(filename));
+		String remoteContent = OrgFileOld.read(syncher.getRemoteFile(filename));
 		updateNotification(10);
 
 		if (remoteContent.indexOf("{\"error\":") == -1)
 			localContents = remoteContent + "\n" + localContents;
 
-		putRemoteFile(filename, localContents);
+		syncher.putRemoteFile(filename, localContents);
 
 		resolver.delete(Edits.CONTENT_URI, null, null);
 		resolver.delete(Files.buildFilenameUri(filename), null, null);
@@ -166,7 +137,7 @@ abstract public class Synchronizer {
 				+ " checksums.dat");
 		String remoteChecksumContents = "";
 
-		remoteChecksumContents = OrgFileOld.read(getRemoteFile("checksums.dat"));
+		remoteChecksumContents = OrgFileOld.read(syncher.getRemoteFile("checksums.dat"));
 
 		updateNotification(40);
 
@@ -193,7 +164,7 @@ abstract public class Synchronizer {
 				+ " index.org");
 		String remoteIndexContents = "";
 
-		remoteIndexContents = OrgFileOld.read(getRemoteFile("index.org"));
+		remoteIndexContents = OrgFileOld.read(syncher.getRemoteFile("index.org"));
 
 		OrgProviderUtil.setTodos(OrgFileParser.getTodosFromIndex(remoteIndexContents), resolver);
 		OrgProviderUtil.setPriorities(OrgFileParser
@@ -218,7 +189,7 @@ abstract public class Synchronizer {
 	private void getAndParseFile(OrgFile orgFile)
 			throws SSLHandshakeException, CertificateException, IOException,
 			Exception {
-		BufferedReader breader = getRemoteFile(orgFile.filename);
+		BufferedReader breader = syncher.getRemoteFile(orgFile.filename);
 
 		if (breader == null) {
 			Log.w("MobileOrg", "File does not seem to exist: " + orgFile.filename);
@@ -335,6 +306,6 @@ abstract public class Synchronizer {
 	}
 
 	public void close() {
-		this.postSynchronize();
+		syncher.postSynchronize();
 	}
 }

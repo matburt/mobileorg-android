@@ -26,6 +26,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.content.res.Resources;
 import android.preference.PreferenceManager;
 import android.util.Base64;
 import android.util.Log;
@@ -34,7 +35,7 @@ import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Gui.CertificateConflictActivity;
 import com.matburt.mobileorg.Parsing.OrgFileOld;
 
-public class WebDAVSynchronizer extends Synchronizer {
+public class WebDAVSynchronizer implements SynchronizerInterface {
 
     class IntelligentX509TrustManager implements X509TrustManager {
         Context c;
@@ -96,12 +97,14 @@ public class WebDAVSynchronizer extends Synchronizer {
 	private String remotePath;
     private String username;
     private String password;
+	private Context context;
+	private Resources r;
 	
 	public WebDAVSynchronizer(Context parentContext) {
-		super(parentContext);
-
+		this.context = parentContext;
+		this.r = context.getResources();
 		SharedPreferences sharedPreferences = PreferenceManager
-				.getDefaultSharedPreferences(context);
+				.getDefaultSharedPreferences(parentContext);
 
 		this.remoteIndexPath = sharedPreferences.getString("webUrl", "");
 		this.remotePath = getRootUrl();
@@ -173,7 +176,7 @@ public class WebDAVSynchronizer extends Synchronizer {
         this.context.startActivity(i);
     }
 	
-	protected void putRemoteFile(String filename, String contents) throws IOException {
+	public void putRemoteFile(String filename, String contents) throws IOException {
 		String urlActual = this.getRootUrl() + filename;
 		putUrlFile(urlActual, contents);
 	}
@@ -320,6 +323,6 @@ public class WebDAVSynchronizer extends Synchronizer {
 	}
 
 	@Override
-	protected void postSynchronize() {		
+	public void postSynchronize() {		
 	}
 }
