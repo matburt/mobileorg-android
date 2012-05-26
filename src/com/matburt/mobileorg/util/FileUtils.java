@@ -1,4 +1,4 @@
-package com.matburt.mobileorg.Parsing;
+package com.matburt.mobileorg.util;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -17,7 +17,7 @@ import android.content.SharedPreferences;
 import android.os.Environment;
 import android.preference.PreferenceManager;
 
-public class OrgFileOld {
+public class FileUtils {
 
 	public static final String CAPTURE_FILE = "mobileorg.org";
 	public static final String CAPTURE_FILE_ALIAS = "Captures";
@@ -25,7 +25,7 @@ public class OrgFileOld {
 	private Context context;
 	private String fileName;
 
-	public OrgFileOld(String file, Context context) {
+	public FileUtils(String file, Context context) {
 		this.context = context;
 		this.fileName = file.replace("/", "_");
 	}

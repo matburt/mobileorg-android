@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import com.matburt.mobileorg.Services.CalendarSyncService;
+import com.matburt.mobileorg.util.FileUtils;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -15,7 +16,7 @@ import android.database.sqlite.SQLiteStatement;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
 
-public class OrgDatabase extends SQLiteOpenHelper {
+public class OrgDatabaseOld extends SQLiteOpenHelper {
 	private static final String DATABASE_NAME = "MobileOrg.db";
 	private static final int DATABASE_VERSION = 4;
 	
@@ -39,7 +40,7 @@ public class OrgDatabase extends SQLiteOpenHelper {
 	private SQLiteStatement addPayloadStatement;
 
 
-	public OrgDatabase(Context context) {
+	public OrgDatabaseOld(Context context) {
 		super(context, DATABASE_NAME, null, DATABASE_VERSION);
 		this.context = context;
 		this.db = this.getWritableDatabase();
@@ -170,7 +171,7 @@ public class OrgDatabase extends SQLiteOpenHelper {
 	
 
 	public void removeFile(String filename) {
-		OrgFileOld orgfile = new OrgFileOld(filename, context);
+		FileUtils orgfile = new FileUtils(filename, context);
 		orgfile.remove();
 		
 		Long file_id = this.getFileId(filename);
@@ -713,7 +714,7 @@ public class OrgDatabase extends SQLiteOpenHelper {
 			changes += cursor.getCount();
 		cursor.close();
 		
-		long file_id = this.getFileId(OrgFileOld.CAPTURE_FILE);
+		long file_id = this.getFileId(FileUtils.CAPTURE_FILE);
 		cursor = db.query("orgdata", new String[] { "_id" }, "file_id=?",
 				new String[] { Long.toString(file_id) }, null, null, null);
 		if(cursor != null) {

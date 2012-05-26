@@ -11,12 +11,12 @@ import android.widget.Spinner;
 
 import com.matburt.mobileorg.Parsing.MobileOrgApplication;
 import com.matburt.mobileorg.Parsing.NodeWrapper;
-import com.matburt.mobileorg.Parsing.OrgDatabase;
-import com.matburt.mobileorg.Parsing.OrgFileOld;
+import com.matburt.mobileorg.Parsing.OrgDatabaseOld;
+import com.matburt.mobileorg.util.FileUtils;
 
 public class LocationTableRow {
 	private NodeWrapper node;
-	private OrgDatabase db;
+	private OrgDatabaseOld db;
 	private LinearLayout locationView;
 	private LocationEntry lastEntry;
 	
@@ -77,7 +77,7 @@ public class LocationTableRow {
 		
 		public void setupSpinner() {
 			if(this.node == null && this.child == null)
-				setupSpinner(OrgFileOld.CAPTURE_FILE);
+				setupSpinner(FileUtils.CAPTURE_FILE);
 			else
 				setupSpinner(this.node.getName());
 		}

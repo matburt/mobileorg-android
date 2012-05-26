@@ -15,9 +15,11 @@ import com.matburt.mobileorg.Synchronizers.DropboxSynchronizer;
 import com.matburt.mobileorg.Synchronizers.SDCardSynchronizer;
 import com.matburt.mobileorg.Synchronizers.SSHSynchronizer;
 import com.matburt.mobileorg.Synchronizers.Synchronizer;
+import com.matburt.mobileorg.Synchronizers.SynchronizerInterface;
+import com.matburt.mobileorg.Synchronizers.SynchronizerNotification;
 import com.matburt.mobileorg.Synchronizers.WebDAVSynchronizer;
 import com.matburt.mobileorg.Synchronizers.NullSynchronizer;
-import com.matburt.mobileorg.provider.OrgDatabaseNew;
+import com.matburt.mobileorg.provider.OrgDatabase;
 
 public class SyncService extends Service implements
 		SharedPreferences.OnSharedPreferenceChangeListener {
@@ -66,33 +68,38 @@ public class SyncService extends Service implements
 	}
 
     public Synchronizer getSynchronizer() {
-        Synchronizer synchronizer = null;
+        SynchronizerInterface synchronizer = null;
 		String syncSource = appSettings.getString("syncSource", "");
 		Context c = getApplicationContext();
+		
 		if (syncSource.equals("webdav"))
-			synchronizer = new Synchronizer(c, new WebDAVSynchronizer(c));
+			synchronizer =new WebDAVSynchronizer(c);
 		else if (syncSource.equals("sdcard"))
-			synchronizer = new Synchronizer(c, new SDCardSynchronizer(c));
+			synchronizer = new SDCardSynchronizer(c);
 		else if (syncSource.equals("dropbox"))
-			synchronizer = new Synchronizer(c, new DropboxSynchronizer(c));
+			synchronizer = new DropboxSynchronizer(c);
 		else if (syncSource.equals("scp"))
-			synchronizer = new Synchronizer(c, new SSHSynchronizer(c));
+			synchronizer = new SSHSynchronizer(c);
         else if (syncSource.equals("null"))
-            synchronizer = new Synchronizer(c, new NullSynchronizer());
+            synchronizer = new NullSynchronizer();
 		else
 			synchronizer = null;
-        return synchronizer;
+		
+		return new Synchronizer(c, synchronizer,
+				new SynchronizerNotification(c));
     }
 
 	private void runSynchronizer() {
 		unsetAlarm();
 		final Synchronizer synchronizer = this.getSynchronizer();
-		final OrgFileParser parser = new OrgFileParser(new OrgDatabaseNew(this), getContentResolver());
+		final OrgDatabase db = new OrgDatabase(this);
+		final OrgFileParser parser = new OrgFileParser(db, getContentResolver());
 
 		Thread syncThread = new Thread() {
 			public void run() {
 				synchronizer.sync(parser);
 				synchronizer.close();
+				db.close();
 				syncRunning = false;
 				setAlarm();
 			}

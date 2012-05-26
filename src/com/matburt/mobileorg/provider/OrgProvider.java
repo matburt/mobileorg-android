@@ -12,12 +12,12 @@ import android.net.Uri;
 import com.matburt.mobileorg.provider.OrgContract.Files;
 import com.matburt.mobileorg.provider.OrgContract.OrgData;
 import com.matburt.mobileorg.provider.OrgContract.Search;
-import com.matburt.mobileorg.provider.OrgDatabaseNew.Tables;
+import com.matburt.mobileorg.provider.OrgDatabase.Tables;
 import com.matburt.mobileorg.util.SelectionBuilder;
 
 public class OrgProvider extends ContentProvider {
 	public static final String AUTHORITY = "com.matburt.mobileorg.provider.OrgProvider";
-	private OrgDatabaseNew dbHelper;
+	private OrgDatabase dbHelper;
 	private static final UriMatcher uriMatcher = buildUriMatcher();
 	
 	private static final int ORGDATA = 100;
@@ -60,7 +60,7 @@ public class OrgProvider extends ContentProvider {
 	
 	@Override
 	public boolean onCreate() {
-		this.dbHelper = new OrgDatabaseNew(getContext());
+		this.dbHelper = new OrgDatabase(getContext());
 		return false;
 	}
 	

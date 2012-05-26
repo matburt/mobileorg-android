@@ -8,7 +8,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
 
-public class OrgDatabaseNew extends SQLiteOpenHelper {
+public class OrgDatabase extends SQLiteOpenHelper {
 	private static final String DATABASE_NAME = "MobileOrg.db";
 	private static final int DATABASE_VERSION = 4;
 
@@ -31,7 +31,7 @@ public class OrgDatabaseNew extends SQLiteOpenHelper {
 		String ORGDATA = "orgdata";
 	}
 	
-	public OrgDatabaseNew(Context context) {
+	public OrgDatabase(Context context) {
 		super(context, DATABASE_NAME, null, DATABASE_VERSION);
 	}
 	
@@ -121,5 +121,14 @@ public class OrgDatabaseNew extends SQLiteOpenHelper {
 			this.orgdata_tagsColumn = orgdataInsertHelper.getColumnIndex(OrgData.TAGS);
 		}
 		orgdataInsertHelper.prepareForInsert();
+	}
+	
+	public void beginTransaction() {
+		getWritableDatabase().beginTransaction();
+	}
+	
+	public void endTransaction() {
+		getWritableDatabase().setTransactionSuccessful();
+		getWritableDatabase().endTransaction();
 	}
 }

@@ -15,14 +15,14 @@ import android.widget.TimePicker;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Parsing.MobileOrgApplication;
 import com.matburt.mobileorg.Parsing.NodeWrapper;
-import com.matburt.mobileorg.Parsing.OrgDatabase;
+import com.matburt.mobileorg.Parsing.OrgDatabaseOld;
 
 public class TimeclockDialog extends FragmentActivity {
 
 	private NodeWrapper node;
 	private int hour = 0;
 	private int minute = 0;
-	private OrgDatabase db;
+	private OrgDatabaseOld db;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {

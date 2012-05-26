@@ -19,7 +19,7 @@ import android.text.format.Time;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Parsing.NodePayload.DateEntry;
 import com.matburt.mobileorg.Parsing.NodeWrapper;
-import com.matburt.mobileorg.Parsing.OrgDatabase;
+import com.matburt.mobileorg.Parsing.OrgDatabaseOld;
 
 public class CalendarSyncService {
 	private final static String CALENDAR_ORGANIZER = "MobileOrg";
@@ -29,11 +29,11 @@ public class CalendarSyncService {
 	private intReminders intReminders = new intReminders();
 	private intCalendarAlerts intCalendarAlerts = new intCalendarAlerts();
 
-	private OrgDatabase db;
+	private OrgDatabaseOld db;
 	private Context context;
 	private SharedPreferences sharedPreferences;
 	
-	public CalendarSyncService(OrgDatabase db, Context context) {
+	public CalendarSyncService(OrgDatabaseOld db, Context context) {
 		this.db = db;
 		this.context = context;
 		this.sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);

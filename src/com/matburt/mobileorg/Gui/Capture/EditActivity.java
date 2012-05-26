@@ -24,10 +24,10 @@ import android.view.WindowManager;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Parsing.MobileOrgApplication;
 import com.matburt.mobileorg.Parsing.NodeWrapper;
-import com.matburt.mobileorg.Parsing.OrgDatabase;
-import com.matburt.mobileorg.Parsing.OrgFileOld;
+import com.matburt.mobileorg.Parsing.OrgDatabaseOld;
 import com.matburt.mobileorg.Services.TimeclockService;
 import com.matburt.mobileorg.Synchronizers.Synchronizer;
+import com.matburt.mobileorg.util.FileUtils;
 
 public class EditActivity extends FragmentActivity {
 	public final static String ACTIONMODE_CREATE = "create";
@@ -38,7 +38,7 @@ public class EditActivity extends FragmentActivity {
 	private NodeWrapper node;
 	private String actionMode;
 	
-	private OrgDatabase orgDB;
+	private OrgDatabaseOld orgDB;
 	private MobileOrgApplication appInst;
 	
 	private EditDetailsFragment detailsFragment;
@@ -406,12 +406,12 @@ public class EditActivity extends FragmentActivity {
 						
 		if (this.actionMode.equals(ACTIONMODE_CREATE) || this.actionMode.equals(ACTIONMODE_ADDCHILD)) {
 			MobileOrgApplication appInst = (MobileOrgApplication) this.getApplication();
-			OrgDatabase orgDB = appInst.getDB();
+			OrgDatabaseOld orgDB = appInst.getDB();
 			long node_id, parent_id;
                         long file_id;
 
                         if (newParent == null) {
-                                file_id = orgDB.addOrUpdateFile(OrgFileOld.CAPTURE_FILE, OrgFileOld.CAPTURE_FILE_ALIAS, "", true);
+                                file_id = orgDB.addOrUpdateFile(FileUtils.CAPTURE_FILE, FileUtils.CAPTURE_FILE_ALIAS, "", true);
                                 parent_id = orgDB.getFileNodeId(orgDB.getFilename(file_id));
                         } else {
                                 file_id = newParent.getFileId();
@@ -446,7 +446,7 @@ public class EditActivity extends FragmentActivity {
 	}
 	
 	private void makeNewheadingEditNode(long node_id, NodeWrapper parent) {
-		boolean generateEdits = parent != null && !parent.getFileName().equals(OrgFileOld.CAPTURE_FILE);
+		boolean generateEdits = parent != null && !parent.getFileName().equals(FileUtils.CAPTURE_FILE);
 		if(generateEdits == false)
 			return;
 
@@ -462,7 +462,7 @@ public class EditActivity extends FragmentActivity {
 	 */ 
 	private void makeEditNodes(String newTitle, String newTodo,
 			String newPriority, String newCleanedPayload, String newTags, NodeWrapper newParent) throws IOException {
-		boolean generateEdits = !node.getFileName().equals(OrgFileOld.CAPTURE_FILE);
+		boolean generateEdits = !node.getFileName().equals(FileUtils.CAPTURE_FILE);
 		
 		if (!node.getName().equals(newTitle)) {
 			if (generateEdits)

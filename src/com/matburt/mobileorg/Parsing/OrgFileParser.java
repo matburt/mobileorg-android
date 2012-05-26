@@ -12,19 +12,19 @@ import android.content.ContentResolver;
 import android.text.TextUtils;
 import android.util.Pair;
 
-import com.matburt.mobileorg.provider.OrgDatabaseNew;
+import com.matburt.mobileorg.provider.OrgDatabase;
 import com.matburt.mobileorg.provider.OrgFile;
 import com.matburt.mobileorg.provider.OrgNode;
 
 public class OrgFileParser {
 
-    private OrgDatabaseNew db;
+    private OrgDatabase db;
     private ContentResolver resolver;    
  
     private ParseStack parseStack;
 	private StringBuilder payload;
 	
-	public OrgFileParser(OrgDatabaseNew db, ContentResolver resolver) {
+	public OrgFileParser(OrgDatabase db, ContentResolver resolver) {
 		this.db = db;
 		this.resolver = resolver;
 	}
@@ -42,7 +42,7 @@ public class OrgFileParser {
 	
 	public void parse(OrgFile orgFile, BufferedReader breader) {
 		init(orgFile);
-		
+		db.beginTransaction();
 		try {
 			String currentLine;
 			while ((currentLine = breader.readLine()) != null)
@@ -52,6 +52,7 @@ public class OrgFileParser {
 			db.fastInsertNodePayload(parseStack.getCurrentNodeId(), this.payload.toString());
 
 		} catch (IOException e) {}
+		db.endTransaction();
 	}
 
 	private void parseLine(String line) {

@@ -23,7 +23,7 @@ import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Gui.Capture.DateTableRow.OrgTimeDate;
 import com.matburt.mobileorg.Parsing.MobileOrgApplication;
 import com.matburt.mobileorg.Parsing.NodeWrapper;
-import com.matburt.mobileorg.Parsing.OrgDatabase;
+import com.matburt.mobileorg.Parsing.OrgDatabaseOld;
 
 public class EditDetailsFragment extends Fragment {
 	private EditText titleView;
@@ -34,7 +34,7 @@ public class EditDetailsFragment extends Fragment {
 	private LinearLayout locationView;
 	private LocationTableRow locationTableRow;
 
-	private OrgDatabase orgDB;
+	private OrgDatabaseOld orgDB;
 
 	private NodeWrapper node;
 	private String actionMode;

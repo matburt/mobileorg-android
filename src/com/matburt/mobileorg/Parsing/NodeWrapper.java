@@ -2,20 +2,22 @@ package com.matburt.mobileorg.Parsing;
 
 import java.util.ArrayList;
 
+import com.matburt.mobileorg.util.FileUtils;
+
 import android.database.Cursor;
 
 public class NodeWrapper {
 
 	private Cursor cursor;
 	private NodePayload payload;
-	private OrgDatabase db;
+	private OrgDatabaseOld db;
 	
-	public NodeWrapper(long node_id, OrgDatabase db) {
+	public NodeWrapper(long node_id, OrgDatabaseOld db) {
 		this.db = db;
 		this.cursor = db.getNode(node_id);
 	}
 	
-	public NodeWrapper(Cursor cursor, OrgDatabase db) {
+	public NodeWrapper(Cursor cursor, OrgDatabaseOld db) {
 		this.db = db;
 		this.cursor = cursor;
 	}
@@ -405,7 +407,7 @@ public class NodeWrapper {
 		StringBuilder rawPayload = new StringBuilder(getRawPayload());
 		rawPayload = NodePayload.addLogbook(rawPayload, startTime, endTime, elapsedTime);
 		
-		boolean generateEdits = !getFileName().equals(OrgFileOld.CAPTURE_FILE);
+		boolean generateEdits = !getFileName().equals(FileUtils.CAPTURE_FILE);
 
 		if(generateEdits)
 			db.addEdit("body", getNodeId(), getName(), getRawPayload(), rawPayload.toString());

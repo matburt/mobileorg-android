@@ -15,7 +15,7 @@ import com.dropbox.client.DropboxAPI;
 import com.dropbox.client.DropboxAPI.Config;
 import com.dropbox.client.DropboxAPI.FileDownload;
 import com.matburt.mobileorg.R;
-import com.matburt.mobileorg.Parsing.OrgFileOld;
+import com.matburt.mobileorg.util.FileUtils;
 
 public class DropboxSynchronizer implements SynchronizerInterface {
 
@@ -54,7 +54,7 @@ public class DropboxSynchronizer implements SynchronizerInterface {
     public void putRemoteFile(String filename, String contents) throws IOException {
     	//this.appdb.removeFile(filename);
        
-		OrgFileOld orgFile = new OrgFileOld(filename, context);
+		FileUtils orgFile = new FileUtils(filename, context);
         BufferedWriter writer =  orgFile.getWriter();
         writer.write(contents);
         writer.close();

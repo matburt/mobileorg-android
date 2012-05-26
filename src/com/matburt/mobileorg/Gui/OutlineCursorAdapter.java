@@ -22,15 +22,15 @@ import android.database.StaleDataException;
 
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Parsing.NodeWrapper;
-import com.matburt.mobileorg.Parsing.OrgDatabase;
+import com.matburt.mobileorg.Parsing.OrgDatabaseOld;
 import com.matburt.mobileorg.Parsing.OrgFileParser;
 
 public class OutlineCursorAdapter extends SimpleCursorAdapter {
 
-	private OrgDatabase db;
+	private OrgDatabaseOld db;
 	private Cursor cursor;
 	
-	public OutlineCursorAdapter(Context context, Cursor cursor, OrgDatabase db) {
+	public OutlineCursorAdapter(Context context, Cursor cursor, OrgDatabaseOld db) {
 		super(context, R.layout.outline_item, cursor, new String[] {}, new int[] {});
 		this.cursor = cursor;
 		this.db = db;

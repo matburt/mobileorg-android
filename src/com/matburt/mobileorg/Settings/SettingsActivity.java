@@ -19,13 +19,13 @@ import android.util.Log;
 
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Parsing.MobileOrgApplication;
-import com.matburt.mobileorg.Parsing.OrgDatabase;
+import com.matburt.mobileorg.Parsing.OrgDatabaseOld;
 import com.matburt.mobileorg.Services.CalendarSyncService;
 
 public class SettingsActivity extends PreferenceActivity implements
 		SharedPreferences.OnSharedPreferenceChangeListener {
 
-	OrgDatabase db;
+	OrgDatabaseOld db;
 	private boolean updateCalendar = false;
 
 	@Override

@@ -8,12 +8,12 @@ import com.matburt.mobileorg.Services.CalendarSyncService;
 import com.matburt.mobileorg.Services.SyncService;
 
 public class MobileOrgApplication extends Application {
-    private OrgDatabase appdb;
+    private OrgDatabaseOld appdb;
 	private CalendarSyncService calendarSyncService;
     
     @Override
     public void onCreate() {
-    	this.appdb = new OrgDatabase(getApplicationContext());
+    	this.appdb = new OrgDatabaseOld(getApplicationContext());
 		init();
 		SyncService.startAlarm(getApplicationContext());
     }
@@ -24,7 +24,7 @@ public class MobileOrgApplication extends Application {
 	}
   
     
-    public OrgDatabase getDB() {
+    public OrgDatabaseOld getDB() {
     	return this.appdb;
     }
     
