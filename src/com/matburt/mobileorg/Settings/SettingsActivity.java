@@ -19,13 +19,12 @@ import android.util.Log;
 
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Parsing.MobileOrgApplication;
-import com.matburt.mobileorg.Parsing.OrgDatabaseOld;
 import com.matburt.mobileorg.Services.CalendarSyncService;
+import com.matburt.mobileorg.provider.OrgProviderUtil;
 
 public class SettingsActivity extends PreferenceActivity implements
 		SharedPreferences.OnSharedPreferenceChangeListener {
 
-	OrgDatabaseOld db;
 	private boolean updateCalendar = false;
 
 	@Override
@@ -35,8 +34,6 @@ public class SettingsActivity extends PreferenceActivity implements
 		Intent prefsIntent = getIntent();
 		int resourceID = prefsIntent.getIntExtra("prefs", R.xml.preferences);
 		addPreferencesFromResource(resourceID);
-
-		this.db = ((MobileOrgApplication) this.getApplication()).getDB();
 
 		populateSyncSources();
 		populateTodoKeywords();
@@ -93,7 +90,7 @@ public class SettingsActivity extends PreferenceActivity implements
 								@Override
 								public void onClick(DialogInterface dialog,
 										int which) {
-									db.clearDB();
+									OrgProviderUtil.clearDB(getContentResolver());
 									if (isCalendarEnabled())
 										getCalendarSyncService()
 												.deleteAllEntries(
@@ -127,7 +124,7 @@ public class SettingsActivity extends PreferenceActivity implements
 	private void populateTodoKeywords() {
 		ListPreference defaultTodo = (ListPreference) findPreference("defaultTodo");
 
-		ArrayList<String> todoList = db.getTodos();
+		ArrayList<String> todoList = OrgProviderUtil.getTags(getContentResolver());;
 
 		CharSequence[] todos = new CharSequence[todoList.size() + 1];
 		int i = 0;

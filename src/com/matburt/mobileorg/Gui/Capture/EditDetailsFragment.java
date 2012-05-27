@@ -24,6 +24,7 @@ import com.matburt.mobileorg.Gui.Capture.DateTableRow.OrgTimeDate;
 import com.matburt.mobileorg.Parsing.MobileOrgApplication;
 import com.matburt.mobileorg.Parsing.NodeWrapper;
 import com.matburt.mobileorg.Parsing.OrgDatabaseOld;
+import com.matburt.mobileorg.provider.OrgNode;
 
 public class EditDetailsFragment extends Fragment {
 	private EditText titleView;
@@ -47,13 +48,13 @@ public class EditDetailsFragment extends Fragment {
 	
 	private ArrayList<String> tagsToRestore = null;
 
-	public void init(NodeWrapper node, String actionMode, String defaultTodo, String title) {
+	public void init(OrgNode node, String actionMode, String defaultTodo, String title) {
 		init(node, actionMode, defaultTodo);
 		this.title = title;
 	}
 	
-	public void init(NodeWrapper node, String actionMode, String defaultTodo) {
-		this.node = node;
+	public void init(OrgNode node, String actionMode, String defaultTodo) {
+		//this.node = node;
 		this.actionMode = actionMode;
 		this.defaultTodo = defaultTodo;
 	}

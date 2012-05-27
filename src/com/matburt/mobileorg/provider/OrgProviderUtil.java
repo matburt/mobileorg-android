@@ -174,6 +174,25 @@ public class OrgProviderUtil {
 		return result.toString().replace(":ORIGINAL_ID:", ":ID:");
 	}
 	
+	public static void addEdit(String edittype, String nodeId, String nodeTitle,
+			String oldValue, String newValue, ContentResolver resolver) {
+		// TODO Check whether to generate edits here
+		ContentValues values = new ContentValues();
+		values.put("type", edittype);
+		values.put("data_id", nodeId);
+		values.put("title", nodeTitle);
+		values.put("old_value", oldValue);
+		values.put("new_value", newValue);
+		
+		resolver.insert(Edits.CONTENT_URI, values);
+	}
+	
+	public static void clearDB(ContentResolver resolver) {
+		resolver.delete(OrgData.CONTENT_URI, null, null);
+		resolver.delete(Files.CONTENT_URI, null, null);
+		resolver.delete(Edits.CONTENT_URI, null, null);
+	}
+	
 //	public static ArrayList<HashMap<String, Integer>> getGroupedTodos(ContentResolver resolver) {
 //		ArrayList<HashMap<String, Integer>> todos = new ArrayList<HashMap<String, Integer>>();
 //		Cursor cursor = resolver.query(Todos.CONTENT_URI, Todos.DEFAULT_COLUMNS, null, null, Todos.GROUP);

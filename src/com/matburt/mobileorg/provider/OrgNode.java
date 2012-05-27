@@ -3,10 +3,15 @@ package com.matburt.mobileorg.provider;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.database.Cursor;
+import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.matburt.mobileorg.Parsing.NodePayload;
+import com.matburt.mobileorg.Parsing.NodeWrapper;
 import com.matburt.mobileorg.provider.OrgContract.OrgData;
 
 public class OrgNode {
@@ -20,8 +25,19 @@ public class OrgNode {
 	public String tags = "";
 	public String name = "";
 	public String payload = "";
+	
+	public NodePayload nodePayload = new NodePayload("");
 
 	public OrgNode() {
+	}
+	
+	public OrgNode(long nodeId, ContentResolver resolver) {
+		Cursor cursor = resolver.query(OrgData.buildIdUri(nodeId),
+				OrgData.DEFAULT_COLUMNS, null, null, null);
+		if(cursor == null || cursor.getCount() < 1)
+			throw new IllegalArgumentException("Node with id \"" + id + "\" not found");
+		set(cursor);
+		cursor.close();
 	}
 
 	public OrgNode(Cursor cursor) {
@@ -47,6 +63,89 @@ public class OrgNode {
 			throw new IllegalArgumentException(
 					"Failed to create OrgNode from cursor");
 		}	
+	}
+	
+	public String getFilename(ContentResolver resolver) {
+		OrgFile file = new OrgFile(fileId, resolver);
+		return file.filename;
+	}
+	
+	private void preparePayload() {
+		if(this.nodePayload == null)
+			this.nodePayload = new NodePayload(this.payload);
+	}
+	
+	public long addNode(ContentResolver resolver) {
+		ContentValues values = new ContentValues();
+		values.put(OrgData.NAME, name);
+		values.put(OrgData.TODO, todo);
+		values.put(OrgData.FILE_ID, fileId);
+		values.put(OrgData.LEVEL, level);
+		values.put(OrgData.PARENT_ID, parentId);
+		values.put(OrgData.PAYLOAD, payload);
+		values.put(OrgData.PRIORITY, priority);
+		values.put(OrgData.TAGS, tags);
+		Uri uri = resolver.insert(OrgData.CONTENT_URI, values);
+		this.id = Long.parseLong(OrgData.getId(uri));
+		return id;
+	}
+	
+	/**
+	 * This is called when generating the olp link to the node. This path can't
+	 * have any "[" or "]" in it's path. For example having [1/3] in the title
+	 * will prevent org-mode from applying the edit. This method will strip that
+	 * out of the name.
+	 */
+	private String getOlpName() {
+		return name.replaceAll("\\[[^\\]]*\\]", "");
+	}
+	
+	/**
+	 * @return The :ID: or :ORIGINAL_ID: field of the payload.
+	 */
+	public String getNodeId(ContentResolver resolver) {
+		preparePayload();
+
+		String id = nodePayload.getId();				
+		if(id == null)
+			return constructOlpId(resolver);
+		
+		return id;
+	}
+	
+	public String constructOlpId(ContentResolver resolver) {
+		StringBuilder result = new StringBuilder();
+		result.insert(0, name);
+
+		while(parentId > 0) {
+			OrgNode node = new OrgNode(parentId, resolver);
+			parentId = node.parentId;
+
+			if(parentId > 0)
+				result.insert(0, node.getOlpName() + "/");
+			else { // Get file nodes real name
+				String filename = node.getFilename(resolver);
+				result.insert(0, filename + ":");
+			}
+		}
+		
+		result.insert(0, "olp:");
+		return result.toString();
+	}
+	
+	
+	public String getCleanedPayload() {
+		// TODO Implement
+		return "";
+	}
+	
+	public String getRawPayload() {
+		// TODO Implement
+		return "";
+	}
+	
+	public NodePayload getPayload() {
+		return this.nodePayload;
 	}
 	
 	public void parseLine(String thisLine, int numstars, boolean useTitleField) {
@@ -112,10 +211,6 @@ public class OrgNode {
 					"(<after>.*</after>)?" + 							// After
 					"$");												// End of line
 	
-
-	public String getPayload() {
-		return this.payload;
-	}
 	
 	public String toString() {
 		StringBuilder result = new StringBuilder();

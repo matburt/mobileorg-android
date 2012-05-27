@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import android.app.AlertDialog;
+import android.content.ContentResolver;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -27,6 +28,9 @@ import com.matburt.mobileorg.Parsing.NodeWrapper;
 import com.matburt.mobileorg.Parsing.OrgDatabaseOld;
 import com.matburt.mobileorg.Services.TimeclockService;
 import com.matburt.mobileorg.Synchronizers.Synchronizer;
+import com.matburt.mobileorg.provider.OrgContract.OrgData;
+import com.matburt.mobileorg.provider.OrgNode;
+import com.matburt.mobileorg.provider.OrgProviderUtil;
 import com.matburt.mobileorg.util.FileUtils;
 
 public class EditActivity extends FragmentActivity {
@@ -35,7 +39,7 @@ public class EditActivity extends FragmentActivity {
 	public final static String ACTIONMODE_ADDCHILD = "add_child";
 
 
-	private NodeWrapper node;
+	private OrgNode node;
 	private String actionMode;
 	
 	private OrgDatabaseOld orgDB;
@@ -45,10 +49,12 @@ public class EditActivity extends FragmentActivity {
 	private EditPayloadFragment payloadFragment;
 	private EditPayloadFragment rawPayloadFragment;
 	private long node_id;
+	private ContentResolver resolver;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		this.resolver = getContentResolver();
 
 		SharedPreferences appSettings = PreferenceManager
 				.getDefaultSharedPreferences(getBaseContext());
@@ -123,21 +129,21 @@ public class EditActivity extends FragmentActivity {
 			if(text == null)
 				text = "";
 
-			node = new NodeWrapper(null, orgDB);
+			node = new OrgNode();
 			this.detailsFragment.init(this.node, this.actionMode, defaultTodo, subject);
 			this.payloadFragment.init(text, true);
 			this.actionMode = ACTIONMODE_CREATE;
 		} else if (this.actionMode.equals(ACTIONMODE_CREATE)) {
-			node = new NodeWrapper(null, orgDB);
+			node = new OrgNode();
 			this.detailsFragment.init(this.node, this.actionMode, defaultTodo);
 			this.payloadFragment.init("", true);
 		} else if (this.actionMode.equals(ACTIONMODE_EDIT)) {
 			long nodeId = intent.getLongExtra("node_id", 0);
-			node = new NodeWrapper(appInst.getDB().getNode(nodeId), orgDB);
+			node = new OrgNode(nodeId, getContentResolver());
 			this.detailsFragment.init(this.node, this.actionMode, defaultTodo);
 			this.payloadFragment.init(this.node.getCleanedPayload(), true);
 		} else if (this.actionMode.equals(ACTIONMODE_ADDCHILD)) {
-			node = new NodeWrapper(this.node_id, orgDB);
+			node = new OrgNode(node_id, getContentResolver());
 			this.detailsFragment.init(this.node, this.actionMode, defaultTodo);
 			this.payloadFragment.init("", true);
 		}
@@ -315,16 +321,16 @@ public class EditActivity extends FragmentActivity {
 	
 	private void archiveNode(long node_id) {
 		NodeWrapper node = new NodeWrapper(node_id, appInst.getDB());
-		appInst.getDB().addEdit("archive", node.getNodeId(),
-				node.getName(), "", "");
+		OrgProviderUtil.addEdit("archive", node.getNodeId(),
+				node.getName(), "", "", getContentResolver());
 		node.close();
-		appInst.getDB().deleteNode(node_id);
+		getContentResolver().delete(OrgData.buildIdUri(node_id), null, null);
 	}
 	
 	private void archiveNodeToSibling(long node_id) {
 		NodeWrapper node = new NodeWrapper(node_id, appInst.getDB());
-		appInst.getDB().addEdit("archive-sibling", node.getNodeId(),
-				node.getName(), "", "");
+		OrgProviderUtil.addEdit("archive-sibling", node.getNodeId(),
+				node.getName(), "", "", getContentResolver());
 		
 		NodeWrapper parent = node.getParent();
 		if(parent != null) {
@@ -340,16 +346,16 @@ public class EditActivity extends FragmentActivity {
 			node.close();
 		} else {
 			node.close();
-			appInst.getDB().deleteNode(node_id);
+			getContentResolver().delete(OrgData.buildIdUri(node_id), null, null);
 		}
 	}
 	
 	private void deleteNode(long node_id) {
 		NodeWrapper node = new NodeWrapper(node_id, appInst.getDB());
-		appInst.getDB().addEdit("delete", node.getNodeId(),
-				node.getName(), "", "");
+		OrgProviderUtil.addEdit("delete", node.getNodeId(),
+				node.getName(), "", "", getContentResolver());
 		node.close();
-		appInst.getDB().deleteNode(node_id); // TODO make recursive
+		getContentResolver().delete(OrgData.buildIdUri(node_id), null, null);
 	}
 	
 	private void startTimeClockingService(long nodeId) {
@@ -395,10 +401,11 @@ public class EditActivity extends FragmentActivity {
 	}
 	
 	private void save() {
-		String newTitle = this.detailsFragment.getTitle();
-		String newTodo = this.detailsFragment.getTodo();
-		String newPriority = this.detailsFragment.getPriority();
-		String newTags = this.detailsFragment.getTags();
+		OrgNode newNode = new OrgNode();
+		newNode.name = this.detailsFragment.getTitle();
+		newNode.todo = this.detailsFragment.getTodo();
+		newNode.priority = this.detailsFragment.getPriority();
+		newNode.tags = this.detailsFragment.getTags();
 		NodeWrapper newParent = this.detailsFragment.getLocation();
 		StringBuilder newCleanedPayload = new StringBuilder(this.payloadFragment.getText());
 		insertChangesIntoPayloadResidue();
@@ -407,17 +414,17 @@ public class EditActivity extends FragmentActivity {
 		if (this.actionMode.equals(ACTIONMODE_CREATE) || this.actionMode.equals(ACTIONMODE_ADDCHILD)) {
 			MobileOrgApplication appInst = (MobileOrgApplication) this.getApplication();
 			OrgDatabaseOld orgDB = appInst.getDB();
-			long node_id, parent_id;
-                        long file_id;
 
-                        if (newParent == null) {
-                                file_id = orgDB.addOrUpdateFile(FileUtils.CAPTURE_FILE, FileUtils.CAPTURE_FILE_ALIAS, "", true);
-                                parent_id = orgDB.getFileNodeId(orgDB.getFilename(file_id));
-                        } else {
-                                file_id = newParent.getFileId();
-                                parent_id = newParent.getId();
-                        }
-			node_id = orgDB.addNode(parent_id, newTitle, newTodo, newPriority, newTags, file_id);
+			if (newParent == null) {
+				newNode.fileId = orgDB.addOrUpdateFile(FileUtils.CAPTURE_FILE,
+						FileUtils.CAPTURE_FILE_ALIAS, "", true);
+				newNode.parentId = orgDB.getFileNodeId(orgDB.getFilename(newNode.fileId));
+			} else {
+				newNode.fileId = newParent.getFileId();
+				newNode.parentId = newParent.getId();
+			}
+			
+			newNode.addNode(resolver);
 			
 			boolean addTimestamp = PreferenceManager.getDefaultSharedPreferences(
 					this).getBoolean("captureWithTimestamp", false);
@@ -434,8 +441,7 @@ public class EditActivity extends FragmentActivity {
 
 		} else if (this.actionMode.equals(ACTIONMODE_EDIT)) {
 			try {
-				makeEditNodes(newTitle, newTodo, newPriority,
-						newCleanedPayload.toString(), newTags, newParent);
+				makeEditNodes(newNode, newParent);
 			} catch (IOException e) {
 			}
 		}
@@ -451,8 +457,9 @@ public class EditActivity extends FragmentActivity {
 			return;
 
 		// Add new heading nodes need the entire content of node without star headings
+		OrgNode node = new OrgNode();
 		String newContent = orgDB.nodeToString(node_id, 1).replaceFirst("[\\*]*", "");
-		orgDB.addEdit("addheading", parent.getNodeId(), parent.getName(), "", newContent);
+		OrgProviderUtil.addEdit("addheading", parent.getNodeId(), parent.getName(), "", newContent, getContentResolver());
 	}
 	
 	/**
@@ -460,49 +467,48 @@ public class EditActivity extends FragmentActivity {
 	 * This function will generate a new edit entry for each value that was 
 	 * changed.
 	 */ 
-	private void makeEditNodes(String newTitle, String newTodo,
-			String newPriority, String newCleanedPayload, String newTags, NodeWrapper newParent) throws IOException {
-		boolean generateEdits = !node.getFileName().equals(FileUtils.CAPTURE_FILE);
+	private void makeEditNodes(OrgNode newNode, NodeWrapper newParent) throws IOException {
+		boolean generateEdits = !node.getFilename(resolver).equals(FileUtils.CAPTURE_FILE);
 		
-		if (!node.getName().equals(newTitle)) {
+		if (!node.name.equals(newNode.name)) {
 			if (generateEdits)
-				orgDB.addEdit("heading", node.getNodeId(), newTitle, node.getName(), newTitle);
-			node.setName(newTitle);
+				OrgProviderUtil.addEdit("heading", node.getNodeId(resolver), newNode.name, node.name, newNode.name, resolver);
+			//node.setName(newNode.name);
 		}
-		if (newTodo != null && !node.getTodo().equals(newTodo)) {
+		if (newNode.todo != null && !node.todo.equals(newNode.todo)) {
 			if (generateEdits)
-				orgDB.addEdit("todo", node.getNodeId(), newTitle, node.getTodo(), newTodo);
-			node.setTodo(newTodo);
+				OrgProviderUtil.addEdit("todo", node.getNodeId(resolver), newNode.name, node.todo, newNode.todo, resolver);
+			//node.setTodo(newNode.todo);
 		}
-		if (newPriority != null && !node.getPriority().equals(newPriority)) {
+		if (newNode.priority != null && !node.priority.equals(newNode.priority)) {
 			if (generateEdits)
-				orgDB.addEdit("priority", node.getNodeId(), newTitle, node.getPriority(),
-					newPriority);
-			node.setPriority(newPriority);
+				OrgProviderUtil.addEdit("priority", node.getNodeId(resolver), newNode.name, node.priority,
+					newNode.priority, getContentResolver());
+			//node.setPriority(newNode.priority);
 		}
-		if (!node.getCleanedPayload().equals(newCleanedPayload)
+		if (!node.getCleanedPayload().equals(newNode.getCleanedPayload())
 				|| !node.getPayload().getPayloadResidue()
 						.equals(node.getPayload().getNewPayloadResidue())) {
 			String newRawPayload = node.getPayload()
-					.getNewPayloadResidue() + newCleanedPayload;
+					.getNewPayloadResidue() + newNode.getCleanedPayload();
 
 			if (generateEdits)
-				orgDB.addEdit("body", node.getNodeId(), newTitle, node.getRawPayload(), newRawPayload);
-			node.setPayload(newRawPayload);
+				OrgProviderUtil.addEdit("body", node.getNodeId(resolver), newNode.name, node.getRawPayload(), newRawPayload, resolver);
+			//node.setPayload(newRawPayload);
 		}
-		if(!node.getTags().equals(newTags)) {
+		if(!node.tags.equals(newNode.tags)) {
 			if (generateEdits) {
-				orgDB.addEdit("tags", node.getNodeId(), newTitle,
-						node.getTagsWithoutInheritet(),
-						NodeWrapper.getTagsWithoutInheritet(newTags));
+				OrgProviderUtil.addEdit("tags", node.getNodeId(resolver), newNode.name,
+						"",//node.getTagsWithoutInheritet(),
+						NodeWrapper.getTagsWithoutInheritet(newNode.tags), resolver);
 			}
-			node.setTags(newTags);
+			//node.setTags(newNode.tags);
 		}
-		if(newParent.getId() != node.getParentId()) {
+		if(newNode.parentId != node.parentId) {
 			if(generateEdits) {
-				orgDB.addEdit("refile", node.getNodeId(), newTitle, "", newParent.getNodeId());
+				OrgProviderUtil.addEdit("refile", node.getNodeId(resolver), newNode.name, "", newNode.getNodeId(resolver), resolver);
 			}
-			node.setParent(newParent);
+			//node.setParent(newParent);
 		}
 	}
 	
