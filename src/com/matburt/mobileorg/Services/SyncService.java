@@ -12,6 +12,7 @@ import android.preference.PreferenceManager;
 import com.matburt.mobileorg.Parsing.MobileOrgApplication;
 import com.matburt.mobileorg.Parsing.OrgFileParser;
 import com.matburt.mobileorg.Synchronizers.DropboxSynchronizer;
+import com.matburt.mobileorg.Synchronizers.UbuntuOneSynchronizer;
 import com.matburt.mobileorg.Synchronizers.SDCardSynchronizer;
 import com.matburt.mobileorg.Synchronizers.SSHSynchronizer;
 import com.matburt.mobileorg.Synchronizers.Synchronizer;
@@ -77,7 +78,11 @@ public class SyncService extends Service implements
 		else if (syncSource.equals("sdcard"))
 			synchronizer = new SDCardSynchronizer(c);
 		else if (syncSource.equals("dropbox"))
-			synchronizer = new DropboxSynchronizer(c);
+			synchronizer = new DropboxSynchronizer(getApplicationContext(), this.appInst);
+        else if (syncSource.equals("ubuntu")) {
+            synchronizer = new UbuntuOneSynchronizer(getApplicationContext(), this.appInst);
+            ((UbuntuOneSynchronizer)synchronizer).getBaseUser();
+        }
 		else if (syncSource.equals("scp"))
 			synchronizer = new SSHSynchronizer(c);
         else if (syncSource.equals("null"))

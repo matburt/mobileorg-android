@@ -1,5 +1,11 @@
 MobileOrg Upgrade Notes
 
+Changes for 0.9.0:
+
+- Basic Time Clocking support
+- Support Ubuntu One as a Synchronizer
+- Updated Spanish translation
+
 Changes for 0.8.5:
 
 - Chinese Translation

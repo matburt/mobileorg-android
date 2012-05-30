@@ -184,6 +184,10 @@ public class SettingsActivity extends PreferenceActivity implements
 				ScpSettingsActivity.class);
 		SynchronizerPreferences.syncIntents.put("scp", synchroIntent);
 
+        synchroIntent = new Intent(getApplicationContext(),
+                UbuntuOneSettingsActivity.class);
+        SynchronizerPreferences.syncIntents.put("ubuntu", synchroIntent);
+
 		// populate the sync source list with updated data
 		syncSource.setEntries(entries);
 		syncSource.setEntryValues(values);

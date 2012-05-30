@@ -82,9 +82,10 @@ public class Synchronizer {
 			Log.d("MobileOrg", e.getStackTrace().toString());
 			return;
 		} catch (Exception e) {
-			notify.finalizeNotification();
-			notify.errorNotification("Error: " + e.toString());
-            Log.d("MobileOrg", e.getStackTrace().toString());
+            finalizeNotification();
+            errorNotification("Error: " + e.toString());
+            e.printStackTrace();
+            Log.d("MobileOrg", e.toString());
             return;
         }
 		notify.finalizeNotification();
