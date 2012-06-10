@@ -37,6 +37,8 @@ import com.matburt.mobileorg.Dropbox.Dropbox;
 import com.matburt.mobileorg.Dropbox.DropboxLoginListener;
 import com.matburt.mobileorg.Synchronizers.SSHSynchronizer;
 import com.matburt.mobileorg.Synchronizers.UbuntuOneSynchronizer;
+import com.matburt.mobileorg.Synchronizers.WebDAVSynchronizer;
+import com.matburt.mobileorg.Views.PageFlipView;
 import com.matburt.mobileorg.Parsing.MobileOrgApplication;
 
 public class WizardActivity extends Activity {
@@ -425,7 +427,7 @@ public class WizardActivity extends Activity {
     }
 
     void loginUbuntuOne() {
-        final UbuntuOneSynchronizer uos = new UbuntuOneSynchronizer((Context)this, (MobileOrgApplication)getApplication());
+        final UbuntuOneSynchronizer uos = new UbuntuOneSynchronizer((Context)this);
         uos.username = ubuntuoneEmail.getText().toString();
         uos.password = ubuntuonePass.getText().toString();
 
@@ -538,7 +540,7 @@ public class WizardActivity extends Activity {
         wizard.setDoneButtonOnClickListener(new FinishWizardButtonListener());
 
         //setup directory browser
-        UbuntuOneSynchronizer uos = new UbuntuOneSynchronizer((Context)this, (MobileOrgApplication)getApplication());
+        UbuntuOneSynchronizer uos = new UbuntuOneSynchronizer((Context)this);
         uos.getBaseUser();
         directory = new DirectoryBrowser.UbuntuOneDirectoryBrowser(this, uos);
 

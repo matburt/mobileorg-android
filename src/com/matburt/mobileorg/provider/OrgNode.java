@@ -135,13 +135,11 @@ public class OrgNode {
 	
 	
 	public String getCleanedPayload() {
-		// TODO Implement
-		return "";
+		return this.nodePayload.getContent();
 	}
 	
 	public String getRawPayload() {
-		// TODO Implement
-		return "";
+		return this.payload;
 	}
 	
 	public NodePayload getPayload() {

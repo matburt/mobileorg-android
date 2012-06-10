@@ -78,9 +78,9 @@ public class SyncService extends Service implements
 		else if (syncSource.equals("sdcard"))
 			synchronizer = new SDCardSynchronizer(c);
 		else if (syncSource.equals("dropbox"))
-			synchronizer = new DropboxSynchronizer(getApplicationContext(), this.appInst);
+			synchronizer = new DropboxSynchronizer(c);
         else if (syncSource.equals("ubuntu")) {
-            synchronizer = new UbuntuOneSynchronizer(getApplicationContext(), this.appInst);
+            synchronizer = new UbuntuOneSynchronizer(c);
             ((UbuntuOneSynchronizer)synchronizer).getBaseUser();
         }
 		else if (syncSource.equals("scp"))
