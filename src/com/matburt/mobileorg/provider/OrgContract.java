@@ -86,7 +86,7 @@ public class OrgContract {
 		public static Uri buildChildrenUri(long node_id) {
 			return buildChildrenUri(Long.toString(node_id));
 		}
-		public static final String DEFAULT_SORT = NAME + " ASC";
+		public static final String DEFAULT_SORT = ID + " ASC";
 		
 		public static final String[] DEFAULT_COLUMNS = { ID, NAME, TODO, TAGS,
 				PARENT_ID, PAYLOAD, LEVEL, PRIORITY, FILE_ID };

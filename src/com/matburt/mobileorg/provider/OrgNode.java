@@ -11,7 +11,6 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.matburt.mobileorg.Parsing.NodePayload;
-import com.matburt.mobileorg.Parsing.NodeWrapper;
 import com.matburt.mobileorg.provider.OrgContract.OrgData;
 
 public class OrgNode {

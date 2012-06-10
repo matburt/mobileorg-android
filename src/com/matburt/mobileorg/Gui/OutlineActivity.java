@@ -125,18 +125,14 @@ public class OutlineActivity extends FragmentActivity
 	 * data has been updated.
 	 */
 	private void refreshDisplay() {
-		Cursor cursor;
-		cursor = getContentResolver().query(
+		Cursor cursor = getContentResolver().query(
 				OrgData.buildChildrenUri(node_id.toString()),
 				OrgData.DEFAULT_COLUMNS, null, null, OrgData.DEFAULT_SORT);
 
 		if (node_id >= 0) {
-			//cursor = appInst.getDB().getNodeChildren(node_id);
 			if(cursor.getCount() == 0)
 				finish();
 		}
-		//else
-			//cursor = appInst.getDB().getFileCursor();
 
         if (cursor == null || cursor.getCount() < 1) {
             emptylist = true;

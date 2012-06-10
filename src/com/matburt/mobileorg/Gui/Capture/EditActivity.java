@@ -38,7 +38,6 @@ public class EditActivity extends FragmentActivity {
 	public final static String ACTIONMODE_EDIT = "edit";
 	public final static String ACTIONMODE_ADDCHILD = "add_child";
 
-
 	private OrgNode node;
 	private String actionMode;
 	
