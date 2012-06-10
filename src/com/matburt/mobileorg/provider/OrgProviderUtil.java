@@ -33,6 +33,27 @@ public class OrgProviderUtil {
 		return checksums;
 	}
 
+	public void updateNodeFields(OrgNode node, String entry, String value, ContentResolver resolver) {
+		ContentValues values = new ContentValues();
+		values.put(entry, value);
+
+		String nodeId = node.getNodeId(resolver);
+		
+		if(nodeId.startsWith("olp:")) {
+			resolver.update(OrgData.buildIdUri(node.id), values, null, null);
+		} else { // Update all nodes that have this :ID:
+			String nodeIdQuery = "%" + nodeId + "%";
+			resolver.update(OrgData.CONTENT_URI, values, OrgData.PAYLOAD + " LIKE ?", new String[]{nodeIdQuery});
+		}
+	}
+
+	public void updateNodeField(long id, String entry, String value, ContentResolver resolver) {
+		ContentValues values = new ContentValues();
+		values.put(entry, value);
+
+		resolver.update(OrgData.buildIdUri(id), values, null, null);
+	}
+	
 	public static void setTodos(ArrayList<HashMap<String, Boolean>> todos,
 			ContentResolver resolver) {
 		resolver.delete(Todos.CONTENT_URI, null, null);
@@ -41,18 +62,18 @@ public class OrgProviderUtil {
 		for (HashMap<String, Boolean> entry : todos) {
 			for (String name : entry.keySet()) {
 				ContentValues values = new ContentValues();
-				values.put("name", name);
-				values.put("todogroup", grouping);
+				values.put(Todos.NAME, name);
+				values.put(Todos.GROUP, grouping);
 
 				if (entry.get(name))
-					values.put("isdone", 1);
+					values.put(Todos.ISDONE, 1);
 				resolver.insert(Todos.CONTENT_URI, values);
 			}
 			grouping++;
 		}
 	}
 	public static ArrayList<String> getTodos(ContentResolver resolver) {
-		Cursor cursor = resolver.query(Todos.CONTENT_URI, new String[] { "name" }, null, null, "_id");
+		Cursor cursor = resolver.query(Todos.CONTENT_URI, new String[] { Todos.NAME }, null, null, Todos.ID);
 		ArrayList<String> todos = cursorToArrayList(cursor);
 
 		cursor.close();
@@ -64,13 +85,13 @@ public class OrgProviderUtil {
 
 		for (String priority : priorities) {
 			ContentValues values = new ContentValues();
-			values.put("name", priority);
+			values.put(Priorities.NAME, priority);
 			resolver.insert(Priorities.CONTENT_URI, values);
 		}
 	}
 	public static ArrayList<String> getPriorities(ContentResolver resolver) {
-		Cursor cursor = resolver.query(Priorities.CONTENT_URI, new String[] { "name" },
-				null, null, "_id");
+		Cursor cursor = resolver.query(Priorities.CONTENT_URI, new String[] { Priorities.NAME },
+				null, null, Priorities.ID);
 		ArrayList<String> priorities = cursorToArrayList(cursor);
 
 		cursor.close();
@@ -83,13 +104,13 @@ public class OrgProviderUtil {
 
 		for (String priority : priorities) {
 			ContentValues values = new ContentValues();
-			values.put("name", priority);
+			values.put(Tags.NAME, priority);
 			resolver.insert(Tags.CONTENT_URI, values);
 		}
 	}
 	public static ArrayList<String> getTags(ContentResolver resolver) {
-		Cursor cursor = resolver.query(Tags.CONTENT_URI, new String[] { "name" },
-				null, null, "_id");
+		Cursor cursor = resolver.query(Tags.CONTENT_URI, new String[] { Tags.NAME },
+				null, null, Tags.ID);
 		ArrayList<String> tags = cursorToArrayList(cursor);
 
 		cursor.close();
@@ -146,43 +167,22 @@ public class OrgProviderUtil {
 
 		StringBuilder result = new StringBuilder();
 		while (cursor.isAfterLast() == false) {
-			result.append(editToString(
-					cursor.getString(cursor.getColumnIndex(Edits.DATA_ID)),
-					cursor.getString(cursor.getColumnIndex(Edits.TITLE)),
-					cursor.getString(cursor.getColumnIndex(Edits.TYPE)),
-					cursor.getString(cursor.getColumnIndex(Edits.OLD_VALUE)),
-					cursor.getString(cursor.getColumnIndex(Edits.NEW_VALUE))));
+			result.append(new OrgEdit(cursor).toString());
 			cursor.moveToNext();
 		}
 		
 		cursor.close();
 		return result.toString();
 	}
-
-	private static String editToString(String nodeId, String title, String editType,
-			String oldVal, String newVal) {
-		if (nodeId.indexOf("olp:") != 0)
-			nodeId = "id:" + nodeId;
-		
-		StringBuilder result = new StringBuilder();
-		result.append("* F(edit:" + editType + ") [[" + nodeId + "]["
-				+ title.trim() + "]]\n");
-		result.append("** Old value\n" + oldVal.trim() + "\n");
-		result.append("** New value\n" + newVal.trim() + "\n");
-		result.append("** End of edit" + "\n\n");
-				
-		return result.toString().replace(":ORIGINAL_ID:", ":ID:");
-	}
 	
-	public static void addEdit(String edittype, String nodeId, String nodeTitle,
-			String oldValue, String newValue, ContentResolver resolver) {
+	public static void addEdit(OrgEdit edit, ContentResolver resolver) {
 		// TODO Check whether to generate edits here
 		ContentValues values = new ContentValues();
-		values.put("type", edittype);
-		values.put("data_id", nodeId);
-		values.put("title", nodeTitle);
-		values.put("old_value", oldValue);
-		values.put("new_value", newValue);
+		values.put(Edits.TYPE, edit.getType());
+		values.put(Edits.DATA_ID, edit.nodeId);
+		values.put(Edits.TITLE, edit.title);
+		values.put(Edits.OLD_VALUE, edit.oldValue);
+		values.put(Edits.NEW_VALUE, edit.newValue);
 		
 		resolver.insert(Edits.CONTENT_URI, values);
 	}
@@ -192,6 +192,7 @@ public class OrgProviderUtil {
 		resolver.delete(Files.CONTENT_URI, null, null);
 		resolver.delete(Edits.CONTENT_URI, null, null);
 	}
+
 	
 //	public static ArrayList<HashMap<String, Integer>> getGroupedTodos(ContentResolver resolver) {
 //		ArrayList<HashMap<String, Integer>> todos = new ArrayList<HashMap<String, Integer>>();
