@@ -12,14 +12,14 @@ import android.preference.PreferenceManager;
 import com.matburt.mobileorg.Parsing.MobileOrgApplication;
 import com.matburt.mobileorg.Parsing.OrgFileParser;
 import com.matburt.mobileorg.Synchronizers.DropboxSynchronizer;
-import com.matburt.mobileorg.Synchronizers.UbuntuOneSynchronizer;
+import com.matburt.mobileorg.Synchronizers.NullSynchronizer;
 import com.matburt.mobileorg.Synchronizers.SDCardSynchronizer;
 import com.matburt.mobileorg.Synchronizers.SSHSynchronizer;
 import com.matburt.mobileorg.Synchronizers.Synchronizer;
 import com.matburt.mobileorg.Synchronizers.SynchronizerInterface;
 import com.matburt.mobileorg.Synchronizers.SynchronizerNotification;
+import com.matburt.mobileorg.Synchronizers.UbuntuOneSynchronizer;
 import com.matburt.mobileorg.Synchronizers.WebDAVSynchronizer;
-import com.matburt.mobileorg.Synchronizers.NullSynchronizer;
 import com.matburt.mobileorg.provider.OrgDatabase;
 
 public class SyncService extends Service implements

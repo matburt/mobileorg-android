@@ -32,27 +32,6 @@ public class OrgProviderUtil {
 		cursor.close();
 		return checksums;
 	}
-
-	public void updateNodeFields(OrgNode node, String entry, String value, ContentResolver resolver) {
-		ContentValues values = new ContentValues();
-		values.put(entry, value);
-
-		String nodeId = node.getNodeId(resolver);
-		
-		if(nodeId.startsWith("olp:")) {
-			resolver.update(OrgData.buildIdUri(node.id), values, null, null);
-		} else { // Update all nodes that have this :ID:
-			String nodeIdQuery = "%" + nodeId + "%";
-			resolver.update(OrgData.CONTENT_URI, values, OrgData.PAYLOAD + " LIKE ?", new String[]{nodeIdQuery});
-		}
-	}
-
-	public void updateNodeField(long id, String entry, String value, ContentResolver resolver) {
-		ContentValues values = new ContentValues();
-		values.put(entry, value);
-
-		resolver.update(OrgData.buildIdUri(id), values, null, null);
-	}
 	
 	public static void setTodos(ArrayList<HashMap<String, Boolean>> todos,
 			ContentResolver resolver) {
@@ -173,18 +152,6 @@ public class OrgProviderUtil {
 		
 		cursor.close();
 		return result.toString();
-	}
-	
-	public static void addEdit(OrgEdit edit, ContentResolver resolver) {
-		// TODO Check whether to generate edits here
-		ContentValues values = new ContentValues();
-		values.put(Edits.TYPE, edit.getType());
-		values.put(Edits.DATA_ID, edit.nodeId);
-		values.put(Edits.TITLE, edit.title);
-		values.put(Edits.OLD_VALUE, edit.oldValue);
-		values.put(Edits.NEW_VALUE, edit.newValue);
-		
-		resolver.insert(Edits.CONTENT_URI, values);
 	}
 	
 	public static void clearDB(ContentResolver resolver) {

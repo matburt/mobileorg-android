@@ -69,12 +69,45 @@ public class OrgNode {
 		return file.filename;
 	}
 	
+	public void setFilename(String filename, ContentResolver resolver) {
+		OrgFile file = new OrgFile(filename, resolver);
+		this.fileId = file.nodeId;
+	}
+	
 	private void preparePayload() {
 		if(this.nodePayload == null)
 			this.nodePayload = new NodePayload(this.payload);
 	}
 	
-	public long addNode(ContentResolver resolver) {
+	public void write(ContentResolver resolver) {
+		if(id < 0)
+			addNode(resolver);
+		else
+			updateNode(resolver);
+	}
+	
+	private long addNode(ContentResolver resolver) {
+		Uri uri = resolver.insert(OrgData.CONTENT_URI, getContentValues());
+		this.id = Long.parseLong(OrgData.getId(uri));
+		return id;
+	}
+	
+	private int updateNode(ContentResolver resolver) {
+		return resolver.update(OrgData.buildIdUri(id), getContentValues(), null, null);
+	}
+	
+	public void updateAllNodes(ContentResolver resolver) {
+		String nodeId = getNodeId(resolver);
+		
+		if(nodeId.startsWith("olp:")) {
+			resolver.update(OrgData.buildIdUri(id), getContentValues(), null, null);
+		} else { // Update all nodes that have this :ID:
+			String nodeIdQuery = "%" + nodeId + "%";
+			resolver.update(OrgData.CONTENT_URI, getContentValues(), OrgData.PAYLOAD + " LIKE ?", new String[]{nodeIdQuery});
+		}
+	}
+	
+	private ContentValues getContentValues() {
 		ContentValues values = new ContentValues();
 		values.put(OrgData.NAME, name);
 		values.put(OrgData.TODO, todo);
@@ -84,9 +117,7 @@ public class OrgNode {
 		values.put(OrgData.PAYLOAD, payload);
 		values.put(OrgData.PRIORITY, priority);
 		values.put(OrgData.TAGS, tags);
-		Uri uri = resolver.insert(OrgData.CONTENT_URI, values);
-		this.id = Long.parseLong(OrgData.getId(uri));
-		return id;
+		return values;
 	}
 	
 	/**

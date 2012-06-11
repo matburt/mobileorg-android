@@ -9,6 +9,7 @@ import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 
+import com.matburt.mobileorg.provider.OrgContract.Edits;
 import com.matburt.mobileorg.provider.OrgContract.Files;
 import com.matburt.mobileorg.provider.OrgContract.OrgData;
 import com.matburt.mobileorg.provider.OrgContract.Search;
@@ -30,6 +31,8 @@ public class OrgProvider extends ContentProvider {
 	private static final int FILES_NAME = 202;
 
 	private static final int EDITS = 300;
+	private static final int EDITS_ID = 301;
+
 	private static final int TAGS = 400;
 	private static final int TODOS = 500;
 	private static final int PRIORITIES = 600;
@@ -48,6 +51,8 @@ public class OrgProvider extends ContentProvider {
 		uriMatcher.addURI(AUTHORITY, "files/*/name", FILES_NAME);
 		
 		uriMatcher.addURI(AUTHORITY, "edits", EDITS);
+		uriMatcher.addURI(AUTHORITY, "edits/*", EDITS_ID);
+		
 		uriMatcher.addURI(AUTHORITY, "tags", TAGS);
 		uriMatcher.addURI(AUTHORITY, "todos", TODOS);
 		uriMatcher.addURI(AUTHORITY, "priorities", PRIORITIES);
@@ -137,6 +142,8 @@ public class OrgProvider extends ContentProvider {
 			return builder.table(Tables.FILES).where(Files.NAME + "=?", Files.getName(uri));
 		case EDITS:
 			return builder.table(Tables.EDITS);
+		case EDITS_ID:
+			return builder.table(Tables.EDITS).where(Edits.ID + "=?", Edits.getId(uri));
 		case TAGS:
 			return builder.table(Tables.TAGS);
 		case TODOS:

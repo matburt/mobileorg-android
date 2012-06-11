@@ -312,13 +312,13 @@ public class EditActivity extends FragmentActivity {
 	
 	private void archiveNode() {
 		OrgEdit edit = new OrgEdit(node, OrgEdit.TYPE.ARCHIVE, resolver);
-		OrgProviderUtil.addEdit(edit, resolver);
+		edit.write(resolver);
 		resolver.delete(OrgData.buildIdUri(node.id), null, null);
 	}
 	
 	private void archiveNodeToSibling() {
 		OrgEdit edit = new OrgEdit(node, OrgEdit.TYPE.ARCHIVE_SIBLING, resolver);
-		OrgProviderUtil.addEdit(edit, resolver);
+		edit.write(resolver);
 		
 		// TODO
 //		OrgNode parent = node.getParent();
@@ -342,7 +342,7 @@ public class EditActivity extends FragmentActivity {
 	
 	private void deleteNode() {
 		OrgEdit edit = new OrgEdit(node, OrgEdit.TYPE.DELETE, resolver);
-		OrgProviderUtil.addEdit(edit, resolver);
+		edit.write(resolver);
 		resolver.delete(OrgData.buildIdUri(node.id), null, null);
 	}
 	

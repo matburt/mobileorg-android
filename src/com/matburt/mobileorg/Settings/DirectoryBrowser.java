@@ -8,9 +8,9 @@ import android.content.Context;
 import android.util.Log;
 
 import com.dropbox.client.DropboxAPI;
-import com.matburt.mobileorg.Synchronizers.UbuntuOneSynchronizer;
 import com.matburt.mobileorg.R;
-import com.matburt.mobileorg.Dropbox.*;
+import com.matburt.mobileorg.Dropbox.Dropbox;
+import com.matburt.mobileorg.Synchronizers.UbuntuOneSynchronizer;
 
 public interface DirectoryBrowser {
 

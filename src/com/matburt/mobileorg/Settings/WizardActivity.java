@@ -39,7 +39,6 @@ import com.matburt.mobileorg.Synchronizers.SSHSynchronizer;
 import com.matburt.mobileorg.Synchronizers.UbuntuOneSynchronizer;
 import com.matburt.mobileorg.Synchronizers.WebDAVSynchronizer;
 import com.matburt.mobileorg.Views.PageFlipView;
-import com.matburt.mobileorg.Parsing.MobileOrgApplication;
 
 public class WizardActivity extends Activity {
 

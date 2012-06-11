@@ -16,7 +16,7 @@ public class OrgFile {
 	public long id = -1;
 	public long nodeId = -1;
 	
-	private ContentResolver resolver;
+	private ContentResolver resolver = null;
 	
 	public OrgFile() {
 	}

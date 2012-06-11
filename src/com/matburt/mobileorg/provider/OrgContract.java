@@ -98,6 +98,18 @@ public class OrgContract {
 		
 		public static final String[] DEFAULT_COLUMNS = { ID, DATA_ID, TITLE,
 				TYPE, OLD_VALUE, NEW_VALUE };
+		
+		public static String getId(Uri uri) {
+			return uri.getPathSegments().get(1);
+		}
+		
+		public static Uri buildIdUri(String id) {
+			return CONTENT_URI.buildUpon().appendPath(id).build();
+		}
+		
+		public static Uri buildIdUri(Long id) {
+			return buildIdUri(id.toString());
+		}
 	}
 	
 	public static class Files implements FilesColumns {
