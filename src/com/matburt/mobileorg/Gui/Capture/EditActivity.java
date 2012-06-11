@@ -1,9 +1,5 @@
 package com.matburt.mobileorg.Gui.Capture;
 
-import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
 import android.app.AlertDialog;
 import android.content.ContentResolver;
 import android.content.DialogInterface;
@@ -23,15 +19,11 @@ import android.view.MenuInflater;
 import android.view.WindowManager;
 
 import com.matburt.mobileorg.R;
-import com.matburt.mobileorg.Parsing.MobileOrgApplication;
 import com.matburt.mobileorg.Parsing.NodeWrapper;
-import com.matburt.mobileorg.Parsing.OrgDatabaseOld;
 import com.matburt.mobileorg.Services.TimeclockService;
 import com.matburt.mobileorg.Synchronizers.Synchronizer;
-import com.matburt.mobileorg.provider.OrgContract.OrgData;
 import com.matburt.mobileorg.provider.OrgEdit;
 import com.matburt.mobileorg.provider.OrgNode;
-import com.matburt.mobileorg.provider.OrgProviderUtil;
 import com.matburt.mobileorg.util.FileUtils;
 
 public class EditActivity extends FragmentActivity {
@@ -276,7 +268,7 @@ public class EditActivity extends FragmentActivity {
 				.setPositiveButton(R.string.yes,
 						new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog, int id) {
-								deleteNode();
+								node.deleteNode(resolver);
 								finish();
 							}
 						})
@@ -296,9 +288,9 @@ public class EditActivity extends FragmentActivity {
 						new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog, int id) {
 								if(editString.equals("archive"))
-									archiveNode();
+									node.archiveNode(resolver);
 								else
-									archiveNodeToSibling();
+									node.archiveNodeToSibling(resolver);
 								finish();
 							}
 						})
@@ -309,43 +301,7 @@ public class EditActivity extends FragmentActivity {
 				});
 		builder.create().show();
 	}
-	
-	private void archiveNode() {
-		OrgEdit edit = new OrgEdit(node, OrgEdit.TYPE.ARCHIVE, resolver);
-		edit.write(resolver);
-		resolver.delete(OrgData.buildIdUri(node.id), null, null);
-	}
-	
-	private void archiveNodeToSibling() {
-		OrgEdit edit = new OrgEdit(node, OrgEdit.TYPE.ARCHIVE_SIBLING, resolver);
-		edit.write(resolver);
-		
-		// TODO
-//		OrgNode parent = node.getParent();
-//		if(parent != null) {
-//			NodeWrapper child = parent.getChild("Archive");
-//			if(child != null) {
-//				node.setParent(child.getId());
-//				child.close();
-//			} else {
-//				OrgNode archiveNode = new OrgNode();
-//				archiveNode.name = "Archive";
-//				archiveNode.parentId = parent.id;
-//				archiveNode.fileId = parent.fileId;
-//				long child_id = node.addNode(resolver);
-//				node.setParent(child_id);
-//			}
-//		} else {
-//			resolver.delete(OrgData.buildIdUri(node.id), null, null);
-//		}
-	}
-	
-	private void deleteNode() {
-		OrgEdit edit = new OrgEdit(node, OrgEdit.TYPE.DELETE, resolver);
-		edit.write(resolver);
-		resolver.delete(OrgData.buildIdUri(node.id), null, null);
-	}
-	
+
 	private void startTimeClockingService() {
 		Intent intent = new Intent(EditActivity.this, TimeclockService.class);
 		intent.putExtra(TimeclockService.NODE_ID, node.id);
@@ -388,18 +344,23 @@ public class EditActivity extends FragmentActivity {
 		node.getPayload().insertOrReplace("DEADLINE:", detailsFragment.getDeadline());
 	}
 	
+	private OrgNode getNodeFromFragments() {
+		OrgNode orgNode = new OrgNode();
+		orgNode.name = this.detailsFragment.getTitle();
+		orgNode.todo = this.detailsFragment.getTodo();
+		orgNode.priority = this.detailsFragment.getPriority();
+		orgNode.tags = this.detailsFragment.getTags();
+		return orgNode;
+	}
+	
 	private void save() {
-		OrgNode newNode = new OrgNode();
-		newNode.name = this.detailsFragment.getTitle();
-		newNode.todo = this.detailsFragment.getTodo();
-		newNode.priority = this.detailsFragment.getPriority();
-		newNode.tags = this.detailsFragment.getTags();
+		OrgNode newNode = getNodeFromFragments();
 		NodeWrapper newParent = this.detailsFragment.getLocation();
 		StringBuilder newCleanedPayload = new StringBuilder(this.payloadFragment.getText());
 		insertChangesIntoPayloadResidue();
 		String newPayloadResidue = node.getPayload().getNewPayloadResidue();
-				
-		// TODO
+		
+		// TODO Finish function
 //		if (this.actionMode.equals(ACTIONMODE_CREATE) || this.actionMode.equals(ACTIONMODE_ADDCHILD)) {
 //			if (newParent == null) {
 //				newNode.fileId = orgDB.addOrUpdateFile(FileUtils.CAPTURE_FILE,
@@ -438,69 +399,14 @@ public class EditActivity extends FragmentActivity {
 	}
 	
 	private void makeNewheadingEditNode(long node_id, OrgNode parent) {
-//		boolean generateEdits = parent != null && !parent.getFileName().equals(FileUtils.CAPTURE_FILE);
-//		if(generateEdits == false)
-//			return;
-//
-//		// Add new heading nodes need the entire content of node without star headings
-//		OrgNode node = new OrgNode();
-//		String newContent = orgDB.nodeToString(node_id, 1).replaceFirst("[\\*]*", "");
-//		OrgProviderUtil.addEdit("addheading", parent.id, parent.name, "", newContent, getContentResolver());
+		boolean generateEdits = parent != null && !parent.getFilename(resolver).equals(FileUtils.CAPTURE_FILE);
+		if(generateEdits == false)
+			return;
+
+		// Add new heading nodes need the entire content of node without star headings
+		node.level = 0;
+		OrgEdit edit = new OrgEdit(parent, OrgEdit.TYPE.ADDHEADING, node.toString(), resolver);
+		edit.write(resolver);
 	}
-	
-	/**
-	 * Takes a Node and five strings, representing edits to the node.
-	 * This function will generate a new edit entry for each value that was 
-	 * changed.
-	 */ 
-	private void makeEditNodes(OrgNode newNode, OrgNode newParent) throws IOException {
-		boolean generateEdits = !node.getFilename(resolver).equals(FileUtils.CAPTURE_FILE);
-		OrgEdit edit = new OrgEdit(node, OrgEdit.TYPE.TODO, resolver);
-		
-//		if (!node.name.equals(newNode.name)) {
-//			if (generateEdits)
-//				OrgProviderUtil.addEdit("heading", node.getNodeId(resolver), newNode.name, node.name, newNode.name, resolver);
-//			//node.setName(newNode.name);
-//		}
-//		if (newNode.todo != null && !node.todo.equals(newNode.todo)) {
-//			if (generateEdits)
-//				OrgProviderUtil.addEdit("todo", node.getNodeId(resolver), newNode.name, node.todo, newNode.todo, resolver);
-//			//node.setTodo(newNode.todo);
-//		}
-//		if (newNode.priority != null && !node.priority.equals(newNode.priority)) {
-//			if (generateEdits)
-//				OrgProviderUtil.addEdit("priority", node.getNodeId(resolver), newNode.name, node.priority,
-//					newNode.priority, getContentResolver());
-//			//node.setPriority(newNode.priority);
-//		}
-//		if (!node.getCleanedPayload().equals(newNode.getCleanedPayload())
-//				|| !node.getPayload().getPayloadResidue()
-//						.equals(node.getPayload().getNewPayloadResidue())) {
-//			String newRawPayload = node.getPayload()
-//					.getNewPayloadResidue() + newNode.getCleanedPayload();
-//
-//			if (generateEdits)
-//				OrgProviderUtil.addEdit("body", node.getNodeId(resolver), newNode.name, node.getRawPayload(), newRawPayload, resolver);
-//			//node.setPayload(newRawPayload);
-//		}
-//		if(!node.tags.equals(newNode.tags)) {
-//			if (generateEdits) {
-//				OrgProviderUtil.addEdit("tags", node.getNodeId(resolver), newNode.name,
-//						"",//node.getTagsWithoutInheritet(),
-//						NodeWrapper.getTagsWithoutInheritet(newNode.tags), resolver);
-//			}
-//			//node.setTags(newNode.tags);
-//		}
-//		if(newNode.parentId != node.parentId) {
-//			if(generateEdits) {
-//				OrgProviderUtil.addEdit("refile", node.getNodeId(resolver), newNode.name, "", newNode.getNodeId(resolver), resolver);
-//			}
-//			//node.setParent(newParent);
-//		}
-	}
-	
-	public static String getTimestamp() {
-		SimpleDateFormat sdf = new SimpleDateFormat("[yyyy-MM-dd EEE HH:mm]");		
-		return sdf.format(new Date());
-	}
+
 }

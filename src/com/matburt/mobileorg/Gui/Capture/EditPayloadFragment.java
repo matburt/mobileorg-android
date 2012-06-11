@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 
 import com.matburt.mobileorg.R;
+import com.matburt.mobileorg.util.OrgUtils;
 
 public class EditPayloadFragment extends Fragment {
 	public static final String DISPLAY_STRING = "text";
@@ -64,6 +65,6 @@ public class EditPayloadFragment extends Fragment {
 	}
 	
 	public void insertTimestamp() {
-		this.editDisplay.append(EditActivity.getTimestamp());
+		this.editDisplay.append(OrgUtils.getTimestamp());
 	}
 }

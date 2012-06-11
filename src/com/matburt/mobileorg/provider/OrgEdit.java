@@ -18,7 +18,8 @@ public class OrgEdit {
 		REFILE,
 		ARCHIVE,
 		ARCHIVE_SIBLING,
-		DELETE
+		DELETE,
+		ADDHEADING
 	};
 	
 	public TYPE type = TYPE.HEADING;

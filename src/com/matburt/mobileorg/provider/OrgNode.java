@@ -1,5 +1,6 @@
 package com.matburt.mobileorg.provider;
 
+import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -12,6 +13,7 @@ import android.util.Log;
 
 import com.matburt.mobileorg.Parsing.NodePayload;
 import com.matburt.mobileorg.provider.OrgContract.OrgData;
+import com.matburt.mobileorg.util.FileUtils;
 
 public class OrgNode {
 
@@ -176,6 +178,57 @@ public class OrgNode {
 		return this.nodePayload;
 	}
 	
+	public void generateEdits(OrgNode newNode, ContentResolver resolver) {
+		ArrayList<OrgEdit> generateEditNodes = generateEditNodes(newNode, resolver);
+		boolean generateEdits = !getFilename(resolver).equals(FileUtils.CAPTURE_FILE);
+		
+		if(generateEdits)
+			for(OrgEdit edit: generateEditNodes)
+				edit.write(resolver);
+	}
+	
+	public ArrayList<OrgEdit> generateEditNodes(OrgNode newNode, ContentResolver resolver) {
+		ArrayList<OrgEdit> edits = new ArrayList<OrgEdit>();
+		
+		if (!name.equals(newNode.name)) {
+			edits.add(new OrgEdit(this, OrgEdit.TYPE.HEADING, newNode.name, resolver));
+			this.name = newNode.name;			
+		}
+		if (newNode.todo != null && !todo.equals(newNode.todo)) {
+			edits.add(new OrgEdit(this, OrgEdit.TYPE.TODO, newNode.todo, resolver));
+			this.todo = newNode.todo;
+		}
+		if (newNode.priority != null && !priority.equals(newNode.priority)) {
+			edits.add(new OrgEdit(this, OrgEdit.TYPE.PRIORITY, newNode.priority, resolver));
+			this.priority = newNode.priority;
+		}
+		if (!getCleanedPayload().equals(newNode.getCleanedPayload())
+				|| !getPayload().getPayloadResidue().equals(
+						getPayload().getNewPayloadResidue())) {
+			String newRawPayload = getPayload().getNewPayloadResidue()
+					+ newNode.getCleanedPayload();
+
+			edits.add(new OrgEdit(this, OrgEdit.TYPE.BODY, newRawPayload, resolver));
+			setPayload(newRawPayload);
+		}
+		if (!tags.equals(newNode.tags)) {
+			// TODO Use node.getTagsWithoutInheritet() instead
+			edits.add(new OrgEdit(this, OrgEdit.TYPE.TAGS, newNode.tags, resolver));
+			this.tags = newNode.tags;
+		}
+		if (newNode.parentId != parentId) {
+			edits.add(new OrgEdit(this, OrgEdit.TYPE.REFILE, newNode.getNodeId(resolver), resolver));
+			this.parentId = newNode.parentId;
+		}
+		
+		return edits;
+	}
+	
+	private void setPayload(String newRawPayload) {
+		// TODO Auto-generated method stub
+		
+	}
+
 	public void parseLine(String thisLine, int numstars, boolean useTitleField) {
         String heading = thisLine.substring(numstars+1);
         
@@ -274,4 +327,40 @@ public class OrgNode {
 			return false;
 	}
 
+	
+	public void deleteNode(ContentResolver resolver) {
+		OrgEdit edit = new OrgEdit(this, OrgEdit.TYPE.DELETE, resolver);
+		edit.write(resolver);
+		resolver.delete(OrgData.buildIdUri(id), null, null);
+	}
+	
+	public void archiveNode(ContentResolver resolver) {
+		OrgEdit edit = new OrgEdit(this, OrgEdit.TYPE.ARCHIVE, resolver);
+		edit.write(resolver);
+		resolver.delete(OrgData.buildIdUri(id), null, null);
+	}
+	
+	public void archiveNodeToSibling(ContentResolver resolver) {
+		OrgEdit edit = new OrgEdit(this, OrgEdit.TYPE.ARCHIVE_SIBLING, resolver);
+		edit.write(resolver);
+		
+		// TODO Finish
+//		OrgNode parent = node.getParent();
+//		if(parent != null) {
+//			NodeWrapper child = parent.getChild("Archive");
+//			if(child != null) {
+//				node.setParent(child.getId());
+//				child.close();
+//			} else {
+//				OrgNode archiveNode = new OrgNode();
+//				archiveNode.name = "Archive";
+//				archiveNode.parentId = parent.id;
+//				archiveNode.fileId = parent.fileId;
+//				long child_id = node.addNode(resolver);
+//				node.setParent(child_id);
+//			}
+//		} else {
+//			resolver.delete(OrgData.buildIdUri(node.id), null, null);
+//		}
+	}
 }
