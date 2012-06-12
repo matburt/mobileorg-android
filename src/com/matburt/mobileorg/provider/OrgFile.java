@@ -70,10 +70,23 @@ public class OrgFile {
 	}
 	
 	public void write() {
-		if (id == -1)
+		assert(resolver != null);
+		if (id == -1 && doesFileExist() == false)
 			addFile();
 		else
 			updateFile();
+	}
+	
+	private boolean doesFileExist() {
+		Cursor cursor = resolver.query(Files.buildFilenameUri(filename),
+				Files.DEFAULT_COLUMNS, null, null, null);
+		int count = cursor.getCount();
+		cursor.close();
+		
+		if(count > 0)
+			return true;
+		else
+			return false;		
 	}
 	
 	public void addFile() {

@@ -159,8 +159,13 @@ public class OrgProviderUtil {
 		resolver.delete(Files.CONTENT_URI, null, null);
 		resolver.delete(Edits.CONTENT_URI, null, null);
 	}
-
 	
+	
+	public static OrgNode getOrgNodeFromFilename(String name, ContentResolver resolver) {
+		OrgFile file = new OrgFile(name, resolver);
+		return new OrgNode(file.nodeId, resolver);
+	}
+
 //	public static ArrayList<HashMap<String, Integer>> getGroupedTodos(ContentResolver resolver) {
 //		ArrayList<HashMap<String, Integer>> todos = new ArrayList<HashMap<String, Integer>>();
 //		Cursor cursor = resolver.query(Todos.CONTENT_URI, Todos.DEFAULT_COLUMNS, null, null, Todos.GROUP);

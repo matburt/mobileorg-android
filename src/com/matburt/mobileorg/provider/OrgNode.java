@@ -122,6 +122,50 @@ public class OrgNode {
 		return values;
 	}
 	
+	public ArrayList<OrgNode> getChildren(ContentResolver resolver) {
+		ArrayList<OrgNode> result = new ArrayList<OrgNode>();
+		
+		Cursor nodeChildren = resolver.query(OrgData.buildChildrenUri(id),
+				OrgData.DEFAULT_COLUMNS, null, null, null);
+		nodeChildren.moveToFirst();
+		
+		
+		while(nodeChildren.isAfterLast() == false) {
+			long id = (new OrgNode(nodeChildren)).id;
+			result.add(new OrgNode(id, resolver));
+			nodeChildren.moveToNext();
+		}
+		
+		return result;
+	}
+	
+	public ArrayList<String> getChildrenStringArray(ContentResolver resolver) {
+		ArrayList<String> result = new ArrayList<String>();
+		for (OrgNode node : getChildren(resolver))
+			result.add(node.name);
+
+		return result;
+	}
+	
+	public OrgNode getChild(String name, ContentResolver resolver) {
+		ArrayList<OrgNode> children = getChildren(resolver);
+		
+		for(OrgNode child: children) {
+			if(child.name.equals(name))
+				return child;
+		}
+		return null;
+	}
+	
+	public OrgNode getParent(ContentResolver resolver) {
+		Cursor cursor = resolver.query(OrgData.buildIdUri(this.parentId),
+				OrgData.DEFAULT_COLUMNS, null, null, null);
+		if(cursor.getCount() > 0)
+			return new OrgNode(cursor);
+		else
+			return null;
+	}
+	
 	/**
 	 * This is called when generating the olp link to the node. This path can't
 	 * have any "[" or "]" in it's path. For example having [1/3] in the title
@@ -178,7 +222,7 @@ public class OrgNode {
 		return this.nodePayload;
 	}
 	
-	public void generateEdits(OrgNode newNode, ContentResolver resolver) {
+	public void generateAndApplyEdits(OrgNode newNode, ContentResolver resolver) {
 		ArrayList<OrgEdit> generateEditNodes = generateEditNodes(newNode, resolver);
 		boolean generateEdits = !getFilename(resolver).equals(FileUtils.CAPTURE_FILE);
 		

@@ -19,12 +19,13 @@ import android.view.MenuInflater;
 import android.view.WindowManager;
 
 import com.matburt.mobileorg.R;
-import com.matburt.mobileorg.Parsing.NodeWrapper;
 import com.matburt.mobileorg.Services.TimeclockService;
 import com.matburt.mobileorg.Synchronizers.Synchronizer;
 import com.matburt.mobileorg.provider.OrgEdit;
+import com.matburt.mobileorg.provider.OrgFile;
 import com.matburt.mobileorg.provider.OrgNode;
 import com.matburt.mobileorg.util.FileUtils;
+import com.matburt.mobileorg.util.OrgUtils;
 
 public class EditActivity extends FragmentActivity {
 	public final static String ACTIONMODE_CREATE = "create";
@@ -114,20 +115,20 @@ public class EditActivity extends FragmentActivity {
 				text = "";
 
 			this.node = new OrgNode();
-			this.detailsFragment.init(this.node, this.actionMode, defaultTodo, subject);
+			this.detailsFragment.init(this.node, this.actionMode, defaultTodo, subject, resolver);
 			this.payloadFragment.init(text, true);
 			this.actionMode = ACTIONMODE_CREATE;
 		} else if (this.actionMode.equals(ACTIONMODE_CREATE)) {
 			this.node = new OrgNode();
-			this.detailsFragment.init(this.node, this.actionMode, defaultTodo);
+			this.detailsFragment.init(this.node, this.actionMode, defaultTodo, resolver);
 			this.payloadFragment.init("", true);
 		} else if (this.actionMode.equals(ACTIONMODE_EDIT)) {
 			this.node = new OrgNode(node_id, getContentResolver());
-			this.detailsFragment.init(this.node, this.actionMode, defaultTodo);
+			this.detailsFragment.init(this.node, this.actionMode, defaultTodo, resolver);
 			this.payloadFragment.init(this.node.getCleanedPayload(), true);
 		} else if (this.actionMode.equals(ACTIONMODE_ADDCHILD)) {
 			this.node = new OrgNode(node_id, getContentResolver());
-			this.detailsFragment.init(this.node, this.actionMode, defaultTodo);
+			this.detailsFragment.init(this.node, this.actionMode, defaultTodo, resolver);
 			this.payloadFragment.init("", true);
 		}
 
@@ -355,43 +356,46 @@ public class EditActivity extends FragmentActivity {
 	
 	private void save() {
 		OrgNode newNode = getNodeFromFragments();
-		NodeWrapper newParent = this.detailsFragment.getLocation();
+
+		if (this.actionMode.equals(ACTIONMODE_CREATE) || this.actionMode.equals(ACTIONMODE_ADDCHILD))
+			createNewNode(newNode);
+		else if (this.actionMode.equals(ACTIONMODE_EDIT))
+			node.generateAndApplyEdits(newNode, resolver);
+
+		announceUpdate();
+	}
+	
+	private void createNewNode(OrgNode newNode) {
+		OrgNode newParent = this.detailsFragment.getLocation();
 		StringBuilder newCleanedPayload = new StringBuilder(this.payloadFragment.getText());
 		insertChangesIntoPayloadResidue();
 		String newPayloadResidue = node.getPayload().getNewPayloadResidue();
 		
-		// TODO Finish function
-//		if (this.actionMode.equals(ACTIONMODE_CREATE) || this.actionMode.equals(ACTIONMODE_ADDCHILD)) {
-//			if (newParent == null) {
-//				newNode.fileId = orgDB.addOrUpdateFile(FileUtils.CAPTURE_FILE,
-//						FileUtils.CAPTURE_FILE_ALIAS, "", true);
-//				newNode.parentId = orgDB.getFileNodeId(orgDB.getFilename(newNode.fileId));
-//			} else {
-//				newNode.fileId = newParent.getFileId();
-//				newNode.parentId = newParent.getId();
-//			}
-//			
-//			newNode.addNode(resolver);
-//			
-//			boolean addTimestamp = PreferenceManager.getDefaultSharedPreferences(
-//					this).getBoolean("captureWithTimestamp", false);
-//			if(addTimestamp)
-//				newCleanedPayload.append("\n").append(getTimestamp()).append("\n");
-//			
-//			orgDB.addNodePayload(node.id, newCleanedPayload.toString() + newPayloadResidue);
-//			
-//			makeNewheadingEditNode(node.id, newParent);
-//	
-//			if(PreferenceManager.getDefaultSharedPreferences(
-//					this).getBoolean("calendarEnabled", false))
-//				appInst.getCalendarSyncService().insertNode(node.id);
-//
-//		} else if (this.actionMode.equals(ACTIONMODE_EDIT)) {
-//			try {
-//				makeEditNodes(newNode, newParent);
-//			} catch (IOException e) {
-//			}
-//		}
+		if (newParent == null) {
+			OrgFile file = new OrgFile(FileUtils.CAPTURE_FILE,
+					FileUtils.CAPTURE_FILE_ALIAS, "");
+			file.write();
+			newNode.parentId = file.nodeId;
+			newNode.fileId = file.id;
+		} else {
+			newNode.fileId = newParent.fileId;
+			newNode.parentId = newParent.id;
+		}
+		
+		boolean addTimestamp = PreferenceManager.getDefaultSharedPreferences(
+				this).getBoolean("captureWithTimestamp", false);
+		if(addTimestamp)
+			newCleanedPayload.append("\n").append(OrgUtils.getTimestamp()).append("\n");
+		
+		
+		newNode.payload = newCleanedPayload.toString() + newPayloadResidue;
+		newNode.write(resolver);
+		
+		makeNewheadingEditNode(node.id, newParent);
+		// TODO Broadcast insertion of new node to calendar
+	}
+	
+	private void announceUpdate() {
 		Intent intent = new Intent(Synchronizer.SYNC_UPDATE);
 		intent.putExtra(Synchronizer.SYNC_DONE, true);
 		intent.putExtra("showToast", false);
@@ -399,8 +403,8 @@ public class EditActivity extends FragmentActivity {
 	}
 	
 	private void makeNewheadingEditNode(long node_id, OrgNode parent) {
-		boolean generateEdits = parent != null && !parent.getFilename(resolver).equals(FileUtils.CAPTURE_FILE);
-		if(generateEdits == false)
+		boolean generateEdit = parent != null && !parent.getFilename(resolver).equals(FileUtils.CAPTURE_FILE);
+		if(generateEdit == false)
 			return;
 
 		// Add new heading nodes need the entire content of node without star headings

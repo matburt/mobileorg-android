@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import android.content.ContentResolver;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -21,10 +22,8 @@ import android.widget.TableLayout;
 
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Gui.Capture.DateTableRow.OrgTimeDate;
-import com.matburt.mobileorg.Parsing.MobileOrgApplication;
-import com.matburt.mobileorg.Parsing.NodeWrapper;
-import com.matburt.mobileorg.Parsing.OrgDatabaseOld;
 import com.matburt.mobileorg.provider.OrgNode;
+import com.matburt.mobileorg.provider.OrgProviderUtil;
 
 public class EditDetailsFragment extends Fragment {
 	private EditText titleView;
@@ -35,9 +34,7 @@ public class EditDetailsFragment extends Fragment {
 	private LinearLayout locationView;
 	private LocationTableRow locationTableRow;
 
-	private OrgDatabaseOld orgDB;
-
-	private NodeWrapper node;
+	private OrgNode node;
 	private String actionMode;
 	
 	private String title;
@@ -47,16 +44,18 @@ public class EditDetailsFragment extends Fragment {
 	private DateTableRow deadlineEntry = null;
 	
 	private ArrayList<String> tagsToRestore = null;
+	private ContentResolver resolver;
 
-	public void init(OrgNode node, String actionMode, String defaultTodo, String title) {
-		init(node, actionMode, defaultTodo);
+	public void init(OrgNode node, String actionMode, String defaultTodo, String title, ContentResolver resolver) {
+		init(node, actionMode, defaultTodo, resolver);
 		this.title = title;
 	}
 	
-	public void init(OrgNode node, String actionMode, String defaultTodo) {
-		//this.node = node;
+	public void init(OrgNode node, String actionMode, String defaultTodo, ContentResolver resolver) {
 		this.actionMode = actionMode;
 		this.defaultTodo = defaultTodo;
+		this.resolver = resolver;
+		this.node = node;
 	}
 	
 	@Override
@@ -72,8 +71,6 @@ public class EditDetailsFragment extends Fragment {
 		this.tagsView = (TableLayout) view.findViewById(R.id.tags);
 		this.datesView = (TableLayout) view.findViewById(R.id.dates);
 		this.locationView = (LinearLayout) view.findViewById(R.id.location);
-
-		this.orgDB = ((MobileOrgApplication) getActivity().getApplication()).getDB();
 		
         setHasOptionsMenu(true);
         initDisplay();
@@ -112,33 +109,33 @@ public class EditDetailsFragment extends Fragment {
         outState.putStringArrayList("tags", tags);
 	}
 
-	private void initDisplay() {
-		
+	private void initDisplay() {		
 		if(this.actionMode == null) {
 			this.actionMode = EditActivity.ACTIONMODE_CREATE;
 			titleView.setText(title);
 			titleView.setSelection(title.length());
 
-			setupSpinner(getActivity(), todoStateView, orgDB.getTodos(), defaultTodo);
-			setupSpinner(getActivity(), priorityView, orgDB.getPriorities(), "");
-			this.locationTableRow = new LocationTableRow(getActivity(), null, locationView);
+			setupSpinner(getActivity(), todoStateView, OrgProviderUtil.getTodos(resolver), defaultTodo);
+			setupSpinner(getActivity(), priorityView, OrgProviderUtil.getPriorities(resolver), "");
+			this.locationTableRow = new LocationTableRow(getActivity(), null, locationView, resolver);
 		}
 		else if (this.actionMode.equals(EditActivity.ACTIONMODE_EDIT)) {
-			titleView.setText(node.getName());
-			titleView.setSelection(node.getName().length());
+			titleView.setText(node.name);
+			titleView.setSelection(node.name.length());
 			
-			setupTags(node.getTagList());
+			// TODO Fix taglist
+			//setupTags(node.getTagList());
 			setupDates();
-			setupSpinner(getActivity(), todoStateView, orgDB.getTodos(), node.getTodo());
-			setupSpinner(getActivity(), priorityView, orgDB.getPriorities(), node.getPriority());
-			if(node.getParent() != null)
-				this.locationTableRow = new LocationTableRow(getActivity(), node.getParent(), locationView);
+			setupSpinner(getActivity(), todoStateView, OrgProviderUtil.getTodos(resolver), node.todo);
+			setupSpinner(getActivity(), priorityView,OrgProviderUtil.getPriorities(resolver), node.priority);
+			if(node.getParent(resolver) != null)
+				this.locationTableRow = new LocationTableRow(getActivity(), node.getParent(resolver), locationView, resolver);
 		} else { //if (this.actionMode.equals(EditActivity.ACTIONMODE_CREATE)) { // or ACTIONMODE_ADDPARENT
 			titleView.setText("");
 
-			setupSpinner(getActivity(), todoStateView, orgDB.getTodos(), defaultTodo);
-			setupSpinner(getActivity(), priorityView, orgDB.getPriorities(), "");
-			this.locationTableRow = new LocationTableRow(getActivity(), node, locationView);
+			setupSpinner(getActivity(), todoStateView, OrgProviderUtil.getTodos(resolver), defaultTodo);
+			setupSpinner(getActivity(), priorityView, OrgProviderUtil.getPriorities(resolver), "");
+			this.locationTableRow = new LocationTableRow(getActivity(), node, locationView, resolver);
 		}
 	}
 	
@@ -268,7 +265,7 @@ public class EditDetailsFragment extends Fragment {
 	}
 
 	private void addTag(String tag) {
-		TagTableRow tagEntry = new TagTableRow(getActivity(), tagsView, orgDB.getTags(), tag, this);
+		TagTableRow tagEntry = new TagTableRow(getActivity(), tagsView, OrgProviderUtil.getTags(resolver), tag, this);
 		tagsView.addView(tagEntry);
 		tagEntries.add(tagEntry);
 	}
@@ -284,10 +281,10 @@ public class EditDetailsFragment extends Fragment {
 				return false;
 		} else if (this.actionMode.equals(EditActivity.ACTIONMODE_EDIT)) {
 			
-			if (newTitle.equals(node.getName())
-					&& newTodo.equals(node.getTodo())
-					&& newTags.equals(node.getTags())
-					&& newPriority.equals(node.getPriority()))
+			if (newTitle.equals(node.name)
+					&& newTodo.equals(node.todo)
+					&& newTags.equals(node.tags)
+					&& newPriority.equals(node.priority))
 				return false;
 		}	
 		return true;
@@ -336,7 +333,7 @@ public class EditDetailsFragment extends Fragment {
 		return priorityView.getSelectedItem().toString();
 	}
 	
-	public NodeWrapper getLocation() {
+	public OrgNode getLocation() {
 		return locationTableRow.getParentNodeId();
 	}
 	

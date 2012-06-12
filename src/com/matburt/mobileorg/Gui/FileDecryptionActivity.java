@@ -14,7 +14,6 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.matburt.mobileorg.R;
-import com.matburt.mobileorg.Parsing.MobileOrgApplication;
 import com.matburt.mobileorg.Parsing.OrgFileParser;
 import com.matburt.mobileorg.provider.OrgDatabase;
 import com.matburt.mobileorg.provider.OrgFile;

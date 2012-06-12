@@ -2,30 +2,31 @@ package com.matburt.mobileorg.Gui.Capture;
 
 import java.util.ArrayList;
 
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.database.Cursor;
 import android.text.TextUtils;
 import android.util.Log;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 
-import com.matburt.mobileorg.Parsing.MobileOrgApplication;
-import com.matburt.mobileorg.Parsing.NodeWrapper;
-import com.matburt.mobileorg.Parsing.OrgDatabaseOld;
+import com.matburt.mobileorg.provider.OrgContract.OrgData;
+import com.matburt.mobileorg.provider.OrgNode;
+import com.matburt.mobileorg.provider.OrgProviderUtil;
 import com.matburt.mobileorg.util.FileUtils;
 
 public class LocationTableRow {
-	private NodeWrapper node;
-	private OrgDatabaseOld db;
+	private OrgNode node;
 	private LinearLayout locationView;
 	private LocationEntry lastEntry;
+	private ContentResolver resolver;
 	
-	public LocationTableRow(Context context, NodeWrapper node, LinearLayout locationView) {
+	public LocationTableRow(Context context, OrgNode node, LinearLayout locationView, ContentResolver resolver) {
 		this.locationView = locationView;
 		
-		MobileOrgApplication appInst = (MobileOrgApplication) context.getApplicationContext();
-		this.db = appInst.getDB();
 		this.node = node;
+		this.resolver = resolver;
 		
 		initLocationView(context);
 	}
@@ -39,26 +40,26 @@ public class LocationTableRow {
 			return;
 		}
 		
-		NodeWrapper currentNode = this.node;
+		OrgNode currentNode = this.node;
 		LocationEntry entry = null;
 		while(currentNode != null) {
-			entry = new LocationEntry(context, currentNode.getParent(), entry);
-			entry.setupSpinner(currentNode.getName());
+			entry = new LocationEntry(context, currentNode.getParent(resolver), entry);
+			entry.setupSpinner(currentNode.name);
 			locationView.addView(entry, 0);
 			
 			if(this.lastEntry == null)
 				this.lastEntry = entry;
 			
-			currentNode = currentNode.getParent();
+			currentNode = currentNode.getParent(resolver);
 		}	
 		
 		getParentNodeId();
 	}
 	
-	public NodeWrapper getParentNodeId() {
-		NodeWrapper node = this.lastEntry.getNode();
+	public OrgNode getParentNodeId() {
+		OrgNode node = this.lastEntry.getNode();
 		if(node != null)
-			Log.d("MobileOrg", "getParentNodeId() : " + node.getName());
+			Log.d("MobileOrg", "getParentNodeId() : " + node.name);
 		else
 			Log.d("MobileOrg", "getParentNodeId() : Top level");
 
@@ -67,9 +68,9 @@ public class LocationTableRow {
 		
 	private class LocationEntry extends Spinner {
 		private LocationEntry child = null;
-		private NodeWrapper node;
+		private OrgNode node;
 		
-		public LocationEntry(Context context, NodeWrapper node, LocationEntry child) {
+		public LocationEntry(Context context, OrgNode node, LocationEntry child) {
 			super(context);
 			this.child = child;
 			this.node = node;
@@ -79,18 +80,20 @@ public class LocationTableRow {
 			if(this.node == null && this.child == null)
 				setupSpinner(FileUtils.CAPTURE_FILE);
 			else
-				setupSpinner(this.node.getName());
+				setupSpinner(this.node.name);
 		}
 		
 		private void setupSpinner(String name) {
 			ArrayList<String> children = new ArrayList<String>();
 			if (this.node == null) {// Toplevel node
-				children = db.cursorToArrayList(db.getFileCursor());
+				Cursor cursor = resolver.query(OrgData.buildIdUri(Integer.toString(-1)), OrgData.DEFAULT_COLUMNS, null, null, null);
+				children = OrgProviderUtil.cursorToArrayList(cursor);
+				cursor.close();
 				Log.d("MobileOrg", "setupSpinner(): this.node = null!");
 			}
 			else {
-				children = node.getChildrenStringArray();
-				Log.d("MobileOrg", "setupSpinner(): this.node = " + this.node.getName());
+				children = node.getChildrenStringArray(resolver);
+				Log.d("MobileOrg", "setupSpinner(): this.node = " + this.node.name);
 			}
 			
 			EditDetailsFragment
@@ -111,19 +114,19 @@ public class LocationTableRow {
 		}
 		
 		private void addChild(String selectedItem) {
-			NodeWrapper childNode;
+			OrgNode childNode;
 			if(this.node == null) {
 				Log.d("MobileOrg", "addChild(): this.node = null!");
-				childNode = new NodeWrapper(db.getFileNodeId(selectedItem), db);
+				childNode = OrgProviderUtil.getOrgNodeFromFilename(selectedItem, resolver);
 			}
 			else {
-				Log.d("MobileOrg", "addChild(): this.node = " + this.node.getName());
-				childNode = this.node.getChild(selectedItem);
+				Log.d("MobileOrg", "addChild(): this.node = " + this.node.name);
+				childNode = this.node.getChild(selectedItem, resolver);
 				
 				if(childNode == null)
 					Log.d("MobileOrg", "addChild(): generated null node!");
 				
-				if(childNode.getChildren().size() == 0)
+				if(childNode.getChildren(resolver).size() == 0)
 					return;
 			}
 			
@@ -135,7 +138,7 @@ public class LocationTableRow {
 		
 		private void setupChildSpinner() {
 			EditDetailsFragment
-			.setupSpinner(getContext(), this, node.getChildrenStringArray(), "");
+			.setupSpinner(getContext(), this, node.getChildrenStringArray(resolver), "");
 		}
 
 		private void removeChildren() {	
@@ -147,16 +150,18 @@ public class LocationTableRow {
 			lastEntry = this;
 		}
 		
-		public NodeWrapper getNode() {
+		public OrgNode getNode() {
 			String selection = (String) this.getSelectedItem();
 			
 			if(TextUtils.isEmpty(selection))
 				return this.node;
 			
-			if(this.node == null)
-				return new NodeWrapper(db.getFileNodeId(selection), db);
+			if(this.node == null) {
+				return OrgProviderUtil.getOrgNodeFromFilename(selection, resolver);
+			}
 			else
-				return this.node.getChild(selection);
+				return this.node.getChild(selection, resolver);
 		}
+
 	}
 }
