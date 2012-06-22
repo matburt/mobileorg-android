@@ -313,7 +313,8 @@ public class EditActivity extends FragmentActivity {
 	}
 	
 	private void doCancel() {
-		if(this.detailsFragment.hasEdits() == false) {
+		if(this.detailsFragment.hasEdits() == false &&
+                   this.payloadFragment.hasEdits() == false) {
 			setResult(RESULT_CANCELED);
 			finish();
 			return;
