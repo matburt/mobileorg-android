@@ -8,6 +8,7 @@ import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.text.InputFilter;
 
 import com.matburt.mobileorg.R;
 
@@ -39,6 +40,8 @@ public class EditPayloadFragment extends Fragment {
     }
 
     public void setText(String text) {
+        // work around Samsung's default limit of 9000 chars per text field
+        this.editDisplay.setFilters(new InputFilter[0]);
         this.editDisplay.setText(text);
         this.editDisplay.setSelection(text.length());
     }
