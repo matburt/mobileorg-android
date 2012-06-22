@@ -16,6 +16,7 @@ public class EditPayloadFragment extends Fragment {
 	public static final String RESULT_STRING = "text";
     private EditText editDisplay;
 
+    private String orig_content;
     private String content;
 	private boolean enabled;
     
@@ -46,6 +47,10 @@ public class EditPayloadFragment extends Fragment {
     public String getText() {
     	return this.editDisplay.getText().toString();
     }
+
+	public boolean hasEdits() {
+            return (getText() != content);
+        }
         
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
