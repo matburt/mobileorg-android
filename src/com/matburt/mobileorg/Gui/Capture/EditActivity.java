@@ -21,10 +21,8 @@ import android.view.WindowManager;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Services.TimeclockService;
 import com.matburt.mobileorg.Synchronizers.Synchronizer;
-import com.matburt.mobileorg.provider.OrgEdit;
-import com.matburt.mobileorg.provider.OrgFile;
 import com.matburt.mobileorg.provider.OrgNode;
-import com.matburt.mobileorg.util.FileUtils;
+import com.matburt.mobileorg.provider.OrgProviderUtil;
 import com.matburt.mobileorg.util.OrgUtils;
 
 public class EditActivity extends FragmentActivity {
@@ -367,50 +365,27 @@ public class EditActivity extends FragmentActivity {
 	
 	private void createNewNode(OrgNode newNode) {
 		OrgNode newParent = this.detailsFragment.getLocation();
+
 		StringBuilder newCleanedPayload = new StringBuilder(this.payloadFragment.getText());
 		insertChangesIntoPayloadResidue();
 		String newPayloadResidue = node.getPayload().getNewPayloadResidue();
-		
-		if (newParent == null) {
-			OrgFile file = new OrgFile(FileUtils.CAPTURE_FILE,
-					FileUtils.CAPTURE_FILE_ALIAS, "");
-			file.write();
-			newNode.parentId = file.nodeId;
-			newNode.fileId = file.id;
-		} else {
-			newNode.fileId = newParent.fileId;
-			newNode.parentId = newParent.id;
-		}
-		
+		String newPayload = newCleanedPayload.toString() + newPayloadResidue;
+
 		boolean addTimestamp = PreferenceManager.getDefaultSharedPreferences(
 				this).getBoolean("captureWithTimestamp", false);
 		if(addTimestamp)
 			newCleanedPayload.append("\n").append(OrgUtils.getTimestamp()).append("\n");
 		
 		
-		newNode.payload = newCleanedPayload.toString() + newPayloadResidue;
-		newNode.write(resolver);
-		
-		makeNewheadingEditNode(node.id, newParent);
-		// TODO Broadcast insertion of new node to calendar
+		OrgProviderUtil.createNode(newNode, newParent, newPayload, resolver);
 	}
+
 	
 	private void announceUpdate() {
 		Intent intent = new Intent(Synchronizer.SYNC_UPDATE);
 		intent.putExtra(Synchronizer.SYNC_DONE, true);
 		intent.putExtra("showToast", false);
 		sendBroadcast(intent);
-	}
-	
-	private void makeNewheadingEditNode(long node_id, OrgNode parent) {
-		boolean generateEdit = parent != null && !parent.getFilename(resolver).equals(FileUtils.CAPTURE_FILE);
-		if(generateEdit == false)
-			return;
-
-		// Add new heading nodes need the entire content of node without star headings
-		node.level = 0;
-		OrgEdit edit = new OrgEdit(parent, OrgEdit.TYPE.ADDHEADING, node.toString(), resolver);
-		edit.write(resolver);
 	}
 
 }

@@ -125,23 +125,25 @@ public class OrgNode {
 	public ArrayList<OrgNode> getChildren(ContentResolver resolver) {
 		ArrayList<OrgNode> result = new ArrayList<OrgNode>();
 		
-		Cursor nodeChildren = resolver.query(OrgData.buildChildrenUri(id),
+		Cursor childCursor = resolver.query(OrgData.buildChildrenUri(id),
 				OrgData.DEFAULT_COLUMNS, null, null, null);
-		nodeChildren.moveToFirst();
 		
+		childCursor.moveToFirst();
 		
-		while(nodeChildren.isAfterLast() == false) {
-			long id = (new OrgNode(nodeChildren)).id;
-			result.add(new OrgNode(id, resolver));
-			nodeChildren.moveToNext();
+		while(childCursor.isAfterLast() == false) {
+			result.add(new OrgNode(childCursor));
+			childCursor.moveToNext();
 		}
 		
+		childCursor.close();
 		return result;
 	}
 	
 	public ArrayList<String> getChildrenStringArray(ContentResolver resolver) {
 		ArrayList<String> result = new ArrayList<String>();
-		for (OrgNode node : getChildren(resolver))
+		ArrayList<OrgNode> children = getChildren(resolver);
+
+		for (OrgNode node : children)
 			result.add(node.name);
 
 		return result;

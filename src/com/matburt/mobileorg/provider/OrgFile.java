@@ -7,6 +7,7 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
+import android.util.Log;
 
 public class OrgFile {
 	public String filename = "";
@@ -78,6 +79,8 @@ public class OrgFile {
 	}
 	
 	private boolean doesFileExist() {
+		Log.d("MobileOrg", "Filename is :" + filename);
+		assert(resolver != null);
 		Cursor cursor = resolver.query(Files.buildFilenameUri(filename),
 				Files.DEFAULT_COLUMNS, null, null, null);
 		int count = cursor.getCount();

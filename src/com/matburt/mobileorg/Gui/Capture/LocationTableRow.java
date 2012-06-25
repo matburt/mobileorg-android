@@ -17,29 +17,29 @@ import com.matburt.mobileorg.provider.OrgProviderUtil;
 import com.matburt.mobileorg.util.FileUtils;
 
 public class LocationTableRow {
-	private OrgNode node;
+	private OrgNode node = null;
 	private LinearLayout locationView;
 	private LocationEntry lastEntry;
 	private ContentResolver resolver;
-	
-	public LocationTableRow(Context context, OrgNode node, LinearLayout locationView, ContentResolver resolver) {
+
+	public LocationTableRow(Context context, LinearLayout locationView, ContentResolver resolver) {
 		this.locationView = locationView;
-		
-		this.node = node;
 		this.resolver = resolver;
-		
+
+		LocationEntry entry = new LocationEntry(context, null, null);
+		entry.setupSpinner();
+		this.lastEntry = entry;
+		locationView.addView(entry);
+	}
+	
+	public LocationTableRow(OrgNode node, Context context, LinearLayout locationView, ContentResolver resolver) {
+		this.locationView = locationView;
+		this.resolver = resolver;	
+		this.node = node;
 		initLocationView(context);
 	}
 	
 	private void initLocationView(Context context) {
-		if(node == null) {
-			LocationEntry entry = new LocationEntry(context, null, null);
-			entry.setupSpinner();
-			locationView.addView(entry);
-			this.lastEntry = entry;
-			return;
-		}
-		
 		OrgNode currentNode = this.node;
 		LocationEntry entry = null;
 		while(currentNode != null) {

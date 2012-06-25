@@ -117,7 +117,7 @@ public class EditDetailsFragment extends Fragment {
 
 			setupSpinner(getActivity(), todoStateView, OrgProviderUtil.getTodos(resolver), defaultTodo);
 			setupSpinner(getActivity(), priorityView, OrgProviderUtil.getPriorities(resolver), "");
-			this.locationTableRow = new LocationTableRow(getActivity(), null, locationView, resolver);
+			this.locationTableRow = new LocationTableRow(getActivity(), locationView, resolver);
 		}
 		else if (this.actionMode.equals(EditActivity.ACTIONMODE_EDIT)) {
 			titleView.setText(node.name);
@@ -129,13 +129,13 @@ public class EditDetailsFragment extends Fragment {
 			setupSpinner(getActivity(), todoStateView, OrgProviderUtil.getTodos(resolver), node.todo);
 			setupSpinner(getActivity(), priorityView,OrgProviderUtil.getPriorities(resolver), node.priority);
 			if(node.getParent(resolver) != null)
-				this.locationTableRow = new LocationTableRow(getActivity(), node.getParent(resolver), locationView, resolver);
+				this.locationTableRow = new LocationTableRow(node.getParent(resolver), getActivity(), locationView, resolver);
 		} else { //if (this.actionMode.equals(EditActivity.ACTIONMODE_CREATE)) { // or ACTIONMODE_ADDPARENT
 			titleView.setText("");
 
 			setupSpinner(getActivity(), todoStateView, OrgProviderUtil.getTodos(resolver), defaultTodo);
 			setupSpinner(getActivity(), priorityView, OrgProviderUtil.getPriorities(resolver), "");
-			this.locationTableRow = new LocationTableRow(getActivity(), node, locationView, resolver);
+			this.locationTableRow = new LocationTableRow(node, getActivity(), locationView, resolver);
 		}
 	}
 	
