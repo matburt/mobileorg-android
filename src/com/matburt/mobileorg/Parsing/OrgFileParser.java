@@ -323,11 +323,13 @@ public class OrgFileParser {
 	 * @return HashMap with Filename->Filename Alias
 	 */
 	public static HashMap<String, String> getFilesFromIndex(String filecontents) {
-		Pattern getOrgFiles = Pattern.compile("\\[file:(.*?)\\]\\[(.*?)\\]\\]");
-		Matcher m = getOrgFiles.matcher(filecontents);
+		final String fileMatchPattern = "\\[file:(.*?)\\]\\[(.*?)\\]\\]";
+		Pattern indexOrgFilePattern = Pattern.compile(fileMatchPattern);
+		Matcher indexOrgFileMatcher = indexOrgFilePattern.matcher(filecontents);
 		HashMap<String, String> allOrgFiles = new HashMap<String, String>();
-		while (m.find()) {
-			allOrgFiles.put(m.group(1), m.group(2));
+		
+		while (indexOrgFileMatcher.find()) {
+			allOrgFiles.put(indexOrgFileMatcher.group(1), indexOrgFileMatcher.group(2));
 		}
 
 		return allOrgFiles;
