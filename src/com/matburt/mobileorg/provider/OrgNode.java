@@ -130,13 +130,10 @@ public class OrgNode {
 		Cursor childCursor = resolver.query(OrgData.buildChildrenUri(id),
 				OrgData.DEFAULT_COLUMNS, null, null, null);
 		
-		Log.d("MobileOrg", "childCursor.getCount(): " + childCursor.getCount());
 		childCursor.moveToFirst();
 		
 		while(childCursor.isAfterLast() == false) {
-			Log.d("MobileOrg", "Inside loop");
 			result.add(new OrgNode(childCursor));
-			Log.d("MobileOrg", "Post added result");
 			childCursor.moveToNext();
 		}
 		
@@ -282,6 +279,7 @@ public class OrgNode {
 
 	public void parseLine(String thisLine, int numstars, boolean useTitleField) {
         String heading = thisLine.substring(numstars+1);
+        this.level = numstars;
         
     	Matcher matcher = titlePattern.matcher(heading);
 		if (matcher.find()) {

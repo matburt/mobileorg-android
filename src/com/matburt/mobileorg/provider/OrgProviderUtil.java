@@ -18,7 +18,7 @@ import com.matburt.mobileorg.util.FileUtils;
 public class OrgProviderUtil {
 	
 	
-	public static void createNode(OrgNode node, OrgNode parent, String newPayload, ContentResolver resolver) {
+	public static void createNodeWithNewheadingEditnode(OrgNode node, OrgNode parent, String newPayload, ContentResolver resolver) {
 		if (parent == null) {
 			OrgFile file;
 			try {
@@ -159,14 +159,16 @@ public class OrgProviderUtil {
 	private static StringBuilder nodesToString(long node_id, long level, ContentResolver resolver) {
 		StringBuilder result = new StringBuilder();
 		
-		Cursor cursor = resolver.query(OrgData.buildIdUri(node_id), OrgData.DEFAULT_COLUMNS, null, null, null);
-		OrgNode node = new OrgNode(cursor);
-		cursor.close();
-		result.append(node.toString());
+		OrgNode node = new OrgNode(node_id, resolver);
+		
+		if(level != 0) { // Don't add top level file node heading
+			result.append(node.toString());
+			result.append("\n");
+		}
 		
 		Cursor childrenCursor = resolver.query(OrgData.buildChildrenUri(node_id), OrgData.DEFAULT_COLUMNS, null, null, null);
 		childrenCursor.moveToFirst();
-		
+				
 		while(childrenCursor.isAfterLast() == false) {
 			result.append(nodesToString(childrenCursor.getLong(childrenCursor
 					.getColumnIndex(OrgData.ID)), level + 1, resolver));

@@ -18,6 +18,7 @@ public class OrgDatabase extends SQLiteOpenHelper {
 	private int orgdata_priorityColumn;
 	private int orgdata_parentidColumn;
 	private int orgdata_fileidColumn;
+	private int orgdata_levelColumn;
 	
 	private InsertHelper orgdataInsertHelper;
 	private SQLiteStatement addPayloadStatement;
@@ -97,6 +98,7 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		orgdataInsertHelper.bind(orgdata_priorityColumn, node.priority);
 		orgdataInsertHelper.bind(orgdata_fileidColumn, node.fileId);
 		orgdataInsertHelper.bind(orgdata_tagsColumn, node.tags);
+		orgdataInsertHelper.bind(orgdata_levelColumn, node.level);
 		return orgdataInsertHelper.execute();
 	}
 		
@@ -119,6 +121,7 @@ public class OrgDatabase extends SQLiteOpenHelper {
 			this.orgdata_parentidColumn = orgdataInsertHelper.getColumnIndex(OrgData.PARENT_ID);
 			this.orgdata_fileidColumn = orgdataInsertHelper.getColumnIndex(OrgData.FILE_ID);
 			this.orgdata_tagsColumn = orgdataInsertHelper.getColumnIndex(OrgData.TAGS);
+			this.orgdata_levelColumn = orgdataInsertHelper.getColumnIndex(OrgData.LEVEL);
 		}
 		orgdataInsertHelper.prepareForInsert();
 	}

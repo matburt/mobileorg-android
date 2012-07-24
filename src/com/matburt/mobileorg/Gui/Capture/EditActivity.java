@@ -376,8 +376,7 @@ public class EditActivity extends FragmentActivity {
 		if(addTimestamp)
 			newCleanedPayload.append("\n").append(OrgUtils.getTimestamp()).append("\n");
 		
-		
-		OrgProviderUtil.createNode(newNode, newParent, newPayload, resolver);
+		OrgProviderUtil.createNodeWithNewheadingEditnode(newNode, newParent, newPayload, resolver);
 	}
 
 	
