@@ -35,7 +35,7 @@ public class OrgNode {
 	public OrgNode(long nodeId, ContentResolver resolver) {
 		Cursor cursor = resolver.query(OrgData.buildIdUri(nodeId),
 				OrgData.DEFAULT_COLUMNS, null, null, null);
-		if(cursor == null || cursor.getCount() < 1)
+		if(cursor == null || cursor.moveToFirst() == false)
 			throw new IllegalArgumentException("Node with id \"" + id + "\" not found");
 		set(cursor);
 		cursor.close();
@@ -46,7 +46,9 @@ public class OrgNode {
 	}
 	
 	public void set(Cursor cursor) {
-		if (cursor != null && cursor.moveToFirst()) {
+		if (cursor != null && cursor.getCount() > 0) {
+			if(cursor.isBeforeFirst() || cursor.isAfterLast())
+				cursor.moveToFirst();
 			id = cursor.getLong(cursor.getColumnIndexOrThrow("_id"));
 			parentId = cursor.getLong(cursor
 					.getColumnIndexOrThrow(OrgData.PARENT_ID));
@@ -128,10 +130,13 @@ public class OrgNode {
 		Cursor childCursor = resolver.query(OrgData.buildChildrenUri(id),
 				OrgData.DEFAULT_COLUMNS, null, null, null);
 		
+		Log.d("MobileOrg", "childCursor.getCount(): " + childCursor.getCount());
 		childCursor.moveToFirst();
 		
 		while(childCursor.isAfterLast() == false) {
+			Log.d("MobileOrg", "Inside loop");
 			result.add(new OrgNode(childCursor));
+			Log.d("MobileOrg", "Post added result");
 			childCursor.moveToNext();
 		}
 		
