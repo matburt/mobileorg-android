@@ -107,6 +107,7 @@
     <!-- preference strings -->
   <string name="title_capture_with_timestamp">Capture with Timestamp</string>
   <string name="summary_capture_with_timestamp">Captured nodes will have a timestamp added</string>
+  <string name="title_animate_transitions">Animate transitions</string>
   <string name="title_agenda_title">Use agenda titles</string>
   <string name="summary_agenda_title">Enables use of custom agenda titles. Needs resync of agenda file to take effect</string>
   <string name="title_do_auto_sync">Background Sync</string>

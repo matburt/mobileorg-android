@@ -7,6 +7,7 @@ import java.util.Date;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ActionBar;
@@ -64,7 +65,11 @@ public class EditActivity extends FragmentActivity {
 					.getFragment(savedInstanceState,
 							EditPayloadFragment.class.getName() + "raw");
 		}
-		
+		// Disable transitions if configured
+		if (Build.VERSION.SDK_INT >= 5 && !PreferenceManager.getDefaultSharedPreferences(this).getBoolean("animateTransitions", true)) {
+			overridePendingTransition(0, 0);
+		}
+	
 		init();
 		
 		setupActionbarTabs(savedInstanceState);

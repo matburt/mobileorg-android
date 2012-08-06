@@ -5,6 +5,7 @@ import android.app.SearchManager;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -22,6 +23,7 @@ public class SearchActivity extends ListActivity {
 
 		Intent intent = getIntent();
 		handleIntent(intent);
+		
 	}
 
 	@Override

@@ -3,6 +3,7 @@ package com.matburt.mobileorg.Settings;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -10,6 +11,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageItemInfo;
 import android.content.pm.ResolveInfo;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.ListPreference;
 import android.preference.Preference;
@@ -28,6 +30,7 @@ public class SettingsActivity extends PreferenceActivity implements
 	OrgDatabase db;
 	private boolean updateCalendar = false;
 
+	@SuppressLint("NewApi")
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -51,6 +54,11 @@ public class SettingsActivity extends PreferenceActivity implements
 		SharedPreferences appSettings = PreferenceManager
 				.getDefaultSharedPreferences(getApplicationContext());
 		appSettings.registerOnSharedPreferenceChangeListener(this);
+
+		// Disable transitions if configured
+		if (Build.VERSION.SDK_INT >= 5 && !PreferenceManager.getDefaultSharedPreferences(this).getBoolean("animateTransitions", true)) {
+			overridePendingTransition(0, 0);
+		}
 	}
 	
 	@Override

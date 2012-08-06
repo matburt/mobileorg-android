@@ -2,10 +2,12 @@ package com.matburt.mobileorg.Settings;
 
 import java.util.ArrayList;
 
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.HandlerThread;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -119,7 +121,8 @@ public class WizardActivity extends Activity {
     UIHandler uiHandler;
     
     /** Called when the activity is first created. */
-    @Override
+    @SuppressLint("NewApi")
+	@Override
         public void onCreate(Bundle savedInstanceState) {
     	super.onCreate(savedInstanceState);
     	setContentView(R.layout.wizard);
@@ -146,6 +149,10 @@ public class WizardActivity extends Activity {
     	progress.setTitle(getString(R.string.signing_in));
     	//when wizard first starts can't go to next page
     	wizard.setNavButtonStateOnPage(0, false, PageFlipView.FIRST_PAGE );
+    	// Disable transitions if configured
+		if (Build.VERSION.SDK_INT >= 5 && !PreferenceManager.getDefaultSharedPreferences(this).getBoolean("animateTransitions", true)) {
+			overridePendingTransition(0, 0);
+		}
     }
     
     /**

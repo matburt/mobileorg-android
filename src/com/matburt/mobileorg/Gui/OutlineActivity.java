@@ -16,6 +16,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentActivity;
@@ -101,7 +102,13 @@ public class OutlineActivity extends FragmentActivity
 		this.syncReceiver = new SynchServiceReceiver();
 		registerReceiver(this.syncReceiver, new IntentFilter(
 				Synchronizer.SYNC_UPDATE));
-			
+		
+		// Disable transitions if configured
+		if (Build.VERSION.SDK_INT >= 5 && !PreferenceManager.getDefaultSharedPreferences(this).getBoolean("animateTransitions", true)) {
+			overridePendingTransition(0, 0);
+		}
+	
+		// Display the payload for the selected node in large landscape layout
 		if (this.node_id != -1) {
 			showDetails(this.node_id);
 		}

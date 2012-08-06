@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <PreferenceCategory android:title="@string/preference_synchronization" >
+        <com.matburt.mobileorg.Settings.WizardPreferences
+            android:key="wizardPref"
+            android:title="Wizard Preference" />
+
+        <ListPreference
+            android:defaultValue="webdav"
+            android:entries="@array/fileSources"
+            android:entryValues="@array/fileSourcesVals"
+            android:key="syncSource"
+            android:summary="@string/preference_sync_source_summary"
+            android:title="@string/preference_sync_source_title" />
+
+        <com.matburt.mobileorg.Settings.SynchronizerPreferences
+            android:defaultValue="32"
+            android:key="syncPref"
+            android:title="Custom Preference" />
+
+        <CheckBoxPreference
+            android:key="doAutoSync"
+            android:summary="@string/summary_do_auto_sync"
+            android:title="@string/title_do_auto_sync" />
+
+        <ListPreference
+            android:dependency="doAutoSync"
+            android:entries="@array/syncIntervals"
+            android:entryValues="@array/syncIntervalsVals"
+            android:key="autoSyncInterval"
+            android:summary="@string/summary_auto_sync_interval"
+            android:title="@string/title_auto_sync_interval" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="@string/preference_viewing" >
+        <CheckBoxPreference
+            android:key="useAgendaTitle"
+            android:summary="@string/summary_agenda_title"
+            android:title="@string/title_agenda_title" />
+        <CheckBoxPreference
+            android:dependency="useAgendaTitle"
+            android:key="combineBlockAgendas"
+            android:summary="@string/preference_combine_block_agenda_summary"
+            android:title="@string/preference_combine_block_agenda_title" />
+        <CheckBoxPreference
+            android:key="viewWrapLines"
+            android:summary="@string/summary_view_wrap_lines"
+            android:title="@string/title_view_wrap_lines" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="viewDefaultEdit"
+            android:summary="When checked, the default behaviour for clicking on nodes without children will be editing. Else it will be viewing."
+            android:title="Edit on click" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="viewApplyFormating"
+            android:summary="Apply formating of orgmode emphasis, bold, underline and strike-through when viewing."
+            android:title="Apply view formating" />
+
+        <ListPreference
+            android:defaultValue="0"
+            android:entries="@array/viewRecursionLevels"
+            android:entryValues="@array/viewRecursionLevelsVals"
+            android:key="viewRecursionMax"
+            android:summary="@string/preference_recursion_level_summary"
+            android:title="@string/preference_recursion_level_title" />
+        <CheckBoxPreference
+            android:key="animateTransitions"
+            android:title="@string/title_animate_transitions" 
+            android:defaultValue="true" />
+        
+    </PreferenceCategory>
+    <PreferenceCategory android:title="@string/preference_storage" >
+
+        <!--
+             <ListPreference
+            android:defaultValue="internal"
+            android:entries="@array/storageModes"
+            android:entryValues="@array/storageModesVals"
+            android:key="storageMode"
+            android:summary="@string/preference_storage_summary"
+            android:title="@string/preference_storage_title" />
+        -->
+        <CheckBoxPreference
+            android:key="captureWithTimestamp"
+            android:summary="@string/summary_capture_with_timestamp"
+            android:title="@string/title_capture_with_timestamp" />
+
+        <ListPreference
+            android:defaultValue=""
+            android:key="defaultTodo"
+            android:summary="@string/preference_default_todo_summary"
+            android:title="@string/preference_default_todo_title" />
+
+        <Preference
+            android:key="clearDB"
+            android:summary="@string/preference_clean_up_db_summary"
+            android:title="@string/preference_clean_up_db_title" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="@string/preference_calendar" >
+        <CheckBoxPreference
+            android:key="calendarEnabled"
+            android:summary="@string/preference_calendar_synch"
+            android:title="@string/preference_calendar_synch_title" />
+
+        <ListPreference
+            android:defaultValue=""
+            android:dependency="calendarEnabled"
+            android:key="calendarName"
+            android:summary="@string/preference_calendar_name_summary"
+            android:title="@string/preference_calendar_name" />
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:dependency="calendarEnabled"
+            android:key="calendarShowDone"
+            android:summary="@string/preference_calendar_show_done_summary"
+            android:title="@string/preference_calendar_show_done" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:dependency="calendarEnabled"
+            android:key="calendarHabits"
+            android:summary="@string/preference_calendar_show_habits_summary"
+            android:title="@string/preference_calendar_show_habits" />
+        <CheckBoxPreference
+            android:dependency="calendarEnabled"
+            android:key="calendarReminder"
+            android:summary="@string/preference_calendar_reminder_summary"
+            android:title="@string/preference_calendar_reminder" />
+
+        <EditTextPreference
+            android:dependency="calendarReminder"
+            android:key="calendarReminderInterval"
+            android:maxLength="3"
+            android:numeric="integer"
+            android:summary="@string/preference_calendar_reminder_interval_summary"
+            android:title="@string/preference_calendar_reminder_interval" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="@string/preference_other" >
+
+        <!--
+        <PreferenceScreen
+            android:key="Widget"
+            android:summary="@string/preferences_widget_summary"
+            android:title="@string/preference_widget_title" >
+        </PreferenceScreen>
+        -->
+        <PreferenceScreen
+            android:key="VersionDisp"
+            android:summary="0.9.0"
+            android:title="@string/preference_version" >
+        </PreferenceScreen>
+    </PreferenceCategory>
+
+</PreferenceScreen>
