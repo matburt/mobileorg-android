@@ -39,6 +39,7 @@ import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Gui.Capture.EditActivity;
 import com.matburt.mobileorg.Parsing.MobileOrgApplication;
 import com.matburt.mobileorg.Parsing.NodeWrapper;
+import com.matburt.mobileorg.Parsing.OrgDatabase;
 import com.matburt.mobileorg.Parsing.OrgFile;
 import com.matburt.mobileorg.Services.SyncService;
 import com.matburt.mobileorg.Services.TimeclockService;
@@ -62,7 +63,8 @@ public class OutlineActivity extends FragmentActivity
 	private ListView listView;
 	private OutlineCursorAdapter outlineAdapter;
 	private SynchServiceReceiver syncReceiver;
-
+	private TextView detailedView;
+	
     private boolean emptylist = false;
 
 	@Override
@@ -94,10 +96,15 @@ public class OutlineActivity extends FragmentActivity
 		listView.setOnItemClickListener(outlineClickListener);
 		registerForContextMenu(listView);	
 		
+		detailedView = (TextView) this.findViewById(R.id.detailed_view);
+		
 		this.syncReceiver = new SynchServiceReceiver();
 		registerReceiver(this.syncReceiver, new IntentFilter(
 				Synchronizer.SYNC_UPDATE));
-				
+			
+		if (this.node_id != -1) {
+			showDetails(this.node_id);
+		}
 		refreshDisplay();
 	}
 	
@@ -436,6 +443,17 @@ public class OutlineActivity extends FragmentActivity
     }
 	
 
+	private void showDetails(Long clicked_node_id) {
+		// Display the full payload as a sample
+		if (detailedView != null && appInst != null) {
+			OrgDatabase db = appInst.getDB();
+			if (db != null) { 
+				detailedView.setText(db.getNodePayloadReal(Long.toString(clicked_node_id)));
+			}
+		}
+	}
+
+
 	private OnItemClickListener outlineClickListener = new OnItemClickListener() {
 		@Override
 		public void onItemClick(AdapterView<?> parent, View v, int position,
@@ -468,6 +486,8 @@ public class OutlineActivity extends FragmentActivity
 				else
 					runViewNodeActivity(clicked_node_id);
 			}
+			
+			showDetails(clicked_node_id);
 		}
 	};
 	
