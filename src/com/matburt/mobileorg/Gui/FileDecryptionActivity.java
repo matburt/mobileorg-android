@@ -55,7 +55,7 @@ public class FileDecryptionActivity extends Activity
 		APGintent.setType("text/plain");
 		APGintent.putExtra(FileDecryptionActivity.EXTRA_DATA, data);
 		// Disable transitions if configured
-		if (Build.VERSION.SDK_INT >= 5 && !PreferenceManager.getDefaultSharedPreferences(this).getBoolean("animateTransitions", true)) {
+		if (Build.VERSION.SDK_INT >= 5 && !PreferenceManager.getDefaultSharedPreferences(this).getBoolean("viewAnimateTransitions", true)) {
 			overridePendingTransition(0, 0);
 		}	
 
@@ -110,7 +110,7 @@ public class FileDecryptionActivity extends Activity
 	 public void finish() {
 		 super.finish();
 		 // Disable transitions if configured
-		 if (Build.VERSION.SDK_INT >= 5 && !PreferenceManager.getDefaultSharedPreferences(this).getBoolean("animateTransitions", true)) {
+		 if (Build.VERSION.SDK_INT >= 5 && !PreferenceManager.getDefaultSharedPreferences(this).getBoolean("viewAnimateTransitions", true)) {
 			 overridePendingTransition(0, 0);
 		 }	
 	 }

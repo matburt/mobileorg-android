@@ -16,7 +16,7 @@ public class ScpSettingsActivity extends PreferenceActivity
         super.onCreate(savedInstanceState);
         addPreferencesFromResource(R.xml.scp_preferences);
     	// Disable transitions if configured
-		if (Build.VERSION.SDK_INT >= 5 && !PreferenceManager.getDefaultSharedPreferences(this).getBoolean("animateTransitions", true)) {
+		if (Build.VERSION.SDK_INT >= 5 && !PreferenceManager.getDefaultSharedPreferences(this).getBoolean("viewAnimateTransitions", true)) {
 			overridePendingTransition(0, 0);
 		}
 
@@ -27,7 +27,7 @@ public class ScpSettingsActivity extends PreferenceActivity
 	public void finish() {
 		super.finish();
 		// Disable transitions if configured
-		if (Build.VERSION.SDK_INT >= 5 && !PreferenceManager.getDefaultSharedPreferences(this).getBoolean("animateTransitions", true)) {
+		if (Build.VERSION.SDK_INT >= 5 && !PreferenceManager.getDefaultSharedPreferences(this).getBoolean("viewAnimateTransitions", true)) {
 			overridePendingTransition(0, 0);
 		}	
 	}

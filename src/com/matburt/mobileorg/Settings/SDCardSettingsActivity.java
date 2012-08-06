@@ -16,7 +16,7 @@ public class SDCardSettingsActivity extends PreferenceActivity
         super.onCreate(savedInstanceState);
         addPreferencesFromResource(R.xml.sdsync_preferences);
     	// Disable transitions if configured
-		if (Build.VERSION.SDK_INT >= 5 && !PreferenceManager.getDefaultSharedPreferences(this).getBoolean("animateTransitions", true)) {
+		if (Build.VERSION.SDK_INT >= 5 && !PreferenceManager.getDefaultSharedPreferences(this).getBoolean("viewAnimateTransitions", true)) {
 			overridePendingTransition(0, 0);
 		}
     }
@@ -26,7 +26,7 @@ public class SDCardSettingsActivity extends PreferenceActivity
 	public void finish() {
 		super.finish();
 		// Disable transitions if configured
-		if (Build.VERSION.SDK_INT >= 5 && !PreferenceManager.getDefaultSharedPreferences(this).getBoolean("animateTransitions", true)) {
+		if (Build.VERSION.SDK_INT >= 5 && !PreferenceManager.getDefaultSharedPreferences(this).getBoolean("viewAnimateTransitions", true)) {
 			overridePendingTransition(0, 0);
 		}	
 	}

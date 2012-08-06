@@ -18,7 +18,7 @@ public class UbuntuOneSettingsActivity extends PreferenceActivity implements OnP
 		super.onCreate(savedInstanceState);
 		addPreferencesFromResource(R.xml.ubuntuone_preferences);
 		// Disable transitions if configured
-		if (Build.VERSION.SDK_INT >= 5 && !PreferenceManager.getDefaultSharedPreferences(this).getBoolean("animateTransitions", true)) {
+		if (Build.VERSION.SDK_INT >= 5 && !PreferenceManager.getDefaultSharedPreferences(this).getBoolean("viewAnimateTransitions", true)) {
 			overridePendingTransition(0, 0);
 		}
 	}
@@ -31,7 +31,7 @@ public class UbuntuOneSettingsActivity extends PreferenceActivity implements OnP
 	public void finish() {
 		super.finish();
 		// Disable transitions if configured
-		if (Build.VERSION.SDK_INT >= 5 && !PreferenceManager.getDefaultSharedPreferences(this).getBoolean("animateTransitions", true)) {
+		if (Build.VERSION.SDK_INT >= 5 && !PreferenceManager.getDefaultSharedPreferences(this).getBoolean("viewAnimateTransitions", true)) {
 			overridePendingTransition(0, 0);
 		}	
 	}

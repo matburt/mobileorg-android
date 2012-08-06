@@ -41,7 +41,7 @@ public class CertificateConflictActivity extends Activity {
         this.hash_details.setText("Previous Hash: " + webCertHash + " does not match the current one: " + conflictHash);
         this.cert_descr.setText("The New Certificate Looks like this:\n" + conflictDetails);
     	// Disable transitions if configured
-		if (Build.VERSION.SDK_INT >= 5 && !PreferenceManager.getDefaultSharedPreferences(this).getBoolean("animateTransitions", true)) {
+		if (Build.VERSION.SDK_INT >= 5 && !PreferenceManager.getDefaultSharedPreferences(this).getBoolean("viewAnimateTransitions", true)) {
 			overridePendingTransition(0, 0);
 		}
 	}

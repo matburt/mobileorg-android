@@ -150,7 +150,7 @@ public class WizardActivity extends Activity {
     	//when wizard first starts can't go to next page
     	wizard.setNavButtonStateOnPage(0, false, PageFlipView.FIRST_PAGE );
     	// Disable transitions if configured
-		if (Build.VERSION.SDK_INT >= 5 && !PreferenceManager.getDefaultSharedPreferences(this).getBoolean("animateTransitions", true)) {
+		if (Build.VERSION.SDK_INT >= 5 && !PreferenceManager.getDefaultSharedPreferences(this).getBoolean("viewAnimateTransitions", true)) {
 			overridePendingTransition(0, 0);
 		}
     }

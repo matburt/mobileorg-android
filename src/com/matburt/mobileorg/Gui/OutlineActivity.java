@@ -104,7 +104,7 @@ public class OutlineActivity extends FragmentActivity
 				Synchronizer.SYNC_UPDATE));
 		
 		// Disable transitions if configured
-		if (Build.VERSION.SDK_INT >= 5 && !PreferenceManager.getDefaultSharedPreferences(this).getBoolean("animateTransitions", true)) {
+		if (Build.VERSION.SDK_INT >= 5 && !PreferenceManager.getDefaultSharedPreferences(this).getBoolean("viewAnimateTransitions", true)) {
 			overridePendingTransition(0, 0);
 		}
 	
@@ -551,7 +551,7 @@ public class OutlineActivity extends FragmentActivity
     public void finish() {
     	super.finish();
     	// Disable transitions if configured
-    	if (Build.VERSION.SDK_INT >= 5 && !PreferenceManager.getDefaultSharedPreferences(this).getBoolean("animateTransitions", true)) {
+    	if (Build.VERSION.SDK_INT >= 5 && !PreferenceManager.getDefaultSharedPreferences(this).getBoolean("viewAnimateTransitions", true)) {
     		overridePendingTransition(0, 0);
     	}	
     }
