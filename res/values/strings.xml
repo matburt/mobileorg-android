@@ -85,7 +85,7 @@
   <string name="host">Host</string>
   <string name="port">Port</string>
   <string name="path">Path</string>
-  <string name="login">Log in</string>
+  <string name="login">Login</string>
   <string name="login_webdav">Check Login</string>
   <string name="login_ssh">Check SSH Login</string>
   <string name="i_want_to_sync_using">I want to sync using:</string>
@@ -165,4 +165,8 @@
   <string name="edit_date_start">Start</string>
   <string name="edit_date_end">End</string>
   <string name="edit_date_date">Date</string>
+  <string name="hint_webURL">http://example.com/index.org</string>
+  <string name="storage_internal">Internal</string>
+  <string name="storage_card">Storage Card</string>
+  <string name="storage_location">Storage Location</string>
 </resources>
