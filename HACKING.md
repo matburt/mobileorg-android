@@ -24,8 +24,8 @@ Build
 * run `ant debug`
 
 If you don't get an error, you managed to compile the project.  The .apk files
-are in `bin/`.  I haven't tried to deploy them using `adb` since I used
-Eclipse (see below).
+are in `bin/`.   You can install the apk either directly on the device or via
+'adb install'
 
 Eclipse Setup
 -------------
@@ -45,4 +45,16 @@ Deployment
   * Probably renaming the application package also works.
 * Run `com.matburt.mobileorg.Gui.OutlineActivity` as "Android application".
 
+Notes regarding pull requests
+-----------------------------
+Make sure that any changes or additions that you make will also build from the
+command line.  This is a requirement before changes will be accepted into the
+mainline branch.
+
+Notes regarding dropbox.xml
+---------------------------
+The private keys used to access Dropbox accounts for users are not included.
+That's not entirely true.  The file exists but contains dummy values so if you want
+dropbox to work on your local builds then you will need to request your own keys from
+Dropbox.
 Happy hacking!
