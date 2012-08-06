@@ -66,10 +66,7 @@
             android:theme="@style/Theme.MobileOrgActionbar" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
-
-                <action android:name="com.matburt.mobileorg.Synchronizer.action.SYNC_UPDATE" />
             </intent-filter>
         </activity>
         <activity
