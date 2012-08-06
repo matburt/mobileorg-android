@@ -52,4 +52,5 @@ public class WizardPreferences extends Preference {
         layout.setId(android.R.id.widget_frame);
         return layout; 
     }    
+    
 }

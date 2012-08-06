@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -375,5 +376,15 @@ public class EditActivity extends FragmentActivity {
 	public static String getTimestamp() {
 		SimpleDateFormat sdf = new SimpleDateFormat("[yyyy-MM-dd EEE HH:mm]");		
 		return sdf.format(new Date());
+	}
+	
+	@SuppressLint("NewApi")
+	@Override
+	public void finish() {
+		super.finish();
+		// Disable transitions if configured
+		if (Build.VERSION.SDK_INT >= 5 && !PreferenceManager.getDefaultSharedPreferences(this).getBoolean("animateTransitions", true)) {
+			overridePendingTransition(0, 0);
+		}	
 	}
 }

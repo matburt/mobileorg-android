@@ -21,4 +21,14 @@ public class ScpSettingsActivity extends PreferenceActivity
 		}
 
     }
+    
+    @SuppressLint("NewApi")
+	@Override
+	public void finish() {
+		super.finish();
+		// Disable transitions if configured
+		if (Build.VERSION.SDK_INT >= 5 && !PreferenceManager.getDefaultSharedPreferences(this).getBoolean("animateTransitions", true)) {
+			overridePendingTransition(0, 0);
+		}	
+	}
 }

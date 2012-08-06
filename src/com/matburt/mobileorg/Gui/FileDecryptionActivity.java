@@ -4,12 +4,15 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.InputStreamReader;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.os.Build;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -17,6 +20,7 @@ import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Parsing.MobileOrgApplication;
 import com.matburt.mobileorg.Parsing.OrgFileParser;
 
+@SuppressLint("NewApi")
 public class FileDecryptionActivity extends Activity
 {
     private static final String mApgPackageName = "org.thialfihar.android.apg";
@@ -50,6 +54,10 @@ public class FileDecryptionActivity extends Activity
 		Intent APGintent = new Intent(DECRYPT_AND_RETURN);
 		APGintent.setType("text/plain");
 		APGintent.putExtra(FileDecryptionActivity.EXTRA_DATA, data);
+		// Disable transitions if configured
+		if (Build.VERSION.SDK_INT >= 5 && !PreferenceManager.getDefaultSharedPreferences(this).getBoolean("animateTransitions", true)) {
+			overridePendingTransition(0, 0);
+		}	
 
 		try {
 			startActivityForResult(APGintent, DECRYPT_MESSAGE);
@@ -97,4 +105,13 @@ public class FileDecryptionActivity extends Activity
 		}
 		return false;
 	}
+	
+	 @Override
+	 public void finish() {
+		 super.finish();
+		 // Disable transitions if configured
+		 if (Build.VERSION.SDK_INT >= 5 && !PreferenceManager.getDefaultSharedPreferences(this).getBoolean("animateTransitions", true)) {
+			 overridePendingTransition(0, 0);
+		 }	
+	 }
 }

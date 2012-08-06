@@ -286,6 +286,7 @@ public class OutlineActivity extends FragmentActivity
     private void runHelp() {
 		Intent intent = new Intent(Intent.ACTION_VIEW,
 				Uri.parse("https://github.com/matburt/mobileorg-android/wiki"));
+		
     	startActivity(intent);
     }
     
@@ -544,5 +545,14 @@ public class OutlineActivity extends FragmentActivity
             slinfo.setText(value);
             return row;
         }
+    }
+    
+    @Override
+    public void finish() {
+    	super.finish();
+    	// Disable transitions if configured
+    	if (Build.VERSION.SDK_INT >= 5 && !PreferenceManager.getDefaultSharedPreferences(this).getBoolean("animateTransitions", true)) {
+    		overridePendingTransition(0, 0);
+    	}	
     }
 }
