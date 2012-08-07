@@ -53,7 +53,7 @@ public class EditPayloadFragment extends Fragment {
     }
 
 	public boolean hasEdits() {
-            return (getText() != content);
+            return (!getText().equals(content));
         }
         
 	@Override
