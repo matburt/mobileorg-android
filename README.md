@@ -11,3 +11,7 @@ We have a Google+ Page:
 And a dedicated Google Group for discussions and announcements:
 
 [http://groups.google.com/group/mobileorg-android](http://groups.google.com/group/mobileorg-android)
+
+If you want to hack on the code:
+
+[HACKING.md](mobileorg-android/blob/master/HACKING.md)
