@@ -175,4 +175,8 @@
   <string name="summary_view_edit_on_click">When checked, the default behaviour for clicking on nodes without children will be editing. Else it will be viewing.</string>
   <string name="rerun_setup_wizard">Re-run setup wizard</string>
   <string name="configure_synchronizer_settings">Synchronizer settings</string>
+  <string name="index_path">Full path to index.org</string>
+  <string name="title_scp_path">Full path to index.org on the server</string>
+  <string name="title_scp_host">Host</string>
+  <string name="title_scp_port">Port</string>
   </resources>

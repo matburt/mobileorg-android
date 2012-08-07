@@ -17,6 +17,7 @@
         <com.matburt.mobileorg.Settings.SynchronizerPreferences
             android:defaultValue="32"
             android:key="syncPref"
+            android:summary="Preference summary"
             android:title="Custom Preference" />
 
         <CheckBoxPreference

@@ -56,7 +56,10 @@
             android:key="viewApplyFormatting"
             android:summary="@string/summary_view_apply_formatting"
             android:title="@string/title_view_apply_formatting" />
-
+   		<CheckBoxPreference
+            android:key="viewAnimateTransitions"
+            android:title="@string/title_view_animate_transitions" 
+            android:defaultValue="true" />
         <ListPreference
             android:defaultValue="0"
             android:entries="@array/viewRecursionLevels"
@@ -64,10 +67,7 @@
             android:key="viewRecursionMax"
             android:summary="@string/preference_recursion_level_summary"
             android:title="@string/preference_recursion_level_title" />
-        <CheckBoxPreference
-            android:key="viewAnimateTransitions"
-            android:title="@string/title_view_animate_transitions" 
-            android:defaultValue="true" />
+     
         
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/preference_storage" >
