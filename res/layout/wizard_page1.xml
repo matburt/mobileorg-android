@@ -36,6 +36,12 @@
        android:text="@string/wizard_dropbox" />
     <RadioButton
        android:textSize="18dp"
+       android:id="@+id/sync_ubuntuone"
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       android:text="@string/wizard_ubuntuone" />
+    <RadioButton
+       android:textSize="18dp"
        android:id="@+id/sync_ssh"
        android:layout_width="wrap_content"
        android:layout_height="wrap_content"

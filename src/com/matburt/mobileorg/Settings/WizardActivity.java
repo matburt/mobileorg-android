@@ -38,6 +38,7 @@ import com.matburt.mobileorg.Dropbox.DropboxLoginListener;
 import com.matburt.mobileorg.Views.PageFlipView;
 import com.matburt.mobileorg.Synchronizers.WebDAVSynchronizer;
 import com.matburt.mobileorg.Synchronizers.SSHSynchronizer;
+import com.matburt.mobileorg.Synchronizers.UbuntuOneSynchronizer;
 import com.matburt.mobileorg.Parsing.MobileOrgApplication;
 
 public class WizardActivity extends Activity {
@@ -77,7 +78,7 @@ public class WizardActivity extends Activity {
     PageFlipView wizard;
     //page 1 variables
     String syncSource;
-    int syncWebDav, syncDropBox, syncSdCard, syncNull, syncSSH;
+    int syncWebDav, syncDropBox, syncUbuntuOne, syncSdCard, syncNull, syncSSH;
     RadioGroup syncGroup; 
     //page 2 variables
     View loginPage;
@@ -90,6 +91,9 @@ public class WizardActivity extends Activity {
     EditText dropboxPass;
     boolean isLoggedIn=false;
     ArrayAdapter<String> dropboxFolders;
+    //ubuntuone variables
+    EditText ubuntuoneEmail;
+    EditText ubuntuonePass;
     //sd card variables
 	DirectoryBrowser directory;
 	FolderAdapter directoryAdapter;
@@ -125,6 +129,7 @@ public class WizardActivity extends Activity {
     	syncGroup = (RadioGroup)findViewById(R.id.sync_group);
     	syncWebDav = ((RadioButton)findViewById(R.id.sync_webdav)).getId();
     	syncDropBox = ((RadioButton)findViewById(R.id.sync_dropbox)).getId();
+        syncUbuntuOne = ((RadioButton)findViewById(R.id.sync_ubuntuone)).getId();
     	syncSdCard = ((RadioButton)findViewById(R.id.sync_sdcard)).getId();
         syncNull = ((RadioButton)findViewById(R.id.sync_null)).getId();
         syncSSH = ((RadioButton)findViewById(R.id.sync_ssh)).getId();
@@ -174,6 +179,10 @@ public class WizardActivity extends Activity {
             else if (checkedId == syncDropBox) {
                 syncSource = "dropbox";
                 createDropboxLogin();
+            }
+            else if (checkedId == syncUbuntuOne) {
+                syncSource = "ubuntu";
+                createUbuntuLogin();
             }
             else if (checkedId == syncSdCard) {
                 syncSource = "sdcard";
@@ -251,6 +260,7 @@ public class WizardActivity extends Activity {
         //enable nav buttons on that page
         wizard.setNavButtonStateOnPage(1,true,PageFlipView.LAST_PAGE);
         wizard.setDoneButtonOnClickListener(new FinishWizardButtonListener());
+
         //setup directory browser
         directory = new DirectoryBrowser.LocalDirectoryBrowser(this);
         //setup directory browser adapter
@@ -258,6 +268,7 @@ public class WizardActivity extends Activity {
         directoryAdapter.setDoneButton( (Button) findViewById(R.id.wizard_done_button) );
         //bind adapter to browser
         directoryAdapter.setDirectoryBrowser( directory );
+
         //bind adapter to listview
         folderList = (ListView) wizard.findViewById(R.id.wizard_folder_list);
         folderList.setAdapter( directoryAdapter );
@@ -288,6 +299,35 @@ public class WizardActivity extends Activity {
                     } else {
                         // Try to log in
                         loginDropbox();
+                    }
+                }
+    	    });
+    }
+
+    void createUbuntuLogin() {
+        wizard.removePagesAfter( 1 );
+        //add login page to wizard
+        wizard.addPage( R.layout.wizard_ubuntuone );
+        //enable nav buttons on that page
+        wizard.setNavButtonStateOnPage(1, true, PageFlipView.MIDDLE_PAGE);
+        wizard.disableAllNextActions( 1 );
+        //get references to login forms
+    	ubuntuoneEmail = (EditText) wizard
+    	    .findViewById(R.id.wizard_ubuntu_email);
+    	ubuntuonePass = (EditText) wizard
+    	    .findViewById(R.id.wizard_ubuntu_password);
+    	//setup listener for buttons
+    	loginButton = (Button) wizard
+    	    .findViewById(R.id.wizard_ubuntu_login_button);
+    	loginButton.setOnClickListener(new OnClickListener() {
+                @Override
+                    public void onClick(View v) {
+                    if (isLoggedIn) {
+                        // We're going to log out
+                        //dropbox.deauthenticate();
+                    } else {
+                        // Try to log in
+                        loginUbuntuOne();
                     }
                 }
     	    });
@@ -385,8 +425,30 @@ public class WizardActivity extends Activity {
             dropbox.login(dropboxListener, email, password);
         }
     }
+
+    void loginUbuntuOne() {
+        final UbuntuOneSynchronizer uos = new UbuntuOneSynchronizer((Context)this, (MobileOrgApplication)getApplication());
+        uos.username = ubuntuoneEmail.getText().toString();
+        uos.password = ubuntuonePass.getText().toString();
+
+        //move this into another thread, so we don't get an ANR if the network is unavailable
+        Thread uiThread = new HandlerThread("UIHandler");
+        uiThread.start();
+        uiHandler = new UIHandler(((HandlerThread)uiThread).getLooper());
+        showToast("Logging in, please wait");
+        if (uos.login()) {
+            showToastRemote("Login Successfull");
+            loginButton.setEnabled(false);
+            wizard.enablePage( 1 );
+            uos.getBaseUser();
+            createUbuntuOneList();
+        }
+        else {
+            showToastRemote("Login Failed");
+        }
+
+    }
     
-    //convience function
     void showToast(String msg) {
         Toast error = Toast.makeText(this, msg, Toast.LENGTH_LONG);
         error.show();
@@ -399,7 +461,6 @@ public class WizardActivity extends Activity {
         uiHandler.sendMessage(msg);
     }
     
-    //ditto
     void shake(View b) {
         Animation shake = AnimationUtils
             .loadAnimation(this, R.anim.shake);
@@ -436,6 +497,7 @@ public class WizardActivity extends Activity {
             }
             
         };
+
     
     void storeKeys(String key, String secret) {
         // Save the access key for later
@@ -459,6 +521,36 @@ public class WizardActivity extends Activity {
         directoryAdapter.setDoneButton( (Button) findViewById(R.id.wizard_done_button) );
         //bind adapter to browser
         directoryAdapter.setDirectoryBrowser( directory );
+        //bind adapter to listview
+        folderList = (ListView) wizard.findViewById(R.id.wizard_folder_list);
+        folderList.setAdapter( directoryAdapter );
+        directoryAdapter.notifyDataSetChanged();
+        //debug
+        //TODO Technically, this should be an async task app may crash
+        //when list of root items is very long and network connection
+        //is slow
+    }
+
+    void createUbuntuOneList() {
+        wizard.addPage(R.layout.wizard_folder_pick_list);
+        wizard.enablePage(1);
+
+        //enable nav buttons on that page
+        wizard.setNavButtonStateOnPage(2, true, PageFlipView.LAST_PAGE);
+        wizard.setDoneButtonOnClickListener(new FinishWizardButtonListener());
+
+        //setup directory browser
+        UbuntuOneSynchronizer uos = new UbuntuOneSynchronizer((Context)this, (MobileOrgApplication)getApplication());
+        uos.getBaseUser();
+        directory = new DirectoryBrowser.UbuntuOneDirectoryBrowser(this, uos);
+
+        //setup directory browser adapter
+        directoryAdapter = new FolderAdapter( this, R.layout.folder_adapter_row, directory.list() );
+        directoryAdapter.setDoneButton( (Button) findViewById(R.id.wizard_done_button) );
+
+        //bind adapter to browser
+        directoryAdapter.setDirectoryBrowser( directory );
+
         //bind adapter to listview
         folderList = (ListView) wizard.findViewById(R.id.wizard_folder_list);
         folderList.setAdapter( directoryAdapter );
@@ -507,6 +599,8 @@ public class WizardActivity extends Activity {
             }
             else if ( syncSource.equals("dropbox") )
                 editor.putString("dropboxPath", directoryAdapter.getCheckedDirectory() + "/");
+            else if ( syncSource.equals("ubuntu") )
+                editor.putString("ubuntuOnePath", directoryAdapter.getCheckedDirectory() + "/");
             else if ( syncSource.equals("sdcard") ) 
                 editor.putString("indexFilePath", directoryAdapter.getCheckedDirectory() );
             editor.putString("storageMode", "sdcard");

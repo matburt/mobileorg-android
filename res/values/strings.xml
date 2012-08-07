@@ -97,16 +97,19 @@
   <string name="i_want_to_sync_using">I want to sync using:</string>
   <string name="wizard_webdav">a WebDAV server</string>
   <string name="wizard_dropbox">a Dropbox account</string>
+  <string name="wizard_ubuntuone">an UbuntuOne account</string>
   <string name="wizard_sdcard">my SD card</string>
   <string name="wizard_ssh">an SSH server</string>
   <string name="wizard_null">nothing (capture only)</string>
   <string name="log_in_to_dropbox">Log in to Dropbox</string>
+  <string name="log_in_to_ubuntuone">Log in to Ubuntu One</string>
   <string name="log_in_to_webdav">Log in to your WebDAV server</string>
   <string name="log_in_to_ssh">Log in to your SSH server</string>
   <string name="null_sync_description">This is a capture only synchronizer.  It will not attempt to synchronize to any source.</string>
   <string name="url">URL</string>
-  <string name="wizard_dropbox_email_hint">uri@frankandrobot.com</string>
-
+  <string name="wizard_dropbox_email_hint">user@host.com</string>
+  <string name="wizard_ubuntu_email_hint">user@host.com</string>
+  
     <!-- preference strings -->
   <string name="title_capture_with_timestamp">Capture with Timestamp</string>
   <string name="summary_capture_with_timestamp">Captured nodes will have a timestamp added</string>
@@ -139,6 +142,10 @@
   <string name="preference_dropbox_login_summary">Login to retrieve an OAuth token</string>
   <string name="preference_dropbox_path">Path</string>
   <string name="preference_dropbox_path_summary">Dropbox path to index.org file</string>
+  <string name="preference_ubuntuone_login">Login</string>
+  <string name="preference_ubuntuone_path">Path</string>
+  <string name="preference_ubuntuone_login_summary">Login to retrieve an OAuth token</string>
+  <string name="preference_ubuntuone_path_summary">UbuntuOne path to index.org file</string>
   <string name="preference_clear_db_dialog_title">Clear DB?</string>
   <string name="preference_clear_db_dialog_message">Are you sure want to clear DB?</string>
   <string name="preference_combine_block_agenda_summary">Combines block agendas into one node, with separators. Needs resync of agenda file to take effect</string>
