@@ -14,21 +14,22 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.view.Window;
 import android.util.Log;
-import android.view.MenuInflater;
 import android.view.WindowManager;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import com.actionbarsherlock.app.SherlockFragmentActivity;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuItem;
+import com.actionbarsherlock.view.Window;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Gui.Capture.EditActivity;
 import com.matburt.mobileorg.Parsing.MobileOrgApplication;
 import com.matburt.mobileorg.Parsing.NodeWrapper;
 import com.matburt.mobileorg.Synchronizers.Synchronizer;
 
-public class NodeViewActivity extends FragmentActivity {
+public class NodeViewActivity extends SherlockFragmentActivity {
 	private WebView display;
 	private MobileOrgApplication appInst;
 	private SynchServiceReceiver syncReceiver;
@@ -81,9 +82,11 @@ public class NodeViewActivity extends FragmentActivity {
 		this.display.loadDataWithBaseURL(null, data, "text/html", "UTF-8", null);
 	}
 	
+	
+	
 	@Override
-	public boolean onCreateOptionsMenu(android.support.v4.view.Menu menu) {
-		MenuInflater inflater = getMenuInflater();
+	public boolean onCreateOptionsMenu(Menu menu) {
+		com.actionbarsherlock.view.MenuInflater inflater = getSupportMenuInflater();
 	    inflater.inflate(R.menu.nodeview, menu);
 	    
 	    if(this.appInst.getDB().isNodeEditable(node_id) == false)
@@ -93,7 +96,7 @@ public class NodeViewActivity extends FragmentActivity {
 	}
 
 	@Override
-	public boolean onOptionsItemSelected(android.support.v4.view.MenuItem item) {
+	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case android.R.id.home:
 			finish();

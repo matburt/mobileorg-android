@@ -7,17 +7,16 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.v4.app.ActionBar;
-import android.support.v4.app.ActionBar.Tab;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.view.MenuItem;
-import android.support.v4.view.SubMenu;
-import android.support.v4.view.Window;
-import android.view.MenuInflater;
 import android.view.WindowManager;
 
+import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.app.SherlockFragmentActivity;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
+import com.actionbarsherlock.view.MenuItem;
+import com.actionbarsherlock.view.SubMenu;
+import com.actionbarsherlock.view.Window;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Services.TimeclockService;
 import com.matburt.mobileorg.Synchronizers.Synchronizer;
@@ -25,48 +24,34 @@ import com.matburt.mobileorg.provider.OrgNode;
 import com.matburt.mobileorg.provider.OrgProviderUtil;
 import com.matburt.mobileorg.util.OrgUtils;
 
-public class EditActivity extends FragmentActivity {
+public class EditActivity extends SherlockFragmentActivity {
+	public final static String NODE_ID = "node_id";
+	public final static String ACTIONMODE = "actionMode";
 	public final static String ACTIONMODE_CREATE = "create";
 	public final static String ACTIONMODE_EDIT = "edit";
 	public final static String ACTIONMODE_ADDCHILD = "add_child";
 
 	private OrgNode node;
 	private String actionMode;
-		
+	
+	public final static String FRAGMENT_DETAILS_TAG = "details";
+	public final static String FRAGMENT_PAYLOAD_TAG = "payload";
+	
 	private EditDetailsFragment detailsFragment;
 	private EditPayloadFragment payloadFragment;
 	private EditPayloadFragment rawPayloadFragment;
 	private ContentResolver resolver;
+	private EditTabListener editTabListener;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		this.resolver = getContentResolver();
-
-		SharedPreferences appSettings = PreferenceManager
-				.getDefaultSharedPreferences(getBaseContext());
-		if (appSettings.getBoolean("fullscreen", true)) {
-			requestWindowFeature(Window.FEATURE_NO_TITLE);
-			getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-					WindowManager.LayoutParams.FLAG_FULLSCREEN);
-		}
-		
-		if (savedInstanceState != null) {
-			this.detailsFragment = (EditDetailsFragment) getSupportFragmentManager()
-					.getFragment(savedInstanceState,
-							EditDetailsFragment.class.getName());
-			this.payloadFragment = (EditPayloadFragment) getSupportFragmentManager()
-					.getFragment(savedInstanceState,
-							EditPayloadFragment.class.getName());
-			this.rawPayloadFragment = (EditPayloadFragment) getSupportFragmentManager()
-					.getFragment(savedInstanceState,
-							EditPayloadFragment.class.getName() + "raw");
-		}
 		
 		setContentView(R.layout.edit);
+		this.resolver = getContentResolver();
 		
-		init();
-		
+		restoreInstanceState(savedInstanceState);
+		initState();
 		setupActionbarTabs(savedInstanceState);
 	}
 	
@@ -82,10 +67,18 @@ public class EditActivity extends FragmentActivity {
         outState.putInt("tab", getSupportActionBar().getSelectedNavigationIndex());
 	}
 	
-	private void init() {
-		Intent intent = getIntent();
-		this.actionMode = intent.getStringExtra("actionMode");
-		long node_id = intent.getLongExtra("node_id", -1);	
+	private void restoreInstanceState(Bundle savedInstanceState) {
+		if (savedInstanceState != null) {
+			this.detailsFragment = (EditDetailsFragment) getSupportFragmentManager()
+					.getFragment(savedInstanceState,
+							EditDetailsFragment.class.getName());
+			this.payloadFragment = (EditPayloadFragment) getSupportFragmentManager()
+					.getFragment(savedInstanceState,
+							EditPayloadFragment.class.getName());
+			this.rawPayloadFragment = (EditPayloadFragment) getSupportFragmentManager()
+					.getFragment(savedInstanceState,
+							EditPayloadFragment.class.getName() + "raw");
+		}		
 		
 		if (this.detailsFragment == null)
 			this.detailsFragment = new EditDetailsFragment();
@@ -93,62 +86,24 @@ public class EditActivity extends FragmentActivity {
 			this.payloadFragment = new EditPayloadFragment();
 		if (this.rawPayloadFragment == null)
 			this.rawPayloadFragment = new EditPayloadFragment();
-		
-		String defaultTodo = PreferenceManager
-				.getDefaultSharedPreferences(this).getString("defaultTodo", "");
-		
-		if (this.actionMode == null) {
-			String subject = intent
-					.getStringExtra("android.intent.extra.SUBJECT");
-			String text = intent.getStringExtra("android.intent.extra.TEXT");
-
-			if(text != null && subject != null) {
-				subject = "[[" + text + "][" + subject + "]]";
-				text = "";
-			}
-			
-			if(subject == null)
-				subject = "";
-			if(text == null)
-				text = "";
-
-			this.node = new OrgNode();
-			this.detailsFragment.init(this.node, this.actionMode, defaultTodo, subject, resolver);
-			this.payloadFragment.init(text, true);
-			this.actionMode = ACTIONMODE_CREATE;
-		} else if (this.actionMode.equals(ACTIONMODE_CREATE)) {
-			this.node = new OrgNode();
-			this.detailsFragment.init(this.node, this.actionMode, defaultTodo, resolver);
-			this.payloadFragment.init("", true);
-		} else if (this.actionMode.equals(ACTIONMODE_EDIT)) {
-			this.node = new OrgNode(node_id, getContentResolver());
-			this.detailsFragment.init(this.node, this.actionMode, defaultTodo, resolver);
-			this.payloadFragment.init(this.node.getCleanedPayload(), true);
-		} else if (this.actionMode.equals(ACTIONMODE_ADDCHILD)) {
-			this.node = new OrgNode(node_id, getContentResolver());
-			this.detailsFragment.init(this.node, this.actionMode, defaultTodo, resolver);
-			this.payloadFragment.init("", true);
-		}
-
-		this.rawPayloadFragment.init(node.getRawPayload(), false);
 	}
-
-
-	private void setupActionbarTabs(Bundle savedInstanceState) {
+	
+	public void setupActionbarTabs(Bundle savedInstanceState) {
 		ActionBar actionbar = getSupportActionBar();
-
 		actionbar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+		actionbar.removeAllTabs();
 
 		ActionBar.Tab detailsTab = actionbar.newTab().setText("Details");
-		detailsTab.setTabListener(new TabListener(detailsFragment, "details"));
+		//editTabListener = new EditTabListener(detailsFragment, "details", getSupportFragmentManager());
+		detailsTab.setTabListener(new EditTabListener(detailsFragment, "details", getSupportFragmentManager()));
 		actionbar.addTab(detailsTab);
 	    
 		ActionBar.Tab payloadTab = actionbar.newTab().setText("Payload");
-		payloadTab.setTabListener(new TabListener(payloadFragment, "payload"));
+		payloadTab.setTabListener(new EditTabListener(payloadFragment, "payload", getSupportFragmentManager()));
 		actionbar.addTab(payloadTab);
 
 	    ActionBar.Tab rawPayloadTab = actionbar.newTab().setText("Raw Payload");
-	    rawPayloadTab.setTabListener(new TabListener(rawPayloadFragment, "raw_payload"));
+	    rawPayloadTab.setTabListener(new EditTabListener(rawPayloadFragment, "raw_payload", getSupportFragmentManager()));
 	    actionbar.addTab(rawPayloadTab);
 	    
 		if (savedInstanceState != null) {
@@ -156,49 +111,75 @@ public class EditActivity extends FragmentActivity {
         }
 	}
 	
+	private void initState() {
+		Intent intent = getIntent();
+		this.actionMode = intent.getStringExtra("actionMode");
+		long node_id = intent.getLongExtra("node_id", -1);	
 
-	private class TabListener implements ActionBar.TabListener {
-		Fragment fragment;
-
-		public TabListener(Fragment fragment, String tag) {
-			this.fragment = fragment;
-
-			FragmentTransaction fragmentTransaction = getSupportFragmentManager()
-					.beginTransaction();
-
-			if (fragment != null && fragment.isAdded() == false) {
-				fragmentTransaction.add(R.id.editnode_fragment_container,
-						fragment, tag);
-			}
-
-			fragmentTransaction.hide(fragment).commit();
+		String defaultTodo = PreferenceManager
+				.getDefaultSharedPreferences(this).getString("defaultTodo", "");
+		
+		if (this.actionMode == null) {
+			this.node = getCaptureIntentContents(intent);
+			this.actionMode = ACTIONMODE_CREATE;
+		} else if (this.actionMode.equals(ACTIONMODE_CREATE)) {
+			this.node = new OrgNode();
+		} else if (this.actionMode.equals(ACTIONMODE_EDIT)) {
+			this.node = new OrgNode(node_id, getContentResolver());
+		} else if (this.actionMode.equals(ACTIONMODE_ADDCHILD)) {
+			this.node = new OrgNode(node_id, getContentResolver());
 		}
 
-		@Override
-		public void onTabSelected(Tab tab, FragmentTransaction ft) {			
-			FragmentTransaction fragmentTransaction = getSupportFragmentManager()
-					.beginTransaction();
-		    fragmentTransaction.show(fragment).commit();
-		}
+		setOrgNode(this.node, defaultTodo);
+	}
+	
+	public void setOrgNode(OrgNode node, String defaultTodo) {
+		
+		EditDetailsFragment detailsFragment = new EditDetailsFragment();
+		detailsFragment.init(node, defaultTodo, resolver);
+		
+		FragmentTransaction beginTransaction = getSupportFragmentManager().beginTransaction();
+		beginTransaction.replace(R.id.editnode_fragment_container, detailsFragment);
+		beginTransaction.commit();
+		this.detailsFragment = detailsFragment;
+		
+		this.payloadFragment.init(node.getCleanedPayload(), true);
+		this.rawPayloadFragment.init(node.getRawPayload(), false);
+	}
+	
+	public OrgNode getOrgNode() {
+		return this.detailsFragment.getEditedOrgNode();
+	}
 
-		@Override
-		public void onTabUnselected(Tab tab, FragmentTransaction ft) {
-			if (fragment != null) {
-				FragmentTransaction fragmentTransaction = getSupportFragmentManager()
-						.beginTransaction();
-				fragmentTransaction.hide(fragment).commit();
-			}
-		}
 
-		@Override
-		public void onTabReselected(Tab tab, FragmentTransaction ft) {
+	private static OrgNode getCaptureIntentContents(Intent intent) {
+		String subject = intent
+				.getStringExtra("android.intent.extra.SUBJECT");
+		String text = intent.getStringExtra("android.intent.extra.TEXT");
+
+		if(text != null && subject != null) {
+			subject = "[[" + text + "][" + subject + "]]";
+			text = "";
 		}
-	};
+		
+		if(subject == null)
+			subject = "";
+		if(text == null)
+			text = "";
+
+		OrgNode node = new OrgNode();
+		node.name = subject;
+		node.payload = text;
+		return node;
+	}
+
+	
+	
 	
     @Override
-	public boolean onCreateOptionsMenu(android.support.v4.view.Menu menu) {
+	public boolean onPrepareOptionsMenu(Menu menu) {
     	super.onCreateOptionsMenu(menu);
-		MenuInflater inflater = getMenuInflater();
+		MenuInflater inflater = getSupportMenuInflater();
 	    inflater.inflate(R.menu.edit, menu);
 	    
 		if (this.node.id > -1) {
@@ -221,11 +202,11 @@ public class EditActivity extends FragmentActivity {
 			subMenuItem.setIcon(R.drawable.ic_menu_moreoverflow);
 			subMenuItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
 		}
-		return true;
+		return true;	
 	}
-	
+
 	@Override
-	public boolean onOptionsItemSelected(android.support.v4.view.MenuItem item) {
+	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case android.R.id.home:
 			doCancel();
@@ -344,17 +325,8 @@ public class EditActivity extends FragmentActivity {
 		node.getPayload().insertOrReplace("DEADLINE:", detailsFragment.getDeadline());
 	}
 	
-	private OrgNode getNodeFromFragments() {
-		OrgNode orgNode = new OrgNode();
-		orgNode.name = this.detailsFragment.getTitle();
-		orgNode.todo = this.detailsFragment.getTodo();
-		orgNode.priority = this.detailsFragment.getPriority();
-		orgNode.tags = this.detailsFragment.getTags();
-		return orgNode;
-	}
-	
 	private void save() {
-		OrgNode newNode = getNodeFromFragments();
+		OrgNode newNode = this.detailsFragment.getEditedOrgNode();
 
 		if (this.actionMode.equals(ACTIONMODE_CREATE) || this.actionMode.equals(ACTIONMODE_ADDCHILD))
 			createNewNode(newNode);

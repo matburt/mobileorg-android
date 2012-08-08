@@ -1,24 +1,24 @@
 package com.matburt.mobileorg.Gui.Capture;
 
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.view.Menu;
+import android.text.InputFilter;
 import android.view.LayoutInflater;
-import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
-import android.text.InputFilter;
 
+import com.actionbarsherlock.app.SherlockFragment;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
+import com.actionbarsherlock.view.MenuItem;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.util.OrgUtils;
 
-public class EditPayloadFragment extends Fragment {
+public class EditPayloadFragment extends SherlockFragment {
 	public static final String DISPLAY_STRING = "text";
 	public static final String RESULT_STRING = "text";
     private EditText editDisplay;
 
-    private String orig_content;
     private String content;
 	private boolean enabled;
     
@@ -54,8 +54,9 @@ public class EditPayloadFragment extends Fragment {
 
 	public boolean hasEdits() {
             return (!getText().equals(content));
-        }
-        
+    }
+	
+	
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
 		super.onCreateOptionsMenu(menu, inflater);
@@ -63,13 +64,14 @@ public class EditPayloadFragment extends Fragment {
 	}
 
 	@Override
-	public boolean onOptionsItemSelected(android.support.v4.view.MenuItem item) {
+	public boolean onOptionsItemSelected(MenuItem item) {
+		// TODO Auto-generated method stub
 		switch (item.getItemId()) {
 		case R.id.nodeeditbody_timestamp:
 			insertTimestamp();
 			return true;
 		}
-		return false;
+		return false;	
 	}
 	
 	public void insertTimestamp() {

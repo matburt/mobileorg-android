@@ -18,14 +18,10 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.view.Window;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
@@ -34,6 +30,10 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.actionbarsherlock.app.SherlockActivity;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
+import com.actionbarsherlock.view.MenuItem;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Gui.Capture.EditActivity;
 import com.matburt.mobileorg.Parsing.MobileOrgApplication;
@@ -44,7 +44,7 @@ import com.matburt.mobileorg.Settings.WizardActivity;
 import com.matburt.mobileorg.Synchronizers.Synchronizer;
 import com.matburt.mobileorg.provider.OrgContract.OrgData;
 
-public class OutlineActivity extends FragmentActivity
+public class OutlineActivity extends SherlockActivity
 {
     private MobileOrgApplication appInst;
 
@@ -66,14 +66,7 @@ public class OutlineActivity extends FragmentActivity
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
-		SharedPreferences appSettings = PreferenceManager
-				.getDefaultSharedPreferences(getBaseContext());
-		if (appSettings.getBoolean("fullscreen", true)) {
-			requestWindowFeature(Window.FEATURE_NO_TITLE);
-			getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-					WindowManager.LayoutParams.FLAG_FULLSCREEN);
-		}
+
 		setContentView(R.layout.outline);		
 		
 		this.appInst = (MobileOrgApplication) this.getApplication();
@@ -125,9 +118,12 @@ public class OutlineActivity extends FragmentActivity
 	 * data has been updated.
 	 */
 	private void refreshDisplay() {
+		final String outlineSort = node_id > 0 ? OrgData.DEFAULT_SORT 
+											   : OrgData.NAME_SORT;
+		
 		Cursor cursor = getContentResolver().query(
 				OrgData.buildChildrenUri(node_id.toString()),
-				OrgData.DEFAULT_COLUMNS, null, null, OrgData.DEFAULT_SORT);
+				OrgData.DEFAULT_COLUMNS, null, null, outlineSort);
 
 		if (node_id >= 0) {
 			if(cursor.getCount() == 0)
@@ -160,13 +156,13 @@ public class OutlineActivity extends FragmentActivity
 		if(this.node_id > -1) {
 			NodeWrapper node = new NodeWrapper(this.node_id, appInst.getDB());
 			final String subTitle = node.constructOlpId().substring("olp:".length());
-			this.getSupportActionBar().setSubtitle(subTitle);
+			//this.getSherlock().setSubtitle(subTitle);
 		}
 	}
 
 	@Override
-	public boolean onCreateOptionsMenu(android.support.v4.view.Menu menu) {
-		MenuInflater inflater = getMenuInflater();
+	public boolean onCreateOptionsMenu(Menu menu) {
+		MenuInflater inflater = getSupportMenuInflater();
 	    inflater.inflate(R.menu.outline_menu, menu);
 	    
 	    if(this.node_id == -1 || isNodeInFile(this.node_id, "agendas.org"))
@@ -176,7 +172,7 @@ public class OutlineActivity extends FragmentActivity
 	}
 
 	@Override
-	public boolean onOptionsItemSelected(android.support.v4.view.MenuItem item) {
+	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case android.R.id.home:
 			if(this.node_id != -1)

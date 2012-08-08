@@ -17,6 +17,7 @@
         android:name=".Parsing.MobileOrgApplication"
         android:debuggable="true"
         android:icon="@drawable/icon"
+        android:theme="@style/Theme.Sherlock"
         android:label="MobileOrg" >
         <meta-data
             android:name="android.app.default_searchable"
@@ -166,6 +167,7 @@
             android:name=".Services.TimeclockDialog"
             android:theme="@android:style/Theme.Dialog" >
         </activity>
+        <activity android:name=".Gui.Capture.EditActivityMock"></activity>
     </application>
 
 </manifest>
