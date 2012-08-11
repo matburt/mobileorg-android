@@ -17,7 +17,7 @@
         android:name=".Parsing.MobileOrgApplication"
         android:debuggable="true"
         android:icon="@drawable/icon"
-        android:theme="@style/Theme.Sherlock"
+        android:theme="@style/Theme.Styled"
         android:label="MobileOrg" >
         <meta-data
             android:name="android.app.default_searchable"
@@ -67,8 +67,7 @@
 
         <activity
             android:name=".Gui.OutlineActivity"
-            android:label="MobileOrg"
-            android:theme="@style/Theme.MobileOrgActionbar" >
+            android:label="MobileOrg" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

@@ -3,6 +3,7 @@
     <style name="Theme.MobileOrgActionbar" parent="Theme.Sherlock">
         <item name="actionModeBackground">@drawable/actionbar_background</item>
         <item name="actionBarDivider">@color/actionbar_separator</item>
+        
        <!-- <item name="abHeight">35dip</item>  -->
        <!--  <item name="abTitleTextStyle"></item> --> 
     </style>
