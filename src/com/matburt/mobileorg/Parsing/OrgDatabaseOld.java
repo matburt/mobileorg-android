@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import com.matburt.mobileorg.Services.CalendarSyncService;
+import com.matburt.mobileorg.util.FileUtils;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -15,9 +16,9 @@ import android.database.sqlite.SQLiteStatement;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
 
-public class OrgDatabase extends SQLiteOpenHelper {
+public class OrgDatabaseOld extends SQLiteOpenHelper {
 	private static final String DATABASE_NAME = "MobileOrg.db";
-	private static final int DATABASE_VERSION = 3;
+	private static final int DATABASE_VERSION = 4;
 	
 	private final static String[] nodeFields = {"_id", "name", "todo", "tags", "priority",
 		"payload", "parent_id", "file_id"};
@@ -39,7 +40,7 @@ public class OrgDatabase extends SQLiteOpenHelper {
 	private SQLiteStatement addPayloadStatement;
 
 
-	public OrgDatabase(Context context) {
+	public OrgDatabaseOld(Context context) {
 		super(context, DATABASE_NAME, null, DATABASE_VERSION);
 		this.context = context;
 		this.db = this.getWritableDatabase();
@@ -79,7 +80,7 @@ public class OrgDatabase extends SQLiteOpenHelper {
 				+ "changed integer)");
 		db.execSQL("CREATE TABLE IF NOT EXISTS orgdata ("
 				+ "_id integer primary key autoincrement,"
-				+ "parent_id integer," // orgdata:_id of parent node
+				+ "parent_id integer default -1," // orgdata:_id of parent node
 				+ "file_id integer," // files:_id of file node
 //				+ "node_id text," // Org data id
 				+ "level integer default 0,"
@@ -100,13 +101,14 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		return db
 				.query("orgdata JOIN files ON (orgdata._id = files.node_id)",
 						nodeJoinFields, null, null, null, null, "orgdata.name ASC");
+//		return db.query("orgdata", nodeFields, "parent_id=-1", null, null, null, "name ASC");
 	}
 	
 	private final static String[] nodeJoinFields = {"orgdata._id", "orgdata.name", "orgdata.todo", "orgdata.tags", "orgdata.priority",
 		"orgdata.payload", "orgdata.parent_id", "orgdata.file_id"};
 	
 	
-	public long getFileId(String filename) {
+	public long getFileNodeId(String filename) {
 		Cursor cursor = db.query("files", new String[] { "node_id" },
 				"filename=?", new String[] {filename}, null, null, null);
 		
@@ -152,7 +154,7 @@ public class OrgDatabase extends SQLiteOpenHelper {
 	}
 	
 	
-	public long getFilenameId(String filename) {
+	public long getFileId(String filename) {
 		Cursor cursor = db.query("files", new String[] { "_id" },
 				"filename=?", new String[] {filename}, null, null, null);
 		
@@ -169,10 +171,10 @@ public class OrgDatabase extends SQLiteOpenHelper {
 	
 
 	public void removeFile(String filename) {
-		OrgFile orgfile = new OrgFile(filename, context);
+		FileUtils orgfile = new FileUtils(filename, context);
 		orgfile.remove();
 		
-		Long file_id = this.getFilenameId(filename);
+		Long file_id = this.getFileId(filename);
 		db.delete("orgdata", "file_id = ?", new String[] { file_id.toString() });
 		db.delete("files", "filename = ?", new String[] { filename });
 		
@@ -195,7 +197,7 @@ public class OrgDatabase extends SQLiteOpenHelper {
 	}
 	
 	public long addOrUpdateFile(String filename, String name, String checksum, boolean includeInOutline) {
-		long file_id = this.getFilenameId(filename);
+		long file_id = this.getFileId(filename);
 	
 		if(file_id >= 0)
 			return file_id;
@@ -205,6 +207,7 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		ContentValues orgdata = new ContentValues();
 		orgdata.put("name", name);
 		orgdata.put("todo", "");
+		orgdata.put("parent_id", -1);
 		
 		ContentValues values = new ContentValues();
 
@@ -310,15 +313,19 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		Cursor cursor = db.query("orgdata", nodeFields, "_id=?",
 				new String[] { id.toString() }, null, null, null);
 		
-		cursor.moveToFirst();
-		return cursor;
+		if(cursor.getCount() > 0) {
+			cursor.moveToFirst();
+			return cursor;
+		}
+		else
+			return null;
 	}
 	
 	public void updateNodeField(NodeWrapper node, String entry, String value) {
 		ContentValues values = new ContentValues();
 		values.put(entry, value);
 
-		String nodeId = node.getNodeId(this);
+		String nodeId = node.getNodeId();
 		
 		if(nodeId.startsWith("olp:")) {
 			db.update("orgdata", values, "_id=?",
@@ -327,6 +334,13 @@ public class OrgDatabase extends SQLiteOpenHelper {
 			String nodeIdQuery = "%" + nodeId + "%";
 			db.update("orgdata", values, "payload LIKE ?", new String[]{nodeIdQuery});
 		}
+	}
+
+	public void updateNodeField(long id, String entry, String value) {
+		ContentValues values = new ContentValues();
+		values.put(entry, value);
+
+		db.update("orgdata", values, "_id=?", new String[] { Long.toString(id) });
 	}
 	
 	/**
@@ -382,28 +396,28 @@ public class OrgDatabase extends SQLiteOpenHelper {
 			return true;
 	}
 	
-	public void cloneNode(Long node_id, Long parent_id, Long target_file_id) {
-		NodeWrapper node = new NodeWrapper(this.getNode(node_id));
+	public void cloneNode(Long nodeId, Long newParentId, Long newFileId) {
+		NodeWrapper node = new NodeWrapper(this.getNode(nodeId), this);
 		
-		long new_node_id = this.addNode(parent_id, node.getName(), node.getTodo(),
-				node.getPriority(), node.getTags(), target_file_id);
+		long new_node_id = this.addNode(newParentId, node.getName(), node.getTodo(),
+				node.getPriority(), node.getTags(), newFileId);
 		
-		Cursor children = this.getNodeChildren(node_id);
+		Cursor children = this.getNodeChildren(nodeId);
 		children.moveToFirst();
 		
 		while(children.isAfterLast() == false) {
 			cloneNode(children.getLong(children.getColumnIndex("_id")),
-					new_node_id, target_file_id);
+					new_node_id, newFileId);
 			children.moveToNext();
 		}
 		children.close();
 		
-		this.addNodePayload(new_node_id, node.getRawPayload(this));
+		this.addNodePayload(new_node_id, node.getRawPayload());
 		node.close();
 	}
 	
 	public Cursor getFileSchedule(String filename) {
-		long file_id = this.getFilenameId(filename);
+		long file_id = this.getFileId(filename);
 		
 		String whereQuery = "file_id=? AND (payload LIKE '%<%>%')";
 		
@@ -435,7 +449,7 @@ public class OrgDatabase extends SQLiteOpenHelper {
 	}
 
 	public String fileToString(String filename) {		
-		long fileNodeId = getFileId(filename);
+		long fileNodeId = getFileNodeId(filename);
 		
 		if(fileNodeId < 0)
 			return "";
@@ -692,6 +706,27 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		return cursor;
 	}
 	
+	public int getChangesCount() {
+		int changes = 0;
+		Cursor cursor = db.query("edits", new String[] { "_id" }, null, null,
+				null, null, null);
+		if(cursor != null)
+			changes += cursor.getCount();
+		cursor.close();
+		
+		long file_id = this.getFileId(FileUtils.CAPTURE_FILE);
+		cursor = db.query("orgdata", new String[] { "_id" }, "file_id=?",
+				new String[] { Long.toString(file_id) }, null, null, null);
+		if(cursor != null) {
+			int captures = cursor.getCount();
+			if(captures > 0)
+				changes += captures;
+		}
+		cursor.close();
+		
+		return changes;
+	}
+	
 
 	/**
 	 * Handles the internal org file: links.
@@ -703,7 +738,7 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		if(file.indexOf(":") > -1)
 			file = file.substring(0, file.indexOf(":"));
 				
-		Cursor cursor = getNode(getFileId(file));
+		Cursor cursor = getNode(getFileNodeId(file));
 		
 		if(cursor.getCount() == 0) {
 			cursor.close();
@@ -715,25 +750,12 @@ public class OrgDatabase extends SQLiteOpenHelper {
 
 		return nodeId;
 	}
-	
-	/**
-	 * This method might be useful to implement the file+headline links.
-	 */
-	@SuppressWarnings("unused")
-	private long findNodeWithName(Cursor nodes, String name) {
-		while(nodes.isAfterLast() == false) {
-			String nodeName = nodes.getString(nodes.getColumnIndex("name"));
-			if(nodeName.equals(name))
-				return nodes.getLong(nodes.getColumnIndex("_id"));
-		}
-		return -1;
-	}
 
 	
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 		switch (newVersion) {
-		case 2:
+		case 4:
 			db.execSQL("DROP TABLE IF EXISTS priorities");
 			db.execSQL("DROP TABLE IF EXISTS files");
 			db.execSQL("DROP TABLE IF EXISTS todos");
@@ -745,7 +767,7 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		onCreate(db);
 	}
 
-	private ArrayList<String> cursorToArrayList(Cursor cursor) {
+	public ArrayList<String> cursorToArrayList(Cursor cursor) {
 		ArrayList<String> list = new ArrayList<String>();
 		cursor.moveToFirst();
 

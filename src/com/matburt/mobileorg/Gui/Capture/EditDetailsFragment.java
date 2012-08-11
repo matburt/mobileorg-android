@@ -4,57 +4,51 @@ import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import android.content.ContentResolver;
 import android.content.Context;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.view.Menu;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
-import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TableLayout;
 
+import com.actionbarsherlock.app.SherlockFragment;
+import com.actionbarsherlock.view.MenuItem;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Gui.Capture.DateTableRow.OrgTimeDate;
-import com.matburt.mobileorg.Parsing.MobileOrgApplication;
-import com.matburt.mobileorg.Parsing.NodeWrapper;
-import com.matburt.mobileorg.Parsing.OrgDatabase;
+import com.matburt.mobileorg.provider.OrgNode;
+import com.matburt.mobileorg.provider.OrgProviderUtil;
 
-public class EditDetailsFragment extends Fragment {
+public class EditDetailsFragment extends SherlockFragment {
 	private EditText titleView;
 	private Spinner priorityView;
 	private Spinner todoStateView;
 	private TableLayout tagsView;
 	private TableLayout datesView;
+	private LinearLayout locationView;
+	private LocationTableRow locationTableRow;
 
-	private OrgDatabase orgDB;
-
-	private NodeWrapper node;
-	private String actionMode;
+	private OrgNode node;
 	
-	private String title;
 	ArrayList<TagTableRow> tagEntries = new ArrayList<TagTableRow>();
 	private String defaultTodo;
 	private DateTableRow scheduledEntry = null;
 	private DateTableRow deadlineEntry = null;
 	
 	private ArrayList<String> tagsToRestore = null;
-
-	public void init(NodeWrapper node, String actionMode, String defaultTodo, String title) {
-		init(node, actionMode, defaultTodo);
-		this.title = title;
-	}
+	private ContentResolver resolver;
 	
-	public void init(NodeWrapper node, String actionMode, String defaultTodo) {
-		this.node = node;
-		this.actionMode = actionMode;
+	public void init(OrgNode node, String defaultTodo, ContentResolver resolver) {
 		this.defaultTodo = defaultTodo;
+		this.resolver = resolver;
+		this.node = node;
 	}
-	
+
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
@@ -67,11 +61,10 @@ public class EditDetailsFragment extends Fragment {
 		this.todoStateView = (Spinner) view.findViewById(R.id.todo_state);
 		this.tagsView = (TableLayout) view.findViewById(R.id.tags);
 		this.datesView = (TableLayout) view.findViewById(R.id.dates);
-
-		this.orgDB = ((MobileOrgApplication) getActivity().getApplication()).getDB();
+		this.locationView = (LinearLayout) view.findViewById(R.id.location);
 		
         setHasOptionsMenu(true);
-        initDisplay();
+        //updateDisplay();
         
 		if (savedInstanceState != null) {
 			setupScheduled(savedInstanceState.getString("scheduled"));
@@ -92,7 +85,10 @@ public class EditDetailsFragment extends Fragment {
 			setupTags(tagsToRestore);
 			tagsToRestore = null;
 		}
+		updateDisplay();
 	}
+	
+	
 	
 	@Override
 	public void onSaveInstanceState(Bundle outState) {
@@ -107,29 +103,23 @@ public class EditDetailsFragment extends Fragment {
         outState.putStringArrayList("tags", tags);
 	}
 
-	private void initDisplay() {
-		if(this.actionMode == null) {
-			this.actionMode = EditActivity.ACTIONMODE_CREATE;
-			titleView.setText(title);
-			titleView.setSelection(title.length());
+	public void updateDisplay() {
+		assert(node != null);
+		assert(node.name != null);
+		assert(titleView != null);
+		titleView.setText(node.name);
+		titleView.setSelection(node.name.length());
 
-			setupSpinner(getActivity(), todoStateView, orgDB.getTodos(), defaultTodo);
-			setupSpinner(getActivity(), priorityView, orgDB.getPriorities(), "");
-		}
-		else if (this.actionMode.equals(EditActivity.ACTIONMODE_EDIT)) {
-			titleView.setText(node.getName());
-			titleView.setSelection(node.getName().length());
-			
-			setupTags(node.getTagList());
-			setupDates();
-			setupSpinner(getActivity(), todoStateView, orgDB.getTodos(), node.getTodo());
-			setupSpinner(getActivity(), priorityView, orgDB.getPriorities(), node.getPriority());
-		} else { //if (this.actionMode.equals(EditActivity.ACTIONMODE_CREATE)) { // or ACTIONMODE_ADDPARENT
-			titleView.setText("");
-
-			setupSpinner(getActivity(), todoStateView, orgDB.getTodos(), defaultTodo);
-			setupSpinner(getActivity(), priorityView, orgDB.getPriorities(), "");
-		}
+		// TODO Fix taglist
+		// setupTags(node.getTagList());
+		setupDates();
+		setupSpinner(getActivity(), todoStateView,
+				OrgProviderUtil.getTodos(resolver), node.todo);
+		setupSpinner(getActivity(), priorityView,
+				OrgProviderUtil.getPriorities(resolver), node.priority);
+		if (node.getParent(resolver) != null)
+			this.locationTableRow = new LocationTableRow(
+					node.getParent(resolver), getActivity(), locationView, resolver);
 	}
 	
 	private void setupTags(ArrayList<String> tagList) {		
@@ -157,8 +147,8 @@ public class EditDetailsFragment extends Fragment {
 	}
 	
 	private void setupDates() {
-		this.scheduledEntry = setupDate(node.getPayload(this.orgDB).getScheduled(), "SCHEDULED", scheduledRemoveListener);
-		this.deadlineEntry = setupDate(node.getPayload(this.orgDB).getDeadline(), "DEADLINE", deadlineRemoveListener);
+		this.scheduledEntry = setupDate(node.getPayload().getScheduled(), "SCHEDULED", scheduledRemoveListener);
+		this.deadlineEntry = setupDate(node.getPayload().getDeadline(), "DEADLINE", deadlineRemoveListener);
 	}
 	
 	private DateTableRow setupDate(String date, String title, View.OnClickListener removeListener) {
@@ -205,14 +195,18 @@ public class EditDetailsFragment extends Fragment {
 	};
 	
     
+	
+	
 	@Override
-	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+	public void onCreateOptionsMenu(com.actionbarsherlock.view.Menu menu,
+			com.actionbarsherlock.view.MenuInflater inflater) {
+		// TODO Auto-generated method stub
 		super.onCreateOptionsMenu(menu, inflater);
 		inflater.inflate(R.menu.edit_details, menu);
 	}
 	
 	@Override
-	public void onPrepareOptionsMenu(Menu menu) {
+	public void onPrepareOptionsMenu(com.actionbarsherlock.view.Menu menu) {
 		super.onPrepareOptionsMenu(menu);
 		
 		if(this.scheduledEntry != null)
@@ -227,7 +221,7 @@ public class EditDetailsFragment extends Fragment {
 	}
 
 	@Override
-	public boolean onOptionsItemSelected(android.support.v4.view.MenuItem item) {
+	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 
 		case R.id.menu_nodeedit_tag:
@@ -258,7 +252,7 @@ public class EditDetailsFragment extends Fragment {
 	}
 
 	private void addTag(String tag) {
-		TagTableRow tagEntry = new TagTableRow(getActivity(), tagsView, orgDB.getTags(), tag, this);
+		TagTableRow tagEntry = new TagTableRow(getActivity(), tagsView, OrgProviderUtil.getTags(resolver), tag, this);
 		tagsView.addView(tagEntry);
 		tagEntries.add(tagEntry);
 	}
@@ -269,22 +263,24 @@ public class EditDetailsFragment extends Fragment {
 		String newTodo = todoStateView.getSelectedItem().toString();
 		String newPriority = priorityView.getSelectedItem().toString();
 		String newTags = getTags();
-		if (this.actionMode.equals(EditActivity.ACTIONMODE_CREATE)) {
-			if (newTitle.length() == 0)
-				return false;
-		} else if (this.actionMode.equals(EditActivity.ACTIONMODE_EDIT)) {
-			
-			if (newTitle.equals(node.getName())
-					&& newTodo.equals(node.getTodo())
-					&& newTags.equals(node.getTags())
-					&& newPriority.equals(node.getPriority()))
-				return false;
-		}	
+
+		if (newTitle.equals(node.name) && newTodo.equals(node.todo)
+				&& newTags.equals(node.tags)
+				&& newPriority.equals(node.priority))
+			return false;
 		return true;
 	}
 	
+	public OrgNode getEditedOrgNode() {
+		OrgNode orgNode = new OrgNode();
+		orgNode.name = getTitle();
+		orgNode.todo = getTodo();
+		orgNode.priority = getPriority();
+		orgNode.tags = getTags();
+		return orgNode;
+	}
 	
-	public String getTags() {
+	private String getTags() {
 		StringBuilder result = new StringBuilder();
 		for(TagTableRow entry: tagEntries) {
 			String selection = entry.getSelection();
@@ -314,20 +310,26 @@ public class EditDetailsFragment extends Fragment {
 			return "DEADLINE: <" + this.deadlineEntry.getDate() + ">";
 	}
 	
-	public String getTitle() {
-		return this.titleView.getText().toString();
+	private String getTitle() {
+		return titleView.getText().toString();
 	}
 	
-	public String getTodo() {
+	private String getTodo() {
 		return todoStateView.getSelectedItem().toString();
 	}
 	
-	public String getPriority() {
+	private String getPriority() {
 		return priorityView.getSelectedItem().toString();
 	}
 	
+	public OrgNode getLocation() {
+		return locationTableRow.getParentNodeId();
+	}
+	
 	public static void setupSpinner(Context context, Spinner view, ArrayList<String> data,
-			String selection) {
+			String selection) {		
+		if(!TextUtils.isEmpty(selection) && !data.contains(selection))
+			data.add(selection);
 		data.add("");
 
 		ArrayAdapter<String> adapter = new ArrayAdapter<String>(context,

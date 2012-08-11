@@ -15,14 +15,14 @@ import android.widget.TimePicker;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Parsing.MobileOrgApplication;
 import com.matburt.mobileorg.Parsing.NodeWrapper;
-import com.matburt.mobileorg.Parsing.OrgDatabase;
+import com.matburt.mobileorg.Parsing.OrgDatabaseOld;
 
 public class TimeclockDialog extends FragmentActivity {
 
 	private NodeWrapper node;
 	private int hour = 0;
 	private int minute = 0;
-	private OrgDatabase db;
+	private OrgDatabaseOld db;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -55,7 +55,7 @@ public class TimeclockDialog extends FragmentActivity {
 		TextView textView = (TextView) findViewById(R.id.timeclock_text);
 		
 		long node_id = TimeclockService.getInstance().getNodeID();
-		this.node = new NodeWrapper(db.getNode(node_id));
+		this.node = new NodeWrapper(db.getNode(node_id), db);
 		textView.setText(node.getName() + "@" + elapsedTime);
 
 	}
@@ -79,7 +79,7 @@ public class TimeclockDialog extends FragmentActivity {
 		long startTime = TimeclockService.getInstance().getStartTime();
 		long endTime = TimeclockService.getInstance().getEndTime();
 		String elapsedTime = TimeclockService.getInstance().getElapsedTimeString();
-		node.addLogbook(startTime, endTime, elapsedTime, db);
+		node.addLogbook(startTime, endTime, elapsedTime);
 	}
 	
 	private void endTimeclock() {

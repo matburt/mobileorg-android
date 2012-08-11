@@ -13,19 +13,20 @@ import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.v4.app.FragmentActivity;
 import android.util.Log;
-import android.view.MenuInflater;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import com.actionbarsherlock.app.SherlockFragmentActivity;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuItem;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Gui.Capture.EditActivity;
 import com.matburt.mobileorg.Parsing.MobileOrgApplication;
 import com.matburt.mobileorg.Parsing.NodeWrapper;
 import com.matburt.mobileorg.Synchronizers.Synchronizer;
 
-public class NodeViewActivity extends FragmentActivity {
+public class NodeViewActivity extends SherlockFragmentActivity {
 	private WebView display;
 	private MobileOrgApplication appInst;
 	private SynchServiceReceiver syncReceiver;
@@ -34,7 +35,7 @@ public class NodeViewActivity extends FragmentActivity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
+		
 		setContentView(R.layout.viewnode);
 		
 		Intent intent = getIntent();
@@ -70,9 +71,11 @@ public class NodeViewActivity extends FragmentActivity {
 		this.display.loadDataWithBaseURL(null, data, "text/html", "UTF-8", null);
 	}
 	
+	
+	
 	@Override
-	public boolean onCreateOptionsMenu(android.support.v4.view.Menu menu) {
-		MenuInflater inflater = getMenuInflater();
+	public boolean onCreateOptionsMenu(Menu menu) {
+		com.actionbarsherlock.view.MenuInflater inflater = getSupportMenuInflater();
 	    inflater.inflate(R.menu.nodeview, menu);
 	    
 	    if(this.appInst.getDB().isNodeEditable(node_id) == false)
@@ -82,7 +85,7 @@ public class NodeViewActivity extends FragmentActivity {
 	}
 
 	@Override
-	public boolean onOptionsItemSelected(android.support.v4.view.MenuItem item) {
+	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case android.R.id.home:
 			finish();
@@ -205,7 +208,7 @@ public class NodeViewActivity extends FragmentActivity {
 			return result.toString();
 		level--;
 
-		for (NodeWrapper child : node.getChildren(appInst.getDB())) {
+		for (NodeWrapper child : node.getChildren()) {
 			result.append(nodeToHTMLRecursive(child, level));
 			child.close();
 		}
@@ -228,8 +231,8 @@ public class NodeViewActivity extends FragmentActivity {
 		
 		result.append("</b></font> <hr />");
 
-		if (!node.getCleanedPayload(appInst.getDB()).equals("")) {
-			String payload = node.getCleanedPayload(appInst.getDB());
+		if (!node.getCleanedPayload().equals("")) {
+			String payload = node.getCleanedPayload();
 			if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(
 					"viewApplyFormating", true))
 				payload = applyFormating(payload);

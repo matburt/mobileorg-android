@@ -26,16 +26,16 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.content.res.Resources;
 import android.preference.PreferenceManager;
 import android.util.Base64;
 import android.util.Log;
 
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Gui.CertificateConflictActivity;
-import com.matburt.mobileorg.Parsing.MobileOrgApplication;
-import com.matburt.mobileorg.Parsing.OrgFile;
+import com.matburt.mobileorg.util.FileUtils;
 
-public class WebDAVSynchronizer extends Synchronizer {
+public class WebDAVSynchronizer implements SynchronizerInterface {
 
     class IntelligentX509TrustManager implements X509TrustManager {
         Context c;
@@ -97,12 +97,14 @@ public class WebDAVSynchronizer extends Synchronizer {
 	private String remotePath;
     private String username;
     private String password;
+	private Context context;
+	private Resources r;
 	
-	public WebDAVSynchronizer(Context parentContext, MobileOrgApplication appInst) {
-		super(parentContext, appInst);
-
+	public WebDAVSynchronizer(Context parentContext) {
+		this.context = parentContext;
+		this.r = context.getResources();
 		SharedPreferences sharedPreferences = PreferenceManager
-				.getDefaultSharedPreferences(context);
+				.getDefaultSharedPreferences(parentContext);
 
 		this.remoteIndexPath = sharedPreferences.getString("webUrl", "");
 		this.remotePath = getRootUrl();
@@ -174,12 +176,12 @@ public class WebDAVSynchronizer extends Synchronizer {
         this.context.startActivity(i);
     }
 	
-	protected void putRemoteFile(String filename, String contents) throws IOException {
+	public void putRemoteFile(String filename, String contents) throws IOException {
 		String urlActual = this.getRootUrl() + filename;
 		putUrlFile(urlActual, contents);
 	}
 
-	protected BufferedReader getRemoteFile(String filename) throws IOException, CertificateException,
+	public BufferedReader getRemoteFile(String filename) throws IOException, CertificateException,
                                                                    SSLHandshakeException, Exception {
 		String orgUrl = this.remotePath + filename;
         InputStream mainFile = null;
@@ -293,7 +295,7 @@ public class WebDAVSynchronizer extends Synchronizer {
             }
         } catch (UnsupportedEncodingException e) {
 			throw new IOException(r.getString(
-					R.string.error_unsupported_encoding, OrgFile.CAPTURE_FILE));
+					R.string.error_unsupported_encoding, FileUtils.CAPTURE_FILE));
 		}
 	}
 
@@ -321,6 +323,6 @@ public class WebDAVSynchronizer extends Synchronizer {
 	}
 
 	@Override
-	protected void postSynchronize() {		
+	public void postSynchronize() {		
 	}
 }

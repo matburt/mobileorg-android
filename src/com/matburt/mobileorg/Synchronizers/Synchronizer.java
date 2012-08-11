@@ -2,29 +2,25 @@ package com.matburt.mobileorg.Synchronizers;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.security.cert.CertificateException;
+
 import javax.net.ssl.SSLHandshakeException;
 
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.content.res.Resources;
-import android.preference.PreferenceManager;
 import android.util.Log;
-import android.widget.RemoteViews;
 
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Gui.FileDecryptionActivity;
-import com.matburt.mobileorg.Gui.OutlineActivity;
-import com.matburt.mobileorg.Parsing.MobileOrgApplication;
-import com.matburt.mobileorg.Parsing.OrgDatabase;
-import com.matburt.mobileorg.Parsing.OrgFile;
 import com.matburt.mobileorg.Parsing.OrgFileParser;
+import com.matburt.mobileorg.provider.OrgContract.Edits;
+import com.matburt.mobileorg.provider.OrgContract.Files;
+import com.matburt.mobileorg.provider.OrgFile;
+import com.matburt.mobileorg.provider.OrgProviderUtil;
+import com.matburt.mobileorg.util.FileUtils;
 
 /**
  * This class implements many of the operations that need to be done on
@@ -34,50 +30,22 @@ import com.matburt.mobileorg.Parsing.OrgFileParser;
  * {@link #putRemoteFile(String, String)} and {@link #getRemoteFile(String)} are
  * needed.
  */
-abstract public class Synchronizer {
+public class Synchronizer {
 	public static final String SYNC_UPDATE = "com.matburt.mobileorg.Synchronizer.action.SYNC_UPDATE";
 	public final static String SYNC_DONE = "sync_done";
+	
+	public static final String CAPTURE_FILE = "mobileorg.org";
 
-	/**
-	 * Called before running the synchronizer to ensure that it's configuration
-	 * is in a valid state.
-	 */
-	protected abstract boolean isConfigured();
+	private Context context;
+	private ContentResolver resolver;
+	private SynchronizerInterface syncher;
+	private SynchronizerNotification notify;
 
-	/**
-	 * Replaces the file on the remote end with the given content.
-	 * 
-	 * @param filename Name of the file, without path
-	 * @param contents Content of the new file
-	 */
-	protected abstract void putRemoteFile(String filename, String contents)
-        throws Exception, IOException;
-
-	/**
-	 * Returns a BufferedReader to the remote file.
-	 * 
-	 * @param filename
-	 *            Name of the file, without path
-	 */
-	protected abstract BufferedReader getRemoteFile(String filename)
-        throws Exception, IOException, CertificateException, SSLHandshakeException;
-
-	/**
-	 * Use this to disconnect from any services and cleanup.
-	 */
-	protected abstract void postSynchronize();
-
-	protected Context context;
-	protected OrgDatabase appdb;
-	protected SharedPreferences appSettings;
-	protected Resources r;
-
-	Synchronizer(Context context, MobileOrgApplication appInst) {
+	public Synchronizer(Context context, SynchronizerInterface syncher, SynchronizerNotification notify) {
 		this.context = context;
-		this.r = this.context.getResources();
-		this.appSettings = PreferenceManager
-				.getDefaultSharedPreferences(context.getApplicationContext());
-		this.appdb = appInst.getDB();
+		this.resolver = context.getContentResolver();
+		this.syncher = syncher;
+		this.notify = notify;
 	}
 
 	/**
@@ -88,39 +56,39 @@ abstract public class Synchronizer {
 		return true;
 	}
 
-	public void sync() {
-		if (!isConfigured()) {
-			errorNotification("Sync not configured");
+	public void sync(OrgFileParser parser) {
+		if (!syncher.isConfigured()) {
+			notify.errorNotification("Sync not configured");
 			return;
 		}
 
-		setupNotification();
-		updateNotification(0,
+		notify.setupNotification();
+		notify.updateNotification(0,
 				context.getString(R.string.sync_synchronizing_changes) + " "
-						+ OrgFile.CAPTURE_FILE);
+						+ CAPTURE_FILE);
 		try {
 			pushCaptures();
-			pull();
+			pull(parser);
 		} catch (IOException e) {
-            finalizeNotification();
-			errorNotification("Error occured during sync: "
+			notify.finalizeNotification();
+			notify.errorNotification("Error occured during sync: "
                               + e.getLocalizedMessage());
 			Log.d("MobileOrg", e.getStackTrace().toString());
 			return;
 		} catch (CertificateException e) {
-            finalizeNotification();
-			errorNotification("Certificate Error occured during sync: "
+			notify.finalizeNotification();
+			notify.errorNotification("Certificate Error occured during sync: "
                               + e.getLocalizedMessage());
 			Log.d("MobileOrg", e.getStackTrace().toString());
 			return;
 		} catch (Exception e) {
-            finalizeNotification();
-            errorNotification("Error: " + e.toString());
+			notify.finalizeNotification();
+			notify.errorNotification("Error: " + e.toString());
             e.printStackTrace();
             Log.d("MobileOrg", e.toString());
             return;
         }
-		finalizeNotification();
+		notify.finalizeNotification();
 		announceSyncDone();
 	}
 
@@ -129,24 +97,24 @@ abstract public class Synchronizer {
 	 * file combine their content. This combined version is transfered to the
 	 * remote.
 	 */
-	private void pushCaptures() throws Exception, IOException,
+	public void pushCaptures() throws Exception, IOException,
 			CertificateException, SSLHandshakeException {
-		final String filename = OrgFile.CAPTURE_FILE;
-		String localContents = this.appdb.fileToString(filename);
-		localContents += this.appdb.editsToString();
+		final String filename = CAPTURE_FILE;
+		String localContents = OrgProviderUtil.fileToString(filename, resolver);
+		localContents += OrgProviderUtil.editsToString(resolver);
 
 		if (localContents.equals(""))
 			return;
-		String remoteContent = OrgFile.read(getRemoteFile(filename));
-		updateNotification(10);
+		String remoteContent = FileUtils.read(syncher.getRemoteFile(filename));
+		notify.updateNotification(10);
 
 		if (remoteContent.indexOf("{\"error\":") == -1)
 			localContents = remoteContent + "\n" + localContents;
 
-		putRemoteFile(filename, localContents);
+		syncher.putRemoteFile(filename, localContents);
 
-		this.appdb.clearEdits();
-		this.appdb.removeFile(filename);
+		resolver.delete(Edits.CONTENT_URI, null, null);
+		resolver.delete(Files.buildFilenameUri(filename), null, null);
 	}
 
 	/**
@@ -154,18 +122,18 @@ abstract public class Synchronizer {
 	 * host. Using those files, it determines the other files that need updating
 	 * and downloads them.
 	 */
-	private void pull() throws SSLHandshakeException, CertificateException, IOException, Exception {
-		updateNotification(20, context.getString(R.string.downloading)
+	public void pull(OrgFileParser parser) throws SSLHandshakeException, CertificateException, IOException, Exception {
+		notify.updateNotification(20, context.getString(R.string.downloading)
 				+ " checksums.dat");
 		String remoteChecksumContents = "";
 
-		remoteChecksumContents = OrgFile.read(getRemoteFile("checksums.dat"));
+		remoteChecksumContents = FileUtils.read(syncher.getRemoteFile("checksums.dat"));
 
-		updateNotification(40);
+		notify.updateNotification(40);
 
 		HashMap<String, String> remoteChecksums = OrgFileParser
 				.getChecksums(remoteChecksumContents);
-		HashMap<String, String> localChecksums = this.appdb.getFileChecksums();
+		HashMap<String, String> localChecksums = OrgProviderUtil.getFileChecksums(resolver);
 
 		ArrayList<String> filesToGet = new ArrayList<String>();
 
@@ -176,165 +144,74 @@ abstract public class Synchronizer {
 			filesToGet.add(key);
 		}
 
-		filesToGet.remove(OrgFile.CAPTURE_FILE);
+		filesToGet.remove(CAPTURE_FILE);
 
 		if (filesToGet.size() == 0)
 			return;
 
 		filesToGet.remove("index.org");
-		updateNotification(60, context.getString(R.string.downloading)
+		notify.updateNotification(60, context.getString(R.string.downloading)
 				+ " index.org");
 		String remoteIndexContents = "";
 
-		remoteIndexContents = OrgFile.read(getRemoteFile("index.org"));
-		this.appdb.setTodos(OrgFileParser
-				.getTodosFromIndex(remoteIndexContents));
-		this.appdb.setPriorities(OrgFileParser
-				.getPrioritiesFromIndex(remoteIndexContents));
-		this.appdb.setTags(OrgFileParser.getTagsFromIndex(remoteIndexContents));
+		remoteIndexContents = FileUtils.read(syncher.getRemoteFile("index.org"));
+
+		OrgProviderUtil.setTodos(OrgFileParser.getTodosFromIndex(remoteIndexContents), resolver);
+		OrgProviderUtil.setPriorities(OrgFileParser
+				.getPrioritiesFromIndex(remoteIndexContents), resolver);
+		OrgProviderUtil.setTags(OrgFileParser.getTagsFromIndex(remoteIndexContents), resolver);
 		HashMap<String, String> filenameMap = OrgFileParser
 				.getFilesFromIndex(remoteIndexContents);
-		this.appdb.addOrUpdateFile("index.org", filenameMap.get("index.org"),
-				remoteChecksums.get("index.org"), false);
-
-		OrgFileParser parser = new OrgFileParser(this.appdb);
 
 		int i = 0;
 		for (String filename : filesToGet) {
 			i++;
-			updateNotification(i, context.getString(R.string.downloading) + " "
+			notify.updateNotification(i, context.getString(R.string.downloading) + " "
 					+ filename, filesToGet.size());
 			Log.d("MobileOrg",
 					"Getting " + filename + "/" + filenameMap.get(filename));
 
-			getAndParseFile(filename, filenameMap.get(filename),
-					remoteChecksums.get(filename), parser);
+			OrgFile orgFile = new OrgFile(filename, filenameMap.get(filename), remoteChecksums.get(filename));
+			getAndParseFile(orgFile, parser);
 		}
 	}
 	
-	private void getAndParseFile(String filename, String filenameAlias,
-			String remoteChecksum, OrgFileParser parser)
+	private void getAndParseFile(OrgFile orgFile, OrgFileParser parser)
 			throws SSLHandshakeException, CertificateException, IOException,
 			Exception {
-		BufferedReader rfile = getRemoteFile(filename);
+		BufferedReader breader = syncher.getRemoteFile(orgFile.filename);
 
-		if (rfile == null) {
-			Log.w("MobileOrg", "File does not seem to exist: " + filename);
+		if (breader == null) {
+			Log.w("MobileOrg", "File does not seem to exist: " + orgFile.filename);
 			return;
 		}
 
-        String fileIdentActual = filenameAlias;
-        if (fileIdentActual == null || fileIdentActual.equals("null"))
-            fileIdentActual = filename;
-
 		// TODO Generate checksum of file and compare to remoteChecksum
 		
-		if (filename.endsWith(".gpg") || filename.endsWith(".pgp")
-            || filename.endsWith(".enc") || filename.endsWith(".asc"))
-        	decryptAndParseFile(filename, fileIdentActual, remoteChecksum, rfile);
-        else
-        	parser.parse(filename, fileIdentActual, remoteChecksum, rfile, context);
+		if (orgFile.isEncrypted())
+        	decryptAndParseFile(orgFile, breader);
+        else {
+        	parser.parse(orgFile, breader);
+        }
 	}
 	
-	private void decryptAndParseFile(String filename, String filenameAlias,
-			String checksum, BufferedReader reader) throws IOException {
+	private void decryptAndParseFile(OrgFile orgFile, BufferedReader reader) throws IOException {
 		Intent intent = new Intent(context, FileDecryptionActivity.class);
-		intent.putExtra("data", OrgFile.read(reader).getBytes());
-		intent.putExtra("filename",filename);
-		intent.putExtra("filenameAlias", filenameAlias);
-		intent.putExtra("checksum", checksum);
+		intent.putExtra("data", FileUtils.read(reader).getBytes());
+		intent.putExtra("filename", orgFile.filename);
+		intent.putExtra("filenameAlias", orgFile.name);
+		intent.putExtra("checksum", orgFile.checksum);
 		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		context.startActivity(intent);
 	}
 
-	private NotificationManager notificationManager;
-	private Notification notification;
-	private int notifyRef = 1;
-
-    private void errorNotification(String errorMsg) {
-		this.notificationManager = (NotificationManager) context
-				.getSystemService(Context.NOTIFICATION_SERVICE);
-		Intent notifyIntent = new Intent(context, OutlineActivity.class);
-		notifyIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-
-		PendingIntent contentIntent = PendingIntent.getActivity(context, 0,
-				notifyIntent, 0);
-
-		notification = new Notification(R.drawable.icon,
-				"Synchronization Failed", System.currentTimeMillis());
-		
-		notification.contentIntent = contentIntent;
-		notification.flags = notification.flags;
-		notification.contentView = new RemoteViews(context
-				.getPackageName(), R.layout.sync_notification);
-		
-		notification.contentView.setImageViewResource(R.id.status_icon, R.drawable.icon);
-        notification.contentView.setTextViewText(R.id.status_text, errorMsg);
-        notification.contentView.setProgressBar(R.id.status_progress, 100, 100, false);
-		notificationManager.notify(notifyRef, notification);
-    }
-	
-	private void setupNotification() {
-		this.notificationManager = (NotificationManager) context
-				.getSystemService(Context.NOTIFICATION_SERVICE);
-		Intent notifyIntent = new Intent(context, OutlineActivity.class);
-		notifyIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
-				| Intent.FLAG_ACTIVITY_SINGLE_TOP);
-
-		PendingIntent contentIntent = PendingIntent.getActivity(context, 0,
-				notifyIntent, 0);
-
-		notification = new Notification(R.drawable.icon,
-				"Started synchronization", System.currentTimeMillis());
-
-		notification.contentIntent = contentIntent;
-		notification.flags = notification.flags
-				| Notification.FLAG_ONGOING_EVENT;
-		notification.contentView = new RemoteViews(context.getPackageName(),
-				R.layout.sync_notification);
-
-		notification.contentView.setImageViewResource(R.id.status_icon,
-				R.drawable.icon);
-		notification.contentView.setTextViewText(R.id.status_text,
-				"Synchronizing...");
-		notification.contentView.setProgressBar(R.id.status_progress, 100, 0,
-				false);
-		notificationManager.notify(notifyRef, notification);
-	}
-
-	private void updateNotification(int progress) {
-		notification.contentView.setProgressBar(R.id.status_progress, 100,
-				progress, false);
-		notificationManager.notify(notifyRef, notification);
-	}
-
-	private void updateNotification(int progress, String message) {
-		notification.contentView.setTextViewText(R.id.status_text, message);
-		notification.contentView.setProgressBar(R.id.status_progress, 100,
-				progress, false);
-		notificationManager.notify(notifyRef, notification);
-	}
-
-	private void updateNotification(int fileNumber, String message,
-			int totalFiles) {
-		int partialProgress = ((40 / totalFiles) * fileNumber);
-		notification.contentView.setProgressBar(R.id.status_progress, 100,
-				60 + partialProgress, false);
-		notification.contentView.setTextViewText(R.id.status_text, message);
-		notificationManager.notify(notifyRef, notification);
-	}
-
-	private void finalizeNotification() {
-		notificationManager.cancel(notifyRef);
-	}
-	
-	public void announceSyncDone() {
+	private void announceSyncDone() {
 		Intent intent = new Intent(Synchronizer.SYNC_UPDATE);
-		intent.putExtra(SYNC_DONE, true);
+		intent.putExtra(Synchronizer.SYNC_DONE, true);
 		this.context.sendBroadcast(intent);
 	}
-
+	
 	public void close() {
-		this.postSynchronize();
+		syncher.postSynchronize();
 	}
 }
