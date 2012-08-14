@@ -1,10 +1,13 @@
 package com.matburt.mobileorg.Gui;
 
+import android.annotation.SuppressLint;
 import android.app.ListActivity;
 import android.app.SearchManager;
 import android.content.Intent;
 import android.database.Cursor;
+import android.os.Build;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -22,6 +25,7 @@ public class SearchActivity extends ListActivity {
 
 		Intent intent = getIntent();
 		handleIntent(intent);
+		
 	}
 
 	@Override
@@ -59,4 +63,14 @@ public class SearchActivity extends ListActivity {
 			startActivity(intent);
 		}
 	};
+	
+	@SuppressLint("NewApi")
+	@Override
+	public void finish() {
+		super.finish();
+		// Disable transitions if configured
+		if (Build.VERSION.SDK_INT >= 5 && !PreferenceManager.getDefaultSharedPreferences(this).getBoolean("viewAnimateTransitions", true)) {
+			overridePendingTransition(0, 0);
+		}	
+	}
 }

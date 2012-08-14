@@ -5,3 +5,5 @@ local.properties
 matburt-key.keystore
 dbprivate.xml
 proguard.cfg
+libs/locale/.classpath
+libs/locale/.project

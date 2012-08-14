@@ -16,6 +16,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentActivity;
@@ -39,6 +40,7 @@ import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Gui.Capture.EditActivity;
 import com.matburt.mobileorg.Parsing.MobileOrgApplication;
 import com.matburt.mobileorg.Parsing.NodeWrapper;
+import com.matburt.mobileorg.Parsing.OrgDatabase;
 import com.matburt.mobileorg.Parsing.OrgFile;
 import com.matburt.mobileorg.Services.SyncService;
 import com.matburt.mobileorg.Services.TimeclockService;
@@ -62,7 +64,8 @@ public class OutlineActivity extends FragmentActivity
 	private ListView listView;
 	private OutlineCursorAdapter outlineAdapter;
 	private SynchServiceReceiver syncReceiver;
-
+	private TextView detailedView;
+	
     private boolean emptylist = false;
 
 	@Override
@@ -94,10 +97,21 @@ public class OutlineActivity extends FragmentActivity
 		listView.setOnItemClickListener(outlineClickListener);
 		registerForContextMenu(listView);	
 		
+		detailedView = (TextView) this.findViewById(R.id.detailed_view);
+		
 		this.syncReceiver = new SynchServiceReceiver();
 		registerReceiver(this.syncReceiver, new IntentFilter(
 				Synchronizer.SYNC_UPDATE));
-				
+		
+		// Disable transitions if configured
+		if (Build.VERSION.SDK_INT >= 5 && !PreferenceManager.getDefaultSharedPreferences(this).getBoolean("viewAnimateTransitions", true)) {
+			overridePendingTransition(0, 0);
+		}
+	
+		// Display the payload for the selected node in large landscape layout
+		if (this.node_id != -1) {
+			showDetails(this.node_id);
+		}
 		refreshDisplay();
 	}
 	
@@ -272,6 +286,7 @@ public class OutlineActivity extends FragmentActivity
     private void runHelp() {
 		Intent intent = new Intent(Intent.ACTION_VIEW,
 				Uri.parse("https://github.com/matburt/mobileorg-android/wiki"));
+		
     	startActivity(intent);
     }
     
@@ -436,6 +451,17 @@ public class OutlineActivity extends FragmentActivity
     }
 	
 
+	private void showDetails(Long clicked_node_id) {
+		// Display the full payload as a sample
+		if (detailedView != null && appInst != null) {
+			OrgDatabase db = appInst.getDB();
+			if (db != null) { 
+				detailedView.setText(db.getNodePayloadReal(Long.toString(clicked_node_id)));
+			}
+		}
+	}
+
+
 	private OnItemClickListener outlineClickListener = new OnItemClickListener() {
 		@Override
 		public void onItemClick(AdapterView<?> parent, View v, int position,
@@ -468,6 +494,8 @@ public class OutlineActivity extends FragmentActivity
 				else
 					runViewNodeActivity(clicked_node_id);
 			}
+			
+			showDetails(clicked_node_id);
 		}
 	};
 	
@@ -517,5 +545,14 @@ public class OutlineActivity extends FragmentActivity
             slinfo.setText(value);
             return row;
         }
+    }
+    
+    @Override
+    public void finish() {
+    	super.finish();
+    	// Disable transitions if configured
+    	if (Build.VERSION.SDK_INT >= 5 && !PreferenceManager.getDefaultSharedPreferences(this).getBoolean("viewAnimateTransitions", true)) {
+    		overridePendingTransition(0, 0);
+    	}	
     }
 }

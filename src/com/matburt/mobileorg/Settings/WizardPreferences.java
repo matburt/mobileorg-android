@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import com.matburt.mobileorg.R;
 
 public class WizardPreferences extends Preference {
     public WizardPreferences(Context context) {
@@ -34,7 +35,7 @@ public class WizardPreferences extends Preference {
         layout.setPadding(20, 10, 10, 10);
         layout.setOrientation(LinearLayout.HORIZONTAL);
         TextView view = new TextView(getContext());
-        view.setText("Re-run Setup Wizard");
+        view.setText(R.string.rerun_setup_wizard);
         // view.setTextSize(18);
         // view.setTypeface(Typeface.SANS_SERIF, Typeface.BOLD);
         view.setTextAppearance(getContext(), android.R.style.TextAppearance_Large);
@@ -52,4 +53,5 @@ public class WizardPreferences extends Preference {
         layout.setId(android.R.id.widget_frame);
         return layout; 
     }    
+    
 }

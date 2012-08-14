@@ -6,30 +6,30 @@
     android:background="#000000">
   <TableRow>
     <TextView
-       android:text="URL:"
+       android:text="@string/url"
        />
   </TableRow>
   <TableRow>
     <EditText
        android:id="@+id/webURL"
-       android:hint="http://example.com/index.org"
+       android:hint="@string/hint_webURL"
        android:singleLine="true"
 	   android:inputType="textUri"
        />
   </TableRow>
   <TableRow>
     <TextView
-       android:text="Login::"
+       android:text="@string/username"
        />
   </TableRow>
   <TableRow>
     <EditText
        android:id="@+id/webUser"
-       android:hint="username"/>
+       android:hint="@string/username"/>
   </TableRow>
   <TableRow>
     <TextView
-       android:text="Password:"
+       android:text="@string/password"
        />
   </TableRow>
 <TableRow>
@@ -46,18 +46,18 @@
                 android:id="@+id/storegrp"> 
       <TextView android:layout_width="fill_parent" 
                 android:layout_height="wrap_content" 
-                android:text="Storage Location"/>
+                android:text="@string/storage_location"/>
       <RadioButton android:checked="true" 
-                   android:text="Internal"
+                   android:text="@string/storage_internal"
                    android:id="@+id/internalopt" /> 
       <RadioButton android:checked="false" 
-                   android:text="Storage Card"
+                   android:text="@string/storage_card"
                    android:id="@+id/sdcardopt"/>
     </RadioGroup> 
   </TableRow>
   <TableRow>
     <Button
        android:id="@+id/settingsSave"
-       android:text="Save" />
+       android:text="@string/save" />
   </TableRow>
 </TableLayout>

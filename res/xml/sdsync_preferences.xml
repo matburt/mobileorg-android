@@ -3,8 +3,7 @@
   <PreferenceCategory android:title="SDCard">
     <EditTextPreference
         android:name="sdcardIndex"
-        android:summary="Full local path to your index.org file"
-        android:title="Index Path"
+        android:title="@string/index_path"
         android:key="indexFilePath" />
   </PreferenceCategory>
 </PreferenceScreen>

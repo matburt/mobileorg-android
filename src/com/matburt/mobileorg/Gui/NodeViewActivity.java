@@ -11,6 +11,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentActivity;
@@ -49,6 +50,10 @@ public class NodeViewActivity extends FragmentActivity {
         this.syncReceiver = new SynchServiceReceiver();
 		registerReceiver(this.syncReceiver, new IntentFilter(
 				Synchronizer.SYNC_UPDATE));
+		// Disable transitions if configured
+		if (Build.VERSION.SDK_INT >= 5 && !PreferenceManager.getDefaultSharedPreferences(this).getBoolean("viewAnimateTransitions", true)) {
+			overridePendingTransition(0, 0);
+		}
         
 		refreshDisplay();
 	}
@@ -231,7 +236,7 @@ public class NodeViewActivity extends FragmentActivity {
 		if (!node.getCleanedPayload(appInst.getDB()).equals("")) {
 			String payload = node.getCleanedPayload(appInst.getDB());
 			if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(
-					"viewApplyFormating", true))
+					"viewApplyFormatting", true))
 				payload = applyFormating(payload);
 			result.append(payload);
 			result.append("\n<br/>\n");
@@ -258,4 +263,12 @@ public class NodeViewActivity extends FragmentActivity {
 		return text;
 	}
 
+	@Override
+	public void finish() {
+		super.finish();
+		// Disable transitions if configured
+		if (Build.VERSION.SDK_INT >= 5 && !PreferenceManager.getDefaultSharedPreferences(this).getBoolean("viewAnimateTransitions", true)) {
+			overridePendingTransition(0, 0);
+		}	
+	}
 }

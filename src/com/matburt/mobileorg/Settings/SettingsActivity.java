@@ -3,6 +3,7 @@ package com.matburt.mobileorg.Settings;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -10,6 +11,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageItemInfo;
 import android.content.pm.ResolveInfo;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.ListPreference;
 import android.preference.Preference;
@@ -27,7 +29,17 @@ public class SettingsActivity extends PreferenceActivity implements
 
 	OrgDatabase db;
 	private boolean updateCalendar = false;
-
+	
+	public static final String KEY_SYNC_SOURCE = "syncSource";
+	public static final String KEY_SYNC_PREF = "syncPref";
+	public static final String KEY_AUTO_SYNC_INTERVAL = "autoSyncInterval";
+	public static final String KEY_VIEW_RECURSION_MAX = "viewRecursionMax";
+	public static final String KEY_DEFAULT_TODO = "defaultTodo";
+	public static final String KEY_CALENDAR_NAME = "calendarName";
+	public static final String KEY_CALENDAR_REMINDER_INTERVAL = "calendarReminderInterval";
+	public static final String KEY_DO_AUTO_SYNC = "doAutoSync";
+	
+	@SuppressLint("NewApi")
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -50,7 +62,22 @@ public class SettingsActivity extends PreferenceActivity implements
 		
 		SharedPreferences appSettings = PreferenceManager
 				.getDefaultSharedPreferences(getApplicationContext());
-		appSettings.registerOnSharedPreferenceChangeListener(this);
+		
+		// Disable transitions if configured
+		if (Build.VERSION.SDK_INT >= 5 && !PreferenceManager.getDefaultSharedPreferences(this).getBoolean("viewAnimateTransitions", true)) {
+			overridePendingTransition(0, 0);
+		}
+		
+		SynchronizerPreferences sync = (SynchronizerPreferences) findPreference(KEY_SYNC_PREF);
+		sync.setParentActivity(this);
+		
+		// Manually invoke so that settings are pre-loaded and sync preference is enabled or disabled as appropriate 
+		onSharedPreferenceChanged(appSettings, KEY_SYNC_SOURCE);
+		setPreferenceSummary(appSettings, KEY_AUTO_SYNC_INTERVAL);
+		setPreferenceSummary(appSettings, KEY_VIEW_RECURSION_MAX);
+		setPreferenceSummary(appSettings, KEY_DEFAULT_TODO);
+		setPreferenceSummary(appSettings, KEY_CALENDAR_NAME);
+		setPreferenceSummary(appSettings, KEY_CALENDAR_REMINDER_INTERVAL);
 	}
 	
 	@Override
@@ -67,18 +94,65 @@ public class SettingsActivity extends PreferenceActivity implements
 						getApplicationContext());
 			}
 		}
+		getPreferenceScreen().getSharedPreferences().unregisterOnSharedPreferenceChangeListener(this);
 		super.onPause();
+	}
+	
+	@Override
+	public void onResume() {
+		super.onResume();
+		getPreferenceScreen().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
 	}
 	
 	@Override
 	public void onSharedPreferenceChanged(SharedPreferences sharedPreferences,
 			String key) {
-		if(key.startsWith("calendar")) {
+		if (key.startsWith("calendar")) {
 			Log.d("MobileOrg", "Set to update calendar");
 			this.updateCalendar = true;
 		}
+
+	    // Set up the initial values following the Settings design guidelines for Ice Cream Sandwich
+		// Settings should show their current value instead of a description
+		setPreferenceSummary(sharedPreferences, key);
+		if (key.equals(KEY_SYNC_SOURCE)) {
+			if (sharedPreferences.getString(key, "").equals("null")) {
+				// Disable synchronizer settings
+				findPreference(KEY_SYNC_PREF).setEnabled(false);
+				findPreference(KEY_DO_AUTO_SYNC).setEnabled(false);
+			} else {
+				// Disable synchronizer settings
+				findPreference(KEY_SYNC_PREF).setEnabled(true);
+				findPreference(KEY_DO_AUTO_SYNC).setEnabled(true);
+			}
+		}
 	}
 
+	
+	protected void setPreferenceSummary(SharedPreferences sharedPreferences, String key) {
+		Preference pref = findPreference(key);
+		if (pref != null) {
+			if (key.equals(KEY_SYNC_SOURCE)) {
+				String value = sharedPreferences.getString(key, "");
+				pref.setSummary(lookUpValue(R.array.fileSources, R.array.fileSourcesVals, value));
+			}
+			if (key.equals(KEY_AUTO_SYNC_INTERVAL)) {
+				String value = sharedPreferences.getString(key, "");
+			}
+			if (key.equals(KEY_VIEW_RECURSION_MAX)) {
+				String value = sharedPreferences.getString(key, "");
+				pref.setSummary(lookUpValue(R.array.viewRecursionLevels, R.array.viewRecursionLevelsVals, value));
+			}
+			if (key.equals(KEY_DEFAULT_TODO)) {
+				String value = sharedPreferences.getString(key, "");
+				pref.setSummary(value);
+			}
+			if (key.equals(KEY_CALENDAR_NAME)) {
+				String value = sharedPreferences.getString(key, "");
+				pref.setSummary(value);
+			}
+		}
+	}
 	private Preference.OnPreferenceClickListener onClearDBClick = new Preference.OnPreferenceClickListener() {
 
 		@Override
@@ -197,6 +271,7 @@ public class SettingsActivity extends PreferenceActivity implements
 	}
 
 	private static final String SYNCHRONIZER_PLUGIN_ACTION = "com.matburt.mobileorg.SYNCHRONIZE";
+	public static final int SYNCHRONIZER_PREFERENCES = 10;
 
 	private static List<PackageItemInfo> discoverSynchronizerPlugins(
 			Context context) {
@@ -211,4 +286,46 @@ public class SettingsActivity extends PreferenceActivity implements
 
 		return out;
 	}
+	
+	@SuppressLint("NewApi")
+	@Override
+	public void finish() {
+		super.finish();
+		// Disable transitions if configured
+		if (Build.VERSION.SDK_INT >= 5 && !PreferenceManager.getDefaultSharedPreferences(this).getBoolean("viewAnimateTransitions", true)) {
+			overridePendingTransition(0, 0);
+		}	
+	}
+	
+	/**
+	 * Convenience method for
+	 * @param keyID the ID of the StringArray that contains the labels
+	 * @param valID the ID of the StringArray that contains the values
+	 * @param value the value to search for
+	 * @return
+	 */
+	private String lookUpValue(int keyID, int valID, String value) {
+		String[] keys = getResources().getStringArray(keyID);
+		String[] values = getResources().getStringArray(valID);
+		for (int i = 0; i < values.length; i++) {
+			if (values[i].equals(value)) {
+				return keys[i];
+			}
+		}
+		return null;
+	}
+	private String lookUpValue(String[] keys, String[] values, String value) {
+		for (int i = 0; i < values.length; i++) {
+			if (values[i].equals(value)) {
+				return keys[i];
+			}
+		}
+		return null;
+	}
+	
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == SYNCHRONIZER_PREFERENCES) {
+        	((SynchronizerPreferences) findPreference(KEY_SYNC_PREF)).setPreferenceSummary();
+        }
+    }
 }
