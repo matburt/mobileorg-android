@@ -291,7 +291,7 @@ public class OrgFileParser {
     	if (OrgFileParser.titlePattern == null) {
     		StringBuffer pattern = new StringBuffer();
     		pattern.append("^\\s?(?:([A-Z]{2,}:?\\s+)\\s*)?"); 	// Todo
-    		pattern.append("(?:\\[\\#(.*)\\])?"); 				// Priority
+    		pattern.append("(?:\\[\\#([^]]+)\\])?"); 			// Priority
     		pattern.append("(.*?)"); 						// Title
     		pattern.append("\\s*(?::([^\\s]+):)?"); 		// Tags
     		pattern.append("(\\s*[!\\*])*"); 				// Habits
