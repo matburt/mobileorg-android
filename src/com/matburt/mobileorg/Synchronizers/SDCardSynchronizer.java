@@ -1,25 +1,23 @@
 package com.matburt.mobileorg.Synchronizers;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
 import android.content.Context;
 import android.preference.PreferenceManager;
 
-import com.matburt.mobileorg.Parsing.MobileOrgApplication;
-import com.matburt.mobileorg.Parsing.OrgFile;
-
-public class SDCardSynchronizer extends Synchronizer {	
+public class SDCardSynchronizer implements SynchronizerInterface {	
 
 	private String remoteIndexPath;
 	private String remotePath;
 
-    public SDCardSynchronizer(Context context, MobileOrgApplication appInst) {
-    	super(context, appInst);
+    public SDCardSynchronizer(Context context) {
 		this.remoteIndexPath = PreferenceManager.getDefaultSharedPreferences(
 				context).getString("indexFilePath", "");
 	
@@ -33,14 +31,16 @@ public class SDCardSynchronizer extends Synchronizer {
         return true;
     }
 
-	protected void putRemoteFile(String filename, String contents) throws IOException {
+	public void putRemoteFile(String filename, String contents) throws IOException {
 		String outfilePath = this.remotePath + filename;
 		
-		OrgFile orgfileOut = new OrgFile(outfilePath, context);
-		orgfileOut.write(outfilePath, contents);
+		File file = new File(outfilePath);
+		BufferedWriter writer = new BufferedWriter(new FileWriter(file, true));
+		writer.write(contents);
+		writer.close();
 	}
 
-	protected BufferedReader getRemoteFile(String filename) throws FileNotFoundException {
+	public BufferedReader getRemoteFile(String filename) throws FileNotFoundException {
 		String filePath = this.remotePath + filename;
 		File file = new File(filePath);
 		FileInputStream fileIS = new FileInputStream(file);
@@ -49,6 +49,6 @@ public class SDCardSynchronizer extends Synchronizer {
 
 
 	@Override
-	protected void postSynchronize() {		
+	public void postSynchronize() {		
 	}
 }

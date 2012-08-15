@@ -19,7 +19,7 @@ import android.widget.RemoteViews;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Parsing.MobileOrgApplication;
 import com.matburt.mobileorg.Parsing.NodeWrapper;
-import com.matburt.mobileorg.Parsing.OrgDatabase;
+import com.matburt.mobileorg.Parsing.OrgDatabaseOld;
 
 public class TimeclockService extends Service {
 	public static final String NODE_ID = "node_id";
@@ -27,7 +27,7 @@ public class TimeclockService extends Service {
 	public static final String TIMECLOCK_TIMEOUT = "timeclock_timeout";
 
 	private final int notificationID = 1337;
-	private OrgDatabase db;
+	private OrgDatabaseOld db;
 	private NotificationManager mNM;
 	private AlarmManager alarmManager;
 	private Notification notification;
@@ -72,7 +72,7 @@ public class TimeclockService extends Service {
 		Log.d("MobileOrg", "Called onStartCommand() with :" + action);
 		if(action == null) {
 			this.node_id = intent.getLongExtra(NODE_ID, -1);
-			this.node = new NodeWrapper(db.getNode(node_id));
+			this.node = new NodeWrapper(db.getNode(node_id), db);
 			this.startTime = System.currentTimeMillis();
 			
 			getEstimated();
@@ -90,7 +90,7 @@ public class TimeclockService extends Service {
 	}
 	
 	private void getEstimated() {
-		String estimated = node.getPayload(db).getProperty("Effort").trim();
+		String estimated = node.getPayload().getProperty("Effort").trim();
 
 		if (TextUtils.isEmpty(estimated) == false) {
 			String[] split = estimated.split(":");

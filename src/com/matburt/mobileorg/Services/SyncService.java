@@ -10,13 +10,17 @@ import android.os.IBinder;
 import android.preference.PreferenceManager;
 
 import com.matburt.mobileorg.Parsing.MobileOrgApplication;
+import com.matburt.mobileorg.Parsing.OrgFileParser;
 import com.matburt.mobileorg.Synchronizers.DropboxSynchronizer;
-import com.matburt.mobileorg.Synchronizers.UbuntuOneSynchronizer;
+import com.matburt.mobileorg.Synchronizers.NullSynchronizer;
 import com.matburt.mobileorg.Synchronizers.SDCardSynchronizer;
 import com.matburt.mobileorg.Synchronizers.SSHSynchronizer;
 import com.matburt.mobileorg.Synchronizers.Synchronizer;
+import com.matburt.mobileorg.Synchronizers.SynchronizerInterface;
+import com.matburt.mobileorg.Synchronizers.SynchronizerNotification;
+import com.matburt.mobileorg.Synchronizers.UbuntuOneSynchronizer;
 import com.matburt.mobileorg.Synchronizers.WebDAVSynchronizer;
-import com.matburt.mobileorg.Synchronizers.NullSynchronizer;
+import com.matburt.mobileorg.provider.OrgDatabase;
 
 public class SyncService extends Service implements
 		SharedPreferences.OnSharedPreferenceChangeListener {
@@ -65,35 +69,42 @@ public class SyncService extends Service implements
 	}
 
     public Synchronizer getSynchronizer() {
-        Synchronizer synchronizer = null;
+        SynchronizerInterface synchronizer = null;
 		String syncSource = appSettings.getString("syncSource", "");
+		Context c = getApplicationContext();
+		
 		if (syncSource.equals("webdav"))
-			synchronizer = new WebDAVSynchronizer(getApplicationContext(), this.appInst);
+			synchronizer =new WebDAVSynchronizer(c);
 		else if (syncSource.equals("sdcard"))
-			synchronizer = new SDCardSynchronizer(getApplicationContext(), this.appInst);
+			synchronizer = new SDCardSynchronizer(c);
 		else if (syncSource.equals("dropbox"))
-			synchronizer = new DropboxSynchronizer(getApplicationContext(), this.appInst);
+			synchronizer = new DropboxSynchronizer(c);
         else if (syncSource.equals("ubuntu")) {
-            synchronizer = new UbuntuOneSynchronizer(getApplicationContext(), this.appInst);
+            synchronizer = new UbuntuOneSynchronizer(c);
             ((UbuntuOneSynchronizer)synchronizer).getBaseUser();
         }
 		else if (syncSource.equals("scp"))
-			synchronizer = new SSHSynchronizer(getApplicationContext(), this.appInst);
+			synchronizer = new SSHSynchronizer(c);
         else if (syncSource.equals("null"))
-            synchronizer = new NullSynchronizer(getApplicationContext(), this.appInst);
+            synchronizer = new NullSynchronizer();
 		else
 			synchronizer = null;
-        return synchronizer;
+		
+		return new Synchronizer(c, synchronizer,
+				new SynchronizerNotification(c));
     }
 
 	private void runSynchronizer() {
 		unsetAlarm();
 		final Synchronizer synchronizer = this.getSynchronizer();
+		final OrgDatabase db = new OrgDatabase(this);
+		final OrgFileParser parser = new OrgFileParser(db, getContentResolver());
 
 		Thread syncThread = new Thread() {
 			public void run() {
-				synchronizer.sync();
+				synchronizer.sync(parser);
 				synchronizer.close();
+				db.close();
 				syncRunning = false;
 				setAlarm();
 			}

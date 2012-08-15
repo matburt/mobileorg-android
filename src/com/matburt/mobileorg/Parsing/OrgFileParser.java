@@ -8,197 +8,90 @@ import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.matburt.mobileorg.Services.CalendarSyncService;
-
-import android.content.Context;
-import android.database.Cursor;
-import android.preference.PreferenceManager;
+import android.content.ContentResolver;
 import android.text.TextUtils;
-import android.util.Log;
+import android.util.Pair;
+
+import com.matburt.mobileorg.provider.OrgDatabase;
+import com.matburt.mobileorg.provider.OrgFile;
+import com.matburt.mobileorg.provider.OrgNode;
 
 public class OrgFileParser {
 
-    private static final String LT = "MobileOrg";
-
     private OrgDatabase db;
-    
-    private ArrayList<HashMap<String, Integer>> todos = null;
-
-	private long file_id;
-	private static Pattern titlePattern = null;
-	private Stack<Integer> starStack;
-	private Stack<Long> parentIdStack;
+    private ContentResolver resolver;    
+ 
+    private ParseStack parseStack;
 	private StringBuilder payload;
+	private OrgFile orgFile;
 	
-	/**
-	 * This toggles the use of the <after>TITLE: </after> field. It is now
-	 * disabled, see https://github.com/matburt/mobileorg-android/issues/114
-	 */
-	private boolean useTitleField = false;
-	
-	public OrgFileParser(OrgDatabase db) {
+	public OrgFileParser(OrgDatabase db, ContentResolver resolver) {
 		this.db = db;
+		this.resolver = resolver;
 	}
-	
-	private long addNewFile(String filename, String fileIdentActual,
-				String remoteChecksum, boolean visable) {
-		db.removeFile(filename);
-		return db.addOrUpdateFile(filename, fileIdentActual, remoteChecksum,
-				visable);
-	}
-	
-	public void parse(String filename, String filenameAlias, String checksum,
-			BufferedReader breader, Context context) {
-		this.useTitleField = PreferenceManager.getDefaultSharedPreferences(context)
-				.getBoolean("useAgendaTitle", false);
-		
-		this.file_id = addNewFile(filename, filenameAlias, checksum, true);
 
-		this.todos = db.getGroupedTodos();
+	private void init(OrgFile orgFile) {
+		orgFile.setResolver(resolver);
+		orgFile.removeFile();
+		orgFile.addFile();
+		this.orgFile = orgFile;
 
-		this.starStack = new Stack<Integer>();
-		this.parentIdStack = new Stack<Long>();
-		
-		this.starStack.push(0);
-		Long fileID = db.getFileId(filename);
-		this.parentIdStack.push(fileID);
+		this.parseStack = new ParseStack();
+		this.parseStack.add(0, orgFile.nodeId);
 
 		this.payload = new StringBuilder();
-		
-		db.getDB().beginTransaction();
-		
+	}
+	
+	public void parse(OrgFile orgFile, BufferedReader breader) {
+		init(orgFile);
+		db.beginTransaction();
 		try {
 			String currentLine;
-
-			while ((currentLine = breader.readLine()) != null) {
-
-				if (TextUtils.isEmpty(currentLine))
-					continue;
-
-				int lineLength = currentLine.length();
-				int numstars = numberOfStars(currentLine, lineLength);
-				if (numstars > 0) {
-					parseHeading(currentLine, numstars);
-				} else {
-					payload.append(currentLine);
-					payload.append("\n");
-				}
-			}
+			while ((currentLine = breader.readLine()) != null)
+				parseLine(currentLine);
 			
 			// Add payload to the final node
-			db.addNodePayload(this.parentIdStack.peek(), this.payload.toString());
+			db.fastInsertNodePayload(parseStack.getCurrentNodeId(), this.payload.toString());
 
 		} catch (IOException e) {}
-		
-		if(filename.equals("agendas.org") && PreferenceManager.getDefaultSharedPreferences(context)
-				.getBoolean("combineBlockAgendas", false) && useTitleField) {
-			combineBlockAgendas();
-		}
- 		
-		db.getDB().setTransactionSuccessful();
-		db.getDB().endTransaction();
-		
-		updateCalendar(filename, context);
-	}
-	
-	private void updateCalendar(String filename, Context context) {
-		if (filename.equals("agendas.org") == false
-				&& PreferenceManager.getDefaultSharedPreferences(context)
-						.getBoolean("calendarEnabled", false)) {
-			try {
-				CalendarSyncService cal = new CalendarSyncService(this.db, context);
-				cal.syncFile(filename);
-			} catch(IllegalArgumentException e) {
-				Log.d("MobileOrg", "Failed to sync calendar");
-			}	
-		}
+		db.endTransaction();
 	}
 
-	public static final String BLOCK_SEPARATOR_PREFIX = "#HEAD#";
-	
-	private void combineBlockAgendas() {
-		final String filename = "agendas.org";
-		long agendaFileNodeID = db.getFileId(filename);
-		Cursor cursor = db.getNodeChildren(agendaFileNodeID);
-		
-		cursor.moveToFirst();
-		
-		String previousBlockTitle = "";
-		long previousBlockNode = -1;
-				
-		while(cursor.isAfterLast() == false) {
-			String name = cursor.getString(cursor.getColumnIndex("name"));
-			
-			if(name.indexOf(">") == -1)
-				continue;
-			
-			String blockTitle = name.substring(0, name.indexOf(">"));
-			
-			if(TextUtils.isEmpty(blockTitle) == false) { // Is a block agenda
-				
-				if(blockTitle.equals(previousBlockTitle) == false) { // Create new node to contain block agenda	
-					previousBlockNode = db.addNode(agendaFileNodeID, blockTitle,
-							"", "", "", db.getFilenameId(filename));
-				}
+	private void parseLine(String line) {
+		if (TextUtils.isEmpty(line))
+			return;
 
-				String blockEntryName = name.substring(name.indexOf(">") + 1);
-
-				long nodeId = cursor.getLong(cursor.getColumnIndex("_id"));
-
-
-				Cursor children = db.getNodeChildren(nodeId);
-				children.moveToFirst();
-						
-				if(blockEntryName.startsWith("Day-agenda") && children.getCount() == 1) {
-					blockEntryName = children.getString(children
-							.getColumnIndex("name"));
-					children = db.getNodeChildren(children.getLong(children
-							.getColumnIndex("_id")));
-					children.moveToFirst();
-					cloneChildren(children, previousBlockNode, agendaFileNodeID,
-							blockEntryName, filename);
-				} else if(blockEntryName.startsWith("Week-agenda")) {
-					while (children.isAfterLast() == false) {
-						blockEntryName = children.getString(children
-								.getColumnIndex("name"));
-						Cursor children2 = db.getNodeChildren(children
-								.getLong(children.getColumnIndex("_id")));
-						children2.moveToFirst();
-						cloneChildren(children2, previousBlockNode,
-								agendaFileNodeID, blockEntryName, filename);
-						children2.close();
-						children.moveToNext();
-					}
-				} else
-					cloneChildren(children, previousBlockNode, agendaFileNodeID,
-							blockEntryName, filename);
-				
-				previousBlockTitle = blockTitle;
-				db.deleteNode(cursor.getLong(cursor.getColumnIndex("_id")));
-				children.close();
-			}
-			
-			cursor.moveToNext();
-		}
-		
-		cursor.close();
-	}
-	
-	private void cloneChildren(Cursor children, long previousBlockNode,
-			Long agendaNodeFileID, String blockEntryName, String filename) {
-		db.addNode(previousBlockNode, BLOCK_SEPARATOR_PREFIX
-				+ blockEntryName, "", "", "", db.getFilenameId(filename));
-		
-		while(children.isAfterLast() == false) {
-			db.cloneNode(
-					children.getLong(children.getColumnIndex("_id")),
-					previousBlockNode, db.getFilenameId("agendas.org"));
-			children.moveToNext();
+		int numstars = numberOfStars(line);
+		if (numstars > 0) {
+			db.fastInsertNodePayload(parseStack.getCurrentNodeId(), this.payload.toString());
+			this.payload = new StringBuilder();
+			parseHeading(line, numstars);
+		} else {
+			payload.append(line).append("\n");
 		}
 	}
 	
-	private static int numberOfStars(String thisLine, int lineLength) {
+    
+	private void parseHeading(String thisLine, int numstars) {
+		if (numstars == parseStack.getCurrentLevel()) { // Node on same level
+			parseStack.pop();
+		} else if (numstars < parseStack.getCurrentLevel()) { // Node on lower level
+			while (numstars <= parseStack.getCurrentLevel())
+				parseStack.pop();
+		}
+        
+		final OrgNode node = new OrgNode();
+		node.parseLine(thisLine, numstars, useTitleField);
+		node.fileId = orgFile.id;
+		node.parentId = parseStack.getCurrentNodeId();
+		long newId = db.fastInsertNode(node);
+		parseStack.add(numstars, newId);      
+    }
+
+	// TODO Replace with Regex matching
+	private static int numberOfStars(String thisLine) {
 		int numstars = 0;
+		int lineLength = thisLine.length();
 
 		for (int idx = 0; idx < lineLength; idx++) {
 			if (thisLine.charAt(idx) != '*')
@@ -212,103 +105,138 @@ public class OrgFileParser {
 		return numstars;
 	}
     
-	private void parseHeading(String thisLine, int numstars) {
-		db.addNodePayload(this.parentIdStack.peek(), this.payload.toString());
-		
-		this.payload = new StringBuilder();
-		
-		if (numstars == starStack.peek()) { // Node on same level
-			starStack.pop();
-			parentIdStack.pop();
-		} else if (numstars < starStack.peek()) { // Node on lower level
-			while (numstars <= starStack.peek()) {
-				starStack.pop();
-				parentIdStack.pop();
-			}
-		}
-        
-		long newId = parseLineIntoNode(thisLine, numstars);
-        this.parentIdStack.push(newId);
-        starStack.push(numstars);        
-    }
-    
-    private long parseLineIntoNode (String thisLine, int numstars) {
-        String heading = thisLine.substring(numstars+1);
+	private class ParseStack {
+		private Stack<Pair<Integer, Long>> parseStack;
 
-        String name = "";
-        String priority = "";
-        String todo = "";
-        String tags = "";
-        
-    	Pattern pattern = prepareTitlePattern();
-    	Matcher matcher = pattern.matcher(heading);
-		if (matcher.find()) {
-			if (matcher.group(TODO_GROUP) != null) {
-				String tempTodo = matcher.group(TODO_GROUP).trim();
-				if (tempTodo.length() > 0 && isValidTodo(tempTodo)) {
-					todo = tempTodo;
-				} else {
-					name = tempTodo + " ";
-				}
-			}
-			if (matcher.group(PRIORITY_GROUP) != null)
-				priority = matcher.group(PRIORITY_GROUP);
-			
-			name += matcher.group(TITLE_GROUP);
-			
-			if(this.useTitleField && matcher.group(AFTER_GROUP) != null) {
-				int start = matcher.group(AFTER_GROUP).indexOf("TITLE:");
-				int end = matcher.group(AFTER_GROUP).indexOf("</after>");
-				
-				if(start > -1 && end > -1) {
-					String title = matcher.group(AFTER_GROUP).substring(
-							start + 7, end);
-					
-					name = title + ">" + name;
-				}
-			}
-			
-			tags = matcher.group(TAGS_GROUP);
-			if (tags == null)
-					tags = "";
-			
-		} else {
-			Log.w(LT, "Title not matched: " + heading);
-			name = heading;
+		public ParseStack() {
+			this.parseStack = new Stack<Pair<Integer, Long>>();
 		}
-    	
-		long nodeId = db.addNode(this.parentIdStack.peek(), name, todo, priority, tags, this.file_id);
-    	return nodeId;
-    }
- 
-    private static final int TODO_GROUP = 1;
-    private static final int PRIORITY_GROUP = 2;
-    private static final int TITLE_GROUP = 3;
-    private static final int TAGS_GROUP = 4;
-    private static final int AFTER_GROUP = 7;
-    
-    private Pattern prepareTitlePattern() {
-    	if (OrgFileParser.titlePattern == null) {
-    		StringBuffer pattern = new StringBuffer();
-    		pattern.append("^\\s?(?:([A-Z]{2,}:?\\s+)\\s*)?"); 	// Todo
-    		pattern.append("(?:\\[\\#([^]]+)\\])?"); 			// Priority
-    		pattern.append("(.*?)"); 						// Title
-    		pattern.append("\\s*(?::([^\\s]+):)?"); 		// Tags
-    		pattern.append("(\\s*[!\\*])*"); 				// Habits
-    		pattern.append("(<before>.*</before>)?");		// Before
-    		pattern.append("(<after>.*</after>)?");			// After
-    		pattern.append("$");							// End of line
-    		OrgFileParser.titlePattern = Pattern.compile(pattern.toString());
-    	}
-		return OrgFileParser.titlePattern;
-    }
-	
-	private boolean isValidTodo(String todo) {
-		for(HashMap<String, Integer> aTodo : this.todos) {
-			if(aTodo.containsKey(todo)) return true;
+		
+		public void add(int level, long nodeId) {
+			parseStack.push(new Pair<Integer, Long>(level, nodeId));
 		}
-		return false;
+		
+		public void pop() {
+			this.parseStack.pop();
+		}
+		
+		public int getCurrentLevel() {
+			return parseStack.peek().first;
+		}
+		
+		public long getCurrentNodeId() {
+			return parseStack.peek().second;
+		}
 	}
+	
+//	/**
+//	 * This toggles the use of the <after>TITLE: </after> field. It is now
+//	 * disabled, see https://github.com/matburt/mobileorg-android/issues/114
+//	 */
+	private boolean useTitleField = false;
+//	this.useTitleField = PreferenceManager.getDefaultSharedPreferences(context)
+//	.getBoolean("useAgendaTitle", false);
+	
+//	private void updateCalendar(String filename, Context context) {
+//	if (filename.equals("agendas.org") == false
+//			&& PreferenceManager.getDefaultSharedPreferences(context)
+//					.getBoolean("calendarEnabled", false)) {
+//		try {
+//			//CalendarSyncService cal = new CalendarSyncService(this.db, context);
+//			//cal.syncFile(filename);
+//		} catch(IllegalArgumentException e) {
+//			Log.d("MobileOrg", "Failed to sync calendar");
+//		}	
+//	}
+//}
+	
+	
+//	if(orgFile.filename.equals("agendas.org") && PreferenceManager.getDefaultSharedPreferences(context)
+//			.getBoolean("combineBlockAgendas", false) && useTitleField) {
+//		//combineBlockAgendas();
+	public static final String BLOCK_SEPARATOR_PREFIX = "#HEAD#";
+	
+//	private void combineBlockAgendas() {
+//		final String filename = "agendas.org";
+//		long agendaFileNodeID = 0;//db.getFileNodeId(filename);
+//		Cursor cursor = null;//db.getNodeChildren(agendaFileNodeID);
+//		
+//		cursor.moveToFirst();
+//		
+//		String previousBlockTitle = "";
+//		long previousBlockNode = -1;
+//				
+//		while(cursor.isAfterLast() == false) {
+//			String name = cursor.getString(cursor.getColumnIndex("name"));
+//			
+//			if(name.indexOf(">") == -1)
+//				continue;
+//			
+//			String blockTitle = name.substring(0, name.indexOf(">"));
+//			
+//			if(TextUtils.isEmpty(blockTitle) == false) { // Is a block agenda
+//				
+//				if(blockTitle.equals(previousBlockTitle) == false) { // Create new node to contain block agenda	
+//					previousBlockNode = db.addNode(agendaFileNodeID, blockTitle,
+//							"", "", "", db.getFileId(filename));
+//				}
+//
+//				String blockEntryName = name.substring(name.indexOf(">") + 1);
+//
+//				long nodeId = cursor.getLong(cursor.getColumnIndex("_id"));
+//
+//
+//				Cursor children = db.getNodeChildren(nodeId);
+//				children.moveToFirst();
+//						
+//				if(blockEntryName.startsWith("Day-agenda") && children.getCount() == 1) {
+//					blockEntryName = children.getString(children
+//							.getColumnIndex("name"));
+//					children = db.getNodeChildren(children.getLong(children
+//							.getColumnIndex("_id")));
+//					children.moveToFirst();
+//					cloneChildren(children, previousBlockNode, agendaFileNodeID,
+//							blockEntryName, filename);
+//				} else if(blockEntryName.startsWith("Week-agenda")) {
+//					while (children.isAfterLast() == false) {
+//						blockEntryName = children.getString(children
+//								.getColumnIndex("name"));
+//						Cursor children2 = db.getNodeChildren(children
+//								.getLong(children.getColumnIndex("_id")));
+//						children2.moveToFirst();
+//						cloneChildren(children2, previousBlockNode,
+//								agendaFileNodeID, blockEntryName, filename);
+//						children2.close();
+//						children.moveToNext();
+//					}
+//				} else
+//					cloneChildren(children, previousBlockNode, agendaFileNodeID,
+//							blockEntryName, filename);
+//				
+//				previousBlockTitle = blockTitle;
+//				db.deleteNode(cursor.getLong(cursor.getColumnIndex("_id")));
+//				children.close();
+//			}
+//			
+//			cursor.moveToNext();
+//		}
+//		
+//		cursor.close();
+//	}
+	
+//	private void cloneChildren(Cursor children, long previousBlockNode,
+//			Long agendaNodeFileID, String blockEntryName, String filename) {
+//		db.addNode(previousBlockNode, BLOCK_SEPARATOR_PREFIX
+//				+ blockEntryName, "", "", "", db.getFileId(filename));
+//		
+//		while(children.isAfterLast() == false) {
+//			db.cloneNode(
+//					children.getLong(children.getColumnIndex("_id")),
+//					previousBlockNode, db.getFileId("agendas.org"));
+//			children.moveToNext();
+//		}
+//	}
+	
 
 
 //	private Pattern editTitlePattern = Pattern
@@ -395,11 +323,13 @@ public class OrgFileParser {
 	 * @return HashMap with Filename->Filename Alias
 	 */
 	public static HashMap<String, String> getFilesFromIndex(String filecontents) {
-		Pattern getOrgFiles = Pattern.compile("\\[file:(.*?)\\]\\[(.*?)\\]\\]");
-		Matcher m = getOrgFiles.matcher(filecontents);
+		final String fileMatchPattern = "\\[file:(.*?)\\]\\[(.*?)\\]\\]";
+		Pattern indexOrgFilePattern = Pattern.compile(fileMatchPattern);
+		Matcher indexOrgFileMatcher = indexOrgFilePattern.matcher(filecontents);
 		HashMap<String, String> allOrgFiles = new HashMap<String, String>();
-		while (m.find()) {
-			allOrgFiles.put(m.group(1), m.group(2));
+		
+		while (indexOrgFileMatcher.find()) {
+			allOrgFiles.put(indexOrgFileMatcher.group(1), indexOrgFileMatcher.group(2));
 		}
 
 		return allOrgFiles;
@@ -467,8 +397,3 @@ public class OrgFileParser {
 		return tagList;
 	}
 }
-
-
-
-
-

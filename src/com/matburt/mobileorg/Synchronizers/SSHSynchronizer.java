@@ -7,6 +7,8 @@ import java.io.InputStreamReader;
 import java.io.StringReader;
 
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.jcraft.jsch.Channel;
@@ -14,9 +16,8 @@ import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
-import com.matburt.mobileorg.Parsing.MobileOrgApplication;
 
-public class SSHSynchronizer extends Synchronizer {
+public class SSHSynchronizer implements SynchronizerInterface {
 	private final String LT = "MobileOrg";
 
 	private String user;
@@ -27,9 +28,11 @@ public class SSHSynchronizer extends Synchronizer {
 
 	private Session session;
 
-	public SSHSynchronizer(Context context, MobileOrgApplication appInst) {
-		super(context, appInst);
+	private SharedPreferences appSettings;
 
+	public SSHSynchronizer(Context context) {
+		this.appSettings = PreferenceManager
+				.getDefaultSharedPreferences(context.getApplicationContext());
 		path = appSettings.getString("scpPath", "");
 		user = appSettings.getString("scpUser", "");
         host = appSettings.getString("scpHost", "");
@@ -104,7 +107,7 @@ public class SSHSynchronizer extends Synchronizer {
     }
 
 	@Override
-	protected boolean isConfigured() {
+	public boolean isConfigured() {
 		if (this.appSettings.getString("scpPath", "").equals("") ||
             this.appSettings.getString("scpUser", "").equals("") ||
             this.appSettings.getString("scpHost", "").equals("") ||
@@ -131,7 +134,7 @@ public class SSHSynchronizer extends Synchronizer {
 		}
     }
 
-    protected void putRemoteFile(String filename, String contents) throws Exception {
+    public void putRemoteFile(String filename, String contents) throws Exception {
         try {
             Channel channel = session.openChannel("sftp");
             channel.connect();
@@ -146,7 +149,7 @@ public class SSHSynchronizer extends Synchronizer {
         }
 	}
 
-	protected BufferedReader getRemoteFile(String filename) throws Exception {
+	public BufferedReader getRemoteFile(String filename) throws Exception {
         StringBuilder contents = null;
         try {
             Channel channel = session.openChannel( "sftp" );
@@ -170,7 +173,7 @@ public class SSHSynchronizer extends Synchronizer {
     }
 
 	@Override
-	protected void postSynchronize() {
+	public void postSynchronize() {
 		if(this.session != null)
 			this.session.disconnect();
 	}

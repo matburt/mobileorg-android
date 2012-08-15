@@ -18,39 +18,37 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.v4.app.FragmentActivity;
 import android.util.Log;
-import android.view.ContextMenu;
-import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.actionbarsherlock.app.SherlockActivity;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
+import com.actionbarsherlock.view.MenuItem;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Gui.Capture.EditActivity;
 import com.matburt.mobileorg.Parsing.MobileOrgApplication;
 import com.matburt.mobileorg.Parsing.NodeWrapper;
-import com.matburt.mobileorg.Parsing.OrgFile;
 import com.matburt.mobileorg.Services.SyncService;
-import com.matburt.mobileorg.Services.TimeclockService;
 import com.matburt.mobileorg.Settings.SettingsActivity;
 import com.matburt.mobileorg.Settings.WizardActivity;
 import com.matburt.mobileorg.Synchronizers.Synchronizer;
+import com.matburt.mobileorg.provider.OrgContract.OrgData;
 
-public class OutlineActivity extends FragmentActivity
+public class OutlineActivity extends SherlockActivity
 {
     private MobileOrgApplication appInst;
 
-	private long node_id;
+	private Long node_id;
 	
 	/**
 	 * Keeps track of the last selected item chosen from the outline. When the
@@ -68,7 +66,7 @@ public class OutlineActivity extends FragmentActivity
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
+
 		setContentView(R.layout.outline);		
 		
 		this.appInst = (MobileOrgApplication) this.getApplication();
@@ -92,15 +90,22 @@ public class OutlineActivity extends FragmentActivity
 
 		listView = (ListView) this.findViewById(R.id.outline_list);
 		listView.setOnItemClickListener(outlineClickListener);
+		listView.setOnItemLongClickListener(outlineLongClickListener);
 		registerForContextMenu(listView);	
 		
 		this.syncReceiver = new SynchServiceReceiver();
 		registerReceiver(this.syncReceiver, new IntentFilter(
 				Synchronizer.SYNC_UPDATE));
-				
+		
 		refreshDisplay();
 	}
 	
+	@Override
+	protected void onResume() {
+		setTitle();
+		super.onResume();
+	}
+
 	@Override
 	protected void onDestroy() {
 		unregisterReceiver(this.syncReceiver);
@@ -113,14 +118,17 @@ public class OutlineActivity extends FragmentActivity
 	 * data has been updated.
 	 */
 	private void refreshDisplay() {
-		Cursor cursor;
+		final String outlineSort = node_id > 0 ? OrgData.DEFAULT_SORT 
+											   : OrgData.NAME_SORT;
+		
+		Cursor cursor = getContentResolver().query(
+				OrgData.buildChildrenUri(node_id.toString()),
+				OrgData.DEFAULT_COLUMNS, null, null, outlineSort);
+
 		if (node_id >= 0) {
-			cursor = appInst.getDB().getNodeChildren(node_id);
 			if(cursor.getCount() == 0)
 				finish();
 		}
-		else
-			cursor = appInst.getDB().getFileCursor();
 
         if (cursor == null || cursor.getCount() < 1) {
             emptylist = true;
@@ -140,11 +148,21 @@ public class OutlineActivity extends FragmentActivity
 		
             listView.setSelection(lastSelection);
         }
+        setTitle();
+	}
+	
+	private void setTitle() {
+		this.getSupportActionBar().setTitle("MobileOrg " + appInst.getChangesString());
+		if(this.node_id > -1) {
+			NodeWrapper node = new NodeWrapper(this.node_id, appInst.getDB());
+			final String subTitle = node.constructOlpId().substring("olp:".length());
+			//this.getSherlock().setSubtitle(subTitle);
+		}
 	}
 
 	@Override
-	public boolean onCreateOptionsMenu(android.support.v4.view.Menu menu) {
-		MenuInflater inflater = getMenuInflater();
+	public boolean onCreateOptionsMenu(Menu menu) {
+		MenuInflater inflater = getSupportMenuInflater();
 	    inflater.inflate(R.menu.outline_menu, menu);
 	    
 	    if(this.node_id == -1 || isNodeInFile(this.node_id, "agendas.org"))
@@ -154,7 +172,7 @@ public class OutlineActivity extends FragmentActivity
 	}
 
 	@Override
-	public boolean onOptionsItemSelected(android.support.v4.view.MenuItem item) {
+	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case android.R.id.home:
 			if(this.node_id != -1)
@@ -185,78 +203,30 @@ public class OutlineActivity extends FragmentActivity
 		case R.id.menu_help:
 			runHelp();
 			return true;
-
 		}
 		return false;
 	}
 
-
-	@Override
-	public void onCreateContextMenu(ContextMenu menu, View v,
-			ContextMenuInfo menuInfo) {
-		super.onCreateContextMenu(menu, v, menuInfo);
-		MenuInflater inflater = getMenuInflater();
-		inflater.inflate(R.menu.outline_contextmenu, menu);
-		
-		AdapterContextMenuInfo info = (AdapterContextMenuInfo) menuInfo;
-		long clicked_node_id = listView.getItemIdAtPosition(info.position);
-		
-		// Prevents editing of file nodes.
-		if (this.node_id == -1) {
-			menu.findItem(R.id.contextmenu_edit).setVisible(false);
-			menu.findItem(R.id.contextmenu_capturechild).setVisible(false);
-		} else {
-			if (isNodeInFile(clicked_node_id, OrgFile.CAPTURE_FILE)) {
-				menu.findItem(R.id.contextmenu_node_delete).setVisible(true);
-			}
+	private OnItemLongClickListener outlineLongClickListener = new OnItemLongClickListener() {
+		@Override
+		public boolean onItemLongClick(AdapterView<?> parent, View v, int position,
+				long id) {
+			long node_id = listView.getItemIdAtPosition(position);
 			
-			if(isNodeInFile(clicked_node_id, "agendas.org")) {
-				menu.findItem(R.id.contextmenu_capturechild).setVisible(false);
-			}
-			
-			menu.findItem(R.id.contextmenu_delete).setVisible(false);
+	        SharedPreferences appSettings =
+	                PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+	        if(appSettings.getBoolean("viewDefaultEdit", false))
+	        	runEditNodeActivity(node_id);
+	        else
+	        	runViewNodeActivity(node_id);
+			return true;
 		}
-	}
+	};
+	
 	
 	private boolean isNodeInFile(long node_id, String filename) {
-		return new NodeWrapper(node_id, appInst.getDB()).getFileName(
-				appInst.getDB()).equals(filename);
-	}
-	
-	@Override
-	public boolean onContextItemSelected(MenuItem item) {
-		AdapterContextMenuInfo info = (AdapterContextMenuInfo) item
-				.getMenuInfo();
-		
-		long node_id = listView.getItemIdAtPosition(info.position);
-
-		switch (item.getItemId()) {
-		case R.id.contextmenu_view:
-			runViewNodeActivity(node_id);
-			break;
-
-		case R.id.contextmenu_edit:
-			runEditNodeActivity(node_id);
-			break;
-			
-		case R.id.contextmenu_capturechild:
-			runEditCaptureNodeChildActivity(node_id);
-			return true;
-			
-		case R.id.contextmenu_delete:
-			runDeleteFileNode(node_id);
-			break;
-			
-		case R.id.contextmenu_node_delete:
-			runDeleteNode(node_id);
-			break;
-			
-		case R.id.contextmenu_startclock:
-			startTimeClockingService(node_id);
-			break;
-		}
-
-		return false;
+		return new NodeWrapper(node_id, appInst.getDB()).getFileName().equals(
+				filename);
 	}
 
     private void showWizard() {
@@ -278,13 +248,6 @@ public class OutlineActivity extends FragmentActivity
     private void runSync() {
 		startService(new Intent(this, SyncService.class));
     }
-    
-	
-	private void startTimeClockingService(long nodeId) {
-		Intent intent = new Intent(OutlineActivity.this, TimeclockService.class);
-		intent.putExtra(TimeclockService.NODE_ID, nodeId);
-		startService(intent);
-	}
 	
 	private boolean runEditNewNodeActivity() {
 		Intent intent = new Intent(this, EditActivity.class);
@@ -320,43 +283,25 @@ public class OutlineActivity extends FragmentActivity
 		startActivity(intent);
 	}
 	
-	private void runDeleteFileNode(final long node_id) {	
-		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setMessage(R.string.outline_delete_prompt)
-				.setCancelable(false)
-				.setPositiveButton(R.string.yes,
-						new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int id) {
-								appInst.getDB().removeFile(node_id);
-								refreshDisplay();
-							}
-						})
-				.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int id) {
-						dialog.cancel();
-					}
-				});
-		builder.create().show();
-	}
-	
-	private void runDeleteNode(final long node_id) {	
-		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setMessage(R.string.outline_delete_prompt)
-				.setCancelable(false)
-				.setPositiveButton(R.string.yes,
-						new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int id) {
-								appInst.getDB().deleteNode(node_id);
-								refreshDisplay();
-							}
-						})
-				.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int id) {
-						dialog.cancel();
-					}
-				});
-		builder.create().show();
-	}
+	// TODO Enable the deletion of files
+//	private void runDeleteFileNode(final long node_id) {	
+//		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+//		builder.setMessage(R.string.outline_delete_prompt)
+//				.setCancelable(false)
+//				.setPositiveButton(R.string.yes,
+//						new DialogInterface.OnClickListener() {
+//							public void onClick(DialogInterface dialog, int id) {
+//								appInst.getDB().removeFile(node_id);
+//								refreshDisplay();
+//							}
+//						})
+//				.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+//					public void onClick(DialogInterface dialog, int id) {
+//						dialog.cancel();
+//					}
+//				});
+//		builder.create().show();
+//	}
 
 	private boolean runSearch() {
 		return onSearchRequested();
@@ -460,14 +405,8 @@ public class OutlineActivity extends FragmentActivity
 			lastSelection = position;
 			if (appInst.getDB().hasNodeChildren(clicked_node_id) || node_id == -1)
 				runExpandSelection(clicked_node_id);
-			else {
-				if (PreferenceManager.getDefaultSharedPreferences(
-						parent.getContext())
-						.getBoolean("viewDefaultEdit", true))
-					runEditNodeActivity(clicked_node_id);
-				else
-					runViewNodeActivity(clicked_node_id);
-			}
+			else 
+				runEditNodeActivity(clicked_node_id);
 		}
 	};
 	

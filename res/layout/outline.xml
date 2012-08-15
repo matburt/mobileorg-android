@@ -6,6 +6,7 @@
 
     <ListView
         android:id="@+id/outline_list"
+        android:fastScrollEnabled="true"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"/>
 </LinearLayout>

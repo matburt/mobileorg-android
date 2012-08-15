@@ -1,59 +1,42 @@
 package com.matburt.mobileorg.Synchronizers;
 
-import com.matburt.mobileorg.R;
-import com.matburt.mobileorg.Parsing.MobileOrgApplication;
-import com.matburt.mobileorg.Parsing.OrgFile;
-
-import android.content.Context;
-import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
-import android.preference.PreferenceManager;
-import android.util.Log;
-
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
-import java.net.Authenticator;
-import java.net.InetAddress;
-import java.net.MalformedURLException;
-import java.net.PasswordAuthentication;
-import java.net.URL;
 import java.net.URI;
+import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
-import javax.net.ssl.HttpsURLConnection;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.json.JSONArray;
-import org.apache.http.HttpRequest;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.message.BasicHeader;
-import org.apache.http.client.ClientProtocolException;
-import android.os.Build;
 
 import oauth.signpost.commonshttp.CommonsHttpOAuthConsumer;
-import oauth.signpost.signature.HmacSha1MessageSigner;
-import oauth.signpost.OAuthConsumer;
-import oauth.signpost.basic.DefaultOAuthConsumer;
-import oauth.signpost.exception.OAuthCommunicationException;
 import oauth.signpost.exception.OAuthException;
-import oauth.signpost.exception.OAuthExpectationFailedException;
-import oauth.signpost.exception.OAuthMessageSignerException;
+import oauth.signpost.signature.HmacSha1MessageSigner;
 
-public class UbuntuOneSynchronizer extends Synchronizer {
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpRequest;
+import org.apache.http.HttpResponse;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
+import android.os.Build;
+import android.preference.PreferenceManager;
+import android.util.Log;
+
+public class UbuntuOneSynchronizer implements SynchronizerInterface {
 
 private static final String BASE_TOKEN_NAME = "Ubuntu One @ MobileOrg:";
 	private static final String CONSUMER_KEY = "consumer_key";
@@ -89,11 +72,11 @@ private static final String BASE_TOKEN_NAME = "Ubuntu One @ MobileOrg:";
     public long bytes_used;
     public long max_bytes;
 
-    private CommonsHttpOAuthConsumer consumer;    
+    private CommonsHttpOAuthConsumer consumer;
+	private Context context;    
 
-    public UbuntuOneSynchronizer(Context parentContext, MobileOrgApplication appInst) {
-        super(parentContext, appInst);
-
+    public UbuntuOneSynchronizer(Context context) {
+    	this.context = context;
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
 		this.remoteIndexPath = sharedPreferences.getString("ubuntuOnePath", "");
         //		this.remotePath = getRootUrl();
@@ -144,7 +127,7 @@ private static final String BASE_TOKEN_NAME = "Ubuntu One @ MobileOrg:";
 		}
 	}
 
-    protected void putRemoteFile(String filename, String contents) throws IOException {
+    public void putRemoteFile(String filename, String contents) throws IOException {
         try {
             buildConsumer();
             String latterPart = remoteIndexPath + filename;
@@ -189,7 +172,7 @@ private static final String BASE_TOKEN_NAME = "Ubuntu One @ MobileOrg:";
         }
     }
 
-    protected BufferedReader getRemoteFile(String filename) {
+    public BufferedReader getRemoteFile(String filename) {
         try { 
             buildConsumer();
             String latterPart = remoteIndexPath + filename;
@@ -276,7 +259,7 @@ private static final String BASE_TOKEN_NAME = "Ubuntu One @ MobileOrg:";
     }
 
     @Override
-    protected void postSynchronize() {
+	public void postSynchronize() {
     }
 
 	public boolean login() {

@@ -1,72 +1,57 @@
 package com.matburt.mobileorg.Gui.Capture;
 
-import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
 import android.app.AlertDialog;
+import android.content.ContentResolver;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.v4.app.ActionBar;
-import android.support.v4.app.ActionBar.Tab;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
-import android.view.MenuInflater;
+import android.view.WindowManager;
 
+import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.app.SherlockFragmentActivity;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
+import com.actionbarsherlock.view.MenuItem;
+import com.actionbarsherlock.view.SubMenu;
+import com.actionbarsherlock.view.Window;
 import com.matburt.mobileorg.R;
-import com.matburt.mobileorg.Parsing.MobileOrgApplication;
-import com.matburt.mobileorg.Parsing.NodeWrapper;
-import com.matburt.mobileorg.Parsing.OrgDatabase;
-import com.matburt.mobileorg.Parsing.OrgFile;
+import com.matburt.mobileorg.Services.TimeclockService;
 import com.matburt.mobileorg.Synchronizers.Synchronizer;
+import com.matburt.mobileorg.provider.OrgNode;
+import com.matburt.mobileorg.provider.OrgProviderUtil;
+import com.matburt.mobileorg.util.OrgUtils;
 
-public class EditActivity extends FragmentActivity {
+public class EditActivity extends SherlockFragmentActivity {
+	public final static String NODE_ID = "node_id";
+	public final static String ACTIONMODE = "actionMode";
 	public final static String ACTIONMODE_CREATE = "create";
 	public final static String ACTIONMODE_EDIT = "edit";
 	public final static String ACTIONMODE_ADDCHILD = "add_child";
 
-
-	private NodeWrapper node;
+	private OrgNode node;
 	private String actionMode;
 	
-	private OrgDatabase orgDB;
-	private MobileOrgApplication appInst;
+	public final static String FRAGMENT_DETAILS_TAG = "details";
+	public final static String FRAGMENT_PAYLOAD_TAG = "payload";
 	
 	private EditDetailsFragment detailsFragment;
 	private EditPayloadFragment payloadFragment;
 	private EditPayloadFragment rawPayloadFragment;
-	private long node_id;
+	private ContentResolver resolver;
+	private EditTabListener editTabListener;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
+		
 		setContentView(R.layout.edit);
-
-		Intent intent = getIntent();
-		this.actionMode = intent.getStringExtra("actionMode");
-		this.node_id = intent.getLongExtra("node_id", -1);
-
-		this.appInst = (MobileOrgApplication) this.getApplication();
-		this.orgDB = appInst.getDB();
+		this.resolver = getContentResolver();
 		
-		if (savedInstanceState != null) {
-			this.detailsFragment = (EditDetailsFragment) getSupportFragmentManager()
-					.getFragment(savedInstanceState,
-							EditDetailsFragment.class.getName());
-			this.payloadFragment = (EditPayloadFragment) getSupportFragmentManager()
-					.getFragment(savedInstanceState,
-							EditPayloadFragment.class.getName());
-			this.rawPayloadFragment = (EditPayloadFragment) getSupportFragmentManager()
-					.getFragment(savedInstanceState,
-							EditPayloadFragment.class.getName() + "raw");
-		}
-		
-		init();
-		
+		restoreInstanceState(savedInstanceState);
+		initState();
 		setupActionbarTabs(savedInstanceState);
 	}
 	
@@ -82,65 +67,43 @@ public class EditActivity extends FragmentActivity {
         outState.putInt("tab", getSupportActionBar().getSelectedNavigationIndex());
 	}
 	
-	private void init() {
+	private void restoreInstanceState(Bundle savedInstanceState) {
+		if (savedInstanceState != null) {
+			this.detailsFragment = (EditDetailsFragment) getSupportFragmentManager()
+					.getFragment(savedInstanceState,
+							EditDetailsFragment.class.getName());
+			this.payloadFragment = (EditPayloadFragment) getSupportFragmentManager()
+					.getFragment(savedInstanceState,
+							EditPayloadFragment.class.getName());
+			this.rawPayloadFragment = (EditPayloadFragment) getSupportFragmentManager()
+					.getFragment(savedInstanceState,
+							EditPayloadFragment.class.getName() + "raw");
+		}		
+		
 		if (this.detailsFragment == null)
 			this.detailsFragment = new EditDetailsFragment();
 		if (this.payloadFragment == null)
 			this.payloadFragment = new EditPayloadFragment();
 		if (this.rawPayloadFragment == null)
 			this.rawPayloadFragment = new EditPayloadFragment();
-		
-		String defaultTodo = PreferenceManager
-				.getDefaultSharedPreferences(this).getString("defaultTodo", "");
-		Intent intent = getIntent();
-		
-		if (this.actionMode == null) {
-			String subject = intent
-					.getStringExtra("android.intent.extra.SUBJECT");
-			if(subject == null)
-				subject = "";
-			String text = intent.getStringExtra("android.intent.extra.TEXT");
-			if(text == null)
-				text = "";
-
-			node = new NodeWrapper(null);
-			this.detailsFragment.init(this.node, this.actionMode, defaultTodo, subject);
-			this.payloadFragment.init(text, true);
-			this.actionMode = ACTIONMODE_CREATE;
-		} else if (this.actionMode.equals(ACTIONMODE_CREATE)) {
-			node = new NodeWrapper(null);
-			this.detailsFragment.init(this.node, this.actionMode, defaultTodo);
-			this.payloadFragment.init("", true);
-		} else if (this.actionMode.equals(ACTIONMODE_EDIT)) {
-			long nodeId = intent.getLongExtra("node_id", 0);
-			node = new NodeWrapper(appInst.getDB().getNode(nodeId));
-			this.detailsFragment.init(this.node, this.actionMode, defaultTodo);
-			this.payloadFragment.init(node.getCleanedPayload(orgDB), true);
-		} else if (this.actionMode.equals(ACTIONMODE_ADDCHILD)) {
-			node = new NodeWrapper(null);
-			this.detailsFragment.init(this.node, this.actionMode, defaultTodo);
-			this.payloadFragment.init("", true);
-		}
-
-		this.rawPayloadFragment.init(node.getRawPayload(orgDB), false);
 	}
-
-
-	private void setupActionbarTabs(Bundle savedInstanceState) {
+	
+	public void setupActionbarTabs(Bundle savedInstanceState) {
 		ActionBar actionbar = getSupportActionBar();
-
 		actionbar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+		actionbar.removeAllTabs();
 
 		ActionBar.Tab detailsTab = actionbar.newTab().setText("Details");
-		detailsTab.setTabListener(new TabListener(detailsFragment, "details"));
+		//editTabListener = new EditTabListener(detailsFragment, "details", getSupportFragmentManager());
+		detailsTab.setTabListener(new EditTabListener(detailsFragment, "details", getSupportFragmentManager()));
 		actionbar.addTab(detailsTab);
 	    
 		ActionBar.Tab payloadTab = actionbar.newTab().setText("Payload");
-		payloadTab.setTabListener(new TabListener(payloadFragment, "payload"));
+		payloadTab.setTabListener(new EditTabListener(payloadFragment, "payload", getSupportFragmentManager()));
 		actionbar.addTab(payloadTab);
 
 	    ActionBar.Tab rawPayloadTab = actionbar.newTab().setText("Raw Payload");
-	    rawPayloadTab.setTabListener(new TabListener(rawPayloadFragment, "raw_payload"));
+	    rawPayloadTab.setTabListener(new EditTabListener(rawPayloadFragment, "raw_payload", getSupportFragmentManager()));
 	    actionbar.addTab(rawPayloadTab);
 	    
 		if (savedInstanceState != null) {
@@ -148,55 +111,102 @@ public class EditActivity extends FragmentActivity {
         }
 	}
 	
+	private void initState() {
+		Intent intent = getIntent();
+		this.actionMode = intent.getStringExtra("actionMode");
+		long node_id = intent.getLongExtra("node_id", -1);	
 
-	private class TabListener implements ActionBar.TabListener {
-		Fragment fragment;
-
-		public TabListener(Fragment fragment, String tag) {
-			this.fragment = fragment;
-
-			FragmentTransaction fragmentTransaction = getSupportFragmentManager()
-					.beginTransaction();
-
-			if (fragment != null && fragment.isAdded() == false) {
-				fragmentTransaction.add(R.id.editnode_fragment_container,
-						fragment, tag);
-			}
-
-			fragmentTransaction.hide(fragment).commit();
+		String defaultTodo = PreferenceManager
+				.getDefaultSharedPreferences(this).getString("defaultTodo", "");
+		
+		if (this.actionMode == null) {
+			this.node = getCaptureIntentContents(intent);
+			this.actionMode = ACTIONMODE_CREATE;
+		} else if (this.actionMode.equals(ACTIONMODE_CREATE)) {
+			this.node = new OrgNode();
+		} else if (this.actionMode.equals(ACTIONMODE_EDIT)) {
+			this.node = new OrgNode(node_id, getContentResolver());
+		} else if (this.actionMode.equals(ACTIONMODE_ADDCHILD)) {
+			this.node = new OrgNode(node_id, getContentResolver());
 		}
 
-		@Override
-		public void onTabSelected(Tab tab, FragmentTransaction ft) {			
-			FragmentTransaction fragmentTransaction = getSupportFragmentManager()
-					.beginTransaction();
-		    fragmentTransaction.show(fragment).commit();
-		}
-
-		@Override
-		public void onTabUnselected(Tab tab, FragmentTransaction ft) {
-			if (fragment != null) {
-				FragmentTransaction fragmentTransaction = getSupportFragmentManager()
-						.beginTransaction();
-				fragmentTransaction.hide(fragment).commit();
-			}
-		}
-
-		@Override
-		public void onTabReselected(Tab tab, FragmentTransaction ft) {
-		}
-	};
-	
-    @Override
-	public boolean onCreateOptionsMenu(android.support.v4.view.Menu menu) {
-    	super.onCreateOptionsMenu(menu);
-		MenuInflater inflater = getMenuInflater();
-	    inflater.inflate(R.menu.edit, menu);
-		return true;
+		setOrgNode(this.node, defaultTodo);
 	}
 	
+	public void setOrgNode(OrgNode node, String defaultTodo) {
+		
+		EditDetailsFragment detailsFragment = new EditDetailsFragment();
+		detailsFragment.init(node, defaultTodo, resolver);
+		
+		FragmentTransaction beginTransaction = getSupportFragmentManager().beginTransaction();
+		beginTransaction.replace(R.id.editnode_fragment_container, detailsFragment);
+		beginTransaction.commit();
+		this.detailsFragment = detailsFragment;
+		
+		this.payloadFragment.init(node.getCleanedPayload(), true);
+		this.rawPayloadFragment.init(node.getRawPayload(), false);
+	}
+	
+	public OrgNode getOrgNode() {
+		return this.detailsFragment.getEditedOrgNode();
+	}
+
+
+	private static OrgNode getCaptureIntentContents(Intent intent) {
+		String subject = intent
+				.getStringExtra("android.intent.extra.SUBJECT");
+		String text = intent.getStringExtra("android.intent.extra.TEXT");
+
+		if(text != null && subject != null) {
+			subject = "[[" + text + "][" + subject + "]]";
+			text = "";
+		}
+		
+		if(subject == null)
+			subject = "";
+		if(text == null)
+			text = "";
+
+		OrgNode node = new OrgNode();
+		node.name = subject;
+		node.payload = text;
+		return node;
+	}
+
+	
+	
+	
+    @Override
+	public boolean onPrepareOptionsMenu(Menu menu) {
+    	super.onCreateOptionsMenu(menu);
+		MenuInflater inflater = getSupportMenuInflater();
+	    inflater.inflate(R.menu.edit, menu);
+	    
+		if (this.node.id > -1) {
+			SubMenu subMenu = menu.addSubMenu(R.string.menu_advanced);
+			MenuItem item = subMenu.add(R.string.menu_advanced,
+					R.string.menu_delete, 0, R.string.menu_delete);
+			item.setIcon(R.drawable.ic_input_delete);
+
+			item = subMenu.add(R.string.menu_advanced, R.string.menu_clockin,
+					1, R.string.menu_clockin);
+			item.setIcon(R.drawable.ic_menu_today);
+			
+			item = subMenu.add(R.string.menu_advanced, R.string.menu_archive,
+					1, R.string.menu_archive);
+			
+			item = subMenu.add(R.string.menu_advanced, R.string.menu_archive_tosibling,
+					1, R.string.menu_archive_tosibling);
+
+			MenuItem subMenuItem = subMenu.getItem();
+			subMenuItem.setIcon(R.drawable.ic_menu_moreoverflow);
+			subMenuItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+		}
+		return true;	
+	}
+
 	@Override
-	public boolean onOptionsItemSelected(android.support.v4.view.MenuItem item) {
+	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case android.R.id.home:
 			doCancel();
@@ -211,8 +221,71 @@ public class EditActivity extends FragmentActivity {
 		case R.id.nodeedit_cancel:
 			doCancel();
 			return true;
+			
+		case R.string.menu_delete:
+			runDeleteNode();
+			return true;
+			
+		case R.string.menu_clockin:
+			startTimeClockingService();
+			return true;
+			
+		case R.string.menu_archive:
+			runArchiveNode("archive");
+			return true;
+			
+		case R.string.menu_archive_tosibling:
+			runArchiveNode("archive-sibling");
+			return true;		
 		}
 		return false;
+	}
+	
+	private void runDeleteNode() {	
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setMessage(R.string.outline_delete_prompt)
+				.setCancelable(false)
+				.setPositiveButton(R.string.yes,
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int id) {
+								node.deleteNode(resolver);
+								finish();
+							}
+						})
+				.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						dialog.cancel();
+					}
+				});
+		builder.create().show();
+	}
+	
+	private void runArchiveNode(final String editString) {	
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setMessage(R.string.outline_archive_prompt)
+				.setCancelable(false)
+				.setPositiveButton(R.string.yes,
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int id) {
+								if(editString.equals("archive"))
+									node.archiveNode(resolver);
+								else
+									node.archiveNodeToSibling(resolver);
+								finish();
+							}
+						})
+				.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						dialog.cancel();
+					}
+				});
+		builder.create().show();
+	}
+
+	private void startTimeClockingService() {
+		Intent intent = new Intent(EditActivity.this, TimeclockService.class);
+		intent.putExtra(TimeclockService.NODE_ID, node.id);
+		startService(intent);
 	}
 	
 	@Override
@@ -248,127 +321,43 @@ public class EditActivity extends FragmentActivity {
 	
 	
 	private void insertChangesIntoPayloadResidue() {
-		node.getPayload(orgDB).insertOrReplace("SCHEDULED:", detailsFragment.getScheduled());
-		node.getPayload(orgDB).insertOrReplace("DEADLINE:", detailsFragment.getDeadline());
+		node.getPayload().insertOrReplace("SCHEDULED:", detailsFragment.getScheduled());
+		node.getPayload().insertOrReplace("DEADLINE:", detailsFragment.getDeadline());
 	}
 	
 	private void save() {
-		String newTitle = this.detailsFragment.getTitle();
-		String newTodo = this.detailsFragment.getTodo();
-		String newPriority = this.detailsFragment.getPriority();
-		String newTags = this.detailsFragment.getTags();
+		OrgNode newNode = this.detailsFragment.getEditedOrgNode();
+
+		if (this.actionMode.equals(ACTIONMODE_CREATE) || this.actionMode.equals(ACTIONMODE_ADDCHILD))
+			createNewNode(newNode);
+		else if (this.actionMode.equals(ACTIONMODE_EDIT))
+			node.generateAndApplyEdits(newNode, resolver);
+
+		announceUpdate();
+	}
+	
+	private void createNewNode(OrgNode newNode) {
+		OrgNode newParent = this.detailsFragment.getLocation();
+
 		StringBuilder newCleanedPayload = new StringBuilder(this.payloadFragment.getText());
 		insertChangesIntoPayloadResidue();
-		String newPayloadResidue = node.getPayload(orgDB).getNewPayloadResidue();
-						
-		if (this.actionMode.equals(ACTIONMODE_CREATE)) {
-			MobileOrgApplication appInst = (MobileOrgApplication) this.getApplication();
-			OrgDatabase orgDB = appInst.getDB();
-			long file_id = orgDB.addOrUpdateFile(OrgFile.CAPTURE_FILE, OrgFile.CAPTURE_FILE_ALIAS, "", true);
-			Long parent = orgDB.getFileId(OrgFile.CAPTURE_FILE);
-			long node_id = orgDB.addNode(parent, newTitle, newTodo, newPriority, newTags, file_id);
-			
-			boolean addTimestamp = PreferenceManager.getDefaultSharedPreferences(
-					this).getBoolean("captureWithTimestamp", false);
-			if(addTimestamp)
-				newCleanedPayload.append("\n").append(getTimestamp()).append("\n");
-			
-			orgDB.addNodePayload(node_id, newCleanedPayload.toString() + newPayloadResidue);
-			
-			if(PreferenceManager.getDefaultSharedPreferences(
-					this).getBoolean("calendarEnabled", false))
-				appInst.getCalendarSyncService().insertNode(node_id);
-			
-		} else if (this.actionMode.equals(ACTIONMODE_ADDCHILD)) {
-			MobileOrgApplication appInst = (MobileOrgApplication) this.getApplication();
-			OrgDatabase orgDB = appInst.getDB();
-			Long parent = this.node_id;
-			long file_id = this.orgDB.getFileId(this.orgDB.getFilenameFromNodeId(parent));
-			long node_id = orgDB.addNode(parent, newTitle, newTodo, newPriority, newTags, file_id);
-			
-			boolean addTimestamp = PreferenceManager.getDefaultSharedPreferences(
-					this).getBoolean("captureWithTimestamp", false);
-			if(addTimestamp)
-				newCleanedPayload.append("\n").append(getTimestamp()).append("\n");
-			
-			orgDB.addNodePayload(node_id, newCleanedPayload.toString() + newPayloadResidue);
-						
-			makeNewheadingEditNode(node_id, new NodeWrapper(parent, orgDB));
-			
-			if(PreferenceManager.getDefaultSharedPreferences(
-					this).getBoolean("calendarEnabled", false))
-				appInst.getCalendarSyncService().insertNode(node_id);
+		String newPayloadResidue = node.getPayload().getNewPayloadResidue();
+		String newPayload = newCleanedPayload.toString() + newPayloadResidue;
 
-		} else if (this.actionMode.equals(ACTIONMODE_EDIT)) {
-			try {
-				makeEditNodes(newTitle, newTodo, newPriority,
-						newCleanedPayload.toString(), newTags);
-			} catch (IOException e) {
-			}
-		}
+		boolean addTimestamp = PreferenceManager.getDefaultSharedPreferences(
+				this).getBoolean("captureWithTimestamp", false);
+		if(addTimestamp)
+			newCleanedPayload.append("\n").append(OrgUtils.getTimestamp()).append("\n");
+		
+		OrgProviderUtil.createNodeWithNewheadingEditnode(newNode, newParent, newPayload, resolver);
+	}
+
+	
+	private void announceUpdate() {
 		Intent intent = new Intent(Synchronizer.SYNC_UPDATE);
 		intent.putExtra(Synchronizer.SYNC_DONE, true);
 		intent.putExtra("showToast", false);
 		sendBroadcast(intent);
 	}
-	
-	private void makeNewheadingEditNode(long node_id, NodeWrapper parent) {
-		boolean generateEdits = !parent.getFileName(orgDB).equals(OrgFile.CAPTURE_FILE);
-		if(generateEdits == false)
-			return;
 
-		// Add new heading nodes need the entire content of node without star headings
-		String newContent = orgDB.nodeToString(node_id, 1).replaceFirst("[\\*]*", "");
-		orgDB.addEdit("newheading", parent.getNodeId(orgDB), parent.getName(), "", newContent);
-	}
-	
-	/**
-	 * Takes a Node and five strings, representing edits to the node.
-	 * This function will generate a new edit entry for each value that was 
-	 * changed.
-	 */ 
-	private void makeEditNodes(String newTitle, String newTodo,
-			String newPriority, String newCleanedPayload, String newTags) throws IOException {
-		boolean generateEdits = !node.getFileName(orgDB).equals(OrgFile.CAPTURE_FILE);
-		
-		if (!node.getName().equals(newTitle)) {
-			if (generateEdits)
-				orgDB.addEdit("heading", node.getNodeId(orgDB), newTitle, node.getName(), newTitle);
-			node.setName(newTitle, orgDB);
-		}
-		if (newTodo != null && !node.getTodo().equals(newTodo)) {
-			if (generateEdits)
-				orgDB.addEdit("todo", node.getNodeId(orgDB), newTitle, node.getTodo(), newTodo);
-			node.setTodo(newTodo, orgDB);
-		}
-		if (newPriority != null && !node.getPriority().equals(newPriority)) {
-			if (generateEdits)
-				orgDB.addEdit("priority", node.getNodeId(orgDB), newTitle, node.getPriority(),
-					newPriority);
-			node.setPriority(newPriority, orgDB);
-		}
-		if (!node.getCleanedPayload(orgDB).equals(newCleanedPayload)
-				|| !node.getPayload(orgDB).getPayloadResidue()
-						.equals(node.getPayload(orgDB).getNewPayloadResidue())) {
-			String newRawPayload = node.getPayload(orgDB)
-					.getNewPayloadResidue() + newCleanedPayload;
-
-			if (generateEdits)
-				orgDB.addEdit("body", node.getNodeId(orgDB), newTitle, node.getRawPayload(orgDB), newRawPayload);
-			node.setPayload(newRawPayload, orgDB);
-		}
-		if(!node.getTags().equals(newTags)) {
-			if (generateEdits) {
-				orgDB.addEdit("tags", node.getNodeId(orgDB), newTitle,
-						node.getTagsWithoutInheritet(),
-						NodeWrapper.getTagsWithoutInheritet(newTags));
-			}
-			node.setTags(newTags, orgDB);
-		}
-	}
-	
-	public static String getTimestamp() {
-		SimpleDateFormat sdf = new SimpleDateFormat("[yyyy-MM-dd EEE HH:mm]");		
-		return sdf.format(new Date());
-	}
 }

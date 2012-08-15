@@ -15,19 +15,19 @@ import com.dropbox.client.DropboxAPI;
 import com.dropbox.client.DropboxAPI.Config;
 import com.dropbox.client.DropboxAPI.FileDownload;
 import com.matburt.mobileorg.R;
-import com.matburt.mobileorg.Parsing.MobileOrgApplication;
-import com.matburt.mobileorg.Parsing.OrgFile;
+import com.matburt.mobileorg.util.FileUtils;
 
-public class DropboxSynchronizer extends Synchronizer {
+public class DropboxSynchronizer implements SynchronizerInterface {
 
 	private String remoteIndexPath;
 	private String remotePath;
 	 
 	private DropboxAPI dropboxAPI = new DropboxAPI();
     private com.dropbox.client.DropboxAPI.Config dropboxConfig;
+	private Context context;
     
-    public DropboxSynchronizer(Context context, MobileOrgApplication appInst) {
-    	super(context, appInst);
+    public DropboxSynchronizer(Context context) {
+    	this.context = context;
 
 		SharedPreferences sharedPreferences = PreferenceManager
 				.getDefaultSharedPreferences(context);
@@ -44,17 +44,17 @@ public class DropboxSynchronizer extends Synchronizer {
     }
 
 
-    protected boolean isConfigured() {
+    public boolean isConfigured() {
         if (this.remoteIndexPath.equals(""))
             return false;
         return true;
     }
 
     
-    protected void putRemoteFile(String filename, String contents) throws IOException {
-        this.appdb.removeFile(filename);
+    public void putRemoteFile(String filename, String contents) throws IOException {
+    	//this.appdb.removeFile(filename);
        
-		OrgFile orgFile = new OrgFile(filename, context);
+		FileUtils orgFile = new FileUtils(filename, context);
         BufferedWriter writer =  orgFile.getWriter();
         writer.write(contents);
         writer.close();
@@ -63,12 +63,12 @@ public class DropboxSynchronizer extends Synchronizer {
         this.dropboxAPI.putFile("dropbox", this.remotePath, uploadFile);
     }
 
-	protected BufferedReader getRemoteFile(String filename) throws IOException {
+	public BufferedReader getRemoteFile(String filename) throws IOException {
 		String filePath = this.remotePath + filename;
 		FileDownload fd = dropboxAPI.getFileStream("dropbox", filePath, null);
 
 		if (fd == null || fd.is == null) {
-			throw new IOException(r.getString(R.string.dropbox_fetch_error,
+			throw new IOException(context.getResources().getString(R.string.dropbox_fetch_error,
 					filePath, "Error downloading file"));
 		}
 
@@ -101,10 +101,10 @@ public class DropboxSynchronizer extends Synchronizer {
     private Config getConfig() {
     	if (dropboxConfig == null) {
 	    	dropboxConfig = dropboxAPI.getConfig(null, false);
-	    	dropboxConfig.consumerKey=r.getString(R.string.dropbox_consumer_key, "invalid");
-	    	dropboxConfig.consumerSecret=r.getString(R.string.dropbox_consumer_secret, "invalid");
-	    	dropboxConfig.server="api.dropbox.com";
-	    	dropboxConfig.contentServer="api-content.dropbox.com";
+	    	dropboxConfig.consumerKey = context.getResources().getString(R.string.dropbox_consumer_key, "invalid");
+	    	dropboxConfig.consumerSecret = context.getResources().getString(R.string.dropbox_consumer_secret, "invalid");
+	    	dropboxConfig.server = "api.dropbox.com";
+	    	dropboxConfig.contentServer = "api-content.dropbox.com";
 	    	dropboxConfig.port=80;
     	}
     	return dropboxConfig;
@@ -139,6 +139,6 @@ public class DropboxSynchronizer extends Synchronizer {
 
 
 	@Override
-	protected void postSynchronize() {
+	public void postSynchronize() {
 	}
 }

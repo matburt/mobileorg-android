@@ -2,18 +2,23 @@ package com.matburt.mobileorg.Parsing;
 
 import java.util.ArrayList;
 
+import com.matburt.mobileorg.util.FileUtils;
+
 import android.database.Cursor;
 
 public class NodeWrapper {
 
 	private Cursor cursor;
 	private NodePayload payload;
+	private OrgDatabaseOld db;
 	
-	public NodeWrapper(long node_id, OrgDatabase db) {
+	public NodeWrapper(long node_id, OrgDatabaseOld db) {
+		this.db = db;
 		this.cursor = db.getNode(node_id);
 	}
 	
-	public NodeWrapper(Cursor cursor) {
+	public NodeWrapper(Cursor cursor, OrgDatabaseOld db) {
+		this.db = db;
 		this.cursor = cursor;
 	}
 	
@@ -29,7 +34,7 @@ public class NodeWrapper {
 			return name;
 	}
 	
-	public ArrayList<NodeWrapper> getChildren(OrgDatabase db) {
+	public ArrayList<NodeWrapper> getChildren() {
 		ArrayList<NodeWrapper> result = new ArrayList<NodeWrapper>();
 		
 		if(!db.hasNodeChildren(this.getId()))
@@ -40,11 +45,19 @@ public class NodeWrapper {
 		
 		
 		while(nodeChildren.isAfterLast() == false) {
-			long id = (new NodeWrapper(nodeChildren)).getId();
+			long id = (new NodeWrapper(nodeChildren, db)).getId();
 			result.add(new NodeWrapper(id, db));
 			nodeChildren.moveToNext();
 		}
 		
+		return result;
+	}
+	
+	public ArrayList<String> getChildrenStringArray() {
+		ArrayList<String> result = new ArrayList<String>();
+		for (NodeWrapper wrapper : getChildren())
+			result.add(wrapper.getName());
+
 		return result;
 	}
 	
@@ -54,7 +67,7 @@ public class NodeWrapper {
 	 * node. We have to do this to guarantee that agenda items will have the
 	 * full payload and that those payload can be edited correctly.
 	 */
-	private void preparePayload(OrgDatabase db) {
+	private void preparePayload() {
 		if(this.payload != null) {
 			return;
 		}
@@ -73,7 +86,7 @@ public class NodeWrapper {
 		
 		this.payload = new NodePayload(result);
 		
-		if(!this.getFileName(db).equals("agendas.org"))
+		if(!this.getFileName().equals("agendas.org"))
 			return;
 		
 		String orgId = payload.getId();
@@ -94,18 +107,18 @@ public class NodeWrapper {
 		}
 	}
 	
-	public NodePayload getPayload(OrgDatabase db) {
-		preparePayload(db);
+	public NodePayload getPayload() {
+		preparePayload();
 		return this.payload;
 	}
 	
-	public String getCleanedPayload(OrgDatabase db) {
-		preparePayload(db);
+	public String getCleanedPayload() {
+		preparePayload();
 		return payload.getContent();
 	}
 	
-	public String getRawPayload(OrgDatabase db) {
-		preparePayload(db);
+	public String getRawPayload() {
+		preparePayload();
 		
 		if(this.cursor == null)
 			return "";
@@ -194,24 +207,27 @@ public class NodeWrapper {
 	/**
 	 * @return The :ID: or :ORIGINAL_ID: field of the payload.
 	 */
-	public String getNodeId(OrgDatabase db) {
-		preparePayload(db);
+	public String getNodeId() {
+		preparePayload();
 
 		String id = payload.getId();				
 		if(id == null)
-			return constructOlpId(db);
+			return constructOlpId();
 		
 		return id;
 	}
 	
-	private String constructOlpId(OrgDatabase db) {
+	public String constructOlpId() {
+		if(cursor == null)
+			return "";
+		
 		StringBuilder result = new StringBuilder();
 		result.insert(0, getName());
 		
 		long parentId = getParentId();
 
 		while(parentId > 0) {
-			NodeWrapper node = new NodeWrapper(db.getNode(parentId));
+			NodeWrapper node = new NodeWrapper(db.getNode(parentId), db);
 			parentId = node.getParentId();
 
 			if(parentId > 0)
@@ -236,14 +252,86 @@ public class NodeWrapper {
 		return getName().replaceAll("\\[[^\\]]*\\]", "");
 	}
 
-	private long getParentId() {
+	public long getParentId() {
 		if(cursor == null)
 			return -1;
 		
-		return cursor.getInt(cursor.getColumnIndex("parent_id"));
+		int column = cursor.getColumnIndex("parent_id");
+		
+		if(column == -1)
+			return -1;
+		
+		return cursor.getLong(column);
 	}
 	
-	public String getFileName(OrgDatabase db) {
+	public NodeWrapper getParent() {
+		if(cursor == null)
+			return null;
+		
+		long parentId = getParentId();
+		
+		if(parentId < 0)
+			return null;
+		
+		Cursor node = db.getNode(parentId);
+		
+		if(node == null)
+			return null;
+		
+		return new NodeWrapper(node, db);
+	}
+	
+	public boolean hasChild(NodeWrapper node) {
+		long id = node.getId();
+		
+		for(NodeWrapper child: getChildren()) {
+			if(child.getId() == id)
+				return true;
+		}
+		
+		return false;
+	}
+	
+	public ArrayList<String> getSiblings() {
+		ArrayList<String> result = new ArrayList<String>();
+		
+		if(cursor == null)
+			return result;
+		
+		NodeWrapper parent = getParent();
+		
+		if(parent != null)
+			result = parent.getChildrenStringArray();
+		else
+			result = db.cursorToArrayList(db.getFileCursor());
+		
+		return result;
+	}
+	
+	public NodeWrapper getSibling(String name) {
+		if(getParent() == null)
+			return null;
+		
+		ArrayList<NodeWrapper> children = getParent().getChildren();
+								
+		for(NodeWrapper child: children) {
+			if(child.getName().equals(name))
+				return child;
+		}
+		return null;
+	}
+	
+	public NodeWrapper getChild(String name) {
+		ArrayList<NodeWrapper> children = getChildren();
+		
+		for(NodeWrapper child: children) {
+			if(child.getName().equals(name))
+				return child;
+		}
+		return null;
+	}
+	
+	public String getFileName() {
 		if(cursor == null)
 			return "";
 		
@@ -252,42 +340,62 @@ public class NodeWrapper {
 		if(columnIndex == -1)
 			return "";
 		
-		long file_id = cursor.getLong(columnIndex);
+		return db.getFilename(cursor.getLong(columnIndex));
+	}
+	
+	public long getFileId() {
+		if(cursor == null)
+			return -1;
 		
-		return db.getFilename(file_id);
+		int columnIndex = cursor.getColumnIndex("file_id");
+		
+		if(columnIndex == -1)
+			return -1;
+		
+		return cursor.getLong(columnIndex);
 	}
 	
 	/**
 	 * @return The internal id of the node. Used for mapping to database.
 	 */
 	public long getId() {
-		if(cursor == null)
+		if(cursor == null || cursor.getCount() < 1)
 			return -1;
-		return cursor.getInt(cursor.getColumnIndex("_id"));
+		
+		int column = cursor.getColumnIndex("_id");
+		
+		if(column < 0)
+			return -1;
+		
+		return cursor.getInt(column);
 	}
 
-	public void setName(String name, OrgDatabase db) {
+	public void setName(String name) {
 		db.updateNodeField(this, "name", name);
 	}
 
-	public void setTodo(String todo, OrgDatabase db) {
+	public void setTodo(String todo) {
 		db.updateNodeField(this, "todo", todo);
 	}
 
-	public void setPriority(String priority, OrgDatabase db) {
+	public void setPriority(String priority) {
 		db.updateNodeField(this, "priority", priority);
 	}
 
-	public void setPayload(String payload, OrgDatabase db) {
+	public void setPayload(String payload) {
 		db.updateNodeField(this, "payload", payload);
 	}
 
-	public void setTags(String tags, OrgDatabase db) {
+	public void setTags(String tags) {
 		db.updateNodeField(this, "tags", tags);
 	}
 	
-	public void setParent(Long parentId, OrgDatabase db) {
-		db.updateNodeField(this, "parent_id", parentId.toString());
+	public void setParent(Long parentId) {
+		db.updateNodeField(getId(), "parent_id", parentId.toString());
+	}
+	
+	public void setFileId(Long fileId) {
+		db.updateNodeField(getId(), "file_id", fileId.toString());
 	}
 	
 	public void close() {
@@ -295,15 +403,23 @@ public class NodeWrapper {
 			this.cursor.close();
 	}
 
-	public void addLogbook(long startTime, long endTime, String elapsedTime, OrgDatabase db) {
-		StringBuilder rawPayload = new StringBuilder(getRawPayload(db));
+	public void addLogbook(long startTime, long endTime, String elapsedTime) {
+		StringBuilder rawPayload = new StringBuilder(getRawPayload());
 		rawPayload = NodePayload.addLogbook(rawPayload, startTime, endTime, elapsedTime);
 		
-		boolean generateEdits = !getFileName(db).equals(OrgFile.CAPTURE_FILE);
+		boolean generateEdits = !getFileName().equals(FileUtils.CAPTURE_FILE);
 
 		if(generateEdits)
-			db.addEdit("body", getNodeId(db), getName(), getRawPayload(db), rawPayload.toString());
-		setPayload(rawPayload.toString(), db);
+			db.addEdit("body", getNodeId(), getName(), getRawPayload(), rawPayload.toString());
+		setPayload(rawPayload.toString());
+	}
+
+	public void setParent(NodeWrapper newParent) {
+		if(cursor == null)
+			return;
+
+		setParent(newParent.getId());
+		setFileId(newParent.getFileId());
 	}
 }
 

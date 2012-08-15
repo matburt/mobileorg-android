@@ -17,6 +17,7 @@
         android:name=".Parsing.MobileOrgApplication"
         android:debuggable="true"
         android:icon="@drawable/icon"
+        android:theme="@style/Theme.Styled"
         android:label="MobileOrg" >
         <meta-data
             android:name="android.app.default_searchable"
@@ -47,6 +48,10 @@
             </intent-filter>
         </service>
 
+        <provider
+            android:name=".provider.OrgProvider"
+            android:authorities="com.matburt.mobileorg.provider.OrgProvider" />
+
         <receiver android:name=".Plugin.Synchronize" >
             <intent-filter>
                 <action android:name="com.twofortyfouram.locale.intent.action.FIRE_SETTING" />
@@ -62,8 +67,7 @@
 
         <activity
             android:name=".Gui.OutlineActivity"
-            android:label="MobileOrg"
-            android:theme="@style/Theme.MobileOrgActionbar" >
+            android:label="MobileOrg" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -162,6 +166,7 @@
             android:name=".Services.TimeclockDialog"
             android:theme="@android:style/Theme.Dialog" >
         </activity>
+        <activity android:name=".Gui.Capture.EditActivityMock"></activity>
     </application>
 
 </manifest>
