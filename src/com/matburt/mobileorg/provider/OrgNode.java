@@ -333,7 +333,7 @@ public class OrgNode {
     private static final int AFTER_GROUP = 7;
     
 	private static final Pattern titlePattern = Pattern
-			.compile("^\\s?(?:([A-Z]{2,}:?\\s+)\\s*)?" + "(?:\\[\\#(.*)\\])?" + // Priority
+			.compile("^\\s?(?:([A-Z]{2,}:?\\s+)\\s*)?" + "(?:\\[\\#([^]]+)\\])?" + // Priority
 					"(.*?)" + 											// Title
 					"\\s*(?::([^\\s]+):)?" + 							// Tags
 					"(\\s*[!\\*])*" + 									// Habits
