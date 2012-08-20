@@ -38,7 +38,7 @@ public class SynchronizerPreferences extends Preference {
         layout.setPadding(20, 10, 10, 10);
         layout.setOrientation(LinearLayout.HORIZONTAL);
         TextView view = new TextView(getContext());
-        view.setText("Configure Synchronizer Settings");
+        view.setText(R.string.configure_synchronizer_settings);
         view.setLayoutParams(params1);
         view.setTextAppearance(getContext(), android.R.style.TextAppearance_Large);
         this.setOnPreferenceClickListener(new OnPreferenceClickListener() {

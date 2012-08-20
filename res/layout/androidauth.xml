@@ -11,14 +11,14 @@
   </TableRow>
   <TableRow>
   <EditText android:id="@+id/dbAuthLogin"
-            android:hint="email address"
+            android:hint="@string/email"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
 			android:inputType="textEmailAddress"/>
   </TableRow>
   <TableRow>
   <EditText android:id="@+id/dbAuthPassword"
-            android:hint="password"
+            android:hint="@string/password"
             android:password="true"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
@@ -26,7 +26,7 @@
   </TableRow>
   <TableRow>
   <Button android:id="@+id/dbAuthSubmit"
-          android:text="Save"
+          android:text="@string/save"
           android:layout_width="fill_parent"
           android:layout_height="fill_parent"/>
   </TableRow>
