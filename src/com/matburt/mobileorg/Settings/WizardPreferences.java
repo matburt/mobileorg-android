@@ -9,6 +9,8 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.matburt.mobileorg.R;
+
 public class WizardPreferences extends Preference {
     public WizardPreferences(Context context) {
         super(context);
@@ -31,7 +33,7 @@ public class WizardPreferences extends Preference {
                               LinearLayout.LayoutParams.WRAP_CONTENT);
         //params1.gravity = Gravity.LEFT;
         params1.weight  = 1.0f;
-        layout.setPadding(20, 10, 10, 10);
+        layout.setPadding(15, 10, 10, 10);
         layout.setOrientation(LinearLayout.HORIZONTAL);
         TextView view = new TextView(getContext());
         view.setText(R.string.rerun_setup_wizard);

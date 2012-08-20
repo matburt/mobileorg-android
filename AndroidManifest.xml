@@ -158,7 +158,11 @@
             android:name=".Settings.ScpSettingsActivity"
             android:label="Scp Settings" >
         </activity>
-
+ 		<activity
+            android:name=".Settings.UbuntuOneSettingsActivity"
+            android:label="Ubuntu One Settings" >
+        </activity>
+        
         <service android:name=".Services.TimeclockService" >
         </service>
 

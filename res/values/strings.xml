@@ -132,7 +132,7 @@
   <string name="preference_storage_summary">Where to store the org files</string>
   <string name="preference_storage_title">Storage Mode</string>
   <string name="preference_storage">Storage</string>
-  <string name="preference_recursion_level_title">Recursion level</string>
+  <string name="preference_recursion_level_title">Child nodes to display</string>
   <string name="preference_recursion_level_summary">How many levels of child nodes to display on view</string>
   <string name="preference_viewing">Viewing</string>
   <string name="preference_synchronization">Synchronization</string>
@@ -177,9 +177,15 @@
   <string name="internal">Internal</string>
   <string name="example_webURL">http://example.com/index.org</string>
   <string name="rerun_setup_wizard">Re-run setup wizard</string>
-  <string name="configure_synchronizer_settings">Configure synchronizer settings</string>
+  <string name="configure_synchronizer_settings">Synchronizer settings</string>
   <string name="summary_view_default_edit">When checked, the default behaviour for long clicking on nodes will be editing. If disabled, the default behavior will be viewing.</string>
   <string name="title_view_default_edit">Edit on long click</string>
   <string name="summary_view_apply_formatting">Apply formatting of orgmode emphasis, bold, underline and strike-through when viewing.</string>
   <string name="title_view_apply_formatting">Apply view formatting</string>
+  <string name="title_scp_host">Host</string>
+  <string name="title_scp_port">Port</string>
+  <string name="title_scp_path">Path</string>
+  <string name="summary_scp_path">Full path to index.org on the server</string>
+  <string name="title_index_file_path">Full local path to index.org</string>
+  <string name="summary_web_url">Full URL path to your index.org file</string>
 </resources>

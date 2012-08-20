@@ -2,24 +2,20 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
   <PreferenceCategory android:title="Scp">
     <EditTextPreference
-        android:summary="Full path to your index.org file on the server"
-        android:title="Path"
+        android:title="@string/title_scp_path"
+        android:dialogMessage="@string/summary_scp_path"
         android:key="scpPath" android:name="scp_path" android:inputType="textUri"/>
     <EditTextPreference
-        android:summary="Username to login"
-        android:title="Username"
+        android:title="@string/username"
         android:key="scpUser" android:name="scp_user"/>
     <EditTextPreference
-        android:summary="Password to login"
-        android:title="Password"
+        android:title="@string/password"
         android:key="scpPass" android:password="true" android:inputType="textPassword" android:name="scp_password"/>
     <EditTextPreference
-        android:summary="Host name"
-        android:title="Host"
+        android:title="@string/title_scp_host"
         android:key="scpHost" android:name="scp_host"/>
     <EditTextPreference
-        android:summary="Host Port"
-        android:title="Port"
-        android:key="scpPort" android:name="scp_host" android:defaultValue="22" android:inputType="number"/>
+        android:title="@string/title_scp_port"
+        android:key="scpPort" android:name="scp_port" android:defaultValue="22" android:inputType="number"/>
   </PreferenceCategory>
 </PreferenceScreen>

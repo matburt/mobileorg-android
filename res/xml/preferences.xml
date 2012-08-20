@@ -68,7 +68,6 @@
             android:entries="@array/viewRecursionLevels"
             android:entryValues="@array/viewRecursionLevelsVals"
             android:key="viewRecursionMax"
-            android:summary="@string/preference_recursion_level_summary"
             android:title="@string/preference_recursion_level_title" />
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/preference_storage" >
