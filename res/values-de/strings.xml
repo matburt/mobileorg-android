@@ -35,7 +35,7 @@
   <string name="error_url_put">Beim Hochladen des URLs %s trat ein Fehler auf</string>
   <string name="dropbox_fetch_error">Es gab ein Problem beim Lesen des Dropbox-Pfades %1$s: %2$s</string>
   <string name="apg_not_found">Android Privacy Guard konnte nicht gefunden werden</string>
-  <string name="apg_versiRebuildingdropbRebuildingdropbRebuildingdropbRebuildingdropbon_not_supported">Diese Version von Android Privacy Guard wird nicht unterstützt</string>
+  <string name="apg_version_not_supported">Diese Version von Android Privacy Guard wird nicht unterstützt</string>
   <string name="view_as_document">Inhalt anzeigen</string>
   <string name="title">Titel</string>
   <string name="body">Hier klicken, um Text hinzuzufügen</string>
