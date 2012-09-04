@@ -4,11 +4,9 @@ import android.app.AlertDialog;
 import android.content.ContentResolver;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentTransaction;
-import android.view.WindowManager;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
@@ -16,7 +14,6 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.view.SubMenu;
-import com.actionbarsherlock.view.Window;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Services.TimeclockService;
 import com.matburt.mobileorg.Synchronizers.Synchronizer;
@@ -127,7 +124,8 @@ public class EditActivity extends SherlockFragmentActivity {
 		} else if (this.actionMode.equals(ACTIONMODE_EDIT)) {
 			this.node = new OrgNode(node_id, getContentResolver());
 		} else if (this.actionMode.equals(ACTIONMODE_ADDCHILD)) {
-			this.node = new OrgNode(node_id, getContentResolver());
+			this.node = new OrgNode();
+			this.node.parentId = node_id;
 		}
 
 		setOrgNode(this.node, defaultTodo);

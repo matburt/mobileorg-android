@@ -194,13 +194,10 @@ public class EditDetailsFragment extends SherlockFragment {
 		}
 	};
 	
-    
-	
-	
+
 	@Override
 	public void onCreateOptionsMenu(com.actionbarsherlock.view.Menu menu,
 			com.actionbarsherlock.view.MenuInflater inflater) {
-		// TODO Auto-generated method stub
 		super.onCreateOptionsMenu(menu, inflater);
 		inflater.inflate(R.menu.edit_details, menu);
 	}

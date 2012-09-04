@@ -156,7 +156,7 @@ public class OutlineActivity extends SherlockActivity
 		if(this.node_id > -1) {
 			NodeWrapper node = new NodeWrapper(this.node_id, appInst.getDB());
 			final String subTitle = node.constructOlpId().substring("olp:".length());
-			//this.getSherlock().setSubtitle(subTitle);
+			this.getSupportActionBar().setSubtitle(subTitle);
 		}
 	}
 

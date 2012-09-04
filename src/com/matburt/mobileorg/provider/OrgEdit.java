@@ -79,6 +79,8 @@ public class OrgEdit {
 		case TAGS:
 			this.oldValue = node.tags;
 			break;
+		default:
+			break;
 		}
 	}
 	

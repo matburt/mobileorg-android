@@ -30,6 +30,7 @@ public class OutlineCursorAdapter extends SimpleCursorAdapter {
 	private OrgDatabaseOld db;
 	private Cursor cursor;
 	
+	@SuppressWarnings("deprecation")
 	public OutlineCursorAdapter(Context context, Cursor cursor, OrgDatabaseOld db) {
 		super(context, R.layout.outline_item, cursor, new String[] {}, new int[] {});
 		this.cursor = cursor;
