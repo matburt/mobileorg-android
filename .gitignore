@@ -6,3 +6,4 @@ matburt-key.keystore
 dbprivate.xml
 proguard.cfg
 .settings
+/libs/ActionBarSherlock
