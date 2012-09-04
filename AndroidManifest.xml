@@ -17,8 +17,8 @@
         android:name=".Parsing.MobileOrgApplication"
         android:debuggable="true"
         android:icon="@drawable/icon"
-        android:theme="@style/Theme.Styled"
-        android:label="MobileOrg" >
+        android:label="MobileOrg"
+        android:theme="@style/Theme.Styled" >
         <meta-data
             android:name="android.app.default_searchable"
             android:value=".Gui.SearchActivity" />
@@ -78,8 +78,7 @@
         </activity>
         <activity
             android:name=".Gui.NodeViewActivity"
-            android:label="Org View"
-            android:theme="@style/Theme.MobileOrgActionbar" >
+            android:label="Org View" >
             <intent-filter>
                 <category android:name="android.intent.category.DEFAULT" />
 
@@ -90,7 +89,6 @@
             android:name=".Gui.Capture.EditActivity"
             android:exported="true"
             android:label="Org Capture"
-            android:theme="@style/Theme.MobileOrgActionbar"
             android:windowSoftInputMode="adjustPan" >
             <intent-filter>
                 <action android:name="com.matburt.mobileorg.CAPTURE" />
@@ -166,7 +164,8 @@
             android:name=".Services.TimeclockDialog"
             android:theme="@android:style/Theme.Dialog" >
         </activity>
-        <activity android:name=".Gui.Capture.EditActivityMock"></activity>
+        <activity android:name=".Gui.Capture.EditActivityMock" >
+        </activity>
     </application>
 
 </manifest>
