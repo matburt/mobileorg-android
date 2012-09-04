@@ -35,6 +35,7 @@ public class Synchronizer {
 	public final static String SYNC_DONE = "sync_done";
 	
 	public static final String CAPTURE_FILE = "mobileorg.org";
+	public static final String INDEX_FILE = "index.org";
 
 	private Context context;
 	private ContentResolver resolver;
@@ -134,7 +135,7 @@ public class Synchronizer {
 		HashMap<String, String> remoteChecksums = OrgFileParser
 				.getChecksums(remoteChecksumContents);
 		HashMap<String, String> localChecksums = OrgProviderUtil.getFileChecksums(resolver);
-
+		
 		ArrayList<String> filesToGet = new ArrayList<String>();
 
 		for (String key : remoteChecksums.keySet()) {
@@ -149,12 +150,12 @@ public class Synchronizer {
 		if (filesToGet.size() == 0)
 			return;
 
-		filesToGet.remove("index.org");
+		filesToGet.remove(INDEX_FILE);
 		notify.updateNotification(60, context.getString(R.string.downloading)
-				+ " index.org");
+				+ " " + INDEX_FILE);
 		String remoteIndexContents = "";
 
-		remoteIndexContents = FileUtils.read(syncher.getRemoteFile("index.org"));
+		remoteIndexContents = FileUtils.read(syncher.getRemoteFile(INDEX_FILE));
 
 		OrgProviderUtil.setTodos(OrgFileParser.getTodosFromIndex(remoteIndexContents), resolver);
 		OrgProviderUtil.setPriorities(OrgFileParser
@@ -187,6 +188,10 @@ public class Synchronizer {
 		}
 
 		// TODO Generate checksum of file and compare to remoteChecksum
+		
+		try {
+			new OrgFile(orgFile.filename, resolver).removeFile();
+		} catch (IllegalArgumentException e) { /* file did not exist */ }
 		
 		if (orgFile.isEncrypted())
         	decryptAndParseFile(orgFile, breader);

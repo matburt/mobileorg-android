@@ -58,7 +58,7 @@ public class OrgProviderUtil {
 	public static HashMap<String, String> getFileChecksums(ContentResolver resolver) {
 		HashMap<String, String> checksums = new HashMap<String, String>();
 
-		Cursor cursor = resolver.query(Files.CONTENT_URI, new String[] { Files.FILENAME, Files.CHECKSUM },
+		Cursor cursor = resolver.query(Files.CONTENT_URI, Files.DEFAULT_COLUMNS,
 				null, null, null);
 		cursor.moveToFirst();
 

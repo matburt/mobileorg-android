@@ -57,7 +57,9 @@ public class OrgFile {
 	}
 	
 	public void set(Cursor cursor) {
-		if (cursor != null && cursor.moveToFirst()) {
+		if (cursor != null && cursor.getCount() > 0) {
+			if(cursor.isBeforeFirst() || cursor.isAfterLast())
+				cursor.moveToFirst();
 			this.name = cursor.getString(cursor.getColumnIndexOrThrow(Files.NAME));
 			this.filename = cursor.getString(cursor.getColumnIndexOrThrow(Files.FILENAME));
 			this.checksum = cursor.getString(cursor.getColumnIndexOrThrow(Files.CHECKSUM));
