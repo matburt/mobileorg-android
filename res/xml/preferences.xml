@@ -49,13 +49,13 @@
         <CheckBoxPreference
             android:defaultValue="true"
             android:key="viewDefaultEdit"
-            android:summary="When checked, the default behaviour for long clicking on nodes will be editing. Else it will be viewing."
-            android:title="Edit on long click" />
+            android:summary="@string/summary_view_default_edit"
+            android:title="@string/title_view_default_edit" />
         <CheckBoxPreference
             android:defaultValue="true"
-            android:key="viewApplyFormating"
-            android:summary="Apply formating of orgmode emphasis, bold, underline and strike-through when viewing."
-            android:title="Apply view formating" />
+            android:key="viewApplyFormatting"
+            android:summary="@string/summary_view_apply_formatting"
+            android:title="@string/title_view_apply_formatting" />
         
         <CheckBoxPreference
             android:defaultValue="true"
@@ -68,7 +68,6 @@
             android:entries="@array/viewRecursionLevels"
             android:entryValues="@array/viewRecursionLevelsVals"
             android:key="viewRecursionMax"
-            android:summary="@string/preference_recursion_level_summary"
             android:title="@string/preference_recursion_level_title" />
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/preference_storage" >

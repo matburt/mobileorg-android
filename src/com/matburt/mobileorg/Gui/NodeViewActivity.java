@@ -234,7 +234,7 @@ public class NodeViewActivity extends SherlockFragmentActivity {
 		if (!node.getCleanedPayload().equals("")) {
 			String payload = node.getCleanedPayload();
 			if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(
-					"viewApplyFormating", true))
+					"viewApplyFormatting", true))
 				payload = applyFormating(payload);
 			result.append(payload);
 			result.append("\n<br/>\n");
