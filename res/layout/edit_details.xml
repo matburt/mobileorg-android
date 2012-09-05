@@ -5,36 +5,38 @@
     android:layout_weight="1"
     android:scrollbars="vertical" >
 
-    <TableLayout
+    <LinearLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/editnodelayout"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:stretchColumns="1" >
+        android:orientation="vertical" >
 
-        <TableRow android:paddingTop="3dip" >
+        <RelativeLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="5dp"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/border"
+            android:orientation="vertical" >
 
             <EditText
                 android:id="@+id/title"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:layout_span="4"
+                android:layout_margin="3dp"
                 android:hint="@string/title"
                 android:inputType="text|textMultiLine|textAutoCorrect|textCapSentences" />
-        </TableRow>
-
-        <LinearLayout
-            android:id="@+id/location"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical" />
-
-        <TableRow>
 
             <ImageView
+                android:id="@+id/imageView2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentLeft="true"
+                android:layout_below="@id/title"
                 android:contentDescription="@string/todo_state"
                 android:src="@drawable/ic_menu_agenda" />
 
@@ -42,46 +44,57 @@
                 android:id="@+id/todo_state"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_marginTop="0dp"
+                android:layout_alignTop="@+id/imageView2"
+                android:layout_toRightOf="@+id/imageView2"
                 android:prompt="@string/todo_state" />
-
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:contentDescription="@string/todo_state"
-                android:src="@drawable/ic_menu_star" />
 
             <Spinner
                 android:id="@+id/priority"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
+                android:layout_alignBaseline="@+id/todo_state"
+                android:layout_alignBottom="@+id/todo_state"
+                android:layout_alignParentRight="true"
                 android:paddingRight="2dip"
                 android:prompt="@string/priority" />
-        </TableRow>
 
-        <View
-            android:layout_height="2dip"
-            android:background="#FF909090"
-            android:paddingBottom="3dip" />
+            <ImageView
+                android:id="@+id/imageView1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/title"
+                android:layout_toLeftOf="@+id/priority"
+                android:contentDescription="@string/todo_state"
+                android:src="@drawable/ic_menu_star" />
+
+            <TableLayout
+                android:id="@+id/tags"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content" >
+            </TableLayout>
+        </RelativeLayout>
+
+        <LinearLayout
+            android:id="@+id/location"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" />
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp"
+            android:background="@drawable/border"
+            android:paddingTop="3dip" >
+        </LinearLayout>
 
         <TableLayout
             android:id="@+id/dates"
             android:layout_width="fill_parent"
-            android:layout_height="wrap_content" >
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp"
+            android:background="@drawable/border" >
         </TableLayout>
-
-        <View
-            android:layout_height="2dip"
-            android:background="#FF909090" />
-
-        <TableLayout
-            android:id="@+id/tags"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content" >
-        </TableLayout>
-    </TableLayout>
+    </LinearLayout>
 
 </ScrollView>

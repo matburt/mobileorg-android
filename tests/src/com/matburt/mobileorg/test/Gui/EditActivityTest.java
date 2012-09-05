@@ -30,8 +30,8 @@ public class EditActivityTest extends ActivityInstrumentationTestCase2<EditActiv
 	public void setUp() throws Exception {
 		super.setUp();
 		
-		//setActivityInitialTouchMode(false);
-		Intent intent = new Intent();
+		setActivityInitialTouchMode(false);
+		//Intent intent = new Intent();
 //		intent.putExtra(EditActivity.ACTIONMODE, EditActivity.ACTIONMODE_EDIT);
 //		intent.putExtra(EditActivity.NODE_ID, 100);
 		//setActivityIntent(intent);
@@ -48,8 +48,9 @@ public class EditActivityTest extends ActivityInstrumentationTestCase2<EditActiv
 	public void testMock() {
 		assertNotNull(this.activity);
 		
-		final OrgNode node = OrgTestUtils.getDefaultOrgNode();
-		activity.setOrgNode(node, "");
+		
+//		final OrgNode node = OrgTestUtils.getDefaultOrgNode();
+//		activity.setOrgNode(node, "");
 		
 //		activity.runOnUiThread(new Runnable (){
 //			@Override
@@ -58,9 +59,9 @@ public class EditActivityTest extends ActivityInstrumentationTestCase2<EditActiv
 //			}
 //		});
 		
-		OrgNode editedNode = activity.getOrgNode();
-		
-		assertEquals(node.name, editedNode.name);
+//		OrgNode editedNode = activity.getOrgNode();
+//		
+//		assertEquals(node.name, editedNode.name);
 	}
 	
 	
@@ -96,11 +97,11 @@ public class EditActivityTest extends ActivityInstrumentationTestCase2<EditActiv
 //		assertEquals(node.name, editedNode.name);
 //	}
 //	
-//	public void testTest() {
-//		EditText titleView = (EditText) activity.findViewById(com.matburt.mobileorg.R.id.title);
-//		assertNotNull(titleView);
-//		assertTrue(titleView.getText().equals(""));	
-//	}
+	public void testTest() {
+		EditText titleView = (EditText) activity.findViewById(com.matburt.mobileorg.R.id.title);
+		assertNotNull(titleView);
+		assertTrue(titleView.getText().equals(""));	
+	}
 //	
 //	
 //	@UiThreadTest

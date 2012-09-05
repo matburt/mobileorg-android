@@ -6,9 +6,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.v4.app.FragmentTransaction;
 
-import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
@@ -30,15 +28,9 @@ public class EditActivity extends SherlockFragmentActivity {
 
 	private OrgNode node;
 	private String actionMode;
-	
-	public final static String FRAGMENT_DETAILS_TAG = "details";
-	public final static String FRAGMENT_PAYLOAD_TAG = "payload";
-	
-	private EditDetailsFragment detailsFragment;
-	private EditPayloadFragment payloadFragment;
-	private EditPayloadFragment rawPayloadFragment;
+
 	private ContentResolver resolver;
-	private EditTabListener editTabListener;
+	private EditDetailsFragment detailsFragment;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -47,65 +39,7 @@ public class EditActivity extends SherlockFragmentActivity {
 		setContentView(R.layout.edit);
 		this.resolver = getContentResolver();
 		
-		restoreInstanceState(savedInstanceState);
 		initState();
-		setupActionbarTabs(savedInstanceState);
-	}
-	
-	@Override
-	protected void onSaveInstanceState(Bundle outState) {
-		super.onSaveInstanceState(outState);
-		getSupportFragmentManager().putFragment(outState,
-				EditPayloadFragment.class.getName(), payloadFragment);
-		getSupportFragmentManager().putFragment(outState,
-				EditPayloadFragment.class.getName() + "raw", rawPayloadFragment);
-		getSupportFragmentManager().putFragment(outState,
-				EditDetailsFragment.class.getName(), detailsFragment);
-        outState.putInt("tab", getSupportActionBar().getSelectedNavigationIndex());
-	}
-	
-	private void restoreInstanceState(Bundle savedInstanceState) {
-		if (savedInstanceState != null) {
-			this.detailsFragment = (EditDetailsFragment) getSupportFragmentManager()
-					.getFragment(savedInstanceState,
-							EditDetailsFragment.class.getName());
-			this.payloadFragment = (EditPayloadFragment) getSupportFragmentManager()
-					.getFragment(savedInstanceState,
-							EditPayloadFragment.class.getName());
-			this.rawPayloadFragment = (EditPayloadFragment) getSupportFragmentManager()
-					.getFragment(savedInstanceState,
-							EditPayloadFragment.class.getName() + "raw");
-		}		
-		
-		if (this.detailsFragment == null)
-			this.detailsFragment = new EditDetailsFragment();
-		if (this.payloadFragment == null)
-			this.payloadFragment = new EditPayloadFragment();
-		if (this.rawPayloadFragment == null)
-			this.rawPayloadFragment = new EditPayloadFragment();
-	}
-	
-	public void setupActionbarTabs(Bundle savedInstanceState) {
-		ActionBar actionbar = getSupportActionBar();
-		actionbar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
-		actionbar.removeAllTabs();
-
-		ActionBar.Tab detailsTab = actionbar.newTab().setText("Details");
-		//editTabListener = new EditTabListener(detailsFragment, "details", getSupportFragmentManager());
-		detailsTab.setTabListener(new EditTabListener(detailsFragment, "details", getSupportFragmentManager()));
-		actionbar.addTab(detailsTab);
-	    
-		ActionBar.Tab payloadTab = actionbar.newTab().setText("Payload");
-		payloadTab.setTabListener(new EditTabListener(payloadFragment, "payload", getSupportFragmentManager()));
-		actionbar.addTab(payloadTab);
-
-	    ActionBar.Tab rawPayloadTab = actionbar.newTab().setText("Raw Payload");
-	    rawPayloadTab.setTabListener(new EditTabListener(rawPayloadFragment, "raw_payload", getSupportFragmentManager()));
-	    actionbar.addTab(rawPayloadTab);
-	    
-		if (savedInstanceState != null) {
-            actionbar.setSelectedNavigationItem(savedInstanceState.getInt("tab", 0));
-        }
 	}
 	
 	private void initState() {
@@ -127,26 +61,12 @@ public class EditActivity extends SherlockFragmentActivity {
 			this.node = new OrgNode();
 			this.node.parentId = node_id;
 		}
-
-		setOrgNode(this.node, defaultTodo);
-	}
-	
-	public void setOrgNode(OrgNode node, String defaultTodo) {
-		
-		EditDetailsFragment detailsFragment = new EditDetailsFragment();
-		detailsFragment.init(node, defaultTodo, resolver);
-		
-		FragmentTransaction beginTransaction = getSupportFragmentManager().beginTransaction();
-		beginTransaction.replace(R.id.editnode_fragment_container, detailsFragment);
-		beginTransaction.commit();
-		this.detailsFragment = detailsFragment;
-		
-		this.payloadFragment.init(node.getCleanedPayload(), true);
-		this.rawPayloadFragment.init(node.getRawPayload(), false);
 	}
 	
 	public OrgNode getOrgNode() {
-		return this.detailsFragment.getEditedOrgNode();
+		if(this.node == null)
+			this.node = new OrgNode();
+		return this.node;
 	}
 
 
@@ -170,8 +90,6 @@ public class EditActivity extends SherlockFragmentActivity {
 		node.payload = text;
 		return node;
 	}
-
-	
 	
 	
     @Override
@@ -179,6 +97,9 @@ public class EditActivity extends SherlockFragmentActivity {
     	super.onCreateOptionsMenu(menu);
 		MenuInflater inflater = getSupportMenuInflater();
 	    inflater.inflate(R.menu.edit, menu);
+	    
+	    if(this.node == null)
+	    	return true;
 	    
 		if (this.node.id > -1) {
 			SubMenu subMenu = menu.addSubMenu(R.string.menu_advanced);
@@ -292,12 +213,12 @@ public class EditActivity extends SherlockFragmentActivity {
 	}
 	
 	private void doCancel() {
-		if(this.detailsFragment.hasEdits() == false &&
-                   this.payloadFragment.hasEdits() == false) {
-			setResult(RESULT_CANCELED);
-			finish();
-			return;
-		}
+//		if(this.detailsFragment.hasEdits() == false &&
+//                   this.payloadFragment.hasEdits() == false) {
+//			setResult(RESULT_CANCELED);
+//			finish();
+//			return;
+//		}
 		
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		builder.setMessage(R.string.node_edit_prompt)
@@ -337,7 +258,7 @@ public class EditActivity extends SherlockFragmentActivity {
 	private void createNewNode(OrgNode newNode) {
 		OrgNode newParent = this.detailsFragment.getLocation();
 
-		StringBuilder newCleanedPayload = new StringBuilder(this.payloadFragment.getText());
+		StringBuilder newCleanedPayload = new StringBuilder( ); //this.payloadFragment.getText());
 		insertChangesIntoPayloadResidue();
 		String newPayloadResidue = node.getPayload().getNewPayloadResidue();
 		String newPayload = newCleanedPayload.toString() + newPayloadResidue;

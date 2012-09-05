@@ -62,7 +62,7 @@ public class EditActivityTestMock extends ActivityInstrumentationTestCase2<EditA
 	
 	public void replaceFragment(OrgNode node) {
 		EditDetailsFragment fragment = new EditDetailsFragment();
-		fragment.init(node, "", null);
+		//fragment.setNode(node, "", null);
 		FragmentManager fragmentManager = activity.getSupportFragmentManager();
 		FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 		fragmentTransaction.replace(com.matburt.mobileorg.R.id.editnode_fragment_container, fragment, "details");

@@ -11,6 +11,8 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.Transformation;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -36,18 +38,11 @@ public class EditDetailsFragment extends SherlockFragment {
 	private OrgNode node;
 	
 	ArrayList<TagTableRow> tagEntries = new ArrayList<TagTableRow>();
-	private String defaultTodo;
 	private DateTableRow scheduledEntry = null;
 	private DateTableRow deadlineEntry = null;
 	
 	private ArrayList<String> tagsToRestore = null;
 	private ContentResolver resolver;
-	
-	public void init(OrgNode node, String defaultTodo, ContentResolver resolver) {
-		this.defaultTodo = defaultTodo;
-		this.resolver = resolver;
-		this.node = node;
-	}
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -61,16 +56,15 @@ public class EditDetailsFragment extends SherlockFragment {
 		this.todoStateView = (Spinner) view.findViewById(R.id.todo_state);
 		this.tagsView = (TableLayout) view.findViewById(R.id.tags);
 		this.datesView = (TableLayout) view.findViewById(R.id.dates);
-		this.locationView = (LinearLayout) view.findViewById(R.id.location);
+		//this.locationView = (LinearLayout) view.findViewById(R.id.location);
 		
         setHasOptionsMenu(true);
-        //updateDisplay();
         
-		if (savedInstanceState != null) {
-			setupScheduled(savedInstanceState.getString("scheduled"));
-			setupDeadline(savedInstanceState.getString("deadline"));
-			tagsToRestore = savedInstanceState.getStringArrayList("tags");
-		}
+//		if (savedInstanceState != null) {
+//			setupScheduled(savedInstanceState.getString("scheduled"));
+//			setupDeadline(savedInstanceState.getString("deadline"));
+//			tagsToRestore = savedInstanceState.getStringArrayList("tags");
+//		}
         
 		return view;
 	}
@@ -79,40 +73,42 @@ public class EditDetailsFragment extends SherlockFragment {
 	public void onStart() {
 		super.onStart();
 		
-		if(tagsToRestore != null) {
-			tagsView.removeAllViews();
-			tagEntries.clear();
-			setupTags(tagsToRestore);
-			tagsToRestore = null;
-		}
+//		if(tagsToRestore != null) {
+//			tagsView.removeAllViews();
+//			tagEntries.clear();
+//			setupTags(tagsToRestore);
+//			tagsToRestore = null;
+//		}
+		
+		EditActivity activity = ((EditActivity)getActivity());
+		
+		this.resolver = activity.getContentResolver();
+		this.node = activity.getOrgNode();
 		updateDisplay();
 	}
 	
+//	@Override
+//	public void onSaveInstanceState(Bundle outState) {
+//		super.onSaveInstanceState(outState);
+//        outState.putString("scheduled", getScheduled());
+//        outState.putString("deadline", getDeadline());
+//        
+//        ArrayList<String> tags = new ArrayList<String>();
+//        for(TagTableRow tag: tagEntries) {
+//        	tags.add(tag.getSelection());
+//        }
+//        outState.putStringArrayList("tags", tags);
+//	}
 	
-	
-	@Override
-	public void onSaveInstanceState(Bundle outState) {
-		super.onSaveInstanceState(outState);
-        outState.putString("scheduled", getScheduled());
-        outState.putString("deadline", getDeadline());
-        
-        ArrayList<String> tags = new ArrayList<String>();
-        for(TagTableRow tag: tagEntries) {
-        	tags.add(tag.getSelection());
-        }
-        outState.putStringArrayList("tags", tags);
-	}
-
 	public void updateDisplay() {
-		assert(node != null);
-		assert(node.name != null);
-		assert(titleView != null);
+		if(node == null)
+			return;
 		titleView.setText(node.name);
 		titleView.setSelection(node.name.length());
 
 		// TODO Fix taglist
 		// setupTags(node.getTagList());
-		setupDates();
+		setupDates(node);
 		setupSpinner(getActivity(), todoStateView,
 				OrgProviderUtil.getTodos(resolver), node.todo);
 		setupSpinner(getActivity(), priorityView,
@@ -120,6 +116,46 @@ public class EditDetailsFragment extends SherlockFragment {
 		if (node.getParent(resolver) != null)
 			this.locationTableRow = new LocationTableRow(
 					node.getParent(resolver), getActivity(), locationView, resolver);
+	}
+	
+	public void anim() {
+		DropDownAnim anim = new DropDownAnim(titleView, 200, true);
+		anim.start();
+	}
+	
+	public class DropDownAnim extends Animation {
+	    int targetHeight;
+	    View view;
+	    boolean down;
+
+	    public DropDownAnim(View view, int targetHeight, boolean down) {
+	        this.view = view;
+	        this.targetHeight = targetHeight;
+	        this.down = down;
+	    }
+
+	    @Override
+	    protected void applyTransformation(float interpolatedTime, Transformation t) {
+	        int newHeight;
+	        if (down) {
+	            newHeight = (int) (targetHeight * interpolatedTime);
+	        } else {
+	            newHeight = (int) (targetHeight * (1 - interpolatedTime));
+	        }
+	        view.getLayoutParams().height = newHeight;
+	        view.requestLayout();
+	    }
+
+	    @Override
+	    public void initialize(int width, int height, int parentWidth,
+	            int parentHeight) {
+	        super.initialize(width, height, parentWidth, parentHeight);
+	    }
+
+	    @Override
+	    public boolean willChangeBounds() {
+	        return true;
+	    }
 	}
 	
 	private void setupTags(ArrayList<String> tagList) {		
@@ -146,7 +182,7 @@ public class EditDetailsFragment extends SherlockFragment {
 			this.deadlineEntry = setupDate(deadline, "DEADLINE", deadlineRemoveListener);
 	}
 	
-	private void setupDates() {
+	private void setupDates(OrgNode node) {
 		this.scheduledEntry = setupDate(node.getPayload().getScheduled(), "SCHEDULED", scheduledRemoveListener);
 		this.deadlineEntry = setupDate(node.getPayload().getDeadline(), "DEADLINE", deadlineRemoveListener);
 	}

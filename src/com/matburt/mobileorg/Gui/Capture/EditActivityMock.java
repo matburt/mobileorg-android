@@ -21,7 +21,7 @@ public class EditActivityMock extends SherlockFragmentActivity {
 		EditDetailsFragment detailsFragment = new EditDetailsFragment();
 		OrgNode node = new OrgNode();
 		node.name = "initial";
-		detailsFragment.init(node, "", getContentResolver());
+		//detailsFragment.setNode(node, "", getContentResolver());
 		addFragment(detailsFragment);
 	}
 	
@@ -40,7 +40,7 @@ public class EditActivityMock extends SherlockFragmentActivity {
 		
 		fragmentTransaction = fragmentManager.beginTransaction();
 		EditDetailsFragment detailsFragment = new EditDetailsFragment();
-		detailsFragment.init(node, "", getContentResolver());
+		//detailsFragment.setNode(node, "", getContentResolver());
 		fragmentTransaction.add(com.matburt.mobileorg.R.id.editnode_fragment_container, detailsFragment, "details2");
 		fragmentTransaction.commit();
 		
