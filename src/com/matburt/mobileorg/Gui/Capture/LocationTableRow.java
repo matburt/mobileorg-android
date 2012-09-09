@@ -21,16 +21,6 @@ public class LocationTableRow {
 	private LinearLayout locationView;
 	private LocationEntry lastEntry;
 	private ContentResolver resolver;
-
-	public LocationTableRow(Context context, LinearLayout locationView, ContentResolver resolver) {
-		this.locationView = locationView;
-		this.resolver = resolver;
-
-		LocationEntry entry = new LocationEntry(context, null, null);
-		entry.setupSpinner();
-		this.lastEntry = entry;
-		locationView.addView(entry);
-	}
 	
 	public LocationTableRow(OrgNode node, Context context, LinearLayout locationView, ContentResolver resolver) {
 		this.locationView = locationView;
@@ -39,13 +29,15 @@ public class LocationTableRow {
 		initLocationView(context);
 	}
 	
-	private void initLocationView(Context context) {
+	private void initLocationView(Context context) {		
 		OrgNode currentNode = this.node;
 		LocationEntry entry = null;
 		while(currentNode != null) {
 			entry = new LocationEntry(context, currentNode.getParent(resolver), entry);
 			entry.setupSpinner(currentNode.name);
-			locationView.addView(entry, 0);
+			
+			if(locationView != null)
+				locationView.addView(entry, 0);
 			
 			if(this.lastEntry == null)
 				this.lastEntry = entry;

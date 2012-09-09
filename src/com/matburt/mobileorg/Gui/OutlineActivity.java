@@ -70,11 +70,10 @@ public class OutlineActivity extends SherlockActivity
 		Intent intent = getIntent();
 		node_id = intent.getLongExtra("node_id", -1);
 
-		displayNewUserDialog();
-
 		if (this.node_id == -1) {
+			displayNewUserDialog();
 			if (this.appInst.isSyncConfigured() == false)
-				this.showWizard();
+				showWizard();
 		}
 
 		listView = (ListView) this.findViewById(R.id.outline_list);
@@ -91,23 +90,10 @@ public class OutlineActivity extends SherlockActivity
 	}
 	
 	private void displayNewUserDialog() {
-		if (!this.checkVersionCode()) {
-			this.showUpgradePopup();
+		if (!checkVersionCode()) {
+			showUpgradePopup();
 		}
 	}
-
-	private OnItemClickListener outlineClickListener = new OnItemClickListener() {
-		@Override
-		public void onItemClick(AdapterView<?> parent, View v, int position,
-				long id) {
-			Long clicked_node_id = listView.getItemIdAtPosition(position);
-			lastSelection = position;
-			if (OrgNode.hasChildren(node_id, resolver) || node_id == -1)
-				runExpandSelection(clicked_node_id);
-			else 
-				runEditNodeActivity(clicked_node_id);
-		}
-	};
 	
 	@Override
 	protected void onResume() {
@@ -135,17 +121,18 @@ public class OutlineActivity extends SherlockActivity
 				OrgData.DEFAULT_COLUMNS, null, null, outlineSort);
 
 		if (node_id >= 0) {
-			if(cursor.getCount() == 0)
+			if(cursor.getCount() == 0) {
 				finish();
+				return;
+			}
 		}
 
-        else {
-            startManagingCursor(cursor);
-				
-            this.outlineAdapter = new OutlineCursorAdapter(this, cursor, getContentResolver());
-            listView.setAdapter(outlineAdapter);
-            listView.setSelection(lastSelection);
-        }
+		startManagingCursor(cursor);
+
+		this.outlineAdapter = new OutlineCursorAdapter(this, cursor, getContentResolver());
+		listView.setAdapter(outlineAdapter);
+		listView.setSelection(lastSelection);
+     
         setTitle();
 	}
 	
@@ -158,6 +145,19 @@ public class OutlineActivity extends SherlockActivity
 		}
 	}
 
+	private OnItemClickListener outlineClickListener = new OnItemClickListener() {
+		@Override
+		public void onItemClick(AdapterView<?> parent, View v, int position,
+				long id) {
+			Long clicked_node_id = listView.getItemIdAtPosition(position);
+			lastSelection = position;
+			if (OrgNode.hasChildren(node_id, resolver) || node_id == -1)
+				runExpandSelection(clicked_node_id);
+			else 
+				runEditNodeActivity(clicked_node_id);
+		}
+	};
+	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		MenuInflater inflater = getSupportMenuInflater();

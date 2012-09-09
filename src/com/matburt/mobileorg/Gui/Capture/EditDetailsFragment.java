@@ -56,7 +56,7 @@ public class EditDetailsFragment extends SherlockFragment {
 		this.todoStateView = (Spinner) view.findViewById(R.id.todo_state);
 		this.tagsView = (TableLayout) view.findViewById(R.id.tags);
 		this.datesView = (TableLayout) view.findViewById(R.id.dates);
-		//this.locationView = (LinearLayout) view.findViewById(R.id.location);
+		this.locationView = (LinearLayout) view.findViewById(R.id.location);
 		
         setHasOptionsMenu(true);
         
@@ -115,7 +115,8 @@ public class EditDetailsFragment extends SherlockFragment {
 				OrgProviderUtil.getPriorities(resolver), node.priority);
 		if (node.getParent(resolver) != null)
 			this.locationTableRow = new LocationTableRow(
-					node.getParent(resolver), getActivity(), locationView, resolver);
+					node.getParent(resolver), getActivity(), locationView,
+					resolver);
 	}
 	
 	public void anim() {
