@@ -186,7 +186,7 @@ public class OrgProviderTest extends ProviderTestCase2<OrgProvider> {
 		OrgEdit edit = new OrgEdit(fileNode, OrgEdit.TYPE.ADDHEADING, node.toString(), resolver);
 		String correctEditString = edit.toString();
 		
-		String editsString = OrgProviderUtil.editsToString(resolver);
+		String editsString = OrgEdit.editsToString(resolver);
 		assertEquals(correctEditString.trim(), editsString.trim());
 	}
 	
@@ -201,7 +201,8 @@ public class OrgProviderTest extends ProviderTestCase2<OrgProvider> {
 		parser.parse(orgFile, breader);
 		db.close();
 
-		String fileString = OrgProviderUtil.fileToString(filename, resolver);
+		OrgFile file = new OrgFile(filename, resolver);
+		String fileString = file.toString(resolver);
 		assertEquals(SimpleOrgFiles.orgFile.trim(), fileString.trim());
 	}
 }	

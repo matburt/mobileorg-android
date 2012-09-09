@@ -48,7 +48,7 @@ public class OrgProviderUtil {
 		if(generateEdit == false)
 			return;
 
-		// Add new heading nodes need the entire content of node without star headings
+		// Add new heading nodes; need the entire content of node without star headings
 		long tempLevel = node.level;
 		node.level = 0;
 		OrgEdit edit = new OrgEdit(parent, OrgEdit.TYPE.ADDHEADING, node.toString(), resolver);
@@ -164,17 +164,7 @@ public class OrgProviderUtil {
 		return list;
 	}
 	
-	
-	public static String fileToString(String filename, ContentResolver resolver) {		
-		try {
-			OrgFile orgFile = new OrgFile(filename, resolver);
-			return nodesToString(orgFile.nodeId, 0, resolver).toString();
-		} catch(IllegalArgumentException e) {
-			return "";
-		}
-	}
-	
-	private static StringBuilder nodesToString(long node_id, long level, ContentResolver resolver) {
+	static StringBuilder nodesToString(long node_id, long level, ContentResolver resolver) {
 		StringBuilder result = new StringBuilder();
 		
 		OrgNode node = new OrgNode(node_id, resolver);
@@ -194,22 +184,6 @@ public class OrgProviderUtil {
 		}
 		childrenCursor.close();
 		return result;
-	}
-
-	
-	public static String editsToString(ContentResolver resolver) {		
-		Cursor cursor = resolver.query(Edits.CONTENT_URI,
-				Edits.DEFAULT_COLUMNS, null, null, null);
-		cursor.moveToFirst();
-
-		StringBuilder result = new StringBuilder();
-		while (cursor.isAfterLast() == false) {
-			result.append(new OrgEdit(cursor).toString());
-			cursor.moveToNext();
-		}
-		
-		cursor.close();
-		return result.toString();
 	}
 	
 	public static void clearDB(ContentResolver resolver) {
@@ -260,49 +234,25 @@ public class OrgProviderUtil {
 	}
 	
 	public static Cursor search(String query, ContentResolver resolver) {
+		Cursor cursor = resolver.query(OrgData.CONTENT_URI, OrgData.DEFAULT_COLUMNS,
+				OrgData.NAME + " LIKE ?", new String[] { query },
+				OrgData.DEFAULT_SORT);
 		
 //		Cursor cursor = db.rawQuery(
 //				"SELECT * FROM orgdata WHERE name LIKE ?",
 //				new String[] { query });
-//		
-//		return cursor;
-		return null;
+		
+		return cursor;
 	}
-
-//	public static ArrayList<HashMap<String, Integer>> getGroupedTodos(ContentResolver resolver) {
-//		ArrayList<HashMap<String, Integer>> todos = new ArrayList<HashMap<String, Integer>>();
-//		Cursor cursor = resolver.query(Todos.CONTENT_URI, Todos.DEFAULT_COLUMNS, null, null, Todos.GROUP);
-//
-//		if (cursor.getCount() > 0) {
-//			HashMap<String, Integer> grouping = new HashMap<String, Integer>();
-//			int resultgroup = 0;
-//
-//			for (cursor.moveToFirst(); cursor.isAfterLast() == false; cursor
-//					.moveToNext()) {
-//				// If new result group, create new grouping
-//				if (resultgroup != cursor.getInt(0)) {
-//					resultgroup = cursor.getInt(0);
-//					todos.add(grouping);
-//					grouping = new HashMap<String, Integer>();
-//				}
-//				// Add item to grouping
-//				grouping.put(cursor.getString(1), cursor.getInt(2));
-//			}
-//
-//			todos.add(grouping);
-//		}
-//
-//		cursor.close();
-//		return todos;
-//	}
 	
 	public static int getChangesCount(ContentResolver resolver) {
 		int changes = 0;
 		Cursor cursor = resolver.query(Edits.CONTENT_URI,
 				Edits.DEFAULT_COLUMNS, null, null, null);
-		if(cursor != null)
+		if(cursor != null) {
 			changes += cursor.getCount();
-		cursor.close();
+			cursor.close();
+		}
 		
 		long file_id = -2;
 		try {
@@ -314,8 +264,8 @@ public class OrgProviderUtil {
 			int captures = cursor.getCount();
 			if(captures > 0)
 				changes += captures;
+			cursor.close();
 		}
-		cursor.close();
 		
 		return changes;
 	}

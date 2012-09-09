@@ -51,7 +51,7 @@ public class OrgContract {
 		String NAME = "name";
 	}
 
-	public static final String CONTENT_AUTHORITY = "com.matburt.mobileorg.provider.OrgProvider";
+	public static final String CONTENT_AUTHORITY = "com.matburt.mobileorg.OrgData.OrgProvider";
 	private static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
 
 	private static final String PATH_ORGDATA = "orgdata";

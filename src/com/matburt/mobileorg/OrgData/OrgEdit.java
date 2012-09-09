@@ -125,4 +125,83 @@ public class OrgEdit {
 				&& nodeId.equals(edit.nodeId);
 	}
 
+	public static String editsToString(ContentResolver resolver) {		
+		Cursor cursor = resolver.query(Edits.CONTENT_URI,
+				Edits.DEFAULT_COLUMNS, null, null, null);
+		cursor.moveToFirst();
+
+		StringBuilder result = new StringBuilder();
+		while (cursor.isAfterLast() == false) {
+			result.append(new OrgEdit(cursor).toString());
+			cursor.moveToNext();
+		}
+		
+		cursor.close();
+		return result.toString();
+	}
+
+/** Legacy code for parsing edits */
+	// TODO Re-enable or delete parsing of edits
+//	private Pattern editTitlePattern = Pattern
+//			.compile("F\\((edit:.*?)\\) \\[\\[(.*?)\\]\\[(.*?)\\]\\]");
+//    
+//    public ArrayList<EditNode> parseEdits() {
+//        Pattern editTitlePattern = Pattern.compile("F\\((edit:.*?)\\) \\[\\[(.*?)\\]\\[(.*?)\\]\\]");
+//        Pattern createTitlePattern = Pattern.compile("^\\*\\s+(.*)");
+// 
+//        ArrayList<EditNode> edits = new ArrayList<EditNode>();
+//        OrgFile orgfile = new OrgFile(OrgFile.CAPTURE_FILE, context);
+//        BufferedReader breader = orgfile.getReader();
+//        if (breader == null)
+//            return edits;
+//
+//        String thisLine;
+//        boolean awaitingOldVal = false;
+//        boolean awaitingNewVal = false;
+//        EditNode thisNode = null;
+//
+//        try {
+//            while ((thisLine = breader.readLine()) != null) {
+//                Matcher editm = editTitlePattern.matcher(thisLine);
+//                Matcher createm = createTitlePattern.matcher(thisLine);
+//                if (editm.find()) {
+//                    thisNode = new EditNode();
+//                    if (editm.group(1) != null)
+//                        thisNode.editType = editm.group(1).split(":")[1];
+//                    if (editm.group(2) != null)
+//                        thisNode.nodeId = editm.group(2).split(":")[1];
+//                    if (editm.group(3) == null)
+//                        thisNode.title = editm.group(3);
+//                }
+//                else if (createm.find()) {
+//                }
+//                else {
+//                    if (thisLine.indexOf("** Old value") != -1) {
+//                        awaitingOldVal = true;
+//                        continue;
+//                    }
+//                    else if (thisLine.indexOf("** New value") != -1) {
+//                        awaitingOldVal = false;
+//                        awaitingNewVal = true;
+//                        continue;
+//                    }
+//                    else if (thisLine.indexOf("** End of edit") != -1) {
+//                        awaitingNewVal = false;
+//                        edits.add(thisNode);
+//                    }
+//
+//                    if (awaitingOldVal) {
+//                        thisNode.oldVal += thisLine;
+//                    }
+//                    if (awaitingNewVal) {
+//                        thisNode.newVal += thisLine;
+//                    }
+//                }
+//            }
+//        }
+//        catch (java.io.IOException e) {
+//            return null;
+//        }
+//        return edits;
+//    }
 }

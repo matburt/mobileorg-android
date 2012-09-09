@@ -17,6 +17,7 @@ import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Gui.FileDecryptionActivity;
 import com.matburt.mobileorg.OrgData.OrgContract.Edits;
 import com.matburt.mobileorg.OrgData.OrgContract.Files;
+import com.matburt.mobileorg.OrgData.OrgEdit;
 import com.matburt.mobileorg.OrgData.OrgFile;
 import com.matburt.mobileorg.OrgData.OrgFileParser;
 import com.matburt.mobileorg.OrgData.OrgProviderUtil;
@@ -107,8 +108,15 @@ public class Synchronizer {
 	public void pushCaptures() throws Exception, IOException,
 			CertificateException, SSLHandshakeException {
 		final String filename = CAPTURE_FILE;
-		String localContents = OrgProviderUtil.fileToString(filename, resolver);
-		localContents += OrgProviderUtil.editsToString(resolver);
+		
+		String localContents = "";
+		
+		try {
+			OrgFile file = new OrgFile(filename, resolver);
+			localContents += file.toString(resolver);
+		} catch (IllegalArgumentException e) {}
+		
+		localContents += OrgEdit.editsToString(resolver);
 
 		if (localContents.equals(""))
 			return;

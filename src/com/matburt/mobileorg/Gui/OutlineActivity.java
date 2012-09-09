@@ -182,7 +182,8 @@ public class OutlineActivity extends SherlockActivity
 			return true;
 
 		case R.id.menu_settings:
-			return runShowSettings();
+			runShowSettings(null);
+			return true;
 
 		case R.id.menu_outline:
 			runExpandSelection(-1);
@@ -305,10 +306,9 @@ public class OutlineActivity extends SherlockActivity
 		return onSearchRequested();
 	}
 	
-	private boolean runShowSettings() {
+	public void runShowSettings(View view) {
 		Intent intent = new Intent(this, SettingsActivity.class);
 		startActivity(intent);
-		return true;
 	}
 
 	private class SynchServiceReceiver extends BroadcastReceiver {
