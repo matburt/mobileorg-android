@@ -1,4 +1,4 @@
-package com.matburt.mobileorg.Parsing;
+package com.matburt.mobileorg.OrgData;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -12,9 +12,6 @@ import android.content.ContentResolver;
 import android.text.TextUtils;
 import android.util.Pair;
 
-import com.matburt.mobileorg.provider.OrgDatabase;
-import com.matburt.mobileorg.provider.OrgFile;
-import com.matburt.mobileorg.provider.OrgNode;
 
 public class OrgFileParser {
 

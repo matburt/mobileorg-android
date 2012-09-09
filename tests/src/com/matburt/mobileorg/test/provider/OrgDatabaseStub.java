@@ -2,8 +2,8 @@ package com.matburt.mobileorg.test.provider;
 
 import android.content.Context;
 
-import com.matburt.mobileorg.provider.OrgDatabase;
-import com.matburt.mobileorg.provider.OrgNode;
+import com.matburt.mobileorg.OrgData.OrgDatabase;
+import com.matburt.mobileorg.OrgData.OrgNode;
 
 public class OrgDatabaseStub extends OrgDatabase {
 

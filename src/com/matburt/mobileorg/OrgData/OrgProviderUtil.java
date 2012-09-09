@@ -1,4 +1,4 @@
-package com.matburt.mobileorg.provider;
+package com.matburt.mobileorg.OrgData;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -8,12 +8,12 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.text.TextUtils;
 
-import com.matburt.mobileorg.provider.OrgContract.Edits;
-import com.matburt.mobileorg.provider.OrgContract.Files;
-import com.matburt.mobileorg.provider.OrgContract.OrgData;
-import com.matburt.mobileorg.provider.OrgContract.Priorities;
-import com.matburt.mobileorg.provider.OrgContract.Tags;
-import com.matburt.mobileorg.provider.OrgContract.Todos;
+import com.matburt.mobileorg.OrgData.OrgContract.Edits;
+import com.matburt.mobileorg.OrgData.OrgContract.Files;
+import com.matburt.mobileorg.OrgData.OrgContract.OrgData;
+import com.matburt.mobileorg.OrgData.OrgContract.Priorities;
+import com.matburt.mobileorg.OrgData.OrgContract.Tags;
+import com.matburt.mobileorg.OrgData.OrgContract.Todos;
 import com.matburt.mobileorg.util.FileUtils;
 
 public class OrgProviderUtil {

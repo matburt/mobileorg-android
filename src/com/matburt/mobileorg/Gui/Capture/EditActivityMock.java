@@ -1,15 +1,12 @@
 package com.matburt.mobileorg.Gui.Capture;
 
-import android.R;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
-import com.matburt.mobileorg.Gui.Capture.EditDetailsFragment;
-import com.matburt.mobileorg.provider.OrgNode;
+import com.matburt.mobileorg.OrgData.OrgNode;
 
 public class EditActivityMock extends SherlockFragmentActivity {
 	

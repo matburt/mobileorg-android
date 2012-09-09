@@ -17,8 +17,8 @@ import android.util.Log;
 import android.widget.RemoteViews;
 
 import com.matburt.mobileorg.R;
-import com.matburt.mobileorg.Parsing.MobileOrgApplication;
-import com.matburt.mobileorg.provider.OrgNode;
+import com.matburt.mobileorg.OrgData.MobileOrgApplication;
+import com.matburt.mobileorg.OrgData.OrgNode;
 
 public class TimeclockService extends Service {
 	public static final String NODE_ID = "node_id";

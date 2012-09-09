@@ -19,9 +19,9 @@ import android.provider.CalendarContract.Reminders;
 import android.text.format.Time;
 
 import com.matburt.mobileorg.R;
-import com.matburt.mobileorg.Parsing.NodePayload.DateEntry;
-import com.matburt.mobileorg.provider.OrgNode;
-import com.matburt.mobileorg.provider.OrgProviderUtil;
+import com.matburt.mobileorg.OrgData.OrgNode;
+import com.matburt.mobileorg.OrgData.OrgNodePayload.DateEntry;
+import com.matburt.mobileorg.OrgData.OrgProviderUtil;
 
 public class CalendarSyncService {
 	private final static String CALENDAR_ORGANIZER = "MobileOrg";

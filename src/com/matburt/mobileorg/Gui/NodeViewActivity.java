@@ -23,10 +23,10 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Gui.Capture.EditActivity;
-import com.matburt.mobileorg.Parsing.MobileOrgApplication;
+import com.matburt.mobileorg.OrgData.MobileOrgApplication;
+import com.matburt.mobileorg.OrgData.OrgFile;
+import com.matburt.mobileorg.OrgData.OrgNode;
 import com.matburt.mobileorg.Synchronizers.Synchronizer;
-import com.matburt.mobileorg.provider.OrgFile;
-import com.matburt.mobileorg.provider.OrgNode;
 
 public class NodeViewActivity extends SherlockFragmentActivity {
 	

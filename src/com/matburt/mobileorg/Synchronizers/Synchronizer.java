@@ -15,12 +15,12 @@ import android.util.Log;
 
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Gui.FileDecryptionActivity;
-import com.matburt.mobileorg.Parsing.OrgFileParser;
+import com.matburt.mobileorg.OrgData.OrgContract.Edits;
+import com.matburt.mobileorg.OrgData.OrgContract.Files;
+import com.matburt.mobileorg.OrgData.OrgFile;
+import com.matburt.mobileorg.OrgData.OrgFileParser;
+import com.matburt.mobileorg.OrgData.OrgProviderUtil;
 import com.matburt.mobileorg.Services.CalendarSyncService;
-import com.matburt.mobileorg.provider.OrgContract.Edits;
-import com.matburt.mobileorg.provider.OrgContract.Files;
-import com.matburt.mobileorg.provider.OrgFile;
-import com.matburt.mobileorg.provider.OrgProviderUtil;
 import com.matburt.mobileorg.util.FileUtils;
 
 /**

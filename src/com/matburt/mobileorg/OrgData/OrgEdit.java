@@ -1,11 +1,11 @@
-package com.matburt.mobileorg.provider;
-
-import com.matburt.mobileorg.provider.OrgContract.Edits;
+package com.matburt.mobileorg.OrgData;
 
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
+
+import com.matburt.mobileorg.OrgData.OrgContract.Edits;
 
 public class OrgEdit {
 

@@ -1,12 +1,12 @@
-package com.matburt.mobileorg.provider;
-
-import com.matburt.mobileorg.provider.OrgContract.OrgData;
+package com.matburt.mobileorg.OrgData;
 
 import android.content.Context;
 import android.database.DatabaseUtils.InsertHelper;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
+
+import com.matburt.mobileorg.OrgData.OrgContract.OrgData;
 
 public class OrgDatabase extends SQLiteOpenHelper {
 	private static final String DATABASE_NAME = "MobileOrg.db";

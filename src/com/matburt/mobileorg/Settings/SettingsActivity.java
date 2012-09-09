@@ -18,10 +18,8 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.matburt.mobileorg.R;
-import com.matburt.mobileorg.Parsing.MobileOrgApplication;
+import com.matburt.mobileorg.OrgData.OrgProviderUtil;
 import com.matburt.mobileorg.Services.CalendarSyncService;
-import com.matburt.mobileorg.provider.OrgDatabase;
-import com.matburt.mobileorg.provider.OrgProviderUtil;
 
 public class SettingsActivity extends PreferenceActivity implements
 		SharedPreferences.OnSharedPreferenceChangeListener {

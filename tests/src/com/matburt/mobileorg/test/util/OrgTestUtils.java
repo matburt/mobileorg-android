@@ -1,7 +1,7 @@
 package com.matburt.mobileorg.test.util;
 
-import com.matburt.mobileorg.provider.OrgFile;
-import com.matburt.mobileorg.provider.OrgNode;
+import com.matburt.mobileorg.OrgData.OrgFile;
+import com.matburt.mobileorg.OrgData.OrgNode;
 
 public class OrgTestUtils {
 

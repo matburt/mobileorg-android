@@ -21,9 +21,9 @@ import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 
 import com.matburt.mobileorg.R;
-import com.matburt.mobileorg.Parsing.OrgFileParser;
-import com.matburt.mobileorg.provider.OrgNode;
-import com.matburt.mobileorg.provider.OrgProviderUtil;
+import com.matburt.mobileorg.OrgData.OrgFileParser;
+import com.matburt.mobileorg.OrgData.OrgNode;
+import com.matburt.mobileorg.OrgData.OrgProviderUtil;
 
 public class OutlineCursorAdapter extends SimpleCursorAdapter {
 

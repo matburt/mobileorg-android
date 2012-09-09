@@ -1,4 +1,4 @@
-package com.matburt.mobileorg.Parsing;
+package com.matburt.mobileorg.OrgData;
 
 import android.app.Application;
 import android.preference.PreferenceManager;
@@ -6,7 +6,6 @@ import android.text.TextUtils;
 
 import com.matburt.mobileorg.Services.CalendarSyncService;
 import com.matburt.mobileorg.Services.SyncService;
-import com.matburt.mobileorg.provider.OrgProviderUtil;
 
 public class MobileOrgApplication extends Application {
 	private CalendarSyncService calendarSyncService;

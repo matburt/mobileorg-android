@@ -11,9 +11,9 @@ import android.util.Log;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 
-import com.matburt.mobileorg.provider.OrgContract.OrgData;
-import com.matburt.mobileorg.provider.OrgNode;
-import com.matburt.mobileorg.provider.OrgProviderUtil;
+import com.matburt.mobileorg.OrgData.OrgContract.OrgData;
+import com.matburt.mobileorg.OrgData.OrgNode;
+import com.matburt.mobileorg.OrgData.OrgProviderUtil;
 import com.matburt.mobileorg.util.FileUtils;
 
 public class LocationTableRow {

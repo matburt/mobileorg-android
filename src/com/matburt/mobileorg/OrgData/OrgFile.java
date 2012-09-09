@@ -1,13 +1,13 @@
-package com.matburt.mobileorg.provider;
-
-import com.matburt.mobileorg.provider.OrgContract.Files;
-import com.matburt.mobileorg.provider.OrgContract.OrgData;
+package com.matburt.mobileorg.OrgData;
 
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
 import android.util.Log;
+
+import com.matburt.mobileorg.OrgData.OrgContract.Files;
+import com.matburt.mobileorg.OrgData.OrgContract.OrgData;
 
 public class OrgFile {
 	public String filename = "";

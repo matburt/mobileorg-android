@@ -6,10 +6,10 @@ import android.database.Cursor;
 import android.test.ProviderTestCase2;
 import android.test.mock.MockContentResolver;
 
-import com.matburt.mobileorg.provider.OrgFile;
-import com.matburt.mobileorg.provider.OrgNode;
-import com.matburt.mobileorg.provider.OrgProvider;
-import com.matburt.mobileorg.provider.OrgContract.OrgData;
+import com.matburt.mobileorg.OrgData.OrgFile;
+import com.matburt.mobileorg.OrgData.OrgNode;
+import com.matburt.mobileorg.OrgData.OrgProvider;
+import com.matburt.mobileorg.OrgData.OrgContract.OrgData;
 import com.matburt.mobileorg.test.util.OrgTestUtils;
 
 public class OrgNodeTest extends ProviderTestCase2<OrgProvider> {

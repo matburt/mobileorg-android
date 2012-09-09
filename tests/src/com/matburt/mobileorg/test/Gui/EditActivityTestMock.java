@@ -10,7 +10,7 @@ import android.test.mock.MockContentResolver;
 import com.matburt.mobileorg.Gui.Capture.EditActivity;
 import com.matburt.mobileorg.Gui.Capture.EditActivityMock;
 import com.matburt.mobileorg.Gui.Capture.EditDetailsFragment;
-import com.matburt.mobileorg.provider.OrgNode;
+import com.matburt.mobileorg.OrgData.OrgNode;
 import com.matburt.mobileorg.test.util.OrgTestUtils;
 
 public class EditActivityTestMock extends ActivityInstrumentationTestCase2<EditActivityMock> {

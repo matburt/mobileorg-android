@@ -1,4 +1,4 @@
-package com.matburt.mobileorg.provider;
+package com.matburt.mobileorg.OrgData;
 
 import android.net.Uri;
 

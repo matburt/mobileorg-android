@@ -1,4 +1,4 @@
-package com.matburt.mobileorg.provider;
+package com.matburt.mobileorg.OrgData;
 
 import android.content.ContentProvider;
 import android.content.ContentUris;
@@ -9,15 +9,15 @@ import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 
-import com.matburt.mobileorg.provider.OrgContract.Edits;
-import com.matburt.mobileorg.provider.OrgContract.Files;
-import com.matburt.mobileorg.provider.OrgContract.OrgData;
-import com.matburt.mobileorg.provider.OrgContract.Search;
-import com.matburt.mobileorg.provider.OrgDatabase.Tables;
+import com.matburt.mobileorg.OrgData.OrgContract.Edits;
+import com.matburt.mobileorg.OrgData.OrgContract.Files;
+import com.matburt.mobileorg.OrgData.OrgContract.OrgData;
+import com.matburt.mobileorg.OrgData.OrgContract.Search;
+import com.matburt.mobileorg.OrgData.OrgDatabase.Tables;
 import com.matburt.mobileorg.util.SelectionBuilder;
 
 public class OrgProvider extends ContentProvider {
-	public static final String AUTHORITY = "com.matburt.mobileorg.provider.OrgProvider";
+	public static final String AUTHORITY = "com.matburt.mobileorg.OrgData.OrgProvider";
 	private OrgDatabase dbHelper;
 	private static final UriMatcher uriMatcher = buildUriMatcher();
 	

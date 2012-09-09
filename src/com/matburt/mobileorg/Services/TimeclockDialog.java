@@ -13,7 +13,7 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 
 import com.matburt.mobileorg.R;
-import com.matburt.mobileorg.provider.OrgNode;
+import com.matburt.mobileorg.OrgData.OrgNode;
 
 public class TimeclockDialog extends FragmentActivity {
 

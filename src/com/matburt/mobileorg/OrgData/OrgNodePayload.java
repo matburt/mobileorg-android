@@ -1,4 +1,4 @@
-package com.matburt.mobileorg.Parsing;
+package com.matburt.mobileorg.OrgData;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -13,7 +13,7 @@ import android.text.format.DateUtils;
 import android.text.format.Time;
 import android.util.Log;
 
-public class NodePayload {
+public class OrgNodePayload {
 	private StringBuilder payload = new StringBuilder();
 	/** These are the remains of the cleaned payload. */
 	private StringBuilder payloadResidue = new StringBuilder();
@@ -27,7 +27,7 @@ public class NodePayload {
 	
 	private String id = null; // Can be :ID: (or :ORIGINAL_ID: for agendas.org)
 	
-	public NodePayload(String payload) {
+	public OrgNodePayload(String payload) {
 		this.payload = new StringBuilder(payload);
 	}
 	

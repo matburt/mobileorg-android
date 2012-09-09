@@ -14,7 +14,7 @@
     <uses-permission android:name="android.permission.WRITE_CALENDAR" />
 
     <application
-        android:name=".Parsing.MobileOrgApplication"
+        android:name=".OrgData.MobileOrgApplication"
         android:debuggable="true"
         android:icon="@drawable/icon"
         android:label="MobileOrg"
@@ -49,8 +49,8 @@
         </service>
 
         <provider
-            android:name=".provider.OrgProvider"
-            android:authorities="com.matburt.mobileorg.provider.OrgProvider" />
+            android:name=".OrgData.OrgProvider"
+            android:authorities="com.matburt.mobileorg.OrgData.OrgProvider" />
 
         <receiver android:name=".Plugin.Synchronize" >
             <intent-filter>

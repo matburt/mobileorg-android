@@ -1,4 +1,4 @@
-package com.matburt.mobileorg.provider;
+package com.matburt.mobileorg.OrgData;
 
 import java.util.ArrayList;
 import java.util.regex.Matcher;
@@ -11,8 +11,7 @@ import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.matburt.mobileorg.Parsing.NodePayload;
-import com.matburt.mobileorg.provider.OrgContract.OrgData;
+import com.matburt.mobileorg.OrgData.OrgContract.OrgData;
 import com.matburt.mobileorg.util.FileUtils;
 
 public class OrgNode {
@@ -27,7 +26,7 @@ public class OrgNode {
 	public String name = "";
 	public String payload = "";
 	
-	public NodePayload nodePayload = new NodePayload("");
+	public OrgNodePayload nodePayload = new OrgNodePayload("");
 
 	public OrgNode() {
 	}
@@ -80,7 +79,7 @@ public class OrgNode {
 	
 	private void preparePayload() {
 		if(this.nodePayload == null)
-			this.nodePayload = new NodePayload(this.payload);
+			this.nodePayload = new OrgNodePayload(this.payload);
 	}
 	
 	public void write(ContentResolver resolver) {
@@ -246,7 +245,7 @@ public class OrgNode {
 		return this.payload;
 	}
 	
-	public NodePayload getPayload() {
+	public OrgNodePayload getPayload() {
 		return this.nodePayload;
 	}
 	
@@ -439,7 +438,7 @@ public class OrgNode {
 	
 	public void addLogbook(long startTime, long endTime, String elapsedTime, ContentResolver resolver) {
 		StringBuilder rawPayload = new StringBuilder(getRawPayload());
-		rawPayload = NodePayload.addLogbook(rawPayload, startTime, endTime, elapsedTime);
+		rawPayload = OrgNodePayload.addLogbook(rawPayload, startTime, endTime, elapsedTime);
 		
 		boolean generateEdits = !getFilename(resolver).equals(FileUtils.CAPTURE_FILE);
 

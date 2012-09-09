@@ -14,7 +14,7 @@ import android.widget.EditText;
 
 import com.matburt.mobileorg.Gui.Capture.EditActivity;
 import com.matburt.mobileorg.Gui.Capture.EditDetailsFragment;
-import com.matburt.mobileorg.provider.OrgNode;
+import com.matburt.mobileorg.OrgData.OrgNode;
 import com.matburt.mobileorg.test.util.OrgTestUtils;
 
 public class EditActivityTest extends ActivityInstrumentationTestCase2<EditActivity> {
