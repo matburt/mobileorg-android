@@ -6,6 +6,7 @@ import java.util.HashMap;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.text.TextUtils;
 
 import com.matburt.mobileorg.provider.OrgContract.Edits;
 import com.matburt.mobileorg.provider.OrgContract.Files;
@@ -65,6 +66,23 @@ public class OrgProviderUtil {
 		while (cursor.isAfterLast() == false) {
 			OrgFile orgFile = new OrgFile(cursor);
 			checksums.put(orgFile.filename, orgFile.checksum);
+			cursor.moveToNext();
+		}
+
+		cursor.close();
+		return checksums;
+	}
+	
+	public static ArrayList<String> getFilenames(ContentResolver resolver) {
+		ArrayList<String> checksums = new ArrayList<String>();
+
+		Cursor cursor = resolver.query(Files.CONTENT_URI, Files.DEFAULT_COLUMNS,
+				null, null, null);
+		cursor.moveToFirst();
+
+		while (cursor.isAfterLast() == false) {
+			OrgFile orgFile = new OrgFile(cursor);
+			checksums.add(orgFile.filename);
 			cursor.moveToNext();
 		}
 
@@ -204,6 +222,41 @@ public class OrgProviderUtil {
 	public static OrgNode getOrgNodeFromFilename(String name, ContentResolver resolver) {
 		OrgFile file = new OrgFile(name, resolver);
 		return new OrgNode(file.nodeId, resolver);
+	}
+	
+	public static boolean isTodoActive(String todo, ContentResolver resolver) {
+		Cursor cursor = resolver.query(Todos.CONTENT_URI, Todos.DEFAULT_COLUMNS, Todos.NAME + " = ?",
+				new String[] { todo }, null);		
+		
+		if(TextUtils.isEmpty(todo))
+			return true;
+		
+		if(cursor.getCount() > 0) {
+			cursor.moveToFirst();
+			int isdone = cursor.getInt(0);
+			cursor.close();
+			
+			if(isdone == 0)
+				return true;
+			else
+				return false;
+		}
+		
+		return false;
+	}
+	
+	public static Cursor getFileSchedule(String filename, boolean calendarHabits, ContentResolver resolver) {
+		OrgFile file = new OrgFile(filename, resolver);
+		
+		String whereQuery = OrgData.FILE_ID + "=? AND (" + OrgData.PAYLOAD + " LIKE '%<%>%')";
+
+		if(calendarHabits)
+			whereQuery += "AND NOT" + OrgData.PAYLOAD + " LIKE '%:STYLE: habit%'";
+			
+		Cursor cursor = resolver.query(OrgData.CONTENT_URI, OrgData.DEFAULT_COLUMNS, whereQuery,
+				new String[] { Long.toString(file.id) }, null);
+		cursor.moveToFirst();
+		return cursor;
 	}
 
 //	public static ArrayList<HashMap<String, Integer>> getGroupedTodos(ContentResolver resolver) {

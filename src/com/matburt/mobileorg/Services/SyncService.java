@@ -99,10 +99,14 @@ public class SyncService extends Service implements
 		final Synchronizer synchronizer = this.getSynchronizer();
 		final OrgDatabase db = new OrgDatabase(this);
 		final OrgFileParser parser = new OrgFileParser(db, getContentResolver());
+		final boolean calendarEnabled = appSettings.getBoolean("calendarEnabled", false);
 
 		Thread syncThread = new Thread() {
 			public void run() {
-				synchronizer.sync(parser);
+				if(calendarEnabled)
+					synchronizer.sync(parser, new CalendarSyncService(getContentResolver(), getBaseContext()));
+				else
+					synchronizer.sync(parser);
 				synchronizer.close();
 				db.close();
 				syncRunning = false;

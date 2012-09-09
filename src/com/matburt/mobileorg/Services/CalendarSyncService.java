@@ -1,7 +1,9 @@
 package com.matburt.mobileorg.Services;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 
+import android.annotation.SuppressLint;
+import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
@@ -18,8 +20,8 @@ import android.text.format.Time;
 
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Parsing.NodePayload.DateEntry;
-import com.matburt.mobileorg.Parsing.NodeWrapper;
-import com.matburt.mobileorg.Parsing.OrgDatabaseOld;
+import com.matburt.mobileorg.provider.OrgNode;
+import com.matburt.mobileorg.provider.OrgProviderUtil;
 
 public class CalendarSyncService {
 	private final static String CALENDAR_ORGANIZER = "MobileOrg";
@@ -29,12 +31,13 @@ public class CalendarSyncService {
 	private intReminders intReminders = new intReminders();
 	private intCalendarAlerts intCalendarAlerts = new intCalendarAlerts();
 
-	private OrgDatabaseOld db;
 	private Context context;
 	private SharedPreferences sharedPreferences;
+
+	private ContentResolver resolver;
 	
-	public CalendarSyncService(OrgDatabaseOld db, Context context) {
-		this.db = db;
+	public CalendarSyncService(ContentResolver resolver, Context context) {
+		this.resolver = resolver;
 		this.context = context;
 		this.sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
 		setupCalendar();
@@ -43,9 +46,9 @@ public class CalendarSyncService {
 	public void syncFiles() {
 		this.deleteAllEntries(context);
 		
-		HashMap<String,String> files = this.db.getFiles();
+		ArrayList<String> files = OrgProviderUtil.getFilenames(resolver);
 		files.remove("agendas.org");
-		for(String filename: files.keySet())
+		for(String filename: files)
 			insertFileEntries(filename);
 	}	
 	
@@ -103,17 +106,18 @@ public class CalendarSyncService {
 	
 	
 	public void insertNode(long node_id) {
-		NodeWrapper node = new NodeWrapper(this.db.getNode(node_id), db);
-		insertNode(node, node.getFileName());
+		OrgNode node = new OrgNode(node_id, resolver);
+		insertNode(node, node.getFilename(resolver));
 	}
 	
 	private void insertFileEntries(String filename) throws IllegalArgumentException {
-		Cursor scheduled = db.getFileSchedule(filename);
+		boolean useHabits = sharedPreferences.getBoolean("calendarHabits", true);		
+		Cursor scheduled = OrgProviderUtil.getFileSchedule(filename, useHabits, resolver);
 
 		if (scheduled == null)
 			return;
 		while (scheduled.isAfterLast() == false) {
-			NodeWrapper node = new NodeWrapper(scheduled, db);
+			OrgNode node = new OrgNode(scheduled);
 			insertNode(node, filename);
 			scheduled.moveToNext();
 		}
@@ -121,13 +125,13 @@ public class CalendarSyncService {
 		scheduled.close();
 	}
 	
-	private void insertNode(NodeWrapper node, String filename)
+	private void insertNode(OrgNode node, String filename)
 			throws IllegalArgumentException {
-		boolean isActive = db.isTodoActive(node.getTodo());
+		boolean isActive = OrgProviderUtil.isTodoActive(node.todo, resolver);
 
 		for (DateEntry date : node.getPayload().getDates()) {
-			insertEntry(node.getName(), isActive, node.getCleanedPayload(),
-					node.getNodeId(), date, filename,
+			insertEntry(node.name, isActive, node.getCleanedPayload(),
+					Long.toString(node.id), date, filename,
 					node.getPayload().getProperty("LOCATION"));
 		}
 	}
@@ -288,6 +292,7 @@ public class CalendarSyncService {
 	/**
 	 * Hack to support phones with Android <3.0
 	 */
+	@SuppressLint("NewApi")
 	private void setupCalendar() {
 		try {
 			intCalendars.CONTENT_URI = Calendars.CONTENT_URI;

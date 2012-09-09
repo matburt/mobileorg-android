@@ -20,6 +20,7 @@ import android.util.Log;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Parsing.MobileOrgApplication;
 import com.matburt.mobileorg.Services.CalendarSyncService;
+import com.matburt.mobileorg.provider.OrgDatabase;
 import com.matburt.mobileorg.provider.OrgProviderUtil;
 
 public class SettingsActivity extends PreferenceActivity implements
@@ -103,7 +104,7 @@ public class SettingsActivity extends PreferenceActivity implements
 	};
 
 	private CalendarSyncService getCalendarSyncService() {
-		return ((MobileOrgApplication) getApplication()).getCalendarSyncService();
+		return new CalendarSyncService(getContentResolver(), this);
 	}
 	
 	private boolean isCalendarEnabled() {

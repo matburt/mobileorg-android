@@ -16,6 +16,7 @@ import android.util.Log;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Gui.FileDecryptionActivity;
 import com.matburt.mobileorg.Parsing.OrgFileParser;
+import com.matburt.mobileorg.Services.CalendarSyncService;
 import com.matburt.mobileorg.provider.OrgContract.Edits;
 import com.matburt.mobileorg.provider.OrgContract.Files;
 import com.matburt.mobileorg.provider.OrgFile;
@@ -57,6 +58,11 @@ public class Synchronizer {
 		return true;
 	}
 
+	public void sync(OrgFileParser parser, CalendarSyncService calendarSyncService) {
+		sync(parser);
+		calendarSyncService.syncFiles();
+	}
+	
 	public void sync(OrgFileParser parser) {
 		if (!syncher.isConfigured()) {
 			notify.errorNotification("Sync not configured");

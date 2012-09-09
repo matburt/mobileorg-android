@@ -28,12 +28,12 @@ public class MobileOrgApplication extends Application {
     	return this.appdb;
     }
     
-    public CalendarSyncService getCalendarSyncService() {
-    	if(this.calendarSyncService == null)
-    		this.calendarSyncService = new CalendarSyncService(getDB(), this);
-    	
-    	return this.calendarSyncService;
-    }
+//    public CalendarSyncService getCalendarSyncService() {
+//    	if(this.calendarSyncService == null)
+//    		this.calendarSyncService = new CalendarSyncService(getDB(), this);
+//    	
+//    	return this.calendarSyncService;
+//    }
     
     public boolean isSyncConfigured() {
     	String syncSource = PreferenceManager.getDefaultSharedPreferences(getApplicationContext())
