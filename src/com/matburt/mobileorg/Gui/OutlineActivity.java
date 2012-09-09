@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -19,7 +20,6 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
@@ -33,15 +33,16 @@ import com.actionbarsherlock.view.MenuItem;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Gui.Capture.EditActivity;
 import com.matburt.mobileorg.Parsing.MobileOrgApplication;
-import com.matburt.mobileorg.Parsing.NodeWrapper;
 import com.matburt.mobileorg.Services.SyncService;
 import com.matburt.mobileorg.Settings.SettingsActivity;
 import com.matburt.mobileorg.Settings.WizardActivity;
 import com.matburt.mobileorg.Synchronizers.Synchronizer;
 import com.matburt.mobileorg.provider.OrgContract.OrgData;
+import com.matburt.mobileorg.provider.OrgNode;
 
 public class OutlineActivity extends SherlockActivity
 {
+	private ContentResolver resolver;
     private MobileOrgApplication appInst;
 
 	private Long node_id;
@@ -61,7 +62,8 @@ public class OutlineActivity extends SherlockActivity
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		setContentView(R.layout.outline);		
+		setContentView(R.layout.outline);
+		this.resolver = getContentResolver();
 		
 		this.appInst = (MobileOrgApplication) this.getApplication();
 		
@@ -74,19 +76,12 @@ public class OutlineActivity extends SherlockActivity
 			if (this.appInst.isSyncConfigured() == false)
 				this.showWizard();
 		}
-		
+
 		listView = (ListView) this.findViewById(R.id.outline_list);
 		listView.setOnItemClickListener(outlineClickListener);
 		listView.setOnItemLongClickListener(outlineLongClickListener);
 		listView.setEmptyView(findViewById(R.id.outline_list_empty));
 		registerForContextMenu(listView);	
-		
-		this.findViewById(R.id.outline_configure).setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				runShowSettings();
-			}
-		});
 		
 		this.syncReceiver = new SynchServiceReceiver();
 		registerReceiver(this.syncReceiver, new IntentFilter(
@@ -107,7 +102,7 @@ public class OutlineActivity extends SherlockActivity
 				long id) {
 			Long clicked_node_id = listView.getItemIdAtPosition(position);
 			lastSelection = position;
-			if (appInst.getDB().hasNodeChildren(clicked_node_id) || node_id == -1)
+			if (OrgNode.hasChildren(node_id, resolver) || node_id == -1)
 				runExpandSelection(clicked_node_id);
 			else 
 				runEditNodeActivity(clicked_node_id);
@@ -147,9 +142,8 @@ public class OutlineActivity extends SherlockActivity
         else {
             startManagingCursor(cursor);
 				
-            this.outlineAdapter = new OutlineCursorAdapter(this, cursor, appInst.getDB());
+            this.outlineAdapter = new OutlineCursorAdapter(this, cursor, getContentResolver());
             listView.setAdapter(outlineAdapter);
-		
             listView.setSelection(lastSelection);
         }
         setTitle();
@@ -158,8 +152,8 @@ public class OutlineActivity extends SherlockActivity
 	private void setTitle() {
 		this.getSupportActionBar().setTitle("MobileOrg " + appInst.getChangesString());
 		if(this.node_id > -1) {
-			NodeWrapper node = new NodeWrapper(this.node_id, appInst.getDB());
-			final String subTitle = node.constructOlpId().substring("olp:".length());
+			OrgNode node = new OrgNode(this.node_id, getContentResolver());
+			final String subTitle = node.constructOlpId(getContentResolver()).substring("olp:".length());
 			this.getSupportActionBar().setSubtitle(subTitle);
 		}
 	}
@@ -230,7 +224,7 @@ public class OutlineActivity extends SherlockActivity
 	
 	
 	private boolean isNodeInFile(long node_id, String filename) {
-		return new NodeWrapper(node_id, appInst.getDB()).getFileName().equals(
+		return new OrgNode(node_id, getContentResolver()).getFilename(getContentResolver()).equals(
 				filename);
 	}
 

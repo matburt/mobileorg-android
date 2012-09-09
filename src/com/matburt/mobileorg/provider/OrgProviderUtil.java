@@ -258,6 +258,16 @@ public class OrgProviderUtil {
 		cursor.moveToFirst();
 		return cursor;
 	}
+	
+	public static Cursor search(String query, ContentResolver resolver) {
+		
+//		Cursor cursor = db.rawQuery(
+//				"SELECT * FROM orgdata WHERE name LIKE ?",
+//				new String[] { query });
+//		
+//		return cursor;
+		return null;
+	}
 
 //	public static ArrayList<HashMap<String, Integer>> getGroupedTodos(ContentResolver resolver) {
 //		ArrayList<HashMap<String, Integer>> todos = new ArrayList<HashMap<String, Integer>>();
@@ -285,4 +295,28 @@ public class OrgProviderUtil {
 //		cursor.close();
 //		return todos;
 //	}
+	
+	public static int getChangesCount(ContentResolver resolver) {
+		int changes = 0;
+		Cursor cursor = resolver.query(Edits.CONTENT_URI,
+				Edits.DEFAULT_COLUMNS, null, null, null);
+		if(cursor != null)
+			changes += cursor.getCount();
+		cursor.close();
+		
+		long file_id = -2;
+		try {
+			file_id = new OrgFile(FileUtils.CAPTURE_FILE, resolver).nodeId;
+		} catch (IllegalArgumentException e) {}
+		cursor = resolver.query(OrgData.CONTENT_URI, OrgData.DEFAULT_COLUMNS, OrgData.FILE_ID + "=?",
+				new String[] { Long.toString(file_id) }, null);
+		if(cursor != null) {
+			int captures = cursor.getCount();
+			if(captures > 0)
+				changes += captures;
+		}
+		cursor.close();
+		
+		return changes;
+	}
 }

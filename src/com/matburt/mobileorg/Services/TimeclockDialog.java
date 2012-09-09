@@ -13,16 +13,13 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 
 import com.matburt.mobileorg.R;
-import com.matburt.mobileorg.Parsing.MobileOrgApplication;
-import com.matburt.mobileorg.Parsing.NodeWrapper;
-import com.matburt.mobileorg.Parsing.OrgDatabaseOld;
+import com.matburt.mobileorg.provider.OrgNode;
 
 public class TimeclockDialog extends FragmentActivity {
 
-	private NodeWrapper node;
+	private OrgNode node;
 	private int hour = 0;
 	private int minute = 0;
-	private OrgDatabaseOld db;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -32,9 +29,6 @@ public class TimeclockDialog extends FragmentActivity {
         setContentView(R.layout.timeclock_dialog);
         getWindow().setFeatureDrawableResource(Window.FEATURE_LEFT_ICON, 
                 android.R.drawable.ic_dialog_alert);
-
-        MobileOrgApplication appInst = (MobileOrgApplication) getApplication();
-        this.db = appInst.getDB();
         
         Button button = (Button) findViewById(R.id.timeclock_cancel);
         button.setOnClickListener(cancelListener);
@@ -55,15 +49,9 @@ public class TimeclockDialog extends FragmentActivity {
 		TextView textView = (TextView) findViewById(R.id.timeclock_text);
 		
 		long node_id = TimeclockService.getInstance().getNodeID();
-		this.node = new NodeWrapper(db.getNode(node_id), db);
-		textView.setText(node.getName() + "@" + elapsedTime);
+		this.node = new OrgNode(node_id, getContentResolver());
+		textView.setText(node.name + "@" + elapsedTime);
 
-	}
-	
-	@Override
-	protected void onStop() {
-		node.close();
-		super.onStop();
 	}
 	
 	private void parseElapsedTime(String elapsedTime) {
@@ -79,7 +67,7 @@ public class TimeclockDialog extends FragmentActivity {
 		long startTime = TimeclockService.getInstance().getStartTime();
 		long endTime = TimeclockService.getInstance().getEndTime();
 		String elapsedTime = TimeclockService.getInstance().getElapsedTimeString();
-		node.addLogbook(startTime, endTime, elapsedTime);
+		node.addLogbook(startTime, endTime, elapsedTime, getContentResolver());
 	}
 	
 	private void endTimeclock() {

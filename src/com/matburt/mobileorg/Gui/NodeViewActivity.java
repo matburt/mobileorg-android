@@ -7,6 +7,7 @@ import java.util.regex.Pattern;
 
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -23,10 +24,13 @@ import com.actionbarsherlock.view.MenuItem;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Gui.Capture.EditActivity;
 import com.matburt.mobileorg.Parsing.MobileOrgApplication;
-import com.matburt.mobileorg.Parsing.NodeWrapper;
 import com.matburt.mobileorg.Synchronizers.Synchronizer;
+import com.matburt.mobileorg.provider.OrgFile;
+import com.matburt.mobileorg.provider.OrgNode;
 
 public class NodeViewActivity extends SherlockFragmentActivity {
+	
+	private ContentResolver resolver;
 	private WebView display;
 	private MobileOrgApplication appInst;
 	private SynchServiceReceiver syncReceiver;
@@ -37,7 +41,8 @@ public class NodeViewActivity extends SherlockFragmentActivity {
 		super.onCreate(savedInstanceState);
 		
 		setContentView(R.layout.viewnode);
-		
+
+		this.resolver = getContentResolver();
 		Intent intent = getIntent();
 		this.node_id = intent.getLongExtra("node_id", -1);
 		
@@ -78,7 +83,7 @@ public class NodeViewActivity extends SherlockFragmentActivity {
 		com.actionbarsherlock.view.MenuInflater inflater = getSupportMenuInflater();
 	    inflater.inflate(R.menu.nodeview, menu);
 	    
-	    if(this.appInst.getDB().isNodeEditable(node_id) == false)
+	    if(new OrgNode(this.node_id, resolver).isNodeEditable(resolver) == false)
 	    	menu.findItem(R.id.viewmenu_edit).setVisible(false);
 
 		return true;
@@ -120,7 +125,7 @@ public class NodeViewActivity extends SherlockFragmentActivity {
 						"viewRecursionMax", "0"));
 
 		String text = nodeToHTMLRecursive(
-				new NodeWrapper(node_id, appInst.getDB()), levelOfRecursion);
+				new OrgNode(node_id, resolver), levelOfRecursion);
 		text = convertLinks(text);
 
 		boolean wrapLines = PreferenceManager.getDefaultSharedPreferences(
@@ -184,7 +189,7 @@ public class NodeViewActivity extends SherlockFragmentActivity {
 	}
 	
 	private void handleInternalOrgUrl(String url) {		
-		long nodeId = appInst.getDB().getNodeFromPath(url);
+		long nodeId = getNodeFromPath(url);
 				
 		Intent intent = new Intent(this, NodeViewActivity.class);
 		intent.putExtra("node_id", nodeId);
@@ -200,7 +205,18 @@ public class NodeViewActivity extends SherlockFragmentActivity {
 		}
 	}
 
-	private String nodeToHTMLRecursive(NodeWrapper node, int level) {
+	private long getNodeFromPath(String path) {
+		String filename = path.substring("file://".length(), path.length());
+		
+		// TODO Handle links to headings instead of simply stripping it out
+		if(filename.indexOf(":") > -1)
+			filename = filename.substring(0, filename.indexOf(":"));
+				
+		OrgFile file = new OrgFile(filename, resolver);
+		return file.nodeId;
+	}
+	
+	private String nodeToHTMLRecursive(OrgNode node, int level) {
 		StringBuilder result = new StringBuilder();
 		result.append(nodeToHTML(node, level));
 
@@ -208,25 +224,22 @@ public class NodeViewActivity extends SherlockFragmentActivity {
 			return result.toString();
 		level--;
 
-		for (NodeWrapper child : node.getChildren()) {
+		for (OrgNode child : node.getChildren(resolver))
 			result.append(nodeToHTMLRecursive(child, level));
-			child.close();
-		}
 		
-		node.close();
 		return result.toString();
 	}
 	
-	private String nodeToHTML(NodeWrapper node, int headingLevel) {
+	private String nodeToHTML(OrgNode node, int headingLevel) {
 		StringBuilder result = new StringBuilder();
 
 		int fontSize = 3 + headingLevel;
 		result.append("<font size=\"");
 		result.append(fontSize);
 		result.append("\"> <b>");
-		result.append(node.getName());
+		result.append(node.name);
 		
-		if(headingLevel == 0 && this.appInst.getDB().hasNodeChildren(node_id))
+		if(headingLevel == 0 && node.hasChildren(resolver))
 			result.append("...");
 		
 		result.append("</b></font> <hr />");

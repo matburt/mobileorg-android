@@ -161,6 +161,25 @@ public class OrgNode {
 		return null;
 	}
 	
+	public boolean hasChildren(ContentResolver resolver) {
+		ArrayList<OrgNode> children = getChildren(resolver);
+		
+		if(children.size() > 0)
+			return true;
+		else
+			return false;
+	}
+	
+	public static boolean hasChildren (long node_id, ContentResolver resolver) {
+		try {
+			OrgNode node = new OrgNode(node_id, resolver);
+			return node.hasChildren(resolver);
+		} catch (IllegalArgumentException e) {
+		}
+		
+		return false;
+	}
+	
 	public OrgNode getParent(ContentResolver resolver) {
 		Cursor cursor = resolver.query(OrgData.buildIdUri(this.parentId),
 				OrgData.DEFAULT_COLUMNS, null, null, null);
@@ -168,6 +187,11 @@ public class OrgNode {
 			return new OrgNode(cursor);
 		else
 			return null;
+	}
+	
+	
+	public boolean isNodeEditable(ContentResolver resolver) {
+		return true;
 	}
 	
 	/**
@@ -411,5 +435,18 @@ public class OrgNode {
 //		} else {
 //			resolver.delete(OrgData.buildIdUri(node.id), null, null);
 //		}
+	}
+	
+	public void addLogbook(long startTime, long endTime, String elapsedTime, ContentResolver resolver) {
+		StringBuilder rawPayload = new StringBuilder(getRawPayload());
+		rawPayload = NodePayload.addLogbook(rawPayload, startTime, endTime, elapsedTime);
+		
+		boolean generateEdits = !getFilename(resolver).equals(FileUtils.CAPTURE_FILE);
+
+		if(generateEdits) {
+			OrgEdit edit = new OrgEdit(this, OrgEdit.TYPE.BODY, rawPayload.toString(), resolver);
+			edit.write(resolver);
+		}
+		setPayload(rawPayload.toString());
 	}
 }

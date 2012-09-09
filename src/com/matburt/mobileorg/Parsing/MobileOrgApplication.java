@@ -6,27 +6,16 @@ import android.text.TextUtils;
 
 import com.matburt.mobileorg.Services.CalendarSyncService;
 import com.matburt.mobileorg.Services.SyncService;
+import com.matburt.mobileorg.provider.OrgProviderUtil;
 
 public class MobileOrgApplication extends Application {
-    private OrgDatabaseOld appdb;
 	private CalendarSyncService calendarSyncService;
     
     @Override
     public void onCreate() {
-    	this.appdb = new OrgDatabaseOld(getApplicationContext());
-		init();
 		SyncService.startAlarm(getApplicationContext());
     }
-    
-    private void init() {
-		if (this.appdb == null || this.appdb.getFiles().isEmpty())
-			return;
-	}
-  
-    
-    public OrgDatabaseOld getDB() {
-    	return this.appdb;
-    }
+
     
 //    public CalendarSyncService getCalendarSyncService() {
 //    	if(this.calendarSyncService == null)
@@ -46,7 +35,7 @@ public class MobileOrgApplication extends Application {
     }
     
     public String getChangesString() {
-    	int changes = appdb.getChangesCount();
+    	int changes = OrgProviderUtil.getChangesCount(getContentResolver());
     	if(changes > 0)
     		return "[" + changes + "]";
     	else
