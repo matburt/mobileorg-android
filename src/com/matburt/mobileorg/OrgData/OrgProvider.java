@@ -17,7 +17,7 @@ import com.matburt.mobileorg.OrgData.OrgDatabase.Tables;
 import com.matburt.mobileorg.util.SelectionBuilder;
 
 public class OrgProvider extends ContentProvider {
-	public static final String AUTHORITY = "com.matburt.mobileorg.OrgData.OrgProvider";
+	public static final String AUTHORITY = OrgContract.CONTENT_AUTHORITY;
 	private OrgDatabase dbHelper;
 	private static final UriMatcher uriMatcher = buildUriMatcher();
 	

@@ -26,7 +26,7 @@ public class OrgNode {
 	public String name = "";
 	public String payload = "";
 	
-	public OrgNodePayload nodePayload = new OrgNodePayload("");
+	private OrgNodePayload nodePayload = new OrgNodePayload("");
 
 	public OrgNode() {
 	}
@@ -161,9 +161,13 @@ public class OrgNode {
 	}
 	
 	public boolean hasChildren(ContentResolver resolver) {
-		ArrayList<OrgNode> children = getChildren(resolver);
+		Cursor childCursor = resolver.query(OrgData.buildChildrenUri(id),
+				OrgData.DEFAULT_COLUMNS, null, null, null);
 		
-		if(children.size() > 0)
+		int childCount = childCursor.getCount();
+		childCursor.close();
+		
+		if(childCount > 0)
 			return true;
 		else
 			return false;
@@ -238,7 +242,10 @@ public class OrgNode {
 	
 	
 	public String getCleanedPayload() {
-		return this.nodePayload.getContent();
+		// TODO Fix cleaning of payloads
+//		preparePayload();
+//		return this.nodePayload.getContent();
+		return this.payload;
 	}
 	
 	public String getRawPayload() {
@@ -246,6 +253,7 @@ public class OrgNode {
 	}
 	
 	public OrgNodePayload getPayload() {
+		preparePayload();
 		return this.nodePayload;
 	}
 	

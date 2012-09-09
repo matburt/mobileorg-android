@@ -238,12 +238,6 @@ public class EditActivity extends SherlockFragmentActivity {
 		builder.create().show();
 	}
 	
-	
-	private void insertChangesIntoPayloadResidue() {
-		node.getPayload().insertOrReplace("SCHEDULED:", detailsFragment.getScheduled());
-		node.getPayload().insertOrReplace("DEADLINE:", detailsFragment.getDeadline());
-	}
-	
 	private void save() {
 		OrgNode newNode = this.detailsFragment.getEditedOrgNode();
 
@@ -255,6 +249,8 @@ public class EditActivity extends SherlockFragmentActivity {
 		announceUpdate();
 	}
 	
+	
+	// TODO Clean up this mess
 	private void createNewNode(OrgNode newNode) {
 		OrgNode newParent = this.detailsFragment.getLocation();
 
@@ -270,7 +266,11 @@ public class EditActivity extends SherlockFragmentActivity {
 		
 		OrgProviderUtil.createNodeWithNewheadingEditnode(newNode, newParent, newPayload, resolver);
 	}
-
+	
+	private void insertChangesIntoPayloadResidue() {
+		node.getPayload().insertOrReplace("SCHEDULED:", detailsFragment.getScheduled());
+		node.getPayload().insertOrReplace("DEADLINE:", detailsFragment.getDeadline());
+	}
 	
 	private void announceUpdate() {
 		Intent intent = new Intent(Synchronizer.SYNC_UPDATE);

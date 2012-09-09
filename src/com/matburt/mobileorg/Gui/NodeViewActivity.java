@@ -23,7 +23,6 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Gui.Capture.EditActivity;
-import com.matburt.mobileorg.OrgData.MobileOrgApplication;
 import com.matburt.mobileorg.OrgData.OrgFile;
 import com.matburt.mobileorg.OrgData.OrgNode;
 import com.matburt.mobileorg.Synchronizers.Synchronizer;
@@ -32,7 +31,6 @@ public class NodeViewActivity extends SherlockFragmentActivity {
 	
 	private ContentResolver resolver;
 	private WebView display;
-	private MobileOrgApplication appInst;
 	private SynchServiceReceiver syncReceiver;
 	private long node_id;
 	
@@ -49,8 +47,6 @@ public class NodeViewActivity extends SherlockFragmentActivity {
 		this.display = (WebView) this.findViewById(R.id.viewnode_webview);
 		this.display.setWebViewClient(new InternalWebViewClient());
 		this.display.getSettings().setBuiltInZoomControls(true);
-
-		this.appInst = (MobileOrgApplication) this.getApplication();
 		
         this.syncReceiver = new SynchServiceReceiver();
 		registerReceiver(this.syncReceiver, new IntentFilter(
@@ -62,7 +58,6 @@ public class NodeViewActivity extends SherlockFragmentActivity {
 	@Override
 	public void onDestroy() {
 		unregisterReceiver(this.syncReceiver);
-		this.display.destroy();
 		super.onDestroy();
 	}
 	
@@ -75,8 +70,6 @@ public class NodeViewActivity extends SherlockFragmentActivity {
 			data = convertToHTML();
 		this.display.loadDataWithBaseURL(null, data, "text/html", "UTF-8", null);
 	}
-	
-	
 	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -243,7 +236,7 @@ public class NodeViewActivity extends SherlockFragmentActivity {
 			result.append("...");
 		
 		result.append("</b></font> <hr />");
-
+		
 		if (!node.getCleanedPayload().equals("")) {
 			String payload = node.getCleanedPayload();
 			if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(

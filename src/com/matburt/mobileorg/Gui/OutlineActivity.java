@@ -34,6 +34,7 @@ import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Gui.Capture.EditActivity;
 import com.matburt.mobileorg.OrgData.MobileOrgApplication;
 import com.matburt.mobileorg.OrgData.OrgContract.OrgData;
+import com.matburt.mobileorg.OrgData.OrgFile;
 import com.matburt.mobileorg.OrgData.OrgNode;
 import com.matburt.mobileorg.Services.SyncService;
 import com.matburt.mobileorg.Settings.SettingsActivity;
@@ -55,7 +56,6 @@ public class OutlineActivity extends SherlockActivity
 	private int lastSelection = 0;
 	
 	private ListView listView;
-	private OutlineCursorAdapter outlineAdapter;
 	private SynchServiceReceiver syncReceiver;
 
 	@Override
@@ -129,8 +129,7 @@ public class OutlineActivity extends SherlockActivity
 
 		startManagingCursor(cursor);
 
-		this.outlineAdapter = new OutlineCursorAdapter(this, cursor, getContentResolver());
-		listView.setAdapter(outlineAdapter);
+		listView.setAdapter(new OutlineCursorAdapter(this, cursor, getContentResolver()));
 		listView.setSelection(lastSelection);
      
         setTitle();
@@ -151,7 +150,7 @@ public class OutlineActivity extends SherlockActivity
 				long id) {
 			Long clicked_node_id = listView.getItemIdAtPosition(position);
 			lastSelection = position;
-			if (OrgNode.hasChildren(node_id, resolver) || node_id == -1)
+			if (OrgNode.hasChildren(clicked_node_id, resolver))
 				runExpandSelection(clicked_node_id);
 			else 
 				runEditNodeActivity(clicked_node_id);
@@ -282,25 +281,26 @@ public class OutlineActivity extends SherlockActivity
 		startActivity(intent);
 	}
 	
-	// TODO Enable the deletion of files
-//	private void runDeleteFileNode(final long node_id) {	
-//		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-//		builder.setMessage(R.string.outline_delete_prompt)
-//				.setCancelable(false)
-//				.setPositiveButton(R.string.yes,
-//						new DialogInterface.OnClickListener() {
-//							public void onClick(DialogInterface dialog, int id) {
-//								appInst.getDB().removeFile(node_id);
-//								refreshDisplay();
-//							}
-//						})
-//				.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
-//					public void onClick(DialogInterface dialog, int id) {
-//						dialog.cancel();
-//					}
-//				});
-//		builder.create().show();
-//	}
+	private void runDeleteFileNode(final long node_id) {
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setMessage(R.string.outline_delete_prompt)
+				.setCancelable(false)
+				.setPositiveButton(R.string.yes,
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int id) {
+								OrgFile file = new OrgFile(node_id, resolver);
+								file.removeFile();
+								refreshDisplay();
+							}
+						})
+				.setNegativeButton(R.string.no,
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int id) {
+								dialog.cancel();
+							}
+						});
+		builder.create().show();
+	}
 
 	private boolean runSearch() {
 		return onSearchRequested();

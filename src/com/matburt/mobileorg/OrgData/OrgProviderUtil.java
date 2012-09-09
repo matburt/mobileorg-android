@@ -238,10 +238,6 @@ public class OrgProviderUtil {
 				OrgData.NAME + " LIKE ?", new String[] { query },
 				OrgData.DEFAULT_SORT);
 		
-//		Cursor cursor = db.rawQuery(
-//				"SELECT * FROM orgdata WHERE name LIKE ?",
-//				new String[] { query });
-		
 		return cursor;
 	}
 	
