@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.LinkedHashMap;
 
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
@@ -19,15 +18,12 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
+import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
-import android.widget.BaseAdapter;
 import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockActivity;
@@ -61,8 +57,6 @@ public class OutlineActivity extends SherlockActivity
 	private OutlineCursorAdapter outlineAdapter;
 	private SynchServiceReceiver syncReceiver;
 
-    private boolean emptylist = false;
-
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -74,24 +68,25 @@ public class OutlineActivity extends SherlockActivity
 		Intent intent = getIntent();
 		node_id = intent.getLongExtra("node_id", -1);
 
-		if (this.node_id == -1) {
-			if (this.appInst.isSyncConfigured() == false) {
-				this.showWizard();
-			} else {
-				if (!this.checkVersionCode()) {
-					this.showUpgradePopup();
-				}
-			}
-		} else {
-			if (!this.checkVersionCode()) {
-				this.showUpgradePopup();
-			}
-		}
+		displayNewUserDialog();
 
+		if (this.node_id == -1) {
+			if (this.appInst.isSyncConfigured() == false)
+				this.showWizard();
+		}
+		
 		listView = (ListView) this.findViewById(R.id.outline_list);
 		listView.setOnItemClickListener(outlineClickListener);
 		listView.setOnItemLongClickListener(outlineLongClickListener);
+		listView.setEmptyView(findViewById(R.id.outline_list_empty));
 		registerForContextMenu(listView);	
+		
+		this.findViewById(R.id.outline_configure).setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				runShowSettings();
+			}
+		});
 		
 		this.syncReceiver = new SynchServiceReceiver();
 		registerReceiver(this.syncReceiver, new IntentFilter(
@@ -99,6 +94,25 @@ public class OutlineActivity extends SherlockActivity
 		
 		refreshDisplay();
 	}
+	
+	private void displayNewUserDialog() {
+		if (!this.checkVersionCode()) {
+			this.showUpgradePopup();
+		}
+	}
+
+	private OnItemClickListener outlineClickListener = new OnItemClickListener() {
+		@Override
+		public void onItemClick(AdapterView<?> parent, View v, int position,
+				long id) {
+			Long clicked_node_id = listView.getItemIdAtPosition(position);
+			lastSelection = position;
+			if (appInst.getDB().hasNodeChildren(clicked_node_id) || node_id == -1)
+				runExpandSelection(clicked_node_id);
+			else 
+				runEditNodeActivity(clicked_node_id);
+		}
+	};
 	
 	@Override
 	protected void onResume() {
@@ -130,17 +144,7 @@ public class OutlineActivity extends SherlockActivity
 				finish();
 		}
 
-        if (cursor == null || cursor.getCount() < 1) {
-            emptylist = true;
-            LinkedHashMap<String, String> lhm = new LinkedHashMap<String, String>();
-            lhm.put("Synchronize", "Fetch your org data");
-            lhm.put("Settings", "Configure MobileOrg");
-            lhm.put("Capture", "Capture a new note");
-            lhm.put("Website", "Visit the MobileOrg Wiki");
-            listView.setAdapter(new HashMapAdapter(lhm, this));
-        }
         else {
-            emptylist = false;
             startManagingCursor(cursor);
 				
             this.outlineAdapter = new OutlineCursorAdapter(this, cursor, appInst.getDB());
@@ -180,7 +184,7 @@ public class OutlineActivity extends SherlockActivity
 			return true;
 			
 		case R.id.menu_sync:
-			runSync();
+			runSynchronize(null);
 			return true;
 
 		case R.id.menu_settings:
@@ -195,13 +199,14 @@ public class OutlineActivity extends SherlockActivity
 			return true;
 			
 		case R.id.menu_capture:
-			return runEditNewNodeActivity();
+			runEditNewNodeActivity(null);
+			return true;
 
 		case R.id.menu_search:
 			return runSearch();
 
 		case R.id.menu_help:
-			runHelp();
+			runHelp(null);
 			return true;
 		}
 		return false;
@@ -239,21 +244,20 @@ public class OutlineActivity extends SherlockActivity
         }
     }
     
-    private void runHelp() {
+    public void runHelp(View view) {
 		Intent intent = new Intent(Intent.ACTION_VIEW,
 				Uri.parse("https://github.com/matburt/mobileorg-android/wiki"));
     	startActivity(intent);
     }
     
-    private void runSync() {
+    public void runSynchronize(View view) {
 		startService(new Intent(this, SyncService.class));
     }
 	
-	private boolean runEditNewNodeActivity() {
+	public void runEditNewNodeActivity(View view) {
 		Intent intent = new Intent(this, EditActivity.class);
 		intent.putExtra("actionMode", EditActivity.ACTIONMODE_CREATE);
 		startActivity(intent);
-		return true;
 	}
 	
 	private void runEditNodeActivity(long nodeId) {
@@ -378,83 +382,5 @@ public class OutlineActivity extends SherlockActivity
             }
         } catch (Exception e) { };
         return true;
-    }
-	
-
-	private OnItemClickListener outlineClickListener = new OnItemClickListener() {
-		@Override
-		public void onItemClick(AdapterView<?> parent, View v, int position,
-				long id) {
-			if (emptylist) {
-				if (position == SYNC_OPTION) {
-					runSync();
-				} else if (position == SETTINGS_OPTION) {
-					runShowSettings();
-				} else if (position == CAPTURE_OPTION) {
-					runEditNewNodeActivity();
-				} else if (position == WEBSITE_OPTION) {
-					String url = "https://github.com/matburt/mobileorg-android/wiki";
-					Intent i = new Intent(Intent.ACTION_VIEW);
-					i.setData(Uri.parse(url));
-					startActivity(i);
-				}
-				return;
-			}
-
-			Long clicked_node_id = listView.getItemIdAtPosition(position);
-			lastSelection = position;
-			if (appInst.getDB().hasNodeChildren(clicked_node_id) || node_id == -1)
-				runExpandSelection(clicked_node_id);
-			else 
-				runEditNodeActivity(clicked_node_id);
-		}
-	};
-	
-    private static final int SYNC_OPTION = 0;
-    private static final int SETTINGS_OPTION = 1;
-    private static final int CAPTURE_OPTION = 2;
-    private static final int WEBSITE_OPTION = 3;
-
-    private class HashMapAdapter extends BaseAdapter {
-        private LinkedHashMap<String, String> mData = new LinkedHashMap<String, String>();
-        private String[] mKeys;
-        private LayoutInflater mInflater;
-
-        public HashMapAdapter(LinkedHashMap<String, String> data, OutlineActivity act){
-            mData  = data;
-            mKeys = mData.keySet().toArray(new String[data.size()]);
-            mInflater = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        }
-
-        @Override
-            public int getCount() {
-            return mData.size();
-        }
-
-        @Override
-            public Object getItem(int position) {
-            return mData.get(mKeys[position]);
-        }
-
-        @Override
-            public long getItemId(int arg0) {
-            return arg0;
-        }
-
-        @Override
-            public View getView(int pos, View convertView, ViewGroup parent) {
-            String key = mKeys[pos];
-            String value = getItem(pos).toString();
-
-            View row;
- 
-            row = mInflater.inflate(R.layout.simple_list_item, null);
- 
-            TextView slitem = (TextView) row.findViewById(R.id.sl_item);
-            slitem.setText(key);
-            TextView slinfo = (TextView) row.findViewById(R.id.sl_info);
-            slinfo.setText(value);
-            return row;
-        }
     }
 }
