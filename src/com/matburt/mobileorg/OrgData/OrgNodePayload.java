@@ -215,11 +215,7 @@ public class OrgNodePayload {
 			try {
 				if(propm.group(2) == null) { // event is an entire day event
 					result.beginTime = getTimeInMs(propm.group(1), "00:00").getTime();
-					result.beginTime += TimeZone.getTimeZone(
-							Time.getCurrentTimezone()).getOffset(
-							result.beginTime);
-
-					result.endTime = result.beginTime; // + DateUtils.DAY_IN_MILLIS;
+					result.endTime = result.beginTime + DateUtils.DAY_IN_MILLIS;
 					result.allDay = 1;
 				}
 				else if (propm.group(2) != null) { // has hh:mm entry
