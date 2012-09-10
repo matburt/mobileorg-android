@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:layout_weight="1"
+    android:background="#00000000"
     android:scrollbars="vertical" >
 
     <LinearLayout
@@ -70,15 +72,17 @@
             <TableLayout
                 android:id="@+id/tags"
                 android:layout_width="fill_parent"
-                android:layout_height="wrap_content" >
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true" >
             </TableLayout>
-        </RelativeLayout>
 
-        <LinearLayout
-            android:id="@+id/location"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical" />
+            <LinearLayout
+                android:id="@+id/location"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/imageView2"
+                android:orientation="vertical" />
+        </RelativeLayout>
 
         <LinearLayout
             android:layout_width="fill_parent"
@@ -86,15 +90,32 @@
             android:layout_margin="5dp"
             android:background="@drawable/border"
             android:paddingTop="3dip" >
+
+            <TableLayout
+                android:id="@+id/dates"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:background="@drawable/border" >
+            </TableLayout>
         </LinearLayout>
 
-        <TableLayout
-            android:id="@+id/dates"
+        <LinearLayout
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_margin="5dp"
-            android:background="@drawable/border" >
-        </TableLayout>
+            android:background="@drawable/border"
+            android:paddingTop="3dip" >
+
+            <fragment
+                android:id="@+id/edit_payload_view"
+                android:name="com.matburt.mobileorg.Gui.NodeViewActivity"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                tools:layout="@layout/viewnode" />
+
+        </LinearLayout>
     </LinearLayout>
 
 </ScrollView>

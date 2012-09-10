@@ -46,9 +46,6 @@ public class EditActivity extends SherlockFragmentActivity {
 		Intent intent = getIntent();
 		this.actionMode = intent.getStringExtra("actionMode");
 		long node_id = intent.getLongExtra("node_id", -1);	
-
-		String defaultTodo = PreferenceManager
-				.getDefaultSharedPreferences(this).getString("defaultTodo", "");
 		
 		if (this.actionMode == null) {
 			this.node = getCaptureIntentContents(intent);

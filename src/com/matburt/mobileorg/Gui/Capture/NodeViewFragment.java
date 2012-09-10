@@ -1,4 +1,4 @@
-package com.matburt.mobileorg.Gui;
+package com.matburt.mobileorg.Gui.Capture;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -6,123 +6,71 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import android.content.ActivityNotFoundException;
-import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
-import com.actionbarsherlock.app.SherlockFragmentActivity;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuItem;
+import com.actionbarsherlock.app.SherlockFragment;
 import com.matburt.mobileorg.R;
-import com.matburt.mobileorg.Gui.Capture.EditActivity;
 import com.matburt.mobileorg.OrgData.OrgFile;
 import com.matburt.mobileorg.OrgData.OrgNode;
-import com.matburt.mobileorg.Synchronizers.Synchronizer;
 
-public class NodeViewActivity extends SherlockFragmentActivity {
+public class NodeViewFragment extends SherlockFragment {
 	
 	private ContentResolver resolver;
 	private WebView display;
-	private SynchServiceReceiver syncReceiver;
-	private long node_id;
+	private OrgNode node;
 	
 	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
+	public View onCreateView(LayoutInflater inflater, ViewGroup container,
+			Bundle savedInstanceState) {
+		View view = inflater.inflate(R.layout.viewnode, container);
 		
-		setContentView(R.layout.viewnode);
-
-		this.resolver = getContentResolver();
-		Intent intent = getIntent();
-		this.node_id = intent.getLongExtra("node_id", -1);
-		
-		this.display = (WebView) this.findViewById(R.id.viewnode_webview);
+		this.display = (WebView) view.findViewById(R.id.viewnode_webview);
 		this.display.setWebViewClient(new InternalWebViewClient());
 		this.display.getSettings().setBuiltInZoomControls(true);
-		
-        this.syncReceiver = new SynchServiceReceiver();
-		registerReceiver(this.syncReceiver, new IntentFilter(
-				Synchronizer.SYNC_UPDATE));
-        
-		refreshDisplay();
+
+		return view;
 	}
 	
 	@Override
-	public void onDestroy() {
-		unregisterReceiver(this.syncReceiver);
-		super.onDestroy();
+	public void onStart() {
+		super.onStart();
+		this.resolver = getActivity().getContentResolver();
+		refreshDisplay();
 	}
-	
+
 	private void refreshDisplay() {
+		EditActivity editActivity = (EditActivity) getActivity();
+		this.node = editActivity.getOrgNode();
+		
 		String data;
 		
-		if(this.node_id == -1)
+		if(this.node.id == -1)
 			data = "<html><body>" + getString(R.string.node_view_error_loading_node) + "</body></html>";
 		else
 			data = convertToHTML();
 		this.display.loadDataWithBaseURL(null, data, "text/html", "UTF-8", null);
 	}
-	
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		com.actionbarsherlock.view.MenuInflater inflater = getSupportMenuInflater();
-	    inflater.inflate(R.menu.nodeview, menu);
-	    
-	    if(new OrgNode(this.node_id, resolver).isNodeEditable(resolver) == false)
-	    	menu.findItem(R.id.viewmenu_edit).setVisible(false);
-
-		return true;
-	}
-
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		switch (item.getItemId()) {
-		case android.R.id.home:
-			finish();
-			break;
-		case R.id.viewmenu_edit:
-			runEditNodeActivity();
-			break;
-			
-		case R.id.viewmenu_capture:
-			runEditNewNodeActivity();
-			break;
-		}
-		return false;
-	}
-	
-	private void runEditNodeActivity() {
-		Intent intent = new Intent(this, EditActivity.class);
-		intent.putExtra("actionMode", EditActivity.ACTIONMODE_EDIT);
-		intent.putExtra("node_id", this.node_id);
-		startActivity(intent);
-	}
-	
-	private void runEditNewNodeActivity() {
-		Intent intent = new Intent(this, EditActivity.class);
-		intent.putExtra("actionMode", EditActivity.ACTIONMODE_CREATE);
-		startActivity(intent);
-	}
 
 	private String convertToHTML() {
 		int levelOfRecursion = Integer.parseInt(PreferenceManager
-				.getDefaultSharedPreferences(getApplicationContext()).getString(
+				.getDefaultSharedPreferences(getActivity()).getString(
 						"viewRecursionMax", "0"));
 
-		String text = nodeToHTMLRecursive(
-				new OrgNode(node_id, resolver), levelOfRecursion);
+		String text = nodeToHTMLRecursive(this.node, levelOfRecursion);
 		text = convertLinks(text);
 
 		boolean wrapLines = PreferenceManager.getDefaultSharedPreferences(
-				getApplicationContext()).getBoolean("viewWrapLines", false);
+				getActivity()).getBoolean("viewWrapLines", false);
 		if (wrapLines) {
 			text = text.replaceAll("\\n\\n", "<br/>\n<br/>\n");		// wrap "paragraphs"
 
@@ -184,18 +132,9 @@ public class NodeViewActivity extends SherlockFragmentActivity {
 	private void handleInternalOrgUrl(String url) {		
 		long nodeId = getNodeFromPath(url);
 				
-		Intent intent = new Intent(this, NodeViewActivity.class);
+		Intent intent = new Intent(getActivity(), NodeViewFragment.class);
 		intent.putExtra("node_id", nodeId);
 		startActivity(intent);
-	}
-
-	private class SynchServiceReceiver extends BroadcastReceiver {
-		@Override
-		public void onReceive(Context context, Intent intent) {
-			if (intent.getBooleanExtra(Synchronizer.SYNC_DONE, false)) {
-				refreshDisplay();
-			}
-		}
 	}
 
 	private long getNodeFromPath(String path) {
@@ -239,7 +178,7 @@ public class NodeViewActivity extends SherlockFragmentActivity {
 		
 		if (!node.getCleanedPayload().equals("")) {
 			String payload = node.getCleanedPayload();
-			if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(
+			if (PreferenceManager.getDefaultSharedPreferences(getActivity()).getBoolean(
 					"viewApplyFormating", true))
 				payload = applyFormating(payload);
 			result.append(payload);
