@@ -5,6 +5,7 @@ import java.util.Date;
 
 import android.content.Context;
 import android.preference.PreferenceManager;
+import android.text.TextUtils;
 
 public class OrgUtils {
 	
@@ -17,4 +18,14 @@ public class OrgUtils {
 		return PreferenceManager.getDefaultSharedPreferences(context)
 				.getString("defaultTodo", "");
 	}
+    
+    public static boolean isSyncConfigured(Context context) {
+    	String syncSource = PreferenceManager.getDefaultSharedPreferences(context)
+		.getString("syncSource", "");
+    	
+    	if(TextUtils.isEmpty(syncSource))
+    		return false;
+    	else
+    		return true;
+    }
 }

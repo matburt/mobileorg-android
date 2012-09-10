@@ -32,19 +32,19 @@ import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Gui.Capture.EditActivity;
-import com.matburt.mobileorg.OrgData.MobileOrgApplication;
 import com.matburt.mobileorg.OrgData.OrgContract.OrgData;
 import com.matburt.mobileorg.OrgData.OrgFile;
 import com.matburt.mobileorg.OrgData.OrgNode;
+import com.matburt.mobileorg.OrgData.OrgProviderUtil;
 import com.matburt.mobileorg.Services.SyncService;
 import com.matburt.mobileorg.Settings.SettingsActivity;
 import com.matburt.mobileorg.Settings.WizardActivity;
 import com.matburt.mobileorg.Synchronizers.Synchronizer;
+import com.matburt.mobileorg.util.OrgUtils;
 
 public class OutlineActivity extends SherlockActivity
 {
 	private ContentResolver resolver;
-    private MobileOrgApplication appInst;
 
 	private Long node_id;
 	
@@ -64,15 +64,13 @@ public class OutlineActivity extends SherlockActivity
 
 		setContentView(R.layout.outline);
 		this.resolver = getContentResolver();
-		
-		this.appInst = (MobileOrgApplication) this.getApplication();
-		
+				
 		Intent intent = getIntent();
 		node_id = intent.getLongExtra("node_id", -1);
 
 		if (this.node_id == -1) {
 			displayNewUserDialog();
-			if (this.appInst.isSyncConfigured() == false)
+			if (OrgUtils.isSyncConfigured(this) == false)
 				showWizard();
 		}
 
@@ -104,7 +102,6 @@ public class OutlineActivity extends SherlockActivity
 	@Override
 	protected void onDestroy() {
 		unregisterReceiver(this.syncReceiver);
-		this.appInst = null;
 		super.onDestroy();
 	}
 		
@@ -135,8 +132,17 @@ public class OutlineActivity extends SherlockActivity
         setTitle();
 	}
 	
+    
+    private String getChangesString() {
+    	int changes = OrgProviderUtil.getChangesCount(getContentResolver());
+    	if(changes > 0)
+    		return "[" + changes + "]";
+    	else
+    		return "";
+    }
+	
 	private void setTitle() {
-		this.getSupportActionBar().setTitle("MobileOrg " + appInst.getChangesString());
+		this.getSupportActionBar().setTitle("MobileOrg " + getChangesString());
 		if(this.node_id > -1) {
 			OrgNode node = new OrgNode(this.node_id, getContentResolver());
 			final String subTitle = node.constructOlpId(getContentResolver()).substring("olp:".length());

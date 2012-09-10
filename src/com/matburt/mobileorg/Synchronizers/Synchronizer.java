@@ -51,14 +51,10 @@ public class Synchronizer {
 		this.notify = notify;
 	}
 
-	/**
-	 * Used to indicate to other systems if active synchronization is available
-	 * (true) or if synchronization is implicit or non-existant (falsse)
-	 */
-	public boolean isEnabled() {
+ 	public boolean isEnabled() {
 		return true;
 	}
-
+ 	
 	public void sync(OrgFileParser parser, CalendarSyncService calendarSyncService) {
 		sync(parser);
 		calendarSyncService.syncFiles();

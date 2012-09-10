@@ -117,7 +117,6 @@ public class OrgNodePayload {
 		return result;
 	}
 	
-	// TODO Convert to use pattern
 	private void stripProperties() {
 		final Pattern propertiesLine = Pattern.compile(":[A-Za-z_]+:");
 		Matcher propm = propertiesLine.matcher(this.payload);
