@@ -4,11 +4,11 @@
     <item
         android:id="@+id/nodeedit_cancel"
         android:title="@string/menu_cancel"
-        android:showAsAction="ifRoom"
+        android:showAsAction="always"
         android:icon="@drawable/ic_menu_close_clear_cancel"/>
     <item
         android:id="@+id/nodeedit_save"
-        android:showAsAction="ifRoom"
+        android:showAsAction="always"
         android:title="Save"
         android:icon="@drawable/ic_menu_save">
     </item>

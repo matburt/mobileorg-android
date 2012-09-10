@@ -15,14 +15,14 @@ public class EditActivityMock extends SherlockFragmentActivity {
 		super.onCreate(savedInstanceState);
 		
 		this.setContentView(com.matburt.mobileorg.R.layout.edit);
-		EditDetailsFragment detailsFragment = new EditDetailsFragment();
+		EditFragment detailsFragment = new EditFragment();
 		OrgNode node = new OrgNode();
 		node.name = "initial";
 		//detailsFragment.setNode(node, "", getContentResolver());
 		addFragment(detailsFragment);
 	}
 	
-	public void addFragment(EditDetailsFragment detailsFragment) {
+	public void addFragment(EditFragment detailsFragment) {
 		FragmentManager fragmentManager = getSupportFragmentManager();
 		FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 		fragmentTransaction.add(com.matburt.mobileorg.R.id.editnode_fragment_container, detailsFragment, "details");
@@ -36,7 +36,7 @@ public class EditActivityMock extends SherlockFragmentActivity {
 		fragmentTransaction.remove(fragment).commit();
 		
 		fragmentTransaction = fragmentManager.beginTransaction();
-		EditDetailsFragment detailsFragment = new EditDetailsFragment();
+		EditFragment detailsFragment = new EditFragment();
 		//detailsFragment.setNode(node, "", getContentResolver());
 		fragmentTransaction.add(com.matburt.mobileorg.R.id.editnode_fragment_container, detailsFragment, "details2");
 		fragmentTransaction.commit();

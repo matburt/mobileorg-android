@@ -30,7 +30,7 @@ public class EditActivity extends SherlockFragmentActivity {
 	private String actionMode;
 
 	private ContentResolver resolver;
-	private EditDetailsFragment detailsFragment;
+	private EditFragment detailsFragment;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -217,22 +217,22 @@ public class EditActivity extends SherlockFragmentActivity {
 //			return;
 //		}
 		
-		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setMessage(R.string.node_edit_prompt)
-				.setCancelable(false)
-				.setPositiveButton(R.string.yes,
-						new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int id) {
-								setResult(RESULT_CANCELED);
+//		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+//		builder.setMessage(R.string.node_edit_prompt)
+//				.setCancelable(false)
+//				.setPositiveButton(R.string.yes,
+//						new DialogInterface.OnClickListener() {
+//							public void onClick(DialogInterface dialog, int id) {
+//								setResult(RESULT_CANCELED);
 								finish();
-							}
-						})
-				.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int id) {
-						dialog.cancel();
-					}
-				});
-		builder.create().show();
+//							}
+//						})
+//				.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+//					public void onClick(DialogInterface dialog, int id) {
+//						dialog.cancel();
+//					}
+//				});
+//		builder.create().show();
 	}
 	
 	private void save() {

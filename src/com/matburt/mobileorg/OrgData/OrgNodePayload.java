@@ -4,13 +4,11 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import android.text.TextUtils;
 import android.text.format.DateUtils;
-import android.text.format.Time;
 import android.util.Log;
 
 public class OrgNodePayload {
@@ -23,7 +21,7 @@ public class OrgNodePayload {
 	private String content = null;
 	private String scheduled = null;
 	private String deadline = null;
-	private ArrayList<String> timestamps = new ArrayList<String>();
+	private String timestamp;
 	
 	private String id = null; // Can be :ID: (or :ORIGINAL_ID: for agendas.org)
 	
@@ -81,7 +79,7 @@ public class OrgNodePayload {
 	private void cleanPayload() {
 		this.scheduled = stripDate("SCHEDULED:");
 		this.deadline = stripDate("DEADLINE:");
-		stripTimestamps();
+		stripTimestamp();
 
 		stripProperties();
 		stripFileProperties();
@@ -89,11 +87,10 @@ public class OrgNodePayload {
 		this.content = payload.toString().trim();
 	}
 	
-	private void stripTimestamps() {
-		String date = "";
-		while((date = stripDate("")).equals("") == false) {
-			this.timestamps.add(date); 
-		}
+	private void stripTimestamp() {
+		String date = stripDate("");
+		if (date.equals("") == false)
+			this.timestamp = date; 
 	}
 		
 	private String stripDate(String scheduled) {		
@@ -186,11 +183,13 @@ public class OrgNodePayload {
 			}
 		}
 		
-		stripTimestamps();
-		for(String timestamp: this.timestamps) {
-			DateEntry timestampEntry = getDateEntry(timestamp);
-			if(timestampEntry != null)
+		if(this.timestamp == null) {
+			this.timestamp = stripDate("");
+			DateEntry timestampEntry = getDateEntry(this.timestamp);
+			if(timestampEntry != null) {
+				timestampEntry.type = "";
 				result.add(timestampEntry);
+			}
 		}
 		
 		return result;
@@ -255,6 +254,13 @@ public class OrgNodePayload {
 			this.deadline = stripDate("DEADLINE:");
 		
 		return this.deadline;
+	}
+	
+	public String getTimestamp() {
+		if(this.timestamp == null)
+			this.timestamp = stripDate("");
+		
+		return this.timestamp;
 	}
 	
 	public void insertOrReplace(String key, String value) {

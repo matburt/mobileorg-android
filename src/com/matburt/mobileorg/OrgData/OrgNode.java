@@ -122,6 +122,26 @@ public class OrgNode {
 		values.put(OrgData.TAGS, tags);
 		return values;
 	}
+
+	/**
+	 * This will split up the tag string that it got from the tag entry in the
+	 * database. The leading and trailing : are stripped out from the tags by
+	 * the parser. A double colon (::) means that the tags before it are
+	 * inherited.
+	 */
+	public ArrayList<String> getTags() {
+		ArrayList<String> result = new ArrayList<String>();
+
+		String[] split = tags.split("\\:");
+
+		for (String tag : split)
+			result.add(tag);
+
+		if (tags.endsWith(":"))
+			result.add("");
+
+		return result;
+	}
 	
 	public ArrayList<OrgNode> getChildren(ContentResolver resolver) {
 		ArrayList<OrgNode> result = new ArrayList<OrgNode>();

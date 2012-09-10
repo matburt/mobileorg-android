@@ -6,7 +6,7 @@
 
     <fragment
         android:id="@+id/editDetailsFragment"
-        android:name="com.matburt.mobileorg.Gui.Capture.EditDetailsFragment"
+        android:name="com.matburt.mobileorg.Gui.Capture.EditFragment"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_weight="1" />

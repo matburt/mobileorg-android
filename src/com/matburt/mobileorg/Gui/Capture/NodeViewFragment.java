@@ -45,17 +45,19 @@ public class NodeViewFragment extends SherlockFragment {
 	public void onStart() {
 		super.onStart();
 		this.resolver = getActivity().getContentResolver();
+		
+		EditActivity editActivity = (EditActivity) getActivity();
+		this.node = editActivity.getOrgNode();
+		this.display.setBackgroundColor(0x00000000);
+		
 		refreshDisplay();
 	}
 
 	private void refreshDisplay() {
-		EditActivity editActivity = (EditActivity) getActivity();
-		this.node = editActivity.getOrgNode();
-		
 		String data;
 		
 		if(this.node.id == -1)
-			data = "<html><body>" + getString(R.string.node_view_error_loading_node) + "</body></html>";
+			data = "<html><body><font color='white'>" + getString(R.string.node_view_error_loading_node) + "</font></body></html>";
 		else
 			data = convertToHTML();
 		this.display.loadDataWithBaseURL(null, data, "text/html", "UTF-8", null);
@@ -80,10 +82,10 @@ public class NodeViewFragment extends SherlockFragment {
 			text = text.replaceAll("((\\s*\\|[^\\n]*\\|\\s*(?:<br/>)?\\n)+)", "<pre>$1</pre>");
 
 			Log.d("MobileOrg", text);
-			text = "<html><body>" + text + "</body></html>";
+			text = "<html><body><font color='white'>" + text + "</font></body></html>";
 		} else {
 			text = text.replaceAll("\\n", "<br/>\n");
-			text = "<html><body><pre>" + text + "</pre></body></html>";
+			text = "<html><body><font color='white'><pre>" + text + "</pre></font></body></html>";
 		}
 
 		return text;

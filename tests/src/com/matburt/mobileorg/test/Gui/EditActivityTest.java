@@ -13,7 +13,7 @@ import android.test.mock.MockContentResolver;
 import android.widget.EditText;
 
 import com.matburt.mobileorg.Gui.Capture.EditActivity;
-import com.matburt.mobileorg.Gui.Capture.EditDetailsFragment;
+import com.matburt.mobileorg.Gui.Capture.EditFragment;
 import com.matburt.mobileorg.OrgData.OrgNode;
 import com.matburt.mobileorg.test.util.OrgTestUtils;
 
@@ -98,7 +98,7 @@ public class EditActivityTest extends ActivityInstrumentationTestCase2<EditActiv
 //	}
 //	
 	public void testTest() {
-		EditText titleView = (EditText) activity.findViewById(com.matburt.mobileorg.R.id.title);
+		EditText titleView = (EditText) activity.findViewById(com.matburt.mobileorg.R.id.edit_title);
 		assertNotNull(titleView);
 		assertTrue(titleView.getText().equals(""));	
 	}

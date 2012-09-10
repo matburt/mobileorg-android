@@ -8,113 +8,118 @@
     android:scrollbars="vertical" >
 
     <LinearLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/editnodelayout"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="5dp"
+        android:layout_marginTop="5dp"
         android:orientation="vertical" >
 
         <RelativeLayout
+            style="@style/EditBorders"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="5dp"
-            android:layout_marginLeft="5dp"
-            android:layout_marginRight="5dp"
-            android:layout_marginTop="10dp"
-            android:background="@drawable/border"
             android:orientation="vertical" >
 
             <EditText
-                android:id="@+id/title"
+                android:id="@+id/edit_title"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="3dp"
+                android:layout_below="@+id/edit_todo_priority"
                 android:hint="@string/title"
                 android:inputType="text|textMultiLine|textAutoCorrect|textCapSentences" />
 
-            <ImageView
-                android:id="@+id/imageView2"
+            <LinearLayout
+                android:id="@+id/edit_todo_priority"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentBottom="true"
-                android:layout_alignParentLeft="true"
-                android:layout_below="@id/title"
-                android:contentDescription="@string/todo_state"
-                android:src="@drawable/ic_menu_agenda" />
+                android:layout_centerHorizontal="true"
+                android:orientation="horizontal" >
 
-            <Spinner
-                android:id="@+id/todo_state"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignTop="@+id/imageView2"
-                android:layout_toRightOf="@+id/imageView2"
-                android:prompt="@string/todo_state" />
+                <ImageView
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_gravity="center_vertical"
+                    android:contentDescription="Todo"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/ic_menu_agenda" />
 
-            <Spinner
-                android:id="@+id/priority"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignBaseline="@+id/todo_state"
-                android:layout_alignBottom="@+id/todo_state"
-                android:layout_alignParentRight="true"
-                android:paddingRight="2dip"
-                android:prompt="@string/priority" />
+                <Spinner
+                    android:id="@+id/edit_todo"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginRight="5dp"
+                    android:gravity="center"
+                    android:prompt="@string/todo_state" />
 
-            <ImageView
-                android:id="@+id/imageView1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/title"
-                android:layout_toLeftOf="@+id/priority"
-                android:contentDescription="@string/todo_state"
-                android:src="@drawable/ic_menu_star" />
+                <ImageView
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_gravity="center_vertical"
+                    android:contentDescription="Priority"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/ic_menu_star" />
+
+                <Spinner
+                    android:id="@+id/edit_priority"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginRight="5dp"
+                    android:gravity="center"
+                    android:prompt="@string/priority" />
+
+            </LinearLayout>
 
             <TableLayout
-                android:id="@+id/tags"
+                android:id="@+id/edit_tags"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:layout_alignParentBottom="true" >
+                android:layout_below="@+id/edit_title" >
             </TableLayout>
-
-            <LinearLayout
-                android:id="@+id/location"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/imageView2"
-                android:orientation="vertical" />
         </RelativeLayout>
 
         <LinearLayout
+            style="@style/EditBorders"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="5dp"
-            android:background="@drawable/border"
+            android:paddingTop="3dip" >
+
+            <LinearLayout
+                android:id="@+id/edit_location"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:orientation="vertical" />
+        </LinearLayout>
+
+        <LinearLayout
+            style="@style/EditBorders"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
             android:paddingTop="3dip" >
 
             <TableLayout
-                android:id="@+id/dates"
+                android:id="@+id/edit_dates"
                 android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="5dp"
-                android:background="@drawable/border" >
+                android:layout_height="wrap_content" >
             </TableLayout>
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/edit_payload"
+            style="@style/EditBorders"
             android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="5dp"
-            android:background="@drawable/border"
-            android:paddingTop="3dip" >
+            android:layout_height="wrap_content" >
 
             <fragment
                 android:id="@+id/edit_payload_view"
-                android:name="com.matburt.mobileorg.Gui.NodeViewActivity"
-                android:layout_width="wrap_content"
+                android:name="com.matburt.mobileorg.Gui.Capture.NodeViewFragment"
+                android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="5dp"
                 tools:layout="@layout/viewnode" />
-
         </LinearLayout>
     </LinearLayout>
 
