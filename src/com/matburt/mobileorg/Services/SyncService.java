@@ -103,10 +103,12 @@ public class SyncService extends Service implements
 
 		Thread syncThread = new Thread() {
 			public void run() {
-				if(calendarEnabled)
-					synchronizer.sync(parser, new CalendarSyncService(getContentResolver(), getBaseContext()));
-				else
-					synchronizer.sync(parser);
+				synchronizer.sync(parser);
+
+				if(calendarEnabled) {
+					CalendarSyncService cal = new CalendarSyncService(getContentResolver(), getBaseContext());
+					cal.syncFiles();
+				}
 				synchronizer.close();
 				db.close();
 				syncRunning = false;

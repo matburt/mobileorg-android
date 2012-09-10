@@ -1,4 +1,4 @@
-package com.matburt.mobileorg.test.provider;
+package com.matburt.mobileorg.test.OrgData;
 
 import java.util.ArrayList;
 

@@ -24,9 +24,9 @@ public class OrgNode {
 	public String todo = "";
 	public String tags = "";
 	public String name = "";
-	public String payload = "";
+	private String payload = "";
 	
-	private OrgNodePayload nodePayload = new OrgNodePayload("");
+	private OrgNodePayload nodePayload = null;
 
 	public OrgNode() {
 	}
@@ -303,9 +303,9 @@ public class OrgNode {
 		return edits;
 	}
 	
-	private void setPayload(String newRawPayload) {
-		// TODO Auto-generated method stub
-		
+	public void setPayload(String newRawPayload) {
+		this.nodePayload = null;
+		this.payload = newRawPayload;
 	}
 
 	public void parseLine(String thisLine, int numstars, boolean useTitleField) {

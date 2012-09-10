@@ -87,7 +87,7 @@ public class EditActivity extends SherlockFragmentActivity {
 
 		OrgNode node = new OrgNode();
 		node.name = subject;
-		node.payload = text;
+		node.setPayload(text);
 		return node;
 	}
 	

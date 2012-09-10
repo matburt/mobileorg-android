@@ -1,4 +1,4 @@
-package com.matburt.mobileorg.test.provider;
+package com.matburt.mobileorg.test.OrgData;
 
 import android.database.Cursor;
 import android.test.ProviderTestCase2;
@@ -68,7 +68,7 @@ public class OrgDatabaseTest extends ProviderTestCase2<OrgProvider> {
 		cursor.close();
 		
 		assertNull(insertedNode.getRawPayload());
-		insertedNode.payload = "";
+		insertedNode.setPayload("");
 		assertTrue(node.equals(insertedNode));
 	}
 	

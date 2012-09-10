@@ -7,6 +7,7 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.matburt.mobileorg.OrgData.OrgContract.Edits;
 import com.matburt.mobileorg.OrgData.OrgContract.Files;
@@ -37,7 +38,7 @@ public class OrgProviderUtil {
 			node.parentId = parent.id;
 		}
 		
-		node.payload = newPayload;
+		node.setPayload(newPayload);
 		node.write(resolver);
 		
 		makeNewheadingEditNode(node, parent, resolver);
@@ -230,6 +231,7 @@ public class OrgProviderUtil {
 		Cursor cursor = resolver.query(OrgData.CONTENT_URI, OrgData.DEFAULT_COLUMNS, whereQuery,
 				new String[] { Long.toString(file.id) }, null);
 		cursor.moveToFirst();
+		Log.d("MobileOrg", "Found " + cursor.getCount() + " entries");
 		return cursor;
 	}
 	

@@ -21,7 +21,6 @@ import com.matburt.mobileorg.OrgData.OrgEdit;
 import com.matburt.mobileorg.OrgData.OrgFile;
 import com.matburt.mobileorg.OrgData.OrgFileParser;
 import com.matburt.mobileorg.OrgData.OrgProviderUtil;
-import com.matburt.mobileorg.Services.CalendarSyncService;
 import com.matburt.mobileorg.util.FileUtils;
 
 /**
@@ -53,11 +52,6 @@ public class Synchronizer {
 
  	public boolean isEnabled() {
 		return true;
-	}
- 	
-	public void sync(OrgFileParser parser, CalendarSyncService calendarSyncService) {
-		sync(parser);
-		calendarSyncService.syncFiles();
 	}
 	
 	public void sync(OrgFileParser parser) {
