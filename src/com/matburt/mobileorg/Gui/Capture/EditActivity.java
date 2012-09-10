@@ -34,9 +34,7 @@ public class EditActivity extends SherlockFragmentActivity {
 	private String actionMode;
 
 	private ContentResolver resolver;
-	private HeadingFragment detailsFragment;
 	private LinearLayout payloadView;
-
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -253,7 +251,7 @@ public class EditActivity extends SherlockFragmentActivity {
 	}
 	
 	private void save() {
-		OrgNode newNode = this.detailsFragment.getEditedOrgNode();
+		OrgNode newNode = new OrgNode();
 
 		if (this.actionMode.equals(ACTIONMODE_CREATE) || this.actionMode.equals(ACTIONMODE_ADDCHILD))
 			createNewNode(newNode);
