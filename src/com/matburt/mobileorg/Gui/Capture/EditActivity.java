@@ -265,8 +265,8 @@ public class EditActivity extends SherlockFragmentActivity {
 	}
 	
 	private void insertChangesIntoPayloadResidue() {
-		node.getPayload().insertOrReplace("SCHEDULED:", detailsFragment.getScheduled());
-		node.getPayload().insertOrReplace("DEADLINE:", detailsFragment.getDeadline());
+//		node.getPayload().insertOrReplace("SCHEDULED:", detailsFragment.getScheduled());
+//		node.getPayload().insertOrReplace("DEADLINE:", detailsFragment.getDeadline());
 	}
 	
 	private void announceUpdate() {

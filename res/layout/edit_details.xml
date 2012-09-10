@@ -69,7 +69,6 @@
                     android:layout_marginRight="5dp"
                     android:gravity="center"
                     android:prompt="@string/priority" />
-
             </LinearLayout>
 
             <TableLayout
@@ -100,11 +99,11 @@
             android:layout_height="wrap_content"
             android:paddingTop="3dip" >
 
-            <TableLayout
+            <fragment
                 android:id="@+id/edit_dates"
+                android:name="com.matburt.mobileorg.Gui.Capture.DateFragment"
                 android:layout_width="fill_parent"
-                android:layout_height="wrap_content" >
-            </TableLayout>
+                android:layout_height="wrap_content" />
         </LinearLayout>
 
         <LinearLayout

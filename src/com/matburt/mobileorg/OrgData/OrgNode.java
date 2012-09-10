@@ -132,6 +132,9 @@ public class OrgNode {
 	public ArrayList<String> getTags() {
 		ArrayList<String> result = new ArrayList<String>();
 
+		if(tags == null)
+			return result;
+		
 		String[] split = tags.split("\\:");
 
 		for (String tag : split)

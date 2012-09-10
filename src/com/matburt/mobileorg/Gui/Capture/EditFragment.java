@@ -1,8 +1,6 @@
 package com.matburt.mobileorg.Gui.Capture;
 
 import java.util.ArrayList;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import android.content.ContentResolver;
 import android.content.Context;
@@ -21,7 +19,6 @@ import android.widget.TableLayout;
 import com.actionbarsherlock.app.SherlockFragment;
 import com.actionbarsherlock.view.MenuItem;
 import com.matburt.mobileorg.R;
-import com.matburt.mobileorg.Gui.Capture.DateTableRow.OrgTimeDate;
 import com.matburt.mobileorg.OrgData.OrgNode;
 import com.matburt.mobileorg.OrgData.OrgProviderUtil;
 
@@ -30,7 +27,6 @@ public class EditFragment extends SherlockFragment {
 	private Spinner priorityView;
 	private Spinner todoStateView;
 	private TableLayout tagsView;
-	private TableLayout datesView;
 	private LinearLayout locationView;
 	private LocationTableRow locationTableRow;
 	private LinearLayout payloadView;
@@ -38,9 +34,7 @@ public class EditFragment extends SherlockFragment {
 	private OrgNode node;
 	
 	ArrayList<TagTableRow> tagEntries = new ArrayList<TagTableRow>();
-	private DateTableRow scheduledEntry = null;
-	private DateTableRow deadlineEntry = null;
-	private DateTableRow timestampEntry = null;
+
 	
 	private ArrayList<String> tagsToRestore = null;
 	private ContentResolver resolver;
@@ -56,7 +50,6 @@ public class EditFragment extends SherlockFragment {
 		this.priorityView = (Spinner) view.findViewById(R.id.edit_priority);
 		this.todoStateView = (Spinner) view.findViewById(R.id.edit_todo);
 		this.tagsView = (TableLayout) view.findViewById(R.id.edit_tags);
-		this.datesView = (TableLayout) view.findViewById(R.id.edit_dates);
 		this.locationView = (LinearLayout) view.findViewById(R.id.edit_location);
 		this.payloadView = (LinearLayout) view.findViewById(R.id.edit_payload);
 		this.payloadView.setOnClickListener(new OnClickListener() {
@@ -73,8 +66,7 @@ public class EditFragment extends SherlockFragment {
         setHasOptionsMenu(true);
         
 		if (savedInstanceState != null) {
-			setupScheduled(savedInstanceState.getString("scheduled"));
-			setupDeadline(savedInstanceState.getString("deadline"));
+
 			tagsToRestore = savedInstanceState.getStringArrayList("tags");
 		}
         
@@ -102,8 +94,6 @@ public class EditFragment extends SherlockFragment {
 	@Override
 	public void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
-        outState.putString("scheduled", getScheduled());
-        outState.putString("deadline", getDeadline());
         
         ArrayList<String> tags = new ArrayList<String>();
         for(TagTableRow tag: tagEntries) {
@@ -119,7 +109,6 @@ public class EditFragment extends SherlockFragment {
 		titleView.setSelection(node.name.length());
 
 		setupTags(node.getTags());
-		setupDates(node);
 		setupSpinner(getActivity(), todoStateView,
 				OrgProviderUtil.getTodos(resolver), node.todo);
 		setupSpinner(getActivity(), priorityView,
@@ -128,18 +117,6 @@ public class EditFragment extends SherlockFragment {
 			this.locationTableRow = new LocationTableRow(
 					node.getParent(resolver), getActivity(), locationView,
 					resolver);
-	}
-
-	private void setupScheduled(String scheduled) {
-		if (scheduled != null)
-			this.scheduledEntry = setupDate(scheduled, "SCHEDULED",
-					scheduledRemoveListener);
-	}
-
-	private void setupDeadline(String deadline) {
-		if (deadline != null)
-			this.deadlineEntry = setupDate(deadline, "DEADLINE",
-					deadlineRemoveListener);
 	}
 	
 	private void setupTags(ArrayList<String> tagList) {		
@@ -156,62 +133,6 @@ public class EditFragment extends SherlockFragment {
 		}
 	}
 	
-	private void setupDates(OrgNode node) {
-		this.scheduledEntry = setupDate(node.getPayload().getScheduled(), "SCHEDULED", scheduledRemoveListener);
-		this.deadlineEntry = setupDate(node.getPayload().getDeadline(), "DEADLINE", deadlineRemoveListener);
-		this.timestampEntry = setupDate(node.getPayload().getTimestamp(), "", timestampRemoveListener);
-	}
-	
-	private DateTableRow setupDate(String date, String title, View.OnClickListener removeListener) {
-		final Pattern schedulePattern = Pattern
-				.compile("((\\d{4})-(\\d{1,2})-(\\d{1,2}))(?:[^\\d]*)" 
-						+ "((\\d{1,2})\\:(\\d{2}))?(-((\\d{1,2})\\:(\\d{2})))?");
-		Matcher propm = schedulePattern.matcher(date);
-		DateTableRow dateEntry = null;
-
-		if (propm.find()) {
-			OrgTimeDate timeDate = new OrgTimeDate();
-
-			try {
-				timeDate.year = Integer.parseInt(propm.group(2));
-				timeDate.monthOfYear = Integer.parseInt(propm.group(3));
-				timeDate.dayOfMonth = Integer.parseInt(propm.group(4));
-
-				timeDate.startTimeOfDay = Integer.parseInt(propm.group(6));
-				timeDate.startMinute = Integer.parseInt(propm.group(7));
-
-				timeDate.endTimeOfDay = Integer.parseInt(propm.group(10));
-				timeDate.endMinute = Integer.parseInt(propm.group(11));
-			} catch (NumberFormatException e) {
-			}
-			dateEntry = new DateTableRow(getActivity(), this, datesView,
-					removeListener, title, timeDate);
-		}
-		
-		return dateEntry;
-	}
-	
-	private View.OnClickListener timestampRemoveListener = new View.OnClickListener() {
-		public void onClick(View v) {
-			datesView.removeView(timestampEntry);
-			timestampEntry = null;
-		}
-	};
-	
-	private View.OnClickListener scheduledRemoveListener = new View.OnClickListener() {
-		public void onClick(View v) {
-			datesView.removeView(scheduledEntry);
-			scheduledEntry = null;
-		}
-	};
-	
-	private View.OnClickListener deadlineRemoveListener = new View.OnClickListener() {
-		public void onClick(View v) {
-			datesView.removeView(deadlineEntry);
-			deadlineEntry = null;
-		}
-	};
-	
 
 	@Override
 	public void onCreateOptionsMenu(com.actionbarsherlock.view.Menu menu,
@@ -223,16 +144,8 @@ public class EditFragment extends SherlockFragment {
 	@Override
 	public void onPrepareOptionsMenu(com.actionbarsherlock.view.Menu menu) {
 		super.onPrepareOptionsMenu(menu);
-		
-		if(this.scheduledEntry != null)
-			menu.findItem(R.id.menu_nodeedit_scheduled).setVisible(false);
-		else
-			menu.findItem(R.id.menu_nodeedit_scheduled).setVisible(true);
-						
-		if(this.deadlineEntry != null)
-			menu.findItem(R.id.menu_nodeedit_deadline).setVisible(false);
-		else
-			menu.findItem(R.id.menu_nodeedit_deadline).setVisible(true);
+			
+
 	}
 
 	@Override
@@ -243,28 +156,10 @@ public class EditFragment extends SherlockFragment {
 			addTag("");
 			return true;
 
-		case R.id.menu_nodeedit_scheduled:
-			addDateScheduled();
-			return true;
-
-		case R.id.menu_nodeedit_deadline:
-			addDateDeadline();
-			return true;
 		}
 		return false;
 	}
-	
-	private void addDateScheduled() {
-		DateTableRow dateEntry = new DateTableRow(getActivity(), this, datesView, scheduledRemoveListener,
-				"SCHEDULED");
-		this.scheduledEntry = dateEntry;
-	}
-	
-	private void addDateDeadline() {
-		DateTableRow dateEntry = new DateTableRow(getActivity(), this, datesView, deadlineRemoveListener,
-				"DEADLINE");
-		this.deadlineEntry = dateEntry;
-	}
+
 
 	private void addTag(String tag) {
 		TagTableRow tagEntry = new TagTableRow(getActivity(), tagsView, OrgProviderUtil.getTags(resolver), tag, this);
@@ -309,20 +204,6 @@ public class EditFragment extends SherlockFragment {
 			return "";
 		else
 			return result.deleteCharAt(result.lastIndexOf(":")).toString();
-	}
-	
-	public String getScheduled() {
-		if(this.scheduledEntry == null || TextUtils.isEmpty(this.scheduledEntry.getDate()))
-			return "";
-		else
-			return "SCHEDULED: <" + this.scheduledEntry.getDate() + ">";
-	}
-
-	public String getDeadline() {
-		if(this.deadlineEntry == null || TextUtils.isEmpty(this.deadlineEntry.getDate()))
-			return "";
-		else
-			return "DEADLINE: <" + this.deadlineEntry.getDate() + ">";
 	}
 	
 	private String getTitle() {

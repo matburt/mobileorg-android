@@ -48,8 +48,7 @@ public class DateTableRow extends TableRow {
 		}
 	};
 	
-	
-	public DateTableRow(Context context, EditFragment parentFragment,
+	public DateTableRow(Context context, DateFragment parentFragment,
 			TableLayout parentTable, View.OnClickListener removeListener,
 			String title) {
 		super(context);
@@ -57,7 +56,7 @@ public class DateTableRow extends TableRow {
 		init(context, parentFragment, parentTable, removeListener, title);
 	}
 	
-	public DateTableRow(Context context, EditFragment parentFragment,
+	public DateTableRow(Context context, DateFragment parentFragment,
 			TableLayout parentTable, View.OnClickListener removeListener,
 			String title, OrgTimeDate timeDateContainer) {
 		super(context);
@@ -76,7 +75,7 @@ public class DateTableRow extends TableRow {
 	}
 
 	private void init(Context context,
-			final EditFragment parentFragment, TableLayout parentTable,
+			final DateFragment parentFragment, TableLayout parentTable,
 			View.OnClickListener removeListener, String title) {
 
 		LayoutInflater layoutInflater = (LayoutInflater) context
