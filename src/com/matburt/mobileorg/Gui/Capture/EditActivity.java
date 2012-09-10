@@ -6,6 +6,10 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.EditText;
+import android.widget.LinearLayout;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
@@ -30,13 +34,28 @@ public class EditActivity extends SherlockFragmentActivity {
 	private String actionMode;
 
 	private ContentResolver resolver;
-	private EditFragment detailsFragment;
+	private HeadingFragment detailsFragment;
+	private LinearLayout payloadView;
+
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
 		setContentView(R.layout.edit);
+		
+		this.payloadView = (LinearLayout) findViewById(R.id.edit_payload);
+		this.payloadView.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				payloadView.removeAllViews();
+				EditText payloadEdit = new EditText(getBaseContext());
+				payloadEdit.setText(node.getRawPayload());
+				payloadView.addView(payloadEdit);
+			}
+		});
+		
 		this.resolver = getContentResolver();
 		
 		initState();
@@ -59,13 +78,6 @@ public class EditActivity extends SherlockFragmentActivity {
 			this.node.parentId = node_id;
 		}
 	}
-	
-	public OrgNode getOrgNode() {
-		if(this.node == null)
-			this.node = new OrgNode();
-		return this.node;
-	}
-
 
 	private static OrgNode getCaptureIntentContents(Intent intent) {
 		String subject = intent
@@ -88,6 +100,11 @@ public class EditActivity extends SherlockFragmentActivity {
 		return node;
 	}
 	
+	public OrgNode getOrgNode() {
+		if(this.node == null)
+			this.node = new OrgNode();
+		return this.node;
+	}
 	
     @Override
 	public boolean onPrepareOptionsMenu(Menu menu) {
@@ -143,7 +160,7 @@ public class EditActivity extends SherlockFragmentActivity {
 			return true;
 			
 		case R.string.menu_clockin:
-			startTimeClockingService();
+			runTimeClockingService();
 			return true;
 			
 		case R.string.menu_archive:
@@ -198,7 +215,7 @@ public class EditActivity extends SherlockFragmentActivity {
 		builder.create().show();
 	}
 
-	private void startTimeClockingService() {
+	private void runTimeClockingService() {
 		Intent intent = new Intent(EditActivity.this, TimeclockService.class);
 		intent.putExtra(TimeclockService.NODE_ID, node.id);
 		startService(intent);
@@ -249,7 +266,7 @@ public class EditActivity extends SherlockFragmentActivity {
 	
 	// TODO Clean up this mess
 	private void createNewNode(OrgNode newNode) {
-		OrgNode newParent = this.detailsFragment.getLocation();
+		OrgNode newParent = new OrgNode(); //this.detailsFragment.getLocation();
 
 		StringBuilder newCleanedPayload = new StringBuilder( ); //this.payloadFragment.getText());
 		insertChangesIntoPayloadResidue();

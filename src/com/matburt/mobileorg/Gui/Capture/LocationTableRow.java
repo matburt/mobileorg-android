@@ -88,7 +88,7 @@ public class LocationTableRow {
 				Log.d("MobileOrg", "setupSpinner(): this.node = " + this.node.name);
 			}
 			
-			EditFragment
+			HeadingFragment
 					.setupSpinner(getContext(), this, children, name);
 		}
 		
@@ -129,7 +129,7 @@ public class LocationTableRow {
 		}
 		
 		private void setupChildSpinner() {
-			EditFragment
+			HeadingFragment
 			.setupSpinner(getContext(), this, node.getChildrenStringArray(resolver), "");
 		}
 

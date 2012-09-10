@@ -164,8 +164,6 @@
             android:name=".Services.TimeclockDialog"
             android:theme="@android:style/Theme.Dialog" >
         </activity>
-        <activity android:name=".Gui.Capture.EditActivityMock" >
-        </activity>
     </application>
 
 </manifest>

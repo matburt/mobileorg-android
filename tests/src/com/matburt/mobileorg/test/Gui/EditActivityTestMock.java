@@ -9,7 +9,7 @@ import android.test.mock.MockContentResolver;
 
 import com.matburt.mobileorg.Gui.Capture.EditActivity;
 import com.matburt.mobileorg.Gui.Capture.EditActivityMock;
-import com.matburt.mobileorg.Gui.Capture.EditFragment;
+import com.matburt.mobileorg.Gui.Capture.HeadingFragment;
 import com.matburt.mobileorg.OrgData.OrgNode;
 import com.matburt.mobileorg.test.util.OrgTestUtils;
 
@@ -61,7 +61,7 @@ public class EditActivityTestMock extends ActivityInstrumentationTestCase2<EditA
 	}
 	
 	public void replaceFragment(OrgNode node) {
-		EditFragment fragment = new EditFragment();
+		HeadingFragment fragment = new HeadingFragment();
 		//fragment.setNode(node, "", null);
 		FragmentManager fragmentManager = activity.getSupportFragmentManager();
 		FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();

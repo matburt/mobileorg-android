@@ -13,7 +13,7 @@ import android.test.mock.MockContentResolver;
 import android.widget.EditText;
 
 import com.matburt.mobileorg.Gui.Capture.EditActivity;
-import com.matburt.mobileorg.Gui.Capture.EditFragment;
+import com.matburt.mobileorg.Gui.Capture.HeadingFragment;
 import com.matburt.mobileorg.OrgData.OrgNode;
 import com.matburt.mobileorg.test.util.OrgTestUtils;
 

@@ -1,14 +1,59 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/editnode_fragment_container"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent" >
+    android:layout_height="wrap_content"
+    android:layout_weight="1"
+    android:background="#00000000"
+    android:scrollbars="vertical" >
 
-    <fragment
-        android:id="@+id/editDetailsFragment"
-        android:name="com.matburt.mobileorg.Gui.Capture.EditFragment"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1" />
+        android:orientation="vertical" >
 
-</LinearLayout>
+        <fragment
+            android:name="com.matburt.mobileorg.Gui.Capture.HeadingFragment"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            tools:layout="@layout/edit_heading" />
+
+        <LinearLayout
+            style="@style/EditBorders"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="3dip" >
+
+            <fragment
+                android:name="com.matburt.mobileorg.Gui.Capture.TagsFragment"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+
+        <LinearLayout
+            style="@style/EditBorders"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="3dip" >
+
+            <fragment
+                android:name="com.matburt.mobileorg.Gui.Capture.DateFragment"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/edit_payload"
+            style="@style/EditBorders"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="3dip" >
+
+            <fragment
+                android:name="com.matburt.mobileorg.Gui.Capture.NodeViewFragment"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+    </LinearLayout>
+
+</ScrollView>

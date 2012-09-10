@@ -56,10 +56,10 @@ public class NodeViewFragment extends SherlockFragment {
 	private void refreshDisplay() {
 		String data;
 		
-		if(this.node.id == -1)
+//		if(this.node.id == -1)
 			data = "<html><body><font color='white'>" + getString(R.string.node_view_error_loading_node) + "</font></body></html>";
-		else
-			data = convertToHTML();
+//		else
+//			data = convertToHTML();
 		this.display.loadDataWithBaseURL(null, data, "text/html", "UTF-8", null);
 	}
 

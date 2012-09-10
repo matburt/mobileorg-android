@@ -12,7 +12,7 @@ import android.widget.TableRow;
 import com.matburt.mobileorg.R;
 
 class TagTableRow extends TableRow {
-	EditFragment activity;
+	TagsFragment activity;
 	TableLayout parent;
 	Spinner spinner;
 	Button button;
@@ -20,7 +20,7 @@ class TagTableRow extends TableRow {
 	String selectionExtra = ""; // used to carry ::
 
 	public TagTableRow(Context context, TableLayout parent,
-			final ArrayList<String> tags, String selection, EditFragment activity) {
+			final ArrayList<String> tags, String selection, TagsFragment activity) {
 		super(context);
 
 		this.parent = parent;
@@ -37,7 +37,7 @@ class TagTableRow extends TableRow {
 		}
 
 		spinner = (Spinner) findViewById(R.id.editnode_tag_list);
-		EditFragment.setupSpinner(this.getContext(), spinner, tags, selection);
+		HeadingFragment.setupSpinner(this.getContext(), spinner, tags, selection);
 	}
 	
 	public void setUnmodifiable() {
