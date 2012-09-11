@@ -12,12 +12,12 @@ import android.widget.TableRow;
 import com.matburt.mobileorg.R;
 
 class TagTableRow extends TableRow {
-	TagsFragment activity;
-	TableLayout parent;
-	Spinner spinner;
-	Button button;
+	private TagsFragment activity;
+	private TableLayout parent;
+	private Spinner spinner;
+	private Button button;
 	
-	String selectionExtra = ""; // used to carry ::
+	private String selectionExtra = ""; // used to carry ::
 
 	public TagTableRow(Context context, TableLayout parent,
 			final ArrayList<String> tags, String selection, TagsFragment activity) {
@@ -26,9 +26,9 @@ class TagTableRow extends TableRow {
 		this.parent = parent;
 		this.activity = activity;
 
-		View.inflate(context, R.layout.edit_tagsrow, this);
+		View tagsView = View.inflate(getContext(), R.layout.edit_tagsrow, this);
 		
-		button = (Button) findViewById(R.id.editnode_tag_remove);
+		button = (Button) tagsView.findViewById(R.id.edit_tag_remove);
 		button.setOnClickListener(removeListener);
 		
 		if(selection.endsWith(":")) {
@@ -36,8 +36,8 @@ class TagTableRow extends TableRow {
 			selection = selection.replace(":", "");
 		}
 
-		spinner = (Spinner) findViewById(R.id.editnode_tag_list);
-		HeadingFragment.setupSpinner(this.getContext(), spinner, tags, selection);
+		spinner = (Spinner) tagsView.findViewById(R.id.edit_tag_list);
+		HeadingFragment.setupSpinner(getContext(), spinner, tags, selection);
 	}
 	
 	public void setUnmodifiable() {

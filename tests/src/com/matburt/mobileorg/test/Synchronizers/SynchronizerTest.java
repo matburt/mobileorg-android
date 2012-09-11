@@ -2,24 +2,18 @@ package com.matburt.mobileorg.test.Synchronizers;
 
 import java.io.IOException;
 import java.security.cert.CertificateException;
-import java.util.HashMap;
 
 import javax.net.ssl.SSLHandshakeException;
 
 import android.content.ContentResolver;
 import android.content.Context;
-import android.database.Cursor;
 import android.test.ProviderTestCase2;
 
 import com.matburt.mobileorg.OrgData.OrgDatabase;
 import com.matburt.mobileorg.OrgData.OrgEdit;
 import com.matburt.mobileorg.OrgData.OrgFile;
-import com.matburt.mobileorg.OrgData.OrgFileParser;
 import com.matburt.mobileorg.OrgData.OrgNode;
 import com.matburt.mobileorg.OrgData.OrgProvider;
-import com.matburt.mobileorg.OrgData.OrgProviderUtil;
-import com.matburt.mobileorg.OrgData.OrgContract.Files;
-import com.matburt.mobileorg.OrgData.OrgContract.OrgData;
 import com.matburt.mobileorg.Synchronizers.Synchronizer;
 import com.matburt.mobileorg.test.util.OrgTestFiles.SimpleOrgFiles;
 

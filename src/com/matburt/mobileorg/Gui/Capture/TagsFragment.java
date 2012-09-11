@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import android.content.ContentResolver;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,96 +20,80 @@ import com.matburt.mobileorg.OrgData.OrgNode;
 import com.matburt.mobileorg.OrgData.OrgProviderUtil;
 
 public class TagsFragment extends SherlockFragment {
-
+	private static String BUNDLE_TAGS = "tags";
+	
 	private ContentResolver resolver;
 	
 	private TableLayout tagsView;
 	ArrayList<TagTableRow> tagEntries = new ArrayList<TagTableRow>();
-	private ArrayList<String> tagsToRestore = null;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
+		setHasOptionsMenu(true);
 		this.tagsView = new TableLayout(getActivity());
-
-		if (savedInstanceState != null) {
-			tagsToRestore = savedInstanceState.getStringArrayList("tags");
-		}
-        		
 		return tagsView;
 	}
 	
 	@Override
-	public void onStart() {
-		super.onStart();
-		
+	public void onActivityCreated(Bundle savedInstanceState) {
+		super.onActivityCreated(savedInstanceState);
 		this.resolver = getActivity().getContentResolver();
 		
-		if(tagsToRestore != null) {
-			tagsView.removeAllViews();
-			tagEntries.clear();
-			setupTags(tagsToRestore);
-			tagsToRestore = null;
+		if(savedInstanceState != null)
+			restoreFromBundle(savedInstanceState);
+		else {
+			OrgNode node = ((EditActivity) getActivity()).getOrgNode();
+			setupTagEntries(node.getTags());
 		}
-		
-		OrgNode node = new OrgNode();
-		setupTags(node.getTags());
+	}
+	
+	public void restoreFromBundle(Bundle savedInstanceState) {
+		if (savedInstanceState != null) {
+			ArrayList<String> tagsToRestore = savedInstanceState.getStringArrayList(BUNDLE_TAGS);
+						
+			if(tagsToRestore != null)
+				setupTagEntries(tagsToRestore);
+		}
 	}
 
 	@Override
 	public void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
 
-        
         ArrayList<String> tags = new ArrayList<String>();
-        for(TagTableRow tag: tagEntries) {
-        	tags.add(tag.getSelection());
+        for(TagTableRow tagTableRow: tagEntries) {
+        	tags.add(tagTableRow.getSelection());
         }
-        outState.putStringArrayList("tags", tags);
-	}
-	
-	
-	
-	@Override
-	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-		// TODO Auto-generated method stub
-		super.onCreateOptionsMenu(menu, inflater);
+        outState.putStringArrayList(BUNDLE_TAGS, tags);
 	}
 
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		switch (item.getItemId()) {
 
-		case R.id.menu_nodeedit_tag:
-			addTag("");
-			return true;
+	private void setupTagEntries(ArrayList<String> tagList) {
+		tagsView.removeAllViews();
+		this.tagEntries.clear();
+		for (String tag : tagList) {
+			Log.d("MobileOrg", "Setting up: " + tag);
 
-		default:
-			return super.onOptionsItemSelected(item);
-		}
-	}
-
-	private void setupTags(ArrayList<String> tagList) {		
-		for(String tag: tagList) {
-			if(TextUtils.isEmpty(tag)) { 
-				// OrgNode found a :: entry, meaning all tags so far where unmodifiable
-				for(TagTableRow entry: tagEntries)
+			if (TextUtils.isEmpty(tag)) { // found a :: entry
+				for (TagTableRow entry : tagEntries) // all tags so far where unmodifiable
 					entry.setUnmodifiable();
-				if(tagEntries.size() > 0)
-					tagEntries.get(tagEntries.size() - 1).setLast();
-			}
-			else
-				addTag(tag);
+			} else
+				addTagEntry(tag);
 		}
+		
+		if (tagEntries.size() > 0) 
+			tagEntries.get(tagEntries.size() - 1).setLast();
 	}
 	
-	private void addTag(String tag) {
-		TagTableRow tagEntry = new TagTableRow(getActivity(), tagsView, OrgProviderUtil.getTags(resolver), tag, this);
-		tagsView.addView(tagEntry);
+	public void addTagEntry(String tag) {
+		TagTableRow tagEntry = new TagTableRow(getActivity(), tagsView,
+				OrgProviderUtil.getTags(resolver), tag, this);
 		tagEntries.add(tagEntry);
+		tagsView.addView(tagEntry);
 	}
-	
-	private String getTags() {
+
+	public String getTags() {
 		StringBuilder result = new StringBuilder();
 		for(TagTableRow entry: tagEntries) {
 			String selection = entry.getSelection();
@@ -118,9 +103,28 @@ public class TagsFragment extends SherlockFragment {
 			}
 		}
 		
-		if(TextUtils.isEmpty(result))
-			return "";
-		else
-			return result.deleteCharAt(result.lastIndexOf(":")).toString();
+		if(!TextUtils.isEmpty(result))
+			result.deleteCharAt(result.lastIndexOf(":"));
+		
+		return result.toString();
+	}
+	
+	@Override
+	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+		super.onCreateOptionsMenu(menu, inflater);
+		inflater.inflate(R.menu.edit_tags, menu);
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+
+		case R.id.menu_edit_addtag:
+			addTagEntry("");
+			return true;
+
+		default:
+			return super.onOptionsItemSelected(item);
+		}
 	}
 }

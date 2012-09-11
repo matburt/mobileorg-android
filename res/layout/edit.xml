@@ -26,6 +26,7 @@
 
             <fragment
                 android:name="com.matburt.mobileorg.Gui.Capture.TagsFragment"
+                android:tag="tagsFragment"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content" />
         </LinearLayout>

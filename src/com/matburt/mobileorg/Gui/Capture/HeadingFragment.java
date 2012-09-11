@@ -81,7 +81,7 @@ public class HeadingFragment extends SherlockFragment {
 	public void onCreateOptionsMenu(com.actionbarsherlock.view.Menu menu,
 			com.actionbarsherlock.view.MenuInflater inflater) {
 		super.onCreateOptionsMenu(menu, inflater);
-		inflater.inflate(R.menu.edit_details, menu);
+		inflater.inflate(R.menu.edit_heading, menu);
 	}
 
 	
@@ -124,7 +124,7 @@ public class HeadingFragment extends SherlockFragment {
 		return locationTableRow.getParentNodeId();
 	}
 	
-	public static void setupSpinner(Context context, Spinner view, ArrayList<String> data,
+	public static void setupSpinner(Context context, Spinner spinner, ArrayList<String> data,
 			String selection) {		
 		if(!TextUtils.isEmpty(selection) && !data.contains(selection))
 			data.add(selection);
@@ -133,11 +133,11 @@ public class HeadingFragment extends SherlockFragment {
 		ArrayAdapter<String> adapter = new ArrayAdapter<String>(context,
 				android.R.layout.simple_spinner_item, data);
 		adapter.setDropDownViewResource(R.layout.edit_spinner_layout);
-		view.setAdapter(adapter);
+		spinner.setAdapter(adapter);
 		int pos = data.indexOf(selection);
 		if (pos < 0) {
 			pos = 0;
 		}
-		view.setSelection(pos);
+		spinner.setSelection(pos);
 	}
 }
