@@ -37,8 +37,10 @@ class TagTableRow extends TableRow {
 		}
 
 		spinner = (Spinner) tagsView.findViewById(R.id.edit_tag_list);
-		HeadingFragment.setupSpinner(getContext(), spinner, tags, selection);
+		HeadingFragment.setupSpinner(spinner, tags, selection);
 	}
+	
+	
 	
 	public void setUnmodifiable() {
 		button.setVisibility(INVISIBLE);

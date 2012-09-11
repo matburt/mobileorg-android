@@ -88,8 +88,7 @@ public class LocationTableRow {
 				Log.d("MobileOrg", "setupSpinner(): this.node = " + this.node.name);
 			}
 			
-			HeadingFragment
-					.setupSpinner(getContext(), this, children, name);
+			HeadingFragment.setupSpinner(this, children, name);
 		}
 		
 		@Override
@@ -129,8 +128,7 @@ public class LocationTableRow {
 		}
 		
 		private void setupChildSpinner() {
-			HeadingFragment
-			.setupSpinner(getContext(), this, node.getChildrenStringArray(resolver), "");
+			HeadingFragment.setupSpinner(this, node.getChildrenStringArray(resolver), "");
 		}
 
 		private void removeChildren() {	
