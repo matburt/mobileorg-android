@@ -15,6 +15,7 @@ import com.matburt.mobileorg.OrgData.OrgContract.OrgData;
 import com.matburt.mobileorg.OrgData.OrgNode;
 import com.matburt.mobileorg.OrgData.OrgProviderUtil;
 import com.matburt.mobileorg.util.FileUtils;
+import com.matburt.mobileorg.util.OrgUtils;
 
 public class LocationTableRow {
 	private OrgNode node = null;
@@ -88,7 +89,7 @@ public class LocationTableRow {
 				Log.d("MobileOrg", "setupSpinner(): this.node = " + this.node.name);
 			}
 			
-			HeadingFragment.setupSpinner(this, children, name);
+			OrgUtils.setupSpinner(this, children, name);
 		}
 		
 		@Override
@@ -128,7 +129,7 @@ public class LocationTableRow {
 		}
 		
 		private void setupChildSpinner() {
-			HeadingFragment.setupSpinner(this, node.getChildrenStringArray(resolver), "");
+			OrgUtils.setupSpinner(this, node.getChildrenStringArray(resolver), "");
 		}
 
 		private void removeChildren() {	

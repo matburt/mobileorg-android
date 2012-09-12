@@ -33,9 +33,9 @@ public class TagsFragmentTest extends ActivityInstrumentationTestCase2<EditActiv
 	
 	@Override
 	public void tearDown() throws Exception {
-		super.tearDown();
 		if(this.node != null)
 			this.node.deleteNode(resolver);
+		super.tearDown();
 	}
 	
 	private void prepareActivityWithTags(String tags) {

@@ -17,6 +17,7 @@ import com.actionbarsherlock.app.SherlockFragment;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.OrgData.OrgNode;
 import com.matburt.mobileorg.OrgData.OrgProviderUtil;
+import com.matburt.mobileorg.util.OrgUtils;
 
 public class HeadingFragment extends SherlockFragment {
 	private EditText titleView;
@@ -69,9 +70,9 @@ public class HeadingFragment extends SherlockFragment {
 		titleView.setText(node.name);
 		titleView.setSelection(node.name.length());
 
-		setupSpinner(todoStateView, OrgProviderUtil.getTodos(resolver),
+		OrgUtils.setupSpinner(todoStateView, OrgProviderUtil.getTodos(resolver),
 				node.todo);
-		setupSpinner(priorityView, OrgProviderUtil.getPriorities(resolver),
+		OrgUtils.setupSpinner(priorityView, OrgProviderUtil.getPriorities(resolver),
 				node.priority);
 	}
 
@@ -121,23 +122,5 @@ public class HeadingFragment extends SherlockFragment {
 	
 	public OrgNode getLocation() {
 		return locationTableRow.getParentNodeId();
-	}
-	
-	public static void setupSpinner(Spinner spinner, ArrayList<String> data,
-			String selection) {		
-		if(!TextUtils.isEmpty(selection) && !data.contains(selection))
-			data.add(selection);
-		data.add("");
-		
-		ArrayAdapter<String> adapter = new ArrayAdapter<String>(spinner.getContext(),
-				android.R.layout.simple_spinner_item, data);
-		adapter.setDropDownViewResource(R.layout.edit_spinner_layout);
-		spinner.setAdapter(adapter);
-		int pos = data.indexOf(selection);
-		if (pos < 0) {
-			pos = 0;
-		}
-		spinner.setSelection(pos);
-		adapter.notifyDataSetChanged();
 	}
 }

@@ -26,6 +26,8 @@ public class OrgNodePayload {
 	private String id = null; // Can be :ID: (or :ORIGINAL_ID: for agendas.org)
 	
 	public OrgNodePayload(String payload) {
+		if(payload == null)
+			payload = "";
 		this.payload = new StringBuilder(payload);
 	}
 	
