@@ -1,16 +1,11 @@
 package com.matburt.mobileorg.Gui.Capture;
 
-import java.util.ArrayList;
-
 import android.content.ContentResolver;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.Spinner;
 
 import com.actionbarsherlock.app.SherlockFragment;
@@ -23,9 +18,6 @@ public class HeadingFragment extends SherlockFragment {
 	private EditText titleView;
 	private Spinner priorityView;
 	private Spinner todoStateView;
-	
-	private LinearLayout locationView;
-	private LocationTableRow locationTableRow;
 
 	private OrgNode node;
 
@@ -55,11 +47,6 @@ public class HeadingFragment extends SherlockFragment {
 		
 		this.resolver = activity.getContentResolver();
 		this.node = activity.getOrgNode();
-		
-		if (node.getParent(resolver) != null)
-			this.locationTableRow = new LocationTableRow(
-					node.getParent(resolver), getActivity(), locationView,
-					resolver);
 		
 		updateDisplay();
 	}
@@ -118,9 +105,5 @@ public class HeadingFragment extends SherlockFragment {
 	
 	private String getPriority() {
 		return priorityView.getSelectedItem().toString();
-	}
-	
-	public OrgNode getLocation() {
-		return locationTableRow.getParentNodeId();
 	}
 }

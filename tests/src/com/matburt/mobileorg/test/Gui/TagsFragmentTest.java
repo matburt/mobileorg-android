@@ -13,7 +13,8 @@ import com.matburt.mobileorg.OrgData.OrgNode;
 import com.matburt.mobileorg.test.util.OrgTestUtils;
 
 public class TagsFragmentTest extends ActivityInstrumentationTestCase2<EditActivity> {
-
+	private final String TAGS_FRAGMENT = "tagsFragment";
+	
 	private EditActivity activity;
 	private ContentResolver resolver;
 	private Instrumentation instrumentation;
@@ -70,7 +71,7 @@ public class TagsFragmentTest extends ActivityInstrumentationTestCase2<EditActiv
 		assertNotNull(this.activity);
 		
 		TagsFragment tagsFragment = ((TagsFragment) this.activity
-				.getSupportFragmentManager().findFragmentByTag("tagsFragment"));
+				.getSupportFragmentManager().findFragmentByTag(TAGS_FRAGMENT));
 		assertNotNull(tagsFragment);
 	}
 	
@@ -79,7 +80,7 @@ public class TagsFragmentTest extends ActivityInstrumentationTestCase2<EditActiv
 		prepareActivityWithTags(tags);
 		
 		TagsFragment tagsFragment = ((TagsFragment) this.activity
-				.getSupportFragmentManager().findFragmentByTag("tagsFragment"));		
+				.getSupportFragmentManager().findFragmentByTag(TAGS_FRAGMENT));		
 		String resultTags = tagsFragment.getTags();
 		assertEquals(tags, resultTags);
 	}
@@ -89,7 +90,7 @@ public class TagsFragmentTest extends ActivityInstrumentationTestCase2<EditActiv
 		prepareActivityWithTags(tags);
 		
 		final TagsFragment tagsFragment = ((TagsFragment) this.activity
-				.getSupportFragmentManager().findFragmentByTag("tagsFragment"));
+				.getSupportFragmentManager().findFragmentByTag(TAGS_FRAGMENT));
 		saveAndRestoreState(tagsFragment);
 				
 		String resultTags = tagsFragment.getTags();
@@ -101,7 +102,7 @@ public class TagsFragmentTest extends ActivityInstrumentationTestCase2<EditActiv
 		prepareActivityWithTags(tags);
 		
 		final TagsFragment tagsFragment = ((TagsFragment) this.activity
-				.getSupportFragmentManager().findFragmentByTag("tagsFragment"));
+				.getSupportFragmentManager().findFragmentByTag(TAGS_FRAGMENT));
 		final String addedTag = "hello";
 		activity.runOnUiThread(new Runnable() {
 			public void run() {

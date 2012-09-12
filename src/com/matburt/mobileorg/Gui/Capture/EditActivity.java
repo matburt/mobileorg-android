@@ -18,7 +18,6 @@ import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.view.SubMenu;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.OrgData.OrgNode;
-import com.matburt.mobileorg.OrgData.OrgProviderUtil;
 import com.matburt.mobileorg.Services.TimeclockService;
 import com.matburt.mobileorg.Synchronizers.Synchronizer;
 import com.matburt.mobileorg.util.OrgUtils;
@@ -42,9 +41,10 @@ public class EditActivity extends SherlockFragmentActivity {
 		
 		setContentView(R.layout.edit);
 		
+		this.resolver = getContentResolver();
+		
 		this.payloadView = (LinearLayout) findViewById(R.id.edit_payload);
 		this.payloadView.setOnClickListener(new OnClickListener() {
-			
 			@Override
 			public void onClick(View v) {
 				payloadView.removeAllViews();
@@ -52,9 +52,7 @@ public class EditActivity extends SherlockFragmentActivity {
 				payloadEdit.setText(node.getRawPayload());
 				payloadView.addView(payloadEdit);
 			}
-		});
-		
-		this.resolver = getContentResolver();
+		});		
 		
 		initState();
 	}
@@ -65,7 +63,7 @@ public class EditActivity extends SherlockFragmentActivity {
 		long node_id = intent.getLongExtra("node_id", -1);	
 		
 		if (this.actionMode == null) {
-			this.node = getCaptureIntentContents(intent);
+			this.node = OrgUtils.getCaptureIntentContents(intent);
 			this.actionMode = ACTIONMODE_CREATE;
 		} else if (this.actionMode.equals(ACTIONMODE_CREATE)) {
 			this.node = new OrgNode();
@@ -77,26 +75,6 @@ public class EditActivity extends SherlockFragmentActivity {
 		}
 	}
 
-	private static OrgNode getCaptureIntentContents(Intent intent) {
-		String subject = intent
-				.getStringExtra("android.intent.extra.SUBJECT");
-		String text = intent.getStringExtra("android.intent.extra.TEXT");
-
-		if(text != null && subject != null) {
-			subject = "[[" + text + "][" + subject + "]]";
-			text = "";
-		}
-		
-		if(subject == null)
-			subject = "";
-		if(text == null)
-			text = "";
-
-		OrgNode node = new OrgNode();
-		node.name = subject;
-		node.setPayload(text);
-		return node;
-	}
 	
 	public OrgNode getOrgNode() {
 		if(this.node == null)
@@ -144,7 +122,7 @@ public class EditActivity extends SherlockFragmentActivity {
 			return true;
 			
 		case R.id.nodeedit_save:
-			save();
+			saveEdits();
 			setResult(RESULT_OK);
 			finish();
 			return true;
@@ -225,33 +203,37 @@ public class EditActivity extends SherlockFragmentActivity {
 	}
 	
 	private void doCancel() {
-//		if(this.detailsFragment.hasEdits() == false &&
-//                   this.payloadFragment.hasEdits() == false) {
-//			setResult(RESULT_CANCELED);
-//			finish();
-//			return;
-//		}
+		if(hasEdits() == false) {
+			setResult(RESULT_CANCELED);
+			finish();
+			return;
+		}
 		
-//		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-//		builder.setMessage(R.string.node_edit_prompt)
-//				.setCancelable(false)
-//				.setPositiveButton(R.string.yes,
-//						new DialogInterface.OnClickListener() {
-//							public void onClick(DialogInterface dialog, int id) {
-//								setResult(RESULT_CANCELED);
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setMessage(R.string.node_edit_prompt)
+				.setCancelable(false)
+				.setPositiveButton(R.string.yes,
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int id) {
+								setResult(RESULT_CANCELED);
 								finish();
-//							}
-//						})
-//				.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
-//					public void onClick(DialogInterface dialog, int id) {
-//						dialog.cancel();
-//					}
-//				});
-//		builder.create().show();
+							}
+						})
+				.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						dialog.cancel();
+					}
+				});
+		builder.create().show();
 	}
 	
-	private void save() {
-		OrgNode newNode = new OrgNode();
+	public boolean hasEdits() {
+		return false;
+	}
+	
+	
+	public void saveEdits() {
+		OrgNode newNode = getEditedNode();
 
 		if (this.actionMode.equals(ACTIONMODE_CREATE) || this.actionMode.equals(ACTIONMODE_ADDCHILD))
 			createNewNode(newNode);
@@ -261,28 +243,22 @@ public class EditActivity extends SherlockFragmentActivity {
 		announceUpdate();
 	}
 	
-	
-	// TODO Clean up this mess
-	private void createNewNode(OrgNode newNode) {
-		OrgNode newParent = new OrgNode(); //this.detailsFragment.getLocation();
-
-		StringBuilder newCleanedPayload = new StringBuilder( ); //this.payloadFragment.getText());
-		insertChangesIntoPayloadResidue();
-		String newPayloadResidue = node.getPayload().getNewPayloadResidue();
-		String newPayload = newCleanedPayload.toString() + newPayloadResidue;
+	public OrgNode getEditedNode() {
+		OrgNode newParent = new OrgNode();
 
 		boolean addTimestamp = PreferenceManager.getDefaultSharedPreferences(
 				this).getBoolean("captureWithTimestamp", false);
 		if(addTimestamp)
-			newCleanedPayload.append("\n").append(OrgUtils.getTimestamp()).append("\n");
+			;
 		
-		OrgProviderUtil.createNodeWithNewheadingEditnode(newNode, newParent, newPayload, resolver);
+		return this.node;
 	}
 	
-	private void insertChangesIntoPayloadResidue() {
-//		node.getPayload().insertOrReplace("SCHEDULED:", detailsFragment.getScheduled());
-//		node.getPayload().insertOrReplace("DEADLINE:", detailsFragment.getDeadline());
+	
+	private void createNewNode(OrgNode newNode) {
+		//OrgProviderUtil.createNodeWithNewheadingEditnode(newNode, newParent, newPayload, resolver);
 	}
+
 	
 	private void announceUpdate() {
 		Intent intent = new Intent(Synchronizer.SYNC_UPDATE);

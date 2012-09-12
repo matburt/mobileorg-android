@@ -5,8 +5,10 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import com.matburt.mobileorg.R;
+import com.matburt.mobileorg.OrgData.OrgNode;
 
 import android.content.Context;
+import android.content.Intent;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.widget.ArrayAdapter;
@@ -49,5 +51,26 @@ public class OrgUtils {
 			pos = 0;
 		}
 		spinner.setSelection(pos, true);
+	}
+	
+	public static OrgNode getCaptureIntentContents(Intent intent) {
+		String subject = intent
+				.getStringExtra("android.intent.extra.SUBJECT");
+		String text = intent.getStringExtra("android.intent.extra.TEXT");
+
+		if(text != null && subject != null) {
+			subject = "[[" + text + "][" + subject + "]]";
+			text = "";
+		}
+		
+		if(subject == null)
+			subject = "";
+		if(text == null)
+			text = "";
+
+		OrgNode node = new OrgNode();
+		node.name = subject;
+		node.setPayload(text);
+		return node;
 	}
 }

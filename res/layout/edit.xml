@@ -12,11 +12,32 @@
         android:layout_height="wrap_content"
         android:orientation="vertical" >
 
-        <fragment
-            android:name="com.matburt.mobileorg.Gui.Capture.HeadingFragment"
+        <LinearLayout
+            style="@style/EditBorders"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            tools:layout="@layout/edit_heading" />
+            android:paddingTop="3dip" >
+
+            <fragment
+                android:name="com.matburt.mobileorg.Gui.Capture.HeadingFragment"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:tag="headingFragment"
+                tools:layout="@layout/edit_heading" />
+        </LinearLayout>
+
+        <LinearLayout
+            style="@style/EditBorders"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="3dip" >
+
+            <fragment
+                android:name="com.matburt.mobileorg.Gui.Capture.LocationFragment"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:tag="locationFragment" />
+        </LinearLayout>
 
         <LinearLayout
             style="@style/EditBorders"
@@ -26,9 +47,9 @@
 
             <fragment
                 android:name="com.matburt.mobileorg.Gui.Capture.TagsFragment"
-                android:tag="tagsFragment"
                 android:layout_width="fill_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:tag="tagsFragment" />
         </LinearLayout>
 
         <LinearLayout
@@ -40,7 +61,8 @@
             <fragment
                 android:name="com.matburt.mobileorg.Gui.Capture.DateFragment"
                 android:layout_width="fill_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:tag="dateFragment" />
         </LinearLayout>
 
         <LinearLayout
@@ -53,7 +75,8 @@
             <fragment
                 android:name="com.matburt.mobileorg.Gui.Capture.NodeViewFragment"
                 android:layout_width="fill_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:tag="payloadFragment" />
         </LinearLayout>
     </LinearLayout>
 
