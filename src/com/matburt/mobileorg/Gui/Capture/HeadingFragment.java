@@ -15,6 +15,10 @@ import com.matburt.mobileorg.OrgData.OrgProviderUtil;
 import com.matburt.mobileorg.util.OrgUtils;
 
 public class HeadingFragment extends SherlockFragment {
+	private final String HEADING_TITLE = "headingTitle";
+	private final String HEADING_TODO = "headingTodo";
+	private final String HEADING_PRIORITY = "headingPriority";
+	
 	private EditText titleView;
 	private Spinner priorityView;
 	private Spinner todoStateView;
@@ -38,37 +42,64 @@ public class HeadingFragment extends SherlockFragment {
 	}
 
 	@Override
-	public void onStart() {
-		super.onStart();
+	public void onActivityCreated(Bundle savedInstanceState) {
+		super.onActivityCreated(savedInstanceState);
 		
 		EditActivity activity = ((EditActivity)getActivity());
 		
 		this.resolver = activity.getContentResolver();
 		this.node = activity.getOrgNode();
 		
-		updateDisplay();
+		if(savedInstanceState != null)
+			restoreInstanceState(savedInstanceState);
+		else
+			updateDisplay(this.node);
+	}
+
+	@Override
+	public void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+        outState.putString(HEADING_TITLE, getTitle());
+        outState.putString(HEADING_TODO, getTodo());
+        outState.putString(HEADING_PRIORITY, getPriority());
 	}
 	
-	public void updateDisplay() {
-		if(node == null)
-			return;
-		titleView.setText(node.name);
-		titleView.setSelection(node.name.length());
+	public void restoreInstanceState(Bundle savedInstanceState) {
+		if(savedInstanceState != null) {
+			String title = savedInstanceState.getString(HEADING_TITLE);
+			String todo = savedInstanceState.getString(HEADING_TODO);
+			String priority = savedInstanceState.getString(HEADING_PRIORITY);
+			updateDisplay(title, todo, priority);
+		}
+	}
+	
+	@Override
+	public void onStart() {
+		super.onStart();
+
+	}
+	
+	public void updateDisplay(OrgNode node) {
+		if(node != null)
+			updateDisplay(node.name, node.todo, node.priority);
+	}
+	
+	public void updateDisplay(String title, String todo, String priority) {
+		titleView.setText(title);
+		titleView.setSelection(title.length());
 
 		OrgUtils.setupSpinner(todoStateView, OrgProviderUtil.getTodos(resolver),
-				node.todo);
+				todo);
 		OrgUtils.setupSpinner(priorityView, OrgProviderUtil.getPriorities(resolver),
-				node.priority);
+				priority);
 	}
 	
 	public boolean hasEdits() {
 		String newTitle = titleView.getText().toString();
 		String newTodo = todoStateView.getSelectedItem().toString();
 		String newPriority = priorityView.getSelectedItem().toString();
-		String newTags = ""; // getTags();
 
 		if (newTitle.equals(node.name) && newTodo.equals(node.todo)
-				&& newTags.equals(node.tags)
 				&& newPriority.equals(node.priority))
 			return false;
 		return true;
@@ -79,7 +110,6 @@ public class HeadingFragment extends SherlockFragment {
 		orgNode.name = getTitle();
 		orgNode.todo = getTodo();
 		orgNode.priority = getPriority();
-//		orgNode.tags = getTags();
 		return orgNode;
 	}
 
