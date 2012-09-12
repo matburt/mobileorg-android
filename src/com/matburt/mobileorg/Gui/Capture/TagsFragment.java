@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import android.content.ContentResolver;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -48,21 +47,12 @@ public class TagsFragment extends SherlockFragment {
 		}
 	}
 	
-	
-	
 	public void restoreFromBundle(Bundle savedInstanceState) {
 		if (savedInstanceState != null) {
 			ArrayList<String> tagsToRestore = savedInstanceState.getStringArrayList(BUNDLE_TAGS);
 						
 			if(tagsToRestore != null)
 				setupTagEntries(tagsToRestore);
-		}
-		
-		Log.d("MobileOrg", "Tags:" + this.getTags());
-		
-		for(TagTableRow entry: tagEntries) {
-			entry.refreshDrawableState();
-			entry.invalidate();
 		}
 	}
 
@@ -82,8 +72,6 @@ public class TagsFragment extends SherlockFragment {
 		this.tagsView.removeAllViews();
 		this.tagEntries.clear();
 		for (String tag : tagList) {
-			Log.d("MobileOrg", "Setting up: " + tag);
-
 			if (TextUtils.isEmpty(tag)) { // found a :: entry
 				for (TagTableRow entry : tagEntries) // all tags so far where unmodifiable
 					entry.setUnmodifiable();
@@ -96,9 +84,13 @@ public class TagsFragment extends SherlockFragment {
 	}
 	
 	public void addTagEntry(String selectedTag) {
-		TagTableRow tagEntry = new TagTableRow(tagsView,
-				OrgProviderUtil.getTags(resolver), selectedTag, this);
-		tagEntries.add(tagEntry);
+		LayoutInflater inflater = LayoutInflater.from(getActivity());
+		TagTableRow tagsTableEntry =
+		                (TagTableRow) inflater.inflate(R.layout.edit_tagsrow, tagsView, false);
+		tagsTableEntry.setTags(selectedTag, OrgProviderUtil.getTags(resolver));
+		tagsTableEntry.setParents(tagsView, this);
+		tagsView.addView(tagsTableEntry);
+		tagEntries.add(tagsTableEntry);
 	}
 
 	public String getTags() {

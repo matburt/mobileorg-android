@@ -49,6 +49,5 @@ public class OrgUtils {
 			pos = 0;
 		}
 		spinner.setSelection(pos, true);
-		adapter.notifyDataSetChanged();
 	}
 }
