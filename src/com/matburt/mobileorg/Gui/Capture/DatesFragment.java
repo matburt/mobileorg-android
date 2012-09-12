@@ -109,11 +109,16 @@ public class DatesFragment extends SherlockFragment {
 		return dateEntry;
 	}
 	
-
+	
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
 		super.onCreateOptionsMenu(menu, inflater);
 		inflater.inflate(R.menu.edit_dates, menu);
+	}
+
+	@Override
+	public void onPrepareOptionsMenu(Menu menu) {
+		super.onPrepareOptionsMenu(menu);
 		if(this.deadlineEntry != null)
 			menu.findItem(R.id.menu_nodeedit_deadline).setVisible(false);
 		else
@@ -129,6 +134,7 @@ public class DatesFragment extends SherlockFragment {
 		else
 			menu.findItem(R.id.menu_nodeedit_timestamp).setVisible(true);
 	}
+
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {

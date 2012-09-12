@@ -83,11 +83,12 @@ public class EditActivity extends SherlockFragmentActivity {
 	}
 	
     @Override
-	public boolean onPrepareOptionsMenu(Menu menu) {
+	public boolean onCreateOptionsMenu(Menu menu) {
     	super.onCreateOptionsMenu(menu);
+    	
 		MenuInflater inflater = getSupportMenuInflater();
 	    inflater.inflate(R.menu.edit, menu);
-	    
+    	
 	    if(this.node == null)
 	    	return true;
 	    
@@ -111,9 +112,10 @@ public class EditActivity extends SherlockFragmentActivity {
 			subMenuItem.setIcon(R.drawable.ic_menu_moreoverflow);
 			subMenuItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
 		}
-		return true;	
+	    
+    	return true;
 	}
-
+    
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {

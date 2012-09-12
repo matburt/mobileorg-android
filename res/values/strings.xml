@@ -172,4 +172,5 @@
   <string name="edit_date_start">Start</string>
   <string name="edit_date_end">End</string>
   <string name="edit_date_date">Date</string>
+  <string name="menu_addtimestamp">Add Timestamp</string>
 </resources>
