@@ -9,5 +9,9 @@
         android:id="@+id/menu_nodeedit_deadline"
         android:icon="@drawable/ic_menu_today"
         android:title="@string/menu_adddeadline"/>
+    <item
+        android:id="@+id/menu_nodeedit_timestamp"
+        android:icon="@drawable/ic_menu_today"
+        android:title="Add timestamp"/>
 
 </menu>

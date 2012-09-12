@@ -59,10 +59,10 @@
             android:paddingTop="3dip" >
 
             <fragment
-                android:name="com.matburt.mobileorg.Gui.Capture.DateFragment"
+                android:name="com.matburt.mobileorg.Gui.Capture.DatesFragment"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:tag="dateFragment" />
+                android:tag="datesFragment" />
         </LinearLayout>
 
         <LinearLayout

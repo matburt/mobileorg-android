@@ -34,8 +34,6 @@ public class HeadingFragment extends SherlockFragment {
 		this.priorityView = (Spinner) view.findViewById(R.id.edit_priority);
 		this.todoStateView = (Spinner) view.findViewById(R.id.edit_todo);
 		
-        setHasOptionsMenu(true);
-
 		return view;
 	}
 
@@ -62,15 +60,6 @@ public class HeadingFragment extends SherlockFragment {
 		OrgUtils.setupSpinner(priorityView, OrgProviderUtil.getPriorities(resolver),
 				node.priority);
 	}
-
-
-	@Override
-	public void onCreateOptionsMenu(com.actionbarsherlock.view.Menu menu,
-			com.actionbarsherlock.view.MenuInflater inflater) {
-		super.onCreateOptionsMenu(menu, inflater);
-		inflater.inflate(R.menu.edit_heading, menu);
-	}
-
 	
 	public boolean hasEdits() {
 		String newTitle = titleView.getText().toString();

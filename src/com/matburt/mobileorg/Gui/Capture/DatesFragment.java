@@ -18,7 +18,10 @@ import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Gui.Capture.DateTableRow.OrgTimeDate;
 import com.matburt.mobileorg.OrgData.OrgNode;
 
-public class DateFragment extends SherlockFragment {
+public class DatesFragment extends SherlockFragment {
+	private final String DATES_SCHEDULED = "scheduled";
+	private final String DATES_DEADLINE = "deadline";
+	private final String DATES_TIMESTAMP = "timestamp";
 	
 	private TableLayout datesView;
 	
@@ -29,58 +32,45 @@ public class DateFragment extends SherlockFragment {
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
-		
+		setHasOptionsMenu(true);
 		this.datesView = new TableLayout(getActivity());
-
-		if(savedInstanceState != null) {
-			setupScheduled(savedInstanceState.getString("scheduled"));
-			setupDeadline(savedInstanceState.getString("deadline"));
-		}
 		return datesView;
 	}
 	
 	@Override
-	public void onStart() {
-		super.onStart();
+	public void onActivityCreated(Bundle savedInstanceState) {
+		super.onActivityCreated(savedInstanceState);
 		EditActivity editActivity = (EditActivity) getActivity();
 		OrgNode node = editActivity.getOrgNode();
-		setupDates(node);
+		
+		if(savedInstanceState != null)
+			restoreInstanceState(savedInstanceState);
+		else
+			setupDates(node);
 	}
-
 
 	@Override
 	public void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
-        outState.putString("scheduled", getScheduled());
-        outState.putString("deadline", getDeadline());
+        outState.putString(DATES_SCHEDULED, getScheduled());
+        outState.putString(DATES_DEADLINE, getDeadline());
+        outState.putString(DATES_TIMESTAMP, getTimestamp());
 	}
-
-	@Override
-	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-		super.onCreateOptionsMenu(menu, inflater);
-		if(this.deadlineEntry != null)
-			menu.findItem(R.id.menu_nodeedit_deadline).setVisible(false);
-		else
-			menu.findItem(R.id.menu_nodeedit_deadline).setVisible(true);
-		
-		if(this.scheduledEntry != null)
-			menu.findItem(R.id.menu_nodeedit_scheduled).setVisible(false);
-		else
-			menu.findItem(R.id.menu_nodeedit_scheduled).setVisible(true);
-	}
-
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		switch (item.getItemId()) {
-		case R.id.menu_nodeedit_scheduled:
-			addDateScheduled();
-			return true;
-
-		case R.id.menu_nodeedit_deadline:
-			addDateDeadline();
-			return true;
-		default:
-			return super.onOptionsItemSelected(item);
+	
+	public void restoreInstanceState(Bundle savedInstanceState) {
+		if(savedInstanceState != null) {
+			String timestamp = savedInstanceState.getString(DATES_TIMESTAMP);
+			if (timestamp != null)
+				this.timestampEntry = setupDate(timestamp, "",
+						timestampRemoveListener);
+			String scheduled = savedInstanceState.getString(DATES_SCHEDULED);
+			if (scheduled != null)
+				this.scheduledEntry = setupDate(scheduled, "SCHEDULED",
+						scheduledRemoveListener);
+			String deadline = savedInstanceState.getString(DATES_DEADLINE);
+			if (deadline != null)
+				this.deadlineEntry = setupDate(deadline, "DEADLINE",
+						deadlineRemoveListener);
 		}
 	}
 
@@ -119,6 +109,51 @@ public class DateFragment extends SherlockFragment {
 		return dateEntry;
 	}
 	
+
+	@Override
+	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+		super.onCreateOptionsMenu(menu, inflater);
+		inflater.inflate(R.menu.edit_dates, menu);
+		if(this.deadlineEntry != null)
+			menu.findItem(R.id.menu_nodeedit_deadline).setVisible(false);
+		else
+			menu.findItem(R.id.menu_nodeedit_deadline).setVisible(true);
+		
+		if(this.scheduledEntry != null)
+			menu.findItem(R.id.menu_nodeedit_scheduled).setVisible(false);
+		else
+			menu.findItem(R.id.menu_nodeedit_scheduled).setVisible(true);
+		
+		if(this.timestampEntry != null)
+			menu.findItem(R.id.menu_nodeedit_timestamp).setVisible(false);
+		else
+			menu.findItem(R.id.menu_nodeedit_timestamp).setVisible(true);
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case R.id.menu_nodeedit_scheduled:
+			addDateScheduled();
+			return true;
+
+		case R.id.menu_nodeedit_deadline:
+			addDateDeadline();
+			return true;
+			
+		case R.id.menu_nodeedit_timestamp:
+			addDateTimestamp();
+			return true;
+		default:
+			return super.onOptionsItemSelected(item);
+		}
+	}
+	
+	private void addDateTimestamp() {
+		DateTableRow dateEntry = new DateTableRow(getActivity(), this, datesView, timestampRemoveListener,
+				"");
+		this.timestampEntry = dateEntry;
+	}
 	
 	private void addDateScheduled() {
 		DateTableRow dateEntry = new DateTableRow(getActivity(), this, datesView, scheduledRemoveListener,
@@ -152,17 +187,13 @@ public class DateFragment extends SherlockFragment {
 			deadlineEntry = null;
 		}
 	};
-	
-	private void setupScheduled(String scheduled) {
-		if (scheduled != null)
-			this.scheduledEntry = setupDate(scheduled, "SCHEDULED",
-					scheduledRemoveListener);
-	}
 
-	private void setupDeadline(String deadline) {
-		if (deadline != null)
-			this.deadlineEntry = setupDate(deadline, "DEADLINE",
-					deadlineRemoveListener);
+	
+	public String getTimestamp() {
+		if(this.timestampEntry == null || TextUtils.isEmpty(this.timestampEntry.getDate()))
+			return "";
+		else
+			return "<" + this.timestampEntry.getDate() + ">";
 	}
 	
 	public String getScheduled() {

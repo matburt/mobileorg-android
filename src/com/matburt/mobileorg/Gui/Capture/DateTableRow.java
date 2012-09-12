@@ -48,7 +48,7 @@ public class DateTableRow extends TableRow {
 		}
 	};
 	
-	public DateTableRow(Context context, DateFragment parentFragment,
+	public DateTableRow(Context context, DatesFragment parentFragment,
 			TableLayout parentTable, View.OnClickListener removeListener,
 			String title) {
 		super(context);
@@ -56,7 +56,7 @@ public class DateTableRow extends TableRow {
 		init(context, parentFragment, parentTable, removeListener, title);
 	}
 	
-	public DateTableRow(Context context, DateFragment parentFragment,
+	public DateTableRow(Context context, DatesFragment parentFragment,
 			TableLayout parentTable, View.OnClickListener removeListener,
 			String title, OrgTimeDate timeDateContainer) {
 		super(context);
@@ -75,7 +75,7 @@ public class DateTableRow extends TableRow {
 	}
 
 	private void init(Context context,
-			final DateFragment parentFragment, TableLayout parentTable,
+			final DatesFragment parentFragment, TableLayout parentTable,
 			View.OnClickListener removeListener, String title) {
 
 		LayoutInflater layoutInflater = (LayoutInflater) context
@@ -91,9 +91,10 @@ public class DateTableRow extends TableRow {
 		
 		if(title.equals("DEADLINE"))
 			imageView.setImageResource(R.drawable.ic_menu_today);
-		else
+		else if(title.equals("SCHEDULED"))
 			imageView.setImageResource(R.drawable.ic_menu_month);
-
+		else
+			imageView.setImageResource(R.drawable.ic_menu_recent_history);
 
 		dateButton = (Button) findViewById(R.id.dateButton);
 		dateButton.setOnClickListener(new View.OnClickListener() {
