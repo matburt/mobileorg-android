@@ -75,20 +75,20 @@ public class OrgProviderUtil {
 	}
 	
 	public static ArrayList<String> getFilenames(ContentResolver resolver) {
-		ArrayList<String> checksums = new ArrayList<String>();
+		ArrayList<String> result = new ArrayList<String>();
 
 		Cursor cursor = resolver.query(Files.CONTENT_URI, Files.DEFAULT_COLUMNS,
-				null, null, null);
+				null, null, Files.DEFAULT_SORT);
 		cursor.moveToFirst();
 
 		while (cursor.isAfterLast() == false) {
 			OrgFile orgFile = new OrgFile(cursor);
-			checksums.add(orgFile.filename);
+			result.add(orgFile.filename);
 			cursor.moveToNext();
 		}
 
 		cursor.close();
-		return checksums;
+		return result;
 	}
 	
 	public static void setTodos(ArrayList<HashMap<String, Boolean>> todos,

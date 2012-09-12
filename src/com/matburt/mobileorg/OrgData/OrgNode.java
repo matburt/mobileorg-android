@@ -215,6 +215,21 @@ public class OrgNode {
 			return null;
 	}
 	
+	public ArrayList<String> getSiblingsStringArray(ContentResolver resolver) {		
+		OrgNode parent = getParent(resolver);
+		if(parent != null)
+			return parent.getChildrenStringArray(resolver);
+		else
+			return OrgProviderUtil.getFilenames(resolver);
+	}
+	
+	public OrgNode getSibling(String name, ContentResolver resolver) {		
+		OrgNode parent = getParent(resolver);
+		if(parent != null)
+			return parent.getChild(name, resolver);
+		else
+			return null;
+	}
 	
 	public boolean isNodeEditable(ContentResolver resolver) {
 		return true;

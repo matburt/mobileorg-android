@@ -120,6 +120,7 @@ public class OrgContract {
 
 		public static final String[] DEFAULT_COLUMNS = { ID, NAME, FILENAME,
 				CHECKSUM, NODE_ID };
+		public static final String DEFAULT_SORT = NAME + " ASC";
 		
 		public static String getId(Uri uri) {
 			return uri.getLastPathSegment();
