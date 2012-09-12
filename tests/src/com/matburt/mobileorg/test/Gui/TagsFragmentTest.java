@@ -8,6 +8,7 @@ import android.test.ActivityInstrumentationTestCase2;
 
 import com.matburt.mobileorg.Gui.Capture.EditActivity;
 import com.matburt.mobileorg.Gui.Capture.TagsFragment;
+import com.matburt.mobileorg.OrgData.OrgContract.OrgData;
 import com.matburt.mobileorg.OrgData.OrgNode;
 import com.matburt.mobileorg.test.util.OrgTestUtils;
 
@@ -18,6 +19,7 @@ public class TagsFragmentTest extends ActivityInstrumentationTestCase2<EditActiv
 	private Instrumentation instrumentation;
 	
 	private OrgNode node;
+	private long nodeId;
 	
 	public TagsFragmentTest() {
 		super(EditActivity.class);
@@ -33,8 +35,7 @@ public class TagsFragmentTest extends ActivityInstrumentationTestCase2<EditActiv
 	
 	@Override
 	public void tearDown() throws Exception {
-		if(this.node != null)
-			this.node.deleteNode(resolver);
+		resolver.delete(OrgData.buildIdUri(nodeId), null, null);
 		super.tearDown();
 	}
 	
@@ -42,6 +43,7 @@ public class TagsFragmentTest extends ActivityInstrumentationTestCase2<EditActiv
 		this.node = OrgTestUtils.getDefaultOrgNode();
 		this.node.tags = tags;
 		this.node.write(resolver);
+		this.nodeId = node.id;
 
 		Intent intent = new Intent();
 		intent.putExtra(EditActivity.ACTIONMODE, EditActivity.ACTIONMODE_EDIT);
