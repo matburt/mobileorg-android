@@ -298,41 +298,33 @@ public class OrgNode {
 		return this.orgNodePayload;
 	}
 	
-	
-	public void createNodeWithNewheadingEditnode(OrgNode parent, ContentResolver resolver) {
-		if (parent == null) {
-			OrgFile file;
-			try {
-				file = new OrgFile(FileUtils.CAPTURE_FILE, resolver);
-			} catch (IllegalArgumentException e) {
-				file = new OrgFile(FileUtils.CAPTURE_FILE, FileUtils.CAPTURE_FILE_ALIAS, "");
-				file.setResolver(resolver);
-				file.write();
-			}
+	public OrgEdit createParentNewheading(ContentResolver resolver) {
+		OrgNode parent;
+		try {
+			parent = new OrgNode(this.parentId, resolver);
+		} catch (IllegalArgumentException e) {
+			throw new IllegalStateException("Parent for node " + this.name
+					+ " does not exist");
+		}
 
-			parentId = file.nodeId;
-			fileId = file.id;
-		} else {
-			parentId = parent.id;
-			fileId = parent.fileId;
+		boolean generateEdit = false;
+		try {
+			OrgFile file = new OrgFile(parent.fileId, resolver);
+			generateEdit = file.isEditable();
+		} catch (IllegalArgumentException e) {
+			throw new IllegalStateException("Couln't find file of node " + parent.name);
 		}
 		
-		write(resolver);
-		
-		makeNewheadingEditNode(parent, resolver);
-	}
-	
-	private void makeNewheadingEditNode(OrgNode parent, ContentResolver resolver) {
-		boolean generateEdit = parent != null && !parent.getFilename(resolver).equals(FileUtils.CAPTURE_FILE);
-		if(generateEdit == false)
-			return;
-
-		// Add new heading nodes; need the entire content of node without star headings
-		long tempLevel = level;
-		level = 0;
-		OrgEdit edit = new OrgEdit(parent, OrgEdit.TYPE.ADDHEADING, this.toString(), resolver);
-		edit.write(resolver);
-		level = tempLevel;
+		if (generateEdit) {
+			// Add new heading nodes; need the entire content of node without
+			// star headings
+			long tempLevel = level;
+			level = 0;
+			OrgEdit edit = new OrgEdit(parent, OrgEdit.TYPE.ADDHEADING, this.toString(), resolver);
+			level = tempLevel;
+			return edit;
+		} else
+			return new OrgEdit();
 	}
 	
 	
@@ -360,7 +352,7 @@ public class OrgNode {
 			edits.add(new OrgEdit(this, OrgEdit.TYPE.PRIORITY, newNode.priority, resolver));
 			this.priority = newNode.priority;
 		}
-		if (newNode.getPayload() != null && newNode.getPayload().equals(getPayload())) {
+		if (newNode.getPayload() != null && !newNode.getPayload().equals(getPayload())) {
 			edits.add(new OrgEdit(this, OrgEdit.TYPE.BODY, newNode.getPayload(), resolver));
 			setPayload(newNode.getPayload());
 		}

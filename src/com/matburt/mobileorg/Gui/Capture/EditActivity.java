@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.util.Log;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
@@ -14,8 +15,6 @@ import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.view.SubMenu;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.OrgData.OrgNode;
-import com.matburt.mobileorg.OrgData.OrgNodePayload;
-import com.matburt.mobileorg.OrgData.OrgProviderUtil;
 import com.matburt.mobileorg.Services.TimeclockService;
 import com.matburt.mobileorg.Synchronizers.Synchronizer;
 import com.matburt.mobileorg.util.OrgUtils;
@@ -228,10 +227,18 @@ public class EditActivity extends SherlockFragmentActivity {
 			newNode.getOrgNodePayload().add(OrgUtils.getTimestamp());
 		
 		
-		if (this.actionMode.equals(ACTIONMODE_CREATE) || this.actionMode.equals(ACTIONMODE_ADDCHILD))
-			;
-		else if (this.actionMode.equals(ACTIONMODE_EDIT))
-			;
+		if (this.actionMode.equals(ACTIONMODE_CREATE) || this.actionMode.equals(ACTIONMODE_ADDCHILD)) {
+			try {
+				newNode.createParentNewheading(resolver).write(resolver);
+				newNode.write(resolver);
+			} catch (IllegalStateException e) {
+				Log.e("MobileOrg", e.getLocalizedMessage());
+			}
+		}
+		else if (this.actionMode.equals(ACTIONMODE_EDIT)) {
+			this.node.generateAndApplyEdits(newNode, resolver);
+			this.node.write(resolver);
+		}
 		
 		announceUpdate();
 	}
@@ -247,7 +254,9 @@ public class EditActivity extends SherlockFragmentActivity {
 		
 		LocationFragment locationFragment = (LocationFragment) getSupportFragmentManager()
 				.findFragmentByTag("locationFragment");
-		newNode.parentId = locationFragment.getLocation();
+		OrgNode newParent = locationFragment.getLocation();
+		newNode.parentId = newParent.id;
+		newNode.fileId = newParent.fileId;
 		
 		PayloadFragment payloadFragment = (PayloadFragment) getSupportFragmentManager()
 				.findFragmentByTag("payloadFragment");

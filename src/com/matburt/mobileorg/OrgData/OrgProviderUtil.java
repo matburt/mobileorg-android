@@ -161,6 +161,19 @@ public class OrgProviderUtil {
 		return new OrgNode(file.nodeId, resolver);
 	}
 	
+	public static OrgNode getOrCreateCaptureFileOrgNode (ContentResolver resolver) {
+		OrgFile file;
+		try {
+			file = new OrgFile(FileUtils.CAPTURE_FILE, resolver);
+		} catch (IllegalArgumentException e) {
+			file = new OrgFile(FileUtils.CAPTURE_FILE, FileUtils.CAPTURE_FILE_ALIAS, "");
+			file.setResolver(resolver);
+			file.write();
+		}
+		OrgNode node = new OrgNode(file.nodeId, resolver);
+		return node;
+	}
+	
 	public static boolean isTodoActive(String todo, ContentResolver resolver) {
 		Cursor cursor = resolver.query(Todos.CONTENT_URI, Todos.DEFAULT_COLUMNS, Todos.NAME + " = ?",
 				new String[] { todo }, null);		

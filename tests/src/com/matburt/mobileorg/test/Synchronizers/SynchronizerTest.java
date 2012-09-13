@@ -115,7 +115,7 @@ public class SynchronizerTest extends ProviderTestCase2<OrgProvider> {
 		node.setFilename(Synchronizer.CAPTURE_FILE, resolver);
 		node.write(resolver);
 		
-		OrgEdit edit = new OrgEdit();
+		OrgEdit edit = new OrgEdit(node, OrgEdit.TYPE.ADDHEADING, resolver);
 		edit.write(resolver);
 		synchronizer.pushCaptures();
 		

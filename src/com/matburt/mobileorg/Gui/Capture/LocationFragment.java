@@ -15,9 +15,10 @@ import com.actionbarsherlock.app.SherlockFragment;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.OrgData.OrgFile;
 import com.matburt.mobileorg.OrgData.OrgNode;
+import com.matburt.mobileorg.OrgData.OrgProviderUtil;
 
 public class LocationFragment extends SherlockFragment {
-	private final String LOCATION_NODEID = "nodeId";
+	private final String NODE_ID = "nodeId";
 	
 	private LinearLayout locationView;
 	private ContentResolver resolver;
@@ -51,14 +52,14 @@ public class LocationFragment extends SherlockFragment {
 	@Override
 	public void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
-		outState.putLong(LOCATION_NODEID, getLocationSelection());
+		outState.putLong(NODE_ID, getLocationSelection());
 	}
 
 	public void restoreFromBundle(Bundle savedInstanceState) {
 		if (savedInstanceState != null) {
 			locationView.removeAllViews();
 			locations.clear();
-			long nodeId = savedInstanceState.getLong(LOCATION_NODEID, -1);
+			long nodeId = savedInstanceState.getLong(NODE_ID, -1);
 			if(nodeId > -1)
 				this.node = new OrgNode(nodeId, resolver);
 		}
@@ -143,11 +144,10 @@ public class LocationFragment extends SherlockFragment {
 		return -1;
 	}
 	
-	public long getLocation() {
+	public OrgNode getLocation() {
 		if(locations.size() < 2)
-			return -1;
-		else {
-			return locations.get(locations.size() - 1).getOrgNode().id;
-		}
+			return OrgProviderUtil.getOrCreateCaptureFileOrgNode(resolver);
+		else
+			return locations.get(locations.size() - 1).getOrgNode();
 	}
 }

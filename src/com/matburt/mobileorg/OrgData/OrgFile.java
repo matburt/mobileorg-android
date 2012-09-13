@@ -10,6 +10,10 @@ import com.matburt.mobileorg.OrgData.OrgContract.Files;
 import com.matburt.mobileorg.OrgData.OrgContract.OrgData;
 
 public class OrgFile {
+	public static final String CAPTURE_FILE = "mobileorg.org";
+	public static final String CAPTURE_FILE_ALIAS = "Captures";
+	public static final String AGENDA_FILE = "agendas.org";
+	
 	public String filename = "";
 	public String name = "";
 	public String checksum = "";
@@ -154,13 +158,21 @@ public class OrgFile {
 				|| filename.endsWith(".enc") || filename.endsWith(".asc");
 	}
 	
+	public boolean isEditable() {
+		if(filename.equals(CAPTURE_FILE))
+			return false;
+		if(filename.equals(AGENDA_FILE))
+			return false;
+		return true;
+	}
+	
 	public boolean equals(OrgFile file) {
 		if (filename.equals(file.filename) && name.equals(file.name))
 			return true;
 		else
 			return false;
 	}
-
+	
 	public String toString(ContentResolver resolver) {		
 		return OrgProviderUtil.nodesToString(nodeId, 0, resolver).toString();
 	}

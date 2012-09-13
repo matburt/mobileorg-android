@@ -22,7 +22,7 @@ public class OrgEdit {
 		ADDHEADING
 	};
 	
-	public TYPE type = TYPE.HEADING;
+	public TYPE type = null;
 	public String nodeId = "";
 	public String title = "";
 	public String oldValue = "";
@@ -94,6 +94,9 @@ public class OrgEdit {
 	}
 
 	public long write(ContentResolver resolver) {
+		if(this.type == null)
+			return -1;
+		
 		ContentValues values = new ContentValues();
 		values.put(Edits.TYPE, getType());
 		values.put(Edits.DATA_ID, nodeId);

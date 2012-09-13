@@ -135,6 +135,7 @@ public class OrgNodeTest extends ProviderTestCase2<OrgProvider> {
 		ArrayList<OrgNode> children = node.getChildren(resolver);
 		assertEquals(2, children.size());
 	}
+	
 			
 	public void testConstructOlpIdWithOrgId() throws Exception {
 		fail("Not implemented");
