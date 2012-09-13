@@ -156,22 +156,23 @@ public class OrgProviderUtil {
 	}
 	
 	
-	public static OrgNode getOrgNodeFromFilename(String name, ContentResolver resolver) {
-		OrgFile file = new OrgFile(name, resolver);
+	public static OrgNode getOrgNodeFromFilename(String filename, ContentResolver resolver) {
+		OrgFile file = new OrgFile(filename, resolver);
 		return new OrgNode(file.nodeId, resolver);
 	}
 	
 	public static OrgNode getOrCreateCaptureFileOrgNode (ContentResolver resolver) {
-		OrgFile file;
 		try {
-			file = new OrgFile(FileUtils.CAPTURE_FILE, resolver);
+			return getOrgNodeFromFilename(FileUtils.CAPTURE_FILE, resolver);
 		} catch (IllegalArgumentException e) {
-			file = new OrgFile(FileUtils.CAPTURE_FILE, FileUtils.CAPTURE_FILE_ALIAS, "");
+			Log.d("MobileOrg", "Caught exception " + e.getLocalizedMessage());
+			OrgFile file = new OrgFile(FileUtils.CAPTURE_FILE, FileUtils.CAPTURE_FILE_ALIAS, "");
 			file.setResolver(resolver);
+			file.includeInOutline = true;
 			file.write();
+			OrgNode node = new OrgNode(file.nodeId, resolver);
+			return node;
 		}
-		OrgNode node = new OrgNode(file.nodeId, resolver);
-		return node;
 	}
 	
 	public static boolean isTodoActive(String todo, ContentResolver resolver) {

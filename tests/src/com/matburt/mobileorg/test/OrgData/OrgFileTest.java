@@ -16,6 +16,7 @@ import com.matburt.mobileorg.OrgData.OrgFile;
 import com.matburt.mobileorg.OrgData.OrgFileParser;
 import com.matburt.mobileorg.OrgData.OrgNode;
 import com.matburt.mobileorg.OrgData.OrgProvider;
+import com.matburt.mobileorg.OrgData.OrgProviderUtil;
 import com.matburt.mobileorg.test.util.OrgTestFiles.SimpleOrgFiles;
 
 public class OrgFileTest extends ProviderTestCase2<OrgProvider> {
@@ -43,15 +44,12 @@ public class OrgFileTest extends ProviderTestCase2<OrgProvider> {
 		
 		OrgFile insertedFile = new OrgFile(orgFile.id, resolver);
 		assertTrue(orgFile.equals(insertedFile));
+		assertEquals(insertedFile.id, orgFile.id);
+		assertEquals(insertedFile.nodeId, orgFile.nodeId);
 		
-		Cursor dataCursor = resolver.query(
-				OrgData.buildIdUri(insertedFile.nodeId),
-				OrgData.DEFAULT_COLUMNS, null, null, null);
-		assertNotNull(dataCursor);
-		assertEquals(1, dataCursor.getCount());
-		OrgNode node = new OrgNode(dataCursor);
-		dataCursor.close();
+		OrgNode node = new OrgNode(orgFile.nodeId, resolver);
 		assertEquals(node.name, orgFile.name);
+		assertEquals(node.fileId, orgFile.id);
 	}
 	
 	public void testRemoveFileSimple() {
@@ -86,5 +84,41 @@ public class OrgFileTest extends ProviderTestCase2<OrgProvider> {
 		OrgFile file = new OrgFile(filename, resolver);
 		String fileString = file.toString(resolver);
 		assertEquals(SimpleOrgFiles.orgFile.trim(), fileString.trim());
+	}
+	
+	public void testCreateCaptureFileOrgNode () {
+		OrgNode capturefileNode = OrgProviderUtil.getOrCreateCaptureFileOrgNode(resolver);
+		
+		assertTrue(capturefileNode.id >= 0);
+		assertTrue(capturefileNode.fileId >= 0);
+		
+		try {
+			OrgFile file = new OrgFile(capturefileNode.fileId, resolver);
+			assertEquals(OrgFile.CAPTURE_FILE, file.filename);
+		} catch (IllegalArgumentException e) {
+			fail("File node not created");
+		}
+		
+		try {
+			OrgNode node = new OrgNode(capturefileNode.id, resolver);
+			assertEquals(OrgFile.CAPTURE_FILE_ALIAS, node.name);
+		} catch (IllegalArgumentException e) {
+			fail("OrgNode not created");
+		}
+	}
+	
+	public void testGetCaptureFileOrgNode () {
+		OrgNode node1 = OrgProviderUtil.getOrCreateCaptureFileOrgNode(resolver);
+
+		assertNotNull(node1);
+		assertTrue(node1.id >= 0);
+		assertTrue(node1.fileId >= 0);
+
+		OrgNode node2 = OrgProviderUtil.getOrCreateCaptureFileOrgNode(resolver);
+		assertNotNull(node2);
+
+		assertEquals(node1.id, node2.id);
+		assertEquals(node1.fileId, node2.fileId);
+		assertEquals(node1.name, node2.name);
 	}
 }	

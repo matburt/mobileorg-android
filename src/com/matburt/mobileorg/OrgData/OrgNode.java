@@ -31,8 +31,8 @@ public class OrgNode {
 	public OrgNode() {
 	}
 	
-	public OrgNode(long nodeId, ContentResolver resolver) {
-		Cursor cursor = resolver.query(OrgData.buildIdUri(nodeId),
+	public OrgNode(long id, ContentResolver resolver) {
+		Cursor cursor = resolver.query(OrgData.buildIdUri(id),
 				OrgData.DEFAULT_COLUMNS, null, null, null);
 		if(cursor == null || cursor.moveToFirst() == false)
 			throw new IllegalArgumentException("Node with id \"" + id + "\" not found");

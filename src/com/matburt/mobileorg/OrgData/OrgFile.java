@@ -4,7 +4,6 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
-import android.util.Log;
 
 import com.matburt.mobileorg.OrgData.OrgContract.Files;
 import com.matburt.mobileorg.OrgData.OrgContract.OrgData;
@@ -53,7 +52,7 @@ public class OrgFile {
 	public OrgFile(String filename, ContentResolver resolver) {
 		Cursor cursor = resolver.query(Files.CONTENT_URI,
 				Files.DEFAULT_COLUMNS, Files.FILENAME + "=?", new String[] {filename}, null);
-		if(cursor == null || cursor.getCount() < 1)
+		if(cursor == null || cursor.getCount() <= 0)
 			throw new IllegalArgumentException("File \"" + filename + "\" not found");
 		set(cursor);
 		cursor.close();
@@ -69,7 +68,10 @@ public class OrgFile {
 			this.checksum = cursor.getString(cursor.getColumnIndexOrThrow(Files.CHECKSUM));
 			this.id = cursor.getLong(cursor.getColumnIndexOrThrow(Files.ID));
 			this.nodeId = cursor.getLong(cursor.getColumnIndexOrThrow(Files.NODE_ID));
-		}
+		} else {
+			throw new IllegalArgumentException(
+					"Failed to create OrgFile from cursor");
+		}	
 	}
 	
 	public void setResolver(ContentResolver resolver) {
@@ -85,7 +87,6 @@ public class OrgFile {
 	}
 	
 	private boolean doesFileExist() {
-		Log.d("MobileOrg", "Filename is :" + filename);
 		assert(resolver != null);
 		Cursor cursor = resolver.query(Files.buildFilenameUri(filename),
 				Files.DEFAULT_COLUMNS, null, null, null);
@@ -100,7 +101,7 @@ public class OrgFile {
 	
 	public void addFile() {
 		if(includeInOutline)
-			this.nodeId = addFileOrgDataNode(); 
+			this.nodeId = addFileOrgDataNode();
 		
 		this.id = addFileNode(nodeId);
 		ContentValues values = new ContentValues();
@@ -114,6 +115,7 @@ public class OrgFile {
 		values.put(Files.NAME, name);
 		values.put(Files.CHECKSUM, checksum);
 		values.put(Files.NODE_ID, nodeId);
+		
 		assert(resolver != null);
 		Uri uri = resolver.insert(Files.CONTENT_URI, values);
 		return Long.parseLong(Files.getId(uri));
@@ -124,6 +126,7 @@ public class OrgFile {
 		orgdata.put(OrgData.NAME, name);
 		orgdata.put(OrgData.TODO, "");
 		orgdata.put(OrgData.PARENT_ID, -1);
+		
 		assert(resolver != null);
 		Uri uri = resolver.insert(OrgData.CONTENT_URI, orgdata);
 		long nodeId = Long.parseLong(OrgData.getId(uri));

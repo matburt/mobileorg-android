@@ -70,7 +70,8 @@ public class FileUtils {
 				if (!morgFile.exists()) {
 					return null;
 				}
-				reader = new BufferedReader(new FileReader(morgFile));
+				FileReader freader = new FileReader(morgFile);
+				reader = new BufferedReader(freader);
 			} else if (storageMode.equals("internal") || storageMode.equals("")) {
 				String dirActual = this.fileName;
 
