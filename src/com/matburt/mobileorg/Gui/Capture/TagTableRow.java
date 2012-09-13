@@ -37,7 +37,7 @@ class TagTableRow extends TableRow {
 
 		spinner = (Spinner) findViewById(R.id.edit_tag_list);
 		spinner.setId(spinnerId++);
-		OrgUtils.setupSpinner(spinner, tags, selectedTag);
+		OrgUtils.setupSpinnerWithEmpty(spinner, tags, selectedTag);
 		
 		button = (Button) findViewById(R.id.edit_tag_remove);
 		button.setOnClickListener(removeListener);

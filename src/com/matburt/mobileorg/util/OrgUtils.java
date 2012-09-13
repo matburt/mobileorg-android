@@ -36,11 +36,16 @@ public class OrgUtils {
     		return true;
     }
     
+    public static void setupSpinnerWithEmpty(Spinner spinner, ArrayList<String> data,
+			String selection) {
+		data.add("");
+		setupSpinner(spinner, data, selection);
+    }
+    
 	public static void setupSpinner(Spinner spinner, ArrayList<String> data,
 			String selection) {		
 		if(!TextUtils.isEmpty(selection) && !data.contains(selection))
 			data.add(selection);
-		data.add("");
 		
 		ArrayAdapter<String> adapter = new ArrayAdapter<String>(spinner.getContext(),
 				android.R.layout.simple_spinner_item, data);

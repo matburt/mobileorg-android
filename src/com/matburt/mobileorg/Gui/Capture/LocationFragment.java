@@ -15,7 +15,6 @@ import com.actionbarsherlock.app.SherlockFragment;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.OrgData.OrgFile;
 import com.matburt.mobileorg.OrgData.OrgNode;
-import com.matburt.mobileorg.util.OrgUtils;
 
 public class LocationFragment extends SherlockFragment {
 	private final String LOCATION_NODEID = "nodeId";
@@ -84,8 +83,7 @@ public class LocationFragment extends SherlockFragment {
 	
 	private LocationEntry addLocationEntry(OrgNode node, ArrayList<String> data, String selection) {
 		LocationEntry location = new LocationEntry(getActivity());
-		OrgUtils.setupSpinner(location, data, selection);
-		location.init(node, this);
+		location.init(node, this, data, selection);
 		locations.add(location);
 		return location;
 	}
@@ -98,8 +96,12 @@ public class LocationFragment extends SherlockFragment {
 			if(childNode == null)
 				return;
 		} else {
+			try {
 			OrgFile file = new OrgFile(spinnerSelection, resolver);
 			childNode = new OrgNode(file.nodeId, resolver);
+			} catch (IllegalArgumentException e) {
+				return;
+			}
 		}
 
 		ArrayList<String> childData = childNode.getChildrenStringArray(resolver);

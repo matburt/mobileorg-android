@@ -173,4 +173,6 @@
   <string name="edit_date_end">End</string>
   <string name="edit_date_date">Date</string>
   <string name="menu_addtimestamp">Add Timestamp</string>
+  <string name="edit_create_new_entry">Create new entry</string>
+  <string name="edit_create_new_entry_body">Type the name of the file you want to create</string>
 </resources>

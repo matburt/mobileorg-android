@@ -88,9 +88,9 @@ public class HeadingFragment extends SherlockFragment {
 		titleView.setText(title);
 		titleView.setSelection(title.length());
 
-		OrgUtils.setupSpinner(todoStateView, OrgProviderUtil.getTodos(resolver),
+		OrgUtils.setupSpinnerWithEmpty(todoStateView, OrgProviderUtil.getTodos(resolver),
 				todo);
-		OrgUtils.setupSpinner(priorityView, OrgProviderUtil.getPriorities(resolver),
+		OrgUtils.setupSpinnerWithEmpty(priorityView, OrgProviderUtil.getPriorities(resolver),
 				priority);
 	}
 	
