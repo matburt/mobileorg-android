@@ -77,7 +77,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".Gui.ViewFragment"
+            android:name=".Gui.ViewActivity"
             android:label="Org View" >
             <intent-filter>
                 <category android:name="android.intent.category.DEFAULT" />

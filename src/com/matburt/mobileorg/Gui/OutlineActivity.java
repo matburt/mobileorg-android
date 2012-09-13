@@ -44,6 +44,7 @@ import com.matburt.mobileorg.util.OrgUtils;
 
 public class OutlineActivity extends SherlockActivity
 {
+	public final static String NODE_ID = "node_id";
 	private ContentResolver resolver;
 
 	private Long node_id;
@@ -66,7 +67,7 @@ public class OutlineActivity extends SherlockActivity
 		this.resolver = getContentResolver();
 				
 		Intent intent = getIntent();
-		node_id = intent.getLongExtra("node_id", -1);
+		node_id = intent.getLongExtra(NODE_ID, -1);
 
 		if (this.node_id == -1) {
 			displayNewUserDialog();
@@ -256,34 +257,34 @@ public class OutlineActivity extends SherlockActivity
 	
 	public void runEditNewNodeActivity(View view) {
 		Intent intent = new Intent(this, EditActivity.class);
-		intent.putExtra("actionMode", EditActivity.ACTIONMODE_CREATE);
+		intent.putExtra(EditActivity.ACTIONMODE, EditActivity.ACTIONMODE_CREATE);
 		startActivity(intent);
 	}
 	
 	private void runEditNodeActivity(long nodeId) {
 		Intent intent = new Intent(this,
 				EditActivity.class);
-		intent.putExtra("actionMode", EditActivity.ACTIONMODE_EDIT);
-		intent.putExtra("node_id", nodeId);
+		intent.putExtra(EditActivity.ACTIONMODE, EditActivity.ACTIONMODE_EDIT);
+		intent.putExtra(EditActivity.NODE_ID, nodeId);
 		startActivity(intent);
 	}
 
 	private void runEditCaptureNodeChildActivity(long node_id) {
 		Intent intent = new Intent(this, EditActivity.class);
-		intent.putExtra("actionMode", EditActivity.ACTIONMODE_ADDCHILD);
-		intent.putExtra("node_id", node_id);
+		intent.putExtra(EditActivity.ACTIONMODE, EditActivity.ACTIONMODE_ADDCHILD);
+		intent.putExtra(EditActivity.NODE_ID, node_id);
 		startActivity(intent);
 	}
 
 	private void runViewNodeActivity(long nodeId) {		
-		Intent intent = new Intent(this, ViewFragment.class);
-		intent.putExtra("node_id", nodeId);
+		Intent intent = new Intent(this, ViewActivity.class);
+		intent.putExtra(ViewActivity.NODE_ID, nodeId);
 		startActivity(intent);
 	}
 
 	private void runExpandSelection(long id) {
 		Intent intent = new Intent(this, OutlineActivity.class);
-		intent.putExtra("node_id", id);
+		intent.putExtra(OutlineActivity.NODE_ID, id);
 		startActivity(intent);
 	}
 	

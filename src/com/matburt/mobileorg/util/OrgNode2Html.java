@@ -13,8 +13,8 @@ public class OrgNode2Html {
 
 	private ContentResolver resolver;
 	
-	private boolean wrapLines = false;
-	private boolean viewApplyFormating = true;
+	public boolean wrapLines = false;
+	public boolean viewApplyFormating = true;
 
 	public OrgNode2Html(ContentResolver resolver) {
 		this.resolver = resolver;
@@ -26,13 +26,21 @@ public class OrgNode2Html {
 		this.viewApplyFormating = PreferenceManager.getDefaultSharedPreferences(context).getBoolean(
 				"viewApplyFormating", true);
 	}
-	
+		
 	public String convertToHTML(OrgNode node) {
 		return convertToHTML(node, 0);
 	}
 	
 	public String convertToHTML(OrgNode node, int levelOfRecursion) {
 		String text = nodeToHTMLRecursive(node, levelOfRecursion);
+		return convertToHTML(text);
+	}
+	
+	public String payloadToHTML(OrgNode node) {
+		return convertToHTML(node.getCleanedPayload());
+	}
+	
+	private String convertToHTML(String text) {
 		text = convertLinks(text);
 
 		if (wrapLines) {
@@ -51,6 +59,7 @@ public class OrgNode2Html {
 
 		return text;
 	}
+
 	
 	private String nodeToHTMLRecursive(OrgNode node, int level) {
 		StringBuilder result = new StringBuilder();

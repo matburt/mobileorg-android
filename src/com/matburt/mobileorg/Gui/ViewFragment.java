@@ -24,7 +24,7 @@ import com.matburt.mobileorg.util.OrgUtils;
 public class ViewFragment extends SherlockFragment {
 	
 	private ContentResolver resolver;
-	private WebView webView;
+	protected WebView webView;
 	
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -46,7 +46,10 @@ public class ViewFragment extends SherlockFragment {
 	}
 	
 	public void displayPayload(OrgNode node) {
-		
+		OrgNode2Html htmlNode = new OrgNode2Html(resolver);
+		htmlNode.wrapLines = true;
+		String html = htmlNode.payloadToHTML(node);
+		displayHtml(html);
 	}
 	
 	public void displayOrgNode(OrgNode node, int levelOfRecursion, ContentResolver resolver) {
@@ -67,7 +70,10 @@ public class ViewFragment extends SherlockFragment {
 		this.webView.loadDataWithBaseURL(null, html, "text/html", "UTF-8", null);
 	}
 
-	private class InternalWebViewClient extends WebViewClient {
+	protected class InternalWebViewClient extends WebViewClient {
+		public InternalWebViewClient() {
+		}
+
 		@Override
 		public boolean shouldOverrideUrlLoading(WebView view, String url) {
 			try {
@@ -99,7 +105,7 @@ public class ViewFragment extends SherlockFragment {
 		long nodeId = OrgUtils.getNodeFromPath(url, resolver);
 				
 		Intent intent = new Intent(getActivity(), ViewActivity.class);
-		intent.putExtra(ViewActivity.INTENT_NODE, nodeId);
+		intent.putExtra(ViewActivity.NODE_ID, nodeId);
 		startActivity(intent);
 	}
 }

@@ -6,10 +6,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.view.View;
-import android.view.View.OnClickListener;
-import android.widget.EditText;
-import android.widget.LinearLayout;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
@@ -33,34 +29,21 @@ public class EditActivity extends SherlockFragmentActivity {
 	private String actionMode;
 
 	private ContentResolver resolver;
-	private LinearLayout payloadView;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
 		setContentView(R.layout.edit);
-		
 		this.resolver = getContentResolver();
-		
-		this.payloadView = (LinearLayout) findViewById(R.id.edit_payload);
-		this.payloadView.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				payloadView.removeAllViews();
-				EditText payloadEdit = new EditText(getBaseContext());
-				payloadEdit.setText(node.getRawPayload());
-				payloadView.addView(payloadEdit);
-			}
-		});		
 		
 		initState();
 	}
 	
 	private void initState() {
 		Intent intent = getIntent();
-		this.actionMode = intent.getStringExtra("actionMode");
-		long node_id = intent.getLongExtra("node_id", -1);	
+		this.actionMode = intent.getStringExtra(ACTIONMODE);
+		long node_id = intent.getLongExtra(NODE_ID, -1);	
 		
 		if (this.actionMode == null) {
 			this.node = OrgUtils.getCaptureIntentContents(intent);
@@ -246,7 +229,7 @@ public class EditActivity extends SherlockFragmentActivity {
 	}
 	
 	public OrgNode getEditedNode() {
-		OrgNode newParent = new OrgNode();
+		//OrgNode newParent = new OrgNode();
 
 		boolean addTimestamp = PreferenceManager.getDefaultSharedPreferences(
 				this).getBoolean("captureWithTimestamp", false);

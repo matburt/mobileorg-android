@@ -10,7 +10,7 @@ import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.OrgData.OrgNode;
 
 public class ViewActivity extends SherlockFragmentActivity {
-	public static String INTENT_NODE = "node_id";
+	public static String NODE_ID = "node_id";
 
 	private ContentResolver resolver;
 	private ViewFragment nodeViewFragment;
@@ -25,7 +25,7 @@ public class ViewActivity extends SherlockFragmentActivity {
 		this.resolver = getContentResolver();
 
 		Intent intent = getIntent();
-		this.node_id = intent.getLongExtra(INTENT_NODE, -1);
+		this.node_id = intent.getLongExtra(NODE_ID, -1);
 	}
 	
 	@Override
