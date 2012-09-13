@@ -2,13 +2,14 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/edit_payload_view"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:orientation="vertical" >
 
     <WebView
         android:id="@+id/edit_payload_webview"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:visibility="gone" />
 
     <EditText
         android:id="@+id/edit_payload_edittext"
@@ -23,7 +24,8 @@
         android:layout_height="35dp"
         android:layout_alignParentRight="true"
         android:layout_alignParentTop="true"
-        android:background="@drawable/ic_menu_edit" />
+        android:background="@drawable/ic_menu_edit"
+        android:visibility="gone" />
 
     <ImageButton
         android:id="@+id/edit_payload_cancel"

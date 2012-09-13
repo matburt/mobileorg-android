@@ -27,20 +27,27 @@ public class OrgNode2Html {
 				"viewApplyFormating", true);
 	}
 		
-	public String convertToHTML(OrgNode node) {
-		return convertToHTML(node, 0);
+	public String toHTML(OrgNode node) {
+		return toHTML(node, 0);
 	}
 	
-	public String convertToHTML(OrgNode node, int levelOfRecursion) {
+	public String toHTML(OrgNode node, int levelOfRecursion) {
 		String text = nodeToHTMLRecursive(node, levelOfRecursion);
 		return convertToHTML(text);
 	}
-	
+			
+	public String toHTML(String text) {
+
+		return convertToHTML(text);
+	}
 	public String payloadToHTML(OrgNode node) {
 		return convertToHTML(node.getCleanedPayload());
 	}
 	
 	private String convertToHTML(String text) {
+		if(text == null || text.trim().equals(""))
+			return "<html><body><font color='white'><pre>" + text + "</pre></font></body></html>";
+		
 		text = convertLinks(text);
 
 		if (wrapLines) {

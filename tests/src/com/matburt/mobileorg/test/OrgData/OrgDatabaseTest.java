@@ -67,7 +67,7 @@ public class OrgDatabaseTest extends ProviderTestCase2<OrgProvider> {
 		OrgNode insertedNode = new OrgNode(cursor);
 		cursor.close();
 		
-		assertNull(insertedNode.getRawPayload());
+		assertNull(insertedNode.getPayload());
 		insertedNode.setPayload("");
 		assertTrue(node.equals(insertedNode));
 	}
@@ -87,7 +87,7 @@ public class OrgDatabaseTest extends ProviderTestCase2<OrgProvider> {
 		OrgNode insertedNode = new OrgNode(cursor);
 		cursor.close();
 		
-		assertEquals(testPayload, insertedNode.getRawPayload());
+		assertEquals(testPayload, insertedNode.getPayload());
 	}
 	
 	public void testFastInsertNodePayloadUpdate() {
@@ -103,7 +103,7 @@ public class OrgDatabaseTest extends ProviderTestCase2<OrgProvider> {
 		OrgNode insertedNode = new OrgNode(cursor);
 		cursor.close();
 		
-		assertEquals(testPayload, insertedNode.getRawPayload());
+		assertEquals(testPayload, insertedNode.getPayload());
 	}
 
 }	

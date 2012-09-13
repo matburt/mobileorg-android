@@ -74,7 +74,7 @@ public class OrgEdit {
 			this.oldValue = node.priority;
 			break;
 		case BODY:
-			this.oldValue = node.getRawPayload();
+			this.oldValue = node.getPayload();
 			break;
 		case TAGS:
 			this.oldValue = node.tags;

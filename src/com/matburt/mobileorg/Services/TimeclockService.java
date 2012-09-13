@@ -86,7 +86,7 @@ public class TimeclockService extends Service {
 	}
 	
 	private void getEstimated() {
-		String estimated = node.getPayload().getProperty("Effort").trim();
+		String estimated = node.getOrgNodePayload().getProperty("Effort").trim();
 
 		if (TextUtils.isEmpty(estimated) == false) {
 			String[] split = estimated.split(":");

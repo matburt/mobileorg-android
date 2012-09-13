@@ -26,7 +26,7 @@ public class OrgNode {
 	public String name = "";
 	private String payload = "";
 	
-	private OrgNodePayload nodePayload = null;
+	private OrgNodePayload orgNodePayload = null;
 
 	public OrgNode() {
 	}
@@ -78,8 +78,8 @@ public class OrgNode {
 	}
 	
 	private void preparePayload() {
-		if(this.nodePayload == null)
-			this.nodePayload = new OrgNodePayload(this.payload);
+		if(this.orgNodePayload == null)
+			this.orgNodePayload = new OrgNodePayload(this.payload);
 	}
 	
 	public void write(ContentResolver resolver) {
@@ -251,7 +251,7 @@ public class OrgNode {
 	public String getNodeId(ContentResolver resolver) {
 		preparePayload();
 
-		String id = nodePayload.getId();				
+		String id = orgNodePayload.getId();				
 		if(id == null)
 			return constructOlpId(resolver);
 		
@@ -280,19 +280,22 @@ public class OrgNode {
 	
 	
 	public String getCleanedPayload() {
-		// TODO Fix cleaning of payloads
-//		preparePayload();
-//		return this.nodePayload.getContent();
-		return this.payload;
-	}
-	
-	public String getRawPayload() {
-		return this.payload;
-	}
-	
-	public OrgNodePayload getPayload() {
 		preparePayload();
-		return this.nodePayload;
+		return this.orgNodePayload.getCleanedPayload();
+	}
+	
+	public String getPayload() {
+		return this.payload;
+	}
+	
+	public void setPayload(String payload) {
+		this.orgNodePayload = null;
+		this.payload = payload;
+	}
+	
+	public OrgNodePayload getOrgNodePayload() {
+		preparePayload();
+		return this.orgNodePayload;
 	}
 	
 	public void generateAndApplyEdits(OrgNode newNode, ContentResolver resolver) {
@@ -319,14 +322,9 @@ public class OrgNode {
 			edits.add(new OrgEdit(this, OrgEdit.TYPE.PRIORITY, newNode.priority, resolver));
 			this.priority = newNode.priority;
 		}
-		if (!getCleanedPayload().equals(newNode.getCleanedPayload())
-				|| !getPayload().getPayloadResidue().equals(
-						getPayload().getNewPayloadResidue())) {
-			String newRawPayload = getPayload().getNewPayloadResidue()
-					+ newNode.getCleanedPayload();
-
-			edits.add(new OrgEdit(this, OrgEdit.TYPE.BODY, newRawPayload, resolver));
-			setPayload(newRawPayload);
+		if (newNode.getPayload() != null && newNode.getPayload().equals(getPayload())) {
+			edits.add(new OrgEdit(this, OrgEdit.TYPE.BODY, newNode.getPayload(), resolver));
+			setPayload(newNode.getPayload());
 		}
 		if (!tags.equals(newNode.tags)) {
 			// TODO Use node.getTagsWithoutInheritet() instead
@@ -340,11 +338,7 @@ public class OrgNode {
 		
 		return edits;
 	}
-	
-	public void setPayload(String newRawPayload) {
-		this.nodePayload = null;
-		this.payload = newRawPayload;
-	}
+
 
 	public void parseLine(String thisLine, int numstars, boolean useTitleField) {
         String heading = thisLine.substring(numstars+1);
@@ -483,7 +477,7 @@ public class OrgNode {
 	}
 	
 	public void addLogbook(long startTime, long endTime, String elapsedTime, ContentResolver resolver) {
-		StringBuilder rawPayload = new StringBuilder(getRawPayload());
+		StringBuilder rawPayload = new StringBuilder(getPayload());
 		rawPayload = OrgNodePayload.addLogbook(rawPayload, startTime, endTime, elapsedTime);
 		
 		boolean generateEdits = !getFilename(resolver).equals(FileUtils.CAPTURE_FILE);

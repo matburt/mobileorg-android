@@ -13,12 +13,15 @@ import android.widget.RelativeLayout;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Gui.ViewFragment;
 import com.matburt.mobileorg.OrgData.OrgNode;
+import com.matburt.mobileorg.OrgData.OrgNodePayload;
 
 public class PayloadFragment extends ViewFragment {
-
+	private static final String PAYLOAD = "payload";
+	
+	
 	private RelativeLayout payloadView;
 	private EditText payloadEdit;
-	private OrgNode node;
+	private OrgNodePayload payload;
 	
 	private ImageButton editButton;
 	private ImageButton cancelButton;
@@ -33,6 +36,7 @@ public class PayloadFragment extends ViewFragment {
 				.findViewById(R.id.edit_payload_webview);
 		this.webView.setBackgroundColor(0x00000000);
 		this.webView.setWebViewClient(new InternalWebViewClient());
+		this.webView.setOnClickListener(editListener);
 
 		this.payloadEdit = (EditText) payloadView
 				.findViewById(R.id.edit_payload_edittext);
@@ -56,20 +60,42 @@ public class PayloadFragment extends ViewFragment {
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
 		EditActivity editActivity = (EditActivity) getActivity();
-		this.node = editActivity.getOrgNode();
-		displayPayload(node);
-		this.webView.setOnClickListener(editListener);
+		
+		if(savedInstanceState != null)
+			restoreInstanceState(savedInstanceState);
+		else {
+			OrgNode node = editActivity.getOrgNode();
+			this.payload = node.getOrgNodePayload();
+		}
+		switchToView();
+	}
+	
+	@Override
+	public void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+		outState.putString(PAYLOAD, this.payload.get());
+	}
+	
+	public void restoreInstanceState(Bundle savedInstanceState) {
+		if(savedInstanceState != null) {
+			String payloadString = savedInstanceState.getString(PAYLOAD);
+			this.payload = new OrgNodePayload(payloadString);
+		}
 	}
 
-	public String getPayload() {
-		return this.node.getRawPayload();
+	public void setPayload(String payload) {
+		this.payload.set(payload);
+	}
+	
+	public OrgNodePayload getPayload() {
+		return this.payload;
 	}
 	
 	private void switchToEdit() {
 		webView.setVisibility(View.GONE);
 		editButton.setVisibility(View.GONE);
 
-		payloadEdit.setText(node.getRawPayload());
+		payloadEdit.setText(this.payload.get());
 		payloadEdit.setVisibility(View.VISIBLE);
 		cancelButton.setVisibility(View.VISIBLE);
 		saveButton.setVisibility(View.VISIBLE);
@@ -80,13 +106,9 @@ public class PayloadFragment extends ViewFragment {
 		cancelButton.setVisibility(View.GONE);
 		saveButton.setVisibility(View.GONE);
 
+		display(this.payload.getCleanedPayload());
 		webView.setVisibility(View.VISIBLE);
 		editButton.setVisibility(View.VISIBLE);
-	}
-	
-	private void savePayload(String payload) {
-		this.node.setPayload(payload);
-		displayPayload(node);
 	}
 	
 	private OnClickListener editListener = new OnClickListener() {
@@ -99,7 +121,7 @@ public class PayloadFragment extends ViewFragment {
 	private OnClickListener saveListener = new OnClickListener() {
 		@Override
 		public void onClick(View v) {
-			savePayload(payloadEdit.getText().toString());
+			setPayload(payloadEdit.getText().toString());
 			switchToView();
 		}
 	};

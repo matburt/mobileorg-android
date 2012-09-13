@@ -44,7 +44,7 @@ public class ViewActivity extends SherlockFragmentActivity {
 			int levelOfRecursion = Integer.parseInt(PreferenceManager
 					.getDefaultSharedPreferences(this).getString(
 							"viewRecursionMax", "0"));
-			nodeViewFragment.displayOrgNode(node, levelOfRecursion, resolver);
+			nodeViewFragment.display(node, levelOfRecursion, resolver);
 		} catch (IllegalArgumentException e) { // Didn't find node
 			nodeViewFragment.displayError();
 		}

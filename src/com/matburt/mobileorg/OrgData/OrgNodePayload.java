@@ -18,12 +18,12 @@ public class OrgNodePayload {
 	private StringBuilder newPayloadResidue = null;
 
 	
-	private String content = null;
+	private String id = null; // Can be :ID: (or :ORIGINAL_ID: for agendas.org)
+	private String cleanedPayload = null;
+
 	private String scheduled = null;
 	private String deadline = null;
-	private String timestamp;
-	
-	private String id = null; // Can be :ID: (or :ORIGINAL_ID: for agendas.org)
+	private String timestamp = null;
 	
 	public OrgNodePayload(String payload) {
 		if(payload == null)
@@ -31,33 +31,31 @@ public class OrgNodePayload {
 		this.payload = new StringBuilder(payload);
 	}
 	
+	public void set(String payload) {
+		this.payload = new StringBuilder(payload);
+		this.cleanedPayload = null;
+	}
+	
+	public String get() {
+		return this.payload.toString();
+	}
+	
 	public void add(String line) {
 		this.payload.append(line + "\n");
 	}
 	
-	public void setContent(String content) {
-		this.content = content;
-	}
-	
-	public String getContent() {
-		if(this.content == null)
+	public String getCleanedPayload() {
+		if(this.cleanedPayload == null)
 			cleanPayload();
 
-		return this.content;
+		return this.cleanedPayload;
 	}
 	
-	public String getPayloadResidue() {
-		if(this.content == null)
+	private String getPayloadResidue() {
+		if(this.cleanedPayload == null)
 			cleanPayload();
 
 		return this.payloadResidue.toString();
-	}
-	
-	public String getNewPayloadResidue() {
-		if(this.newPayloadResidue == null)
-			return this.payloadResidue.toString();
-		else
-			return this.newPayloadResidue.toString();
 	}
 		
 	public String getId() {
@@ -86,7 +84,7 @@ public class OrgNodePayload {
 		stripProperties();
 		stripFileProperties();
 		
-		this.content = payload.toString().trim();
+		this.cleanedPayload = payload.toString().trim();
 	}
 	
 	private void stripTimestamp() {
@@ -265,6 +263,7 @@ public class OrgNodePayload {
 		return this.timestamp;
 	}
 	
+	// TODO Fix
 	public void insertOrReplace(String key, String value) {
 		if(newPayloadResidue == null)
 			newPayloadResidue = new StringBuilder(payloadResidue);

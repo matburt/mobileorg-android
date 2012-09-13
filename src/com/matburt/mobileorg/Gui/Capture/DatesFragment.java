@@ -75,9 +75,9 @@ public class DatesFragment extends SherlockFragment {
 	}
 
 	private void setupDates(OrgNode node) {
-		this.scheduledEntry = setupDate(node.getPayload().getScheduled(), "SCHEDULED", scheduledRemoveListener);
-		this.deadlineEntry = setupDate(node.getPayload().getDeadline(), "DEADLINE", deadlineRemoveListener);
-		this.timestampEntry = setupDate(node.getPayload().getTimestamp(), "", timestampRemoveListener);
+		this.scheduledEntry = setupDate(node.getOrgNodePayload().getScheduled(), "SCHEDULED", scheduledRemoveListener);
+		this.deadlineEntry = setupDate(node.getOrgNodePayload().getDeadline(), "DEADLINE", deadlineRemoveListener);
+		this.timestampEntry = setupDate(node.getOrgNodePayload().getTimestamp(), "", timestampRemoveListener);
 	}
 	
 	private DateTableRow setupDate(String date, String title, View.OnClickListener removeListener) {
