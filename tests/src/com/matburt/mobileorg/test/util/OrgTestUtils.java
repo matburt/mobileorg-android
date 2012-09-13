@@ -12,6 +12,16 @@ public class OrgTestUtils {
 		return node;
 	}
 
+	public static OrgNode getComplexOrgNode() {
+		OrgNode node = new OrgNode();
+		node.name = "My complicated name";
+		node.todo = "TODO";
+		node.priority = "C";
+		node.tags = "tag1:tag2::tag3";
+		node.setPayload("my complex payload");
+		return node;
+	}
+	
 	public static OrgFile getDefaultOrgFile() {
 		OrgFile file = new OrgFile("filename", "name", "checksum");
 		return file;

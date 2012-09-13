@@ -263,6 +263,10 @@ public class OrgNodePayload {
 		return this.timestamp;
 	}
 	
+	public void modifyDates(String scheduled, String deadline, String timestamp) {
+		
+	}
+	
 	// TODO Fix
 	public void insertOrReplace(String key, String value) {
 		if(newPayloadResidue == null)

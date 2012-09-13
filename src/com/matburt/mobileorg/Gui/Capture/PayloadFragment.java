@@ -87,8 +87,8 @@ public class PayloadFragment extends ViewFragment {
 		this.payload.set(payload);
 	}
 	
-	public OrgNodePayload getPayload() {
-		return this.payload;
+	public String getPayload() {
+		return this.payload.get();
 	}
 	
 	private void switchToEdit() {

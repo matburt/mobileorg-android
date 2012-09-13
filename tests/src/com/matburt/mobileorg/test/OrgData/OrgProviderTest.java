@@ -16,7 +16,6 @@ import com.matburt.mobileorg.OrgData.OrgFile;
 import com.matburt.mobileorg.OrgData.OrgFileParser;
 import com.matburt.mobileorg.OrgData.OrgNode;
 import com.matburt.mobileorg.OrgData.OrgProvider;
-import com.matburt.mobileorg.OrgData.OrgProviderUtil;
 import com.matburt.mobileorg.OrgData.OrgContract.Edits;
 import com.matburt.mobileorg.OrgData.OrgContract.Files;
 import com.matburt.mobileorg.OrgData.OrgContract.OrgData;
@@ -129,7 +128,7 @@ public class OrgProviderTest extends ProviderTestCase2<OrgProvider> {
 	
 	public void testCreateNodeNullParent() {
 		OrgNode node = OrgTestUtils.getDefaultOrgNode();
-		OrgProviderUtil.createNodeWithNewheadingEditnode(node, null, "", resolver);
+		node.createNodeWithNewheadingEditnode(null, resolver);
 		
 		OrgNode insertedNode = new OrgNode(node.id, resolver);
 		
@@ -140,15 +139,15 @@ public class OrgProviderTest extends ProviderTestCase2<OrgProvider> {
 		OrgNode node = OrgTestUtils.getDefaultOrgNode();
 		OrgNode node2 = OrgTestUtils.getDefaultOrgNode();
 
-		OrgProviderUtil.createNodeWithNewheadingEditnode(node, null, "", resolver);
-		OrgProviderUtil.createNodeWithNewheadingEditnode(node2, null, "", resolver);
+		node.createNodeWithNewheadingEditnode(null, resolver);
+		node2.createNodeWithNewheadingEditnode(null, resolver);
 		
 		assertEquals(node.fileId, node2.fileId);
 	}
 	
 	public void testCreateNodeCaptureFileNoEditsGenerated() {
 		OrgNode node = OrgTestUtils.getDefaultOrgNode();
-		OrgProviderUtil.createNodeWithNewheadingEditnode(node, null, "", resolver);
+		node.createNodeWithNewheadingEditnode(null, resolver);
 		
 		Cursor cursor = resolver.query(Edits.CONTENT_URI,
 				Edits.DEFAULT_COLUMNS, null, null, null);
@@ -164,7 +163,7 @@ public class OrgProviderTest extends ProviderTestCase2<OrgProvider> {
 		OrgNode fileNode = new OrgNode(file.nodeId, resolver);
 		
 		OrgNode node = OrgTestUtils.getDefaultOrgNode();
-		OrgProviderUtil.createNodeWithNewheadingEditnode(node, fileNode, "", resolver);
+		node.createNodeWithNewheadingEditnode(fileNode, resolver);
 		
 		Cursor cursor = resolver.query(Edits.CONTENT_URI,
 				Edits.DEFAULT_COLUMNS, null, null, null);
@@ -180,7 +179,7 @@ public class OrgProviderTest extends ProviderTestCase2<OrgProvider> {
 		OrgNode fileNode = new OrgNode(file.nodeId, resolver);
 		
 		OrgNode node = OrgTestUtils.getDefaultOrgNode();
-		OrgProviderUtil.createNodeWithNewheadingEditnode(node, fileNode, "", resolver);
+		node.createNodeWithNewheadingEditnode(fileNode, resolver);
 		
 		node.level = 0;
 		OrgEdit edit = new OrgEdit(fileNode, OrgEdit.TYPE.ADDHEADING, node.toString(), resolver);

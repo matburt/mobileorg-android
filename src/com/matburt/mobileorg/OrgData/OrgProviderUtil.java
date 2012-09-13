@@ -19,44 +19,6 @@ import com.matburt.mobileorg.util.FileUtils;
 
 public class OrgProviderUtil {
 	
-	
-	public static void createNodeWithNewheadingEditnode(OrgNode node, OrgNode parent, String newPayload, ContentResolver resolver) {
-		if (parent == null) {
-			OrgFile file;
-			try {
-				file = new OrgFile(FileUtils.CAPTURE_FILE, resolver);
-			} catch (IllegalArgumentException e) {
-				file = new OrgFile(FileUtils.CAPTURE_FILE, FileUtils.CAPTURE_FILE_ALIAS, "");
-				file.setResolver(resolver);
-				file.write();
-			}
-
-			node.parentId = file.nodeId;
-			node.fileId = file.id;
-		} else {
-			node.fileId = parent.fileId;
-			node.parentId = parent.id;
-		}
-		
-		node.setPayload(newPayload);
-		node.write(resolver);
-		
-		makeNewheadingEditNode(node, parent, resolver);
-	}
-	
-	private static void makeNewheadingEditNode(OrgNode node, OrgNode parent, ContentResolver resolver) {
-		boolean generateEdit = parent != null && !parent.getFilename(resolver).equals(FileUtils.CAPTURE_FILE);
-		if(generateEdit == false)
-			return;
-
-		// Add new heading nodes; need the entire content of node without star headings
-		long tempLevel = node.level;
-		node.level = 0;
-		OrgEdit edit = new OrgEdit(parent, OrgEdit.TYPE.ADDHEADING, node.toString(), resolver);
-		edit.write(resolver);
-		node.level = tempLevel;
-	}
-	
 	public static HashMap<String, String> getFileChecksums(ContentResolver resolver) {
 		HashMap<String, String> checksums = new HashMap<String, String>();
 

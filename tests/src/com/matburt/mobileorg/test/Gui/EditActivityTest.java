@@ -8,6 +8,7 @@ import android.test.ActivityInstrumentationTestCase2;
 import com.matburt.mobileorg.Gui.Capture.EditActivity;
 import com.matburt.mobileorg.OrgData.OrgNode;
 import com.matburt.mobileorg.OrgData.OrgContract.OrgData;
+import com.matburt.mobileorg.test.util.OrgTestUtils;
 
 public class EditActivityTest extends ActivityInstrumentationTestCase2<EditActivity> {
 
@@ -52,6 +53,14 @@ public class EditActivityTest extends ActivityInstrumentationTestCase2<EditActiv
 		prepareActivityWithNode(node);
 		
 		assertFalse(activity.hasEdits());
+		OrgNode newNode = activity.getEditedNode();
+		assertTrue(node.equals(newNode));
+	}
+	
+	public void testGetUneditedBasic() {
+		OrgNode node = OrgTestUtils.getComplexOrgNode();
+		prepareActivityWithNode(node);
+		
 		OrgNode newNode = activity.getEditedNode();
 		assertTrue(node.equals(newNode));
 	}

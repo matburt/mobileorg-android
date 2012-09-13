@@ -298,6 +298,44 @@ public class OrgNode {
 		return this.orgNodePayload;
 	}
 	
+	
+	public void createNodeWithNewheadingEditnode(OrgNode parent, ContentResolver resolver) {
+		if (parent == null) {
+			OrgFile file;
+			try {
+				file = new OrgFile(FileUtils.CAPTURE_FILE, resolver);
+			} catch (IllegalArgumentException e) {
+				file = new OrgFile(FileUtils.CAPTURE_FILE, FileUtils.CAPTURE_FILE_ALIAS, "");
+				file.setResolver(resolver);
+				file.write();
+			}
+
+			parentId = file.nodeId;
+			fileId = file.id;
+		} else {
+			parentId = parent.id;
+			fileId = parent.fileId;
+		}
+		
+		write(resolver);
+		
+		makeNewheadingEditNode(parent, resolver);
+	}
+	
+	private void makeNewheadingEditNode(OrgNode parent, ContentResolver resolver) {
+		boolean generateEdit = parent != null && !parent.getFilename(resolver).equals(FileUtils.CAPTURE_FILE);
+		if(generateEdit == false)
+			return;
+
+		// Add new heading nodes; need the entire content of node without star headings
+		long tempLevel = level;
+		level = 0;
+		OrgEdit edit = new OrgEdit(parent, OrgEdit.TYPE.ADDHEADING, this.toString(), resolver);
+		edit.write(resolver);
+		level = tempLevel;
+	}
+	
+	
 	public void generateAndApplyEdits(OrgNode newNode, ContentResolver resolver) {
 		ArrayList<OrgEdit> generateEditNodes = generateEditNodes(newNode, resolver);
 		boolean generateEdits = !getFilename(resolver).equals(FileUtils.CAPTURE_FILE);

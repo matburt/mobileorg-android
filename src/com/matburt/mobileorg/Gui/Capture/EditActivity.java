@@ -14,6 +14,8 @@ import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.view.SubMenu;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.OrgData.OrgNode;
+import com.matburt.mobileorg.OrgData.OrgNodePayload;
+import com.matburt.mobileorg.OrgData.OrgProviderUtil;
 import com.matburt.mobileorg.Services.TimeclockService;
 import com.matburt.mobileorg.Synchronizers.Synchronizer;
 import com.matburt.mobileorg.util.OrgUtils;
@@ -220,30 +222,44 @@ public class EditActivity extends SherlockFragmentActivity {
 	public void saveEdits() {
 		OrgNode newNode = getEditedNode();
 
+		boolean addTimestamp = PreferenceManager.getDefaultSharedPreferences(
+				this).getBoolean("captureWithTimestamp", false);
+		if(addTimestamp)
+			newNode.getOrgNodePayload().add(OrgUtils.getTimestamp());
+		
+		
 		if (this.actionMode.equals(ACTIONMODE_CREATE) || this.actionMode.equals(ACTIONMODE_ADDCHILD))
-			createNewNode(newNode);
+			;
 		else if (this.actionMode.equals(ACTIONMODE_EDIT))
-			node.generateAndApplyEdits(newNode, resolver);
-
+			;
+		
 		announceUpdate();
 	}
 	
 	public OrgNode getEditedNode() {
-		//OrgNode newParent = new OrgNode();
-
-		boolean addTimestamp = PreferenceManager.getDefaultSharedPreferences(
-				this).getBoolean("captureWithTimestamp", false);
-		if(addTimestamp)
-			;
+		HeadingFragment headingFragment = (HeadingFragment) getSupportFragmentManager()
+				.findFragmentByTag("headingFragment");
+		OrgNode newNode = headingFragment.getEditedOrgNode();
 		
-		return this.node;
-	}
-	
-	
-	private void createNewNode(OrgNode newNode) {
-		//OrgProviderUtil.createNodeWithNewheadingEditnode(newNode, newParent, newPayload, resolver);
-	}
+		TagsFragment tagsFragment = (TagsFragment) getSupportFragmentManager()
+				.findFragmentByTag("tagsFragment");
+		newNode.tags = tagsFragment.getTags();
+		
+		LocationFragment locationFragment = (LocationFragment) getSupportFragmentManager()
+				.findFragmentByTag("locationFragment");
+		newNode.parentId = locationFragment.getLocation();
+		
+		PayloadFragment payloadFragment = (PayloadFragment) getSupportFragmentManager()
+				.findFragmentByTag("payloadFragment");
+		newNode.setPayload(payloadFragment.getPayload());
 
+		DatesFragment datesFragment = (DatesFragment) getSupportFragmentManager()
+				.findFragmentByTag("datesFragment");
+		newNode.getOrgNodePayload().modifyDates(datesFragment.getScheduled(),
+				datesFragment.getDeadline(), datesFragment.getTimestamp());
+
+		return newNode;
+	}
 	
 	private void announceUpdate() {
 		Intent intent = new Intent(Synchronizer.SYNC_UPDATE);
