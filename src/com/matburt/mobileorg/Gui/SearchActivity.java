@@ -10,7 +10,6 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.SimpleCursorAdapter;
 
-import com.matburt.mobileorg.Gui.Capture.NodeViewFragment;
 import com.matburt.mobileorg.OrgData.OrgProviderUtil;
 
 public class SearchActivity extends ListActivity {
@@ -52,7 +51,7 @@ public class SearchActivity extends ListActivity {
 		@Override
 		public void onItemClick(AdapterView<?> parent, View view, int position,
 				long id) {
-			Intent intent = new Intent(getApplicationContext(), NodeViewFragment.class);
+			Intent intent = new Intent(getApplicationContext(), ViewFragment.class);
 			intent.putExtra("node_id", id);
 			startActivity(intent);
 		}

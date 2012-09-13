@@ -5,7 +5,7 @@
     android:orientation="vertical" >
     
     <WebView
-        android:id="@+id/viewnode_webview"
+        android:id="@+id/viewfragment_webview"
         android:layout_width="fill_parent"
         android:layout_height="0dip"
         android:layout_weight="1" />

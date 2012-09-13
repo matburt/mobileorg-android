@@ -5,8 +5,10 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import com.matburt.mobileorg.R;
+import com.matburt.mobileorg.OrgData.OrgFile;
 import com.matburt.mobileorg.OrgData.OrgNode;
 
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.preference.PreferenceManager;
@@ -77,5 +79,17 @@ public class OrgUtils {
 		node.name = subject;
 		node.setPayload(text);
 		return node;
+	}
+	
+
+	public static long getNodeFromPath(String path, ContentResolver resolver) {
+		String filename = path.substring("file://".length(), path.length());
+		
+		// TODO Handle links to headings instead of simply stripping it out
+		if(filename.indexOf(":") > -1)
+			filename = filename.substring(0, filename.indexOf(":"));
+				
+		OrgFile file = new OrgFile(filename, resolver);
+		return file.nodeId;
 	}
 }
