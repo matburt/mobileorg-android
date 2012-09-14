@@ -53,7 +53,9 @@ public class OrgEdit {
 	}
 	
 	public void set(Cursor cursor) {
-		if (cursor != null && cursor.moveToFirst()) {
+		if (cursor != null && cursor.getCount() > 0) {
+			if(cursor.isBeforeFirst() || cursor.isAfterLast())
+				cursor.moveToFirst();
 			this.nodeId = cursor.getString(cursor.getColumnIndexOrThrow(Edits.DATA_ID));
 			this.title = cursor.getString(cursor.getColumnIndexOrThrow(Edits.TITLE));
 			this.oldValue = cursor.getString(cursor.getColumnIndexOrThrow(Edits.OLD_VALUE));

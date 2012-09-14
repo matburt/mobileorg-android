@@ -12,6 +12,7 @@ import android.text.format.DateUtils;
 import android.util.Log;
 
 public class OrgNodePayload {
+	private String originalPayload;
 	private StringBuilder payload = new StringBuilder();
 	/** These are the remains of the cleaned payload. */
 	private StringBuilder payloadResidue = new StringBuilder();
@@ -29,15 +30,17 @@ public class OrgNodePayload {
 		if(payload == null)
 			payload = "";
 		this.payload = new StringBuilder(payload);
+		this.originalPayload = payload;
 	}
 	
 	public void set(String payload) {
 		this.payload = new StringBuilder(payload);
+		this.originalPayload = payload;
 		this.cleanedPayload = null;
 	}
 	
 	public String get() {
-		return this.payload.toString();
+		return this.originalPayload;
 	}
 	
 	public void add(String line) {

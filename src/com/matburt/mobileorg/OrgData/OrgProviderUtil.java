@@ -181,7 +181,7 @@ public class OrgProviderUtil {
 		Cursor cursor = resolver.query(Files.CONTENT_URI,
 				Files.DEFAULT_COLUMNS, Files.NAME + "=?", new String[] {fileAlias}, null);
 		if(cursor == null || cursor.getCount() <= 0) {
-			throw new IllegalArgumentException("Couldn't find file with alias: " + fileAlias);
+			return getOrCreateFile(fileAlias, fileAlias, resolver);
 		} else {
 			OrgFile file = new OrgFile();
 			file.set(cursor);

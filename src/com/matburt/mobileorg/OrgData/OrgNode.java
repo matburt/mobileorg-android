@@ -363,7 +363,9 @@ public class OrgNode {
 			this.tags = newNode.tags;
 		}
 		if (newNode.parentId != parentId) {
-			String newId = newNode.getNodeId(resolver);
+			OrgNode parent = new OrgNode(newNode.parentId, resolver);
+			String newId = parent.getNodeId(resolver);
+			
 			edits.add(new OrgEdit(this, OrgEdit.TYPE.REFILE, newId, resolver));
 			this.parentId = newNode.parentId;
 			this.fileId = newNode.fileId;
