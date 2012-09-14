@@ -167,14 +167,10 @@ public class LocationFragment extends SherlockFragment {
 			result = getSelectedTopNodeId();
 			break;
 		case 2:
-			String selection = (String) locations.get(1).getSelectedItem();
-			if(TextUtils.isEmpty(selection))
-				result = getSelectedTopNodeId();
-			else
-				result = getSelectedNodeId();
+			result = getSelectedNodeId(locations.size() - 1);
 			break;
 		default:
-				result = getSelectedNodeId();
+			result = getSelectedNodeId(locations.size() - 1);
 			break;
 		}
 		
@@ -186,9 +182,7 @@ public class LocationFragment extends SherlockFragment {
 	private OrgNode getSelectedTopNodeId() {
 		if(locations.size() < 1)
 			return null;
-		
-		Log.d("MobileOrg", "getSelectedTopNodeId");
-		
+				
 		String selection = (String) locations.get(0)
 				.getSelectedItem();
 		
@@ -198,30 +192,30 @@ public class LocationFragment extends SherlockFragment {
 			
 			return OrgProviderUtil.getOrCreateFileFromAlias(selection, resolver).getOrgNode(resolver);
 		} else
-			Log.d("MobileOrg", "getSelectedTopNodeId: selection was empty");
-		
-		return null;
+			throw new IllegalStateException("Can't determine location");
 	}
 	
-	private OrgNode getSelectedNodeId() {
+	private OrgNode getSelectedNodeId(int index) {
+		if(index < 1)
+			return getSelectedTopNodeId();
+		
 		if(locations.size() < 2)
 			return null;
-		
-		Log.d("MobileOrg", "getSelectedNodeId");
-		
-		String selection = (String) locations.get(locations.size() - 1)
+				
+		String selection = (String) locations.get(index)
 				.getSelectedItem();
 		if (TextUtils.isEmpty(selection) == false) {
-			OrgNode parent = locations.get(locations.size() - 1).getOrgNode();
+			OrgNode parent = locations.get(index).getOrgNode();
 			try {
-				OrgNode child = parent.getSibling(selection, resolver);
+				OrgNode child = parent.getChild(selection, resolver);
+				Log.d("MobileOrg", "getLocation returning " + child.id);
 				return child;
 			} catch (IllegalArgumentException e) {
-				Log.d("MobileOrg", "Couldn't get sibling");
+				throw new IllegalStateException("Can't determine location");
 			}
-		} else
-			Log.d("MobileOrg", "Selection was empty");
-
-		return null;
+		} else {
+			Log.d("MobileOrg", "Selection was empty, trying previous spinner");
+			return getSelectedNodeId(--index);
+		}
 	}
 }

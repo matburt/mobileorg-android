@@ -73,6 +73,7 @@ public class EditActivity extends SherlockFragmentActivity {
 		else if (this.actionMode.equals(ACTIONMODE_ADDCHILD)) {			
 			try {
 				OrgNode parent = new OrgNode(this.node.parentId, resolver);
+				Log.d("MobileOrg", "Setting parent " + this.node.parentId);
 				return parent;
 			} catch (IllegalArgumentException e) {}
 		}
