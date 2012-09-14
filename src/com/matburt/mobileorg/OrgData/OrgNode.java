@@ -220,7 +220,7 @@ public class OrgNode {
 		if(parent != null)
 			return parent.getChildrenStringArray(resolver);
 		else
-			return OrgProviderUtil.getFilenames(resolver);
+			throw new IllegalArgumentException("Couln't get parent for node " + name);
 	}
 	
 	public OrgNode getSibling(String name, ContentResolver resolver) {		

@@ -125,6 +125,7 @@ public class OrgFile {
 		ContentValues orgdata = new ContentValues();
 		orgdata.put(OrgData.NAME, name);
 		orgdata.put(OrgData.TODO, "");
+		orgdata.put(OrgData.PRIORITY, "");
 		orgdata.put(OrgData.PARENT_ID, -1);
 		
 		assert(resolver != null);

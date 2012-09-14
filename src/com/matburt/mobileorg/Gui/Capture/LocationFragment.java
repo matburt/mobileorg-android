@@ -66,15 +66,30 @@ public class LocationFragment extends SherlockFragment {
 	}
 	
 	private void initLocationView() {
+		if(this.node != null && (this.node.id >= 0 || this.node.parentId >= 0))
+			setupLocation();
+		else {
+			LocationEntry topEntry = getTopLevelNode(OrgFile.CAPTURE_FILE);
+			locationView.addView(topEntry);
+		}
+	}
+	
+	private void setupLocation() {
 		OrgNode currentNode = this.node;
+		
 		while(currentNode != null) {
 			OrgNode spinnerNode = currentNode.getParent(resolver);
 			String selection = currentNode.name;
-			ArrayList<String> data = currentNode.getSiblingsStringArray(resolver);
-			addLocationEntry(spinnerNode, data, selection);
 			
-			currentNode = currentNode.getParent(resolver);
-		}	
+			if (currentNode.getParent(resolver) != null) {
+				ArrayList<String> data = currentNode.getSiblingsStringArray(resolver);
+				getLocationEntry(spinnerNode, data, selection);
+				currentNode = currentNode.getParent(resolver);
+			} else {
+				getTopLevelNode(selection);
+				currentNode = null;
+			}
+		}
 		
 		locationView.removeAllViews();
 		Collections.reverse(locations);
@@ -82,13 +97,19 @@ public class LocationFragment extends SherlockFragment {
 			locationView.addView(location);
 	}
 	
-	private LocationEntry addLocationEntry(OrgNode node, ArrayList<String> data, String selection) {
+	private LocationEntry getLocationEntry(OrgNode node, ArrayList<String> data, String selection) {
 		LocationEntry location = new LocationEntry(getActivity());
 		location.init(node, this, data, selection);
 		locations.add(location);
 		return location;
 	}
 	
+	private LocationEntry getTopLevelNode(String selection) {
+		ArrayList<String> data = OrgProviderUtil.getFilenames(resolver);
+		data.remove(OrgFile.AGENDA_FILE);
+		LocationEntry entry = getLocationEntry(null, data, selection);
+		return entry;
+	}
 	
 	public void addChild(OrgNode spinnerNode, String spinnerSelection) {
 		OrgNode childNode;
@@ -107,7 +128,7 @@ public class LocationFragment extends SherlockFragment {
 
 		ArrayList<String> childData = childNode.getChildrenStringArray(resolver);
 		
-		LocationEntry location = addLocationEntry(childNode, childData, "");
+		LocationEntry location = getLocationEntry(childNode, childData, "");
 		locationView.addView(location);
 	}
 
