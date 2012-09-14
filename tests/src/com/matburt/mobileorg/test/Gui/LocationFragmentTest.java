@@ -111,6 +111,7 @@ public class LocationFragmentTest extends ActivityInstrumentationTestCase2<EditA
 		
 		OrgTestUtils.cleanupParentScenario(resolver);
 		assertEquals(node.id, locationNode.id);
+		assertEquals(node.fileId, locationNode.fileId);
 	}
 
 	public void test_Edit_NestedChild() {
@@ -121,5 +122,6 @@ public class LocationFragmentTest extends ActivityInstrumentationTestCase2<EditA
 		
 		OrgTestUtils.cleanupParentScenario(resolver);
 		assertEquals(node.parentId, locationNode.id);
+		assertEquals(node.fileId, locationNode.fileId);
 	}
 }

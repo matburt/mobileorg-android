@@ -262,11 +262,12 @@ public class OrgNode {
 		StringBuilder result = new StringBuilder();
 		result.insert(0, name);
 
-		while(parentId > 0) {
-			OrgNode node = new OrgNode(parentId, resolver);
-			parentId = node.parentId;
+		long currentParentId = this.parentId;
+		while(currentParentId > 0) {
+			OrgNode node = new OrgNode(currentParentId, resolver);
+			currentParentId = node.parentId;
 
-			if(parentId > 0)
+			if(currentParentId > 0)
 				result.insert(0, node.getOlpName() + "/");
 			else { // Get file nodes real name
 				String filename = node.getFilename(resolver);
@@ -331,7 +332,7 @@ public class OrgNode {
 	public void generateAndApplyEdits(OrgNode newNode, ContentResolver resolver) {
 		ArrayList<OrgEdit> generateEditNodes = generateEditNodes(newNode, resolver);
 		boolean generateEdits = !getFilename(resolver).equals(FileUtils.CAPTURE_FILE);
-		
+				
 		if(generateEdits)
 			for(OrgEdit edit: generateEditNodes)
 				edit.write(resolver);
@@ -339,7 +340,7 @@ public class OrgNode {
 	
 	public ArrayList<OrgEdit> generateEditNodes(OrgNode newNode, ContentResolver resolver) {
 		ArrayList<OrgEdit> edits = new ArrayList<OrgEdit>();
-		
+
 		if (!name.equals(newNode.name)) {
 			edits.add(new OrgEdit(this, OrgEdit.TYPE.HEADING, newNode.name, resolver));
 			this.name = newNode.name;			
@@ -362,8 +363,10 @@ public class OrgNode {
 			this.tags = newNode.tags;
 		}
 		if (newNode.parentId != parentId) {
-			edits.add(new OrgEdit(this, OrgEdit.TYPE.REFILE, newNode.getNodeId(resolver), resolver));
+			String newId = newNode.getNodeId(resolver);
+			edits.add(new OrgEdit(this, OrgEdit.TYPE.REFILE, newId, resolver));
 			this.parentId = newNode.parentId;
+			this.fileId = newNode.fileId;
 		}
 		
 		return edits;

@@ -241,7 +241,7 @@ public class EditActivity extends SherlockFragmentActivity {
 	
 	public void saveEdits() {
 		OrgNode newNode = getEditedNode();
-
+		
 		boolean addTimestamp = PreferenceManager.getDefaultSharedPreferences(
 				this).getBoolean("captureWithTimestamp", false);
 		if(addTimestamp)
@@ -250,7 +250,7 @@ public class EditActivity extends SherlockFragmentActivity {
 		
 		if (this.actionMode.equals(ACTIONMODE_CREATE) || this.actionMode.equals(ACTIONMODE_ADDCHILD)) {
 			try {
-				newNode.createParentNewheading(resolver).write(resolver);
+				newNode.createParentNewheading(resolver);
 				newNode.write(resolver);
 			} catch (IllegalStateException e) {
 				Log.e("MobileOrg", e.getLocalizedMessage());
