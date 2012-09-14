@@ -4,9 +4,14 @@ import android.content.ContentResolver;
 
 import com.matburt.mobileorg.OrgData.OrgFile;
 import com.matburt.mobileorg.OrgData.OrgNode;
+import com.matburt.mobileorg.OrgData.OrgProviderUtil;
 
 public class OrgTestUtils {
 
+	public static final String defaultTestfilename = "test file.org";
+	public static final String defaultTestfileAlias = "delete me";
+
+	
 	public static OrgNode getDefaultOrgNode() {
 		OrgNode node = new OrgNode();
 		node.name = "title";
@@ -25,9 +30,8 @@ public class OrgTestUtils {
 	}
 	
 	public static OrgNode setupParentScenario(ContentResolver resolver) {
-		OrgFile file = getDefaultOrgFile();
-		file.setResolver(resolver);
-		file.write();
+		OrgFile file = OrgProviderUtil.getOrCreateFile(defaultTestfilename,
+				defaultTestfileAlias, resolver);
 		
 		OrgNode child = getDefaultOrgNode();
 		child.parentId = file.nodeId;
@@ -48,14 +52,13 @@ public class OrgTestUtils {
 	}
 	
 	public static void cleanupParentScenario(ContentResolver resolver) {
-		String filename = getDefaultOrgFile().filename;
-		OrgFile file = new OrgFile(filename, resolver);
+		OrgFile file = new OrgFile(defaultTestfilename, resolver);
 		file.setResolver(resolver);
 		file.removeFile();
 	}
 	
 	public static OrgFile getDefaultOrgFile() {
-		OrgFile file = new OrgFile("test file", "name", "checksum");
+		OrgFile file = new OrgFile(defaultTestfilename, defaultTestfileAlias, "checksum");
 		return file;
 	}
 }

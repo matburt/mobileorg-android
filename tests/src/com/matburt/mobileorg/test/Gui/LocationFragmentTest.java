@@ -8,13 +8,13 @@ import android.test.ActivityInstrumentationTestCase2;
 import com.matburt.mobileorg.Gui.Capture.EditActivity;
 import com.matburt.mobileorg.Gui.Capture.LocationFragment;
 import com.matburt.mobileorg.OrgData.OrgContract.OrgData;
+import com.matburt.mobileorg.OrgData.OrgFile;
 import com.matburt.mobileorg.OrgData.OrgNode;
 import com.matburt.mobileorg.OrgData.OrgProviderUtil;
 import com.matburt.mobileorg.test.util.OrgTestUtils;
 
 public class LocationFragmentTest extends ActivityInstrumentationTestCase2<EditActivity> {
 	private final String LOCATION_FRAGMENT = "locationFragment";
-	
 	
 	private EditActivity activity;
 	private ContentResolver resolver;
@@ -44,8 +44,6 @@ public class LocationFragmentTest extends ActivityInstrumentationTestCase2<EditA
 	}
 	
 	private void prepareActivityWithNode(OrgNode node, String actionMode) {
-		this.nodeId = node.id;
-
 		Intent intent = new Intent();
 		intent.putExtra(EditActivity.ACTIONMODE, actionMode);
 		intent.putExtra(EditActivity.NODE_ID, node.id);
@@ -53,6 +51,7 @@ public class LocationFragmentTest extends ActivityInstrumentationTestCase2<EditA
 		
 		setActivityInitialTouchMode(false);
 		this.activity = getActivity();
+		this.resolver = activity.getContentResolver();
 		
 		this.locationFragment = ((LocationFragment) this.activity
 				.getSupportFragmentManager().findFragmentByTag(LOCATION_FRAGMENT));
@@ -62,47 +61,65 @@ public class LocationFragmentTest extends ActivityInstrumentationTestCase2<EditA
 		OrgNode node = OrgTestUtils.getDefaultOrgNode();
 		node.write(resolver);
 		this.nodeId = node.id;
+		
 		prepareActivityWithNode(node, EditActivity.ACTIONMODE_EDIT);
+		
 		assertNotNull(this.activity);
 		assertNotNull(this.locationFragment);
 	}
 	
-	public void testCreateSimple() {
+	public void test_Create_Simple() {
 		OrgNode node = new OrgNode();
-		prepareActivityWithNode(node, EditActivity.ACTIONMODE_CREATE);
 		
-		OrgNode location = locationFragment.getLocation();;
-		OrgNode captureNode = OrgProviderUtil
-				.getOrCreateCaptureFileOrgNode(resolver);
-		// TODO Y u no work?! Race condition?
-		assertEquals(captureNode.id, location.id);
+		prepareActivityWithNode(node, EditActivity.ACTIONMODE_CREATE);
+		OrgNode locationNode = locationFragment.getLocationSelection();
+		
+		OrgNode captureFile = OrgProviderUtil.getOrCreateCaptureFile(resolver).getOrgNode(resolver);
+		assertEquals(captureFile.fileId, locationNode.fileId);
+		assertEquals(captureFile.id, locationNode.id);
 	}
 	
-	public void testAddToplevelFile() {
-		OrgNode fileNode = OrgProviderUtil.getOrCreateCaptureFileOrgNode(resolver);
+	public void test_Addchild_ToplevelFile() {
+		OrgFile file = OrgProviderUtil.getOrCreateFile("test file.org", "delete me", resolver);
+		OrgNode fileNode = file.getOrgNode(resolver);
+		
 		prepareActivityWithNode(fileNode, EditActivity.ACTIONMODE_ADDCHILD);
-
-		OrgNode location = locationFragment.getLocation();
-		assertTrue(location.id >= 0);
-		assertEquals(fileNode.id, location.id);
+		OrgNode locationNode = locationFragment.getLocationSelection();
+				
+		file.removeFile();
+		assertEquals(fileNode.name, locationNode.name);
+		assertEquals(fileNode.id, locationNode.id);
+		assertEquals(fileNode.fileId, locationNode.fileId);
 	}
 	
-	public void testAddToplevelFileWithAddChild() {
-		OrgNode fileNode = OrgProviderUtil.getOrCreateCaptureFileOrgNode(resolver);
+	public void test_Addchild_ToplevelFileWithAddChild() {
+		OrgNode fileNode = OrgProviderUtil.getOrCreateCaptureFile(resolver).getOrgNode(resolver);
+		
 		prepareActivityWithNode(fileNode, EditActivity.ACTIONMODE_ADDCHILD);
-
 		locationFragment.addChild(null, "");
-		OrgNode location = locationFragment.getLocation();
-		assertEquals(fileNode.id, location.id);
+		OrgNode locationNode = locationFragment.getLocationSelection();
+
+		assertEquals(fileNode.id, locationNode.id);
+		assertEquals(fileNode.fileId, locationNode.fileId);
 	}
 	
-	public void testEditNestedChild() {
+	public void test_Addchild_NestedChild() {
 		OrgNode node = OrgTestUtils.setupParentScenario(resolver);
-		prepareActivityWithNode(node, EditActivity.ACTIONMODE_EDIT);
-
-		OrgNode location = locationFragment.getLocation();
-		OrgNode parent = node.getParent(resolver);
-		assertEquals(parent.id, location.id);
+		
+		prepareActivityWithNode(node, EditActivity.ACTIONMODE_ADDCHILD);
+		OrgNode locationNode = locationFragment.getLocationSelection();
+		
 		OrgTestUtils.cleanupParentScenario(resolver);
+		assertEquals(node.id, locationNode.id);
+	}
+
+	public void test_Edit_NestedChild() {
+		OrgNode node = OrgTestUtils.setupParentScenario(resolver);
+		
+		prepareActivityWithNode(node, EditActivity.ACTIONMODE_EDIT);
+		OrgNode locationNode = locationFragment.getLocationSelection();
+		
+		OrgTestUtils.cleanupParentScenario(resolver);
+		assertEquals(node.parentId, locationNode.id);
 	}
 }

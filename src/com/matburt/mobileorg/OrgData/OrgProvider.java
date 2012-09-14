@@ -28,7 +28,7 @@ public class OrgProvider extends ContentProvider {
 	
 	private static final int FILES = 200;
 	private static final int FILES_ID = 201;
-	private static final int FILES_NAME = 202;
+	private static final int FILES_FILENAME = 202;
 
 	private static final int EDITS = 300;
 	private static final int EDITS_ID = 301;
@@ -48,7 +48,7 @@ public class OrgProvider extends ContentProvider {
 		
 		uriMatcher.addURI(AUTHORITY, "files", FILES);
 		uriMatcher.addURI(AUTHORITY, "files/*", FILES_ID);
-		uriMatcher.addURI(AUTHORITY, "files/*/name", FILES_NAME);
+		uriMatcher.addURI(AUTHORITY, "files/*/filename", FILES_FILENAME);
 		
 		uriMatcher.addURI(AUTHORITY, "edits", EDITS);
 		uriMatcher.addURI(AUTHORITY, "edits/*", EDITS_ID);
@@ -138,8 +138,8 @@ public class OrgProvider extends ContentProvider {
 			return builder.table(Tables.FILES);
 		case FILES_ID:
 			return builder.table(Tables.FILES).where(Files.ID + "=?", Files.getId(uri));
-		case FILES_NAME:
-			return builder.table(Tables.FILES).where(Files.NAME + "=?", Files.getName(uri));
+		case FILES_FILENAME:
+			return builder.table(Tables.FILES).where(Files.FILENAME + "=?", Files.getFilename(uri));
 		case EDITS:
 			return builder.table(Tables.EDITS);
 		case EDITS_ID:

@@ -83,7 +83,7 @@ public class OrgEditTest extends ProviderTestCase2<OrgProvider> {
 	
 	public void testNewHeadingDefaultFile() {
 		OrgNode capturefileNode = OrgProviderUtil
-				.getOrCreateCaptureFileOrgNode(resolver);
+				.getOrCreateCaptureFile(resolver).getOrgNode(resolver);
 		assertTrue(capturefileNode.fileId >= 0);
 
 		OrgNode node = OrgTestUtils.getDefaultOrgNode();

@@ -126,13 +126,13 @@ public class OrgContract {
 			return uri.getLastPathSegment();
 		}
 
-		public static String getName(Uri uri) {
-			return uri.getLastPathSegment();
+		public static String getFilename(Uri uri) {
+			return uri.getPathSegments().get(1);
 		}
 		
 		public static Uri buildFilenameUri(String filename) {
 			return CONTENT_URI.buildUpon().appendPath(filename)
-					.appendPath("name").build();
+					.appendPath("filename").build();
 		}
 		
 		public static Uri buildIdUri(Long fileId) {

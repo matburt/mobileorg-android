@@ -49,7 +49,16 @@ public class OrgFileTest extends ProviderTestCase2<OrgProvider> {
 		
 		OrgNode node = new OrgNode(orgFile.nodeId, resolver);
 		assertEquals(node.name, orgFile.name);
+		assertTrue(orgFile.id >= 0);
 		assertEquals(node.fileId, orgFile.id);
+	}
+	
+	public void testDoesFileExist() {
+		OrgFile orgFile = new OrgFile("filename", "name", "checksum");
+		orgFile.setResolver(resolver);
+		orgFile.addFile();
+		
+		assertTrue(orgFile.doesFileExist());
 	}
 	
 	public void testRemoveFileSimple() {
@@ -86,39 +95,81 @@ public class OrgFileTest extends ProviderTestCase2<OrgProvider> {
 		assertEquals(SimpleOrgFiles.orgFile.trim(), fileString.trim());
 	}
 	
-	public void testCreateCaptureFileOrgNode () {
-		OrgNode capturefileNode = OrgProviderUtil.getOrCreateCaptureFileOrgNode(resolver);
+	public void testCreateFile () {
+		final String fileAlias = "test name";
+		OrgFile file = OrgProviderUtil.getOrCreateFile("test file", fileAlias, resolver);
 		
-		assertTrue(capturefileNode.id >= 0);
-		assertTrue(capturefileNode.fileId >= 0);
-		
+		assertTrue(file.id >= 0);
+		assertTrue(file.doesFileExist());
+
 		try {
-			OrgFile file = new OrgFile(capturefileNode.fileId, resolver);
-			assertEquals(OrgFile.CAPTURE_FILE, file.filename);
-		} catch (IllegalArgumentException e) {
-			fail("File node not created");
-		}
-		
-		try {
-			OrgNode node = new OrgNode(capturefileNode.id, resolver);
-			assertEquals(OrgFile.CAPTURE_FILE_ALIAS, node.name);
+			OrgNode capturefileNode = file.getOrgNode(resolver);
+			assertTrue(capturefileNode.id >= 0);
+			assertTrue(capturefileNode.fileId >= 0);
+			assertEquals(file.id, capturefileNode.fileId);
+			assertEquals(fileAlias, capturefileNode.name);
 		} catch (IllegalArgumentException e) {
 			fail("OrgNode not created");
 		}
+		
+		try {
+			OrgFile file2 = new OrgFile(file.id, resolver);
+			assertTrue(file.equals(file2));
+		} catch (IllegalArgumentException e) {
+			fail("File node not created");
+		}
 	}
 	
-	public void testGetCaptureFileOrgNode () {
-		OrgNode node1 = OrgProviderUtil.getOrCreateCaptureFileOrgNode(resolver);
+	public void testCreateCaptureFile () {		
+		OrgFile file = OrgProviderUtil.getOrCreateCaptureFile(resolver);
+		
+		assertTrue(file.id >= 0);
+		assertTrue(file.doesFileExist());
+
+		try {
+			OrgNode capturefileNode = file.getOrgNode(resolver);
+			assertTrue(capturefileNode.id >= 0);
+			assertTrue(capturefileNode.fileId >= 0);
+			assertEquals(file.id, capturefileNode.fileId);
+			assertEquals(OrgFile.CAPTURE_FILE_ALIAS, capturefileNode.name);
+		} catch (IllegalArgumentException e) {
+			fail("OrgNode not created");
+		}
+		
+		try {
+			OrgFile file2 = new OrgFile(file.id, resolver);
+			assertTrue(file.equals(file2));
+		} catch (IllegalArgumentException e) {
+			fail("File node not created");
+		}
+	}
+	
+	public void testGetCaptureFile () {
+		OrgNode node1 = OrgProviderUtil.getOrCreateCaptureFile(resolver)
+				.getOrgNode(resolver);
 
 		assertNotNull(node1);
 		assertTrue(node1.id >= 0);
 		assertTrue(node1.fileId >= 0);
 
-		OrgNode node2 = OrgProviderUtil.getOrCreateCaptureFileOrgNode(resolver);
+		OrgNode node2 = OrgProviderUtil.getOrCreateCaptureFile(resolver)
+				.getOrgNode(resolver);
 		assertNotNull(node2);
 
 		assertEquals(node1.id, node2.id);
 		assertEquals(node1.fileId, node2.fileId);
 		assertEquals(node1.name, node2.name);
+	}
+	
+	public void testGetOrgNodeFromFilename() {
+		OrgFile file = OrgProviderUtil.getOrCreateFile("test file", "file name", resolver);
+		OrgNode fileNode = file.getOrgNode(resolver);
+		
+		OrgNode node = OrgProviderUtil.getOrgNodeFromFilename(file.filename, resolver);
+		
+		assertEquals(fileNode.name, node.name);
+		assertEquals(fileNode.id, node.id);
+		assertEquals(fileNode.fileId, node.fileId);
+		assertEquals(fileNode.parentId, node.parentId);
 	}
 }	

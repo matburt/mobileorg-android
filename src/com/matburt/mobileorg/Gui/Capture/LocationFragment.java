@@ -5,6 +5,8 @@ import java.util.Collections;
 
 import android.content.ContentResolver;
 import android.os.Bundle;
+import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -44,7 +46,7 @@ public class LocationFragment extends SherlockFragment {
 		restoreFromBundle(savedInstanceState);
 
 		if(this.node == null)
-			this.node = activity.getOrgNode();
+			this.node = activity.getParentOrgNode();
 
 		initLocationView();
 	}
@@ -52,7 +54,7 @@ public class LocationFragment extends SherlockFragment {
 	@Override
 	public void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
-		outState.putLong(NODE_ID, getLocationSelection());
+		outState.putLong(NODE_ID, getLocationSelection().id);
 	}
 
 	public void restoreFromBundle(Bundle savedInstanceState) {
@@ -60,14 +62,18 @@ public class LocationFragment extends SherlockFragment {
 			locationView.removeAllViews();
 			locations.clear();
 			long nodeId = savedInstanceState.getLong(NODE_ID, -1);
-			if(nodeId > -1)
+			if(nodeId >= 0)
 				this.node = new OrgNode(nodeId, resolver);
 		}
 	}
 	
-	private void initLocationView() {
-		if(this.node != null && (this.node.id >= 0 || this.node.parentId >= 0))
-			setupLocation();
+	private void initLocationView() {		
+		if(this.node != null) {
+			if(this.node.parentId == -2) // Editing top node; can't be refiled
+				return;
+			//(this.node.id >= 0 || this.node.parentId >= 0) // Valid Node
+				setupLocation();
+		}
 		else {
 			LocationEntry topEntry = getTopLevelNode(OrgFile.CAPTURE_FILE);
 			locationView.addView(topEntry);
@@ -149,26 +155,73 @@ public class LocationFragment extends SherlockFragment {
 		locations.removeAll(locationsToDelete);
 	}
 	
-	public long getLocationSelection() {
-		if (locations.size() > 1) {
-			LocationEntry lastEntry = locations.get(locations.size() - 1);
-			OrgNode parent = lastEntry.getOrgNode();
-			if(parent != null) {
-				OrgNode child = parent.getChild((String) lastEntry.getSelectedItem(), resolver);
-				if(child != null)
-					return child.id;
-				else
-					return parent.id;
-			}
+	
+	public OrgNode getLocationSelection() {
+		OrgNode result = null;
+		
+		switch (locations.size()) {
+		case 0:
+			result = null;
+			break;
+		case 1:
+			result = getSelectedTopNodeId();
+			break;
+		case 2:
+			String selection = (String) locations.get(1).getSelectedItem();
+			if(TextUtils.isEmpty(selection))
+				result = getSelectedTopNodeId();
+			else
+				result = getSelectedNodeId();
+			break;
+		default:
+				result = getSelectedNodeId();
+			break;
 		}
 		
-		return -1;
+		if(result == null)
+			result = new OrgNode();
+		return result;
 	}
 	
-	public OrgNode getLocation() {
+	private OrgNode getSelectedTopNodeId() {
+		if(locations.size() < 1)
+			return null;
+		
+		Log.d("MobileOrg", "getSelectedTopNodeId");
+		
+		String selection = (String) locations.get(0)
+				.getSelectedItem();
+		
+		if (TextUtils.isEmpty(selection) == false) {
+			if(selection.equals(OrgFile.CAPTURE_FILE))
+				return OrgProviderUtil.getOrCreateCaptureFile(resolver).getOrgNode(resolver);
+			
+			return OrgProviderUtil.getOrCreateFileFromAlias(selection, resolver).getOrgNode(resolver);
+		} else
+			Log.d("MobileOrg", "getSelectedTopNodeId: selection was empty");
+		
+		return null;
+	}
+	
+	private OrgNode getSelectedNodeId() {
 		if(locations.size() < 2)
-			return OrgProviderUtil.getOrCreateCaptureFileOrgNode(resolver);
-		else
-			return locations.get(locations.size() - 1).getOrgNode();
+			return null;
+		
+		Log.d("MobileOrg", "getSelectedNodeId");
+		
+		String selection = (String) locations.get(locations.size() - 1)
+				.getSelectedItem();
+		if (TextUtils.isEmpty(selection) == false) {
+			OrgNode parent = locations.get(locations.size() - 1).getOrgNode();
+			try {
+				OrgNode child = parent.getSibling(selection, resolver);
+				return child;
+			} catch (IllegalArgumentException e) {
+				Log.d("MobileOrg", "Couldn't get sibling");
+			}
+		} else
+			Log.d("MobileOrg", "Selection was empty");
+
+		return null;
 	}
 }

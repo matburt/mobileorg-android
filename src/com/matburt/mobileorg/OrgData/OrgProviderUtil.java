@@ -161,17 +161,33 @@ public class OrgProviderUtil {
 		return new OrgNode(file.nodeId, resolver);
 	}
 	
-	public static OrgNode getOrCreateCaptureFileOrgNode (ContentResolver resolver) {
-		try {
-			return getOrgNodeFromFilename(FileUtils.CAPTURE_FILE, resolver);
-		} catch (IllegalArgumentException e) {
-			Log.d("MobileOrg", "Caught exception " + e.getLocalizedMessage());
-			OrgFile file = new OrgFile(FileUtils.CAPTURE_FILE, FileUtils.CAPTURE_FILE_ALIAS, "");
-			file.setResolver(resolver);
+	public static OrgFile getOrCreateCaptureFile (ContentResolver resolver) {
+		return getOrCreateFile(FileUtils.CAPTURE_FILE, FileUtils.CAPTURE_FILE_ALIAS, resolver);
+	}
+	
+	public static OrgFile getOrCreateFile(String filename, String fileAlias, ContentResolver resolver) {
+		OrgFile file = new OrgFile(filename, fileAlias, "");
+		file.setResolver(resolver);
+		if(file.doesFileExist() == false) {
 			file.includeInOutline = true;
-			file.write();
-			OrgNode node = new OrgNode(file.nodeId, resolver);
-			return node;
+			file.addFile();
+		} else {
+			file = new OrgFile(filename, resolver);
+		}
+		return file;
+	}
+	
+	public static OrgFile getOrCreateFileFromAlias(String fileAlias, ContentResolver resolver) {
+		Cursor cursor = resolver.query(Files.CONTENT_URI,
+				Files.DEFAULT_COLUMNS, Files.NAME + "=?", new String[] {fileAlias}, null);
+		if(cursor == null || cursor.getCount() <= 0) {
+			throw new IllegalArgumentException("Couldn't find file with alias: " + fileAlias);
+		} else {
+			OrgFile file = new OrgFile();
+			file.set(cursor);
+			cursor.close();
+			file.setResolver(resolver);
+			return file;
 		}
 	}
 	

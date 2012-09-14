@@ -86,7 +86,7 @@ public class OrgFile {
 			updateFile();
 	}
 	
-	private boolean doesFileExist() {
+	public boolean doesFileExist() {
 		assert(resolver != null);
 		Cursor cursor = resolver.query(Files.buildFilenameUri(filename),
 				Files.DEFAULT_COLUMNS, null, null, null);
@@ -97,6 +97,10 @@ public class OrgFile {
 			return true;
 		else
 			return false;		
+	}
+	
+	public OrgNode getOrgNode(ContentResolver resolver) {
+		return new OrgNode(this.nodeId, resolver);
 	}
 	
 	public void addFile() {
@@ -116,7 +120,6 @@ public class OrgFile {
 		values.put(Files.CHECKSUM, checksum);
 		values.put(Files.NODE_ID, nodeId);
 		
-		assert(resolver != null);
 		Uri uri = resolver.insert(Files.CONTENT_URI, values);
 		return Long.parseLong(Files.getId(uri));
 	}
@@ -128,7 +131,6 @@ public class OrgFile {
 		orgdata.put(OrgData.PRIORITY, "");
 		orgdata.put(OrgData.PARENT_ID, -1);
 		
-		assert(resolver != null);
 		Uri uri = resolver.insert(OrgData.CONTENT_URI, orgdata);
 		long nodeId = Long.parseLong(OrgData.getId(uri));
 		return nodeId;

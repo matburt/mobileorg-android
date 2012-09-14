@@ -58,7 +58,27 @@ public class EditActivity extends SherlockFragmentActivity {
 			this.node.parentId = node_id;
 		}
 	}
+	
+	public OrgNode getParentOrgNode() {
+		if (this.actionMode.equals(ACTIONMODE_EDIT)) {
+			OrgNode parent = this.node.getParent(resolver);
 
+			if (parent == null) {
+				parent = new OrgNode();
+				parent.parentId = -2;
+			}
+			return parent;
+		} else if (this.actionMode.equals(ACTIONMODE_CREATE))
+			return null;
+		else if (this.actionMode.equals(ACTIONMODE_ADDCHILD)) {			
+			try {
+				OrgNode parent = new OrgNode(this.node.parentId, resolver);
+				return parent;
+			} catch (IllegalArgumentException e) {}
+		}
+		
+		return new OrgNode();
+	}
 	
 	public OrgNode getOrgNode() {
 		if(this.node == null)
@@ -254,7 +274,7 @@ public class EditActivity extends SherlockFragmentActivity {
 		
 		LocationFragment locationFragment = (LocationFragment) getSupportFragmentManager()
 				.findFragmentByTag("locationFragment");
-		OrgNode newParent = locationFragment.getLocation();
+		OrgNode newParent = locationFragment.getLocationSelection();
 		newNode.parentId = newParent.id;
 		newNode.fileId = newParent.fileId;
 		
