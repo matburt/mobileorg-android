@@ -15,11 +15,12 @@ import android.util.Log;
 
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Gui.FileDecryptionActivity;
-import com.matburt.mobileorg.Parsing.OrgFileParser;
-import com.matburt.mobileorg.provider.OrgContract.Edits;
-import com.matburt.mobileorg.provider.OrgContract.Files;
-import com.matburt.mobileorg.provider.OrgFile;
-import com.matburt.mobileorg.provider.OrgProviderUtil;
+import com.matburt.mobileorg.OrgData.OrgContract.Edits;
+import com.matburt.mobileorg.OrgData.OrgContract.Files;
+import com.matburt.mobileorg.OrgData.OrgEdit;
+import com.matburt.mobileorg.OrgData.OrgFile;
+import com.matburt.mobileorg.OrgData.OrgFileParser;
+import com.matburt.mobileorg.OrgData.OrgProviderUtil;
 import com.matburt.mobileorg.util.FileUtils;
 
 /**
@@ -49,14 +50,10 @@ public class Synchronizer {
 		this.notify = notify;
 	}
 
-	/**
-	 * Used to indicate to other systems if active synchronization is available
-	 * (true) or if synchronization is implicit or non-existant (falsse)
-	 */
-	public boolean isEnabled() {
+ 	public boolean isEnabled() {
 		return true;
 	}
-
+	
 	public void sync(OrgFileParser parser) {
 		if (!syncher.isConfigured()) {
 			notify.errorNotification("Sync not configured");
@@ -101,8 +98,15 @@ public class Synchronizer {
 	public void pushCaptures() throws Exception, IOException,
 			CertificateException, SSLHandshakeException {
 		final String filename = CAPTURE_FILE;
-		String localContents = OrgProviderUtil.fileToString(filename, resolver);
-		localContents += OrgProviderUtil.editsToString(resolver);
+		
+		String localContents = "";
+		
+		try {
+			OrgFile file = new OrgFile(filename, resolver);
+			localContents += file.toString(resolver);
+		} catch (IllegalArgumentException e) {}
+		
+		localContents += OrgEdit.editsToString(resolver);
 
 		if (localContents.equals(""))
 			return;

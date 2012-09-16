@@ -14,9 +14,9 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.matburt.mobileorg.R;
-import com.matburt.mobileorg.Parsing.OrgFileParser;
-import com.matburt.mobileorg.provider.OrgDatabase;
-import com.matburt.mobileorg.provider.OrgFile;
+import com.matburt.mobileorg.OrgData.OrgDatabase;
+import com.matburt.mobileorg.OrgData.OrgFile;
+import com.matburt.mobileorg.OrgData.OrgFileParser;
 
 public class FileDecryptionActivity extends Activity
 {

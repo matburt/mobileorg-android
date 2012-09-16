@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <lint>
+    <issue id="HardcodedText">
+        <ignore path="res/layout/outline.xml" />
+    </issue>
     <issue id="MissingTranslation" severity="warning">
         <ignore path="res/values-de" />
     </issue>

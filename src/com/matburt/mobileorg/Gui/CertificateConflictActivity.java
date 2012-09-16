@@ -1,14 +1,13 @@
 package com.matburt.mobileorg.Gui;
 
 import android.app.Activity;
-import android.view.View;
-import android.widget.TextView;
-import android.widget.Button;
-import android.os.Bundle;
-
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.view.View;
+import android.widget.Button;
+import android.widget.TextView;
 
 import com.matburt.mobileorg.R;
 

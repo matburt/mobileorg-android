@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="5dp"
+    android:layout_marginTop="5dp"
+    android:orientation="vertical" >
+
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" >
+
+        <EditText
+            android:id="@+id/edit_title"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/edit_todo_priority"
+            android:hint="@string/title"
+            android:inputType="text|textMultiLine|textAutoCorrect|textCapSentences" />
+
+        <LinearLayout
+            android:id="@+id/edit_todo_priority"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:orientation="horizontal" >
+
+            <ImageView
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_gravity="center_vertical"
+                android:contentDescription="Todo"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_menu_agenda" />
+
+            <Spinner
+                android:id="@+id/edit_todo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp"
+                android:gravity="center"
+                android:prompt="@string/todo_state" />
+
+            <ImageView
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_gravity="center_vertical"
+                android:contentDescription="Priority"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_menu_star" />
+
+            <Spinner
+                android:id="@+id/edit_priority"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginRight="5dp"
+                android:gravity="center"
+                android:prompt="@string/priority" />
+        </LinearLayout>
+    </RelativeLayout>
+
+</LinearLayout>

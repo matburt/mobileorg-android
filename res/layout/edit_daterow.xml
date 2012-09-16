@@ -2,42 +2,60 @@
 <TableRow xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_marginBottom="3dp"
+    android:layout_marginTop="3dp"
     android:orientation="vertical" >
 
     <ImageView
         android:id="@+id/dateImage"
-        android:contentDescription=""
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="35dp"
+        android:layout_height="35dp"
+        android:layout_gravity="center_vertical"
+        android:contentDescription="@string/date"
         android:src="@drawable/ic_menu_month" />
 
     <Button
         android:id="@+id/dateButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:layout_marginLeft="5dp"
         android:layout_span="3"
-        android:hint="@string/edit_date_date" />
+        android:background="@drawable/border"
+        android:hint="@string/edit_date_date"
+        android:paddingLeft="5dp"
+        android:paddingRight="5dp" />
 
     <Button
         android:id="@+id/dateTimeStartButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:layout_marginLeft="5dp"
         android:layout_span="3"
-        android:hint="@string/edit_date_start" />
+        android:background="@drawable/border"
+        android:hint="@string/edit_date_start"
+        android:paddingLeft="5dp"
+        android:paddingRight="5dp" />
 
     <Button
         android:id="@+id/dateTimeEndButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:layout_marginLeft="5dp"
         android:layout_span="3"
-        android:hint="@string/edit_date_end" />
+        android:background="@drawable/border"
+        android:hint="@string/edit_date_end"
+        android:paddingLeft="5dp"
+        android:paddingRight="5dp" />
 
     <Button
         android:id="@+id/dateRemove"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="35dp"
+        android:layout_height="35dp"
         android:layout_gravity="center_vertical"
-        android:background="@drawable/ic_input_delete"
-        android:padding="10dp" />
+        android:layout_marginLeft="5dp"
+        android:background="@drawable/ic_menu_close_clear_cancel" />
 
 </TableRow>

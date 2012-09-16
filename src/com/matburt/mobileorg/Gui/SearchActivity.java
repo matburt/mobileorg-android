@@ -10,7 +10,7 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.SimpleCursorAdapter;
 
-import com.matburt.mobileorg.Parsing.MobileOrgApplication;
+import com.matburt.mobileorg.OrgData.OrgProviderUtil;
 
 public class SearchActivity extends ListActivity {
 
@@ -39,12 +39,9 @@ public class SearchActivity extends ListActivity {
 	}
 
 	private void doSearch(String query) {
-		MobileOrgApplication appInst = (MobileOrgApplication) this
-				.getApplication();
+		Cursor result = OrgProviderUtil.search("%"+ query.trim() + "%", getContentResolver());
 		
-		Cursor result = appInst.getDB().search("%"+ query.trim() + "%");
-		
-		adapter = new OutlineCursorAdapter(this, result, appInst.getDB());
+		adapter = new OutlineCursorAdapter(this, result, getContentResolver());
 		this.setListAdapter(adapter);
 				
 		this.getListView().setOnItemClickListener(showNode);
@@ -54,7 +51,7 @@ public class SearchActivity extends ListActivity {
 		@Override
 		public void onItemClick(AdapterView<?> parent, View view, int position,
 				long id) {
-			Intent intent = new Intent(getApplicationContext(), NodeViewActivity.class);
+			Intent intent = new Intent(getApplicationContext(), ViewFragment.class);
 			intent.putExtra("node_id", id);
 			startActivity(intent);
 		}

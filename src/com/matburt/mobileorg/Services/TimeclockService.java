@@ -17,9 +17,8 @@ import android.util.Log;
 import android.widget.RemoteViews;
 
 import com.matburt.mobileorg.R;
-import com.matburt.mobileorg.Parsing.MobileOrgApplication;
-import com.matburt.mobileorg.Parsing.NodeWrapper;
-import com.matburt.mobileorg.Parsing.OrgDatabaseOld;
+import com.matburt.mobileorg.OrgData.MobileOrgApplication;
+import com.matburt.mobileorg.OrgData.OrgNode;
 
 public class TimeclockService extends Service {
 	public static final String NODE_ID = "node_id";
@@ -27,13 +26,12 @@ public class TimeclockService extends Service {
 	public static final String TIMECLOCK_TIMEOUT = "timeclock_timeout";
 
 	private final int notificationID = 1337;
-	private OrgDatabaseOld db;
 	private NotificationManager mNM;
 	private AlarmManager alarmManager;
 	private Notification notification;
 	
 	private long node_id;
-	private NodeWrapper node;
+	private OrgNode node;
 	private int estimatedMinute = -1;
 	private int estimatedHour = -1;
 	private MobileOrgApplication appInst;
@@ -55,9 +53,7 @@ public class TimeclockService extends Service {
 		sInstance = this;
 		this.mNM = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 		this.alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-
 		this.appInst = (MobileOrgApplication) getApplication();
-		this.db = appInst.getDB();
 	}
 
 	@Override
@@ -72,7 +68,7 @@ public class TimeclockService extends Service {
 		Log.d("MobileOrg", "Called onStartCommand() with :" + action);
 		if(action == null) {
 			this.node_id = intent.getLongExtra(NODE_ID, -1);
-			this.node = new NodeWrapper(db.getNode(node_id), db);
+			this.node = new OrgNode(node_id, getContentResolver());
 			this.startTime = System.currentTimeMillis();
 			
 			getEstimated();
@@ -90,7 +86,7 @@ public class TimeclockService extends Service {
 	}
 	
 	private void getEstimated() {
-		String estimated = node.getPayload().getProperty("Effort").trim();
+		String estimated = node.getOrgNodePayload().getProperty("Effort").trim();
 
 		if (TextUtils.isEmpty(estimated) == false) {
 			String[] split = estimated.split(":");
@@ -107,7 +103,7 @@ public class TimeclockService extends Service {
 	}
 	
 	private void showNotification(long node_id) {		
-		this.notification = new Notification(R.drawable.icon, node.getName(),
+		this.notification = new Notification(R.drawable.icon, node.name,
 				System.currentTimeMillis());
 		
 		PendingIntent contentIntent = PendingIntent.getActivity(this, 1,
@@ -122,12 +118,11 @@ public class TimeclockService extends Service {
 		notification.contentView.setImageViewResource(R.id.timeclock_notification_icon,
 				R.drawable.icon);
 		notification.contentView.setTextViewText(R.id.timeclock_notification_text,
-				node.getName());
+				node.name);
 		
 		updateTime();
 
 		mNM.notify(notificationID, notification);
-		node.close();
 	}
 	
 	private void setUpdateAlarm() {
@@ -227,8 +222,6 @@ public class TimeclockService extends Service {
 	public void cancelNotification() {
 		unsetAlarms();
 		mNM.cancel(notificationID);
-		if(node != null)
-			node.close();
 		this.stopSelf();
 	}
 

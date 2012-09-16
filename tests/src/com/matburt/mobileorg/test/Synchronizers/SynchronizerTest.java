@@ -2,25 +2,19 @@ package com.matburt.mobileorg.test.Synchronizers;
 
 import java.io.IOException;
 import java.security.cert.CertificateException;
-import java.util.HashMap;
 
 import javax.net.ssl.SSLHandshakeException;
 
 import android.content.ContentResolver;
 import android.content.Context;
-import android.database.Cursor;
 import android.test.ProviderTestCase2;
 
-import com.matburt.mobileorg.Parsing.OrgFileParser;
+import com.matburt.mobileorg.OrgData.OrgDatabase;
+import com.matburt.mobileorg.OrgData.OrgEdit;
+import com.matburt.mobileorg.OrgData.OrgFile;
+import com.matburt.mobileorg.OrgData.OrgNode;
+import com.matburt.mobileorg.OrgData.OrgProvider;
 import com.matburt.mobileorg.Synchronizers.Synchronizer;
-import com.matburt.mobileorg.provider.OrgContract.OrgData;
-import com.matburt.mobileorg.provider.OrgDatabase;
-import com.matburt.mobileorg.provider.OrgEdit;
-import com.matburt.mobileorg.provider.OrgFile;
-import com.matburt.mobileorg.provider.OrgNode;
-import com.matburt.mobileorg.provider.OrgProvider;
-import com.matburt.mobileorg.provider.OrgProviderUtil;
-import com.matburt.mobileorg.provider.OrgContract.Files;
 import com.matburt.mobileorg.test.util.OrgTestFiles.SimpleOrgFiles;
 
 public class SynchronizerTest extends ProviderTestCase2<OrgProvider> {
@@ -121,7 +115,7 @@ public class SynchronizerTest extends ProviderTestCase2<OrgProvider> {
 		node.setFilename(Synchronizer.CAPTURE_FILE, resolver);
 		node.write(resolver);
 		
-		OrgEdit edit = new OrgEdit();
+		OrgEdit edit = new OrgEdit(node, OrgEdit.TYPE.ADDHEADING, resolver);
 		edit.write(resolver);
 		synchronizer.pushCaptures();
 		
