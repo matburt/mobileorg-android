@@ -205,12 +205,7 @@ public class EditActivity extends SherlockFragmentActivity {
 				.setPositiveButton(R.string.yes,
 						new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog, int id) {
-								if(archiveToSibling)
-									node.archiveNodeToSibling(resolver);
-								else
-									node.archiveNode(resolver);
-								OrgUtils.announceUpdate(getBaseContext());
-								finish();
+								archiveNode(archiveToSibling);
 							}
 						})
 				.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
@@ -221,6 +216,17 @@ public class EditActivity extends SherlockFragmentActivity {
 		builder.create().show();
 	}
 
+	private void archiveNode(boolean archiveToSibling) {
+		if(hasEdits())
+			saveEdits();
+		
+		if(archiveToSibling)
+			node.archiveNodeToSibling(resolver);
+		else
+			node.archiveNode(resolver);
+		OrgUtils.announceUpdate(getBaseContext());
+		finish();
+	}
 	
 	private void runDeleteFileNode() {
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
