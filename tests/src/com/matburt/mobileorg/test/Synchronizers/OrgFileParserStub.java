@@ -5,9 +5,9 @@ import java.util.ArrayList;
 
 import android.content.ContentResolver;
 
-import com.matburt.mobileorg.Parsing.OrgFileParser;
-import com.matburt.mobileorg.provider.OrgDatabase;
-import com.matburt.mobileorg.provider.OrgFile;
+import com.matburt.mobileorg.OrgData.OrgDatabase;
+import com.matburt.mobileorg.OrgData.OrgFile;
+import com.matburt.mobileorg.OrgData.OrgFileParser;
 
 public class OrgFileParserStub extends OrgFileParser {
 	ArrayList<String> filesParsed = new ArrayList<String>();

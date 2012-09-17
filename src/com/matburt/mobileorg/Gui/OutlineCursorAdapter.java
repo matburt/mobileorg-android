@@ -3,8 +3,10 @@ package com.matburt.mobileorg.Gui;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.StaleDataException;
 import android.graphics.Color;
 import android.text.Spannable;
 import android.text.SpannableString;
@@ -18,23 +20,21 @@ import android.view.ViewGroup;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 
-import android.database.StaleDataException;
-
 import com.matburt.mobileorg.R;
-import com.matburt.mobileorg.Parsing.NodeWrapper;
-import com.matburt.mobileorg.Parsing.OrgDatabaseOld;
-import com.matburt.mobileorg.Parsing.OrgFileParser;
+import com.matburt.mobileorg.OrgData.OrgFileParser;
+import com.matburt.mobileorg.OrgData.OrgNode;
+import com.matburt.mobileorg.OrgData.OrgProviderUtil;
 
 public class OutlineCursorAdapter extends SimpleCursorAdapter {
 
-	private OrgDatabaseOld db;
 	private Cursor cursor;
+	private ContentResolver resolver;
 	
 	@SuppressWarnings("deprecation")
-	public OutlineCursorAdapter(Context context, Cursor cursor, OrgDatabaseOld db) {
+	public OutlineCursorAdapter(Context context, Cursor cursor, ContentResolver resolver) {
 		super(context, R.layout.outline_item, cursor, new String[] {}, new int[] {});
 		this.cursor = cursor;
-		this.db = db;
+		this.resolver = resolver;
 	}
 	
 	@Override
@@ -72,12 +72,12 @@ public class OutlineCursorAdapter extends SimpleCursorAdapter {
 			holder.tagsLayout = (TextView) v.findViewById(R.id.tagsLayout);
 		}
 
-		NodeWrapper node = new NodeWrapper(c, db);
+		OrgNode node = new OrgNode(c);
 
-		String todo = node.getTodo();
-		String name = node.getName();
-		String priority = node.getPriority();
-		String tags = node.getTags();
+		String todo = node.todo;
+		String name = node.name;
+		String priority = node.priority;
+		String tags = node.tags;
 		
 		SpannableStringBuilder itemText = new SpannableStringBuilder(name);
 		
@@ -124,7 +124,7 @@ public class OutlineCursorAdapter extends SimpleCursorAdapter {
 		if(TextUtils.isEmpty(todo) == false) {
 			Spannable todoSpan = new SpannableString(todo + " ");
 			
-			if(db.isTodoActive(todo))
+			if(OrgProviderUtil.isTodoActive(todo, resolver))
 				todoSpan.setSpan(new ForegroundColorSpan(Color.RED), 0,
 						todo.length(), 0);
 			else
