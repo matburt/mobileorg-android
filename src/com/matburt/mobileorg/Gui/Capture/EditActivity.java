@@ -293,7 +293,14 @@ public class EditActivity extends SherlockFragmentActivity {
 	}
 	
 	public boolean hasEdits() {
-		return false;
+		OrgNode newNode = getEditedNode();
+		OrgNode clonedNode = new OrgNode(this.node.id, resolver);
+		int numberOfEdits = clonedNode.generateApplyEditNodes(newNode, resolver).size();
+		
+		if(numberOfEdits > 0)
+			return true;
+		else
+			return false;
 	}
 	
 	
@@ -315,7 +322,7 @@ public class EditActivity extends SherlockFragmentActivity {
 			}
 		}
 		else if (this.actionMode.equals(ACTIONMODE_EDIT)) {
-			this.node.generateAndApplyEdits(newNode, resolver);
+			this.node.generateApplyWriteEdits(newNode, resolver);
 			this.node.updateAllNodes(resolver);
 		}
 		

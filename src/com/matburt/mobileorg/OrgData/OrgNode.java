@@ -392,8 +392,8 @@ public class OrgNode {
 	}
 	
 	
-	public void generateAndApplyEdits(OrgNode newNode, ContentResolver resolver) {
-		ArrayList<OrgEdit> generateEditNodes = generateEditNodes(newNode, resolver);
+	public void generateApplyWriteEdits(OrgNode newNode, ContentResolver resolver) {
+		ArrayList<OrgEdit> generateEditNodes = generateApplyEditNodes(newNode, resolver);
 		boolean generateEdits = !getFilename(resolver).equals(FileUtils.CAPTURE_FILE);
 				
 		if(generateEdits)
@@ -401,7 +401,7 @@ public class OrgNode {
 				edit.write(resolver);
 	}
 	
-	public ArrayList<OrgEdit> generateEditNodes(OrgNode newNode, ContentResolver resolver) {
+	public ArrayList<OrgEdit> generateApplyEditNodes(OrgNode newNode, ContentResolver resolver) {
 		ArrayList<OrgEdit> edits = new ArrayList<OrgEdit>();
 
 		if (!name.equals(newNode.name)) {

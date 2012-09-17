@@ -59,7 +59,7 @@ public class OrgEditTest extends ProviderTestCase2<OrgProvider> {
 		editedNode.todo += "OO";
 		final int numberOfEdits = 2;
 		
-		ArrayList<OrgEdit> generatedEdits = node.generateEditNodes(editedNode,
+		ArrayList<OrgEdit> generatedEdits = node.generateApplyEditNodes(editedNode,
 				resolver);
 		assertEquals(numberOfEdits, generatedEdits.size());
 	}
