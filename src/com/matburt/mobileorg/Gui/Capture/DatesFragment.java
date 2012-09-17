@@ -29,6 +29,7 @@ public class DatesFragment extends SherlockFragment {
 	private DateTableRow deadlineEntry = null;
 	private DateTableRow timestampEntry = null;
 	
+	private boolean isModifiable = true;
 	
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -50,6 +51,8 @@ public class DatesFragment extends SherlockFragment {
 		else
 			setupDates(node);
 		
+		if(editActivity.isNodeModifiable() == false)
+			setUnmodifable();
 		editActivity.invalidateOptionsMenu();
 	}
 
@@ -82,6 +85,17 @@ public class DatesFragment extends SherlockFragment {
 		this.scheduledEntry = setupDate(node.getOrgNodePayload().getScheduled(), "SCHEDULED", scheduledRemoveListener);
 		this.deadlineEntry = setupDate(node.getOrgNodePayload().getDeadline(), "DEADLINE", deadlineRemoveListener);
 		this.timestampEntry = setupDate(node.getOrgNodePayload().getTimestamp(), "", timestampRemoveListener);
+	}
+	
+	public void setUnmodifable() {
+		if(this.scheduledEntry != null)
+			this.scheduledEntry.setUnmodifiable();
+		if(this.timestampEntry != null)
+			this.timestampEntry.setUnmodifiable();
+		if(this.deadlineEntry != null)
+			this.deadlineEntry.setUnmodifiable();
+		
+		this.isModifiable = false;
 	}
 	
 	private DateTableRow setupDate(String date, String title, View.OnClickListener removeListener) {
@@ -123,20 +137,20 @@ public class DatesFragment extends SherlockFragment {
 	@Override
 	public void onPrepareOptionsMenu(Menu menu) {
 		super.onPrepareOptionsMenu(menu);
-		if(this.deadlineEntry != null)
-			menu.findItem(R.id.menu_nodeedit_deadline).setVisible(false);
-		else
+		if(this.deadlineEntry == null && isModifiable)
 			menu.findItem(R.id.menu_nodeedit_deadline).setVisible(true);
-		
-		if(this.scheduledEntry != null)
-			menu.findItem(R.id.menu_nodeedit_scheduled).setVisible(false);
 		else
+			menu.findItem(R.id.menu_nodeedit_deadline).setVisible(false);
+		
+		if(this.scheduledEntry == null && isModifiable)
 			menu.findItem(R.id.menu_nodeedit_scheduled).setVisible(true);
-		
-		if(this.timestampEntry != null)
-			menu.findItem(R.id.menu_nodeedit_timestamp).setVisible(false);
 		else
+			menu.findItem(R.id.menu_nodeedit_scheduled).setVisible(false);
+		
+		if(this.timestampEntry == null && isModifiable)
 			menu.findItem(R.id.menu_nodeedit_timestamp).setVisible(true);
+		else
+			menu.findItem(R.id.menu_nodeedit_timestamp).setVisible(false);
 	}
 
 

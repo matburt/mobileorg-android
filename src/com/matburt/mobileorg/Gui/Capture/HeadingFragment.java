@@ -54,6 +54,9 @@ public class HeadingFragment extends SherlockFragment {
 			restoreInstanceState(savedInstanceState);
 		else
 			updateDisplay(this.node);
+		
+		if(activity.isNodeModifiable() == false)
+			setUnmodifiable();
 	}
 
 	@Override
@@ -73,12 +76,6 @@ public class HeadingFragment extends SherlockFragment {
 		}
 	}
 	
-	@Override
-	public void onStart() {
-		super.onStart();
-
-	}
-	
 	public void updateDisplay(OrgNode node) {
 		if(node != null)
 			updateDisplay(node.name, node.todo, node.priority);
@@ -92,6 +89,12 @@ public class HeadingFragment extends SherlockFragment {
 				todo);
 		OrgUtils.setupSpinnerWithEmpty(priorityView, OrgProviderUtil.getPriorities(resolver),
 				priority);
+	}
+	
+	public void setUnmodifiable() {
+		this.titleView.setEnabled(false);
+		this.priorityView.setEnabled(false);
+		this.todoStateView.setEnabled(false);
 	}
 	
 	public boolean hasEdits() {

@@ -28,6 +28,7 @@ public class DateTableRow extends TableRow {
 	private Button dateButton;
 	private Button startTimeButton;
 	private Button endTimeButton;
+	private Button removeButton;
 
 	private OrgTimeDate timeDateContainer;
 	
@@ -73,6 +74,13 @@ public class DateTableRow extends TableRow {
 				|| timeDateContainer.endMinute != -1)
 			updateEndTime();
 	}
+	
+	public void setUnmodifiable() {
+		this.dateButton.setEnabled(false);
+		this.startTimeButton.setEnabled(false);
+		this.endTimeButton.setEnabled(false);
+		this.removeButton.setVisibility(View.GONE);
+	}
 
 	private void init(Context context,
 			final DatesFragment parentFragment, TableLayout parentTable,
@@ -84,7 +92,7 @@ public class DateTableRow extends TableRow {
 				R.layout.edit_daterow, this);
 		parentTable.addView(row);
 
-		Button removeButton = (Button) findViewById(R.id.dateRemove);
+		removeButton = (Button) findViewById(R.id.dateRemove);
 		removeButton.setOnClickListener(removeListener);
 
 		ImageView imageView = (ImageView) findViewById(R.id.dateImage);

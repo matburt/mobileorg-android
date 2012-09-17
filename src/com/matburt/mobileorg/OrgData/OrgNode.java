@@ -232,6 +232,18 @@ public class OrgNode {
 	}
 	
 	public boolean isNodeEditable(ContentResolver resolver) {
+		if(id < 0) // Node is not in database
+			return true;
+		
+		if(id >= 0 && parentId == -1) // Top-level node
+			return false;
+		
+		try {
+			OrgFile agendaFile = new OrgFile(OrgFile.AGENDA_FILE, resolver);
+			if (agendaFile != null && agendaFile.nodeId == parentId) // Second level in agendas file
+				return false;
+		} catch (IllegalArgumentException e) {}
+
 		return true;
 	}
 	

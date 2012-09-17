@@ -68,7 +68,11 @@ public class PayloadFragment extends ViewFragment {
 			OrgNode node = editActivity.getOrgNode();
 			this.payload = node.getOrgNodePayload();
 		}
+		
 		switchToView();
+		
+		if(editActivity.isNodeModifiable() == false)
+			setUnmodifiable();
 	}
 	
 	@Override
@@ -82,6 +86,10 @@ public class PayloadFragment extends ViewFragment {
 			String payloadString = savedInstanceState.getString(PAYLOAD);
 			this.payload = new OrgNodePayload(payloadString);
 		}
+	}
+	
+	public void setUnmodifiable() {
+		this.editButton.setVisibility(View.GONE);
 	}
 
 	public void setPayload(String payload) {

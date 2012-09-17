@@ -27,6 +27,8 @@ public class TagsFragment extends SherlockFragment {
 	private TableLayout tagsView;
 	ArrayList<TagTableRow> tagEntries = new ArrayList<TagTableRow>();
 
+	private boolean isModifiable = true;
+
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
@@ -41,12 +43,19 @@ public class TagsFragment extends SherlockFragment {
 		super.onActivityCreated(savedInstanceState);
 		this.resolver = getActivity().getContentResolver();
 		
+		EditActivity activity = (EditActivity) getActivity();
+		
 		if(savedInstanceState != null)
 			restoreFromBundle(savedInstanceState);
 		else {
-			OrgNode node = ((EditActivity) getActivity()).getOrgNode();
+			OrgNode node = activity.getOrgNode();
 			setupTagEntries(node.getTags());
 		}
+		
+		if(activity.isNodeModifiable() == false)
+			setUnmodifiable();
+		
+		activity.invalidateOptionsMenu();
 	}
 	
 	public void restoreFromBundle(Bundle savedInstanceState) {
@@ -81,6 +90,13 @@ public class TagsFragment extends SherlockFragment {
 		}
 	}
 	
+	public void setUnmodifiable() {
+		for(TagTableRow entry: tagEntries)
+			entry.setUnmodifiable();
+		
+		this.isModifiable = false;
+	}
+	
 	public void addTagEntry(String selectedTag) {
 		LayoutInflater inflater = LayoutInflater.from(getActivity());
 		TagTableRow tagsTableEntry =
@@ -111,6 +127,15 @@ public class TagsFragment extends SherlockFragment {
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
 		inflater.inflate(R.menu.edit_tags, menu);
 		super.onCreateOptionsMenu(menu, inflater);
+	}
+
+	@Override
+	public void onPrepareOptionsMenu(Menu menu) {
+		super.onPrepareOptionsMenu(menu);
+		if(this.isModifiable)
+			menu.findItem(R.id.menu_edit_addtag).setVisible(true);
+		else
+			menu.findItem(R.id.menu_edit_addtag).setVisible(false);
 	}
 
 	@Override

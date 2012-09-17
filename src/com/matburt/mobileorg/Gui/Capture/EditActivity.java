@@ -87,12 +87,15 @@ public class EditActivity extends SherlockFragmentActivity {
 		return this.node;
 	}
 	
+	public boolean isNodeModifiable() {
+		return getOrgNode().isNodeEditable(resolver);
+	}
 	
     @Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getSupportMenuInflater().inflate(R.menu.edit, menu);
 
-		if (this.node != null && this.node.id >= 0) {
+		if (this.node != null && this.node.id >= 0 && isNodeModifiable()) {
 			SubMenu subMenu = menu.addSubMenu(R.string.menu_advanced);
 			MenuItem item = subMenu.add(R.string.menu_advanced,
 					R.string.menu_delete, 0, R.string.menu_delete);
