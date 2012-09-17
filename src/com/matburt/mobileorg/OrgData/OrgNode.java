@@ -113,12 +113,10 @@ public class OrgNode {
 	public OrgNode findOriginalNode(ContentResolver resolver) {
 		String nodeId = getNodeId(resolver);
 		if (nodeId.startsWith("olp:") == false) { // Update all nodes that have this :ID:
-			String nodeIdQuery = "'%:ID: " + nodeId + "%'";
-			Log.d("MobileOrg", "Search string " + nodeIdQuery);
-			Cursor query = resolver.query(OrgData.CONTENT_URI, OrgData.DEFAULT_COLUMNS,
-					OrgData.PAYLOAD + " LIKE ?", new String[] { nodeIdQuery },
+			String nodeIdQuery = OrgData.PAYLOAD + " LIKE '%:ID:%" + nodeId + "%'";
+			Cursor query = resolver.query(OrgData.CONTENT_URI,
+					OrgData.DEFAULT_COLUMNS, nodeIdQuery, null,
 					null);
-			Log.d("MobileOrg", "Got back cursor with " + query.getCount());
 			try {
 				OrgNode node = new OrgNode(query);
 				query.close();
@@ -127,8 +125,7 @@ public class OrgNode {
 				if (query != null)
 					query.close();
 			}
-		} else
-			Log.d("MobileOrg", "Couldn't find id for " + getNodeId(resolver));
+		}
 		
 		return this;
 	}

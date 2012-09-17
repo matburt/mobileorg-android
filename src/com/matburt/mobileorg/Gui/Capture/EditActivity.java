@@ -61,7 +61,8 @@ public class EditActivity extends SherlockFragmentActivity {
 	
 	public OrgNode getParentOrgNode() {
 		if (this.actionMode.equals(ACTIONMODE_EDIT)) {
-			OrgNode parent = this.node.getParent(resolver);
+			OrgNode node = this.node.findOriginalNode(resolver);
+			OrgNode parent = node.getParent(resolver);
 
 			if (parent == null) {
 				parent = new OrgNode();
@@ -95,6 +96,9 @@ public class EditActivity extends SherlockFragmentActivity {
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getSupportMenuInflater().inflate(R.menu.edit, menu);
 
+		if(isNodeModifiable() == false)
+			menu.findItem(R.id.nodeedit_save).setVisible(false);
+		
 		if (this.node != null && this.node.id >= 0 && isNodeModifiable()) {
 			SubMenu subMenu = menu.addSubMenu(R.string.menu_advanced);
 			MenuItem item = subMenu.add(R.string.menu_advanced,

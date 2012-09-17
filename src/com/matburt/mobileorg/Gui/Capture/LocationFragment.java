@@ -85,7 +85,7 @@ public class LocationFragment extends SherlockFragment {
 	}
 	
 	private void setupLocation() {
-		OrgNode currentNode = this.node.findOriginalNode(resolver);
+		OrgNode currentNode = this.node;
 		
 		while(currentNode != null) {
 			OrgNode spinnerNode = currentNode.getParent(resolver);
