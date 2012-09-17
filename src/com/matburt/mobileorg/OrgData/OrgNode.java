@@ -100,14 +100,24 @@ public class OrgNode {
 	}
 	
 	public void updateAllNodes(ContentResolver resolver) {
-		String nodeId = getNodeId(resolver);
+		updateNode(resolver);
 		
-		if(nodeId.startsWith("olp:")) {
-			resolver.update(OrgData.buildIdUri(id), getContentValues(), null, null);
-		} else { // Update all nodes that have this :ID:
+		String nodeId = getNodeId(resolver);
+		if (nodeId.startsWith("olp:") == false) { // Update all nodes that have this :ID:
 			String nodeIdQuery = "%" + nodeId + "%";
-			resolver.update(OrgData.CONTENT_URI, getContentValues(), OrgData.PAYLOAD + " LIKE ?", new String[]{nodeIdQuery});
+			resolver.update(OrgData.CONTENT_URI, getSimpleContentValues(),
+					OrgData.PAYLOAD + " LIKE ?", new String[] { nodeIdQuery });
 		}
+	}
+	
+	private ContentValues getSimpleContentValues() {
+		ContentValues values = new ContentValues();
+		values.put(OrgData.NAME, name);
+		values.put(OrgData.TODO, todo);
+		values.put(OrgData.PAYLOAD, payload);
+		values.put(OrgData.PRIORITY, priority);
+		values.put(OrgData.TAGS, tags);
+		return values;
 	}
 	
 	private ContentValues getContentValues() {

@@ -256,7 +256,7 @@ public class EditActivity extends SherlockFragmentActivity {
 		}
 		else if (this.actionMode.equals(ACTIONMODE_EDIT)) {
 			this.node.generateAndApplyEdits(newNode, resolver);
-			this.node.write(resolver);
+			this.node.updateAllNodes(resolver);
 		}
 		
 		announceUpdate();
