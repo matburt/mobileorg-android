@@ -112,8 +112,10 @@ public class OrgNode {
 	}
 	
 	public OrgNode findOriginalNode(ContentResolver resolver) {
-		if(getFilename(resolver).equals(OrgFile.AGENDA_FILE) == false)
-			return this;
+		try {
+			if(getFilename(resolver).equals(OrgFile.AGENDA_FILE) == false)
+				return this;
+		} catch (IllegalArgumentException e) {}
 		
 		String nodeId = getNodeId(resolver);
 		if (nodeId.startsWith("olp:") == false) { // Update all nodes that have this :ID:
@@ -420,7 +422,7 @@ public class OrgNode {
 			edits.add(new OrgEdit(this, OrgEdit.TYPE.BODY, newNode.getPayload(), resolver));
 			setPayload(newNode.getPayload());
 		}
-		if (!tags.equals(newNode.tags)) {
+		if (tags != null && !tags.equals(newNode.tags)) {
 			// TODO Use node.getTagsWithoutInheritet() instead
 			edits.add(new OrgEdit(this, OrgEdit.TYPE.TAGS, newNode.tags, resolver));
 			this.tags = newNode.tags;

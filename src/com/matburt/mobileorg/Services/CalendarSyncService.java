@@ -20,7 +20,7 @@ import android.text.format.Time;
 
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.OrgData.OrgNode;
-import com.matburt.mobileorg.OrgData.OrgNodePayload.DateEntry;
+import com.matburt.mobileorg.OrgData.OrgNodeDate;
 import com.matburt.mobileorg.OrgData.OrgProviderUtil;
 
 public class CalendarSyncService {
@@ -129,7 +129,7 @@ public class CalendarSyncService {
 			throws IllegalArgumentException {
 		boolean isActive = OrgProviderUtil.isTodoActive(node.todo, resolver);
 
-		for (DateEntry date : node.getOrgNodePayload().getDates()) {
+		for (OrgNodeDate date : node.getOrgNodePayload().getDates()) {
 			insertEntry(node.name, isActive, node.getCleanedPayload(),
 					Long.toString(node.id), date, filename,
 					node.getOrgNodePayload().getProperty("LOCATION"));
@@ -138,7 +138,7 @@ public class CalendarSyncService {
 
 	// TODO Speed up using bulkInserts
 	private String insertEntry(String name, boolean isTodoActive, String payload, 
-			String orgID, DateEntry date, String filename, String location) throws IllegalArgumentException {
+			String orgID, OrgNodeDate date, String filename, String location) throws IllegalArgumentException {
 		
 		if (sharedPreferences.getBoolean("calendarShowDone", true) == false
 				&& isTodoActive == false)

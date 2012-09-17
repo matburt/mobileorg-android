@@ -17,6 +17,7 @@ import com.actionbarsherlock.view.MenuItem;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Gui.Capture.DateTableRow.OrgTimeDate;
 import com.matburt.mobileorg.OrgData.OrgNode;
+import com.matburt.mobileorg.OrgData.OrgNodePayload;
 
 public class DatesFragment extends SherlockFragment {
 	private final String DATES_SCHEDULED = "scheduled";
@@ -24,12 +25,13 @@ public class DatesFragment extends SherlockFragment {
 	private final String DATES_TIMESTAMP = "timestamp";
 	
 	private TableLayout datesView;
+	private boolean isModifiable = true;
 	
 	private DateTableRow scheduledEntry = null;
 	private DateTableRow deadlineEntry = null;
 	private DateTableRow timestampEntry = null;
-	
-	private boolean isModifiable = true;
+
+	private OrgNodePayload payload;
 	
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -49,7 +51,7 @@ public class DatesFragment extends SherlockFragment {
 		if(savedInstanceState != null)
 			restoreInstanceState(savedInstanceState);
 		else
-			setupDates(node);
+			setupDates(node.getOrgNodePayload());
 		
 		setModifable(editActivity.isNodeModifiable());
 		editActivity.invalidateOptionsMenu();
@@ -80,10 +82,11 @@ public class DatesFragment extends SherlockFragment {
 		}
 	}
 
-	private void setupDates(OrgNode node) {
-		this.scheduledEntry = setupDate(node.getOrgNodePayload().getScheduled(), "SCHEDULED", scheduledRemoveListener);
-		this.deadlineEntry = setupDate(node.getOrgNodePayload().getDeadline(), "DEADLINE", deadlineRemoveListener);
-		this.timestampEntry = setupDate(node.getOrgNodePayload().getTimestamp(), "", timestampRemoveListener);
+	public void setupDates(OrgNodePayload payload) {
+		this.payload = payload;
+		this.scheduledEntry = setupDate(payload.getScheduled(), "SCHEDULED", scheduledRemoveListener);
+		this.deadlineEntry = setupDate(payload.getDeadline(), "DEADLINE", deadlineRemoveListener);
+		this.timestampEntry = setupDate(payload.getTimestamp(), "", timestampRemoveListener);
 	}
 	
 	public void setModifable(boolean enabled) {
@@ -182,6 +185,7 @@ public class DatesFragment extends SherlockFragment {
 		DateTableRow dateEntry = new DateTableRow(getActivity(), this, datesView, scheduledRemoveListener,
 				"SCHEDULED");
 		this.scheduledEntry = dateEntry;
+		this.payload.add("haha");
 	}
 	
 	private void addDateDeadline() {
