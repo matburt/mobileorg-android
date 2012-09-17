@@ -291,27 +291,6 @@ public class OutlineActivity extends SherlockActivity
 		intent.putExtra(OutlineActivity.NODE_ID, id);
 		startActivity(intent);
 	}
-	
-	private void runDeleteFileNode(final long node_id) {
-		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setMessage(R.string.outline_delete_prompt)
-				.setCancelable(false)
-				.setPositiveButton(R.string.yes,
-						new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int id) {
-								OrgFile file = new OrgFile(node_id, resolver);
-								file.removeFile();
-								refreshDisplay();
-							}
-						})
-				.setNegativeButton(R.string.no,
-						new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int id) {
-								dialog.cancel();
-							}
-						});
-		builder.create().show();
-	}
 
 	private boolean runSearch() {
 		return onSearchRequested();

@@ -91,7 +91,7 @@ public class SettingsActivity extends PreferenceActivity implements
 								public void onClick(DialogInterface dialog,
 										int which) {
 									OrgProviderUtil.clearDB(getContentResolver());
-									OrgUtils.announceSyncDone(getApplicationContext());
+									OrgUtils.announceUpdate(getApplicationContext());
 									if (isCalendarEnabled())
 										getCalendarSyncService()
 												.deleteAllEntries(

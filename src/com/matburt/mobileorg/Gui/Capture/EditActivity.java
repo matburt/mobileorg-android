@@ -13,9 +13,9 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.view.SubMenu;
 import com.matburt.mobileorg.R;
+import com.matburt.mobileorg.OrgData.OrgFile;
 import com.matburt.mobileorg.OrgData.OrgNode;
 import com.matburt.mobileorg.Services.TimeclockService;
-import com.matburt.mobileorg.Synchronizers.Synchronizer;
 import com.matburt.mobileorg.util.OrgUtils;
 
 public class EditActivity extends SherlockFragmentActivity {
@@ -109,18 +109,28 @@ public class EditActivity extends SherlockFragmentActivity {
 			SubMenu subMenu = menu.addSubMenu(R.string.menu_advanced);
 			MenuItem item = subMenu.add(R.string.menu_advanced,
 					R.string.menu_delete, 0, R.string.menu_delete);
-			item.setIcon(R.drawable.ic_input_delete);
+			item.setIcon(R.drawable.ic_menu_delete);
+
+			item = subMenu.add(R.string.menu_advanced, R.string.menu_archive,
+					1, R.string.menu_archive);
+			item.setIcon(R.drawable.ic_menu_archive);
+			
+			item = subMenu.add(R.string.menu_advanced, R.string.menu_archive_tosibling,
+					1, R.string.menu_archive_tosibling);
+			item.setIcon(R.drawable.ic_menu_archive);
 
 			item = subMenu.add(R.string.menu_advanced, R.string.menu_clockin,
 					1, R.string.menu_clockin);
 			item.setIcon(R.drawable.ic_menu_today);
-			
-			item = subMenu.add(R.string.menu_advanced, R.string.menu_archive,
-					1, R.string.menu_archive);
-			
-			item = subMenu.add(R.string.menu_advanced, R.string.menu_archive_tosibling,
-					1, R.string.menu_archive_tosibling);
 
+			MenuItem subMenuItem = subMenu.getItem();
+			subMenuItem.setIcon(R.drawable.ic_menu_moreoverflow);
+			subMenuItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+		} else if(this.node != null && this.node.isFilenode(getContentResolver())) {
+			SubMenu subMenu = menu.addSubMenu(R.string.menu_advanced);
+			MenuItem item = subMenu.add(R.string.menu_advanced,
+					R.string.menu_delete_file, 0, R.string.menu_delete_file);
+			item.setIcon(R.drawable.ic_menu_delete);
 			MenuItem subMenuItem = subMenu.getItem();
 			subMenuItem.setIcon(R.drawable.ic_menu_moreoverflow);
 			subMenuItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
@@ -150,16 +160,20 @@ public class EditActivity extends SherlockFragmentActivity {
 			runDeleteNode();
 			return true;
 			
+		case R.string.menu_delete_file:
+			runDeleteFileNode();
+			return true;
+			
 		case R.string.menu_clockin:
 			runTimeClockingService();
 			return true;
 			
 		case R.string.menu_archive:
-			runArchiveNode("archive");
+			runArchiveNode(false);
 			return true;
 			
 		case R.string.menu_archive_tosibling:
-			runArchiveNode("archive-sibling");
+			runArchiveNode(true);
 			return true;		
 		}
 		return false;
@@ -184,17 +198,18 @@ public class EditActivity extends SherlockFragmentActivity {
 		builder.create().show();
 	}
 	
-	private void runArchiveNode(final String editString) {	
+	private void runArchiveNode(final boolean archiveToSibling) {	
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		builder.setMessage(R.string.outline_archive_prompt)
 				.setCancelable(false)
 				.setPositiveButton(R.string.yes,
 						new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog, int id) {
-								if(editString.equals("archive"))
-									node.archiveNode(resolver);
-								else
+								if(archiveToSibling)
 									node.archiveNodeToSibling(resolver);
+								else
+									node.archiveNode(resolver);
+								OrgUtils.announceUpdate(getBaseContext());
 								finish();
 							}
 						})
@@ -206,6 +221,35 @@ public class EditActivity extends SherlockFragmentActivity {
 		builder.create().show();
 	}
 
+	
+	private void runDeleteFileNode() {
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setMessage(R.string.outline_delete_prompt)
+				.setCancelable(false)
+				.setPositiveButton(R.string.yes,
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int id) {
+								deleteFileNode();
+							}
+						})
+				.setNegativeButton(R.string.no,
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int id) {
+								dialog.cancel();
+							}
+						});
+		builder.create().show();
+	}
+	
+	private void deleteFileNode() {
+		try {
+			OrgFile file = new OrgFile(node.fileId, resolver);
+			file.removeFile();
+			OrgUtils.announceUpdate(this);
+			finish();
+		} catch (IllegalArgumentException e) {}
+	}
+	
 	private void runTimeClockingService() {
 		Intent intent = new Intent(EditActivity.this, TimeclockService.class);
 		intent.putExtra(TimeclockService.NODE_ID, node.id);
@@ -269,7 +313,7 @@ public class EditActivity extends SherlockFragmentActivity {
 			this.node.updateAllNodes(resolver);
 		}
 		
-		announceUpdate();
+		OrgUtils.announceUpdate(this);
 	}
 	
 	public OrgNode getEditedNode() {
@@ -298,12 +342,4 @@ public class EditActivity extends SherlockFragmentActivity {
 
 		return newNode;
 	}
-	
-	private void announceUpdate() {
-		Intent intent = new Intent(Synchronizer.SYNC_UPDATE);
-		intent.putExtra(Synchronizer.SYNC_DONE, true);
-		intent.putExtra("showToast", false);
-		sendBroadcast(intent);
-	}
-
 }

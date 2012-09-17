@@ -17,7 +17,7 @@
     <string name="menu_timestamp">Add Timestamp</string>
     <string name="contextmenu_edit">Edit Node</string>
     <string name="contextmenu_view">View Node</string>
-    <string name="contextmenu_delete">Delete File</string>
+    <string name="menu_delete_file">Delete File</string>
     <string name="contextmenu_node_delete">Delete Node</string>
     <string name="menu_delete">Delete</string>
     <string name="menu_advanced">Advanced</string>

@@ -15,7 +15,8 @@ import com.matburt.mobileorg.OrgData.OrgContract.OrgData;
 import com.matburt.mobileorg.util.FileUtils;
 
 public class OrgNode {
-
+	public static final String ARCHIVE_NODE = "Archive";
+	
 	public long id = -1;
 	public long parentId = -1;
 	public long fileId = -1;
@@ -269,6 +270,16 @@ public class OrgNode {
 			return parent.getChild(name, resolver);
 		else
 			return null;
+	}
+	
+	public boolean isFilenode(ContentResolver resolver) {
+		try {
+			OrgFile file = new OrgFile(fileId, resolver);
+			if(file.nodeId == this.id)
+				return true;
+		} catch (IllegalArgumentException e) {}
+		
+		return false;
 	}
 	
 	public boolean isNodeEditable(ContentResolver resolver) {
@@ -533,34 +544,37 @@ public class OrgNode {
 		resolver.delete(OrgData.buildIdUri(id), null, null);
 	}
 	
-	public void archiveNode(ContentResolver resolver) {
+	public OrgEdit archiveNode(ContentResolver resolver) {
 		OrgEdit edit = new OrgEdit(this, OrgEdit.TYPE.ARCHIVE, resolver);
 		edit.write(resolver);
 		resolver.delete(OrgData.buildIdUri(id), null, null);
+		return edit;
 	}
 	
-	public void archiveNodeToSibling(ContentResolver resolver) {
+	public OrgEdit archiveNodeToSibling(ContentResolver resolver) {
 		OrgEdit edit = new OrgEdit(this, OrgEdit.TYPE.ARCHIVE_SIBLING, resolver);
 		edit.write(resolver);
-		
-		// TODO Finish
-//		OrgNode parent = node.getParent();
-//		if(parent != null) {
-//			NodeWrapper child = parent.getChild("Archive");
-//			if(child != null) {
-//				node.setParent(child.getId());
-//				child.close();
-//			} else {
-//				OrgNode archiveNode = new OrgNode();
-//				archiveNode.name = "Archive";
-//				archiveNode.parentId = parent.id;
-//				archiveNode.fileId = parent.fileId;
-//				long child_id = node.addNode(resolver);
-//				node.setParent(child_id);
-//			}
-//		} else {
-//			resolver.delete(OrgData.buildIdUri(node.id), null, null);
-//		}
+
+		OrgNode parent = getParent(resolver);
+		if (parent != null) {
+			OrgNode archiveNode = parent.getChild(ARCHIVE_NODE, resolver);
+			
+			if (archiveNode == null) {
+				archiveNode = new OrgNode();
+				archiveNode.name = ARCHIVE_NODE;
+				archiveNode.parentId = parent.id;
+				archiveNode.fileId = parent.fileId;
+				archiveNode.write(resolver);
+			}
+			
+			this.parentId = archiveNode.id;
+			this.write(resolver);
+		} else
+			throw new IllegalArgumentException(
+					"Could not archive correctly, didn't find parent of node "
+							+ this.name);
+
+		return edit;
 	}
 	
 	public void addLogbook(long startTime, long endTime, String elapsedTime, ContentResolver resolver) {

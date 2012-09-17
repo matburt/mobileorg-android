@@ -94,7 +94,7 @@ public class OrgUtils {
 		return file.nodeId;
 	}
 	
-	public static void announceSyncDone(Context context) {
+	public static void announceUpdate(Context context) {
 		Intent intent = new Intent(Synchronizer.SYNC_UPDATE);
 		intent.putExtra(Synchronizer.SYNC_DONE, true);
 		context.sendBroadcast(intent);

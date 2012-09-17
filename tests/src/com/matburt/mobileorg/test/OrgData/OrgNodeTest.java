@@ -6,9 +6,11 @@ import android.database.Cursor;
 import android.test.ProviderTestCase2;
 import android.test.mock.MockContentResolver;
 
+import com.matburt.mobileorg.OrgData.OrgEdit;
 import com.matburt.mobileorg.OrgData.OrgFile;
 import com.matburt.mobileorg.OrgData.OrgNode;
 import com.matburt.mobileorg.OrgData.OrgProvider;
+import com.matburt.mobileorg.OrgData.OrgContract.Edits;
 import com.matburt.mobileorg.OrgData.OrgContract.OrgData;
 import com.matburt.mobileorg.test.util.OrgTestUtils;
 
@@ -135,13 +137,66 @@ public class OrgNodeTest extends ProviderTestCase2<OrgProvider> {
 		ArrayList<OrgNode> children = node.getChildren(resolver);
 		assertEquals(2, children.size());
 	}
-	
-			
-	public void testConstructOlpIdWithOrgId() throws Exception {
-		fail("Not implemented");
+
+	public void testArchiveNode() {
+		OrgNode childNode = OrgTestUtils.setupParentScenario(resolver);
+		childNode.archiveNode(resolver);
+
+		try {
+			new OrgNode(childNode.id, resolver);
+			fail("Node should not exist");
+		} catch (IllegalArgumentException e) {}
+
+		OrgTestUtils.cleanupParentScenario(resolver);
 	}
 	
-	public void testConstructOlpIdWithoutOrgId() throws Exception {
-		fail("Not implemented");
+	public void testArchiveNodeGeneratesEdit() {
+		OrgNode node = OrgTestUtils.getDefaultOrgNode();
+		node.write(resolver);
+		
+		Cursor editCursor = resolver.query(Edits.CONTENT_URI, Edits.DEFAULT_COLUMNS, null, null, null);
+		int baseOfEdits = editCursor.getCount();
+		editCursor.close();
+		
+		OrgEdit edit = node.archiveNode(resolver);
+		edit.type.equals(OrgEdit.TYPE.ARCHIVE);
+		
+		Cursor editCursor2 = resolver.query(Edits.CONTENT_URI, Edits.DEFAULT_COLUMNS, null, null, null);
+		int numberOfEdits = editCursor2.getCount();
+		editCursor2.close();
+				
+		assertEquals(baseOfEdits + 1, numberOfEdits);
+	}
+	
+	public void testArchiveNodeToSibling() {
+		OrgNode childNode = OrgTestUtils.setupParentScenario(resolver);
+		OrgNode parent = childNode.getParent(resolver);
+		assertNotNull(parent);
+
+		childNode.archiveNodeToSibling(resolver);
+				
+		OrgNode archiveNode = parent.getChild(OrgNode.ARCHIVE_NODE, resolver);
+		assertNotNull(archiveNode);
+		
+		assertEquals(archiveNode.id, childNode.parentId);
+		assertEquals(archiveNode.fileId, childNode.fileId);
+	}
+	
+	public void testArchiveNodeToSiblingGeneratesEdit() {
+		OrgNode node = OrgTestUtils.setupParentScenario(resolver);
+		node.write(resolver);
+		
+		Cursor editCursor = resolver.query(Edits.CONTENT_URI, Edits.DEFAULT_COLUMNS, null, null, null);
+		int baseOfEdits = editCursor.getCount();
+		editCursor.close();
+		
+		OrgEdit edit = node.archiveNodeToSibling(resolver);
+		edit.type.equals(OrgEdit.TYPE.ARCHIVE_SIBLING);
+		
+		Cursor editCursor2 = resolver.query(Edits.CONTENT_URI, Edits.DEFAULT_COLUMNS, null, null, null);
+		int numberOfEdits = editCursor2.getCount();
+		editCursor2.close();
+				
+		assertEquals(baseOfEdits + 1, numberOfEdits);
 	}
 }
