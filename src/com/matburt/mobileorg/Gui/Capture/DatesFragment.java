@@ -29,9 +29,11 @@ public class DatesFragment extends SherlockFragment {
 	private DateTableRow deadlineEntry = null;
 	private DateTableRow timestampEntry = null;
 	
+	
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
+		super.onCreateView(inflater, container, savedInstanceState);
 		setHasOptionsMenu(true);
 		this.datesView = new TableLayout(getActivity());
 		return datesView;
@@ -47,6 +49,8 @@ public class DatesFragment extends SherlockFragment {
 			restoreInstanceState(savedInstanceState);
 		else
 			setupDates(node);
+		
+		editActivity.invalidateOptionsMenu();
 	}
 
 	@Override
@@ -112,10 +116,10 @@ public class DatesFragment extends SherlockFragment {
 	
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-		super.onCreateOptionsMenu(menu, inflater);
 		inflater.inflate(R.menu.edit_dates, menu);
+		super.onCreateOptionsMenu(menu, inflater);
 	}
-
+	
 	@Override
 	public void onPrepareOptionsMenu(Menu menu) {
 		super.onPrepareOptionsMenu(menu);

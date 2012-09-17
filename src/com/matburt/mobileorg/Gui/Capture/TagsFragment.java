@@ -29,6 +29,7 @@ public class TagsFragment extends SherlockFragment {
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
+		super.onCreateView(inflater, container, savedInstanceState);
 		setHasOptionsMenu(true);
 		this.tagsView = new TableLayout(getActivity());
 		return tagsView;
@@ -111,8 +112,8 @@ public class TagsFragment extends SherlockFragment {
 	
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-		super.onCreateOptionsMenu(menu, inflater);
 		inflater.inflate(R.menu.edit_tags, menu);
+		super.onCreateOptionsMenu(menu, inflater);
 	}
 
 	@Override

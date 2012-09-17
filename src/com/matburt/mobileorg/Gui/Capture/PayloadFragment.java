@@ -30,6 +30,7 @@ public class PayloadFragment extends ViewFragment {
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
+		super.onCreateView(inflater, container, savedInstanceState);
 		this.payloadView = (RelativeLayout) inflater.inflate(
 				R.layout.edit_payload, container, false);
 		this.webView = (WebView) payloadView

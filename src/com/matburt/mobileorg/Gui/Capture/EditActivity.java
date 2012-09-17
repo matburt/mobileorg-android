@@ -10,7 +10,6 @@ import android.util.Log;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.view.SubMenu;
 import com.matburt.mobileorg.R;
@@ -39,6 +38,7 @@ public class EditActivity extends SherlockFragmentActivity {
 		this.resolver = getContentResolver();
 		
 		initState();
+		invalidateOptionsMenu();
 	}
 	
 	private void initState() {
@@ -87,17 +87,12 @@ public class EditActivity extends SherlockFragmentActivity {
 		return this.node;
 	}
 	
+	
     @Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-    	super.onCreateOptionsMenu(menu);
-    	
-		MenuInflater inflater = getSupportMenuInflater();
-	    inflater.inflate(R.menu.edit, menu);
-    	
-	    if(this.node == null)
-	    	return true;
-	    
-		if (this.node.id > -1) {
+		getSupportMenuInflater().inflate(R.menu.edit, menu);
+
+		if (this.node != null && this.node.id >= 0) {
 			SubMenu subMenu = menu.addSubMenu(R.string.menu_advanced);
 			MenuItem item = subMenu.add(R.string.menu_advanced,
 					R.string.menu_delete, 0, R.string.menu_delete);
@@ -118,8 +113,8 @@ public class EditActivity extends SherlockFragmentActivity {
 			subMenuItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
 		}
 	    
-    	return true;
-	}
+    	return super.onCreateOptionsMenu(menu);
+    }
     
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {

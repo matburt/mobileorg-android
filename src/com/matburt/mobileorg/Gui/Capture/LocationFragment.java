@@ -31,6 +31,7 @@ public class LocationFragment extends SherlockFragment {
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
+		super.onCreateView(inflater, container, savedInstanceState);
 		this.locationView = (LinearLayout) inflater.inflate(
 				R.layout.edit_location, container, false);
 		return locationView;
