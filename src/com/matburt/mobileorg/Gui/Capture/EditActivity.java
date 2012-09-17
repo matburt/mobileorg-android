@@ -52,7 +52,7 @@ public class EditActivity extends SherlockFragmentActivity {
 		} else if (this.actionMode.equals(ACTIONMODE_CREATE)) {
 			this.node = new OrgNode();
 		} else if (this.actionMode.equals(ACTIONMODE_EDIT)) {
-			this.node = new OrgNode(node_id, getContentResolver());
+			this.node = new OrgNode(node_id, getContentResolver()).findOriginalNode(resolver);
 		} else if (this.actionMode.equals(ACTIONMODE_ADDCHILD)) {
 			this.node = new OrgNode();
 			this.node.parentId = node_id;
@@ -61,7 +61,6 @@ public class EditActivity extends SherlockFragmentActivity {
 	
 	public OrgNode getParentOrgNode() {
 		if (this.actionMode.equals(ACTIONMODE_EDIT)) {
-			OrgNode node = this.node.findOriginalNode(resolver);
 			OrgNode parent = node.getParent(resolver);
 
 			if (parent == null) {

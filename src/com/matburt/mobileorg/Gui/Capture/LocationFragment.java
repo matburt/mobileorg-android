@@ -6,7 +6,6 @@ import java.util.Collections;
 import android.content.ContentResolver;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -85,16 +84,19 @@ public class LocationFragment extends SherlockFragment {
 	}
 	
 	private void setupLocation() {
-		OrgNode currentNode = this.node;
+		if(this.node != null)
+			getLocationEntry(this.node,
+					this.node.getChildrenStringArray(resolver), "");
 		
+		OrgNode currentNode = this.node;
 		while(currentNode != null) {
 			OrgNode spinnerNode = currentNode.getParent(resolver);
 			String selection = currentNode.name;
 			
-			if (currentNode.getParent(resolver) != null) {
+			if (spinnerNode != null) {
 				ArrayList<String> data = currentNode.getSiblingsStringArray(resolver);
 				getLocationEntry(spinnerNode, data, selection);
-				currentNode = currentNode.getParent(resolver);
+				currentNode = spinnerNode;
 			} else {
 				getTopLevelNode(selection);
 				currentNode = null;
@@ -130,7 +132,7 @@ public class LocationFragment extends SherlockFragment {
 		OrgNode childNode;
 		if (spinnerNode != null) {
 			childNode = spinnerNode.getChild(spinnerSelection, resolver);
-			if(childNode == null)
+			if(childNode == null || childNode.getChildren(resolver).size() == 0)
 				return;
 		} else {
 			try {

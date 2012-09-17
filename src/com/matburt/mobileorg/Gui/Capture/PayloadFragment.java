@@ -104,7 +104,10 @@ public class PayloadFragment extends ViewFragment {
 		webView.setVisibility(View.GONE);
 		editButton.setVisibility(View.GONE);
 
-		payloadEdit.setText(this.payload.get());
+		
+		String payloadString = this.payload.get();
+		if(payloadString != null)
+			payloadEdit.setText(payloadString);
 		payloadEdit.setVisibility(View.VISIBLE);
 		cancelButton.setVisibility(View.VISIBLE);
 		saveButton.setVisibility(View.VISIBLE);
