@@ -12,6 +12,7 @@ public class OrgFile {
 	public static final String CAPTURE_FILE = "mobileorg.org";
 	public static final String CAPTURE_FILE_ALIAS = "Captures";
 	public static final String AGENDA_FILE = "agendas.org";
+	public static final String AGENDA_FILE_ALIAS = "Agenda Views";
 	
 	public String filename = "";
 	public String name = "";

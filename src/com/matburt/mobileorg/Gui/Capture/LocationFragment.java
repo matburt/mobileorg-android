@@ -78,7 +78,7 @@ public class LocationFragment extends SherlockFragment {
 			setupLocation();
 		}
 		else {
-			LocationEntry topEntry = getTopLevelNode(OrgFile.CAPTURE_FILE);
+			LocationEntry topEntry = getTopLevelNode(OrgFile.CAPTURE_FILE_ALIAS);
 			locationView.addView(topEntry);
 		}
 	}
@@ -115,6 +115,12 @@ public class LocationFragment extends SherlockFragment {
 	}
 	
 	private LocationEntry getLocationEntry(OrgNode node, ArrayList<String> data, String selection) {
+		if(this.node != null && node != null && this.node.id == node.id) {
+			String editNodeName = ((EditActivity) getActivity()).getOrgNode().name;
+			if(TextUtils.isEmpty(editNodeName) == false)
+				data.remove(editNodeName); // Prevents refiling node "under itself"
+		}
+		
 		LocationEntry location = new LocationEntry(getActivity());
 		location.init(node, this, data, selection);
 		locations.add(location);
@@ -122,8 +128,9 @@ public class LocationFragment extends SherlockFragment {
 	}
 	
 	private LocationEntry getTopLevelNode(String selection) {
-		ArrayList<String> data = OrgProviderUtil.getFilenames(resolver);
+		ArrayList<String> data = OrgProviderUtil.getFileAliases(resolver);
 		data.remove(OrgFile.AGENDA_FILE);
+		data.remove(OrgFile.AGENDA_FILE_ALIAS);
 		LocationEntry entry = getLocationEntry(null, data, selection);
 		return entry;
 	}
@@ -132,12 +139,13 @@ public class LocationFragment extends SherlockFragment {
 		OrgNode childNode;
 		if (spinnerNode != null) {
 			childNode = spinnerNode.getChild(spinnerSelection, resolver);
+			
 			if(childNode == null || childNode.getChildren(resolver).size() == 0)
 				return;
 		} else {
 			try {
-			OrgFile file = new OrgFile(spinnerSelection, resolver);
-			childNode = new OrgNode(file.nodeId, resolver);
+				childNode = OrgProviderUtil.getOrgNodeFromFileAlias(
+						spinnerSelection, resolver);
 			} catch (IllegalArgumentException e) {
 				return;
 			}
@@ -198,9 +206,6 @@ public class LocationFragment extends SherlockFragment {
 				.getSelectedItem();
 		
 		if (TextUtils.isEmpty(selection) == false) {
-			if(selection.equals(OrgFile.CAPTURE_FILE))
-				return OrgProviderUtil.getOrCreateCaptureFile(resolver).getOrgNode(resolver);
-			
 			return OrgProviderUtil.getOrCreateFileFromAlias(selection, resolver).getOrgNode(resolver);
 		} else
 			throw new IllegalStateException("Can't determine location");

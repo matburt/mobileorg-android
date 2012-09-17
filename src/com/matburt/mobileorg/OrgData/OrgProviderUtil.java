@@ -53,6 +53,23 @@ public class OrgProviderUtil {
 		return result;
 	}
 	
+	public static ArrayList<String> getFileAliases(ContentResolver resolver) {
+		ArrayList<String> result = new ArrayList<String>();
+
+		Cursor cursor = resolver.query(Files.CONTENT_URI, Files.DEFAULT_COLUMNS,
+				null, null, Files.DEFAULT_SORT);
+		cursor.moveToFirst();
+
+		while (cursor.isAfterLast() == false) {
+			OrgFile orgFile = new OrgFile(cursor);
+			result.add(orgFile.name);
+			cursor.moveToNext();
+		}
+
+		cursor.close();
+		return result;
+	}
+	
 	public static void setTodos(ArrayList<HashMap<String, Boolean>> todos,
 			ContentResolver resolver) {
 		resolver.delete(Todos.CONTENT_URI, null, null);
@@ -175,6 +192,13 @@ public class OrgProviderUtil {
 			file = new OrgFile(filename, resolver);
 		}
 		return file;
+	}
+	
+	public static OrgNode getOrgNodeFromFileAlias(String fileAlias, ContentResolver resolver) {
+		Cursor cursor = resolver.query(OrgData.CONTENT_URI,
+				OrgData.DEFAULT_COLUMNS, OrgData.NAME + "=? AND " + OrgData.PARENT_ID + "=-1", new String[] {fileAlias}, null);
+		OrgNode node = new OrgNode(cursor);
+		return node;
 	}
 	
 	public static OrgFile getOrCreateFileFromAlias(String fileAlias, ContentResolver resolver) {
