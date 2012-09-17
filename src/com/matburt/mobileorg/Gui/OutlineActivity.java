@@ -97,7 +97,7 @@ public class OutlineActivity extends SherlockActivity
 	@Override
 	protected void onResume() {
 		super.onResume();
-		refreshDisplay();
+		refreshTitle();
 	}
 
 	@Override
@@ -130,7 +130,7 @@ public class OutlineActivity extends SherlockActivity
 		listView.setAdapter(new OutlineCursorAdapter(this, cursor, getContentResolver()));
 		listView.setSelection(lastSelection);
      
-        setTitle();
+        refreshTitle();
 	}
 	
     
@@ -142,12 +142,16 @@ public class OutlineActivity extends SherlockActivity
     		return "";
     }
 	
-	private void setTitle() {
+	private void refreshTitle() {
 		this.getSupportActionBar().setTitle("MobileOrg " + getChangesString());
 		if(this.node_id > -1) {
-			OrgNode node = new OrgNode(this.node_id, getContentResolver());
-			final String subTitle = node.constructOlpId(getContentResolver()).substring("olp:".length());
-			this.getSupportActionBar().setSubtitle(subTitle);
+			try {
+				OrgNode node = new OrgNode(this.node_id, getContentResolver());
+				final String subTitle = node.constructOlpId(getContentResolver()).substring("olp:".length());
+				this.getSupportActionBar().setSubtitle(subTitle);
+			} catch (IllegalArgumentException e) {
+				refreshDisplay();
+			}
 		}
 	}
 
