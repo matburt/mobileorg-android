@@ -97,7 +97,7 @@ public class OutlineActivity extends SherlockActivity
 	@Override
 	protected void onResume() {
 		super.onResume();
-		setTitle();
+		refreshDisplay();
 	}
 
 	@Override
