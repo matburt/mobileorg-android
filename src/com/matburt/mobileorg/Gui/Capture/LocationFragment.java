@@ -75,8 +75,8 @@ public class LocationFragment extends SherlockFragment {
 		if(this.node != null) {
 			if(this.node.parentId == -2) // Editing top node; can't be refiled
 				return;
-			//(this.node.id >= 0 || this.node.parentId >= 0) // Valid Node
-				setupLocation();
+
+			setupLocation();
 		}
 		else {
 			LocationEntry topEntry = getTopLevelNode(OrgFile.CAPTURE_FILE);
@@ -85,7 +85,7 @@ public class LocationFragment extends SherlockFragment {
 	}
 	
 	private void setupLocation() {
-		OrgNode currentNode = this.node;
+		OrgNode currentNode = this.node.findOriginalNode(resolver);
 		
 		while(currentNode != null) {
 			OrgNode spinnerNode = currentNode.getParent(resolver);
@@ -217,13 +217,11 @@ public class LocationFragment extends SherlockFragment {
 			OrgNode parent = locations.get(index).getOrgNode();
 			try {
 				OrgNode child = parent.getChild(selection, resolver);
-				Log.d("MobileOrg", "getLocation returning " + child.id);
 				return child;
 			} catch (IllegalArgumentException e) {
 				throw new IllegalStateException("Can't determine location");
 			}
 		} else {
-			Log.d("MobileOrg", "Selection was empty, trying previous spinner");
 			return getSelectedNodeId(--index);
 		}
 	}

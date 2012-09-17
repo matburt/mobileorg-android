@@ -13,6 +13,16 @@ public class OrgTestUtils {
 	public static final String defaultTestfileAlias = "delete me";
 
 	
+	public static final String testId = "E7C7B57B-F557-47AD-A80D-6B6F466F4A7C";
+	public static final String testIdPayload = 
+			":PROPERTIES:\n" + 
+			":ID:       " + testId + "\n" + 
+			":END:";
+	public static final String testIdAgendasPayload = "\n\n" +
+			"   :PROPERTIES:\n" + 
+			"   :ORIGINAL_ID: " + testId + "\n" +
+			"   :END:";
+	
 	public static OrgNode getDefaultOrgNode() {
 		OrgNode node = new OrgNode();
 		node.name = "title";

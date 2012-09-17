@@ -110,6 +110,29 @@ public class OrgNode {
 		}
 	}
 	
+	public OrgNode findOriginalNode(ContentResolver resolver) {
+		String nodeId = getNodeId(resolver);
+		if (nodeId.startsWith("olp:") == false) { // Update all nodes that have this :ID:
+			String nodeIdQuery = "'%:ID: " + nodeId + "%'";
+			Log.d("MobileOrg", "Search string " + nodeIdQuery);
+			Cursor query = resolver.query(OrgData.CONTENT_URI, OrgData.DEFAULT_COLUMNS,
+					OrgData.PAYLOAD + " LIKE ?", new String[] { nodeIdQuery },
+					null);
+			Log.d("MobileOrg", "Got back cursor with " + query.getCount());
+			try {
+				OrgNode node = new OrgNode(query);
+				query.close();
+				return node;
+			} catch (IllegalArgumentException e) {
+				if (query != null)
+					query.close();
+			}
+		} else
+			Log.d("MobileOrg", "Couldn't find id for " + getNodeId(resolver));
+		
+		return this;
+	}
+	
 	private ContentValues getSimpleContentValues() {
 		ContentValues values = new ContentValues();
 		values.put(OrgData.NAME, name);
@@ -132,6 +155,7 @@ public class OrgNode {
 		values.put(OrgData.TAGS, tags);
 		return values;
 	}
+	
 
 	/**
 	 * This will split up the tag string that it got from the tag entry in the
