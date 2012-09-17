@@ -1,6 +1,7 @@
 package com.matburt.mobileorg.Gui.Capture;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import android.content.ContentResolver;
 import android.os.Bundle;
@@ -50,22 +51,18 @@ public class TagsFragment extends SherlockFragment {
 	
 	public void restoreFromBundle(Bundle savedInstanceState) {
 		if (savedInstanceState != null) {
-			ArrayList<String> tagsToRestore = savedInstanceState.getStringArrayList(BUNDLE_TAGS);
+			String tags = savedInstanceState.getString(BUNDLE_TAGS);
+			ArrayList<String> tagsList = new ArrayList<String>(Arrays.asList(tags.split(":")));
 						
-			if(tagsToRestore != null)
-				setupTagEntries(tagsToRestore);
+			if(tagsList != null)
+				setupTagEntries(tagsList);
 		}
 	}
 
 	@Override
 	public void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
-
-        ArrayList<String> tags = new ArrayList<String>();
-        for(TagTableRow tagTableRow: tagEntries) {
-        	tags.add(tagTableRow.getSelection());
-        }
-        outState.putStringArrayList(BUNDLE_TAGS, tags);
+        outState.putString(BUNDLE_TAGS, getTags());
 	}
 
 
