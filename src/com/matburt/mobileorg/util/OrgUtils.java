@@ -7,6 +7,7 @@ import java.util.Date;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.OrgData.OrgFile;
 import com.matburt.mobileorg.OrgData.OrgNode;
+import com.matburt.mobileorg.Synchronizers.Synchronizer;
 
 import android.content.ContentResolver;
 import android.content.Context;
@@ -91,5 +92,11 @@ public class OrgUtils {
 				
 		OrgFile file = new OrgFile(filename, resolver);
 		return file.nodeId;
+	}
+	
+	public static void announceSyncDone(Context context) {
+		Intent intent = new Intent(Synchronizer.SYNC_UPDATE);
+		intent.putExtra(Synchronizer.SYNC_DONE, true);
+		context.sendBroadcast(intent);
 	}
 }

@@ -113,7 +113,13 @@ public class OrgNode {
 	public OrgNode findOriginalNode(ContentResolver resolver) {
 		String nodeId = getNodeId(resolver);
 		if (nodeId.startsWith("olp:") == false) { // Update all nodes that have this :ID:
-			String nodeIdQuery = OrgData.PAYLOAD + " LIKE '%:ID:%" + nodeId + "%'";
+			String nodeIdQuery = OrgData.PAYLOAD + " LIKE '%" + nodeId + "%'";
+			try {
+				OrgFile agendaFile = new OrgFile(OrgFile.AGENDA_FILE, resolver);
+				if(agendaFile != null)
+					nodeIdQuery += " AND NOT " + OrgData.FILE_ID + "=" + agendaFile.nodeId;
+			} catch (IllegalArgumentException e) {}
+			
 			Cursor query = resolver.query(OrgData.CONTENT_URI,
 					OrgData.DEFAULT_COLUMNS, nodeIdQuery, null,
 					null);
