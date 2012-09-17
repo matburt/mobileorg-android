@@ -91,6 +91,13 @@ public class EditActivity extends SherlockFragmentActivity {
 		return getOrgNode().isNodeEditable(resolver);
 	}
 	
+	public boolean isNodeRefilable() {
+		if(this.actionMode.equals(ACTIONMODE_CREATE))
+			return false;
+		else
+			return getOrgNode().isNodeEditable(resolver);
+	}
+	
     @Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getSupportMenuInflater().inflate(R.menu.edit, menu);

@@ -55,8 +55,7 @@ public class HeadingFragment extends SherlockFragment {
 		else
 			updateDisplay(this.node);
 		
-		if(activity.isNodeModifiable() == false)
-			setUnmodifiable();
+		setModifiable(activity.isNodeModifiable());
 	}
 
 	@Override
@@ -91,10 +90,10 @@ public class HeadingFragment extends SherlockFragment {
 				priority);
 	}
 	
-	public void setUnmodifiable() {
-		this.titleView.setEnabled(false);
-		this.priorityView.setEnabled(false);
-		this.todoStateView.setEnabled(false);
+	public void setModifiable(boolean enabled) {
+		this.titleView.setEnabled(enabled);
+		this.priorityView.setEnabled(enabled);
+		this.todoStateView.setEnabled(enabled);
 	}
 	
 	public boolean hasEdits() {

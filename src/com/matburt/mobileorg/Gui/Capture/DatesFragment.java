@@ -51,8 +51,7 @@ public class DatesFragment extends SherlockFragment {
 		else
 			setupDates(node);
 		
-		if(editActivity.isNodeModifiable() == false)
-			setUnmodifable();
+		setModifable(editActivity.isNodeModifiable());
 		editActivity.invalidateOptionsMenu();
 	}
 
@@ -87,15 +86,15 @@ public class DatesFragment extends SherlockFragment {
 		this.timestampEntry = setupDate(node.getOrgNodePayload().getTimestamp(), "", timestampRemoveListener);
 	}
 	
-	public void setUnmodifable() {
+	public void setModifable(boolean enabled) {
 		if(this.scheduledEntry != null)
-			this.scheduledEntry.setUnmodifiable();
+			this.scheduledEntry.setModifiable(enabled);
 		if(this.timestampEntry != null)
-			this.timestampEntry.setUnmodifiable();
+			this.timestampEntry.setModifiable(enabled);
 		if(this.deadlineEntry != null)
-			this.deadlineEntry.setUnmodifiable();
+			this.deadlineEntry.setModifiable(enabled);
 		
-		this.isModifiable = false;
+		this.isModifiable = enabled;
 	}
 	
 	private DateTableRow setupDate(String date, String title, View.OnClickListener removeListener) {

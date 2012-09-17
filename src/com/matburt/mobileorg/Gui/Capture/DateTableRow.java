@@ -75,11 +75,14 @@ public class DateTableRow extends TableRow {
 			updateEndTime();
 	}
 	
-	public void setUnmodifiable() {
-		this.dateButton.setEnabled(false);
-		this.startTimeButton.setEnabled(false);
-		this.endTimeButton.setEnabled(false);
-		this.removeButton.setVisibility(View.GONE);
+	public void setModifiable(boolean enabled) {
+		this.dateButton.setEnabled(enabled);
+		this.startTimeButton.setEnabled(enabled);
+		this.endTimeButton.setEnabled(enabled);
+		if(enabled)
+			this.removeButton.setVisibility(View.VISIBLE);
+		else
+			this.removeButton.setVisibility(View.GONE);
 	}
 
 	private void init(Context context,

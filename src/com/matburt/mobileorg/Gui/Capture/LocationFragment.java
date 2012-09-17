@@ -50,8 +50,7 @@ public class LocationFragment extends SherlockFragment {
 
 		initLocationView();
 		
-		if(activity.isNodeModifiable() == false)
-			setUnmodifiable();
+		setModifiable(activity.isNodeRefilable());
 	}
 	
 	@Override
@@ -109,9 +108,9 @@ public class LocationFragment extends SherlockFragment {
 			locationView.addView(location);
 	}
 	
-	public void setUnmodifiable() {
+	public void setModifiable(boolean enabled) {
 		for(LocationEntry entry: locations)
-			entry.setEnabled(false);
+			entry.setEnabled(enabled);
 	}
 	
 	private LocationEntry getLocationEntry(OrgNode node, ArrayList<String> data, String selection) {

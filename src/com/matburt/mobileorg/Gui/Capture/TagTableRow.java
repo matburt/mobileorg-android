@@ -48,9 +48,12 @@ class TagTableRow extends TableRow {
 		this.tagsFragment = tagsFragment;
 	}
 	
-	public void setUnmodifiable() {
-		button.setVisibility(INVISIBLE);
-		spinner.setEnabled(false);
+	public void setModifiable(boolean enabled) {
+		if(enabled)
+			button.setVisibility(VISIBLE);
+		else
+			button.setVisibility(INVISIBLE);
+		spinner.setEnabled(enabled);
 	}
 	
 	public void setLast() {

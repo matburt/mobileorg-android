@@ -52,9 +52,7 @@ public class TagsFragment extends SherlockFragment {
 			setupTagEntries(node.getTags());
 		}
 		
-		if(activity.isNodeModifiable() == false)
-			setUnmodifiable();
-		
+		setModifiable(activity.isNodeModifiable());
 		activity.invalidateOptionsMenu();
 	}
 	
@@ -81,7 +79,7 @@ public class TagsFragment extends SherlockFragment {
 		for (String tag : tagList) {
 			if (TextUtils.isEmpty(tag)) { // found a :: entry
 				for (TagTableRow entry : tagEntries) // all tags so far where unmodifiable
-					entry.setUnmodifiable();
+					entry.setModifiable(false);
 				
 				if (tagEntries.size() > 0) 
 					tagEntries.get(tagEntries.size() - 1).setLast();
@@ -90,11 +88,11 @@ public class TagsFragment extends SherlockFragment {
 		}
 	}
 	
-	public void setUnmodifiable() {
+	public void setModifiable(boolean enabled) {
 		for(TagTableRow entry: tagEntries)
-			entry.setUnmodifiable();
+			entry.setModifiable(enabled);
 		
-		this.isModifiable = false;
+		this.isModifiable = enabled;
 	}
 	
 	public void addTagEntry(String selectedTag) {
