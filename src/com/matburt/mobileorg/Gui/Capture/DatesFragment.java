@@ -1,8 +1,5 @@
 package com.matburt.mobileorg.Gui.Capture;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -15,9 +12,9 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 import com.matburt.mobileorg.R;
-import com.matburt.mobileorg.Gui.Capture.DateTableRow.OrgTimeDate;
 import com.matburt.mobileorg.OrgData.OrgNode;
 import com.matburt.mobileorg.OrgData.OrgNodePayload;
+import com.matburt.mobileorg.OrgData.OrgNodeTimeDate;
 
 public class DatesFragment extends SherlockFragment {
 	private final String DATES_SCHEDULED = "scheduled";
@@ -84,6 +81,7 @@ public class DatesFragment extends SherlockFragment {
 
 	public void setupDates(OrgNodePayload payload) {
 		this.payload = payload;
+		this.payload.getCleanedPayload(); // Hack
 		this.scheduledEntry = setupDate(payload.getScheduled(), "SCHEDULED", scheduledRemoveListener);
 		this.deadlineEntry = setupDate(payload.getDeadline(), "DEADLINE", deadlineRemoveListener);
 		this.timestampEntry = setupDate(payload.getTimestamp(), "", timestampRemoveListener);
@@ -101,32 +99,16 @@ public class DatesFragment extends SherlockFragment {
 	}
 	
 	private DateTableRow setupDate(String date, String title, View.OnClickListener removeListener) {
-		final Pattern schedulePattern = Pattern
-				.compile("((\\d{4})-(\\d{1,2})-(\\d{1,2}))(?:[^\\d]*)" 
-						+ "((\\d{1,2})\\:(\\d{2}))?(-((\\d{1,2})\\:(\\d{2})))?");
-		Matcher propm = schedulePattern.matcher(date);
-		DateTableRow dateEntry = null;
+		try {
+			OrgNodeTimeDate timeDate = new OrgNodeTimeDate();
+			timeDate.parseDate(date);
 
-		if (propm.find()) {
-			OrgTimeDate timeDate = new OrgTimeDate();
-
-			try {
-				timeDate.year = Integer.parseInt(propm.group(2));
-				timeDate.monthOfYear = Integer.parseInt(propm.group(3));
-				timeDate.dayOfMonth = Integer.parseInt(propm.group(4));
-
-				timeDate.startTimeOfDay = Integer.parseInt(propm.group(6));
-				timeDate.startMinute = Integer.parseInt(propm.group(7));
-
-				timeDate.endTimeOfDay = Integer.parseInt(propm.group(10));
-				timeDate.endMinute = Integer.parseInt(propm.group(11));
-			} catch (NumberFormatException e) {
-			}
-			dateEntry = new DateTableRow(getActivity(), this, datesView,
-					removeListener, title, timeDate);
+			DateTableRow dateEntry = new DateTableRow(getActivity(), this,
+					datesView, removeListener, title, timeDate);
+			return dateEntry;
+		} catch (IllegalArgumentException e) {
+			return null;
 		}
-		
-		return dateEntry;
 	}
 	
 	
@@ -185,7 +167,6 @@ public class DatesFragment extends SherlockFragment {
 		DateTableRow dateEntry = new DateTableRow(getActivity(), this, datesView, scheduledRemoveListener,
 				"SCHEDULED");
 		this.scheduledEntry = dateEntry;
-		this.payload.add("haha");
 	}
 	
 	private void addDateDeadline() {

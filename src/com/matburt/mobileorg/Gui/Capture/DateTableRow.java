@@ -1,7 +1,5 @@
 package com.matburt.mobileorg.Gui.Capture;
 
-import java.util.Calendar;
-
 import android.app.DatePickerDialog;
 import android.app.DatePickerDialog.OnDateSetListener;
 import android.app.Dialog;
@@ -23,6 +21,7 @@ import android.widget.TableRow;
 import android.widget.TimePicker;
 
 import com.matburt.mobileorg.R;
+import com.matburt.mobileorg.OrgData.OrgNodeTimeDate;
 
 public class DateTableRow extends TableRow {
 	private Button dateButton;
@@ -30,36 +29,20 @@ public class DateTableRow extends TableRow {
 	private Button endTimeButton;
 	private Button removeButton;
 
-	private OrgTimeDate timeDateContainer;
-	
-	public static class OrgTimeDate {
-		public int year;
-		public int monthOfYear;
-		public int dayOfMonth;
-		public int startTimeOfDay = -1;
-		public int startMinute = -1;
-		public int endTimeOfDay = -1;
-		public int endMinute = -1;
-		
-		OrgTimeDate() {
-			final Calendar c = Calendar.getInstance();
-			this.year = c.get(Calendar.YEAR);
-			this.monthOfYear = c.get(Calendar.MONTH) + 1;
-			this.dayOfMonth = c.get(Calendar.DAY_OF_MONTH);
-		}
-	};
+	private OrgNodeTimeDate timeDateContainer;
+
 	
 	public DateTableRow(Context context, DatesFragment parentFragment,
 			TableLayout parentTable, View.OnClickListener removeListener,
 			String title) {
 		super(context);
-		this.timeDateContainer = new OrgTimeDate();
+		this.timeDateContainer = new OrgNodeTimeDate();
 		init(context, parentFragment, parentTable, removeListener, title);
 	}
 	
 	public DateTableRow(Context context, DatesFragment parentFragment,
 			TableLayout parentTable, View.OnClickListener removeListener,
-			String title, OrgTimeDate timeDateContainer) {
+			String title, OrgNodeTimeDate timeDateContainer) {
 		super(context);
 		this.timeDateContainer = timeDateContainer;
 		init(context, parentFragment, parentTable, removeListener, title);

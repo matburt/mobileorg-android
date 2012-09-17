@@ -1,6 +1,5 @@
 package com.matburt.mobileorg.OrgData;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -8,14 +7,15 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import android.text.TextUtils;
-import android.text.format.DateUtils;
-import android.util.Log;
 
 public class OrgNodePayload {
-	private StringBuilder originalPayload = new StringBuilder();
+	private StringBuilder payload = new StringBuilder();
+	
+	/** This is a "cache" for the cleaned payload. */
 	private StringBuilder cleanPayload = null;
 	
-	private String id = null; // Can be :ID: (or :ORIGINAL_ID: for agendas.org)
+	/** Can be :ID: or :ORIGINAL_ID: (for nodes agendas.org) */
+	private String id = null;
 
 	private String scheduled = null;
 	private String deadline = null;
@@ -28,37 +28,38 @@ public class OrgNodePayload {
 	}
 	
 	public void set(String payload) {
-		this.originalPayload = new StringBuilder(payload);
+		this.payload = new StringBuilder(payload);
 		this.cleanPayload = null;
 	}
 	
 	public String get() {
-		return this.originalPayload.toString();
+		return this.payload.toString();
 	}
 	
 	public void add(String line) {
-		//this.payload.append(line + "\n");
-		this.originalPayload.append(line + "\n");
+		this.payload.append(line + "\n");
+		this.cleanPayload = null;
 	}
 	
 	public String getCleanedPayload() {
 		if(this.cleanPayload == null)
 			cleanPayload();
 
-		return this.cleanPayload.toString();
+		return this.cleanPayload.toString().trim();
 	}
 	
-	private void prepareCleanedPayload() {
-		if(this.cleanPayload == null)
-			this.cleanPayload = new StringBuilder(this.originalPayload);
-	}
-		
 	public String getId() {
 		if(this.id == null)
 			stripProperties();
 			//this.id = getProperty("ID");
 		
 		return this.id;
+	}
+	
+	
+	private void prepareCleanedPayload() {
+		if(this.cleanPayload == null)
+			this.cleanPayload = new StringBuilder(this.payload);
 	}
 	
 	private void cleanPayload() {
@@ -72,6 +73,7 @@ public class OrgNodePayload {
 		
 	private String stripDate(String scheduled) {		
 		prepareCleanedPayload();
+		
 		final Pattern scheduledLine = Pattern.compile(scheduled
 				+ "\\s*<([^>]*)>(?:--<([^>]*)>)?");
 		Matcher matcher = scheduledLine.matcher(cleanPayload.toString());
@@ -145,7 +147,7 @@ public class OrgNodePayload {
 	
 	public String getProperty(String property) {
 		final Pattern propertiesLine = Pattern.compile(":"+property+":([^\\n]+)");
-		Matcher propm = propertiesLine.matcher(this.originalPayload);
+		Matcher propm = propertiesLine.matcher(this.payload);
 		
 		if(propm.find())
 			return propm.group(1).trim();
@@ -153,9 +155,6 @@ public class OrgNodePayload {
 			return "";
 	}
 	
-	/**
-	 * Returns a string containing the time at which a todo is scheduled or deadlined.
-	 */
 	public ArrayList<OrgNodeDate> getDates() {
 		ArrayList<OrgNodeDate> result = new ArrayList<OrgNodeDate>();
 		
@@ -218,16 +217,16 @@ public class OrgNodePayload {
 	// TODO Fix
 	public void insertOrReplaceDate(String dateType, String date) {
 		final Pattern schedulePattern = Pattern.compile(dateType + "\\s*<[^>]+>");
-		Matcher matcher = schedulePattern.matcher(originalPayload);
+		Matcher matcher = schedulePattern.matcher(payload);
 
 		if (matcher.find()) {
 			if (TextUtils.isEmpty(date))
-				originalPayload.delete(matcher.start(), matcher.end());
+				payload.delete(matcher.start(), matcher.end());
 			else
-				originalPayload.replace(matcher.start(), matcher.end(), date);
+				payload.replace(matcher.start(), matcher.end(), date);
 		}
 		else if(TextUtils.isEmpty(date) == false)
-			originalPayload.insert(0, date).append("\n");
+			payload.insert(0, date).append("\n");
 	}
 	
 	public long sumClocks() {
