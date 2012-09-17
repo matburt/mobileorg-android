@@ -111,6 +111,9 @@ public class OrgNode {
 	}
 	
 	public OrgNode findOriginalNode(ContentResolver resolver) {
+		if(getFilename(resolver).equals(OrgFile.AGENDA_FILE) == false)
+			return this;
+		
 		String nodeId = getNodeId(resolver);
 		if (nodeId.startsWith("olp:") == false) { // Update all nodes that have this :ID:
 			String nodeIdQuery = OrgData.PAYLOAD + " LIKE '%" + nodeId + "%'";
