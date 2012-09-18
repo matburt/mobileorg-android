@@ -9,6 +9,7 @@ import com.matburt.mobileorg.OrgData.OrgNode;
 import com.matburt.mobileorg.OrgData.OrgProvider;
 import com.matburt.mobileorg.OrgData.OrgContract.OrgData;
 import com.matburt.mobileorg.test.util.OrgTestUtils;
+import com.matburt.mobileorg.util.OrgNodeNotFoundException;
 
 public class OrgDatabaseTest extends ProviderTestCase2<OrgProvider> {
 
@@ -36,7 +37,7 @@ public class OrgDatabaseTest extends ProviderTestCase2<OrgProvider> {
 		try { 
 			new OrgNode(null);
 			fail("IllegalArgumentException not thrown");
-		} catch(IllegalArgumentException e) {	
+		} catch(OrgNodeNotFoundException e) {	
 		}
 	}
 	
@@ -64,7 +65,11 @@ public class OrgDatabaseTest extends ProviderTestCase2<OrgProvider> {
 		assertEquals(1, cursor.getCount());
 		assertTrue(cursor.getColumnCount() > 0);
 
-		OrgNode insertedNode = new OrgNode(cursor);
+		OrgNode insertedNode = new OrgNode();
+		
+		try {
+			insertedNode.set(cursor);
+		} catch (OrgNodeNotFoundException e) {}
 		cursor.close();
 		
 		assertNull(insertedNode.getPayload());
@@ -84,7 +89,10 @@ public class OrgDatabaseTest extends ProviderTestCase2<OrgProvider> {
 		assertEquals(1, cursor.getCount());
 		assertTrue(cursor.getColumnCount() > 0);
 
-		OrgNode insertedNode = new OrgNode(cursor);
+		OrgNode insertedNode = new OrgNode();
+		try {
+			insertedNode.set(cursor);
+		} catch (OrgNodeNotFoundException e) {}
 		cursor.close();
 		
 		assertEquals(testPayload, insertedNode.getPayload());
@@ -100,7 +108,10 @@ public class OrgDatabaseTest extends ProviderTestCase2<OrgProvider> {
 		
 		Cursor cursor = resolver.query(OrgData.buildIdUri(Long.toString(id)),
 				OrgData.DEFAULT_COLUMNS, null, null, null);
-		OrgNode insertedNode = new OrgNode(cursor);
+		OrgNode insertedNode = new OrgNode();
+		try {
+			insertedNode.set(cursor);
+		} catch (OrgNodeNotFoundException e) {}
 		cursor.close();
 		
 		assertEquals(testPayload, insertedNode.getPayload());

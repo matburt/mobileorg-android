@@ -14,6 +14,7 @@ import android.widget.TimePicker;
 
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.OrgData.OrgNode;
+import com.matburt.mobileorg.util.OrgNodeNotFoundException;
 
 public class TimeclockDialog extends FragmentActivity {
 
@@ -49,7 +50,10 @@ public class TimeclockDialog extends FragmentActivity {
 		TextView textView = (TextView) findViewById(R.id.timeclock_text);
 		
 		long node_id = TimeclockService.getInstance().getNodeID();
-		this.node = new OrgNode(node_id, getContentResolver());
+
+		try {
+			this.node = new OrgNode(node_id, getContentResolver());
+		} catch (OrgNodeNotFoundException e) {}
 		textView.setText(node.name + "@" + elapsedTime);
 
 	}

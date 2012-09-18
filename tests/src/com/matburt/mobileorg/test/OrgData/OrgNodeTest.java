@@ -13,6 +13,7 @@ import com.matburt.mobileorg.OrgData.OrgProvider;
 import com.matburt.mobileorg.OrgData.OrgContract.Edits;
 import com.matburt.mobileorg.OrgData.OrgContract.OrgData;
 import com.matburt.mobileorg.test.util.OrgTestUtils;
+import com.matburt.mobileorg.util.OrgNodeNotFoundException;
 
 public class OrgNodeTest extends ProviderTestCase2<OrgProvider> {
 
@@ -53,7 +54,7 @@ public class OrgNodeTest extends ProviderTestCase2<OrgProvider> {
 		assertTrue(node.equals(parsedNode));
 	}
 	
-	public void testAddNodeSimple() {
+	public void testAddNodeSimple() throws OrgNodeNotFoundException {
 		OrgNode node = OrgTestUtils.getDefaultOrgNode();
 		node.write(resolver);
 		
@@ -67,7 +68,7 @@ public class OrgNodeTest extends ProviderTestCase2<OrgProvider> {
 		assertTrue(node.equals(insertedNode));
 	}
 	
-	public void testAddAndUpdateNode() {
+	public void testAddAndUpdateNode() throws OrgNodeNotFoundException {
 		OrgNode node = OrgTestUtils.getDefaultOrgNode();
 		node.write(resolver);
 		
@@ -88,7 +89,7 @@ public class OrgNodeTest extends ProviderTestCase2<OrgProvider> {
 		assertTrue(node.equals(insertedNode));
 	}
 	
-	public void testGetParentSimple() {
+	public void testGetParentSimple() throws OrgNodeNotFoundException {
 		OrgNode node = OrgTestUtils.getDefaultOrgNode();
 		node.write(resolver);
 		
@@ -100,7 +101,7 @@ public class OrgNodeTest extends ProviderTestCase2<OrgProvider> {
 		assertEquals(node.id, parent.id);
 	}
 	
-	public void testGetParentFileNode() {
+	public void testGetParentFileNode() throws OrgNodeNotFoundException {
 		OrgFile file = OrgTestUtils.getDefaultOrgFile();
 		file.setResolver(resolver);
 		file.write();
@@ -112,15 +113,17 @@ public class OrgNodeTest extends ProviderTestCase2<OrgProvider> {
 		assertEquals(file.nodeId, parent.id);
 	}
 	
-	public void testGetParentWithTopLevel() {
+	public void testGetParentWithTopLevel() throws OrgNodeNotFoundException {
 		OrgFile file = OrgTestUtils.getDefaultOrgFile();
 		file.setResolver(resolver);
 		file.write();
 		
 		OrgNode node = new OrgNode(file.nodeId, resolver);
-		OrgNode parent = node.getParent(resolver);
 		
-		assertNull(parent);
+		try {
+			node.getParent(resolver);
+			fail("File shouldn't exist");
+		} catch (OrgNodeNotFoundException e) {}
 	}
 	
 	public void testGetChildrenSimple() {
@@ -145,7 +148,7 @@ public class OrgNodeTest extends ProviderTestCase2<OrgProvider> {
 		try {
 			new OrgNode(childNode.id, resolver);
 			fail("Node should not exist");
-		} catch (IllegalArgumentException e) {}
+		} catch (OrgNodeNotFoundException e) {}
 
 		OrgTestUtils.cleanupParentScenario(resolver);
 	}
@@ -168,10 +171,9 @@ public class OrgNodeTest extends ProviderTestCase2<OrgProvider> {
 		assertEquals(baseOfEdits + 1, numberOfEdits);
 	}
 	
-	public void testArchiveNodeToSibling() {
+	public void testArchiveNodeToSibling() throws OrgNodeNotFoundException {
 		OrgNode childNode = OrgTestUtils.setupParentScenario(resolver);
 		OrgNode parent = childNode.getParent(resolver);
-		assertNotNull(parent);
 
 		childNode.archiveNodeToSibling(resolver);
 				

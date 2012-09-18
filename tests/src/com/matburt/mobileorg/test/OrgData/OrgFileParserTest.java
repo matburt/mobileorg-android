@@ -15,6 +15,7 @@ import com.matburt.mobileorg.OrgData.OrgNode;
 import com.matburt.mobileorg.OrgData.OrgProvider;
 import com.matburt.mobileorg.OrgData.OrgContract.OrgData;
 import com.matburt.mobileorg.test.util.OrgTestFiles.SimpleOrgFiles;
+import com.matburt.mobileorg.util.OrgNodeNotFoundException;
 
 public class OrgFileParserTest extends ProviderTestCase2<OrgProvider> {
 
@@ -68,7 +69,7 @@ public class OrgFileParserTest extends ProviderTestCase2<OrgProvider> {
 		cursor.close();
 	}
 	
-	public void testParseParentChildRelation() {
+	public void testParseParentChildRelation() throws OrgNodeNotFoundException {
 		InputStream is = new ByteArrayInputStream(SimpleOrgFiles.orgFile.getBytes());
 		BufferedReader breader = new BufferedReader(new InputStreamReader(is));
 		final String name = "file alias";

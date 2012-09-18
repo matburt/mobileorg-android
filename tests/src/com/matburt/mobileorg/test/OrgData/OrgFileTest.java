@@ -19,6 +19,7 @@ import com.matburt.mobileorg.OrgData.OrgProvider;
 import com.matburt.mobileorg.OrgData.OrgProviderUtil;
 import com.matburt.mobileorg.test.util.OrgTestFiles.SimpleOrgFiles;
 import com.matburt.mobileorg.util.OrgFileNotFoundException;
+import com.matburt.mobileorg.util.OrgNodeNotFoundException;
 
 public class OrgFileTest extends ProviderTestCase2<OrgProvider> {
 
@@ -38,7 +39,7 @@ public class OrgFileTest extends ProviderTestCase2<OrgProvider> {
 	protected void tearDown() throws Exception {
 	}
 
-	public void testAddFileSimple() throws OrgFileNotFoundException {
+	public void testAddFileSimple() throws OrgFileNotFoundException, OrgNodeNotFoundException{
 		OrgFile orgFile = new OrgFile("filename", "name", "checksum");
 		orgFile.setResolver(resolver);
 		orgFile.addFile();

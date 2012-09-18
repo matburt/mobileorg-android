@@ -8,6 +8,7 @@ import android.net.Uri;
 import com.matburt.mobileorg.OrgData.OrgContract.Files;
 import com.matburt.mobileorg.OrgData.OrgContract.OrgData;
 import com.matburt.mobileorg.util.OrgFileNotFoundException;
+import com.matburt.mobileorg.util.OrgNodeNotFoundException;
 
 public class OrgFile {
 	public static final String CAPTURE_FILE = "mobileorg.org";
@@ -45,7 +46,7 @@ public class OrgFile {
 		Cursor cursor = resolver.query(Files.buildIdUri(id),
 				Files.DEFAULT_COLUMNS, null, null, null);
 		if(cursor == null || cursor.getCount() < 1)
-			throw new IllegalArgumentException("File with id \"" + id + "\" not found");
+			throw new OrgFileNotFoundException("File with id \"" + id + "\" not found");
 		set(cursor);
 		cursor.close();
 		this.resolver = resolver;
@@ -55,7 +56,7 @@ public class OrgFile {
 		Cursor cursor = resolver.query(Files.CONTENT_URI,
 				Files.DEFAULT_COLUMNS, Files.FILENAME + "=?", new String[] {filename}, null);
 		if(cursor == null || cursor.getCount() <= 0)
-			throw new IllegalArgumentException("File \"" + filename + "\" not found");
+			throw new OrgFileNotFoundException("File \"" + filename + "\" not found");
 		set(cursor);
 		cursor.close();
 		this.resolver = resolver;
@@ -102,7 +103,12 @@ public class OrgFile {
 	}
 	
 	public OrgNode getOrgNode(ContentResolver resolver) {
-		return new OrgNode(this.nodeId, resolver);
+		try {
+			return new OrgNode(this.nodeId, resolver);
+		} catch (OrgNodeNotFoundException e) {
+			throw new IllegalStateException("Org node for file " + filename
+					+ " should exist");
+		}
 	}
 	
 	public void addFile() {

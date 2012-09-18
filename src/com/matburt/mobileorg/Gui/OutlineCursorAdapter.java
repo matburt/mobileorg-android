@@ -24,6 +24,7 @@ import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.OrgData.OrgFileParser;
 import com.matburt.mobileorg.OrgData.OrgNode;
 import com.matburt.mobileorg.OrgData.OrgProviderUtil;
+import com.matburt.mobileorg.util.OrgNodeNotFoundException;
 
 public class OutlineCursorAdapter extends SimpleCursorAdapter {
 
@@ -72,8 +73,10 @@ public class OutlineCursorAdapter extends SimpleCursorAdapter {
 			holder.tagsLayout = (TextView) v.findViewById(R.id.tagsLayout);
 		}
 
-		OrgNode node = new OrgNode(c);
-
+		OrgNode node = new OrgNode();
+		try {
+			node.set(c);
+		} catch (OrgNodeNotFoundException e) {}
 		String todo = node.todo;
 		String name = node.name;
 		String priority = node.priority;

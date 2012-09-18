@@ -18,6 +18,7 @@ import com.matburt.mobileorg.OrgData.OrgFile;
 import com.matburt.mobileorg.OrgData.OrgNode;
 import com.matburt.mobileorg.Services.TimeclockService;
 import com.matburt.mobileorg.util.OrgFileNotFoundException;
+import com.matburt.mobileorg.util.OrgNodeNotFoundException;
 import com.matburt.mobileorg.util.OrgUtils;
 
 public class EditActivity extends SherlockFragmentActivity {
@@ -54,7 +55,9 @@ public class EditActivity extends SherlockFragmentActivity {
 		} else if (this.actionMode.equals(ACTIONMODE_CREATE)) {
 			this.node = new OrgNode();
 		} else if (this.actionMode.equals(ACTIONMODE_EDIT)) {
-			this.node = new OrgNode(node_id, getContentResolver()).findOriginalNode(resolver);
+			try {
+				this.node = new OrgNode(node_id, getContentResolver()).findOriginalNode(resolver);
+			} catch (OrgNodeNotFoundException e) {}
 		} else if (this.actionMode.equals(ACTIONMODE_ADDCHILD)) {
 			this.node = new OrgNode();
 			this.node.parentId = node_id;
@@ -63,9 +66,10 @@ public class EditActivity extends SherlockFragmentActivity {
 	
 	public OrgNode getParentOrgNode() {
 		if (this.actionMode.equals(ACTIONMODE_EDIT)) {
-			OrgNode parent = node.getParent(resolver);
-
-			if (parent == null) {
+			OrgNode parent;
+			try {
+				parent = node.getParent(resolver);
+			} catch (OrgNodeNotFoundException e) {
 				parent = new OrgNode();
 				parent.parentId = -2;
 			}
@@ -77,7 +81,7 @@ public class EditActivity extends SherlockFragmentActivity {
 				OrgNode parent = new OrgNode(this.node.parentId, resolver);
 				Log.d("MobileOrg", "Setting parent " + this.node.parentId);
 				return parent;
-			} catch (IllegalArgumentException e) {}
+			} catch (OrgNodeNotFoundException e) {}
 		}
 		
 		return new OrgNode();
@@ -301,7 +305,7 @@ public class EditActivity extends SherlockFragmentActivity {
 		try {
 			OrgNode clonedNode = new OrgNode(this.node.id, resolver);
 			numberOfEdits = clonedNode.generateApplyEditNodes(newNode, resolver).size();
-		} catch (IllegalArgumentException e) {}
+		} catch (OrgNodeNotFoundException e) {}
 		
 		if(numberOfEdits > 0)
 			return true;

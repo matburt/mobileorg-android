@@ -96,7 +96,14 @@ public class LocationFragmentTest extends ActivityInstrumentationTestCase2<EditA
 		OrgNode fileNode = OrgProviderUtil.getOrCreateCaptureFile(resolver).getOrgNode(resolver);
 		
 		prepareActivityWithNode(fileNode, EditActivity.ACTIONMODE_ADDCHILD);
-		locationFragment.addChild(null, "");
+		
+		activity.runOnUiThread(new Runnable() {
+			public void run() {
+				locationFragment.addChild(null, "");
+			}
+		});
+		instrumentation.waitForIdleSync();
+		
 		OrgNode locationNode = locationFragment.getLocationSelection();
 
 		assertEquals(fileNode.id, locationNode.id);

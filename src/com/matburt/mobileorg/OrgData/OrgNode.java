@@ -14,6 +14,7 @@ import android.util.Log;
 import com.matburt.mobileorg.OrgData.OrgContract.OrgData;
 import com.matburt.mobileorg.util.FileUtils;
 import com.matburt.mobileorg.util.OrgFileNotFoundException;
+import com.matburt.mobileorg.util.OrgNodeNotFoundException;
 
 public class OrgNode {
 	public static final String ARCHIVE_NODE = "Archive";
@@ -33,20 +34,20 @@ public class OrgNode {
 	public OrgNode() {
 	}
 	
-	public OrgNode(long id, ContentResolver resolver) {
+	public OrgNode(long id, ContentResolver resolver) throws OrgNodeNotFoundException {
 		Cursor cursor = resolver.query(OrgData.buildIdUri(id),
 				OrgData.DEFAULT_COLUMNS, null, null, null);
 		if(cursor == null || cursor.moveToFirst() == false)
-			throw new IllegalArgumentException("Node with id \"" + id + "\" not found");
+			throw new OrgNodeNotFoundException("Node with id \"" + id + "\" not found");
 		set(cursor);
 		cursor.close();
 	}
 
-	public OrgNode(Cursor cursor) {
+	public OrgNode(Cursor cursor) throws OrgNodeNotFoundException {
 		set(cursor);
 	}
 	
-	public void set(Cursor cursor) {
+	public void set(Cursor cursor) throws OrgNodeNotFoundException {
 		if (cursor != null && cursor.getCount() > 0) {
 			if(cursor.isBeforeFirst() || cursor.isAfterLast())
 				cursor.moveToFirst();
@@ -64,7 +65,7 @@ public class OrgNode {
 			payload = cursor.getString(cursor
 					.getColumnIndexOrThrow(OrgData.PAYLOAD));
 		} else {
-			throw new IllegalArgumentException(
+			throw new OrgNodeNotFoundException(
 					"Failed to create OrgNode from cursor");
 		}	
 	}
@@ -136,7 +137,7 @@ public class OrgNode {
 				OrgNode node = new OrgNode(query);
 				query.close();
 				return node;
-			} catch (IllegalArgumentException e) {
+			} catch (OrgNodeNotFoundException e) {
 				if (query != null)
 					query.close();
 			}
@@ -201,7 +202,9 @@ public class OrgNode {
 		childCursor.moveToFirst();
 		
 		while(childCursor.isAfterLast() == false) {
-			result.add(new OrgNode(childCursor));
+			try {
+				result.add(new OrgNode(childCursor));
+			} catch (OrgNodeNotFoundException e) {}
 			childCursor.moveToNext();
 		}
 		
@@ -246,35 +249,31 @@ public class OrgNode {
 		try {
 			OrgNode node = new OrgNode(node_id, resolver);
 			return node.hasChildren(resolver);
-		} catch (IllegalArgumentException e) {
+		} catch (OrgNodeNotFoundException e) {
 		}
 		
 		return false;
 	}
 	
-	public OrgNode getParent(ContentResolver resolver) {
+	public OrgNode getParent(ContentResolver resolver) throws OrgNodeNotFoundException {
 		Cursor cursor = resolver.query(OrgData.buildIdUri(this.parentId),
 				OrgData.DEFAULT_COLUMNS, null, null, null);
-		if(cursor.getCount() > 0)
-			return new OrgNode(cursor);
-		else
-			return null;
+		return new OrgNode(cursor);
 	}
 	
-	public ArrayList<String> getSiblingsStringArray(ContentResolver resolver) {		
-		OrgNode parent = getParent(resolver);
-		if(parent != null)
+	public ArrayList<String> getSiblingsStringArray(ContentResolver resolver) {
+		try {
+			OrgNode parent = getParent(resolver);
 			return parent.getChildrenStringArray(resolver);
-		else
+		}
+		catch (OrgNodeNotFoundException e) {
 			throw new IllegalArgumentException("Couln't get parent for node " + name);
+		}
 	}
 	
-	public OrgNode getSibling(String name, ContentResolver resolver) {		
+	public OrgNode getSibling(String name, ContentResolver resolver) throws OrgNodeNotFoundException {
 		OrgNode parent = getParent(resolver);
-		if(parent != null)
-			return parent.getChild(name, resolver);
-		else
-			return null;
+		return parent.getChild(name, resolver);
 	}
 	
 	public boolean isFilenode(ContentResolver resolver) {
@@ -344,18 +343,22 @@ public class OrgNode {
 		result.insert(0, name);
 
 		long currentParentId = this.parentId;
-		while(currentParentId > 0) {
-			OrgNode node = new OrgNode(currentParentId, resolver);
-			currentParentId = node.parentId;
+		while (currentParentId > 0) {
+			OrgNode node;
+			try {
+				node = new OrgNode(currentParentId, resolver);
+				currentParentId = node.parentId;
 
-			if(currentParentId > 0)
-				result.insert(0, node.getOlpName() + "/");
-			else { // Get file nodes real name
-				String filename = node.getFilename(resolver);
-				result.insert(0, filename + ":");
+				if (currentParentId > 0)
+					result.insert(0, node.getOlpName() + "/");
+				else { // Get file nodes real name
+					String filename = node.getFilename(resolver);
+					result.insert(0, filename + ":");
+				}
+			} catch (OrgNodeNotFoundException e) {
 			}
 		}
-		
+
 		result.insert(0, "olp:");
 		return result.toString();
 	}
@@ -384,7 +387,7 @@ public class OrgNode {
 		OrgNode parent;
 		try {
 			parent = new OrgNode(this.parentId, resolver);
-		} catch (IllegalArgumentException e) {
+		} catch (OrgNodeNotFoundException e) {
 			throw new IllegalStateException("Parent for node " + this.name
 					+ " does not exist");
 		}
@@ -444,12 +447,14 @@ public class OrgNode {
 			this.tags = newNode.tags;
 		}
 		if (newNode.parentId != parentId) {
-			OrgNode parent = new OrgNode(newNode.parentId, resolver);
-			String newId = parent.getNodeId(resolver);
-			
-			edits.add(new OrgEdit(this, OrgEdit.TYPE.REFILE, newId, resolver));
-			this.parentId = newNode.parentId;
-			this.fileId = newNode.fileId;
+			try {
+				OrgNode parent = new OrgNode(newNode.parentId, resolver);
+				String newId = parent.getNodeId(resolver);
+
+				edits.add(new OrgEdit(this, OrgEdit.TYPE.REFILE, newId, resolver));
+				this.parentId = newNode.parentId;
+				this.fileId = newNode.fileId;
+			} catch (OrgNodeNotFoundException e) {}
 		}
 		
 		return edits;
@@ -573,8 +578,8 @@ public class OrgNode {
 		OrgEdit edit = new OrgEdit(this, OrgEdit.TYPE.ARCHIVE_SIBLING, resolver);
 		edit.write(resolver);
 
-		OrgNode parent = getParent(resolver);
-		if (parent != null) {
+		try {
+			OrgNode parent = getParent(resolver);
 			OrgNode archiveNode = parent.getChild(ARCHIVE_NODE, resolver);
 			
 			if (archiveNode == null) {
@@ -587,10 +592,11 @@ public class OrgNode {
 			
 			this.parentId = archiveNode.id;
 			this.write(resolver);
-		} else
+		} catch (OrgNodeNotFoundException e) {
 			throw new IllegalArgumentException(
 					"Could not archive correctly, didn't find parent of node "
 							+ this.name);
+		}
 
 		return edit;
 	}

@@ -17,6 +17,7 @@ import com.matburt.mobileorg.OrgData.OrgContract.Tags;
 import com.matburt.mobileorg.OrgData.OrgContract.Todos;
 import com.matburt.mobileorg.util.FileUtils;
 import com.matburt.mobileorg.util.OrgFileNotFoundException;
+import com.matburt.mobileorg.util.OrgNodeNotFoundException;
 
 public class OrgProviderUtil {
 	
@@ -161,7 +162,12 @@ public class OrgProviderUtil {
 	static StringBuilder nodesToString(long node_id, long level, ContentResolver resolver) {
 		StringBuilder result = new StringBuilder();
 		
-		OrgNode node = new OrgNode(node_id, resolver);
+		OrgNode node;
+		try {
+			node = new OrgNode(node_id, resolver);
+		} catch (OrgNodeNotFoundException e) {
+			return result;
+		}
 		
 		if(level != 0) { // Don't add top level file node heading
 			result.append(node.toString());
@@ -189,7 +195,12 @@ public class OrgProviderUtil {
 	
 	public static OrgNode getOrgNodeFromFilename(String filename, ContentResolver resolver) throws OrgFileNotFoundException {
 		OrgFile file = new OrgFile(filename, resolver);
-		return new OrgNode(file.nodeId, resolver);
+		try {
+			return new OrgNode(file.nodeId, resolver);
+		} catch (OrgNodeNotFoundException e) {
+			throw new IllegalStateException("OrgNode for file " + file.name
+					+ " should exist");
+		}
 	}
 	
 	public static OrgFile getOrCreateCaptureFile (ContentResolver resolver) {
@@ -213,7 +224,12 @@ public class OrgProviderUtil {
 	public static OrgNode getOrgNodeFromFileAlias(String fileAlias, ContentResolver resolver) {
 		Cursor cursor = resolver.query(OrgData.CONTENT_URI,
 				OrgData.DEFAULT_COLUMNS, OrgData.NAME + "=? AND " + OrgData.PARENT_ID + "=-1", new String[] {fileAlias}, null);
-		OrgNode node = new OrgNode(cursor);
+		OrgNode node = new OrgNode();
+		
+		try {
+			node.set(cursor);
+		} catch (OrgNodeNotFoundException e) {}
+		
 		return node;
 	}
 	

@@ -23,6 +23,7 @@ import com.matburt.mobileorg.OrgData.OrgNode;
 import com.matburt.mobileorg.OrgData.OrgNodeDate;
 import com.matburt.mobileorg.OrgData.OrgProviderUtil;
 import com.matburt.mobileorg.util.OrgFileNotFoundException;
+import com.matburt.mobileorg.util.OrgNodeNotFoundException;
 
 public class CalendarSyncService {
 	private final static String CALENDAR_ORGANIZER = "MobileOrg";
@@ -107,8 +108,10 @@ public class CalendarSyncService {
 	
 	
 	public void insertNode(long node_id) {
-		OrgNode node = new OrgNode(node_id, resolver);
-		insertNode(node, node.getFilename(resolver));
+		try {
+			OrgNode node = new OrgNode(node_id, resolver);
+			insertNode(node, node.getFilename(resolver));
+		} catch (OrgNodeNotFoundException e) {}
 	}
 	
 	private void insertFileEntries(String filename) throws IllegalArgumentException {
@@ -123,8 +126,10 @@ public class CalendarSyncService {
 		}
 
 		while (scheduled.isAfterLast() == false) {
-			OrgNode node = new OrgNode(scheduled);
-			insertNode(node, filename);
+			try {
+				OrgNode node = new OrgNode(scheduled);
+				insertNode(node, filename);
+			} catch (OrgNodeNotFoundException e) {}
 			scheduled.moveToNext();
 		}
 

@@ -17,6 +17,7 @@ import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.OrgData.OrgFile;
 import com.matburt.mobileorg.OrgData.OrgNode;
 import com.matburt.mobileorg.OrgData.OrgProviderUtil;
+import com.matburt.mobileorg.util.OrgNodeNotFoundException;
 
 public class LocationFragment extends SherlockFragment {
 	private final String NODE_ID = "nodeId";
@@ -64,8 +65,11 @@ public class LocationFragment extends SherlockFragment {
 			locationView.removeAllViews();
 			locations.clear();
 			long nodeId = savedInstanceState.getLong(NODE_ID, -1);
-			if(nodeId >= 0)
-				this.node = new OrgNode(nodeId, resolver);
+			if(nodeId >= 0) {
+				try {
+					this.node = new OrgNode(nodeId, resolver);
+				} catch (OrgNodeNotFoundException e) {}
+			}
 		}
 	}
 	
@@ -89,7 +93,10 @@ public class LocationFragment extends SherlockFragment {
 		
 		OrgNode currentNode = this.node;
 		while(currentNode != null) {
-			OrgNode spinnerNode = currentNode.getParent(resolver);
+			OrgNode spinnerNode = null;
+			try {
+				spinnerNode = currentNode.getParent(resolver);
+			} catch (OrgNodeNotFoundException e) {}
 			String selection = currentNode.name;
 			
 			if (spinnerNode != null) {

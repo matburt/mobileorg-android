@@ -22,6 +22,7 @@ import com.matburt.mobileorg.OrgData.OrgFile;
 import com.matburt.mobileorg.OrgData.OrgFileParser;
 import com.matburt.mobileorg.OrgData.OrgProviderUtil;
 import com.matburt.mobileorg.util.FileUtils;
+import com.matburt.mobileorg.util.OrgFileNotFoundException;
 
 /**
  * This class implements many of the operations that need to be done on
@@ -104,7 +105,7 @@ public class Synchronizer {
 		try {
 			OrgFile file = new OrgFile(filename, resolver);
 			localContents += file.toString(resolver);
-		} catch (IllegalArgumentException e) {}
+		} catch (OrgFileNotFoundException e) {}
 		
 		localContents += OrgEdit.editsToString(resolver);
 
@@ -195,7 +196,7 @@ public class Synchronizer {
 		
 		try {
 			new OrgFile(orgFile.filename, resolver).removeFile();
-		} catch (IllegalArgumentException e) { /* file did not exist */ }
+		} catch (OrgFileNotFoundException e) { /* file did not exist */ }
 		
 		if (orgFile.isEncrypted())
         	decryptAndParseFile(orgFile, breader);

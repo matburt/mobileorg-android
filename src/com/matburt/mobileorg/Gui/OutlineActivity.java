@@ -33,13 +33,13 @@ import com.actionbarsherlock.view.MenuItem;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Gui.Capture.EditActivity;
 import com.matburt.mobileorg.OrgData.OrgContract.OrgData;
-import com.matburt.mobileorg.OrgData.OrgFile;
 import com.matburt.mobileorg.OrgData.OrgNode;
 import com.matburt.mobileorg.OrgData.OrgProviderUtil;
 import com.matburt.mobileorg.Services.SyncService;
 import com.matburt.mobileorg.Settings.SettingsActivity;
 import com.matburt.mobileorg.Settings.WizardActivity;
 import com.matburt.mobileorg.Synchronizers.Synchronizer;
+import com.matburt.mobileorg.util.OrgNodeNotFoundException;
 import com.matburt.mobileorg.util.OrgUtils;
 
 public class OutlineActivity extends SherlockActivity
@@ -149,7 +149,7 @@ public class OutlineActivity extends SherlockActivity
 				OrgNode node = new OrgNode(this.node_id, getContentResolver());
 				final String subTitle = node.constructOlpId(getContentResolver()).substring("olp:".length());
 				this.getSupportActionBar().setSubtitle(subTitle);
-			} catch (IllegalArgumentException e) {
+			} catch (OrgNodeNotFoundException e) {
 				refreshDisplay();
 			}
 		}
@@ -177,7 +177,7 @@ public class OutlineActivity extends SherlockActivity
 	    	OrgNode node = new OrgNode(this.node_id, resolver);
 	    	if(node.areChildrenEditable(resolver))
 	    		menu.findItem(R.id.menu_capturechild).setVisible(true);
-	    } catch (IllegalArgumentException e) {}
+	    } catch (OrgNodeNotFoundException e) {}
 	    
 		return true;
 	}

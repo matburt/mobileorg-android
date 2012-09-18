@@ -13,6 +13,7 @@ import com.matburt.mobileorg.OrgData.OrgProvider;
 import com.matburt.mobileorg.OrgData.OrgProviderUtil;
 import com.matburt.mobileorg.OrgData.OrgContract.Edits;
 import com.matburt.mobileorg.test.util.OrgTestUtils;
+import com.matburt.mobileorg.util.OrgNodeNotFoundException;
 
 public class OrgEditTest extends ProviderTestCase2<OrgProvider> {
 
@@ -65,7 +66,7 @@ public class OrgEditTest extends ProviderTestCase2<OrgProvider> {
 	}
 
 	
-	public void testNewHeadingSimple() {
+	public void testNewHeadingSimple() throws OrgNodeNotFoundException {
 		OrgFile file = OrgTestUtils.getDefaultOrgFile();
 		file.setResolver(resolver);
 		file.write();
@@ -95,7 +96,7 @@ public class OrgEditTest extends ProviderTestCase2<OrgProvider> {
 	}
 
 	
-	public void testEditsToStringSimple() {
+	public void testEditsToStringSimple() throws OrgNodeNotFoundException {
 		OrgFile file = OrgTestUtils.getDefaultOrgFile();
 		file.setResolver(resolver);
 		file.write();
