@@ -18,7 +18,6 @@ import com.matburt.mobileorg.OrgData.OrgNodePayload;
 public class PayloadFragment extends ViewFragment {
 	private static final String PAYLOAD = "payload";
 	
-	
 	private RelativeLayout payloadView;
 	private EditText payloadEdit;
 	private OrgNodePayload payload;
@@ -104,7 +103,6 @@ public class PayloadFragment extends ViewFragment {
 		webView.setVisibility(View.GONE);
 		editButton.setVisibility(View.GONE);
 
-		
 		String payloadString = this.payload.get();
 		if(payloadString != null)
 			payloadEdit.setText(payloadString);
@@ -117,7 +115,7 @@ public class PayloadFragment extends ViewFragment {
 		payloadEdit.setVisibility(View.GONE);
 		cancelButton.setVisibility(View.GONE);
 		saveButton.setVisibility(View.GONE);
-
+		
 		display(this.payload.getCleanedPayload());
 		webView.setVisibility(View.VISIBLE);
 		editButton.setVisibility(View.VISIBLE);
@@ -127,6 +125,7 @@ public class PayloadFragment extends ViewFragment {
 		@Override
 		public void onClick(View v) {
 			switchToEdit();
+			payloadEdit.requestFocus();
 		}
 	};
 	
@@ -135,6 +134,7 @@ public class PayloadFragment extends ViewFragment {
 		public void onClick(View v) {
 			setPayload(payloadEdit.getText().toString());
 			switchToView();
+			webView.requestFocus();
 		}
 	};
 	
@@ -142,6 +142,7 @@ public class PayloadFragment extends ViewFragment {
 		@Override
 		public void onClick(View v) {
 			switchToView();
+			webView.requestFocus();
 		}
 	};
 }

@@ -83,7 +83,7 @@ public class HeadingFragment extends SherlockFragment {
 	public void updateDisplay(String title, String todo, String priority) {
 		titleView.setText(title);
 		titleView.setSelection(title.length());
-
+		
 		OrgUtils.setupSpinnerWithEmpty(todoStateView, OrgProviderUtil.getTodos(resolver),
 				todo);
 		OrgUtils.setupSpinnerWithEmpty(priorityView, OrgProviderUtil.getPriorities(resolver),
