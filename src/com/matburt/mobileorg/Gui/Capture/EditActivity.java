@@ -363,11 +363,6 @@ public class EditActivity extends SherlockFragmentActivity implements
 				.findFragmentByTag("payloadFragment");
 		newNode.setPayload(payloadFragment.getPayload());
 
-		DatesFragment datesFragment = (DatesFragment) getSupportFragmentManager()
-				.findFragmentByTag("datesFragment");
-		newNode.getOrgNodePayload().modifyDates(datesFragment.getScheduled(),
-				datesFragment.getDeadline(), datesFragment.getTimestamp());
-
 		return newNode;
 	}
 

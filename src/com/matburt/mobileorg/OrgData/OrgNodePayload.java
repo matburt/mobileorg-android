@@ -219,8 +219,8 @@ public class OrgNodePayload {
 	}
 	
 	public void modifyDates(String scheduled, String deadline, String timestamp) {
-		insertOrReplaceDate("SCHEDULED", scheduled);
-		insertOrReplaceDate("DEADLINE", deadline);
+		insertOrReplaceDate("SCHEDULED:", scheduled);
+		insertOrReplaceDate("DEADLINE:", deadline);
 		//insertOrReplaceDate("", timestamp);
 		resetCachedValues();
 	}

@@ -9,7 +9,6 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentTransaction;
-import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -25,14 +24,16 @@ import com.matburt.mobileorg.OrgData.OrgNodeTimeDate;
 public class DateTableRow extends TableRow {
 	private Context context;
 
+	private DatesFragment parentFragment;
+	private TableLayout parentLayout;
+	private DateTableRowListener listener = null;
+
 	private Button dateButton;
 	private Button startTimeButton;
 	private Button endTimeButton;
 	private Button removeButton;
 
-	private OrgNodeTimeDate timeDateContainer;
-
-	private DateTableRowListener listener = null;
+	private OrgNodeTimeDate timeDate;
 	
 	public interface DateTableRowListener {
 		public abstract void onDateTableRowModified();
@@ -46,29 +47,23 @@ public class DateTableRow extends TableRow {
 		super(context);
 		this.context = context;
 	}
-	
-	public void set(DatesFragment parentFragment,
-			TableLayout parentTable, View.OnClickListener removeListener,
-			String title) {
-		this.timeDateContainer = new OrgNodeTimeDate();
-		init(parentFragment, parentTable, removeListener, title);
-	}
-	
-	public void set(DatesFragment parentFragment,
-			TableLayout parentTable, View.OnClickListener removeListener,
-			String title, OrgNodeTimeDate timeDateContainer) {
-		this.timeDateContainer = timeDateContainer;
-		init(parentFragment, parentTable, removeListener, title);
 
-		updateDate();
+	
+	public void init(DatesFragment parentFragment, TableLayout parentLayout,
+			OrgNodeTimeDate timeDate) {
+		this.timeDate = timeDate;
+		this.parentFragment = parentFragment;
+		this.parentLayout = parentLayout;
 		
-		if (timeDateContainer.startTimeOfDay != -1
-				|| timeDateContainer.startMinute != -1)
-			updateStartTime();
+		LayoutInflater layoutInflater = (LayoutInflater) context
+				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		TableRow row = (TableRow) layoutInflater.inflate(R.layout.edit_daterow,
+				this);
+		parentLayout.addView(row);
 		
-		if (timeDateContainer.endTimeOfDay != -1
-				|| timeDateContainer.endMinute != -1)
-			updateEndTime();
+		prepareDateImage();
+		prepareButtons();
+		refreshDates();
 	}
 	
 	public void setModifiable(boolean enabled) {
@@ -81,27 +76,68 @@ public class DateTableRow extends TableRow {
 			this.removeButton.setVisibility(View.GONE);
 	}
 
-	private void init(final DatesFragment parentFragment, TableLayout parentTable,
-			View.OnClickListener removeListener, String title) {
+	public void refreshDates() {
+		if(timeDate.year != -1)		
+			this.dateButton.setText(this.timeDate.getDate());
+		
+		if (timeDate.startTimeOfDay != -1
+				|| timeDate.startMinute != -1)
+			startTimeButton.setText(this.timeDate.getStartTime());
+		
+		if (timeDate.endTimeOfDay != -1
+				|| timeDate.endMinute != -1)
+			endTimeButton.setText(this.timeDate.getEndTime());
+	}
 
-		LayoutInflater layoutInflater = (LayoutInflater) context
-				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		TableRow row = (TableRow) layoutInflater.inflate(
-				R.layout.edit_daterow, this);
-		parentTable.addView(row);
-
-		removeButton = (Button) findViewById(R.id.dateRemove);
-		removeButton.setOnClickListener(removeListener);
-
+	private void prepareDateImage() {
 		ImageView imageView = (ImageView) findViewById(R.id.dateImage);
 		
-		if(title.equals("DEADLINE"))
+		if(this.timeDate.type.equals(OrgNodeTimeDate.TYPE.Deadline))
 			imageView.setImageResource(R.drawable.ic_menu_today);
-		else if(title.equals("SCHEDULED"))
+		else if(this.timeDate.type.equals(OrgNodeTimeDate.TYPE.Scheduled))
 			imageView.setImageResource(R.drawable.ic_menu_month);
 		else
 			imageView.setImageResource(R.drawable.ic_menu_recent_history);
+	}
+	
+	private void remove() {
+		parentLayout.removeView(this);
+		
+		switch (this.timeDate.type) {
+		case Scheduled:
+			parentFragment.scheduledEntry = null;
+			break;
+		case Deadline:
+			parentFragment.deadlineEntry = null;
+			break;
+		case Timestamp:
+			parentFragment.timestampEntry = null;
+			break;
+		default:
+			break;
+		}
+		
+		notifyListenerOfChange();
+	}
 
+
+	private void notifyListenerOfChange() {
+		if(this.listener != null)
+			this.listener.onDateTableRowModified();
+	}
+
+	public String toString() {
+		return this.timeDate.toString();
+	}
+	
+	
+	private void prepareButtons() {
+		removeButton = (Button) findViewById(R.id.dateRemove);
+		removeButton.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				remove();
+			}});
+		
 		dateButton = (Button) findViewById(R.id.dateButton);
 		dateButton.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
@@ -109,7 +145,7 @@ public class DateTableRow extends TableRow {
 						.beginTransaction();
 				DialogFragment newFragment = new DatePickerDialogFragment(
 						dateChangeListener);
-				newFragment.show(ft, "dateialog");
+				newFragment.show(ft, "dateDialog");
 			}
 		});
 
@@ -135,74 +171,48 @@ public class DateTableRow extends TableRow {
 			}
 		});
 	}
-
-	private void setStartTime(int timeOfDay, int minute) {
-		this.timeDateContainer.startTimeOfDay = timeOfDay;
-		this.timeDateContainer.startMinute = minute;
-		updateStartTime();
-	}
-
-	private void updateStartTime() {
-		startTimeButton.setText(String.format("%02d:%02d",
-				this.timeDateContainer.startTimeOfDay,
-				this.timeDateContainer.startMinute));
-	}
 	
-	private void setEndTime(int timeOfDay, int minute) {
-		this.timeDateContainer.endTimeOfDay = timeOfDay;
-		this.timeDateContainer.endMinute = minute;
-		updateEndTime();
-	}
-
-	private void updateEndTime() {
-		endTimeButton.setText(String.format("%02d:%02d",
-				this.timeDateContainer.endTimeOfDay,
-				this.timeDateContainer.endMinute));
-	}
-
-	private void setDate(int year, int monthOfYear, int dayOfMonth) {
-		this.timeDateContainer.year = year;
-		this.timeDateContainer.monthOfYear = monthOfYear;
-		this.timeDateContainer.dayOfMonth = dayOfMonth;
-
-		updateDate();
-	}
-
-	private void updateDate() {
-		dateButton.setText(String.format("%d-%02d-%02d",
-				this.timeDateContainer.year,
-				this.timeDateContainer.monthOfYear,
-				this.timeDateContainer.dayOfMonth));
-	}
+	
+	private TimePickerDialog.OnTimeSetListener startTimeChangeListener = new TimePickerDialog.OnTimeSetListener() {
+		public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+			setStartTimeCallback(hourOfDay, minute);
+		}
+	};
 
 	private DatePickerDialog.OnDateSetListener dateChangeListener = new DatePickerDialog.OnDateSetListener() {
 		public void onDateSet(DatePicker view, int year, int monthOfYear,
 				int dayOfMonth) {
-			setDate(year, monthOfYear + 1, dayOfMonth);
-			notifyListenerOfChange();
-		}
-	};
-
-	private TimePickerDialog.OnTimeSetListener startTimeChangeListener = new TimePickerDialog.OnTimeSetListener() {
-		public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-			setStartTime(hourOfDay, minute);
-			notifyListenerOfChange();
+			setDateCallback(year, monthOfYear + 1, dayOfMonth);
 		}
 	};
 
 	private TimePickerDialog.OnTimeSetListener endTimeChangeListener = new TimePickerDialog.OnTimeSetListener() {
 		public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-			setEndTime(hourOfDay, minute);
-			notifyListenerOfChange();
+			setEndTimeCallback(hourOfDay, minute);
 		}
 	};
-
-	private void notifyListenerOfChange() {
-		if(this.listener != null)
-			this.listener.onDateTableRowModified();
+	
+	
+	private void setStartTimeCallback(int timeOfDay, int minute) {
+		this.timeDate.startTimeOfDay = timeOfDay;
+		this.timeDate.startMinute = minute;
+		notifyListenerOfChange();
 	}
 	
-	private class StartTimePickerDialogFragment extends DialogFragment {
+	private void setEndTimeCallback(int timeOfDay, int minute) {
+		this.timeDate.endTimeOfDay = timeOfDay;
+		this.timeDate.endMinute = minute;
+		notifyListenerOfChange();
+	}
+
+	private void setDateCallback(int year, int monthOfYear, int dayOfMonth) {
+		this.timeDate.year = year;
+		this.timeDate.monthOfYear = monthOfYear;
+		this.timeDate.dayOfMonth = dayOfMonth;
+		notifyListenerOfChange();
+	}
+	
+	public class StartTimePickerDialogFragment extends DialogFragment {
 		private OnTimeSetListener callback;
 
 		public StartTimePickerDialogFragment(OnTimeSetListener callback) {
@@ -210,8 +220,8 @@ public class DateTableRow extends TableRow {
 		}
 
 		public Dialog onCreateDialog(Bundle savedInstanceState) {
-			int timeOfDay= timeDateContainer.startTimeOfDay;
-			int minute = timeDateContainer.startMinute;
+			int timeOfDay= timeDate.startTimeOfDay;
+			int minute = timeDate.startMinute;
 			
 			if(timeOfDay == -1 || minute == -1) {
 				timeOfDay = 12;
@@ -223,7 +233,7 @@ public class DateTableRow extends TableRow {
 		}
 	}
 	
-	private class EndTimePickerDialogFragment extends DialogFragment {
+	public class EndTimePickerDialogFragment extends DialogFragment {
 		private OnTimeSetListener callback;
 
 		public EndTimePickerDialogFragment(OnTimeSetListener callback) {
@@ -231,10 +241,10 @@ public class DateTableRow extends TableRow {
 		}
 
 		public Dialog onCreateDialog(Bundle savedInstanceState) {
-			int timeOfDay= timeDateContainer.endTimeOfDay;
-			int minute = timeDateContainer.endMinute;
-			int startTimeOfDay = timeDateContainer.startTimeOfDay;
-			int startMinute = timeDateContainer.startMinute;
+			int timeOfDay= timeDate.endTimeOfDay;
+			int minute = timeDate.endMinute;
+			int startTimeOfDay = timeDate.startTimeOfDay;
+			int startMinute = timeDate.startMinute;
 			
 			if ((timeOfDay == -1 || minute == -1)) {
 				if (startTimeOfDay != -1 && startMinute != -1) {
@@ -255,7 +265,7 @@ public class DateTableRow extends TableRow {
 		}
 	}
 
-	private class DatePickerDialogFragment extends DialogFragment {
+	public class DatePickerDialogFragment extends DialogFragment {
 		private OnDateSetListener callback;
 
 		public DatePickerDialogFragment(OnDateSetListener callback) {
@@ -263,33 +273,8 @@ public class DateTableRow extends TableRow {
 		}
 
 		public Dialog onCreateDialog(Bundle savedInstanceState) {
-			return new DatePickerDialog(getActivity(), callback, timeDateContainer.year,
-					timeDateContainer.monthOfYear - 1, timeDateContainer.dayOfMonth);
+			return new DatePickerDialog(getActivity(), callback, timeDate.year,
+					timeDate.monthOfYear - 1, timeDate.dayOfMonth);
 		}
-	}
-
-	
-	public String getDate() {
-		return dateButton.getText().toString() + getStartTime() + getEndTime();
-	}
-	
-	private String getStartTime() {
-		String time = startTimeButton.getText().toString();
-
-		if (timeDateContainer.startTimeOfDay == -1
-				|| timeDateContainer.startMinute == -1 || TextUtils.isEmpty(time))
-			return "";
-		else
-			return " " + time;
-	}
-	
-	private String getEndTime() {
-		String time = endTimeButton.getText().toString();
-
-		if (timeDateContainer.endTimeOfDay == -1
-				|| timeDateContainer.endMinute == -1 || TextUtils.isEmpty(time))
-			return "";
-		else
-			return "-" + time;
 	}
 }

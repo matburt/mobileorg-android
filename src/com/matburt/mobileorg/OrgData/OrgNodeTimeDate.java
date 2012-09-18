@@ -4,19 +4,31 @@ import java.util.Calendar;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import android.util.Log;
+import android.text.TextUtils;
 
 public class OrgNodeTimeDate {
+	public enum TYPE {
+		Scheduled,
+		Deadline,
+		Timestamp,
+		InactiveTimestamp
+	};
+	
+	public TYPE type = TYPE.Scheduled;
 
-	public int year;
-	public int monthOfYear;
-	public int dayOfMonth;
+	public int year = -1;
+	public int monthOfYear = -1;
+	public int dayOfMonth = -1;
 	public int startTimeOfDay = -1;
 	public int startMinute = -1;
 	public int endTimeOfDay = -1;
 	public int endMinute = -1;
 
-	public OrgNodeTimeDate() {
+	public OrgNodeTimeDate(TYPE type) {
+		this.type = type;
+	}
+
+	public void setToCurrentDate() {
 		final Calendar c = Calendar.getInstance();
 		this.year = c.get(Calendar.YEAR);
 		this.monthOfYear = c.get(Calendar.MONTH) + 1;
@@ -24,6 +36,8 @@ public class OrgNodeTimeDate {
 	}
 	
 	public void parseDate(String date) {
+		if(date == null)
+			return;
 		final Pattern schedulePattern = Pattern
 				.compile("((\\d{4})-(\\d{1,2})-(\\d{1,2}))(?:[^\\d]*)"
 						+ "((\\d{1,2})\\:(\\d{2}))?(-((\\d{1,2})\\:(\\d{2})))?");
@@ -42,7 +56,65 @@ public class OrgNodeTimeDate {
 				endTimeOfDay = Integer.parseInt(propm.group(10));
 				endMinute = Integer.parseInt(propm.group(11));
 			} catch (NumberFormatException e) {}
-		} else
-			throw new IllegalArgumentException("Could not parse date: " + date);
+		}
+	}
+
+	
+	public String getDate() {
+		return String.format("%d-%02d-%02d", year, monthOfYear, dayOfMonth);
+	}
+	
+	public String getStartTime() {
+		return String.format("%02d:%02d", startTimeOfDay, startMinute);
+	}
+	
+	public String getEndTime() {
+		return String.format("%02d:%02d", endTimeOfDay, endMinute);
+	}
+	
+	
+	public String toString() {
+		return getDate().toString() + getStartTimeFormated() + getEndTimeFormated();
+	}
+	
+	public String toFormatedString() {
+		if (TextUtils.isEmpty(getDate()))
+			return "";
+		else {
+			return getTypePrefix() + "<" + getDate() + ">";
+		}
+	}
+	
+	private String getTypePrefix() {
+		switch (type) {
+		case Scheduled:
+			return "SCHEDULED: ";
+		case Deadline:
+			return "DEADLINE: ";
+		case Timestamp:
+			return "";
+		default:
+			return "";
+		}
+	}
+	
+	private String getStartTimeFormated() {
+		String time = getStartTime().toString();
+
+		if (startTimeOfDay == -1
+				|| startMinute == -1 || TextUtils.isEmpty(time))
+			return "";
+		else
+			return " " + time;
+	}
+	
+	private String getEndTimeFormated() {
+		String time = getEndTime().toString();
+
+		if (endTimeOfDay == -1
+				|| endMinute == -1 || TextUtils.isEmpty(time))
+			return "";
+		else
+			return "-" + time;
 	}
 }
