@@ -2,6 +2,7 @@ package com.matburt.mobileorg.Synchronizers;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringReader;
@@ -134,7 +135,7 @@ public class SSHSynchronizer implements SynchronizerInterface {
 		}
     }
 
-    public void putRemoteFile(String filename, String contents) throws Exception {
+    public void putRemoteFile(String filename, String contents) throws IOException {
         try {
             Channel channel = session.openChannel("sftp");
             channel.connect();
@@ -145,11 +146,11 @@ public class SSHSynchronizer implements SynchronizerInterface {
             sftpChannel.exit();
         } catch (Exception e) {
             Log.e("MobileOrg", "Exception in putRemoteFile: " + e.toString());
-            throw e;
+            throw new IOException(e);
         }
 	}
 
-	public BufferedReader getRemoteFile(String filename) throws Exception {
+	public BufferedReader getRemoteFile(String filename) throws IOException {
         StringBuilder contents = null;
         try {
             Channel channel = session.openChannel( "sftp" );
@@ -167,7 +168,7 @@ public class SSHSynchronizer implements SynchronizerInterface {
             sftpChannel.exit();
         } catch (Exception e) {
             Log.e("MobileOrg", "Exception in getRemoteFile: " + e.toString());
-            throw e;
+            throw new IOException(e);
         }
         return new BufferedReader(new StringReader(contents.toString()));
     }

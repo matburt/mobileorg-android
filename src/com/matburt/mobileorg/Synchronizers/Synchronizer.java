@@ -96,7 +96,7 @@ public class Synchronizer {
 	 * file combine their content. This combined version is transfered to the
 	 * remote.
 	 */
-	public void pushCaptures() throws Exception, IOException,
+	public void pushCaptures() throws IOException,
 			CertificateException, SSLHandshakeException {
 		final String filename = CAPTURE_FILE;
 		
@@ -128,7 +128,7 @@ public class Synchronizer {
 	 * host. Using those files, it determines the other files that need updating
 	 * and downloads them.
 	 */
-	public void pull(OrgFileParser parser) throws SSLHandshakeException, CertificateException, IOException, Exception {
+	public void pull(OrgFileParser parser) throws SSLHandshakeException, CertificateException, IOException {
 		notify.updateNotification(20, context.getString(R.string.downloading)
 				+ " checksums.dat");
 		String remoteChecksumContents = "";
@@ -183,14 +183,9 @@ public class Synchronizer {
 	}
 	
 	private void getAndParseFile(OrgFile orgFile, OrgFileParser parser)
-			throws SSLHandshakeException, CertificateException, IOException,
-			Exception {
+			throws CertificateException, IOException {
+		
 		BufferedReader breader = syncher.getRemoteFile(orgFile.filename);
-
-		if (breader == null) {
-			Log.w("MobileOrg", "File does not seem to exist: " + orgFile.filename);
-			return;
-		}
 
 		// TODO Generate checksum of file and compare to remoteChecksum
 		
@@ -205,14 +200,16 @@ public class Synchronizer {
         }
 	}
 	
-	private void decryptAndParseFile(OrgFile orgFile, BufferedReader reader) throws IOException {
-		Intent intent = new Intent(context, FileDecryptionActivity.class);
-		intent.putExtra("data", FileUtils.read(reader).getBytes());
-		intent.putExtra("filename", orgFile.filename);
-		intent.putExtra("filenameAlias", orgFile.name);
-		intent.putExtra("checksum", orgFile.checksum);
-		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-		context.startActivity(intent);
+	private void decryptAndParseFile(OrgFile orgFile, BufferedReader reader) {
+		try {
+			Intent intent = new Intent(context, FileDecryptionActivity.class);
+			intent.putExtra("data", FileUtils.read(reader).getBytes());
+			intent.putExtra("filename", orgFile.filename);
+			intent.putExtra("filenameAlias", orgFile.name);
+			intent.putExtra("checksum", orgFile.checksum);
+			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+			context.startActivity(intent);	
+		} catch(IOException e) {}
 	}
 
 	private void announceSyncDone() {
