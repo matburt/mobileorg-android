@@ -295,8 +295,12 @@ public class EditActivity extends SherlockFragmentActivity {
 	
 	public boolean hasEdits() {
 		OrgNode newNode = getEditedNode();
-		OrgNode clonedNode = new OrgNode(this.node.id, resolver);
-		int numberOfEdits = clonedNode.generateApplyEditNodes(newNode, resolver).size();
+		
+		int numberOfEdits = 0;
+		try {
+			OrgNode clonedNode = new OrgNode(this.node.id, resolver);
+			numberOfEdits = clonedNode.generateApplyEditNodes(newNode, resolver).size();
+		} catch (IllegalArgumentException e) {}
 		
 		if(numberOfEdits > 0)
 			return true;

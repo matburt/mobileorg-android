@@ -300,6 +300,19 @@ public class OrgNode {
 		return true;
 	}
 	
+	public boolean areChildrenEditable(ContentResolver resolver) {
+		if(id < 0) // Node is not in database
+			return false;
+		
+		try {
+			OrgFile agendaFile = new OrgFile(OrgFile.AGENDA_FILE, resolver);
+			if (agendaFile != null && agendaFile.id == fileId) // In agenda file
+				return false;
+		} catch (IllegalArgumentException e) {}
+
+		return true;
+	}
+	
 	/**
 	 * This is called when generating the olp link to the node. This path can't
 	 * have any "[" or "]" in it's path. For example having [1/3] in the title

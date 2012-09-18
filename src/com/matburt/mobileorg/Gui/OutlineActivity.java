@@ -33,7 +33,6 @@ import com.actionbarsherlock.view.MenuItem;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Gui.Capture.EditActivity;
 import com.matburt.mobileorg.OrgData.OrgContract.OrgData;
-import com.matburt.mobileorg.OrgData.OrgFile;
 import com.matburt.mobileorg.OrgData.OrgNode;
 import com.matburt.mobileorg.OrgData.OrgProviderUtil;
 import com.matburt.mobileorg.Services.SyncService;
@@ -173,8 +172,11 @@ public class OutlineActivity extends SherlockActivity
 		MenuInflater inflater = getSupportMenuInflater();
 	    inflater.inflate(R.menu.outline_menu, menu);
 	    
-	    if(this.node_id == -1 || isNodeInFile(this.node_id, "agendas.org"))
-			menu.findItem(R.id.menu_capturechild).setVisible(false);
+	    try {
+	    	OrgNode node = new OrgNode(this.node_id, resolver);
+	    	if(node.areChildrenEditable(resolver))
+	    		menu.findItem(R.id.menu_capturechild).setVisible(true);
+	    } catch (IllegalArgumentException e) {}
 	    
 		return true;
 	}
@@ -232,12 +234,6 @@ public class OutlineActivity extends SherlockActivity
 			return true;
 		}
 	};
-	
-	
-	private boolean isNodeInFile(long node_id, String filename) {
-		return new OrgNode(node_id, getContentResolver()).getFilename(getContentResolver()).equals(
-				filename);
-	}
 
     private void showWizard() {
         startActivityForResult(new Intent(this, WizardActivity.class), 0);
