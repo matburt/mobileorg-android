@@ -13,6 +13,7 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.view.SubMenu;
 import com.matburt.mobileorg.R;
+import com.matburt.mobileorg.Gui.ViewActivity;
 import com.matburt.mobileorg.OrgData.OrgEdit;
 import com.matburt.mobileorg.OrgData.OrgFile;
 import com.matburt.mobileorg.OrgData.OrgNode;
@@ -113,38 +114,48 @@ public class EditActivity extends SherlockFragmentActivity implements
 		if(isNodeModifiable() == false)
 			menu.findItem(R.id.nodeedit_save).setVisible(false);
 		
+		SubMenu subMenu = menu.addSubMenu(R.string.menu_advanced);
+		MenuItem subMenuItem = subMenu.getItem();
+		subMenuItem.setIcon(R.drawable.ic_menu_moreoverflow);
+		subMenuItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+		MenuItem item = subMenu.add(R.string.menu_advanced,
+				R.string.contextmenu_view, 0, R.string.contextmenu_view);
+		item.setIcon(R.drawable.ic_menu_view);
+		
 		if (this.node != null && this.node.id >= 0 && isNodeModifiable()) {
-			SubMenu subMenu = menu.addSubMenu(R.string.menu_advanced);
-			MenuItem item = subMenu.add(R.string.menu_advanced,
-					R.string.menu_delete, 0, R.string.menu_delete);
-			item.setIcon(R.drawable.ic_menu_delete);
-
-			item = subMenu.add(R.string.menu_advanced, R.string.menu_archive,
-					1, R.string.menu_archive);
-			item.setIcon(R.drawable.ic_menu_archive);
-			
-			item = subMenu.add(R.string.menu_advanced, R.string.menu_archive_tosibling,
-					1, R.string.menu_archive_tosibling);
-			item.setIcon(R.drawable.ic_menu_archive);
-
-			item = subMenu.add(R.string.menu_advanced, R.string.menu_clockin,
-					1, R.string.menu_clockin);
-			item.setIcon(R.drawable.ic_menu_today);
-
-			MenuItem subMenuItem = subMenu.getItem();
-			subMenuItem.setIcon(R.drawable.ic_menu_moreoverflow);
-			subMenuItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
-		} else if(this.node != null && this.node.isFilenode(getContentResolver())) {
-			SubMenu subMenu = menu.addSubMenu(R.string.menu_advanced);
-			MenuItem item = subMenu.add(R.string.menu_advanced,
-					R.string.menu_delete_file, 0, R.string.menu_delete_file);
-			item.setIcon(R.drawable.ic_menu_delete);
-			MenuItem subMenuItem = subMenu.getItem();
-			subMenuItem.setIcon(R.drawable.ic_menu_moreoverflow);
-			subMenuItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+			createNodeSubMenu(subMenu);
+			subMenuItem.setVisible(true);
+		}
+		else if(this.node != null && this.node.isFilenode(getContentResolver())) {
+			createFileNodeSubMenu(subMenu);
+			subMenuItem.setVisible(true);
 		}
 	    
     	return super.onCreateOptionsMenu(menu);
+    }
+    
+    private void createNodeSubMenu(Menu subMenu) {
+		MenuItem item = subMenu.add(R.string.menu_advanced,
+				R.string.menu_delete, 0, R.string.menu_delete);
+		item.setIcon(R.drawable.ic_menu_delete);
+
+		item = subMenu.add(R.string.menu_advanced, R.string.menu_archive,
+				1, R.string.menu_archive);
+		item.setIcon(R.drawable.ic_menu_archive);
+		
+		item = subMenu.add(R.string.menu_advanced, R.string.menu_archive_tosibling,
+				1, R.string.menu_archive_tosibling);
+		item.setIcon(R.drawable.ic_menu_archive);
+
+		item = subMenu.add(R.string.menu_advanced, R.string.menu_clockin,
+				1, R.string.menu_clockin);
+		item.setIcon(R.drawable.ic_menu_today);
+    }
+    
+    private void createFileNodeSubMenu(Menu subMenu) {
+		MenuItem item = subMenu.add(R.string.menu_advanced,
+				R.string.menu_delete_file, 0, R.string.menu_delete_file);
+		item.setIcon(R.drawable.ic_menu_delete);
     }
     
 	@Override
@@ -182,7 +193,11 @@ public class EditActivity extends SherlockFragmentActivity implements
 			
 		case R.string.menu_archive_tosibling:
 			runArchiveNode(true);
-			return true;		
+			return true;
+			
+		case R.string.contextmenu_view:
+			runViewNodeActivity();
+			return true;
 		}
 		return false;
 	}
@@ -262,6 +277,12 @@ public class EditActivity extends SherlockFragmentActivity implements
 			OrgUtils.announceUpdate(this);
 			finish();
 		} catch (OrgFileNotFoundException e) {}
+	}
+	
+	private void runViewNodeActivity() {		
+		Intent intent = new Intent(this, ViewActivity.class);
+		intent.putExtra(ViewActivity.NODE_ID, node.id);
+		startActivity(intent);
 	}
 	
 	private void runTimeClockingService() {

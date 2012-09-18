@@ -125,7 +125,7 @@ public class SettingsActivity extends PreferenceActivity implements
 	private void populateTodoKeywords() {
 		ListPreference defaultTodo = (ListPreference) findPreference("defaultTodo");
 
-		ArrayList<String> todoList = OrgProviderUtil.getTags(getContentResolver());;
+		ArrayList<String> todoList = OrgProviderUtil.getTodos(getContentResolver());;
 
 		CharSequence[] todos = new CharSequence[todoList.size() + 1];
 		int i = 0;

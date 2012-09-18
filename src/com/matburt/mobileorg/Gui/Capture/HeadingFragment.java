@@ -84,6 +84,9 @@ public class HeadingFragment extends SherlockFragment {
 		titleView.setText(title);
 		titleView.setSelection(title.length());
 		
+		if(node.id == -1 && todo.equals(""))
+			todo = OrgUtils.getDefaultTodo(getActivity());
+		
 		OrgUtils.setupSpinnerWithEmpty(todoStateView, OrgProviderUtil.getTodos(resolver),
 				todo);
 		OrgUtils.setupSpinnerWithEmpty(priorityView, OrgProviderUtil.getPriorities(resolver),
