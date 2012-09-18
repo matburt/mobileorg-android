@@ -17,6 +17,7 @@ import com.matburt.mobileorg.OrgData.OrgEdit;
 import com.matburt.mobileorg.OrgData.OrgFile;
 import com.matburt.mobileorg.OrgData.OrgNode;
 import com.matburt.mobileorg.Services.TimeclockService;
+import com.matburt.mobileorg.util.OrgFileNotFoundException;
 import com.matburt.mobileorg.util.OrgUtils;
 
 public class EditActivity extends SherlockFragmentActivity {
@@ -254,7 +255,7 @@ public class EditActivity extends SherlockFragmentActivity {
 			file.removeFile();
 			OrgUtils.announceUpdate(this);
 			finish();
-		} catch (IllegalArgumentException e) {}
+		} catch (OrgFileNotFoundException e) {}
 	}
 	
 	private void runTimeClockingService() {

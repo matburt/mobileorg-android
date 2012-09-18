@@ -33,6 +33,7 @@ import com.actionbarsherlock.view.MenuItem;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Gui.Capture.EditActivity;
 import com.matburt.mobileorg.OrgData.OrgContract.OrgData;
+import com.matburt.mobileorg.OrgData.OrgFile;
 import com.matburt.mobileorg.OrgData.OrgNode;
 import com.matburt.mobileorg.OrgData.OrgProviderUtil;
 import com.matburt.mobileorg.Services.SyncService;
@@ -262,8 +263,7 @@ public class OutlineActivity extends SherlockActivity
 	}
 	
 	private void runEditNodeActivity(long nodeId) {
-		Intent intent = new Intent(this,
-				EditActivity.class);
+		Intent intent = new Intent(this, EditActivity.class);
 		intent.putExtra(EditActivity.ACTIONMODE, EditActivity.ACTIONMODE_EDIT);
 		intent.putExtra(EditActivity.NODE_ID, nodeId);
 		startActivity(intent);

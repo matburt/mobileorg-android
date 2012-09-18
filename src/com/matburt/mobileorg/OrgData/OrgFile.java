@@ -7,6 +7,7 @@ import android.net.Uri;
 
 import com.matburt.mobileorg.OrgData.OrgContract.Files;
 import com.matburt.mobileorg.OrgData.OrgContract.OrgData;
+import com.matburt.mobileorg.util.OrgFileNotFoundException;
 
 public class OrgFile {
 	public static final String CAPTURE_FILE = "mobileorg.org";
@@ -36,11 +37,11 @@ public class OrgFile {
         	this.name = name;
 	}
 	
-	public OrgFile(Cursor cursor) {
+	public OrgFile(Cursor cursor) throws OrgFileNotFoundException {
 		set(cursor);
 	}
 	
-	public OrgFile(long id, ContentResolver resolver) {
+	public OrgFile(long id, ContentResolver resolver) throws OrgFileNotFoundException {
 		Cursor cursor = resolver.query(Files.buildIdUri(id),
 				Files.DEFAULT_COLUMNS, null, null, null);
 		if(cursor == null || cursor.getCount() < 1)
@@ -50,7 +51,7 @@ public class OrgFile {
 		this.resolver = resolver;
 	}
 	
-	public OrgFile(String filename, ContentResolver resolver) {
+	public OrgFile(String filename, ContentResolver resolver) throws OrgFileNotFoundException {
 		Cursor cursor = resolver.query(Files.CONTENT_URI,
 				Files.DEFAULT_COLUMNS, Files.FILENAME + "=?", new String[] {filename}, null);
 		if(cursor == null || cursor.getCount() <= 0)
@@ -60,7 +61,7 @@ public class OrgFile {
 		this.resolver = resolver;
 	}
 	
-	public void set(Cursor cursor) {
+	public void set(Cursor cursor) throws OrgFileNotFoundException {
 		if (cursor != null && cursor.getCount() > 0) {
 			if(cursor.isBeforeFirst() || cursor.isAfterLast())
 				cursor.moveToFirst();
@@ -70,7 +71,7 @@ public class OrgFile {
 			this.id = cursor.getLong(cursor.getColumnIndexOrThrow(Files.ID));
 			this.nodeId = cursor.getLong(cursor.getColumnIndexOrThrow(Files.NODE_ID));
 		} else {
-			throw new IllegalArgumentException(
+			throw new OrgFileNotFoundException(
 					"Failed to create OrgFile from cursor");
 		}	
 	}

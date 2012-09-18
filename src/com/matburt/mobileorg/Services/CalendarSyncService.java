@@ -22,6 +22,7 @@ import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.OrgData.OrgNode;
 import com.matburt.mobileorg.OrgData.OrgNodeDate;
 import com.matburt.mobileorg.OrgData.OrgProviderUtil;
+import com.matburt.mobileorg.util.OrgFileNotFoundException;
 
 public class CalendarSyncService {
 	private final static String CALENDAR_ORGANIZER = "MobileOrg";
@@ -111,11 +112,16 @@ public class CalendarSyncService {
 	}
 	
 	private void insertFileEntries(String filename) throws IllegalArgumentException {
-		boolean useHabits = sharedPreferences.getBoolean("calendarHabits", true);		
-		Cursor scheduled = OrgProviderUtil.getFileSchedule(filename, useHabits, resolver);
-
-		if (scheduled == null)
+		boolean useHabits = sharedPreferences.getBoolean("calendarHabits", true);	
+		Cursor scheduled;
+		
+		try {
+			scheduled = OrgProviderUtil.getFileSchedule(filename, useHabits,
+					resolver);
+		} catch (OrgFileNotFoundException e) {
 			return;
+		}
+
 		while (scheduled.isAfterLast() == false) {
 			OrgNode node = new OrgNode(scheduled);
 			insertNode(node, filename);

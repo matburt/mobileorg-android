@@ -18,6 +18,7 @@ import com.matburt.mobileorg.OrgData.OrgNode;
 import com.matburt.mobileorg.OrgData.OrgProvider;
 import com.matburt.mobileorg.OrgData.OrgProviderUtil;
 import com.matburt.mobileorg.test.util.OrgTestFiles.SimpleOrgFiles;
+import com.matburt.mobileorg.util.OrgFileNotFoundException;
 
 public class OrgFileTest extends ProviderTestCase2<OrgProvider> {
 
@@ -37,7 +38,7 @@ public class OrgFileTest extends ProviderTestCase2<OrgProvider> {
 	protected void tearDown() throws Exception {
 	}
 
-	public void testAddFileSimple() {
+	public void testAddFileSimple() throws OrgFileNotFoundException {
 		OrgFile orgFile = new OrgFile("filename", "name", "checksum");
 		orgFile.setResolver(resolver);
 		orgFile.addFile();
@@ -61,7 +62,7 @@ public class OrgFileTest extends ProviderTestCase2<OrgProvider> {
 		assertTrue(orgFile.doesFileExist());
 	}
 	
-	public void testRemoveFileSimple() {
+	public void testRemoveFileSimple() throws OrgFileNotFoundException {
 		OrgFile orgFile = new OrgFile("filename", "name", "checksum");
 		orgFile.setResolver(resolver);
 		orgFile.addFile();
@@ -79,7 +80,7 @@ public class OrgFileTest extends ProviderTestCase2<OrgProvider> {
 		dataCursor.close();
 	}
 
-	public void testFileToStringSimple() {
+	public void testFileToStringSimple() throws OrgFileNotFoundException {
 		final String filename = "filename";
 		InputStream is = new ByteArrayInputStream(SimpleOrgFiles.orgFile.getBytes());
 		BufferedReader breader = new BufferedReader(new InputStreamReader(is));
@@ -115,7 +116,7 @@ public class OrgFileTest extends ProviderTestCase2<OrgProvider> {
 		try {
 			OrgFile file2 = new OrgFile(file.id, resolver);
 			assertTrue(file.equals(file2));
-		} catch (IllegalArgumentException e) {
+		} catch (OrgFileNotFoundException e) {
 			fail("File node not created");
 		}
 	}
@@ -139,7 +140,7 @@ public class OrgFileTest extends ProviderTestCase2<OrgProvider> {
 		try {
 			OrgFile file2 = new OrgFile(file.id, resolver);
 			assertTrue(file.equals(file2));
-		} catch (IllegalArgumentException e) {
+		} catch (OrgFileNotFoundException e) {
 			fail("File node not created");
 		}
 	}
@@ -161,7 +162,7 @@ public class OrgFileTest extends ProviderTestCase2<OrgProvider> {
 		assertEquals(node1.name, node2.name);
 	}
 	
-	public void testGetOrgNodeFromFilename() {
+	public void testGetOrgNodeFromFilename() throws OrgFileNotFoundException{
 		OrgFile file = OrgProviderUtil.getOrCreateFile("test file", "file name", resolver);
 		OrgNode fileNode = file.getOrgNode(resolver);
 		

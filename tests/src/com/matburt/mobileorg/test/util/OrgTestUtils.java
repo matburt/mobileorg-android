@@ -6,6 +6,7 @@ import android.util.Log;
 import com.matburt.mobileorg.OrgData.OrgFile;
 import com.matburt.mobileorg.OrgData.OrgNode;
 import com.matburt.mobileorg.OrgData.OrgProviderUtil;
+import com.matburt.mobileorg.util.OrgFileNotFoundException;
 
 public class OrgTestUtils {
 
@@ -71,9 +72,11 @@ public class OrgTestUtils {
 	}
 	
 	public static void cleanupParentScenario(ContentResolver resolver) {
-		OrgFile file = new OrgFile(defaultTestfilename, resolver);
-		file.setResolver(resolver);
-		file.removeFile();
+		try {
+			OrgFile file = new OrgFile(defaultTestfilename, resolver);
+			file.setResolver(resolver);
+			file.removeFile();
+		} catch (OrgFileNotFoundException e) {}
 	}
 	
 	public static OrgFile getDefaultOrgFile() {

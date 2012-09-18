@@ -83,7 +83,7 @@ public class OrgUtils {
 	}
 	
 
-	public static long getNodeFromPath(String path, ContentResolver resolver) {
+	public static long getNodeFromPath(String path, ContentResolver resolver) throws OrgFileNotFoundException {
 		String filename = path.substring("file://".length(), path.length());
 		
 		// TODO Handle links to headings instead of simply stripping it out

@@ -13,6 +13,7 @@ import android.util.Log;
 
 import com.matburt.mobileorg.OrgData.OrgContract.OrgData;
 import com.matburt.mobileorg.util.FileUtils;
+import com.matburt.mobileorg.util.OrgFileNotFoundException;
 
 public class OrgNode {
 	public static final String ARCHIVE_NODE = "Archive";
@@ -69,11 +70,15 @@ public class OrgNode {
 	}
 	
 	public String getFilename(ContentResolver resolver) {
-		OrgFile file = new OrgFile(fileId, resolver);
-		return file.filename;
+		try {
+			OrgFile file = new OrgFile(fileId, resolver);
+			return file.filename;
+		} catch (OrgFileNotFoundException e) {
+			return "";
+		}
 	}
 	
-	public void setFilename(String filename, ContentResolver resolver) {
+	public void setFilename(String filename, ContentResolver resolver) throws OrgFileNotFoundException {
 		OrgFile file = new OrgFile(filename, resolver);
 		this.fileId = file.nodeId;
 	}
@@ -112,10 +117,8 @@ public class OrgNode {
 	}
 	
 	public OrgNode findOriginalNode(ContentResolver resolver) {
-		try {
-			if(getFilename(resolver).equals(OrgFile.AGENDA_FILE) == false)
-				return this;
-		} catch (IllegalArgumentException e) {}
+		if (getFilename(resolver).equals(OrgFile.AGENDA_FILE) == false)
+			return this;
 		
 		String nodeId = getNodeId(resolver);
 		if (nodeId.startsWith("olp:") == false) { // Update all nodes that have this :ID:
@@ -124,7 +127,7 @@ public class OrgNode {
 				OrgFile agendaFile = new OrgFile(OrgFile.AGENDA_FILE, resolver);
 				if(agendaFile != null)
 					nodeIdQuery += " AND NOT " + OrgData.FILE_ID + "=" + agendaFile.nodeId;
-			} catch (IllegalArgumentException e) {}
+			} catch (OrgFileNotFoundException e) {}
 			
 			Cursor query = resolver.query(OrgData.CONTENT_URI,
 					OrgData.DEFAULT_COLUMNS, nodeIdQuery, null,
@@ -279,7 +282,7 @@ public class OrgNode {
 			OrgFile file = new OrgFile(fileId, resolver);
 			if(file.nodeId == this.id)
 				return true;
-		} catch (IllegalArgumentException e) {}
+		} catch (OrgFileNotFoundException e) {}
 		
 		return false;
 	}
@@ -295,7 +298,7 @@ public class OrgNode {
 			OrgFile agendaFile = new OrgFile(OrgFile.AGENDA_FILE, resolver);
 			if (agendaFile != null && agendaFile.nodeId == parentId) // Second level in agendas file
 				return false;
-		} catch (IllegalArgumentException e) {}
+		} catch (OrgFileNotFoundException e) {}
 
 		return true;
 	}
@@ -308,7 +311,7 @@ public class OrgNode {
 			OrgFile agendaFile = new OrgFile(OrgFile.AGENDA_FILE, resolver);
 			if (agendaFile != null && agendaFile.id == fileId) // In agenda file
 				return false;
-		} catch (IllegalArgumentException e) {}
+		} catch (OrgFileNotFoundException e) {}
 
 		return true;
 	}
@@ -390,7 +393,7 @@ public class OrgNode {
 		try {
 			OrgFile file = new OrgFile(parent.fileId, resolver);
 			generateEdit = file.isEditable();
-		} catch (IllegalArgumentException e) {
+		} catch (OrgFileNotFoundException e) {
 			throw new IllegalStateException("Couln't find file of node " + parent.name);
 		}
 		
