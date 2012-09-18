@@ -10,7 +10,6 @@ import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentTransaction;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -24,28 +23,32 @@ import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.OrgData.OrgNodeTimeDate;
 
 public class DateTableRow extends TableRow {
+	private Context context;
+
 	private Button dateButton;
 	private Button startTimeButton;
 	private Button endTimeButton;
 	private Button removeButton;
 
 	private OrgNodeTimeDate timeDateContainer;
-
 	
-	public DateTableRow(Context context, DatesFragment parentFragment,
-			TableLayout parentTable, View.OnClickListener removeListener,
-			String title) {
+	public DateTableRow(Context context) {
 		super(context);
-		this.timeDateContainer = new OrgNodeTimeDate();
-		init(context, parentFragment, parentTable, removeListener, title);
+		this.context = context;
 	}
 	
-	public DateTableRow(Context context, DatesFragment parentFragment,
+	public void set(DatesFragment parentFragment,
+			TableLayout parentTable, View.OnClickListener removeListener,
+			String title) {
+		this.timeDateContainer = new OrgNodeTimeDate();
+		init(parentFragment, parentTable, removeListener, title);
+	}
+	
+	public void set(DatesFragment parentFragment,
 			TableLayout parentTable, View.OnClickListener removeListener,
 			String title, OrgNodeTimeDate timeDateContainer) {
-		super(context);
 		this.timeDateContainer = timeDateContainer;
-		init(context, parentFragment, parentTable, removeListener, title);
+		init(parentFragment, parentTable, removeListener, title);
 
 		updateDate();
 		
@@ -68,8 +71,7 @@ public class DateTableRow extends TableRow {
 			this.removeButton.setVisibility(View.GONE);
 	}
 
-	private void init(Context context,
-			final DatesFragment parentFragment, TableLayout parentTable,
+	private void init(final DatesFragment parentFragment, TableLayout parentTable,
 			View.OnClickListener removeListener, String title) {
 
 		LayoutInflater layoutInflater = (LayoutInflater) context
@@ -166,14 +168,12 @@ public class DateTableRow extends TableRow {
 
 	private TimePickerDialog.OnTimeSetListener startTimeChangeListener = new TimePickerDialog.OnTimeSetListener() {
 		public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-			Log.d("MobileOrg", "startTime Listener");
 			setStartTime(hourOfDay, minute);
 		}
 	};
 	
 	private TimePickerDialog.OnTimeSetListener endTimeChangeListener = new TimePickerDialog.OnTimeSetListener() {
 		public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-			Log.d("MobileOrg", "endTime Listener");
 			setEndTime(hourOfDay, minute);		
 		}
 	};

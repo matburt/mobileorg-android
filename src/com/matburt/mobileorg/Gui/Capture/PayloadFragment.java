@@ -1,5 +1,6 @@
 package com.matburt.mobileorg.Gui.Capture;
 
+import android.app.Activity;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -26,6 +27,25 @@ public class PayloadFragment extends ViewFragment {
 	private ImageButton cancelButton;
 	private ImageButton saveButton;
 	
+	private OnPayloadModifiedListener mListener;
+	
+	public interface OnPayloadModifiedListener {
+		public void onPayloadStartedEdit();
+		public void onPayloadEndedEdit();
+		public void onPayloadModified();
+	}
+	
+	@Override
+	public void onAttach(Activity activity) {
+		super.onAttach(activity);
+		
+		try {
+            mListener = (OnPayloadModifiedListener) activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString() + " must implement OnPayloadModifiedListener");
+        }
+	}
+
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
@@ -98,6 +118,8 @@ public class PayloadFragment extends ViewFragment {
 
 	public void setPayload(String payload) {
 		this.payload.set(payload);
+		
+		mListener.onPayloadModified();
 	}
 	
 	public String getPayload() {
@@ -113,13 +135,15 @@ public class PayloadFragment extends ViewFragment {
 		payloadEdit.setVisibility(View.VISIBLE);
 		cancelButton.setVisibility(View.VISIBLE);
 		saveButton.setVisibility(View.VISIBLE);
+		
+		mListener.onPayloadStartedEdit();
 	}
 	
 	private void switchToEdit() {
 		switchToEdit(this.payload.get());
 	}
 	
-	private void switchToView() {
+	public void switchToView() {
 		payloadEdit.setVisibility(View.GONE);
 		cancelButton.setVisibility(View.GONE);
 		saveButton.setVisibility(View.GONE);
@@ -127,6 +151,8 @@ public class PayloadFragment extends ViewFragment {
 		display(this.payload.getCleanedPayload());
 		webView.setVisibility(View.VISIBLE);
 		editButton.setVisibility(View.VISIBLE);
+		
+		mListener.onPayloadEndedEdit();
 	}
 	
 	private OnClickListener editListener = new OnClickListener() {

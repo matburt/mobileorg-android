@@ -30,6 +30,10 @@ public class OrgNodePayload {
 	public void set(String payload) {
 		this.payload = new StringBuilder(payload);
 		this.cleanPayload = null;
+		this.scheduled = null;
+		this.deadline = null;
+		this.timestamp = null;
+		this.id = null;
 	}
 	
 	public String get() {

@@ -21,7 +21,9 @@ import com.matburt.mobileorg.util.OrgFileNotFoundException;
 import com.matburt.mobileorg.util.OrgNodeNotFoundException;
 import com.matburt.mobileorg.util.OrgUtils;
 
-public class EditActivity extends SherlockFragmentActivity {
+public class EditActivity extends SherlockFragmentActivity implements
+		PayloadFragment.OnPayloadModifiedListener,
+		DatesFragment.OnDatesModifiedListener {
 	public final static String NODE_ID = "node_id";
 	public final static String ACTIONMODE = "actionMode";
 	public final static String ACTIONMODE_CREATE = "create";
@@ -367,5 +369,33 @@ public class EditActivity extends SherlockFragmentActivity {
 				datesFragment.getDeadline(), datesFragment.getTimestamp());
 
 		return newNode;
+	}
+
+	@Override
+	public void onDatesModified() {
+		PayloadFragment payloadFragment = (PayloadFragment) getSupportFragmentManager()
+				.findFragmentByTag("payloadFragment");
+		payloadFragment.switchToView();
+	}
+	
+	@Override
+	public void onPayloadModified() {
+		DatesFragment datesFragment = (DatesFragment) getSupportFragmentManager()
+				.findFragmentByTag("datesFragment");
+		datesFragment.setupDates();
+	}
+
+	@Override
+	public void onPayloadStartedEdit() {
+		DatesFragment datesFragment = (DatesFragment) getSupportFragmentManager()
+				.findFragmentByTag("datesFragment");
+		datesFragment.setModifable(false);
+	}
+
+	@Override
+	public void onPayloadEndedEdit() {
+		DatesFragment datesFragment = (DatesFragment) getSupportFragmentManager()
+				.findFragmentByTag("datesFragment");
+		datesFragment.setModifable(true);
 	}
 }

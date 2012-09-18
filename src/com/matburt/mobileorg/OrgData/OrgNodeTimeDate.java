@@ -4,6 +4,8 @@ import java.util.Calendar;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import android.util.Log;
+
 public class OrgNodeTimeDate {
 
 	public int year;
@@ -29,18 +31,19 @@ public class OrgNodeTimeDate {
 		Matcher propm = schedulePattern.matcher(date);
 
 		if (propm.find()) {
-			OrgNodeTimeDate timeDate = new OrgNodeTimeDate();
-
 			try {
-				timeDate.year = Integer.parseInt(propm.group(2));
-				timeDate.monthOfYear = Integer.parseInt(propm.group(3));
-				timeDate.dayOfMonth = Integer.parseInt(propm.group(4));
+				year = Integer.parseInt(propm.group(2));
+				monthOfYear = Integer.parseInt(propm.group(3));
+				dayOfMonth = Integer.parseInt(propm.group(4));
 
-				timeDate.startTimeOfDay = Integer.parseInt(propm.group(6));
-				timeDate.startMinute = Integer.parseInt(propm.group(7));
+				Log.d("MobileOrg", "Parsed " + year);
 
-				timeDate.endTimeOfDay = Integer.parseInt(propm.group(10));
-				timeDate.endMinute = Integer.parseInt(propm.group(11));
+				
+				startTimeOfDay = Integer.parseInt(propm.group(6));
+				startMinute = Integer.parseInt(propm.group(7));
+
+				endTimeOfDay = Integer.parseInt(propm.group(10));
+				endMinute = Integer.parseInt(propm.group(11));
 			} catch (NumberFormatException e) {}
 		} else
 			throw new IllegalArgumentException("Could not parse date: " + date);
