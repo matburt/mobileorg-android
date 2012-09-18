@@ -13,6 +13,7 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.view.SubMenu;
 import com.matburt.mobileorg.R;
+import com.matburt.mobileorg.OrgData.OrgEdit;
 import com.matburt.mobileorg.OrgData.OrgFile;
 import com.matburt.mobileorg.OrgData.OrgNode;
 import com.matburt.mobileorg.Services.TimeclockService;
@@ -313,15 +314,18 @@ public class EditActivity extends SherlockFragmentActivity {
 			newNode.getOrgNodePayload().add(OrgUtils.getTimestamp());
 		
 		
-		if (this.actionMode.equals(ACTIONMODE_CREATE) || this.actionMode.equals(ACTIONMODE_ADDCHILD)) {
+		if (this.actionMode.equals(ACTIONMODE_CREATE)) {
+			newNode.write(resolver);
+		} else if (this.actionMode.equals(ACTIONMODE_ADDCHILD)) {
 			try {
-				newNode.createParentNewheading(resolver);
-				newNode.write(resolver);
+				OrgEdit edit = newNode.createParentNewheading(resolver);
+				edit.write(resolver);
 			} catch (IllegalStateException e) {
 				Log.e("MobileOrg", e.getLocalizedMessage());
 			}
-		}
-		else if (this.actionMode.equals(ACTIONMODE_EDIT)) {
+			newNode.write(resolver);
+
+		} else if (this.actionMode.equals(ACTIONMODE_EDIT)) {
 			this.node.generateApplyWriteEdits(newNode, resolver);
 			this.node.updateAllNodes(resolver);
 		}
