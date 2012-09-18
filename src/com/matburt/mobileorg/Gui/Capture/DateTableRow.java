@@ -36,7 +36,7 @@ public class DateTableRow extends TableRow {
 	private OrgNodeTimeDate timeDate;
 	
 	public interface DateTableRowListener {
-		public abstract void onDateTableRowModified();
+		public abstract void onDateTableRowModified(OrgNodeTimeDate.TYPE type);
 	}
 	
 	public void setDateTableRowListener(DateTableRowListener listener) {
@@ -77,8 +77,10 @@ public class DateTableRow extends TableRow {
 	}
 
 	public void refreshDates() {
-		if(timeDate.year != -1)		
-			this.dateButton.setText(this.timeDate.getDate());
+		if(timeDate.year == -1)
+			this.timeDate.setToCurrentDate();
+			
+		this.dateButton.setText(this.timeDate.getDate());
 		
 		if (timeDate.startTimeOfDay != -1
 				|| timeDate.startMinute != -1)
@@ -122,8 +124,9 @@ public class DateTableRow extends TableRow {
 
 
 	private void notifyListenerOfChange() {
+		refreshDates();
 		if(this.listener != null)
-			this.listener.onDateTableRowModified();
+			this.listener.onDateTableRowModified(this.timeDate.type);
 	}
 
 	public String toString() {

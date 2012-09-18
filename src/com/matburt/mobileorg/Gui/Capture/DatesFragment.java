@@ -129,8 +129,8 @@ public class DatesFragment extends SherlockFragment {
 		dateEntry.init(this, datesView, timeDate);
 		dateEntry.setDateTableRowListener(new DateTableRowListener() {
 			@Override
-			public void onDateTableRowModified() {
-				announceDatesModified();
+			public void onDateTableRowModified(OrgNodeTimeDate.TYPE type) {
+				announceDateModified(type);
 			}
 		});
 
@@ -164,8 +164,22 @@ public class DatesFragment extends SherlockFragment {
 		this.isModifiable = enabled;
 	}
 
-	private void announceDatesModified() {
-		this.node.getOrgNodePayload().modifyDates(getScheduled(), getDeadline(), getTimestamp());
+	private void announceDateModified(OrgNodeTimeDate.TYPE type) {
+		OrgNodePayload payload = this.node.getOrgNodePayload();
+		switch (type) {
+		case Scheduled:
+			payload.insertOrReplaceDate(type, getScheduled());
+			break;
+		case Deadline:
+			payload.insertOrReplaceDate(type, getDeadline());
+			break;
+		case Timestamp:
+			payload.insertOrReplaceDate(type, getTimestamp());
+			break;
+		default:
+			return;
+		}
+		
 		if(mListener != null)
 			mListener.onDatesModified();
 	}
@@ -202,14 +216,17 @@ public class DatesFragment extends SherlockFragment {
 		switch (item.getItemId()) {
 		case R.id.menu_nodeedit_scheduled:
 			addDateScheduled(null);
+			announceDateModified(OrgNodeTimeDate.TYPE.Scheduled);
 			return true;
 
 		case R.id.menu_nodeedit_deadline:
 			addDateDeadline(null);
+			announceDateModified(OrgNodeTimeDate.TYPE.Deadline);
 			return true;
 			
 		case R.id.menu_nodeedit_timestamp:
 			addDateTimestamp(null);
+			announceDateModified(OrgNodeTimeDate.TYPE.Timestamp);
 			return true;
 		default:
 			return super.onOptionsItemSelected(item);

@@ -7,7 +7,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import android.text.TextUtils;
-import android.util.Log;
 
 public class OrgNodePayload {
 	private StringBuilder payload = new StringBuilder();
@@ -132,7 +131,7 @@ public class OrgNodePayload {
 			if(matcher.group(3) != null)
 				result += matcher.group(3);
 			
-			cleanPayload.delete(matcher.start(2), matcher.end());
+			cleanPayload.delete(matcher.start(), matcher.end());
 		}
 		
 		return result;
@@ -153,18 +152,6 @@ public class OrgNodePayload {
 			payload.insert(0, formatedDate + "\n");
 		
 		resetCachedValues();
-	}
-	
-	
-	public void modifyDates(String scheduled, String deadline, String timestamp) {
-		if(scheduled != null)
-			insertOrReplaceDate(OrgNodeTimeDate.TYPE.Scheduled, scheduled);
-			
-		if(deadline != null)
-			insertOrReplaceDate(OrgNodeTimeDate.TYPE.Deadline, deadline);
-		
-		if(timestamp != null)
-			insertOrReplaceDate(OrgNodeTimeDate.TYPE.Timestamp, timestamp);
 	}
 	
 	

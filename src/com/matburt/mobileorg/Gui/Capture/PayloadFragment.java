@@ -151,8 +151,6 @@ public class PayloadFragment extends ViewFragment {
 		display(this.payload.getCleanedPayload());
 		webView.setVisibility(View.VISIBLE);
 		editButton.setVisibility(View.VISIBLE);
-		
-		mListener.onPayloadEndedEdit();
 	}
 	
 	private OnClickListener editListener = new OnClickListener() {
@@ -168,6 +166,7 @@ public class PayloadFragment extends ViewFragment {
 		public void onClick(View v) {
 			setPayload(payloadEdit.getText().toString());
 			switchToView();
+			mListener.onPayloadEndedEdit();
 			webView.requestFocus();
 		}
 	};
@@ -176,6 +175,7 @@ public class PayloadFragment extends ViewFragment {
 		@Override
 		public void onClick(View v) {
 			switchToView();
+			mListener.onPayloadEndedEdit();
 			webView.requestFocus();
 		}
 	};
