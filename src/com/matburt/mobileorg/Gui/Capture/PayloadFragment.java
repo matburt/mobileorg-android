@@ -61,14 +61,13 @@ public class PayloadFragment extends ViewFragment {
 		super.onActivityCreated(savedInstanceState);
 		EditActivity editActivity = (EditActivity) getActivity();
 		
+		OrgNode node = editActivity.getOrgNode();
+		this.payload = node.getOrgNodePayload();
+		
 		if(savedInstanceState != null)
 			restoreInstanceState(savedInstanceState);
-		else {
-			OrgNode node = editActivity.getOrgNode();
-			this.payload = node.getOrgNodePayload();
-		}
-		
-		switchToView();
+		else
+			switchToView();
 		
 		if(editActivity.isNodeModifiable() == false)
 			setUnmodifiable();
@@ -77,13 +76,19 @@ public class PayloadFragment extends ViewFragment {
 	@Override
 	public void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
-		outState.putString(PAYLOAD, this.payload.get());
+		
+		if(this.payloadEdit.getVisibility() == View.VISIBLE)
+			outState.putString(PAYLOAD, this.payloadEdit.getText().toString());
 	}
 	
 	public void restoreInstanceState(Bundle savedInstanceState) {
 		if(savedInstanceState != null) {
 			String payloadString = savedInstanceState.getString(PAYLOAD);
-			this.payload = new OrgNodePayload(payloadString);
+			
+			if(payloadString != null)
+				switchToEdit(payloadString);
+			else
+				switchToView();
 		}
 	}
 	
@@ -99,16 +104,19 @@ public class PayloadFragment extends ViewFragment {
 		return this.payload.get();
 	}
 	
-	private void switchToEdit() {
+	private void switchToEdit(String payloadString) {
 		webView.setVisibility(View.GONE);
 		editButton.setVisibility(View.GONE);
 
-		String payloadString = this.payload.get();
 		if(payloadString != null)
 			payloadEdit.setText(payloadString);
 		payloadEdit.setVisibility(View.VISIBLE);
 		cancelButton.setVisibility(View.VISIBLE);
 		saveButton.setVisibility(View.VISIBLE);
+	}
+	
+	private void switchToEdit() {
+		switchToEdit(this.payload.get());
 	}
 	
 	private void switchToView() {
