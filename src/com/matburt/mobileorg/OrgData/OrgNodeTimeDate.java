@@ -14,6 +14,27 @@ public class OrgNodeTimeDate {
 		InactiveTimestamp
 	};
 	
+	public static String typeToFormated(TYPE type) {
+		switch (type) {
+		case Scheduled:
+			return "SCHEDULED: ";
+		case Deadline:
+			return "DEADLINE: ";
+		case Timestamp:
+			return "";
+		default:
+			return "";
+		}
+	}
+	
+	public static String formatDate(TYPE type, String timestamp) {
+		if (TextUtils.isEmpty(timestamp))
+			return "";
+		else {
+			return OrgNodeTimeDate.typeToFormated(type) + "<" + timestamp + ">";
+		}
+	}
+	
 	public TYPE type = TYPE.Scheduled;
 
 	public int year = -1;
@@ -78,25 +99,9 @@ public class OrgNodeTimeDate {
 	}
 	
 	public String toFormatedString() {
-		if (TextUtils.isEmpty(getDate()))
-			return "";
-		else {
-			return getTypePrefix() + "<" + getDate() + ">";
-		}
+		return formatDate(type, getDate());
 	}
-	
-	private String getTypePrefix() {
-		switch (type) {
-		case Scheduled:
-			return "SCHEDULED: ";
-		case Deadline:
-			return "DEADLINE: ";
-		case Timestamp:
-			return "";
-		default:
-			return "";
-		}
-	}
+
 	
 	private String getStartTimeFormated() {
 		String time = getStartTime().toString();

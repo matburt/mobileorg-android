@@ -71,34 +71,14 @@ public class OrgNodePayload {
 	}
 	
 	private void cleanPayload() {
-		this.scheduled = stripDate("SCHEDULED:");
-		this.deadline = stripDate("DEADLINE:");
-		this.timestamp = stripDate("");
+		this.scheduled = stripDate(OrgNodeTimeDate.TYPE.Scheduled);
+		this.deadline = stripDate(OrgNodeTimeDate.TYPE.Deadline);
+		this.timestamp = stripDate(OrgNodeTimeDate.TYPE.Timestamp);
 
 		stripProperties();
 		stripFileProperties();
 	}
-		
-	private String stripDate(String scheduled) {		
-		prepareCleanedPayload();
-		
-		final Pattern scheduledLine = Pattern.compile(scheduled
-				+ "\\s*<([^>]*)>(?:--<([^>]*)>)?");
-		Matcher matcher = scheduledLine.matcher(cleanPayload.toString());
-		
-		String result = "";
-		
-		if(matcher.find()) {
-			result = matcher.group(1);
-			
-			if(matcher.group(2) != null)
-				result += matcher.group(2);
-			
-			cleanPayload.delete(matcher.start(), matcher.end());
-		}	
-		
-		return result;
-	}
+	
 	
 	private ArrayList<String> stripProperties() {
 		prepareCleanedPayload();
@@ -163,11 +143,95 @@ public class OrgNodePayload {
 			return "";
 	}
 	
+	
+	private Pattern getTimestampMatcher(OrgNodeTimeDate.TYPE type) {
+		final String timestampPattern = "\\s*<([^>]*)>(?:--<([^>]*)>)?";
+		final String timestampPattern2 = "(?:!DEADLINE\\:|SCHEDULED\\:)" + timestampPattern + "";
+		
+		String pattern;
+		if(type == OrgNodeTimeDate.TYPE.Timestamp)
+			pattern = timestampPattern2;
+		else
+			pattern = OrgNodeTimeDate.typeToFormated(type) + timestampPattern;
+		
+		Pattern scheduledLine = Pattern.compile(pattern);
+		return scheduledLine;
+	}
+	
+	private String stripDate(OrgNodeTimeDate.TYPE type) {		
+		prepareCleanedPayload();
+
+		Matcher matcher = getTimestampMatcher(type).matcher(
+				cleanPayload.toString());
+		
+		String result = "";
+		
+		if(matcher.find()) {
+			result = matcher.group(1);
+			
+			if(matcher.group(2) != null)
+				result += matcher.group(2);
+			
+			cleanPayload.delete(matcher.start(), matcher.end());
+		}	
+		
+		return result;
+	}
+	
+	public void insertOrReplaceDate(OrgNodeTimeDate.TYPE type, String date) {
+		Matcher matcher = getTimestampMatcher(type).matcher(payload);
+		final String formatedDate = OrgNodeTimeDate.formatDate(type, date);
+		
+		if (matcher.find()) {
+			if (TextUtils.isEmpty(date)) // Date was set to empty
+				payload.delete(matcher.start(), matcher.end());
+			else // Replace existing date
+				payload.replace(matcher.start(), matcher.end(), formatedDate);
+		}
+		else if(TextUtils.isEmpty(date) == false) // Insert new date
+			payload.insert(0, formatedDate + "\n");
+	}
+	
+	public void modifyDates(String scheduled, String deadline, String timestamp) {
+		if(scheduled != null)
+			insertOrReplaceDate(OrgNodeTimeDate.TYPE.Scheduled, scheduled);
+			
+		if(deadline != null)
+			insertOrReplaceDate(OrgNodeTimeDate.TYPE.Deadline, deadline);
+		
+		if(timestamp != null)
+			insertOrReplaceDate(OrgNodeTimeDate.TYPE.Timestamp, timestamp);
+		
+		resetCachedValues();
+	}
+	
+	public String getScheduled() {
+		if(this.scheduled == null)
+			this.scheduled = stripDate(OrgNodeTimeDate.TYPE.Scheduled);
+		
+		return this.scheduled;
+	}
+	
+	public String getDeadline() {
+		if(this.deadline == null)
+			this.deadline = stripDate(OrgNodeTimeDate.TYPE.Deadline);
+		
+		return this.deadline;
+	}
+	
+	public String getTimestamp() {
+		if(this.timestamp == null)
+			this.timestamp = stripDate(OrgNodeTimeDate.TYPE.Timestamp);
+		
+		return this.timestamp;
+	}
+	
+	
 	public ArrayList<OrgNodeDate> getDates() {
 		ArrayList<OrgNodeDate> result = new ArrayList<OrgNodeDate>();
 		
 		if (this.scheduled == null)
-			this.scheduled = stripDate("SCHEDULED:");
+			this.scheduled = stripDate(OrgNodeTimeDate.TYPE.Scheduled);
 
 		try {
 			OrgNodeDate scheduledEntry = new OrgNodeDate(this.scheduled);
@@ -176,7 +240,7 @@ public class OrgNodePayload {
 		} catch (IllegalArgumentException e) {}
 		
 		if (this.deadline == null)
-			this.deadline = stripDate("DEADLINE:");
+			this.deadline = stripDate(OrgNodeTimeDate.TYPE.Deadline);
 		
 		try {
 			OrgNodeDate deadlineEntry = new OrgNodeDate(this.deadline);
@@ -185,7 +249,7 @@ public class OrgNodePayload {
 		} catch (IllegalArgumentException e) {}
 		
 		if (this.timestamp == null)
-			this.timestamp = stripDate("");
+			this.timestamp = stripDate(OrgNodeTimeDate.TYPE.Timestamp);
 
 		try {
 			OrgNodeDate timestampEntry = new OrgNodeDate(this.timestamp);
@@ -194,50 +258,6 @@ public class OrgNodePayload {
 		} catch (IllegalArgumentException e) {}
 		
 		return result;
-	}
-	
-	
-	public String getScheduled() {
-		if(this.scheduled == null)
-			this.scheduled = stripDate("SCHEDULED:");
-		
-		return this.scheduled;
-	}
-	
-	public String getDeadline() {
-		if(this.deadline == null)
-			this.deadline = stripDate("DEADLINE:");
-		
-		return this.deadline;
-	}
-	
-	public String getTimestamp() {
-		if(this.timestamp == null)
-			this.timestamp = stripDate("");
-		
-		return this.timestamp;
-	}
-	
-	public void modifyDates(String scheduled, String deadline, String timestamp) {
-		insertOrReplaceDate("SCHEDULED:", scheduled);
-		insertOrReplaceDate("DEADLINE:", deadline);
-		//insertOrReplaceDate("", timestamp);
-		resetCachedValues();
-	}
-	
-	// TODO Fix
-	public void insertOrReplaceDate(String dateType, String date) {
-		final Pattern schedulePattern = Pattern.compile(dateType + "\\s*<[^>]+>");
-		Matcher matcher = schedulePattern.matcher(payload);
-
-		if (matcher.find()) {
-			if (TextUtils.isEmpty(date))
-				payload.delete(matcher.start(), matcher.end());
-			else
-				payload.replace(matcher.start(), matcher.end(), date);
-		}
-		else if(TextUtils.isEmpty(date) == false)
-			payload.insert(0, date).append("\n");
 	}
 	
 	public long sumClocks() {
@@ -261,7 +281,5 @@ public class OrgNodePayload {
 		else
 			payload.insert(logbookIndex + ":LOGBOOK:".length(), "\n" + line);
 		return payload;
-	}
-	
+	}	
 }
-
