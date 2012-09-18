@@ -24,6 +24,7 @@ public class OrgTestUtils {
 			"   :ORIGINAL_ID: " + testId + "\n" +
 			"   :END:";
 	
+	
 	public static final String testTimestampNotInPayload = "2222-12-30";
 	public static final String testTimestampScheduled = "2012-05-18 Tue";
 	public static final String testTimestampDeadline = "2032-09-18 Thu";
@@ -32,6 +33,7 @@ public class OrgTestUtils {
 			"SCHEDULED: <" + testTimestampScheduled + "> DEADLINE: <" + testTimestampDeadline + ">\n" +
 			"<" + testTimestampTimestamp + ">  \n" +
 			testIdPayload;
+	public static final String testTimestampPayloadSimple = "<" + testTimestampTimestamp + ">";
 	
 	public static OrgNode getDefaultOrgNode() {
 		OrgNode node = new OrgNode();
