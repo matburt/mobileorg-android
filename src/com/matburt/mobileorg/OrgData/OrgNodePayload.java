@@ -29,6 +29,10 @@ public class OrgNodePayload {
 	
 	public void set(String payload) {
 		this.payload = new StringBuilder(payload);
+		resetCachedValues();
+	}
+	
+	private void resetCachedValues() {
 		this.cleanPayload = null;
 		this.scheduled = null;
 		this.deadline = null;
@@ -41,7 +45,7 @@ public class OrgNodePayload {
 	}
 	
 	public void add(String line) {
-		this.payload.append(line + "\n");
+		set(this.payload.toString() + "\n" + line + "\n");
 		this.cleanPayload = null;
 	}
 	
@@ -215,7 +219,10 @@ public class OrgNodePayload {
 	}
 	
 	public void modifyDates(String scheduled, String deadline, String timestamp) {
-		
+		insertOrReplaceDate("SCHEDULED", scheduled);
+		insertOrReplaceDate("DEADLINE", deadline);
+		//insertOrReplaceDate("", timestamp);
+		resetCachedValues();
 	}
 	
 	// TODO Fix

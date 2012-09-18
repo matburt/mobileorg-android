@@ -35,9 +35,6 @@ public class OrgNodeTimeDate {
 				year = Integer.parseInt(propm.group(2));
 				monthOfYear = Integer.parseInt(propm.group(3));
 				dayOfMonth = Integer.parseInt(propm.group(4));
-
-				Log.d("MobileOrg", "Parsed " + year);
-
 				
 				startTimeOfDay = Integer.parseInt(propm.group(6));
 				startMinute = Integer.parseInt(propm.group(7));

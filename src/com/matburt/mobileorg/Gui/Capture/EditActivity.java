@@ -373,6 +373,7 @@ public class EditActivity extends SherlockFragmentActivity implements
 
 	@Override
 	public void onDatesModified() {
+		Log.d("MobileOrg", "onDatesModified()");
 		PayloadFragment payloadFragment = (PayloadFragment) getSupportFragmentManager()
 				.findFragmentByTag("payloadFragment");
 		payloadFragment.switchToView();

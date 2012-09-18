@@ -3,7 +3,6 @@ package com.matburt.mobileorg.Gui.Capture;
 import android.app.Activity;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +13,7 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 import com.matburt.mobileorg.R;
+import com.matburt.mobileorg.Gui.Capture.DateTableRow.DateTableRowListener;
 import com.matburt.mobileorg.OrgData.OrgNode;
 import com.matburt.mobileorg.OrgData.OrgNodePayload;
 import com.matburt.mobileorg.OrgData.OrgNodeTimeDate;
@@ -84,15 +84,15 @@ public class DatesFragment extends SherlockFragment {
 		if(savedInstanceState != null) {
 			String timestamp = savedInstanceState.getString(DATES_TIMESTAMP);
 			if (timestamp != null)
-				this.timestampEntry = setupDate(timestamp, "",
+				this.timestampEntry = getDateTableRow(timestamp, "",
 						timestampRemoveListener);
 			String scheduled = savedInstanceState.getString(DATES_SCHEDULED);
 			if (scheduled != null)
-				this.scheduledEntry = setupDate(scheduled, "SCHEDULED",
+				this.scheduledEntry = getDateTableRow(scheduled, "SCHEDULED",
 						scheduledRemoveListener);
 			String deadline = savedInstanceState.getString(DATES_DEADLINE);
 			if (deadline != null)
-				this.deadlineEntry = setupDate(deadline, "DEADLINE",
+				this.deadlineEntry = getDateTableRow(deadline, "DEADLINE",
 						deadlineRemoveListener);
 		}
 	}
@@ -101,10 +101,51 @@ public class DatesFragment extends SherlockFragment {
 		removeDateEntries();
 		OrgNodePayload payload = this.node.getOrgNodePayload();
 		payload.getCleanedPayload(); // Hack
-		this.scheduledEntry = setupDate(payload.getScheduled(), "SCHEDULED", scheduledRemoveListener);
-		this.deadlineEntry = setupDate(payload.getDeadline(), "DEADLINE", deadlineRemoveListener);
-		this.timestampEntry = setupDate(payload.getTimestamp(), "", timestampRemoveListener);
+		
+		addDateScheduled(payload.getScheduled());
+		addDateDeadline(payload.getDeadline());
+		addDateTimestamp(payload.getTimestamp());
 	}
+
+	private void addDateTimestamp(String date) {
+		this.timestampEntry = getDateTableRow(date, "", timestampRemoveListener);
+	}
+	
+	private void addDateScheduled(String date) {
+		this.scheduledEntry = getDateTableRow(date, "SCHEDULED",
+				scheduledRemoveListener);
+	}
+	
+	private void addDateDeadline(String date) {
+		this.deadlineEntry = getDateTableRow(date, "DEADLINE",
+				deadlineRemoveListener);
+	}
+	
+	private DateTableRow getDateTableRow(String date, String title,
+			View.OnClickListener removeListener) {
+		try {
+			DateTableRow dateEntry = new DateTableRow(getActivity());
+			if (date != null) {
+				OrgNodeTimeDate timeDate = new OrgNodeTimeDate();
+				timeDate.parseDate(date);
+				dateEntry.set(this, datesView, removeListener, title, timeDate);
+			}
+			else
+				dateEntry.set(this, datesView, removeListener, title);
+
+			dateEntry.setDateTableRowListener(new DateTableRowListener() {
+				@Override
+				public void onDateTableRowModified() {
+					announceDatesModified();
+				}
+			});
+
+			return dateEntry;
+		} catch (IllegalArgumentException e) {
+			return null;
+		}
+	}
+
 	
 	private void removeDateEntries() {
 		if(this.scheduledEntry != null) {
@@ -132,21 +173,34 @@ public class DatesFragment extends SherlockFragment {
 		this.isModifiable = enabled;
 	}
 	
-	private int dateEntryId = 0;
-	
-	private DateTableRow setupDate(String date, String title, View.OnClickListener removeListener) {
-		try {
-			OrgNodeTimeDate timeDate = new OrgNodeTimeDate();
-			timeDate.parseDate(date);
-
-			DateTableRow dateEntry = new DateTableRow(getActivity());
-			dateEntry.setId(dateEntryId++);
-			dateEntry.set(this, datesView, removeListener, title, timeDate);
-			Log.d("MobileOrg", "Successfully set up " + title);
-			return dateEntry;
-		} catch (IllegalArgumentException e) {
-			return null;
+	private View.OnClickListener timestampRemoveListener = new View.OnClickListener() {
+		public void onClick(View v) {
+			datesView.removeView(timestampEntry);
+			timestampEntry = null;
+			announceDatesModified();
 		}
+	};
+	
+	private View.OnClickListener scheduledRemoveListener = new View.OnClickListener() {
+		public void onClick(View v) {
+			datesView.removeView(scheduledEntry);
+			scheduledEntry = null;
+			announceDatesModified();
+		}
+	};
+	
+	private View.OnClickListener deadlineRemoveListener = new View.OnClickListener() {
+		public void onClick(View v) {
+			datesView.removeView(deadlineEntry);
+			deadlineEntry = null;
+			announceDatesModified();
+		}
+	};
+
+	private void announceDatesModified() {
+		this.node.getOrgNodePayload().modifyDates(getScheduled(), getDeadline(), getTimestamp());
+		if(mListener != null)
+			mListener.onDatesModified();
 	}
 	
 	
@@ -180,60 +234,21 @@ public class DatesFragment extends SherlockFragment {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.menu_nodeedit_scheduled:
-			addDateScheduled();
+			addDateScheduled(null);
 			return true;
 
 		case R.id.menu_nodeedit_deadline:
-			addDateDeadline();
+			addDateDeadline(null);
 			return true;
 			
 		case R.id.menu_nodeedit_timestamp:
-			addDateTimestamp();
+			addDateTimestamp(null);
 			return true;
 		default:
 			return super.onOptionsItemSelected(item);
 		}
 	}
 	
-	private void addDateTimestamp() {
-		DateTableRow dateEntry = new DateTableRow(getActivity());
-		dateEntry.set(this, datesView, timestampRemoveListener, "");
-		this.timestampEntry = dateEntry;
-	}
-	
-	private void addDateScheduled() {
-		DateTableRow dateEntry = new DateTableRow(getActivity());
-		dateEntry.set(this, datesView, scheduledRemoveListener, "SCHEDULED");
-		this.scheduledEntry = dateEntry;
-	}
-	
-	private void addDateDeadline() {
-		DateTableRow dateEntry = new DateTableRow(getActivity());
-		dateEntry.set(this, datesView, deadlineRemoveListener, "DEADLINE");
-		this.deadlineEntry = dateEntry;
-	}
-	
-	private View.OnClickListener timestampRemoveListener = new View.OnClickListener() {
-		public void onClick(View v) {
-			datesView.removeView(timestampEntry);
-			timestampEntry = null;
-		}
-	};
-	
-	private View.OnClickListener scheduledRemoveListener = new View.OnClickListener() {
-		public void onClick(View v) {
-			datesView.removeView(scheduledEntry);
-			scheduledEntry = null;
-		}
-	};
-	
-	private View.OnClickListener deadlineRemoveListener = new View.OnClickListener() {
-		public void onClick(View v) {
-			datesView.removeView(deadlineEntry);
-			deadlineEntry = null;
-		}
-	};
-
 	
 	public String getTimestamp() {
 		if(this.timestampEntry == null || TextUtils.isEmpty(this.timestampEntry.getDate()))

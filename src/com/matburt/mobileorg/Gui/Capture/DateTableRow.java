@@ -31,6 +31,16 @@ public class DateTableRow extends TableRow {
 	private Button removeButton;
 
 	private OrgNodeTimeDate timeDateContainer;
+
+	private DateTableRowListener listener = null;
+	
+	public interface DateTableRowListener {
+		public abstract void onDateTableRowModified();
+	}
+	
+	public void setDateTableRowListener(DateTableRowListener listener) {
+		this.listener = listener;
+	}
 	
 	public DateTableRow(Context context) {
 		super(context);
@@ -133,7 +143,9 @@ public class DateTableRow extends TableRow {
 	}
 
 	private void updateStartTime() {
-		startTimeButton.setText(String.format("%02d:%02d", this.timeDateContainer.startTimeOfDay, this.timeDateContainer.startMinute));
+		startTimeButton.setText(String.format("%02d:%02d",
+				this.timeDateContainer.startTimeOfDay,
+				this.timeDateContainer.startMinute));
 	}
 	
 	private void setEndTime(int timeOfDay, int minute) {
@@ -143,7 +155,9 @@ public class DateTableRow extends TableRow {
 	}
 
 	private void updateEndTime() {
-		endTimeButton.setText(String.format("%02d:%02d", this.timeDateContainer.endTimeOfDay, this.timeDateContainer.endMinute));
+		endTimeButton.setText(String.format("%02d:%02d",
+				this.timeDateContainer.endTimeOfDay,
+				this.timeDateContainer.endMinute));
 	}
 
 	private void setDate(int year, int monthOfYear, int dayOfMonth) {
@@ -155,7 +169,9 @@ public class DateTableRow extends TableRow {
 	}
 
 	private void updateDate() {
-		dateButton.setText(String.format("%d-%02d-%02d", this.timeDateContainer.year, this.timeDateContainer.monthOfYear,
+		dateButton.setText(String.format("%d-%02d-%02d",
+				this.timeDateContainer.year,
+				this.timeDateContainer.monthOfYear,
 				this.timeDateContainer.dayOfMonth));
 	}
 
@@ -163,21 +179,29 @@ public class DateTableRow extends TableRow {
 		public void onDateSet(DatePicker view, int year, int monthOfYear,
 				int dayOfMonth) {
 			setDate(year, monthOfYear + 1, dayOfMonth);
+			notifyListenerOfChange();
 		}
 	};
 
 	private TimePickerDialog.OnTimeSetListener startTimeChangeListener = new TimePickerDialog.OnTimeSetListener() {
 		public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
 			setStartTime(hourOfDay, minute);
-		}
-	};
-	
-	private TimePickerDialog.OnTimeSetListener endTimeChangeListener = new TimePickerDialog.OnTimeSetListener() {
-		public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-			setEndTime(hourOfDay, minute);		
+			notifyListenerOfChange();
 		}
 	};
 
+	private TimePickerDialog.OnTimeSetListener endTimeChangeListener = new TimePickerDialog.OnTimeSetListener() {
+		public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+			setEndTime(hourOfDay, minute);
+			notifyListenerOfChange();
+		}
+	};
+
+	private void notifyListenerOfChange() {
+		if(this.listener != null)
+			this.listener.onDateTableRowModified();
+	}
+	
 	private class StartTimePickerDialogFragment extends DialogFragment {
 		private OnTimeSetListener callback;
 
