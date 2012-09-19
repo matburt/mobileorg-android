@@ -290,7 +290,7 @@ public class OrgNode {
 		if(id < 0) // Node is not in database
 			return true;
 		
-		if(id >= 0 && parentId == -1) // Top-level node
+		if(id >= 0 && parentId < 0) // Top-level node
 			return false;
 		
 		try {
@@ -370,7 +370,8 @@ public class OrgNode {
 	}
 	
 	public String getPayload() {
-		return this.payload;
+		preparePayload();
+		return this.orgNodePayload.get();
 	}
 	
 	public void setPayload(String payload) {
@@ -442,7 +443,6 @@ public class OrgNode {
 			setPayload(newNode.getPayload());
 		}
 		if (tags != null && !tags.equals(newNode.tags)) {
-			// TODO Use node.getTagsWithoutInheritet() instead
 			edits.add(new OrgEdit(this, OrgEdit.TYPE.TAGS, newNode.tags, resolver));
 			this.tags = newNode.tags;
 		}
