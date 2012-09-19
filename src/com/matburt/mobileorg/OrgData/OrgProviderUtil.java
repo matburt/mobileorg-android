@@ -3,6 +3,8 @@ package com.matburt.mobileorg.OrgData;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import android.content.ContentResolver;
 import android.content.ContentValues;
@@ -176,6 +178,28 @@ public class OrgProviderUtil {
 		
 		Collections.reverse(nodes);
 		return nodes;
+	}
+	
+	public static OrgNode getOrgNodeFromOlpPath(String olpPath, ContentResolver resolver) throws OrgNodeNotFoundException, OrgFileNotFoundException {
+		Matcher matcher = Pattern.compile("olp:([^:]+):?" + "(.*)").matcher(olpPath);
+		
+		String filename;
+		String[] nodes = new String[0];
+		if(matcher.find()) {
+			filename = matcher.group(1);
+			
+			if(matcher.group(2) != null && matcher.group(2).trim().equals("") == false) {
+				nodes = matcher.group(2).split("/");
+			}
+		} else
+			throw new IllegalArgumentException("Olp path " + olpPath + " is not valid");
+
+		OrgNode node = new OrgFile(filename, resolver).getOrgNode(resolver);
+		
+		for(String nodeName: nodes)
+			node = node.getChild(nodeName, resolver);
+		
+		return node;
 	}
 	
 	public static StringBuilder nodesToString(long node_id, long level, ContentResolver resolver) {

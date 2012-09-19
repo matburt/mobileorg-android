@@ -222,14 +222,15 @@ public class OrgNode {
 		return result;
 	}
 	
-	public OrgNode getChild(String name, ContentResolver resolver) {
+	public OrgNode getChild(String name, ContentResolver resolver) throws OrgNodeNotFoundException {
 		ArrayList<OrgNode> children = getChildren(resolver);
 		
 		for(OrgNode child: children) {
 			if(child.name.equals(name))
 				return child;
 		}
-		return null;
+		throw new OrgNodeNotFoundException("Couln't find child of node "
+				+ this.name + " with name " + name);
 	}
 	
 	public boolean hasChildren(ContentResolver resolver) {
@@ -581,9 +582,10 @@ public class OrgNode {
 
 		try {
 			OrgNode parent = getParent(resolver);
-			OrgNode archiveNode = parent.getChild(ARCHIVE_NODE, resolver);
-			
-			if (archiveNode == null) {
+			OrgNode archiveNode;
+			try {
+				archiveNode = parent.getChild(ARCHIVE_NODE, resolver);
+			} catch (OrgNodeNotFoundException e) {
 				archiveNode = new OrgNode();
 				archiveNode.name = ARCHIVE_NODE;
 				archiveNode.parentId = parent.id;

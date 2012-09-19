@@ -12,7 +12,9 @@ import com.matburt.mobileorg.OrgData.OrgNode;
 import com.matburt.mobileorg.OrgData.OrgProvider;
 import com.matburt.mobileorg.OrgData.OrgContract.Edits;
 import com.matburt.mobileorg.OrgData.OrgContract.OrgData;
+import com.matburt.mobileorg.OrgData.OrgProviderUtil;
 import com.matburt.mobileorg.test.util.OrgTestUtils;
+import com.matburt.mobileorg.util.OrgFileNotFoundException;
 import com.matburt.mobileorg.util.OrgNodeNotFoundException;
 
 public class OrgNodeTest extends ProviderTestCase2<OrgProvider> {
@@ -207,5 +209,24 @@ public class OrgNodeTest extends ProviderTestCase2<OrgProvider> {
 		
 		String olp = node.getOlpId(resolver);
 		assertEquals(OrgTestUtils.setupParentScenarioChild2ChildOlpId, olp);
+	}
+	
+	public void testGetNodeFromOlpLink() throws OrgNodeNotFoundException, OrgFileNotFoundException {
+		OrgNode node = OrgTestUtils.setupParentScenario(resolver);
+		
+		String olp = node.getOlpId(resolver);
+		OrgNode nodeFromOlpPath = OrgProviderUtil.getOrgNodeFromOlpPath(olp, resolver);
+		assertEquals(node.id, nodeFromOlpPath.id);
+	}
+	
+	public void testGetNodeFromOlpFileLink() throws OrgNodeNotFoundException, OrgFileNotFoundException {
+		OrgTestUtils.setupParentScenario(resolver);
+		final String filename = OrgTestUtils.defaultTestfilename;
+		OrgNode fileNode = OrgProviderUtil.getOrgNodeFromFilename(filename, resolver);
+		final String olp = "olp:" + filename;
+		
+		OrgNode nodeFromOlpPath = OrgProviderUtil.getOrgNodeFromOlpPath(olp, resolver);
+		
+		assertEquals(fileNode.id, nodeFromOlpPath.id);
 	}
 }

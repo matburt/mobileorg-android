@@ -11,4 +11,8 @@ public class OrgNodeNotFoundException extends Exception {
 	public OrgNodeNotFoundException(String message) {
 		super(message);
 	}
+
+	public OrgNodeNotFoundException(OrgFileNotFoundException e) {
+		super(e);
+	}
 }

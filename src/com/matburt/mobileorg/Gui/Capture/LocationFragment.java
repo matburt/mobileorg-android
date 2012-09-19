@@ -144,10 +144,13 @@ public class LocationFragment extends SherlockFragment {
 	public void addChild(OrgNode spinnerNode, String spinnerSelection) {
 		OrgNode childNode;
 		if (spinnerNode != null) {
-			childNode = spinnerNode.getChild(spinnerSelection, resolver);
-			
-			if(childNode == null || childNode.getChildren(resolver).size() == 0)
+			try {
+				childNode = spinnerNode.getChild(spinnerSelection, resolver);
+				if(childNode.getChildren(resolver).size() == 0)
+					return;
+			} catch (OrgNodeNotFoundException e) {
 				return;
+			}
 		} else {
 			try {
 				childNode = OrgProviderUtil.getOrgNodeFromFileAlias(
@@ -231,7 +234,7 @@ public class LocationFragment extends SherlockFragment {
 			try {
 				OrgNode child = parent.getChild(selection, resolver);
 				return child;
-			} catch (IllegalArgumentException e) {
+			} catch (OrgNodeNotFoundException e) {
 				throw new IllegalStateException("Can't determine location");
 			}
 		} else {

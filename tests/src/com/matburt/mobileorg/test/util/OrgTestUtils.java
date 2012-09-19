@@ -58,21 +58,21 @@ public class OrgTestUtils {
 	public static OrgNode setupParentScenario(ContentResolver resolver) {
 		OrgFile file = OrgProviderUtil.getOrCreateFile(defaultTestfilename,
 				defaultTestfileAlias, resolver);
-		Log.d("MobileOrg", "*** Created file " + file.nodeId);
+		//Log.d("MobileOrg", "*** Created file " + file.nodeId);
 		
 		OrgNode child = new OrgNode();
 		child.name = "child";
 		child.parentId = file.nodeId;
 		child.fileId = file.id;
 		child.write(resolver);
-		Log.d("MobileOrg", "*** Created child " + child.id);
+		//Log.d("MobileOrg", "*** Created child " + child.id);
 		
 		OrgNode child2 = new OrgNode();
 		child2.name = "child2";
 		child2.parentId = file.nodeId;
 		child2.fileId = file.id;
 		child2.write(resolver);
-		Log.d("MobileOrg", "*** Created child2 " + child2.id);
+		//Log.d("MobileOrg", "*** Created child2 " + child2.id);
 
 		
 		OrgNode child2Child = new OrgNode();
@@ -80,7 +80,7 @@ public class OrgTestUtils {
 		child2Child.parentId = child2.id;
 		child2Child.fileId = file.id;
 		child2Child.write(resolver);
-		Log.d("MobileOrg", "*** Created child2Child " + child2Child.id);
+		//Log.d("MobileOrg", "*** Created child2Child " + child2Child.id);
 		
 		return child2Child;
 	}
