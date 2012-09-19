@@ -6,7 +6,6 @@ import com.matburt.mobileorg.OrgData.OrgNodeTimeDate;
 import com.matburt.mobileorg.test.util.OrgTestUtils;
 
 import android.test.AndroidTestCase;
-import android.util.Log;
 
 public class OrgNodePayloadTest extends AndroidTestCase {
 
@@ -88,7 +87,6 @@ public class OrgNodePayloadTest extends AndroidTestCase {
 		OrgNodePayload payload = new OrgNodePayload(OrgTestUtils.testIdAgendasPayload);
 		final String newTimestamp = OrgTestUtils.testTimestampNotInPayload;
 		payload.insertOrReplaceDate(OrgNodeTimeDate.TYPE.Timestamp, newTimestamp);
-		Log.d("MobileOrg", "Got : " + payload.get());
 		assertEquals(newTimestamp, payload.getTimestamp());
 	}
 }
