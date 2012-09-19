@@ -27,42 +27,42 @@ public class OrgNodePayloadTest extends AndroidTestCase {
 	}
 	
 	
-	public void testGetScheduled() {
+	public void testScheduledGet() {
 		OrgNodePayload payload = new OrgNodePayload(OrgTestUtils.testTimestampPayload);
 		assertEquals(OrgTestUtils.testTimestampScheduled, payload.getScheduled());
 	}
 	
-	public void testGetDeadline() {
+	public void testDeadlineGet() {
 		OrgNodePayload payload = new OrgNodePayload(OrgTestUtils.testTimestampPayload);
 		assertEquals(OrgTestUtils.testTimestampDeadline, payload.getDeadline());
 	}
 	
-	public void testGetTimestampSimple() {
+	public void testTimestampGetSimple() {
 		OrgNodePayload payload = new OrgNodePayload(OrgTestUtils.testTimestampPayloadSimple);
 		assertEquals(OrgTestUtils.testTimestampTimestamp, payload.getTimestamp());
 	}
 	
-	public void testGetTimestamp() {
+	public void testTimestampGet() {
 		OrgNodePayload payload = new OrgNodePayload(OrgTestUtils.testTimestampPayload);
 		assertEquals(OrgTestUtils.testTimestampTimestamp, payload.getTimestamp());
 	}
 	
 	
-	public void testModifyScheduled() {
+	public void testScheduledModify() {
 		OrgNodePayload payload = new OrgNodePayload(OrgTestUtils.testTimestampPayload);
 		final String newTimestamp = OrgTestUtils.testTimestampNotInPayload;
 		payload.insertOrReplaceDate(OrgNodeTimeDate.TYPE.Scheduled, newTimestamp);
 		assertEquals(newTimestamp, payload.getScheduled());
 	}
 	
-	public void testModifyDeadline() {
+	public void testDeadlineModify() {
 		OrgNodePayload payload = new OrgNodePayload(OrgTestUtils.testTimestampPayload);
 		final String newTimestamp = OrgTestUtils.testTimestampNotInPayload;
 		payload.insertOrReplaceDate(OrgNodeTimeDate.TYPE.Deadline, newTimestamp);
 		assertEquals(newTimestamp, payload.getDeadline());
 	}
 
-	public void testModifyTimestamp() {
+	public void testTimestampModify() {
 		OrgNodePayload payload = new OrgNodePayload(OrgTestUtils.testTimestampPayload);
 		final String newTimestamp = OrgTestUtils.testTimestampNotInPayload;
 		payload.insertOrReplaceDate(OrgNodeTimeDate.TYPE.Timestamp, newTimestamp);
@@ -70,21 +70,21 @@ public class OrgNodePayloadTest extends AndroidTestCase {
 	}
 	
 	
-	public void testInsertNewScheduled() {
+	public void testScheduledInsertNew() {
 		OrgNodePayload payload = new OrgNodePayload(OrgTestUtils.testIdAgendasPayload);
 		final String newTimestamp = OrgTestUtils.testTimestampNotInPayload;
 		payload.insertOrReplaceDate(OrgNodeTimeDate.TYPE.Scheduled, newTimestamp);
 		assertEquals(newTimestamp, payload.getScheduled());
 	}
 	
-	public void testInsertNewDeadline() {
+	public void testDeadlineInsertNew() {
 		OrgNodePayload payload = new OrgNodePayload(OrgTestUtils.testIdAgendasPayload);
 		final String newTimestamp = OrgTestUtils.testTimestampNotInPayload;
 		payload.insertOrReplaceDate(OrgNodeTimeDate.TYPE.Deadline, newTimestamp);
 		assertEquals(newTimestamp, payload.getDeadline());
 	}
 
-	public void testInsertNewTimestamp() {
+	public void testTimestampInsertNew() {
 		OrgNodePayload payload = new OrgNodePayload(OrgTestUtils.testIdAgendasPayload);
 		final String newTimestamp = OrgTestUtils.testTimestampNotInPayload;
 		payload.insertOrReplaceDate(OrgNodeTimeDate.TYPE.Timestamp, newTimestamp);

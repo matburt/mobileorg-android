@@ -102,16 +102,20 @@ public class OrgNodePayload {
 	
 	
 	private Pattern getTimestampMatcher(OrgNodeTimeDate.TYPE type) {
-		final String timestampPattern = "<([^>]*)>(?:--<([^>]*)>)?";
+		final String timestampPattern = "\\s*<([^>]*)>(?:--<([^>]*)>)?";
+		
+		final String timestampPatternNonCapture = "<(?:[^>]+)>(?:--<(?:[^>]+)>)?";
 
-		final String timestampPatternNonCapture = "(?:\\s*<(?:[^>]*)>)";
-		final String timestampPattern2 = "(?:(?!SCHEDULED\\:|DEADLINE\\:)" + timestampPatternNonCapture + ")*\\s*(" + timestampPattern + ")";
+		final String timestampPatternWorking = "(?:(?<!(SCHEDULED:|DEADLINE:)\\s)" + timestampPatternNonCapture + ")" +
+											   "(" + timestampPattern + ")";
+				
+		// working java regex (?<!(A|B)\s*)(<[^>]+>)
 		
 		String pattern;
 		if(type == OrgNodeTimeDate.TYPE.Timestamp)
-			pattern = timestampPattern2;
+			pattern = timestampPatternWorking;
 		else
-			pattern = "(" + OrgNodeTimeDate.typeToFormated(type) + "\\s*" + timestampPattern + ")";
+			pattern = "(" + OrgNodeTimeDate.typeToFormated(type) + timestampPattern + ")";
 		
 		Pattern scheduledLine = Pattern.compile(pattern);
 		return scheduledLine;
@@ -131,7 +135,7 @@ public class OrgNodePayload {
 			if(matcher.group(3) != null)
 				result += matcher.group(3);
 			
-			cleanPayload.delete(matcher.start(), matcher.end());
+			cleanPayload.delete(matcher.start(1), matcher.end());
 		}
 		
 		return result;
