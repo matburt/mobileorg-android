@@ -1,6 +1,7 @@
 package com.matburt.mobileorg.OrgData;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 
 import android.content.ContentResolver;
@@ -159,7 +160,25 @@ public class OrgProviderUtil {
 		return list;
 	}
 	
-	static StringBuilder nodesToString(long node_id, long level, ContentResolver resolver) {
+	public static ArrayList<OrgNode> getOrgNodePathFromTopLevel(long node_id, ContentResolver resolver) {
+		ArrayList<OrgNode> nodes = new ArrayList<OrgNode>();
+		
+		long currentId = node_id;
+		while(currentId >= 0) {
+			try {
+				OrgNode node = new OrgNode(currentId, resolver);
+				nodes.add(node);
+				currentId = node.parentId;
+			} catch (OrgNodeNotFoundException e) {
+				throw new IllegalStateException("Couldn't build entire path to root from a given node");
+			}
+		}
+		
+		Collections.reverse(nodes);
+		return nodes;
+	}
+	
+	public static StringBuilder nodesToString(long node_id, long level, ContentResolver resolver) {
 		StringBuilder result = new StringBuilder();
 		
 		OrgNode node;
@@ -281,7 +300,6 @@ public class OrgProviderUtil {
 		Cursor cursor = resolver.query(OrgData.CONTENT_URI, OrgData.DEFAULT_COLUMNS, whereQuery,
 				new String[] { Long.toString(file.id) }, null);
 		cursor.moveToFirst();
-		Log.d("MobileOrg", "Found " + cursor.getCount() + " entries");
 		return cursor;
 	}
 	

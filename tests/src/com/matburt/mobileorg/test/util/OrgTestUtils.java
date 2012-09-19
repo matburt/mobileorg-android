@@ -35,6 +35,7 @@ public class OrgTestUtils {
 			testIdPayload;
 	public static final String testTimestampPayloadSimple = "<" + testTimestampTimestamp + ">";
 	
+	
 	public static OrgNode getDefaultOrgNode() {
 		OrgNode node = new OrgNode();
 		node.name = "title";
@@ -52,6 +53,8 @@ public class OrgTestUtils {
 		return node;
 	}
 	
+	
+	public static final String setupParentScenarioChild2ChildOlpId = "olp:" + defaultTestfilename + ":" + "child2/child2Child";
 	public static OrgNode setupParentScenario(ContentResolver resolver) {
 		OrgFile file = OrgProviderUtil.getOrCreateFile(defaultTestfilename,
 				defaultTestfileAlias, resolver);

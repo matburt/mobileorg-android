@@ -267,7 +267,7 @@ public class OrgNode {
 			return parent.getChildrenStringArray(resolver);
 		}
 		catch (OrgNodeNotFoundException e) {
-			throw new IllegalArgumentException("Couln't get parent for node " + name);
+			throw new IllegalArgumentException("Couldn't get parent for node " + name);
 		}
 	}
 	
@@ -314,53 +314,54 @@ public class OrgNode {
 
 		return true;
 	}
+
 	
 	/**
-	 * This is called when generating the olp link to the node. This path can't
-	 * have any "[" or "]" in it's path. For example having [1/3] in the title
-	 * will prevent org-mode from applying the edit. This method will strip that
-	 * out of the name.
-	 */
-	private String getOlpName() {
-		return name.replaceAll("\\[[^\\]]*\\]", "");
-	}
-	
-	/**
-	 * @return The :ID: or :ORIGINAL_ID: field of the payload.
+	 * @return The :ID:, :ORIGINAL_ID: or olp link of node.
 	 */
 	public String getNodeId(ContentResolver resolver) {
 		preparePayload();
 
 		String id = orgNodePayload.getId();				
-		if(id == null)
-			return constructOlpId(resolver);
-		
-		return id;
+		if(id != null && id.equals("") == false)
+			return id;
+		else
+			return getOlpId(resolver);
 	}
 	
-	public String constructOlpId(ContentResolver resolver) {
+	public String getOlpId(ContentResolver resolver) {
 		StringBuilder result = new StringBuilder();
-		result.insert(0, name);
-
-		long currentParentId = this.parentId;
-		while (currentParentId > 0) {
-			OrgNode node;
-			try {
-				node = new OrgNode(currentParentId, resolver);
-				currentParentId = node.parentId;
-
-				if (currentParentId > 0)
-					result.insert(0, node.getOlpName() + "/");
-				else { // Get file nodes real name
-					String filename = node.getFilename(resolver);
-					result.insert(0, filename + ":");
-				}
-			} catch (OrgNodeNotFoundException e) {
-			}
+		
+		ArrayList<OrgNode> nodesFromRoot;
+		try {
+			nodesFromRoot = OrgProviderUtil.getOrgNodePathFromTopLevel(
+					parentId, resolver);
+		} catch (IllegalStateException e) {
+			return "";
 		}
-
-		result.insert(0, "olp:");
+		
+		if(nodesFromRoot.size() == 0)
+			return "";
+			
+		OrgNode topNode = nodesFromRoot.get(0);
+		nodesFromRoot.remove(0);
+		result.append("olp:" + topNode.getFilename(resolver) + ":");
+		
+		for(OrgNode node: nodesFromRoot)
+			result.append(node.getStrippedNameForOlpPathLink() + "/");
+		
+		result.append(this.name);
 		return result.toString();
+	}
+	
+	/**
+	 * Olp paths containing certain symbols can't be applied by org-mode. To
+	 * prevent node names from injecting bad symbols, we strip them out here.
+	 */
+	private String getStrippedNameForOlpPathLink() {
+		String result = this.name;
+		result = result.replaceAll("\\[[^\\]]*\\]", ""); // Strip out "[*]"
+		return result;
 	}
 	
 	

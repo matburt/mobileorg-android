@@ -365,6 +365,21 @@ public class EditActivity extends SherlockFragmentActivity implements
 		OrgUtils.announceUpdate(this);
 	}
 	
+	public OrgNode ensureNodeStillExists(OrgNode node) {
+		try {
+			OrgNode resultNode = new OrgNode(node.id, resolver);
+			return node; // Everything is fine, node still exists
+		} catch (OrgNodeNotFoundException e) {}
+
+		// TODO Use olp path to find new node
+		
+		
+		
+		// TODO Else return capture node
+		
+		return node;
+	}
+	
 	public OrgNode getEditedNode() {
 		HeadingFragment headingFragment = (HeadingFragment) getSupportFragmentManager()
 				.findFragmentByTag("headingFragment");

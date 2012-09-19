@@ -147,7 +147,7 @@ public class OutlineActivity extends SherlockActivity
 		if(this.node_id > -1) {
 			try {
 				OrgNode node = new OrgNode(this.node_id, getContentResolver());
-				final String subTitle = node.constructOlpId(getContentResolver()).substring("olp:".length());
+				final String subTitle = node.getOlpId(getContentResolver()).substring("olp:".length());
 				this.getSupportActionBar().setSubtitle(subTitle);
 			} catch (OrgNodeNotFoundException e) {
 				refreshDisplay();

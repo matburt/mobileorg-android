@@ -201,4 +201,11 @@ public class OrgNodeTest extends ProviderTestCase2<OrgProvider> {
 				
 		assertEquals(baseOfEdits + 1, numberOfEdits);
 	}
+	
+	public void testGetOlpLink() {
+		OrgNode node = OrgTestUtils.setupParentScenario(resolver);
+		
+		String olp = node.getOlpId(resolver);
+		assertEquals(OrgTestUtils.setupParentScenarioChild2ChildOlpId, olp);
+	}
 }
