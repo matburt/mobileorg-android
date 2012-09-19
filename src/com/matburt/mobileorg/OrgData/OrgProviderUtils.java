@@ -10,7 +10,6 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.matburt.mobileorg.OrgData.OrgContract.Edits;
 import com.matburt.mobileorg.OrgData.OrgContract.Files;
@@ -22,7 +21,7 @@ import com.matburt.mobileorg.util.FileUtils;
 import com.matburt.mobileorg.util.OrgFileNotFoundException;
 import com.matburt.mobileorg.util.OrgNodeNotFoundException;
 
-public class OrgProviderUtil {
+public class OrgProviderUtils {
 	
 	public static HashMap<String, String> getFileChecksums(ContentResolver resolver) {
 		HashMap<String, String> checksums = new HashMap<String, String>();
@@ -181,6 +180,9 @@ public class OrgProviderUtil {
 	}
 	
 	public static OrgNode getOrgNodeFromOlpPath(String olpPath, ContentResolver resolver) throws OrgNodeNotFoundException, OrgFileNotFoundException {
+		if(olpPath == null || olpPath.equals(""))
+			throw new IllegalArgumentException("Empty Olp path received");
+		
 		Matcher matcher = Pattern.compile("olp:([^:]+):?" + "(.*)").matcher(olpPath);
 		
 		String filename;

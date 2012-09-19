@@ -34,7 +34,7 @@ import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Gui.Capture.EditActivity;
 import com.matburt.mobileorg.OrgData.OrgContract.OrgData;
 import com.matburt.mobileorg.OrgData.OrgNode;
-import com.matburt.mobileorg.OrgData.OrgProviderUtil;
+import com.matburt.mobileorg.OrgData.OrgProviderUtils;
 import com.matburt.mobileorg.Services.SyncService;
 import com.matburt.mobileorg.Settings.SettingsActivity;
 import com.matburt.mobileorg.Settings.WizardActivity;
@@ -135,7 +135,7 @@ public class OutlineActivity extends SherlockActivity
 	
     
     private String getChangesString() {
-    	int changes = OrgProviderUtil.getChangesCount(getContentResolver());
+    	int changes = OrgProviderUtils.getChangesCount(getContentResolver());
     	if(changes > 0)
     		return "[" + changes + "]";
     	else
@@ -147,7 +147,9 @@ public class OutlineActivity extends SherlockActivity
 		if(this.node_id > -1) {
 			try {
 				OrgNode node = new OrgNode(this.node_id, getContentResolver());
-				final String subTitle = node.getOlpId(getContentResolver()).substring("olp:".length());
+				String subTitle = node.getOlpId(getContentResolver());
+				if(subTitle.startsWith("olp:"))
+					subTitle = subTitle.substring("olp:".length());
 				this.getSupportActionBar().setSubtitle(subTitle);
 			} catch (OrgNodeNotFoundException e) {
 				refreshDisplay();

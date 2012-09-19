@@ -23,7 +23,7 @@ import android.widget.TextView;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.OrgData.OrgFileParser;
 import com.matburt.mobileorg.OrgData.OrgNode;
-import com.matburt.mobileorg.OrgData.OrgProviderUtil;
+import com.matburt.mobileorg.OrgData.OrgProviderUtils;
 import com.matburt.mobileorg.util.OrgNodeNotFoundException;
 
 public class OutlineCursorAdapter extends SimpleCursorAdapter {
@@ -127,7 +127,7 @@ public class OutlineCursorAdapter extends SimpleCursorAdapter {
 		if(TextUtils.isEmpty(todo) == false) {
 			Spannable todoSpan = new SpannableString(todo + " ");
 			
-			if(OrgProviderUtil.isTodoActive(todo, resolver))
+			if(OrgProviderUtils.isTodoActive(todo, resolver))
 				todoSpan.setSpan(new ForegroundColorSpan(Color.RED), 0,
 						todo.length(), 0);
 			else

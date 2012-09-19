@@ -21,7 +21,7 @@ import android.text.format.Time;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.OrgData.OrgNode;
 import com.matburt.mobileorg.OrgData.OrgNodeDate;
-import com.matburt.mobileorg.OrgData.OrgProviderUtil;
+import com.matburt.mobileorg.OrgData.OrgProviderUtils;
 import com.matburt.mobileorg.util.OrgFileNotFoundException;
 import com.matburt.mobileorg.util.OrgNodeNotFoundException;
 
@@ -48,7 +48,7 @@ public class CalendarSyncService {
 	public void syncFiles() {
 		this.deleteAllEntries(context);
 		
-		ArrayList<String> files = OrgProviderUtil.getFilenames(resolver);
+		ArrayList<String> files = OrgProviderUtils.getFilenames(resolver);
 		files.remove("agendas.org");
 		for(String filename: files)
 			insertFileEntries(filename);
@@ -108,10 +108,18 @@ public class CalendarSyncService {
 	
 	
 	public void insertNode(long node_id) {
+		OrgNode node;
 		try {
-			OrgNode node = new OrgNode(node_id, resolver);
-			insertNode(node, node.getFilename(resolver));
-		} catch (OrgNodeNotFoundException e) {}
+			node = new OrgNode(node_id, resolver);
+		} catch (OrgNodeNotFoundException e) {
+			return;
+		}
+
+		try {
+			insertNode(node, node.getOrgFile(resolver).filename);
+		} catch (OrgFileNotFoundException e) {
+			insertNode(node, "");
+		}
 	}
 	
 	private void insertFileEntries(String filename) throws IllegalArgumentException {
@@ -119,7 +127,7 @@ public class CalendarSyncService {
 		Cursor scheduled;
 		
 		try {
-			scheduled = OrgProviderUtil.getFileSchedule(filename, useHabits,
+			scheduled = OrgProviderUtils.getFileSchedule(filename, useHabits,
 					resolver);
 		} catch (OrgFileNotFoundException e) {
 			return;
@@ -138,7 +146,7 @@ public class CalendarSyncService {
 	
 	private void insertNode(OrgNode node, String filename)
 			throws IllegalArgumentException {
-		boolean isActive = OrgProviderUtil.isTodoActive(node.todo, resolver);
+		boolean isActive = OrgProviderUtils.isTodoActive(node.todo, resolver);
 
 		for (OrgNodeDate date : node.getOrgNodePayload().getDates()) {
 			insertEntry(node.name, isActive, node.getCleanedPayload(),

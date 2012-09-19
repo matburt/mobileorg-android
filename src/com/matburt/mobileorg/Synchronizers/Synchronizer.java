@@ -20,7 +20,7 @@ import com.matburt.mobileorg.OrgData.OrgContract.Files;
 import com.matburt.mobileorg.OrgData.OrgEdit;
 import com.matburt.mobileorg.OrgData.OrgFile;
 import com.matburt.mobileorg.OrgData.OrgFileParser;
-import com.matburt.mobileorg.OrgData.OrgProviderUtil;
+import com.matburt.mobileorg.OrgData.OrgProviderUtils;
 import com.matburt.mobileorg.util.FileUtils;
 import com.matburt.mobileorg.util.OrgFileNotFoundException;
 
@@ -139,7 +139,7 @@ public class Synchronizer {
 
 		HashMap<String, String> remoteChecksums = OrgFileParser
 				.getChecksums(remoteChecksumContents);
-		HashMap<String, String> localChecksums = OrgProviderUtil.getFileChecksums(resolver);
+		HashMap<String, String> localChecksums = OrgProviderUtils.getFileChecksums(resolver);
 		
 		ArrayList<String> filesToGet = new ArrayList<String>();
 
@@ -162,10 +162,10 @@ public class Synchronizer {
 
 		remoteIndexContents = FileUtils.read(syncher.getRemoteFile(INDEX_FILE));
 
-		OrgProviderUtil.setTodos(OrgFileParser.getTodosFromIndex(remoteIndexContents), resolver);
-		OrgProviderUtil.setPriorities(OrgFileParser
+		OrgProviderUtils.setTodos(OrgFileParser.getTodosFromIndex(remoteIndexContents), resolver);
+		OrgProviderUtils.setPriorities(OrgFileParser
 				.getPrioritiesFromIndex(remoteIndexContents), resolver);
-		OrgProviderUtil.setTags(OrgFileParser.getTagsFromIndex(remoteIndexContents), resolver);
+		OrgProviderUtils.setTags(OrgFileParser.getTagsFromIndex(remoteIndexContents), resolver);
 		HashMap<String, String> filenameMap = OrgFileParser
 				.getFilesFromIndex(remoteIndexContents);
 

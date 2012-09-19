@@ -4,7 +4,7 @@ import android.content.ContentResolver;
 
 import com.matburt.mobileorg.OrgData.OrgFile;
 import com.matburt.mobileorg.OrgData.OrgNode;
-import com.matburt.mobileorg.OrgData.OrgProviderUtil;
+import com.matburt.mobileorg.OrgData.OrgProviderUtils;
 import com.matburt.mobileorg.util.OrgFileNotFoundException;
 
 public class OrgTestUtils {
@@ -58,7 +58,7 @@ public class OrgTestUtils {
 	
 	public static final String setupParentScenarioChild2ChildOlpId = "olp:" + defaultTestfilename + ":" + "child2/child2Child";
 	public static OrgNode setupParentScenario(ContentResolver resolver) {
-		OrgFile file = OrgProviderUtil.getOrCreateFile(defaultTestfilename,
+		OrgFile file = OrgProviderUtils.getOrCreateFile(defaultTestfilename,
 				defaultTestfileAlias, resolver);
 		//Log.d("MobileOrg", "*** Created file " + file.nodeId);
 		

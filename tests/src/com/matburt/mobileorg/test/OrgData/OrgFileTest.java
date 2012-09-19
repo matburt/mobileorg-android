@@ -16,7 +16,7 @@ import com.matburt.mobileorg.OrgData.OrgFile;
 import com.matburt.mobileorg.OrgData.OrgFileParser;
 import com.matburt.mobileorg.OrgData.OrgNode;
 import com.matburt.mobileorg.OrgData.OrgProvider;
-import com.matburt.mobileorg.OrgData.OrgProviderUtil;
+import com.matburt.mobileorg.OrgData.OrgProviderUtils;
 import com.matburt.mobileorg.test.util.OrgTestFiles.SimpleOrgFiles;
 import com.matburt.mobileorg.util.OrgFileNotFoundException;
 import com.matburt.mobileorg.util.OrgNodeNotFoundException;
@@ -99,7 +99,7 @@ public class OrgFileTest extends ProviderTestCase2<OrgProvider> {
 	
 	public void testCreateFile () {
 		final String fileAlias = "test name";
-		OrgFile file = OrgProviderUtil.getOrCreateFile("test file", fileAlias, resolver);
+		OrgFile file = OrgProviderUtils.getOrCreateFile("test file", fileAlias, resolver);
 		
 		assertTrue(file.id >= 0);
 		assertTrue(file.doesFileExist());
@@ -123,7 +123,7 @@ public class OrgFileTest extends ProviderTestCase2<OrgProvider> {
 	}
 	
 	public void testCreateCaptureFile () {		
-		OrgFile file = OrgProviderUtil.getOrCreateCaptureFile(resolver);
+		OrgFile file = OrgProviderUtils.getOrCreateCaptureFile(resolver);
 		
 		assertTrue(file.id >= 0);
 		assertTrue(file.doesFileExist());
@@ -147,14 +147,14 @@ public class OrgFileTest extends ProviderTestCase2<OrgProvider> {
 	}
 	
 	public void testGetCaptureFile () {
-		OrgNode node1 = OrgProviderUtil.getOrCreateCaptureFile(resolver)
+		OrgNode node1 = OrgProviderUtils.getOrCreateCaptureFile(resolver)
 				.getOrgNode(resolver);
 
 		assertNotNull(node1);
 		assertTrue(node1.id >= 0);
 		assertTrue(node1.fileId >= 0);
 
-		OrgNode node2 = OrgProviderUtil.getOrCreateCaptureFile(resolver)
+		OrgNode node2 = OrgProviderUtils.getOrCreateCaptureFile(resolver)
 				.getOrgNode(resolver);
 		assertNotNull(node2);
 
@@ -164,10 +164,10 @@ public class OrgFileTest extends ProviderTestCase2<OrgProvider> {
 	}
 	
 	public void testGetOrgNodeFromFilename() throws OrgFileNotFoundException{
-		OrgFile file = OrgProviderUtil.getOrCreateFile("test file", "file name", resolver);
+		OrgFile file = OrgProviderUtils.getOrCreateFile("test file", "file name", resolver);
 		OrgNode fileNode = file.getOrgNode(resolver);
 		
-		OrgNode node = OrgProviderUtil.getOrgNodeFromFilename(file.filename, resolver);
+		OrgNode node = OrgProviderUtils.getOrgNodeFromFilename(file.filename, resolver);
 		
 		assertEquals(fileNode.name, node.name);
 		assertEquals(fileNode.id, node.id);

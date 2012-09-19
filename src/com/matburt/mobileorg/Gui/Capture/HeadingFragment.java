@@ -11,7 +11,7 @@ import android.widget.Spinner;
 import com.actionbarsherlock.app.SherlockFragment;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.OrgData.OrgNode;
-import com.matburt.mobileorg.OrgData.OrgProviderUtil;
+import com.matburt.mobileorg.OrgData.OrgProviderUtils;
 import com.matburt.mobileorg.util.OrgUtils;
 
 public class HeadingFragment extends SherlockFragment {
@@ -87,9 +87,9 @@ public class HeadingFragment extends SherlockFragment {
 		if(node.id == -1 && todo.equals(""))
 			todo = OrgUtils.getDefaultTodo(getActivity());
 		
-		OrgUtils.setupSpinnerWithEmpty(todoStateView, OrgProviderUtil.getTodos(resolver),
+		OrgUtils.setupSpinnerWithEmpty(todoStateView, OrgProviderUtils.getTodos(resolver),
 				todo);
-		OrgUtils.setupSpinnerWithEmpty(priorityView, OrgProviderUtil.getPriorities(resolver),
+		OrgUtils.setupSpinnerWithEmpty(priorityView, OrgProviderUtils.getPriorities(resolver),
 				priority);
 	}
 	

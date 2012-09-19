@@ -79,6 +79,10 @@ public class OrgNode {
 		}
 	}
 	
+	public OrgFile getOrgFile(ContentResolver resolver) throws OrgFileNotFoundException {
+		return new OrgFile(fileId, resolver);
+	}
+	
 	public void setFilename(String filename, ContentResolver resolver) throws OrgFileNotFoundException {
 		OrgFile file = new OrgFile(filename, resolver);
 		this.fileId = file.nodeId;
@@ -335,14 +339,19 @@ public class OrgNode {
 		
 		ArrayList<OrgNode> nodesFromRoot;
 		try {
-			nodesFromRoot = OrgProviderUtil.getOrgNodePathFromTopLevel(
+			nodesFromRoot = OrgProviderUtils.getOrgNodePathFromTopLevel(
 					parentId, resolver);
 		} catch (IllegalStateException e) {
 			return "";
 		}
 		
-		if(nodesFromRoot.size() == 0)
-			return "";
+		if (nodesFromRoot.size() == 0) {
+			try {
+				return "olp:" + getOrgFile(resolver).name;
+			} catch (OrgFileNotFoundException e) {
+				return "";
+			}
+		}
 			
 		OrgNode topNode = nodesFromRoot.get(0);
 		nodesFromRoot.remove(0);
@@ -417,10 +426,10 @@ public class OrgNode {
 			parent = new OrgNode(this.parentId, resolver);
 		} catch (OrgNodeNotFoundException e) {
 			try {
-				parent = OrgProviderUtil.getOrgNodeFromOlpPath(olpPath,
+				parent = OrgProviderUtils.getOrgNodeFromOlpPath(olpPath,
 						resolver);
 			} catch (Exception ex) {
-				parent = OrgProviderUtil.getOrCreateCaptureFile(resolver)
+				parent = OrgProviderUtils.getOrCreateCaptureFile(resolver)
 						.getOrgNode(resolver);
 			}
 		}

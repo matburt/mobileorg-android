@@ -16,7 +16,7 @@ import com.actionbarsherlock.app.SherlockFragment;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.OrgData.OrgFile;
 import com.matburt.mobileorg.OrgData.OrgNode;
-import com.matburt.mobileorg.OrgData.OrgProviderUtil;
+import com.matburt.mobileorg.OrgData.OrgProviderUtils;
 import com.matburt.mobileorg.util.OrgNodeNotFoundException;
 
 public class LocationFragment extends SherlockFragment {
@@ -134,7 +134,7 @@ public class LocationFragment extends SherlockFragment {
 	}
 	
 	private LocationEntry getTopLevelNode(String selection) {
-		ArrayList<String> data = OrgProviderUtil.getFileAliases(resolver);
+		ArrayList<String> data = OrgProviderUtils.getFileAliases(resolver);
 		data.remove(OrgFile.AGENDA_FILE);
 		data.remove(OrgFile.AGENDA_FILE_ALIAS);
 		LocationEntry entry = getLocationEntry(null, data, selection);
@@ -153,7 +153,7 @@ public class LocationFragment extends SherlockFragment {
 			}
 		} else {
 			try {
-				childNode = OrgProviderUtil.getOrgNodeFromFileAlias(
+				childNode = OrgProviderUtils.getOrgNodeFromFileAlias(
 						spinnerSelection, resolver);
 			} catch (OrgNodeNotFoundException e) {
 				return;
@@ -215,7 +215,7 @@ public class LocationFragment extends SherlockFragment {
 				.getSelectedItem();
 		
 		if (TextUtils.isEmpty(selection) == false) {
-			return OrgProviderUtil.getOrCreateFileFromAlias(selection, resolver).getOrgNode(resolver);
+			return OrgProviderUtils.getOrCreateFileFromAlias(selection, resolver).getOrgNode(resolver);
 		} else
 			throw new IllegalStateException("Can't determine location");
 	}

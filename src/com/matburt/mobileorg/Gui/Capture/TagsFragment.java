@@ -17,7 +17,7 @@ import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.OrgData.OrgNode;
-import com.matburt.mobileorg.OrgData.OrgProviderUtil;
+import com.matburt.mobileorg.OrgData.OrgProviderUtils;
 
 public class TagsFragment extends SherlockFragment {
 	private static String BUNDLE_TAGS = "tags";
@@ -99,7 +99,7 @@ public class TagsFragment extends SherlockFragment {
 		LayoutInflater inflater = LayoutInflater.from(getActivity());
 		TagTableRow tagsTableEntry =
 		                (TagTableRow) inflater.inflate(R.layout.edit_tagsrow, tagsView, false);
-		tagsTableEntry.setTags(selectedTag, OrgProviderUtil.getTags(resolver));
+		tagsTableEntry.setTags(selectedTag, OrgProviderUtils.getTags(resolver));
 		tagsTableEntry.setParents(tagsView, this);
 		tagsView.addView(tagsTableEntry);
 		tagEntries.add(tagsTableEntry);
