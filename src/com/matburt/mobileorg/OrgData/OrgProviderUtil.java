@@ -264,14 +264,11 @@ public class OrgProviderUtil {
 		return file;
 	}
 	
-	public static OrgNode getOrgNodeFromFileAlias(String fileAlias, ContentResolver resolver) {
+	public static OrgNode getOrgNodeFromFileAlias(String fileAlias, ContentResolver resolver) throws OrgNodeNotFoundException {
 		Cursor cursor = resolver.query(OrgData.CONTENT_URI,
 				OrgData.DEFAULT_COLUMNS, OrgData.NAME + "=? AND " + OrgData.PARENT_ID + "=-1", new String[] {fileAlias}, null);
 		OrgNode node = new OrgNode();
-		
-		try {
-			node.set(cursor);
-		} catch (OrgNodeNotFoundException e) {}
+		node.set(cursor);
 		
 		return node;
 	}

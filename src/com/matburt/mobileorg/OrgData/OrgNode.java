@@ -580,26 +580,28 @@ public class OrgNode {
 		OrgEdit edit = new OrgEdit(this, OrgEdit.TYPE.ARCHIVE_SIBLING, resolver);
 		edit.write(resolver);
 
+		OrgNode parent;
 		try {
-			OrgNode parent = getParent(resolver);
-			OrgNode archiveNode;
-			try {
-				archiveNode = parent.getChild(ARCHIVE_NODE, resolver);
-			} catch (OrgNodeNotFoundException e) {
-				archiveNode = new OrgNode();
-				archiveNode.name = ARCHIVE_NODE;
-				archiveNode.parentId = parent.id;
-				archiveNode.fileId = parent.fileId;
-				archiveNode.write(resolver);
-			}
-			
-			this.parentId = archiveNode.id;
-			this.write(resolver);
+			parent = getParent(resolver);
 		} catch (OrgNodeNotFoundException e) {
 			throw new IllegalArgumentException(
-					"Could not archive correctly, didn't find parent of node "
+					"Could't archive correctly, didn't find parent of node "
 							+ this.name);
 		}
+		
+		OrgNode archiveNode;
+		try {
+			archiveNode = parent.getChild(ARCHIVE_NODE, resolver);
+		} catch (OrgNodeNotFoundException e) {
+			archiveNode = new OrgNode();
+			archiveNode.name = ARCHIVE_NODE;
+			archiveNode.parentId = parent.id;
+			archiveNode.fileId = parent.fileId;
+			archiveNode.write(resolver);
+		}
+
+		this.parentId = archiveNode.id;
+		this.write(resolver);
 
 		return edit;
 	}

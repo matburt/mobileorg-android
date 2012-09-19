@@ -4,6 +4,8 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 import android.database.Cursor;
 import android.test.ProviderTestCase2;
@@ -14,7 +16,9 @@ import com.matburt.mobileorg.OrgData.OrgFileParser;
 import com.matburt.mobileorg.OrgData.OrgNode;
 import com.matburt.mobileorg.OrgData.OrgProvider;
 import com.matburt.mobileorg.OrgData.OrgContract.OrgData;
+import com.matburt.mobileorg.test.util.OrgTestFiles.ComplexOrgFiles;
 import com.matburt.mobileorg.test.util.OrgTestFiles.SimpleOrgFiles;
+import com.matburt.mobileorg.test.util.OrgTestUtils;
 import com.matburt.mobileorg.util.OrgNodeNotFoundException;
 
 public class OrgFileParserTest extends ProviderTestCase2<OrgProvider> {
@@ -96,23 +100,39 @@ public class OrgFileParserTest extends ProviderTestCase2<OrgProvider> {
 		assertEquals(topNode.id, childNode.parentId);
 	}
 	
-	public void testGetChecksums() {
-		fail("Not implemented");
-	}
-	
 	public void testGetFilesFromIndex() {
-		fail("Not implemented");
+		HashMap<String,String> files = OrgFileParser.getFilesFromIndex(SimpleOrgFiles.indexFile);
+		
+		for(String file: SimpleOrgFiles.files) {
+			if(files.get(file) == null)
+				fail("Didn't find all files");
+		}
 	}
 	
 	public void testGetTodosFromIndex() {
-		fail("Not implemented");
+		ArrayList<String> tagsFromIndex = OrgFileParser.getTagsFromIndex(SimpleOrgFiles.indexFile);
+		
+		for(String tag: SimpleOrgFiles.tags) {
+			if(tagsFromIndex.contains(tag) == false)
+				fail("Didn't find all tags");
+		}
 	}
 	
 	public void testGetPrioritiesFromIndex() {
-		fail("Not implemented");
+		ArrayList<String> prioritiesFromIndex = OrgFileParser.getPrioritiesFromIndex(SimpleOrgFiles.indexFile);
+		
+		for(String priorities: SimpleOrgFiles.priorities) {
+			if(prioritiesFromIndex.contains(priorities) == false)
+				fail("Didn't find all priorities");
+		}
 	}
 	
 	public void testGetTagsFromIndex() {
-		fail("Not implemented");
+		ArrayList<String> tagsFromIndex = OrgFileParser.getTagsFromIndex(SimpleOrgFiles.indexFile);
+		
+		for(String tag: SimpleOrgFiles.tags) {
+			if(tagsFromIndex.contains(tag) == false)
+				fail("Didn't find all tags");
+		}
 	}
 }

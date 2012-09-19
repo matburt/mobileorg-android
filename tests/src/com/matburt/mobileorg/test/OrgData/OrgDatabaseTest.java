@@ -72,7 +72,7 @@ public class OrgDatabaseTest extends ProviderTestCase2<OrgProvider> {
 		} catch (OrgNodeNotFoundException e) {}
 		cursor.close();
 		
-		assertNull(insertedNode.getPayload());
+		assertEquals("", insertedNode.getPayload());
 		insertedNode.setPayload("");
 		assertTrue(node.equals(insertedNode));
 	}

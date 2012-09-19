@@ -3,6 +3,11 @@ package com.matburt.mobileorg.test.util;
 public class OrgTestFiles {
 
 	public static class SimpleOrgFiles {
+		public static final String[] tags = {"Home", "Computer", "Errands"};
+		public static final String[] todos = {"TODO", "DONE"};
+		public static final String[] files = {"GTD.org"};
+		public static final String[] priorities = {"A", "B", "C"};
+		
 		public static final String indexFile = "#+READONLY\n"
 				+ "#+TODO: TODO | DONE\n"
 				+ "#+TAGS: { Home Computer Errands } \n"

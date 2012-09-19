@@ -155,7 +155,7 @@ public class LocationFragment extends SherlockFragment {
 			try {
 				childNode = OrgProviderUtil.getOrgNodeFromFileAlias(
 						spinnerSelection, resolver);
-			} catch (IllegalArgumentException e) {
+			} catch (OrgNodeNotFoundException e) {
 				return;
 			}
 		}
@@ -191,9 +191,9 @@ public class LocationFragment extends SherlockFragment {
 		case 0:
 			result = null;
 			break;
-		case 1:
-			result = getSelectedTopNodeId();
-			break;
+//		case 1:
+//			result = getSelectedTopNodeId();
+//			break;
 		case 2:
 			result = getSelectedNodeId(locations.size() - 1);
 			break;

@@ -1,7 +1,6 @@
 package com.matburt.mobileorg.test.util;
 
 import android.content.ContentResolver;
-import android.util.Log;
 
 import com.matburt.mobileorg.OrgData.OrgFile;
 import com.matburt.mobileorg.OrgData.OrgNode;
@@ -25,15 +24,18 @@ public class OrgTestUtils {
 			"   :END:";
 	
 	
-	public static final String testTimestampNotInPayload = "2222-12-30";
-	public static final String testTimestampScheduled = "2012-05-18 Tue";
-	public static final String testTimestampDeadline = "2032-09-18 Thu";
-	public static final String testTimestampTimestamp = "3012-02-24 Fri";
-	public static final String testTimestampPayload = 
-			"SCHEDULED: <" + testTimestampScheduled + "> DEADLINE: <" + testTimestampDeadline + ">\n" +
-			"<" + testTimestampTimestamp + ">  \n" +
-			testIdPayload;
-	public static final String testTimestampPayloadSimple = "<" + testTimestampTimestamp + ">";
+	public static class TestTimestampPayload {
+		public static final String timestampNotInPayload = "2222-12-30";
+		public static final String scheduled = "2012-05-18 Tue";
+		public static final String deadline = "2032-09-18 Thu";
+		public static final String timestamp = "3012-02-24 Fri";
+		public static final String payload = "SCHEDULED: <"
+				+ scheduled + "> DEADLINE: <"
+				+ deadline + ">\n" + "<" + timestamp
+				+ ">  \n" + testIdPayload;
+		public static final String payloadSimple = "<"
+				+ timestamp + ">";
+	}
 	
 	
 	public static OrgNode getDefaultOrgNode() {
