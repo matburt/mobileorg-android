@@ -105,8 +105,7 @@ public class OrgNodeTest extends ProviderTestCase2<OrgProvider> {
 	
 	public void testGetParentFileNode() throws OrgNodeNotFoundException {
 		OrgFile file = OrgTestUtils.getDefaultOrgFile();
-		file.setResolver(resolver);
-		file.write();
+		file.write(resolver);
 		OrgNode node = OrgTestUtils.getDefaultOrgNode();
 		node.parentId = file.nodeId;
 		node.write(resolver);
@@ -117,8 +116,7 @@ public class OrgNodeTest extends ProviderTestCase2<OrgProvider> {
 	
 	public void testGetParentWithTopLevel() throws OrgNodeNotFoundException {
 		OrgFile file = OrgTestUtils.getDefaultOrgFile();
-		file.setResolver(resolver);
-		file.write();
+		file.write(resolver);
 		
 		OrgNode node = new OrgNode(file.nodeId, resolver);
 		

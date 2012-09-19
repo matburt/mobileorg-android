@@ -90,8 +90,7 @@ public class OrgTestUtils {
 	public static void cleanupParentScenario(ContentResolver resolver) {
 		try {
 			OrgFile file = new OrgFile(defaultTestfilename, resolver);
-			file.setResolver(resolver);
-			file.removeFile();
+			file.removeFile(resolver);
 		} catch (OrgFileNotFoundException e) {}
 	}
 	

@@ -68,8 +68,7 @@ public class OrgEditTest extends ProviderTestCase2<OrgProvider> {
 	
 	public void testNewHeadingSimple() throws OrgNodeNotFoundException {
 		OrgFile file = OrgTestUtils.getDefaultOrgFile();
-		file.setResolver(resolver);
-		file.write();
+		file.write(resolver);
 		
 		OrgNode fileNode = new OrgNode(file.nodeId, resolver);
 		
@@ -98,8 +97,7 @@ public class OrgEditTest extends ProviderTestCase2<OrgProvider> {
 	
 	public void testEditsToStringSimple() throws OrgNodeNotFoundException {
 		OrgFile file = OrgTestUtils.getDefaultOrgFile();
-		file.setResolver(resolver);
-		file.write();
+		file.write(resolver);
 		OrgNode fileNode = new OrgNode(file.nodeId, resolver);
 		
 		OrgNode node = OrgTestUtils.getDefaultOrgNode();

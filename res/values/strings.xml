@@ -21,6 +21,7 @@
     <string name="contextmenu_node_delete">Delete Node</string>
     <string name="menu_delete">Delete</string>
     <string name="menu_advanced">Advanced</string>
+    <string name="menu_recover">Recover</string>
     <string name="menu_clockin">Clock in</string>
     <string name="menu_archive">Archive</string>
     <string name="menu_archive_tosibling">Archive to sibling</string>

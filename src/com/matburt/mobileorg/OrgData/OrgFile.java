@@ -22,9 +22,7 @@ public class OrgFile {
 	public boolean includeInOutline = true;
 	public long id = -1;
 	public long nodeId = -1;
-	
-	private ContentResolver resolver = null;
-	
+		
 	public OrgFile() {
 	}
 	
@@ -49,7 +47,6 @@ public class OrgFile {
 			throw new OrgFileNotFoundException("File with id \"" + id + "\" not found");
 		set(cursor);
 		cursor.close();
-		this.resolver = resolver;
 	}
 	
 	public OrgFile(String filename, ContentResolver resolver) throws OrgFileNotFoundException {
@@ -59,7 +56,6 @@ public class OrgFile {
 			throw new OrgFileNotFoundException("File \"" + filename + "\" not found");
 		set(cursor);
 		cursor.close();
-		this.resolver = resolver;
 	}
 	
 	public void set(Cursor cursor) throws OrgFileNotFoundException {
@@ -77,20 +73,14 @@ public class OrgFile {
 		}	
 	}
 	
-	public void setResolver(ContentResolver resolver) {
-		this.resolver = resolver;
-	}
-	
-	public void write() {
-		assert(resolver != null);
-		if (id == -1 && doesFileExist() == false)
-			addFile();
+	public void write(ContentResolver resolver) {
+		if (id >= 0 && doesFileExist(resolver))
+			updateFile(resolver);
 		else
-			updateFile();
+			addFile(resolver);
 	}
 	
-	public boolean doesFileExist() {
-		assert(resolver != null);
+	public boolean doesFileExist(ContentResolver resolver) {
 		Cursor cursor = resolver.query(Files.buildFilenameUri(filename),
 				Files.DEFAULT_COLUMNS, null, null, null);
 		int count = cursor.getCount();
@@ -111,17 +101,17 @@ public class OrgFile {
 		}
 	}
 	
-	public void addFile() {
+	public void addFile(ContentResolver resolver) {
 		if(includeInOutline)
-			this.nodeId = addFileOrgDataNode();
+			this.nodeId = addFileOrgDataNode(resolver);
 		
-		this.id = addFileNode(nodeId);
+		this.id = addFileNode(nodeId, resolver);
 		ContentValues values = new ContentValues();
 		values.put(OrgData.FILE_ID, id);
 		resolver.update(OrgData.buildIdUri(nodeId), values, null, null);
 	}
 	
-	private long addFileNode(long nodeId) {
+	private long addFileNode(long nodeId, ContentResolver resolver) {
 		ContentValues values = new ContentValues();
 		values.put(Files.FILENAME, filename);
 		values.put(Files.NAME, name);
@@ -132,11 +122,12 @@ public class OrgFile {
 		return Long.parseLong(Files.getId(uri));
 	}
 	
-	private long addFileOrgDataNode() {
+	private long addFileOrgDataNode(ContentResolver resolver) {
 		ContentValues orgdata = new ContentValues();
 		orgdata.put(OrgData.NAME, name);
 		orgdata.put(OrgData.TODO, "");
 		orgdata.put(OrgData.PRIORITY, "");
+		orgdata.put(OrgData.LEVEL, 0);
 		orgdata.put(OrgData.PARENT_ID, -1);
 		
 		Uri uri = resolver.insert(OrgData.CONTENT_URI, orgdata);
@@ -144,23 +135,21 @@ public class OrgFile {
 		return nodeId;
 	}
 	
-	public long updateFile() {
+	public long updateFile(ContentResolver resolver) {
 		return -1;
 	}
 	
-	public void removeFile() {
-		removeFileOrgDataNodes();
-		removeFileNode();
+	public void removeFile(ContentResolver resolver) {
+		removeFileOrgDataNodes(resolver);
+		removeFileNode(resolver);
 	}
 	
-	private long removeFileNode() {
-		assert(resolver != null);
+	private long removeFileNode(ContentResolver resolver) {
 		return resolver.delete(Files.buildIdUri(id), Files.NAME + "=? AND "
 				+ Files.FILENAME + "=?", new String[] { name, filename });
 	}
 	
-	private long removeFileOrgDataNodes() {
-		assert(resolver != null);
+	private long removeFileOrgDataNodes(ContentResolver resolver) {
 		int total = resolver.delete(OrgData.CONTENT_URI, OrgData.FILE_ID + "=?",
 				new String[] { Long.toString(nodeId) });
 		total += resolver.delete(OrgData.buildIdUri(nodeId), null, null);
@@ -172,7 +161,7 @@ public class OrgFile {
 				|| filename.endsWith(".enc") || filename.endsWith(".asc");
 	}
 	
-	public boolean isEditable() {
+	public boolean generateEditsForFile() {
 		if(filename.equals(CAPTURE_FILE))
 			return false;
 		if(filename.equals(AGENDA_FILE))

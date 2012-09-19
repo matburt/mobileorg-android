@@ -207,27 +207,17 @@ public class OrgProviderUtils {
 	public static StringBuilder nodesToString(long node_id, long level, ContentResolver resolver) {
 		StringBuilder result = new StringBuilder();
 		
-		OrgNode node;
 		try {
-			node = new OrgNode(node_id, resolver);
-		} catch (OrgNodeNotFoundException e) {
-			return result;
-		}
-		
-		if(level != 0) { // Don't add top level file node heading
-			result.append(node.toString());
-			result.append("\n");
-		}
-		
-		Cursor childrenCursor = resolver.query(OrgData.buildChildrenUri(node_id), OrgData.DEFAULT_COLUMNS, null, null, null);
-		childrenCursor.moveToFirst();
-				
-		while(childrenCursor.isAfterLast() == false) {
-			result.append(nodesToString(childrenCursor.getLong(childrenCursor
-					.getColumnIndex(OrgData.ID)), level + 1, resolver));
-			childrenCursor.moveToNext();
-		}
-		childrenCursor.close();
+			OrgNode node = new OrgNode(node_id, resolver);
+			
+			if(level != 0) // Don't add top level file node heading
+				result.append(node.toString() + "\n");
+			
+			for (OrgNode child : node.getChildren(resolver))
+				result.append(nodesToString(child.id, level + 1, resolver));
+			
+		} catch (OrgNodeNotFoundException e) {}
+
 		return result;
 	}
 	
@@ -254,10 +244,9 @@ public class OrgProviderUtils {
 	
 	public static OrgFile getOrCreateFile(String filename, String fileAlias, ContentResolver resolver) {
 		OrgFile file = new OrgFile(filename, fileAlias, "");
-		file.setResolver(resolver);
-		if(file.doesFileExist() == false) {
+		if(file.doesFileExist(resolver) == false) {
 			file.includeInOutline = true;
-			file.addFile();
+			file.write(resolver);
 		} else {
 			try {
 			file = new OrgFile(filename, resolver);
@@ -278,15 +267,17 @@ public class OrgProviderUtils {
 	public static OrgFile getOrCreateFileFromAlias(String fileAlias, ContentResolver resolver) {
 		Cursor cursor = resolver.query(Files.CONTENT_URI,
 				Files.DEFAULT_COLUMNS, Files.NAME + "=?", new String[] {fileAlias}, null);
-		if(cursor == null || cursor.getCount() <= 0) {
-			return getOrCreateFile(fileAlias, fileAlias, resolver);
+		if(cursor == null || cursor.getCount() == 0) {
+			if(fileAlias.equals(OrgFile.CAPTURE_FILE_ALIAS))
+				return getOrCreateCaptureFile(resolver);
+			else
+				return getOrCreateFile(fileAlias, fileAlias, resolver);
 		} else {
 			OrgFile file = new OrgFile();
 			try {
 				file.set(cursor);
 			} catch (OrgFileNotFoundException e) {}
 			cursor.close();
-			file.setResolver(resolver);
 			return file;
 		}
 	}

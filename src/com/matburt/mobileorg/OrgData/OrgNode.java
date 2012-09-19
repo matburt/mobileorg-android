@@ -122,6 +122,9 @@ public class OrgNode {
 	}
 	
 	public OrgNode findOriginalNode(ContentResolver resolver) {
+		if(parentId == -1)
+			return this;
+		
 		if (getFilename(resolver).equals(OrgFile.AGENDA_FILE) == false)
 			return this;
 		
@@ -401,11 +404,12 @@ public class OrgNode {
 	
 	public OrgEdit createParentNewheading(ContentResolver resolver, String olpPath) {
 		OrgNode parent = getParentSafe(olpPath, resolver);
+		this.level = parent.level + 1;
 
 		boolean generateEdit = true;
 		try {
 			OrgFile file = new OrgFile(parent.fileId, resolver);
-			generateEdit = file.isEditable();
+			generateEdit = file.generateEditsForFile();
 		} catch (OrgFileNotFoundException e) {}
 		
 		if (generateEdit) {

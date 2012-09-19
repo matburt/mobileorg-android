@@ -93,7 +93,6 @@ public class EditActivity extends SherlockFragmentActivity implements
 		else if (this.actionMode.equals(ACTIONMODE_ADDCHILD)) {			
 			try {
 				OrgNode parent = new OrgNode(this.node.parentId, resolver);
-				Log.d("MobileOrg", "Setting parent " + this.node.parentId);
 				return parent;
 			} catch (OrgNodeNotFoundException e) {}
 		}
@@ -167,6 +166,9 @@ public class EditActivity extends SherlockFragmentActivity implements
 		MenuItem item = subMenu.add(R.string.menu_advanced,
 				R.string.menu_delete_file, 0, R.string.menu_delete_file);
 		item.setIcon(R.drawable.ic_menu_delete);
+		item = subMenu.add(R.string.menu_advanced, R.string.menu_recover,
+				1, R.string.menu_recover);
+		item.setIcon(R.drawable.ic_menu_archive);
     }
     
 	@Override
@@ -208,6 +210,10 @@ public class EditActivity extends SherlockFragmentActivity implements
 			
 		case R.string.contextmenu_view:
 			runViewNodeActivity();
+			return true;
+			
+		case R.string.menu_recover:
+			runRecover();
 			return true;
 		}
 		return false;
@@ -284,7 +290,7 @@ public class EditActivity extends SherlockFragmentActivity implements
 	private void deleteFileNode() {
 		try {
 			OrgFile file = new OrgFile(node.fileId, resolver);
-			file.removeFile();
+			file.removeFile(resolver);
 			OrgUtils.announceUpdate(this);
 			finish();
 		} catch (OrgFileNotFoundException e) {}
@@ -300,6 +306,15 @@ public class EditActivity extends SherlockFragmentActivity implements
 		Intent intent = new Intent(EditActivity.this, TimeclockService.class);
 		intent.putExtra(TimeclockService.NODE_ID, node.id);
 		startService(intent);
+	}
+	
+	private void runRecover() {
+		try {
+			OrgFile orgFile = this.node.getOrgFile(resolver);
+			Log.d("MobileOrg", orgFile.toString(resolver));
+		} catch (OrgFileNotFoundException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	@Override
@@ -358,6 +373,7 @@ public class EditActivity extends SherlockFragmentActivity implements
 		
 		
 		if (this.actionMode.equals(ACTIONMODE_CREATE)) {
+			newNode.level = 1;
 			newNode.write(resolver);
 		} else if (this.actionMode.equals(ACTIONMODE_ADDCHILD)) {
 			try {

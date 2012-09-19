@@ -190,7 +190,7 @@ public class Synchronizer {
 		// TODO Generate checksum of file and compare to remoteChecksum
 		
 		try {
-			new OrgFile(orgFile.filename, resolver).removeFile();
+			new OrgFile(orgFile.filename, resolver).removeFile(resolver);
 		} catch (OrgFileNotFoundException e) { /* file did not exist */ }
 		
 		if (orgFile.isEncrypted())
