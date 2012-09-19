@@ -387,21 +387,17 @@ public class OrgNode {
 	}
 	
 	public OrgEdit createParentNewheading(ContentResolver resolver) {
-		OrgNode parent;
-		try {
-			parent = new OrgNode(this.parentId, resolver);
-		} catch (OrgNodeNotFoundException e) {
-			throw new IllegalStateException("Parent for node " + this.name
-					+ " does not exist");
-		}
+		return createParentNewheading(resolver, "");
+	}
+	
+	public OrgEdit createParentNewheading(ContentResolver resolver, String olpPath) {
+		OrgNode parent = getParentSafe(olpPath, resolver);
 
-		boolean generateEdit = false;
+		boolean generateEdit = true;
 		try {
 			OrgFile file = new OrgFile(parent.fileId, resolver);
 			generateEdit = file.isEditable();
-		} catch (OrgFileNotFoundException e) {
-			throw new IllegalStateException("Couln't find file of node " + parent.name);
-		}
+		} catch (OrgFileNotFoundException e) {}
 		
 		if (generateEdit) {
 			// Add new heading nodes; need the entire content of node without
@@ -415,9 +411,24 @@ public class OrgNode {
 			return new OrgEdit();
 	}
 	
+	private OrgNode getParentSafe(String olpPath, ContentResolver resolver) {
+		OrgNode parent;
+		try {
+			parent = new OrgNode(this.parentId, resolver);
+		} catch (OrgNodeNotFoundException e) {
+			try {
+				parent = OrgProviderUtil.getOrgNodeFromOlpPath(olpPath,
+						resolver);
+			} catch (Exception ex) {
+				parent = OrgProviderUtil.getOrCreateCaptureFile(resolver)
+						.getOrgNode(resolver);
+			}
+		}
+		return parent;
+	}
 	
-	public void generateApplyWriteEdits(OrgNode newNode, ContentResolver resolver) {
-		ArrayList<OrgEdit> generateEditNodes = generateApplyEditNodes(newNode, resolver);
+	public void generateApplyWriteEdits(OrgNode newNode, String olpPath, ContentResolver resolver) {
+		ArrayList<OrgEdit> generateEditNodes = generateApplyEditNodes(newNode, olpPath, resolver);
 		boolean generateEdits = !getFilename(resolver).equals(FileUtils.CAPTURE_FILE);
 				
 		if(generateEdits)
@@ -426,6 +437,10 @@ public class OrgNode {
 	}
 	
 	public ArrayList<OrgEdit> generateApplyEditNodes(OrgNode newNode, ContentResolver resolver) {
+		return generateApplyEditNodes(newNode, "", resolver);
+	}
+	
+	public ArrayList<OrgEdit> generateApplyEditNodes(OrgNode newNode, String olpPath, ContentResolver resolver) {
 		ArrayList<OrgEdit> edits = new ArrayList<OrgEdit>();
 
 		if (!name.equals(newNode.name)) {
@@ -449,14 +464,12 @@ public class OrgNode {
 			this.tags = newNode.tags;
 		}
 		if (newNode.parentId != parentId) {
-			try {
-				OrgNode parent = new OrgNode(newNode.parentId, resolver);
-				String newId = parent.getNodeId(resolver);
+			OrgNode parent = newNode.getParentSafe(olpPath, resolver);
+			String newId = parent.getNodeId(resolver);
 
-				edits.add(new OrgEdit(this, OrgEdit.TYPE.REFILE, newId, resolver));
-				this.parentId = newNode.parentId;
-				this.fileId = newNode.fileId;
-			} catch (OrgNodeNotFoundException e) {}
+			edits.add(new OrgEdit(this, OrgEdit.TYPE.REFILE, newId, resolver));
+			this.parentId = newNode.parentId;
+			this.fileId = newNode.fileId;
 		}
 		
 		return edits;

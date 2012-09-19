@@ -31,6 +31,11 @@ public class EditActivity extends SherlockFragmentActivity implements
 	public final static String ACTIONMODE_EDIT = "edit";
 	public final static String ACTIONMODE_ADDCHILD = "add_child";
 
+	/**
+	 * Used by create or add_child, in case underlying data changes and parent
+	 * can't be found on save.
+	 */
+	private String nodeOlpPath = "";
 	private OrgNode node;
 	private String actionMode;
 
@@ -60,10 +65,16 @@ public class EditActivity extends SherlockFragmentActivity implements
 		} else if (this.actionMode.equals(ACTIONMODE_EDIT)) {
 			try {
 				this.node = new OrgNode(node_id, getContentResolver()).findOriginalNode(resolver);
+				this.nodeOlpPath = node.getOlpId(resolver);
 			} catch (OrgNodeNotFoundException e) {}
 		} else if (this.actionMode.equals(ACTIONMODE_ADDCHILD)) {
 			this.node = new OrgNode();
 			this.node.parentId = node_id;
+			
+			try {
+				OrgNode parent = new OrgNode(node_id, resolver);
+				this.nodeOlpPath = parent.getOlpId(resolver);
+			} catch (OrgNodeNotFoundException e) {}
 		}
 	}
 	
@@ -358,26 +369,11 @@ public class EditActivity extends SherlockFragmentActivity implements
 			newNode.write(resolver);
 
 		} else if (this.actionMode.equals(ACTIONMODE_EDIT)) {
-			this.node.generateApplyWriteEdits(newNode, resolver);
+			this.node.generateApplyWriteEdits(newNode, this.nodeOlpPath, resolver);
 			this.node.updateAllNodes(resolver);
 		}
 		
 		OrgUtils.announceUpdate(this);
-	}
-	
-	public OrgNode ensureNodeStillExists(OrgNode node) {
-		try {
-			OrgNode resultNode = new OrgNode(node.id, resolver);
-			return node; // Everything is fine, node still exists
-		} catch (OrgNodeNotFoundException e) {}
-
-		// TODO Use olp path to find new node
-		
-		
-		
-		// TODO Else return capture node
-		
-		return node;
 	}
 	
 	public OrgNode getEditedNode() {

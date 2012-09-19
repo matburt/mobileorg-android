@@ -86,7 +86,6 @@ public class LocationFragmentTest extends ActivityInstrumentationTestCase2<EditA
 		prepareActivityWithNode(fileNode, EditActivity.ACTIONMODE_ADDCHILD);
 		OrgNode locationNode = locationFragment.getLocationSelection();
 				
-		file.removeFile();
 		assertEquals(fileNode.name, locationNode.name);
 		assertEquals(fileNode.id, locationNode.id);
 		assertEquals(fileNode.fileId, locationNode.fileId);

@@ -191,9 +191,9 @@ public class LocationFragment extends SherlockFragment {
 		case 0:
 			result = null;
 			break;
-//		case 1:
-//			result = getSelectedTopNodeId();
-//			break;
+		case 1:
+			result = getSelectedTopNodeId();
+			break;
 		case 2:
 			result = getSelectedNodeId(locations.size() - 1);
 			break;
