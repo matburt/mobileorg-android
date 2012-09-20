@@ -141,23 +141,23 @@
             android:label="Dropbox Authentication" >
         </activity>
         <activity
-            android:name=".Settings.WebDAVSettingsActivity"
+            android:name=".Settings.Synchronizers.WebDAVSettingsActivity"
             android:label="WebDAV Settings" >
         </activity>
         <activity
-            android:name=".Settings.SDCardSettingsActivity"
+            android:name=".Settings.Synchronizers.SDCardSettingsActivity"
             android:label="SDCard Settings" >
         </activity>
         <activity
-            android:name=".Settings.DropboxSettingsActivity"
+            android:name=".Settings.Synchronizers.DropboxSettingsActivity"
             android:label="Dropbox Settings" >
         </activity>
         <activity
-            android:name=".Settings.ScpSettingsActivity"
+            android:name=".Settings.Synchronizers.ScpSettingsActivity"
             android:label="Scp Settings" >
         </activity>
  		<activity
-            android:name=".Settings.UbuntuOneSettingsActivity"
+            android:name=".Settings.Synchronizers.UbuntuOneSettingsActivity"
             android:label="Ubuntu One Settings" >
         </activity>
         

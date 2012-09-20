@@ -14,6 +14,11 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.matburt.mobileorg.R;
+import com.matburt.mobileorg.Settings.Synchronizers.DropboxSettingsActivity;
+import com.matburt.mobileorg.Settings.Synchronizers.SDCardSettingsActivity;
+import com.matburt.mobileorg.Settings.Synchronizers.ScpSettingsActivity;
+import com.matburt.mobileorg.Settings.Synchronizers.UbuntuOneSettingsActivity;
+import com.matburt.mobileorg.Settings.Synchronizers.WebDAVSettingsActivity;
 
 public class SynchronizerPreferences extends Preference {
 	private TextView mDetails;

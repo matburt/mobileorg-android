@@ -13,18 +13,23 @@ import android.content.pm.ResolveInfo;
 import android.os.Bundle;
 import android.preference.ListPreference;
 import android.preference.Preference;
-import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+import com.actionbarsherlock.app.SherlockPreferenceActivity;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.OrgData.OrgProviderUtils;
 import com.matburt.mobileorg.Services.CalendarSyncService;
+import com.matburt.mobileorg.Settings.Synchronizers.DropboxSettingsActivity;
+import com.matburt.mobileorg.Settings.Synchronizers.SDCardSettingsActivity;
+import com.matburt.mobileorg.Settings.Synchronizers.ScpSettingsActivity;
+import com.matburt.mobileorg.Settings.Synchronizers.UbuntuOneSettingsActivity;
+import com.matburt.mobileorg.Settings.Synchronizers.WebDAVSettingsActivity;
 import com.matburt.mobileorg.util.OrgUtils;
 
-public class SettingsActivity extends PreferenceActivity implements
+public class SettingsActivity extends SherlockPreferenceActivity implements
 SharedPreferences.OnSharedPreferenceChangeListener {
-
+	
 	public static final String KEY_SYNC_SOURCE = "syncSource";
 	public static final String KEY_SYNC_PREF = "syncPref";
 	public static final String KEY_AUTO_SYNC_INTERVAL = "autoSyncInterval";
@@ -41,7 +46,7 @@ SharedPreferences.OnSharedPreferenceChangeListener {
 
 		Intent prefsIntent = getIntent();
 		int resourceID = prefsIntent.getIntExtra("prefs", R.xml.preferences);
-		addPreferencesFromResource(resourceID);
+		addPreferencesFromResource(R.xml.preferences);
 
 		populateSyncSources();
 		populateTodoKeywords();
