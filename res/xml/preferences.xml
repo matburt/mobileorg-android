@@ -34,11 +34,6 @@
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/preference_viewing" >
         <CheckBoxPreference
-            android:key="useAgendaTitle"
-            android:summary="@string/summary_agenda_title"
-            android:title="@string/title_agenda_title" />
-        <CheckBoxPreference
-            android:dependency="useAgendaTitle"
             android:key="combineBlockAgendas"
             android:summary="@string/preference_combine_block_agenda_summary"
             android:title="@string/preference_combine_block_agenda_title" />
@@ -56,11 +51,6 @@
             android:key="viewApplyFormatting"
             android:summary="@string/summary_view_apply_formatting"
             android:title="@string/title_view_apply_formatting" />
-        <CheckBoxPreference
-            android:defaultValue="true"
-            android:key="fullscreen"
-            android:summary="@string/preference_fullscreen_summary"
-            android:title="@string/preference_fullscreen_title" />
 
         <ListPreference
             android:defaultValue="0"
@@ -70,20 +60,6 @@
             android:title="@string/preference_recursion_level_title" />
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/preference_storage" >
-
-        <!--
-             <ListPreference
-            android:defaultValue="internal"
-            android:entries="@array/storageModes"
-            android:entryValues="@array/storageModesVals"
-            android:key="storageMode"
-            android:summary="@string/preference_storage_summary"
-            android:title="@string/preference_storage_title" />
-        -->
-        <CheckBoxPreference
-            android:key="captureWithTimestamp"
-            android:summary="@string/summary_capture_with_timestamp"
-            android:title="@string/title_capture_with_timestamp" />
         <CheckBoxPreference
             android:defaultValue="true"
             android:key="captureAdvanced"
@@ -115,18 +91,6 @@
             android:title="@string/preference_calendar_name" />
 
         <CheckBoxPreference
-            android:defaultValue="true"
-            android:dependency="calendarEnabled"
-            android:key="calendarShowDone"
-            android:summary="@string/preference_calendar_show_done_summary"
-            android:title="@string/preference_calendar_show_done" />
-        <CheckBoxPreference
-            android:defaultValue="true"
-            android:dependency="calendarEnabled"
-            android:key="calendarHabits"
-            android:summary="@string/preference_calendar_show_habits_summary"
-            android:title="@string/preference_calendar_show_habits" />
-        <CheckBoxPreference
             android:dependency="calendarEnabled"
             android:key="calendarReminder"
             android:summary="@string/preference_calendar_reminder_summary"
@@ -139,16 +103,21 @@
             android:numeric="integer"
             android:summary="@string/preference_calendar_reminder_interval_summary"
             android:title="@string/preference_calendar_reminder_interval" />
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:dependency="calendarEnabled"
+            android:key="calendarShowDone"
+            android:summary="@string/preference_calendar_show_done_summary"
+            android:title="@string/preference_calendar_show_done" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:dependency="calendarEnabled"
+            android:key="calendarHabits"
+            android:summary="@string/preference_calendar_show_habits_summary"
+            android:title="@string/preference_calendar_show_habits" />
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/preference_other" >
-
-        <!--
-        <PreferenceScreen
-            android:key="Widget"
-            android:summary="@string/preferences_widget_summary"
-            android:title="@string/preference_widget_title" >
-        </PreferenceScreen>
-        -->
         <PreferenceScreen
             android:key="VersionDisp"
             android:summary="0.9.0"

@@ -489,7 +489,7 @@ public class OrgNode {
 	}
 
 
-	public void parseLine(String thisLine, int numstars, boolean useTitleField) {
+	public void parseLine(String thisLine, int numstars) {
         String heading = thisLine.substring(numstars+1);
         this.level = numstars;
         
@@ -509,7 +509,7 @@ public class OrgNode {
 			
 			name += matcher.group(TITLE_GROUP);
 			
-			if(useTitleField && matcher.group(AFTER_GROUP) != null) {
+			if(matcher.group(AFTER_GROUP) != null) {
 				int start = matcher.group(AFTER_GROUP).indexOf("TITLE:");
 				int end = matcher.group(AFTER_GROUP).indexOf("</after>");
 				

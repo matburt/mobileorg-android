@@ -77,7 +77,7 @@ public class OrgFileParser {
 		}
         
 		final OrgNode node = new OrgNode();
-		node.parseLine(thisLine, numstars, useTitleField);
+		node.parseLine(thisLine, numstars);
 		node.fileId = orgFile.id;
 		node.parentId = parseStack.getCurrentNodeId();
 		long newId = db.fastInsertNode(node);
@@ -130,9 +130,6 @@ public class OrgFileParser {
 //	 * This toggles the use of the <after>TITLE: </after> field. It is now
 //	 * disabled, see https://github.com/matburt/mobileorg-android/issues/114
 //	 */
-	private boolean useTitleField = false;
-//	this.useTitleField = PreferenceManager.getDefaultSharedPreferences(context)
-//	.getBoolean("useAgendaTitle", false);
 	
 //	private void updateCalendar(String filename, Context context) {
 //	if (filename.equals("agendas.org") == false
