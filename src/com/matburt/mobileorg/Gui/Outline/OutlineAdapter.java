@@ -25,6 +25,7 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
 import com.matburt.mobileorg.R;
+import com.matburt.mobileorg.Gui.Outline.Theme.DefaultTheme;
 import com.matburt.mobileorg.OrgData.OrgContract.OrgData;
 import com.matburt.mobileorg.OrgData.OrgFileParser;
 import com.matburt.mobileorg.OrgData.OrgNode;
@@ -36,14 +37,22 @@ public class OutlineAdapter extends ArrayAdapter<OrgNode> {
 	private ContentResolver resolver;
 	
 	private ArrayList<Boolean> expanded = new ArrayList<Boolean>();
+	int[] levelColors = new int[0];
+
+	private DefaultTheme theme;
 	
 	public OutlineAdapter(Context context) {
 		super(context, R.layout.outline_expandable_item);
 		this.resolver = context.getContentResolver();
 		
+		theme = new DefaultTheme();
+		levelColors = new int[] { theme.ccLBlue, theme.c3Yellow, theme.ceLCyan,
+				theme.c1Red, theme.c2Green, theme.c5Purple, theme.ccLBlue,
+				theme.c2Green, theme.ccLBlue, theme.c3Yellow, theme.ceLCyan };
+		
 		Cursor cursor = resolver.query(
 				OrgData.buildChildrenUri("-1"),
-				OrgData.DEFAULT_COLUMNS, null, null, OrgData.DEFAULT_SORT);
+				OrgData.DEFAULT_COLUMNS, null, null, OrgData.NAME_SORT);
 		cursor.moveToFirst();
 		
 		while(cursor.isAfterLast() == false) {
@@ -121,22 +130,27 @@ public class OutlineAdapter extends ArrayAdapter<OrgNode> {
 			itemText.insert(0, prioritySpan);
 		}
 		
+		
+		itemText.setSpan(
+				new ForegroundColorSpan(levelColors[(int) Math
+						.abs((node.level) % levelColors.length)]), 0,
+				itemText.length(), 0);
+		
+		
 		if(TextUtils.isEmpty(todo) == false) {
 			Spannable todoSpan = new SpannableString(todo + " ");
 			
-			if(OrgProviderUtils.isTodoActive(todo, resolver))
-				todoSpan.setSpan(new ForegroundColorSpan(Color.RED), 0,
-						todo.length(), 0);
-			else
-				todoSpan.setSpan(new ForegroundColorSpan(Color.GREEN), 0,
-						todo.length(), 0);
+			boolean active = OrgProviderUtils.isTodoActive(todo, resolver);
+			
+			todoSpan.setSpan(new ForegroundColorSpan(active ? theme.c1Red : theme.caLGreen), 0,
+					todo.length(), 0);
 			itemText.insert(0, todoSpan);
 		}
 		
 		for(int i = 0; i < node.level; i++)
 			itemText.insert(0, "   ");
 		
-		itemText.setSpan(new StyleSpan(Typeface.MONOSPACE.NORMAL), 0, itemText.length(), 0);
+		itemText.setSpan(new StyleSpan(Typeface.NORMAL), 0, itemText.length(), 0);
 		orgItem.setText(itemText);
 		
 		if(tags != null && TextUtils.isEmpty(tags) == false) {
@@ -212,5 +226,10 @@ public class OutlineAdapter extends ArrayAdapter<OrgNode> {
 		OrgNode node = getItem(position);
 		insertAll(node.getChildren(resolver), position + 1);
 		this.expanded.set(position, true);
+	}
+	
+	public long getNodeId(int position) {
+		OrgNode node = getItem(position);
+		return node.id;
 	}
 }

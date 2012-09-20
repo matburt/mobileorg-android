@@ -168,7 +168,6 @@
             android:name=".Services.TimeclockDialog"
             android:theme="@android:style/Theme.Dialog" >
         </activity>
-        <activity android:name=".Gui.Outline.OutlineActivityExpandable"></activity>
     </application>
 
 </manifest>

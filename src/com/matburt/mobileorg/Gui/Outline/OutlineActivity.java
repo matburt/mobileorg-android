@@ -21,10 +21,10 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ListView;
 import android.widget.Toast;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemLongClickListener;
 
 import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.Menu;
@@ -33,9 +33,9 @@ import com.actionbarsherlock.view.MenuItem;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Gui.ViewActivity;
 import com.matburt.mobileorg.Gui.Capture.EditActivity;
-import com.matburt.mobileorg.OrgData.OrgContract.OrgData;
 import com.matburt.mobileorg.OrgData.OrgNode;
 import com.matburt.mobileorg.OrgData.OrgProviderUtils;
+import com.matburt.mobileorg.OrgData.OrgContract.OrgData;
 import com.matburt.mobileorg.Services.SyncService;
 import com.matburt.mobileorg.Settings.SettingsActivity;
 import com.matburt.mobileorg.Settings.WizardActivity;
@@ -43,21 +43,15 @@ import com.matburt.mobileorg.Synchronizers.Synchronizer;
 import com.matburt.mobileorg.util.OrgNodeNotFoundException;
 import com.matburt.mobileorg.util.OrgUtils;
 
-public class OutlineActivity extends SherlockActivity
-{
+public class OutlineActivity extends SherlockActivity {
+
 	public final static String NODE_ID = "node_id";
 	private ContentResolver resolver;
 
 	private Long node_id;
 	
-	/**
-	 * Keeps track of the last selected item chosen from the outline. When the
-	 * outline resumes it will remember what node was selected. Purely cosmetic
-	 * feature.
-	 */
-	private int lastSelection = 0;
-	
 	private ListView listView;
+	private OutlineAdapter adapter;
 	private SynchServiceReceiver syncReceiver;
 
 	@Override
@@ -77,9 +71,13 @@ public class OutlineActivity extends SherlockActivity
 		}
 
 		listView = (ListView) this.findViewById(R.id.outline_list);
+		
+		this.adapter = new OutlineAdapter(this);
+		listView.setAdapter(adapter);		
 		listView.setOnItemClickListener(outlineClickListener);
 		listView.setOnItemLongClickListener(outlineLongClickListener);
 		listView.setEmptyView(findViewById(R.id.outline_list_empty));
+		
 		registerForContextMenu(listView);	
 		
 		this.syncReceiver = new SynchServiceReceiver();
@@ -99,11 +97,11 @@ public class OutlineActivity extends SherlockActivity
 	protected void onResume() {
 		super.onResume();
 		
-		try {
-			new OrgNode(this.node_id, getContentResolver());
-		} catch (OrgNodeNotFoundException e) {
-			refreshDisplay();
-		}
+//		try {
+//			new OrgNode(this.node_id, getContentResolver());
+//		} catch (OrgNodeNotFoundException e) {
+//			refreshDisplay();
+//		}
 		
 		refreshTitle();
 	}
@@ -119,25 +117,26 @@ public class OutlineActivity extends SherlockActivity
 	 * data has been updated.
 	 */
 	private void refreshDisplay() {
-		final String outlineSort = node_id > 0 ? OrgData.DEFAULT_SORT 
-											   : OrgData.NAME_SORT;
-		
-		Cursor cursor = getContentResolver().query(
-				OrgData.buildChildrenUri(node_id.toString()),
-				OrgData.DEFAULT_COLUMNS, null, null, outlineSort);
-		if (node_id >= 0) {
-			if(cursor.getCount() == 0) {
-				finish();
-				return;
-			}
-		}
-
-		startManagingCursor(cursor);
-
-		listView.setAdapter(new OutlineCursorAdapter(this, cursor, getContentResolver()));
-		listView.setSelection(lastSelection);
+//		final String outlineSort = node_id > 0 ? OrgData.DEFAULT_SORT 
+//											   : OrgData.NAME_SORT;
+//		
+//		Cursor cursor = getContentResolver().query(
+//				OrgData.buildChildrenUri(node_id.toString()),
+//				OrgData.DEFAULT_COLUMNS, null, null, outlineSort);
+//		if (node_id >= 0) {
+//			if(cursor.getCount() == 0) {
+//				finish();
+//				return;
+//			}
+//		}
+//
+//		startManagingCursor(cursor);
+//
+//		listView.setAdapter(new OutlineCursorAdapter(this, cursor, getContentResolver()));
+//		listView.setSelection(lastSelection);
      
-        refreshTitle();
+		adapter.notifyDataSetInvalidated();
+		refreshTitle();
 	}
 	
     
@@ -151,29 +150,36 @@ public class OutlineActivity extends SherlockActivity
 	
 	private void refreshTitle() {
 		this.getSupportActionBar().setTitle("MobileOrg " + getChangesString());
-		if(this.node_id > -1) {
-			try {
-				OrgNode node = new OrgNode(this.node_id, getContentResolver());
-				String subTitle = node.getOlpId(getContentResolver());
-				if(subTitle.startsWith("olp:"))
-					subTitle = subTitle.substring("olp:".length());
-				this.getSupportActionBar().setSubtitle(subTitle);
-			} catch (OrgNodeNotFoundException e) {}
-		}
+//		if(this.node_id > -1) {
+//			try {
+//				OrgNode node = new OrgNode(this.node_id, getContentResolver());
+//				String subTitle = node.getOlpId(getContentResolver());
+//				if(subTitle.startsWith("olp:"))
+//					subTitle = subTitle.substring("olp:".length());
+//				this.getSupportActionBar().setSubtitle(subTitle);
+//			} catch (OrgNodeNotFoundException e) {}
+//		}
 	}
 
 	private OnItemClickListener outlineClickListener = new OnItemClickListener() {
 		@Override
 		public void onItemClick(AdapterView<?> parent, View v, int position,
 				long id) {
-			Long clicked_node_id = listView.getItemIdAtPosition(position);
-			lastSelection = position;
-			if (OrgNode.hasChildren(clicked_node_id, resolver))
-				runExpandSelection(clicked_node_id);
-			else 
-				runEditNodeActivity(clicked_node_id);
+			adapter.collapseExpand(position);
 		}
 	};
+	
+
+	private OnItemLongClickListener outlineLongClickListener = new OnItemLongClickListener() {
+		@Override
+		public boolean onItemLongClick(AdapterView<?> parent, View v, int position,
+				long id) {
+			long nodeId = adapter.getNodeId(position);
+			runEditNodeActivity(nodeId);
+			return true;
+		}
+	};
+	
 	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -217,22 +223,6 @@ public class OutlineActivity extends SherlockActivity
 		return false;
 	}
 
-	private OnItemLongClickListener outlineLongClickListener = new OnItemLongClickListener() {
-		@Override
-		public boolean onItemLongClick(AdapterView<?> parent, View v, int position,
-				long id) {
-			long node_id = listView.getItemIdAtPosition(position);
-			
-	        SharedPreferences appSettings =
-	                PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-	        if(appSettings.getBoolean("viewDefaultEdit", false))
-	        	runEditNodeActivity(node_id);
-	        else
-	        	runViewNodeActivity(node_id);
-			return true;
-		}
-	};
-
     private void showWizard() {
         startActivityForResult(new Intent(this, WizardActivity.class), 0);
     }
@@ -244,7 +234,7 @@ public class OutlineActivity extends SherlockActivity
     }
     
     private void runExpandableOutline() {
-		Intent intent = new Intent(this, OutlineActivityExpandable.class);
+		Intent intent = new Intent(this, OutlineActivity.class);
 		startActivity(intent);
     }
     
@@ -270,8 +260,7 @@ public class OutlineActivity extends SherlockActivity
 		
 		String captureMode = EditActivity.ACTIONMODE_CREATE;
 		if (OrgUtils.useAdvancedCapturing(this)) {
-			captureMode = node_id == -1 ? EditActivity.ACTIONMODE_CREATE
-					: EditActivity.ACTIONMODE_ADDCHILD;
+			captureMode = EditActivity.ACTIONMODE_ADDCHILD;
 		}
 		
 		intent.putExtra(EditActivity.ACTIONMODE, captureMode);
