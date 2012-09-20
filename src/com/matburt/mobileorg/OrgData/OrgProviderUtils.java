@@ -283,15 +283,15 @@ public class OrgProviderUtils {
 	}
 	
 	public static boolean isTodoActive(String todo, ContentResolver resolver) {
+		if(TextUtils.isEmpty(todo))
+			return true;
+
 		Cursor cursor = resolver.query(Todos.CONTENT_URI, Todos.DEFAULT_COLUMNS, Todos.NAME + " = ?",
 				new String[] { todo }, null);		
 		
-		if(TextUtils.isEmpty(todo))
-			return true;
-		
 		if(cursor.getCount() > 0) {
 			cursor.moveToFirst();
-			int isdone = cursor.getInt(0);
+			int isdone = cursor.getInt(cursor.getColumnIndex(Todos.ISDONE));
 			cursor.close();
 			
 			if(isdone == 0)
