@@ -165,7 +165,11 @@ public class OutlineActivity extends SherlockActivity {
 		@Override
 		public void onItemClick(AdapterView<?> parent, View v, int position,
 				long id) {
-			adapter.collapseExpand(position);
+			OrgNode node = adapter.getItem(position);
+			if(node.hasChildren(resolver))
+				adapter.collapseExpand(position);
+			else
+				runEditNodeActivity(node.id);
 		}
 	};
 	
