@@ -11,7 +11,7 @@ import android.widget.Spinner;
 import com.actionbarsherlock.app.SherlockFragment;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.OrgData.OrgNode;
-import com.matburt.mobileorg.OrgData.OrgProviderUtil;
+import com.matburt.mobileorg.OrgData.OrgProviderUtils;
 import com.matburt.mobileorg.util.OrgUtils;
 
 public class HeadingFragment extends SherlockFragment {
@@ -54,6 +54,8 @@ public class HeadingFragment extends SherlockFragment {
 			restoreInstanceState(savedInstanceState);
 		else
 			updateDisplay(this.node);
+		
+		setModifiable(activity.isNodeModifiable());
 	}
 
 	@Override
@@ -73,12 +75,6 @@ public class HeadingFragment extends SherlockFragment {
 		}
 	}
 	
-	@Override
-	public void onStart() {
-		super.onStart();
-
-	}
-	
 	public void updateDisplay(OrgNode node) {
 		if(node != null)
 			updateDisplay(node.name, node.todo, node.priority);
@@ -87,11 +83,20 @@ public class HeadingFragment extends SherlockFragment {
 	public void updateDisplay(String title, String todo, String priority) {
 		titleView.setText(title);
 		titleView.setSelection(title.length());
-
-		OrgUtils.setupSpinnerWithEmpty(todoStateView, OrgProviderUtil.getTodos(resolver),
+		
+		if(node.id == -1 && todo.equals(""))
+			todo = OrgUtils.getDefaultTodo(getActivity());
+		
+		OrgUtils.setupSpinnerWithEmpty(todoStateView, OrgProviderUtils.getTodos(resolver),
 				todo);
-		OrgUtils.setupSpinnerWithEmpty(priorityView, OrgProviderUtil.getPriorities(resolver),
+		OrgUtils.setupSpinnerWithEmpty(priorityView, OrgProviderUtils.getPriorities(resolver),
 				priority);
+	}
+	
+	public void setModifiable(boolean enabled) {
+		this.titleView.setEnabled(enabled);
+		this.priorityView.setEnabled(enabled);
+		this.todoStateView.setEnabled(enabled);
 	}
 	
 	public boolean hasEdits() {

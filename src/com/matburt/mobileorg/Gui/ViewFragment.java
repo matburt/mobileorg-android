@@ -18,6 +18,7 @@ import android.webkit.WebViewClient;
 import com.actionbarsherlock.app.SherlockFragment;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.OrgData.OrgNode;
+import com.matburt.mobileorg.util.OrgFileNotFoundException;
 import com.matburt.mobileorg.util.OrgNode2Html;
 import com.matburt.mobileorg.util.OrgUtils;
 
@@ -108,11 +109,14 @@ public class ViewFragment extends SherlockFragment {
 
 	}
 	
-	private void handleInternalOrgUrl(String url) {		
-		long nodeId = OrgUtils.getNodeFromPath(url, resolver);
-				
-		Intent intent = new Intent(getActivity(), ViewActivity.class);
-		intent.putExtra(ViewActivity.NODE_ID, nodeId);
-		startActivity(intent);
+	private void handleInternalOrgUrl(String url) {
+		try {
+			long nodeId = OrgUtils.getNodeFromPath(url, resolver);
+
+			Intent intent = new Intent(getActivity(), ViewActivity.class);
+			intent.putExtra(ViewActivity.NODE_ID, nodeId);
+			startActivity(intent);
+		} catch (OrgFileNotFoundException e) {
+		}
 	}
 }

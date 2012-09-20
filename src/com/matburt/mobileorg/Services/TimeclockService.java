@@ -19,6 +19,7 @@ import android.widget.RemoteViews;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.OrgData.MobileOrgApplication;
 import com.matburt.mobileorg.OrgData.OrgNode;
+import com.matburt.mobileorg.util.OrgNodeNotFoundException;
 
 public class TimeclockService extends Service {
 	public static final String NODE_ID = "node_id";
@@ -68,7 +69,9 @@ public class TimeclockService extends Service {
 		Log.d("MobileOrg", "Called onStartCommand() with :" + action);
 		if(action == null) {
 			this.node_id = intent.getLongExtra(NODE_ID, -1);
-			this.node = new OrgNode(node_id, getContentResolver());
+			try {
+				this.node = new OrgNode(node_id, getContentResolver());
+			} catch (OrgNodeNotFoundException e) {}
 			this.startTime = System.currentTimeMillis();
 			
 			getEstimated();

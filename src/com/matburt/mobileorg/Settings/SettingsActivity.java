@@ -18,8 +18,9 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.matburt.mobileorg.R;
-import com.matburt.mobileorg.OrgData.OrgProviderUtil;
+import com.matburt.mobileorg.OrgData.OrgProviderUtils;
 import com.matburt.mobileorg.Services.CalendarSyncService;
+import com.matburt.mobileorg.util.OrgUtils;
 
 public class SettingsActivity extends PreferenceActivity implements
 		SharedPreferences.OnSharedPreferenceChangeListener {
@@ -89,7 +90,8 @@ public class SettingsActivity extends PreferenceActivity implements
 								@Override
 								public void onClick(DialogInterface dialog,
 										int which) {
-									OrgProviderUtil.clearDB(getContentResolver());
+									OrgProviderUtils.clearDB(getContentResolver());
+									OrgUtils.announceUpdate(getApplicationContext());
 									if (isCalendarEnabled())
 										getCalendarSyncService()
 												.deleteAllEntries(
@@ -123,7 +125,7 @@ public class SettingsActivity extends PreferenceActivity implements
 	private void populateTodoKeywords() {
 		ListPreference defaultTodo = (ListPreference) findPreference("defaultTodo");
 
-		ArrayList<String> todoList = OrgProviderUtil.getTags(getContentResolver());;
+		ArrayList<String> todoList = OrgProviderUtils.getTodos(getContentResolver());;
 
 		CharSequence[] todos = new CharSequence[todoList.size() + 1];
 		int i = 0;

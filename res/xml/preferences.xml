@@ -56,7 +56,6 @@
             android:key="viewApplyFormating"
             android:summary="Apply formating of orgmode emphasis, bold, underline and strike-through when viewing."
             android:title="Apply view formating" />
-        
         <CheckBoxPreference
             android:defaultValue="true"
             android:key="fullscreen"
@@ -86,6 +85,12 @@
             android:key="captureWithTimestamp"
             android:summary="@string/summary_capture_with_timestamp"
             android:title="@string/title_capture_with_timestamp" />
+        
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="captureAdvanced"
+            android:summary="@string/preference_capture_advanced"
+            android:title="@string/preference_capture_advanced_title" />
 
         <ListPreference
             android:defaultValue=""

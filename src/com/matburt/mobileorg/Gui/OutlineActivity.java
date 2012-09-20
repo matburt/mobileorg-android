@@ -33,13 +33,13 @@ import com.actionbarsherlock.view.MenuItem;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Gui.Capture.EditActivity;
 import com.matburt.mobileorg.OrgData.OrgContract.OrgData;
-import com.matburt.mobileorg.OrgData.OrgFile;
 import com.matburt.mobileorg.OrgData.OrgNode;
-import com.matburt.mobileorg.OrgData.OrgProviderUtil;
+import com.matburt.mobileorg.OrgData.OrgProviderUtils;
 import com.matburt.mobileorg.Services.SyncService;
 import com.matburt.mobileorg.Settings.SettingsActivity;
 import com.matburt.mobileorg.Settings.WizardActivity;
 import com.matburt.mobileorg.Synchronizers.Synchronizer;
+import com.matburt.mobileorg.util.OrgNodeNotFoundException;
 import com.matburt.mobileorg.util.OrgUtils;
 
 public class OutlineActivity extends SherlockActivity
@@ -97,7 +97,14 @@ public class OutlineActivity extends SherlockActivity
 	@Override
 	protected void onResume() {
 		super.onResume();
-		setTitle();
+		
+		try {
+			new OrgNode(this.node_id, getContentResolver());
+		} catch (OrgNodeNotFoundException e) {
+			refreshDisplay();
+		}
+		
+		refreshTitle();
 	}
 
 	@Override
@@ -117,7 +124,6 @@ public class OutlineActivity extends SherlockActivity
 		Cursor cursor = getContentResolver().query(
 				OrgData.buildChildrenUri(node_id.toString()),
 				OrgData.DEFAULT_COLUMNS, null, null, outlineSort);
-
 		if (node_id >= 0) {
 			if(cursor.getCount() == 0) {
 				finish();
@@ -130,24 +136,28 @@ public class OutlineActivity extends SherlockActivity
 		listView.setAdapter(new OutlineCursorAdapter(this, cursor, getContentResolver()));
 		listView.setSelection(lastSelection);
      
-        setTitle();
+        refreshTitle();
 	}
 	
     
     private String getChangesString() {
-    	int changes = OrgProviderUtil.getChangesCount(getContentResolver());
+    	int changes = OrgProviderUtils.getChangesCount(getContentResolver());
     	if(changes > 0)
     		return "[" + changes + "]";
     	else
     		return "";
     }
 	
-	private void setTitle() {
+	private void refreshTitle() {
 		this.getSupportActionBar().setTitle("MobileOrg " + getChangesString());
 		if(this.node_id > -1) {
-			OrgNode node = new OrgNode(this.node_id, getContentResolver());
-			final String subTitle = node.constructOlpId(getContentResolver()).substring("olp:".length());
-			this.getSupportActionBar().setSubtitle(subTitle);
+			try {
+				OrgNode node = new OrgNode(this.node_id, getContentResolver());
+				String subTitle = node.getOlpId(getContentResolver());
+				if(subTitle.startsWith("olp:"))
+					subTitle = subTitle.substring("olp:".length());
+				this.getSupportActionBar().setSubtitle(subTitle);
+			} catch (OrgNodeNotFoundException e) {}
 		}
 	}
 
@@ -168,9 +178,6 @@ public class OutlineActivity extends SherlockActivity
 	public boolean onCreateOptionsMenu(Menu menu) {
 		MenuInflater inflater = getSupportMenuInflater();
 	    inflater.inflate(R.menu.outline_menu, menu);
-	    
-	    if(this.node_id == -1 || isNodeInFile(this.node_id, "agendas.org"))
-			menu.findItem(R.id.menu_capturechild).setVisible(false);
 	    
 		return true;
 	}
@@ -196,11 +203,7 @@ public class OutlineActivity extends SherlockActivity
 			return true;
 
 		case R.id.menu_capturechild:
-			runEditCaptureNodeChildActivity(this.node_id);
-			return true;
-			
-		case R.id.menu_capture:
-			runEditNewNodeActivity(null);
+			runEditCaptureActivity(this.node_id);
 			return true;
 
 		case R.id.menu_search:
@@ -228,12 +231,6 @@ public class OutlineActivity extends SherlockActivity
 			return true;
 		}
 	};
-	
-	
-	private boolean isNodeInFile(long node_id, String filename) {
-		return new OrgNode(node_id, getContentResolver()).getFilename(getContentResolver()).equals(
-				filename);
-	}
 
     private void showWizard() {
         startActivityForResult(new Intent(this, WizardActivity.class), 0);
@@ -255,23 +252,23 @@ public class OutlineActivity extends SherlockActivity
 		startService(new Intent(this, SyncService.class));
     }
 	
-	public void runEditNewNodeActivity(View view) {
-		Intent intent = new Intent(this, EditActivity.class);
-		intent.putExtra(EditActivity.ACTIONMODE, EditActivity.ACTIONMODE_CREATE);
-		startActivity(intent);
-	}
-	
 	private void runEditNodeActivity(long nodeId) {
-		Intent intent = new Intent(this,
-				EditActivity.class);
+		Intent intent = new Intent(this, EditActivity.class);
 		intent.putExtra(EditActivity.ACTIONMODE, EditActivity.ACTIONMODE_EDIT);
 		intent.putExtra(EditActivity.NODE_ID, nodeId);
 		startActivity(intent);
 	}
 
-	private void runEditCaptureNodeChildActivity(long node_id) {
+	private void runEditCaptureActivity(long node_id) {
 		Intent intent = new Intent(this, EditActivity.class);
-		intent.putExtra(EditActivity.ACTIONMODE, EditActivity.ACTIONMODE_ADDCHILD);
+		
+		String captureMode = EditActivity.ACTIONMODE_CREATE;
+		if (OrgUtils.useAdvancedCapturing(this)) {
+			captureMode = node_id == -1 ? EditActivity.ACTIONMODE_CREATE
+					: EditActivity.ACTIONMODE_ADDCHILD;
+		}
+		
+		intent.putExtra(EditActivity.ACTIONMODE, captureMode);
 		intent.putExtra(EditActivity.NODE_ID, node_id);
 		startActivity(intent);
 	}
@@ -286,27 +283,6 @@ public class OutlineActivity extends SherlockActivity
 		Intent intent = new Intent(this, OutlineActivity.class);
 		intent.putExtra(OutlineActivity.NODE_ID, id);
 		startActivity(intent);
-	}
-	
-	private void runDeleteFileNode(final long node_id) {
-		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setMessage(R.string.outline_delete_prompt)
-				.setCancelable(false)
-				.setPositiveButton(R.string.yes,
-						new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int id) {
-								OrgFile file = new OrgFile(node_id, resolver);
-								file.removeFile();
-								refreshDisplay();
-							}
-						})
-				.setNegativeButton(R.string.no,
-						new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int id) {
-								dialog.cancel();
-							}
-						});
-		builder.create().show();
 	}
 
 	private boolean runSearch() {

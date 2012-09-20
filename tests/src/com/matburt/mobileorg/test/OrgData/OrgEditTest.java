@@ -10,9 +10,10 @@ import com.matburt.mobileorg.OrgData.OrgEdit;
 import com.matburt.mobileorg.OrgData.OrgFile;
 import com.matburt.mobileorg.OrgData.OrgNode;
 import com.matburt.mobileorg.OrgData.OrgProvider;
-import com.matburt.mobileorg.OrgData.OrgProviderUtil;
+import com.matburt.mobileorg.OrgData.OrgProviderUtils;
 import com.matburt.mobileorg.OrgData.OrgContract.Edits;
 import com.matburt.mobileorg.test.util.OrgTestUtils;
+import com.matburt.mobileorg.util.OrgNodeNotFoundException;
 
 public class OrgEditTest extends ProviderTestCase2<OrgProvider> {
 
@@ -59,16 +60,15 @@ public class OrgEditTest extends ProviderTestCase2<OrgProvider> {
 		editedNode.todo += "OO";
 		final int numberOfEdits = 2;
 		
-		ArrayList<OrgEdit> generatedEdits = node.generateEditNodes(editedNode,
+		ArrayList<OrgEdit> generatedEdits = node.generateApplyEditNodes(editedNode,
 				resolver);
 		assertEquals(numberOfEdits, generatedEdits.size());
 	}
 
 	
-	public void testNewHeadingSimple() {
+	public void testNewHeadingSimple() throws OrgNodeNotFoundException {
 		OrgFile file = OrgTestUtils.getDefaultOrgFile();
-		file.setResolver(resolver);
-		file.write();
+		file.write(resolver);
 		
 		OrgNode fileNode = new OrgNode(file.nodeId, resolver);
 		
@@ -82,7 +82,7 @@ public class OrgEditTest extends ProviderTestCase2<OrgProvider> {
 	
 	
 	public void testNewHeadingDefaultFile() {
-		OrgNode capturefileNode = OrgProviderUtil
+		OrgNode capturefileNode = OrgProviderUtils
 				.getOrCreateCaptureFile(resolver).getOrgNode(resolver);
 		assertTrue(capturefileNode.fileId >= 0);
 
@@ -95,10 +95,9 @@ public class OrgEditTest extends ProviderTestCase2<OrgProvider> {
 	}
 
 	
-	public void testEditsToStringSimple() {
+	public void testEditsToStringSimple() throws OrgNodeNotFoundException {
 		OrgFile file = OrgTestUtils.getDefaultOrgFile();
-		file.setResolver(resolver);
-		file.write();
+		file.write(resolver);
 		OrgNode fileNode = new OrgNode(file.nodeId, resolver);
 		
 		OrgNode node = OrgTestUtils.getDefaultOrgNode();

@@ -93,8 +93,7 @@ public class SynchronizerTest extends ProviderTestCase2<OrgProvider> {
 	public void testPushWithCaptures() throws SSLHandshakeException, CertificateException, IOException, Exception {
 		synchronizerStub.addFile(Synchronizer.CAPTURE_FILE, "");
 		OrgFile file = new OrgFile(Synchronizer.CAPTURE_FILE, Synchronizer.CAPTURE_FILE, "");
-		file.setResolver(resolver);
-		file.write();
+		file.write(resolver);
 		
 		OrgNode node = new OrgNode();
 		node.setFilename(Synchronizer.CAPTURE_FILE, resolver);
@@ -108,8 +107,7 @@ public class SynchronizerTest extends ProviderTestCase2<OrgProvider> {
 	public void testPushWithCapturesAndEdits() throws SSLHandshakeException, CertificateException, IOException, Exception {
 		synchronizerStub.addFile(Synchronizer.CAPTURE_FILE, "");
 		OrgFile file = new OrgFile(Synchronizer.CAPTURE_FILE, Synchronizer.CAPTURE_FILE, "");
-		file.setResolver(resolver);
-		file.write();
+		file.write(resolver);
 		
 		OrgNode node = new OrgNode();
 		node.setFilename(Synchronizer.CAPTURE_FILE, resolver);

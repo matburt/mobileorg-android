@@ -10,7 +10,7 @@ import com.matburt.mobileorg.Gui.Capture.LocationFragment;
 import com.matburt.mobileorg.OrgData.OrgContract.OrgData;
 import com.matburt.mobileorg.OrgData.OrgFile;
 import com.matburt.mobileorg.OrgData.OrgNode;
-import com.matburt.mobileorg.OrgData.OrgProviderUtil;
+import com.matburt.mobileorg.OrgData.OrgProviderUtils;
 import com.matburt.mobileorg.test.util.OrgTestUtils;
 
 public class LocationFragmentTest extends ActivityInstrumentationTestCase2<EditActivity> {
@@ -74,29 +74,35 @@ public class LocationFragmentTest extends ActivityInstrumentationTestCase2<EditA
 		prepareActivityWithNode(node, EditActivity.ACTIONMODE_CREATE);
 		OrgNode locationNode = locationFragment.getLocationSelection();
 		
-		OrgNode captureFile = OrgProviderUtil.getOrCreateCaptureFile(resolver).getOrgNode(resolver);
+		OrgNode captureFile = OrgProviderUtils.getOrCreateCaptureFile(resolver).getOrgNode(resolver);
 		assertEquals(captureFile.fileId, locationNode.fileId);
 		assertEquals(captureFile.id, locationNode.id);
 	}
 	
 	public void test_Addchild_ToplevelFile() {
-		OrgFile file = OrgProviderUtil.getOrCreateFile("test file.org", "delete me", resolver);
+		OrgFile file = OrgProviderUtils.getOrCreateFile("test file.org", "delete me", resolver);
 		OrgNode fileNode = file.getOrgNode(resolver);
 		
 		prepareActivityWithNode(fileNode, EditActivity.ACTIONMODE_ADDCHILD);
 		OrgNode locationNode = locationFragment.getLocationSelection();
 				
-		file.removeFile();
 		assertEquals(fileNode.name, locationNode.name);
 		assertEquals(fileNode.id, locationNode.id);
 		assertEquals(fileNode.fileId, locationNode.fileId);
 	}
 	
 	public void test_Addchild_ToplevelFileWithAddChild() {
-		OrgNode fileNode = OrgProviderUtil.getOrCreateCaptureFile(resolver).getOrgNode(resolver);
+		OrgNode fileNode = OrgProviderUtils.getOrCreateCaptureFile(resolver).getOrgNode(resolver);
 		
 		prepareActivityWithNode(fileNode, EditActivity.ACTIONMODE_ADDCHILD);
-		locationFragment.addChild(null, "");
+		
+		activity.runOnUiThread(new Runnable() {
+			public void run() {
+				locationFragment.addChild(null, "");
+			}
+		});
+		instrumentation.waitForIdleSync();
+		
 		OrgNode locationNode = locationFragment.getLocationSelection();
 
 		assertEquals(fileNode.id, locationNode.id);

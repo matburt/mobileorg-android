@@ -13,11 +13,8 @@
     <item
         android:id="@+id/menu_capturechild"
         android:icon="@drawable/ic_menu_add"
+        android:visible="true"
         android:showAsAction="ifRoom"
-        android:title="@string/menu_capture"/>
-    <item
-        android:id="@+id/menu_capture"
-        android:icon="@drawable/ic_menu_add"
         android:title="@string/menu_capture"/>
     <item
         android:id="@+id/menu_search"

@@ -2,15 +2,14 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
 
     <item
-        android:id="@+id/nodeedit_cancel"
-        android:title="@string/menu_cancel"
-        android:showAsAction="always"
-        android:icon="@drawable/ic_menu_close_clear_cancel"/>
-    <item
         android:id="@+id/nodeedit_save"
+        android:icon="@drawable/ic_menu_save"
         android:showAsAction="always"
-        android:title="Save"
-        android:icon="@drawable/ic_menu_save">
-    </item>
+        android:title="Save"/>
+    <item
+        android:id="@+id/nodeedit_cancel"
+        android:icon="@drawable/ic_menu_close_clear_cancel"
+        android:showAsAction="always"
+        android:title="@string/menu_cancel"/>
 
 </menu>

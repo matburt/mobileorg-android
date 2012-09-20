@@ -7,11 +7,14 @@ import android.net.Uri;
 
 import com.matburt.mobileorg.OrgData.OrgContract.Files;
 import com.matburt.mobileorg.OrgData.OrgContract.OrgData;
+import com.matburt.mobileorg.util.OrgFileNotFoundException;
+import com.matburt.mobileorg.util.OrgNodeNotFoundException;
 
 public class OrgFile {
 	public static final String CAPTURE_FILE = "mobileorg.org";
 	public static final String CAPTURE_FILE_ALIAS = "Captures";
 	public static final String AGENDA_FILE = "agendas.org";
+	public static final String AGENDA_FILE_ALIAS = "Agenda Views";
 	
 	public String filename = "";
 	public String name = "";
@@ -19,9 +22,7 @@ public class OrgFile {
 	public boolean includeInOutline = true;
 	public long id = -1;
 	public long nodeId = -1;
-	
-	private ContentResolver resolver = null;
-	
+		
 	public OrgFile() {
 	}
 	
@@ -35,31 +36,29 @@ public class OrgFile {
         	this.name = name;
 	}
 	
-	public OrgFile(Cursor cursor) {
+	public OrgFile(Cursor cursor) throws OrgFileNotFoundException {
 		set(cursor);
 	}
 	
-	public OrgFile(long id, ContentResolver resolver) {
+	public OrgFile(long id, ContentResolver resolver) throws OrgFileNotFoundException {
 		Cursor cursor = resolver.query(Files.buildIdUri(id),
 				Files.DEFAULT_COLUMNS, null, null, null);
 		if(cursor == null || cursor.getCount() < 1)
-			throw new IllegalArgumentException("File with id \"" + id + "\" not found");
+			throw new OrgFileNotFoundException("File with id \"" + id + "\" not found");
 		set(cursor);
 		cursor.close();
-		this.resolver = resolver;
 	}
 	
-	public OrgFile(String filename, ContentResolver resolver) {
+	public OrgFile(String filename, ContentResolver resolver) throws OrgFileNotFoundException {
 		Cursor cursor = resolver.query(Files.CONTENT_URI,
 				Files.DEFAULT_COLUMNS, Files.FILENAME + "=?", new String[] {filename}, null);
 		if(cursor == null || cursor.getCount() <= 0)
-			throw new IllegalArgumentException("File \"" + filename + "\" not found");
+			throw new OrgFileNotFoundException("File \"" + filename + "\" not found");
 		set(cursor);
 		cursor.close();
-		this.resolver = resolver;
 	}
 	
-	public void set(Cursor cursor) {
+	public void set(Cursor cursor) throws OrgFileNotFoundException {
 		if (cursor != null && cursor.getCount() > 0) {
 			if(cursor.isBeforeFirst() || cursor.isAfterLast())
 				cursor.moveToFirst();
@@ -69,25 +68,19 @@ public class OrgFile {
 			this.id = cursor.getLong(cursor.getColumnIndexOrThrow(Files.ID));
 			this.nodeId = cursor.getLong(cursor.getColumnIndexOrThrow(Files.NODE_ID));
 		} else {
-			throw new IllegalArgumentException(
+			throw new OrgFileNotFoundException(
 					"Failed to create OrgFile from cursor");
 		}	
 	}
 	
-	public void setResolver(ContentResolver resolver) {
-		this.resolver = resolver;
-	}
-	
-	public void write() {
-		assert(resolver != null);
-		if (id == -1 && doesFileExist() == false)
-			addFile();
+	public void write(ContentResolver resolver) {
+		if (id >= 0 && doesFileExist(resolver))
+			updateFile(resolver);
 		else
-			updateFile();
+			addFile(resolver);
 	}
 	
-	public boolean doesFileExist() {
-		assert(resolver != null);
+	public boolean doesFileExist(ContentResolver resolver) {
 		Cursor cursor = resolver.query(Files.buildFilenameUri(filename),
 				Files.DEFAULT_COLUMNS, null, null, null);
 		int count = cursor.getCount();
@@ -100,20 +93,25 @@ public class OrgFile {
 	}
 	
 	public OrgNode getOrgNode(ContentResolver resolver) {
-		return new OrgNode(this.nodeId, resolver);
+		try {
+			return new OrgNode(this.nodeId, resolver);
+		} catch (OrgNodeNotFoundException e) {
+			throw new IllegalStateException("Org node for file " + filename
+					+ " should exist");
+		}
 	}
 	
-	public void addFile() {
+	public void addFile(ContentResolver resolver) {
 		if(includeInOutline)
-			this.nodeId = addFileOrgDataNode();
+			this.nodeId = addFileOrgDataNode(resolver);
 		
-		this.id = addFileNode(nodeId);
+		this.id = addFileNode(nodeId, resolver);
 		ContentValues values = new ContentValues();
 		values.put(OrgData.FILE_ID, id);
 		resolver.update(OrgData.buildIdUri(nodeId), values, null, null);
 	}
 	
-	private long addFileNode(long nodeId) {
+	private long addFileNode(long nodeId, ContentResolver resolver) {
 		ContentValues values = new ContentValues();
 		values.put(Files.FILENAME, filename);
 		values.put(Files.NAME, name);
@@ -124,11 +122,12 @@ public class OrgFile {
 		return Long.parseLong(Files.getId(uri));
 	}
 	
-	private long addFileOrgDataNode() {
+	private long addFileOrgDataNode(ContentResolver resolver) {
 		ContentValues orgdata = new ContentValues();
 		orgdata.put(OrgData.NAME, name);
 		orgdata.put(OrgData.TODO, "");
 		orgdata.put(OrgData.PRIORITY, "");
+		orgdata.put(OrgData.LEVEL, 0);
 		orgdata.put(OrgData.PARENT_ID, -1);
 		
 		Uri uri = resolver.insert(OrgData.CONTENT_URI, orgdata);
@@ -136,25 +135,24 @@ public class OrgFile {
 		return nodeId;
 	}
 	
-	public long updateFile() {
+	public long updateFile(ContentResolver resolver) {
 		return -1;
 	}
 	
-	public void removeFile() {
-		removeFileOrgDataNodes();
-		removeFileNode();
+	public long removeFile(ContentResolver resolver) {
+		long entriesRemoved = removeFileOrgDataNodes(resolver);
+		removeFileNode(resolver);
+		return entriesRemoved;
 	}
 	
-	private long removeFileNode() {
-		assert(resolver != null);
+	private long removeFileNode(ContentResolver resolver) {
 		return resolver.delete(Files.buildIdUri(id), Files.NAME + "=? AND "
 				+ Files.FILENAME + "=?", new String[] { name, filename });
 	}
 	
-	private long removeFileOrgDataNodes() {
-		assert(resolver != null);
+	private long removeFileOrgDataNodes(ContentResolver resolver) {
 		int total = resolver.delete(OrgData.CONTENT_URI, OrgData.FILE_ID + "=?",
-				new String[] { Long.toString(nodeId) });
+				new String[] { Long.toString(id) });
 		total += resolver.delete(OrgData.buildIdUri(nodeId), null, null);
 		return total;
 	}
@@ -164,7 +162,7 @@ public class OrgFile {
 				|| filename.endsWith(".enc") || filename.endsWith(".asc");
 	}
 	
-	public boolean isEditable() {
+	public boolean generateEditsForFile() {
 		if(filename.equals(CAPTURE_FILE))
 			return false;
 		if(filename.equals(AGENDA_FILE))
@@ -180,6 +178,6 @@ public class OrgFile {
 	}
 	
 	public String toString(ContentResolver resolver) {		
-		return OrgProviderUtil.nodesToString(nodeId, 0, resolver).toString();
+		return OrgProviderUtils.nodesToString(nodeId, 0, resolver).toString();
 	}
 }

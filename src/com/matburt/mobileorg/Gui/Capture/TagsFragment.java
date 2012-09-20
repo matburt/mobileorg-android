@@ -1,6 +1,7 @@
 package com.matburt.mobileorg.Gui.Capture;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import android.content.ContentResolver;
 import android.os.Bundle;
@@ -16,7 +17,7 @@ import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.OrgData.OrgNode;
-import com.matburt.mobileorg.OrgData.OrgProviderUtil;
+import com.matburt.mobileorg.OrgData.OrgProviderUtils;
 
 public class TagsFragment extends SherlockFragment {
 	private static String BUNDLE_TAGS = "tags";
@@ -26,9 +27,12 @@ public class TagsFragment extends SherlockFragment {
 	private TableLayout tagsView;
 	ArrayList<TagTableRow> tagEntries = new ArrayList<TagTableRow>();
 
+	private boolean isModifiable = true;
+
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
+		super.onCreateView(inflater, container, savedInstanceState);
 		setHasOptionsMenu(true);
 		this.tagsView = new TableLayout(getActivity());
 		return tagsView;
@@ -39,32 +43,33 @@ public class TagsFragment extends SherlockFragment {
 		super.onActivityCreated(savedInstanceState);
 		this.resolver = getActivity().getContentResolver();
 		
+		EditActivity activity = (EditActivity) getActivity();
+		
 		if(savedInstanceState != null)
 			restoreFromBundle(savedInstanceState);
 		else {
-			OrgNode node = ((EditActivity) getActivity()).getOrgNode();
+			OrgNode node = activity.getOrgNode();
 			setupTagEntries(node.getTags());
 		}
+		
+		setModifiable(activity.isNodeModifiable());
+		activity.invalidateOptionsMenu();
 	}
 	
 	public void restoreFromBundle(Bundle savedInstanceState) {
 		if (savedInstanceState != null) {
-			ArrayList<String> tagsToRestore = savedInstanceState.getStringArrayList(BUNDLE_TAGS);
+			String tags = savedInstanceState.getString(BUNDLE_TAGS);
+			ArrayList<String> tagsList = new ArrayList<String>(Arrays.asList(tags.split(":")));
 						
-			if(tagsToRestore != null)
-				setupTagEntries(tagsToRestore);
+			if(tagsList != null)
+				setupTagEntries(tagsList);
 		}
 	}
 
 	@Override
 	public void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
-
-        ArrayList<String> tags = new ArrayList<String>();
-        for(TagTableRow tagTableRow: tagEntries) {
-        	tags.add(tagTableRow.getSelection());
-        }
-        outState.putStringArrayList(BUNDLE_TAGS, tags);
+        outState.putString(BUNDLE_TAGS, getTags());
 	}
 
 
@@ -74,7 +79,7 @@ public class TagsFragment extends SherlockFragment {
 		for (String tag : tagList) {
 			if (TextUtils.isEmpty(tag)) { // found a :: entry
 				for (TagTableRow entry : tagEntries) // all tags so far where unmodifiable
-					entry.setUnmodifiable();
+					entry.setModifiable(false);
 				
 				if (tagEntries.size() > 0) 
 					tagEntries.get(tagEntries.size() - 1).setLast();
@@ -83,11 +88,18 @@ public class TagsFragment extends SherlockFragment {
 		}
 	}
 	
+	public void setModifiable(boolean enabled) {
+		for(TagTableRow entry: tagEntries)
+			entry.setModifiable(enabled);
+		
+		this.isModifiable = enabled;
+	}
+	
 	public void addTagEntry(String selectedTag) {
 		LayoutInflater inflater = LayoutInflater.from(getActivity());
 		TagTableRow tagsTableEntry =
 		                (TagTableRow) inflater.inflate(R.layout.edit_tagsrow, tagsView, false);
-		tagsTableEntry.setTags(selectedTag, OrgProviderUtil.getTags(resolver));
+		tagsTableEntry.setTags(selectedTag, OrgProviderUtils.getTags(resolver));
 		tagsTableEntry.setParents(tagsView, this);
 		tagsView.addView(tagsTableEntry);
 		tagEntries.add(tagsTableEntry);
@@ -111,8 +123,17 @@ public class TagsFragment extends SherlockFragment {
 	
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-		super.onCreateOptionsMenu(menu, inflater);
 		inflater.inflate(R.menu.edit_tags, menu);
+		super.onCreateOptionsMenu(menu, inflater);
+	}
+
+	@Override
+	public void onPrepareOptionsMenu(Menu menu) {
+		super.onPrepareOptionsMenu(menu);
+		if(this.isModifiable)
+			menu.findItem(R.id.menu_edit_addtag).setVisible(true);
+		else
+			menu.findItem(R.id.menu_edit_addtag).setVisible(false);
 	}
 
 	@Override
