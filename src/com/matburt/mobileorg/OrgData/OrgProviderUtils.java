@@ -306,10 +306,12 @@ public class OrgProviderUtils {
 	public static Cursor getFileSchedule(String filename, boolean calendarHabits, ContentResolver resolver) throws OrgFileNotFoundException {
 		OrgFile file = new OrgFile(filename, resolver);
 		
-		String whereQuery = OrgData.FILE_ID + "=? AND (" + OrgData.PAYLOAD + " LIKE '%<%>%')";
+		String whereQuery = OrgData.FILE_ID + "=? AND (" + OrgData.PAYLOAD + " LIKE '%<%>%'";
 
 		if(calendarHabits)
-			whereQuery += "AND NOT" + OrgData.PAYLOAD + " LIKE '%:STYLE: habit%'";
+			whereQuery += " AND NOT " + OrgData.PAYLOAD + " LIKE '%:STYLE: habit%'";
+		
+		whereQuery += ")";
 			
 		Cursor cursor = resolver.query(OrgData.CONTENT_URI, OrgData.DEFAULT_COLUMNS, whereQuery,
 				new String[] { Long.toString(file.id) }, null);
