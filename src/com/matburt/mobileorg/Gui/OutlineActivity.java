@@ -97,6 +97,13 @@ public class OutlineActivity extends SherlockActivity
 	@Override
 	protected void onResume() {
 		super.onResume();
+		
+		try {
+			new OrgNode(this.node_id, getContentResolver());
+		} catch (OrgNodeNotFoundException e) {
+			refreshDisplay();
+		}
+		
 		refreshTitle();
 	}
 
@@ -117,7 +124,6 @@ public class OutlineActivity extends SherlockActivity
 		Cursor cursor = getContentResolver().query(
 				OrgData.buildChildrenUri(node_id.toString()),
 				OrgData.DEFAULT_COLUMNS, null, null, outlineSort);
-
 		if (node_id >= 0) {
 			if(cursor.getCount() == 0) {
 				finish();
@@ -151,9 +157,7 @@ public class OutlineActivity extends SherlockActivity
 				if(subTitle.startsWith("olp:"))
 					subTitle = subTitle.substring("olp:".length());
 				this.getSupportActionBar().setSubtitle(subTitle);
-			} catch (OrgNodeNotFoundException e) {
-				refreshDisplay();
-			}
+			} catch (OrgNodeNotFoundException e) {}
 		}
 	}
 

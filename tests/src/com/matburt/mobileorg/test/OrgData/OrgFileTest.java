@@ -18,6 +18,7 @@ import com.matburt.mobileorg.OrgData.OrgNode;
 import com.matburt.mobileorg.OrgData.OrgProvider;
 import com.matburt.mobileorg.OrgData.OrgProviderUtils;
 import com.matburt.mobileorg.test.util.OrgTestFiles.SimpleOrgFiles;
+import com.matburt.mobileorg.test.util.OrgTestUtils;
 import com.matburt.mobileorg.util.OrgFileNotFoundException;
 import com.matburt.mobileorg.util.OrgNodeNotFoundException;
 
@@ -76,6 +77,26 @@ public class OrgFileTest extends ProviderTestCase2<OrgProvider> {
 				OrgData.DEFAULT_COLUMNS, null, null, null);
 		assertEquals(0, dataCursor.getCount());
 		dataCursor.close();
+	}
+	
+	public void testRemoveFileWithNodes() throws OrgFileNotFoundException {
+		OrgNode node = OrgTestUtils.setupParentScenario(resolver);
+		OrgFile orgFile = node.getOrgFile(resolver);
+		
+		orgFile.removeFile(resolver);
+		
+		Cursor filesCursor = resolver.query(Files.buildIdUri(orgFile.id),
+				Files.DEFAULT_COLUMNS, null, null, null);
+		assertEquals(0, filesCursor.getCount());
+		filesCursor.close();
+		
+		Cursor dataCursor = resolver.query(OrgData.CONTENT_URI,
+				OrgData.DEFAULT_COLUMNS, OrgData.FILE_ID + "=?",
+				new String[] { Long.toString(orgFile.id) }, null);
+		assertEquals(0, dataCursor.getCount());
+		dataCursor.close();
+		
+		OrgTestUtils.cleanupParentScenario(resolver);
 	}
 
 	public void testFileToStringSimple() throws OrgFileNotFoundException {

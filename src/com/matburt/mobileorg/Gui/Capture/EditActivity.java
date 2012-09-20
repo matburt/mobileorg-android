@@ -371,7 +371,6 @@ public class EditActivity extends SherlockFragmentActivity implements
 		if(addTimestamp)
 			newNode.getOrgNodePayload().add(OrgUtils.getTimestamp());
 		
-		
 		if (this.actionMode.equals(ACTIONMODE_CREATE)) {
 			newNode.level = 1;
 			newNode.write(resolver);

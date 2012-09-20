@@ -139,9 +139,10 @@ public class OrgFile {
 		return -1;
 	}
 	
-	public void removeFile(ContentResolver resolver) {
-		removeFileOrgDataNodes(resolver);
+	public long removeFile(ContentResolver resolver) {
+		long entriesRemoved = removeFileOrgDataNodes(resolver);
 		removeFileNode(resolver);
+		return entriesRemoved;
 	}
 	
 	private long removeFileNode(ContentResolver resolver) {
@@ -151,7 +152,7 @@ public class OrgFile {
 	
 	private long removeFileOrgDataNodes(ContentResolver resolver) {
 		int total = resolver.delete(OrgData.CONTENT_URI, OrgData.FILE_ID + "=?",
-				new String[] { Long.toString(nodeId) });
+				new String[] { Long.toString(id) });
 		total += resolver.delete(OrgData.buildIdUri(nodeId), null, null);
 		return total;
 	}

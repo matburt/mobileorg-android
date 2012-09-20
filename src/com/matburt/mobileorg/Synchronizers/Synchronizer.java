@@ -118,6 +118,10 @@ public class Synchronizer {
 			localContents = remoteContent + "\n" + localContents;
 
 		syncher.putRemoteFile(filename, localContents);
+		
+		try {
+			new OrgFile(filename, resolver).removeFile(resolver);
+		} catch (OrgFileNotFoundException e) {}
 
 		resolver.delete(Edits.CONTENT_URI, null, null);
 		resolver.delete(Files.buildFilenameUri(filename), null, null);
