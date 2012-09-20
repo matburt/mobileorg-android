@@ -51,9 +51,7 @@ public class DropboxSynchronizer implements SynchronizerInterface {
     }
 
     
-    public void putRemoteFile(String filename, String contents) throws IOException {
-    	//this.appdb.removeFile(filename);
-       
+    public void putRemoteFile(String filename, String contents) throws IOException {       
 		FileUtils orgFile = new FileUtils(filename, context);
         BufferedWriter writer =  orgFile.getWriter();
         writer.write(contents);
@@ -67,7 +65,7 @@ public class DropboxSynchronizer implements SynchronizerInterface {
 		String filePath = this.remotePath + filename;
 		FileDownload fd = dropboxAPI.getFileStream("dropbox", filePath, null);
 
-		if (fd == null || fd.is == null) {
+		if (fd == null || fd.is == null || fd.isError()) {
 			throw new IOException(context.getResources().getString(R.string.dropbox_fetch_error,
 					filePath, "Error downloading file"));
 		}

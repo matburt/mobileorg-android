@@ -20,8 +20,10 @@ import android.text.format.Time;
 
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.OrgData.OrgNode;
-import com.matburt.mobileorg.OrgData.OrgNodePayload.DateEntry;
-import com.matburt.mobileorg.OrgData.OrgProviderUtil;
+import com.matburt.mobileorg.OrgData.OrgNodeDate;
+import com.matburt.mobileorg.OrgData.OrgProviderUtils;
+import com.matburt.mobileorg.util.OrgFileNotFoundException;
+import com.matburt.mobileorg.util.OrgNodeNotFoundException;
 
 public class CalendarSyncService {
 	private final static String CALENDAR_ORGANIZER = "MobileOrg";
@@ -46,7 +48,7 @@ public class CalendarSyncService {
 	public void syncFiles() {
 		this.deleteAllEntries(context);
 		
-		ArrayList<String> files = OrgProviderUtil.getFilenames(resolver);
+		ArrayList<String> files = OrgProviderUtils.getFilenames(resolver);
 		files.remove("agendas.org");
 		for(String filename: files)
 			insertFileEntries(filename);
@@ -106,19 +108,36 @@ public class CalendarSyncService {
 	
 	
 	public void insertNode(long node_id) {
-		OrgNode node = new OrgNode(node_id, resolver);
-		insertNode(node, node.getFilename(resolver));
+		OrgNode node;
+		try {
+			node = new OrgNode(node_id, resolver);
+		} catch (OrgNodeNotFoundException e) {
+			return;
+		}
+
+		try {
+			insertNode(node, node.getOrgFile(resolver).filename);
+		} catch (OrgFileNotFoundException e) {
+			insertNode(node, "");
+		}
 	}
 	
 	private void insertFileEntries(String filename) throws IllegalArgumentException {
-		boolean useHabits = sharedPreferences.getBoolean("calendarHabits", true);		
-		Cursor scheduled = OrgProviderUtil.getFileSchedule(filename, useHabits, resolver);
-
-		if (scheduled == null)
+		boolean useHabits = sharedPreferences.getBoolean("calendarHabits", true);	
+		Cursor scheduled;
+		
+		try {
+			scheduled = OrgProviderUtils.getFileSchedule(filename, useHabits,
+					resolver);
+		} catch (OrgFileNotFoundException e) {
 			return;
+		}
+
 		while (scheduled.isAfterLast() == false) {
-			OrgNode node = new OrgNode(scheduled);
-			insertNode(node, filename);
+			try {
+				OrgNode node = new OrgNode(scheduled);
+				insertNode(node, filename);
+			} catch (OrgNodeNotFoundException e) {}
 			scheduled.moveToNext();
 		}
 
@@ -127,9 +146,9 @@ public class CalendarSyncService {
 	
 	private void insertNode(OrgNode node, String filename)
 			throws IllegalArgumentException {
-		boolean isActive = OrgProviderUtil.isTodoActive(node.todo, resolver);
+		boolean isActive = OrgProviderUtils.isTodoActive(node.todo, resolver);
 
-		for (DateEntry date : node.getOrgNodePayload().getDates()) {
+		for (OrgNodeDate date : node.getOrgNodePayload().getDates()) {
 			insertEntry(node.name, isActive, node.getCleanedPayload(),
 					Long.toString(node.id), date, filename,
 					node.getOrgNodePayload().getProperty("LOCATION"));
@@ -138,7 +157,7 @@ public class CalendarSyncService {
 
 	// TODO Speed up using bulkInserts
 	private String insertEntry(String name, boolean isTodoActive, String payload, 
-			String orgID, DateEntry date, String filename, String location) throws IllegalArgumentException {
+			String orgID, OrgNodeDate date, String filename, String location) throws IllegalArgumentException {
 		
 		if (sharedPreferences.getBoolean("calendarShowDone", true) == false
 				&& isTodoActive == false)

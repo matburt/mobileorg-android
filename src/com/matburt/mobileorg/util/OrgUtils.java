@@ -7,6 +7,7 @@ import java.util.Date;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.OrgData.OrgFile;
 import com.matburt.mobileorg.OrgData.OrgNode;
+import com.matburt.mobileorg.Synchronizers.Synchronizer;
 
 import android.content.ContentResolver;
 import android.content.Context;
@@ -28,6 +29,11 @@ public class OrgUtils {
 				.getString("defaultTodo", "");
 	}
     
+	public static boolean useAdvancedCapturing(Context context) {
+		return PreferenceManager.getDefaultSharedPreferences(context)
+				.getBoolean("captureAdvanced", true);
+	}
+	
     public static boolean isSyncConfigured(Context context) {
     	String syncSource = PreferenceManager.getDefaultSharedPreferences(context)
 		.getString("syncSource", "");
@@ -82,7 +88,7 @@ public class OrgUtils {
 	}
 	
 
-	public static long getNodeFromPath(String path, ContentResolver resolver) {
+	public static long getNodeFromPath(String path, ContentResolver resolver) throws OrgFileNotFoundException {
 		String filename = path.substring("file://".length(), path.length());
 		
 		// TODO Handle links to headings instead of simply stripping it out
@@ -91,5 +97,11 @@ public class OrgUtils {
 				
 		OrgFile file = new OrgFile(filename, resolver);
 		return file.nodeId;
+	}
+	
+	public static void announceUpdate(Context context) {
+		Intent intent = new Intent(Synchronizer.SYNC_UPDATE);
+		intent.putExtra(Synchronizer.SYNC_DONE, true);
+		context.sendBroadcast(intent);
 	}
 }

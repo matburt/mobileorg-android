@@ -1,6 +1,5 @@
 package com.matburt.mobileorg.OrgData;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -8,19 +7,15 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import android.text.TextUtils;
-import android.text.format.DateUtils;
-import android.util.Log;
 
 public class OrgNodePayload {
-	private String originalPayload;
 	private StringBuilder payload = new StringBuilder();
-	/** These are the remains of the cleaned payload. */
-	private StringBuilder payloadResidue = new StringBuilder();
-	private StringBuilder newPayloadResidue = null;
-
 	
-	private String id = null; // Can be :ID: (or :ORIGINAL_ID: for agendas.org)
-	private String cleanedPayload = null;
+	/** This is a "cache" for the cleaned payload. */
+	private StringBuilder cleanPayload = null;
+	
+	/** Can be :ID: or :ORIGINAL_ID: (for nodes agendas.org) */
+	private String id = null;
 
 	private String scheduled = null;
 	private String deadline = null;
@@ -29,97 +24,139 @@ public class OrgNodePayload {
 	public OrgNodePayload(String payload) {
 		if(payload == null)
 			payload = "";
-		this.payload = new StringBuilder(payload);
-		this.originalPayload = payload;
+		set(payload);
 	}
 	
 	public void set(String payload) {
 		this.payload = new StringBuilder(payload);
-		this.originalPayload = payload;
-		this.cleanedPayload = null;
+		resetCachedValues();
+	}
+	
+	private void resetCachedValues() {
+		this.cleanPayload = null;
+		this.scheduled = null;
+		this.deadline = null;
+		this.timestamp = null;
+		this.id = null;
 	}
 	
 	public String get() {
-		return this.originalPayload;
+		return this.payload.toString();
 	}
 	
 	public void add(String line) {
-		this.payload.append(line + "\n");
+		set(this.payload.toString() + "\n" + line + "\n");
+		this.cleanPayload = null;
 	}
 	
 	public String getCleanedPayload() {
-		if(this.cleanedPayload == null)
+		if(this.cleanPayload == null)
 			cleanPayload();
 
-		return this.cleanedPayload;
+		return this.cleanPayload.toString().trim();
 	}
 	
-	private String getPayloadResidue() {
-		if(this.cleanedPayload == null)
-			cleanPayload();
-
-		return this.payloadResidue.toString();
-	}
-		
 	public String getId() {
 		if(this.id == null)
-			this.stripProperties();
+			stripProperties();
+			//this.id = getProperty("ID");
 		
 		return this.id;
 	}
 	
-	public String getProperty(String property) {
-		String residue = getPayloadResidue();
-		final Pattern propertiesLine = Pattern.compile(":"+property+":([^\\n]+)");
-		Matcher propm = propertiesLine.matcher(residue);
-		
-		if(propm.find())
-			return propm.group(1).trim();
-		else
-			return "";
+	
+	private void prepareCleanedPayload() {
+		if(this.cleanPayload == null)
+			this.cleanPayload = new StringBuilder(this.payload);
 	}
 	
 	private void cleanPayload() {
-		this.scheduled = stripDate("SCHEDULED:");
-		this.deadline = stripDate("DEADLINE:");
-		stripTimestamp();
+		this.scheduled = getScheduled();
+		this.deadline = getDeadline();
+		this.timestamp = getTimestamp();
 
 		stripProperties();
 		stripFileProperties();
-		
-		this.cleanedPayload = payload.toString().trim();
 	}
 	
-	private void stripTimestamp() {
-		String date = stripDate("");
-		if (date.equals("") == false)
-			this.timestamp = date; 
-	}
+	public String getScheduled() {
+		if(this.scheduled == null)
+			this.scheduled = stripDate(OrgNodeTimeDate.TYPE.Scheduled);
 		
-	private String stripDate(String scheduled) {		
-		final Pattern scheduledLine = Pattern.compile(scheduled
-				+ "\\s*<([^>]*)>(?:--<([^>]*)>)?");
-		Matcher matcher = scheduledLine.matcher(payload.toString());
+		return this.scheduled;
+	}
+	
+	public String getDeadline() {
+		if(this.deadline == null)
+			this.deadline = stripDate(OrgNodeTimeDate.TYPE.Deadline);
+		
+		return this.deadline;
+	}
+	
+	public String getTimestamp() {
+		if(this.timestamp == null)
+			this.timestamp = stripDate(OrgNodeTimeDate.TYPE.Timestamp);
+		
+		return this.timestamp;
+	}
+	
+	
+	private Pattern getTimestampMatcher(OrgNodeTimeDate.TYPE type) {
+		final String timestampPattern =  "<([^>]+)>" + "(?:\\s*--\\s*<([^>]+)>)?";
+		final String timestampLookbehind = "(?<!(?:SCHEDULED:|DEADLINE:)\\s?)";
+		
+		String pattern;
+		if(type == OrgNodeTimeDate.TYPE.Timestamp)
+			pattern = timestampLookbehind + "(" + timestampPattern + ")";
+		else
+			pattern = "(" + OrgNodeTimeDate.typeToFormated(type) + "\\s*" + timestampPattern + ")";
+		
+		return Pattern.compile(pattern);
+	}
+	
+	private String stripDate(OrgNodeTimeDate.TYPE type) {		
+		prepareCleanedPayload();
+
+		Matcher matcher = getTimestampMatcher(type).matcher(
+				cleanPayload.toString());
 		
 		String result = "";
 		
 		if(matcher.find()) {
-			result = matcher.group(1);
+			result = matcher.group(2);
+
+			if(matcher.group(3) != null)
+				result += matcher.group(3);
 			
-			if(matcher.group(2) != null)
-				result += matcher.group(2);
-			
-			payloadResidue.append(payload.substring(matcher.start(),
-					matcher.end()) + "\n");
-			payload.delete(matcher.start(), matcher.end());
-		}	
+			cleanPayload.delete(matcher.start(), matcher.end());
+		}
 		
 		return result;
 	}
 	
-	private void stripProperties() {
+	public void insertOrReplaceDate(OrgNodeTimeDate.TYPE type, String date) {
+		Matcher matcher = getTimestampMatcher(type).matcher(payload);
+		
+		String formatedDate = OrgNodeTimeDate.formatDate(type, date);
+		
+		if (matcher.find()) {
+			if (TextUtils.isEmpty(date)) // Date was set to empty
+				payload.delete(matcher.start(), matcher.end());
+			else // Replace existing date
+				payload.replace(matcher.start(1), matcher.end(), formatedDate);
+		}
+		else if(TextUtils.isEmpty(date) == false) // Insert new date
+			payload.insert(0, formatedDate + "\n");
+		
+		resetCachedValues();
+	}
+	
+	
+	private ArrayList<String> stripProperties() {
+		prepareCleanedPayload();
+		ArrayList<String> properties = new ArrayList<String>();
 		final Pattern propertiesLine = Pattern.compile(":[A-Za-z_]+:");
-		Matcher propm = propertiesLine.matcher(this.payload);
+		Matcher propm = propertiesLine.matcher(this.cleanPayload);
 
 		while(propm.find()) {
 			String name = propm.group();
@@ -128,164 +165,88 @@ public class OrgNodePayload {
 			int end;
 			
 			if(name.equals(":LOGBOOK:")) {
-				end = payload.indexOf(":END:");
+				end = cleanPayload.indexOf(":END:");
 			} else
-				end = payload.indexOf("\n", propm.end());
+				end = cleanPayload.indexOf("\n", propm.end());
 
 			if(end == -1)
 				end = propm.end();
 			else {
-				String value = payload.substring(propm.end(), end);
+				String value = cleanPayload.substring(propm.end(), end);
 				if(name.equals(":ID:") || name.equals(":ORIGINAL_ID:")) {
 					this.id = value.trim();
 				}
 			}
-			payloadResidue.append(payload.substring(start, end) + "\n");
-			payload.delete(start, end);
-			propm = propertiesLine.matcher(this.payload);
+			properties.add(cleanPayload.substring(start, end) + "\n");
+			cleanPayload.delete(start, end);
+			propm = propertiesLine.matcher(this.cleanPayload);
 		}
+		
+		return properties;
 	}
 	
-	private void stripFileProperties() {
+	private ArrayList<String> stripFileProperties() {
+		prepareCleanedPayload();
+		ArrayList<String> fileProperties = new ArrayList<String>();
 		while (true) {
-			int start = payload.indexOf("#+");
+			int start = cleanPayload.indexOf("#+");
 			if (start == -1)
 				break;
 			
-			int end = payload.indexOf("\n", start);
+			int end = cleanPayload.indexOf("\n", start);
 			if(end == -1)
 				break;
 			
-			payloadResidue.append(payload.substring(start, end + 1) + "\n");
-			payload.delete(start, end + 1);
+			fileProperties.add(cleanPayload.substring(start, end + 1) + "\n");
+			cleanPayload.delete(start, end + 1);
 		}
+		
+		return fileProperties;
 	}
 
 	
-	/**
-	 * Returns a string containing the time at which a todo is scheduled or deadlined.
-	 */
-	public ArrayList<DateEntry> getDates() {
-		ArrayList<DateEntry> result = new ArrayList<DateEntry>();
+	public String getProperty(String property) {
+		final Pattern propertiesLine = Pattern.compile(":"+property+":([^\\n]+)");
+		Matcher propm = propertiesLine.matcher(this.payload);
 		
-		if(this.scheduled == null) {
-			this.scheduled = stripDate("SCHEDULED:");
-			DateEntry scheduledEntry = getDateEntry(this.scheduled);
-			if(scheduledEntry != null) {
-				scheduledEntry.type = "SC: ";
-				result.add(scheduledEntry);
-			}
-		}
+		if(propm.find())
+			return propm.group(1).trim();
+		else
+			return "";
+	}
+	
+	
+	public ArrayList<OrgNodeDate> getDates() {
+		ArrayList<OrgNodeDate> result = new ArrayList<OrgNodeDate>();
 		
-		if(this.deadline == null) {
-			this.deadline = stripDate("DEADLINE:");
-			DateEntry deadlineEntry = getDateEntry(this.deadline);
-			if(deadlineEntry != null) {
-				deadlineEntry.type = "DL: ";
-				result.add(deadlineEntry);
-			}
-		}
+		if (this.scheduled == null)
+			this.scheduled = stripDate(OrgNodeTimeDate.TYPE.Scheduled);
+
+		try {
+			OrgNodeDate scheduledEntry = new OrgNodeDate(this.scheduled);
+			scheduledEntry.type = "SC: ";
+			result.add(scheduledEntry);
+		} catch (IllegalArgumentException e) {}
 		
-		if(this.timestamp == null) {
-			this.timestamp = stripDate("");
-			DateEntry timestampEntry = getDateEntry(this.timestamp);
-			if(timestampEntry != null) {
-				timestampEntry.type = "";
-				result.add(timestampEntry);
-			}
-		}
+		if (this.deadline == null)
+			this.deadline = stripDate(OrgNodeTimeDate.TYPE.Deadline);
+		
+		try {
+			OrgNodeDate deadlineEntry = new OrgNodeDate(this.deadline);
+			deadlineEntry.type = "DL: ";
+			result.add(deadlineEntry);
+		} catch (IllegalArgumentException e) {}
+		
+		if (this.timestamp == null)
+			this.timestamp = stripDate(OrgNodeTimeDate.TYPE.Timestamp);
+
+		try {
+			OrgNodeDate timestampEntry = new OrgNodeDate(this.timestamp);
+			timestampEntry.type = "";
+			result.add(timestampEntry);
+		} catch (IllegalArgumentException e) {}
 		
 		return result;
-	}
-	
-	public class DateEntry {
-		public long beginTime;
-		public long endTime;
-		public int allDay;
-		public String type = "";
-	}
-	
-	private DateEntry getDateEntry(String date)
-			throws IllegalArgumentException {
-		final Pattern schedulePattern = Pattern
-				.compile("(\\d{4}-\\d{2}-\\d{2})(?:[^\\d]*)(\\d{1,2}\\:\\d{2})?\\-?(\\d{1,2}\\:\\d{2})?");
-		
-		Matcher propm = schedulePattern.matcher(date);
-		DateEntry result = new DateEntry();
-
-		if (propm.find()) {
-			try {
-				if(propm.group(2) == null) { // event is an entire day event
-					result.beginTime = getTimeInMs(propm.group(1), "00:00").getTime();
-					result.endTime = result.beginTime + DateUtils.DAY_IN_MILLIS;
-					result.allDay = 1;
-				}
-				else if (propm.group(2) != null) { // has hh:mm entry
-					result.beginTime = getTimeInMs(propm.group(1), propm.group(2)).getTime();
-					result.allDay = 0;
-
-					if (propm.group(3) != null) { // has hh:mm-hh:mm entry
-						result.endTime = getTimeInMs(propm.group(1), propm.group(3)).getTime();
-					} else // event is one hour per default
-						result.endTime = result.beginTime + DateUtils.HOUR_IN_MILLIS;
-				}
-
-				return result;
-			} catch (ParseException e) {
-				Log.w("MobileOrg",
-						"Unable to parse schedule: " + date);
-			}
-		} else
-			Log.w("MobileOrg", "Unable to find time entry of entry");
-		return null;
-	}
-	
-	private Date getTimeInMs(String date, String time) throws ParseException {
-		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-		return formatter.parse(date + " " + time);
-	}
-	
-	public String getScheduled() {
-		if(this.scheduled == null)
-			this.scheduled = stripDate("SCHEDULED:");
-		
-		return this.scheduled;
-	}
-	
-	public String getDeadline() {
-		if(this.deadline == null)
-			this.deadline = stripDate("DEADLINE:");
-		
-		return this.deadline;
-	}
-	
-	public String getTimestamp() {
-		if(this.timestamp == null)
-			this.timestamp = stripDate("");
-		
-		return this.timestamp;
-	}
-	
-	public void modifyDates(String scheduled, String deadline, String timestamp) {
-		
-	}
-	
-	// TODO Fix
-	public void insertOrReplace(String key, String value) {
-		if(newPayloadResidue == null)
-			newPayloadResidue = new StringBuilder(payloadResidue);
-		
-		final Pattern schedulePattern = Pattern.compile(key + "\\s*<[^>]+>");
-		Matcher matcher = schedulePattern.matcher(newPayloadResidue);
-
-		if (matcher.find()) {
-			if (TextUtils.isEmpty(value))
-				newPayloadResidue.delete(matcher.start(), matcher.end());
-			else
-				newPayloadResidue.replace(matcher.start(), matcher.end(), value);
-		}
-		else if(TextUtils.isEmpty(value) == false)
-			newPayloadResidue.insert(0, value).append("\n");
 	}
 	
 	public long sumClocks() {
@@ -309,7 +270,5 @@ public class OrgNodePayload {
 		else
 			payload.insert(logbookIndex + ":LOGBOOK:".length(), "\n" + line);
 		return payload;
-	}
-	
+	}	
 }
-

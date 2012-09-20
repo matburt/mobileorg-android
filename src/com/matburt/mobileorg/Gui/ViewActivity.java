@@ -8,6 +8,7 @@ import android.preference.PreferenceManager;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.OrgData.OrgNode;
+import com.matburt.mobileorg.util.OrgNodeNotFoundException;
 
 public class ViewActivity extends SherlockFragmentActivity {
 	public static String NODE_ID = "node_id";
@@ -45,7 +46,7 @@ public class ViewActivity extends SherlockFragmentActivity {
 					.getDefaultSharedPreferences(this).getString(
 							"viewRecursionMax", "0"));
 			nodeViewFragment.display(node, levelOfRecursion, resolver);
-		} catch (IllegalArgumentException e) { // Didn't find node
+		} catch (OrgNodeNotFoundException e) {
 			nodeViewFragment.displayError();
 		}
 	}

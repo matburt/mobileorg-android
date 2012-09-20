@@ -10,22 +10,32 @@ import android.util.Log;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.view.SubMenu;
 import com.matburt.mobileorg.R;
+import com.matburt.mobileorg.Gui.ViewActivity;
+import com.matburt.mobileorg.OrgData.OrgEdit;
+import com.matburt.mobileorg.OrgData.OrgFile;
 import com.matburt.mobileorg.OrgData.OrgNode;
 import com.matburt.mobileorg.Services.TimeclockService;
-import com.matburt.mobileorg.Synchronizers.Synchronizer;
+import com.matburt.mobileorg.util.OrgFileNotFoundException;
+import com.matburt.mobileorg.util.OrgNodeNotFoundException;
 import com.matburt.mobileorg.util.OrgUtils;
 
-public class EditActivity extends SherlockFragmentActivity {
+public class EditActivity extends SherlockFragmentActivity implements
+		PayloadFragment.OnPayloadModifiedListener,
+		DatesFragment.OnDatesModifiedListener {
 	public final static String NODE_ID = "node_id";
 	public final static String ACTIONMODE = "actionMode";
 	public final static String ACTIONMODE_CREATE = "create";
 	public final static String ACTIONMODE_EDIT = "edit";
 	public final static String ACTIONMODE_ADDCHILD = "add_child";
 
+	/**
+	 * Used by create or add_child, in case underlying data changes and parent
+	 * can't be found on save.
+	 */
+	private String nodeOlpPath = "";
 	private OrgNode node;
 	private String actionMode;
 
@@ -39,6 +49,7 @@ public class EditActivity extends SherlockFragmentActivity {
 		this.resolver = getContentResolver();
 		
 		initState();
+		invalidateOptionsMenu();
 	}
 	
 	private void initState() {
@@ -52,18 +63,27 @@ public class EditActivity extends SherlockFragmentActivity {
 		} else if (this.actionMode.equals(ACTIONMODE_CREATE)) {
 			this.node = new OrgNode();
 		} else if (this.actionMode.equals(ACTIONMODE_EDIT)) {
-			this.node = new OrgNode(node_id, getContentResolver());
+			try {
+				this.node = new OrgNode(node_id, getContentResolver()).findOriginalNode(resolver);
+				this.nodeOlpPath = node.getOlpId(resolver);
+			} catch (OrgNodeNotFoundException e) {}
 		} else if (this.actionMode.equals(ACTIONMODE_ADDCHILD)) {
 			this.node = new OrgNode();
 			this.node.parentId = node_id;
+			
+			try {
+				OrgNode parent = new OrgNode(node_id, resolver);
+				this.nodeOlpPath = parent.getOlpId(resolver);
+			} catch (OrgNodeNotFoundException e) {}
 		}
 	}
 	
 	public OrgNode getParentOrgNode() {
 		if (this.actionMode.equals(ACTIONMODE_EDIT)) {
-			OrgNode parent = this.node.getParent(resolver);
-
-			if (parent == null) {
+			OrgNode parent;
+			try {
+				parent = node.getParent(resolver);
+			} catch (OrgNodeNotFoundException e) {
 				parent = new OrgNode();
 				parent.parentId = -2;
 			}
@@ -73,9 +93,8 @@ public class EditActivity extends SherlockFragmentActivity {
 		else if (this.actionMode.equals(ACTIONMODE_ADDCHILD)) {			
 			try {
 				OrgNode parent = new OrgNode(this.node.parentId, resolver);
-				Log.d("MobileOrg", "Setting parent " + this.node.parentId);
 				return parent;
-			} catch (IllegalArgumentException e) {}
+			} catch (OrgNodeNotFoundException e) {}
 		}
 		
 		return new OrgNode();
@@ -87,39 +106,70 @@ public class EditActivity extends SherlockFragmentActivity {
 		return this.node;
 	}
 	
+	public boolean isNodeModifiable() {
+		return getOrgNode().isNodeEditable(resolver);
+	}
+	
+	public boolean isNodeRefilable() {
+		if(this.actionMode.equals(ACTIONMODE_CREATE))
+			return false;
+		else
+			return getOrgNode().isNodeEditable(resolver);
+	}
+	
     @Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-    	super.onCreateOptionsMenu(menu);
-    	
-		MenuInflater inflater = getSupportMenuInflater();
-	    inflater.inflate(R.menu.edit, menu);
-    	
-	    if(this.node == null)
-	    	return true;
-	    
-		if (this.node.id > -1) {
-			SubMenu subMenu = menu.addSubMenu(R.string.menu_advanced);
-			MenuItem item = subMenu.add(R.string.menu_advanced,
-					R.string.menu_delete, 0, R.string.menu_delete);
-			item.setIcon(R.drawable.ic_input_delete);
+		getSupportMenuInflater().inflate(R.menu.edit, menu);
 
-			item = subMenu.add(R.string.menu_advanced, R.string.menu_clockin,
-					1, R.string.menu_clockin);
-			item.setIcon(R.drawable.ic_menu_today);
-			
-			item = subMenu.add(R.string.menu_advanced, R.string.menu_archive,
-					1, R.string.menu_archive);
-			
-			item = subMenu.add(R.string.menu_advanced, R.string.menu_archive_tosibling,
-					1, R.string.menu_archive_tosibling);
-
-			MenuItem subMenuItem = subMenu.getItem();
-			subMenuItem.setIcon(R.drawable.ic_menu_moreoverflow);
-			subMenuItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+		if(isNodeModifiable() == false)
+			menu.findItem(R.id.nodeedit_save).setVisible(false);
+		
+		SubMenu subMenu = menu.addSubMenu(R.string.menu_advanced);
+		MenuItem subMenuItem = subMenu.getItem();
+		subMenuItem.setIcon(R.drawable.ic_menu_moreoverflow);
+		subMenuItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+		MenuItem item = subMenu.add(R.string.menu_advanced,
+				R.string.contextmenu_view, 0, R.string.contextmenu_view);
+		item.setIcon(R.drawable.ic_menu_view);
+		
+		if (this.node != null && this.node.id >= 0 && isNodeModifiable()) {
+			createNodeSubMenu(subMenu);
+			subMenuItem.setVisible(true);
+		}
+		else if(this.node != null && this.node.isFilenode(getContentResolver())) {
+			createFileNodeSubMenu(subMenu);
+			subMenuItem.setVisible(true);
 		}
 	    
-    	return true;
-	}
+    	return super.onCreateOptionsMenu(menu);
+    }
+    
+    private void createNodeSubMenu(Menu subMenu) {
+		MenuItem item = subMenu.add(R.string.menu_advanced,
+				R.string.menu_delete, 0, R.string.menu_delete);
+		item.setIcon(R.drawable.ic_menu_delete);
+
+		item = subMenu.add(R.string.menu_advanced, R.string.menu_archive,
+				1, R.string.menu_archive);
+		item.setIcon(R.drawable.ic_menu_archive);
+		
+		item = subMenu.add(R.string.menu_advanced, R.string.menu_archive_tosibling,
+				1, R.string.menu_archive_tosibling);
+		item.setIcon(R.drawable.ic_menu_archive);
+
+		item = subMenu.add(R.string.menu_advanced, R.string.menu_clockin,
+				1, R.string.menu_clockin);
+		item.setIcon(R.drawable.ic_menu_today);
+    }
+    
+    private void createFileNodeSubMenu(Menu subMenu) {
+		MenuItem item = subMenu.add(R.string.menu_advanced,
+				R.string.menu_delete_file, 0, R.string.menu_delete_file);
+		item.setIcon(R.drawable.ic_menu_delete);
+		item = subMenu.add(R.string.menu_advanced, R.string.menu_recover,
+				1, R.string.menu_recover);
+		item.setIcon(R.drawable.ic_menu_archive);
+    }
     
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
@@ -142,17 +192,29 @@ public class EditActivity extends SherlockFragmentActivity {
 			runDeleteNode();
 			return true;
 			
+		case R.string.menu_delete_file:
+			runDeleteFileNode();
+			return true;
+			
 		case R.string.menu_clockin:
 			runTimeClockingService();
 			return true;
 			
 		case R.string.menu_archive:
-			runArchiveNode("archive");
+			runArchiveNode(false);
 			return true;
 			
 		case R.string.menu_archive_tosibling:
-			runArchiveNode("archive-sibling");
-			return true;		
+			runArchiveNode(true);
+			return true;
+			
+		case R.string.contextmenu_view:
+			runViewNodeActivity();
+			return true;
+			
+		case R.string.menu_recover:
+			runRecover();
+			return true;
 		}
 		return false;
 	}
@@ -176,18 +238,14 @@ public class EditActivity extends SherlockFragmentActivity {
 		builder.create().show();
 	}
 	
-	private void runArchiveNode(final String editString) {	
+	private void runArchiveNode(final boolean archiveToSibling) {	
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		builder.setMessage(R.string.outline_archive_prompt)
 				.setCancelable(false)
 				.setPositiveButton(R.string.yes,
 						new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog, int id) {
-								if(editString.equals("archive"))
-									node.archiveNode(resolver);
-								else
-									node.archiveNodeToSibling(resolver);
-								finish();
+								archiveNode(archiveToSibling);
 							}
 						})
 				.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
@@ -198,10 +256,65 @@ public class EditActivity extends SherlockFragmentActivity {
 		builder.create().show();
 	}
 
+	private void archiveNode(boolean archiveToSibling) {
+		if(hasEdits())
+			saveEdits();
+		
+		if(archiveToSibling)
+			node.archiveNodeToSibling(resolver);
+		else
+			node.archiveNode(resolver);
+		OrgUtils.announceUpdate(getBaseContext());
+		finish();
+	}
+	
+	private void runDeleteFileNode() {
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setMessage(R.string.outline_delete_prompt)
+				.setCancelable(false)
+				.setPositiveButton(R.string.yes,
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int id) {
+								deleteFileNode();
+							}
+						})
+				.setNegativeButton(R.string.no,
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int id) {
+								dialog.cancel();
+							}
+						});
+		builder.create().show();
+	}
+	
+	private void deleteFileNode() {
+		try {
+			OrgFile file = new OrgFile(node.fileId, resolver);
+			file.removeFile(resolver);
+			OrgUtils.announceUpdate(this);
+			finish();
+		} catch (OrgFileNotFoundException e) {}
+	}
+	
+	private void runViewNodeActivity() {		
+		Intent intent = new Intent(this, ViewActivity.class);
+		intent.putExtra(ViewActivity.NODE_ID, node.id);
+		startActivity(intent);
+	}
+	
 	private void runTimeClockingService() {
 		Intent intent = new Intent(EditActivity.this, TimeclockService.class);
 		intent.putExtra(TimeclockService.NODE_ID, node.id);
 		startService(intent);
+	}
+	
+	private void runRecover() {
+		try {
+			OrgFile orgFile = this.node.getOrgFile(resolver);
+			Log.d("MobileOrg", orgFile.toString(resolver));
+		} catch (OrgFileNotFoundException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	@Override
@@ -235,7 +348,18 @@ public class EditActivity extends SherlockFragmentActivity {
 	}
 	
 	public boolean hasEdits() {
-		return false;
+		OrgNode newNode = getEditedNode();
+		
+		int numberOfEdits = 0;
+		try {
+			OrgNode clonedNode = new OrgNode(this.node.id, resolver);
+			numberOfEdits = clonedNode.generateApplyEditNodes(newNode, resolver).size();
+		} catch (OrgNodeNotFoundException e) {}
+		
+		if(numberOfEdits > 0)
+			return true;
+		else
+			return false;
 	}
 	
 	
@@ -247,21 +371,24 @@ public class EditActivity extends SherlockFragmentActivity {
 		if(addTimestamp)
 			newNode.getOrgNodePayload().add(OrgUtils.getTimestamp());
 		
-		
-		if (this.actionMode.equals(ACTIONMODE_CREATE) || this.actionMode.equals(ACTIONMODE_ADDCHILD)) {
+		if (this.actionMode.equals(ACTIONMODE_CREATE)) {
+			newNode.level = 1;
+			newNode.write(resolver);
+		} else if (this.actionMode.equals(ACTIONMODE_ADDCHILD)) {
 			try {
-				newNode.createParentNewheading(resolver);
-				newNode.write(resolver);
+				OrgEdit edit = newNode.createParentNewheading(resolver);
+				edit.write(resolver);
 			} catch (IllegalStateException e) {
 				Log.e("MobileOrg", e.getLocalizedMessage());
 			}
-		}
-		else if (this.actionMode.equals(ACTIONMODE_EDIT)) {
-			this.node.generateAndApplyEdits(newNode, resolver);
-			this.node.write(resolver);
+			newNode.write(resolver);
+
+		} else if (this.actionMode.equals(ACTIONMODE_EDIT)) {
+			this.node.generateApplyWriteEdits(newNode, this.nodeOlpPath, resolver);
+			this.node.updateAllNodes(resolver);
 		}
 		
-		announceUpdate();
+		OrgUtils.announceUpdate(this);
 	}
 	
 	public OrgNode getEditedNode() {
@@ -283,19 +410,34 @@ public class EditActivity extends SherlockFragmentActivity {
 				.findFragmentByTag("payloadFragment");
 		newNode.setPayload(payloadFragment.getPayload());
 
-		DatesFragment datesFragment = (DatesFragment) getSupportFragmentManager()
-				.findFragmentByTag("datesFragment");
-		newNode.getOrgNodePayload().modifyDates(datesFragment.getScheduled(),
-				datesFragment.getDeadline(), datesFragment.getTimestamp());
-
 		return newNode;
 	}
+
+	@Override
+	public void onDatesModified() {
+		PayloadFragment payloadFragment = (PayloadFragment) getSupportFragmentManager()
+				.findFragmentByTag("payloadFragment");
+		payloadFragment.switchToView();
+	}
 	
-	private void announceUpdate() {
-		Intent intent = new Intent(Synchronizer.SYNC_UPDATE);
-		intent.putExtra(Synchronizer.SYNC_DONE, true);
-		intent.putExtra("showToast", false);
-		sendBroadcast(intent);
+	@Override
+	public void onPayloadModified() {
+		DatesFragment datesFragment = (DatesFragment) getSupportFragmentManager()
+				.findFragmentByTag("datesFragment");
+		datesFragment.setupDates();
 	}
 
+	@Override
+	public void onPayloadStartedEdit() {
+		DatesFragment datesFragment = (DatesFragment) getSupportFragmentManager()
+				.findFragmentByTag("datesFragment");
+		datesFragment.setModifable(false);
+	}
+
+	@Override
+	public void onPayloadEndedEdit() {
+		DatesFragment datesFragment = (DatesFragment) getSupportFragmentManager()
+				.findFragmentByTag("datesFragment");
+		datesFragment.setModifable(true);
+	}
 }

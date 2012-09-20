@@ -20,8 +20,9 @@ import com.matburt.mobileorg.OrgData.OrgContract.Files;
 import com.matburt.mobileorg.OrgData.OrgEdit;
 import com.matburt.mobileorg.OrgData.OrgFile;
 import com.matburt.mobileorg.OrgData.OrgFileParser;
-import com.matburt.mobileorg.OrgData.OrgProviderUtil;
+import com.matburt.mobileorg.OrgData.OrgProviderUtils;
 import com.matburt.mobileorg.util.FileUtils;
+import com.matburt.mobileorg.util.OrgFileNotFoundException;
 
 /**
  * This class implements many of the operations that need to be done on
@@ -95,7 +96,7 @@ public class Synchronizer {
 	 * file combine their content. This combined version is transfered to the
 	 * remote.
 	 */
-	public void pushCaptures() throws Exception, IOException,
+	public void pushCaptures() throws IOException,
 			CertificateException, SSLHandshakeException {
 		final String filename = CAPTURE_FILE;
 		
@@ -104,7 +105,7 @@ public class Synchronizer {
 		try {
 			OrgFile file = new OrgFile(filename, resolver);
 			localContents += file.toString(resolver);
-		} catch (IllegalArgumentException e) {}
+		} catch (OrgFileNotFoundException e) {}
 		
 		localContents += OrgEdit.editsToString(resolver);
 
@@ -117,6 +118,10 @@ public class Synchronizer {
 			localContents = remoteContent + "\n" + localContents;
 
 		syncher.putRemoteFile(filename, localContents);
+		
+		try {
+			new OrgFile(filename, resolver).removeFile(resolver);
+		} catch (OrgFileNotFoundException e) {}
 
 		resolver.delete(Edits.CONTENT_URI, null, null);
 		resolver.delete(Files.buildFilenameUri(filename), null, null);
@@ -127,7 +132,7 @@ public class Synchronizer {
 	 * host. Using those files, it determines the other files that need updating
 	 * and downloads them.
 	 */
-	public void pull(OrgFileParser parser) throws SSLHandshakeException, CertificateException, IOException, Exception {
+	public void pull(OrgFileParser parser) throws SSLHandshakeException, CertificateException, IOException {
 		notify.updateNotification(20, context.getString(R.string.downloading)
 				+ " checksums.dat");
 		String remoteChecksumContents = "";
@@ -138,7 +143,7 @@ public class Synchronizer {
 
 		HashMap<String, String> remoteChecksums = OrgFileParser
 				.getChecksums(remoteChecksumContents);
-		HashMap<String, String> localChecksums = OrgProviderUtil.getFileChecksums(resolver);
+		HashMap<String, String> localChecksums = OrgProviderUtils.getFileChecksums(resolver);
 		
 		ArrayList<String> filesToGet = new ArrayList<String>();
 
@@ -161,10 +166,10 @@ public class Synchronizer {
 
 		remoteIndexContents = FileUtils.read(syncher.getRemoteFile(INDEX_FILE));
 
-		OrgProviderUtil.setTodos(OrgFileParser.getTodosFromIndex(remoteIndexContents), resolver);
-		OrgProviderUtil.setPriorities(OrgFileParser
+		OrgProviderUtils.setTodos(OrgFileParser.getTodosFromIndex(remoteIndexContents), resolver);
+		OrgProviderUtils.setPriorities(OrgFileParser
 				.getPrioritiesFromIndex(remoteIndexContents), resolver);
-		OrgProviderUtil.setTags(OrgFileParser.getTagsFromIndex(remoteIndexContents), resolver);
+		OrgProviderUtils.setTags(OrgFileParser.getTagsFromIndex(remoteIndexContents), resolver);
 		HashMap<String, String> filenameMap = OrgFileParser
 				.getFilesFromIndex(remoteIndexContents);
 
@@ -182,20 +187,15 @@ public class Synchronizer {
 	}
 	
 	private void getAndParseFile(OrgFile orgFile, OrgFileParser parser)
-			throws SSLHandshakeException, CertificateException, IOException,
-			Exception {
+			throws CertificateException, IOException {
+		
 		BufferedReader breader = syncher.getRemoteFile(orgFile.filename);
-
-		if (breader == null) {
-			Log.w("MobileOrg", "File does not seem to exist: " + orgFile.filename);
-			return;
-		}
 
 		// TODO Generate checksum of file and compare to remoteChecksum
 		
 		try {
-			new OrgFile(orgFile.filename, resolver).removeFile();
-		} catch (IllegalArgumentException e) { /* file did not exist */ }
+			new OrgFile(orgFile.filename, resolver).removeFile(resolver);
+		} catch (OrgFileNotFoundException e) { /* file did not exist */ }
 		
 		if (orgFile.isEncrypted())
         	decryptAndParseFile(orgFile, breader);
@@ -204,14 +204,16 @@ public class Synchronizer {
         }
 	}
 	
-	private void decryptAndParseFile(OrgFile orgFile, BufferedReader reader) throws IOException {
-		Intent intent = new Intent(context, FileDecryptionActivity.class);
-		intent.putExtra("data", FileUtils.read(reader).getBytes());
-		intent.putExtra("filename", orgFile.filename);
-		intent.putExtra("filenameAlias", orgFile.name);
-		intent.putExtra("checksum", orgFile.checksum);
-		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-		context.startActivity(intent);
+	private void decryptAndParseFile(OrgFile orgFile, BufferedReader reader) {
+		try {
+			Intent intent = new Intent(context, FileDecryptionActivity.class);
+			intent.putExtra("data", FileUtils.read(reader).getBytes());
+			intent.putExtra("filename", orgFile.filename);
+			intent.putExtra("filenameAlias", orgFile.name);
+			intent.putExtra("checksum", orgFile.checksum);
+			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+			context.startActivity(intent);	
+		} catch(IOException e) {}
 	}
 
 	private void announceSyncDone() {

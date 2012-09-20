@@ -19,10 +19,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
-        android:layout_marginLeft="5dp"
         android:layout_span="3"
         android:background="@drawable/border"
         android:hint="@string/edit_date_date"
+        android:includeFontPadding="false"
+        android:minHeight="35dp"
         android:paddingLeft="5dp"
         android:paddingRight="5dp" />
 
@@ -35,6 +36,8 @@
         android:layout_span="3"
         android:background="@drawable/border"
         android:hint="@string/edit_date_start"
+        android:minHeight="35dip"
+        android:minWidth="30dip"
         android:paddingLeft="5dp"
         android:paddingRight="5dp" />
 
@@ -47,6 +50,8 @@
         android:layout_span="3"
         android:background="@drawable/border"
         android:hint="@string/edit_date_end"
+        android:minHeight="35dp"
+        android:minWidth="30dp"
         android:paddingLeft="5dp"
         android:paddingRight="5dp" />
 
@@ -55,7 +60,6 @@
         android:layout_width="35dp"
         android:layout_height="35dp"
         android:layout_gravity="center_vertical"
-        android:layout_marginLeft="5dp"
         android:background="@drawable/ic_menu_close_clear_cancel" />
 
 </TableRow>

@@ -6,7 +6,6 @@ import java.util.Collections;
 import android.content.ContentResolver;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,7 +16,8 @@ import com.actionbarsherlock.app.SherlockFragment;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.OrgData.OrgFile;
 import com.matburt.mobileorg.OrgData.OrgNode;
-import com.matburt.mobileorg.OrgData.OrgProviderUtil;
+import com.matburt.mobileorg.OrgData.OrgProviderUtils;
+import com.matburt.mobileorg.util.OrgNodeNotFoundException;
 
 public class LocationFragment extends SherlockFragment {
 	private final String NODE_ID = "nodeId";
@@ -31,6 +31,7 @@ public class LocationFragment extends SherlockFragment {
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
+		super.onCreateView(inflater, container, savedInstanceState);
 		this.locationView = (LinearLayout) inflater.inflate(
 				R.layout.edit_location, container, false);
 		return locationView;
@@ -49,6 +50,8 @@ public class LocationFragment extends SherlockFragment {
 			this.node = activity.getParentOrgNode();
 
 		initLocationView();
+		
+		setModifiable(activity.isNodeRefilable());
 	}
 	
 	@Override
@@ -62,8 +65,11 @@ public class LocationFragment extends SherlockFragment {
 			locationView.removeAllViews();
 			locations.clear();
 			long nodeId = savedInstanceState.getLong(NODE_ID, -1);
-			if(nodeId >= 0)
-				this.node = new OrgNode(nodeId, resolver);
+			if(nodeId >= 0) {
+				try {
+					this.node = new OrgNode(nodeId, resolver);
+				} catch (OrgNodeNotFoundException e) {}
+			}
 		}
 	}
 	
@@ -71,26 +77,32 @@ public class LocationFragment extends SherlockFragment {
 		if(this.node != null) {
 			if(this.node.parentId == -2) // Editing top node; can't be refiled
 				return;
-			//(this.node.id >= 0 || this.node.parentId >= 0) // Valid Node
-				setupLocation();
+
+			setupLocation();
 		}
 		else {
-			LocationEntry topEntry = getTopLevelNode(OrgFile.CAPTURE_FILE);
+			LocationEntry topEntry = getTopLevelNode(OrgFile.CAPTURE_FILE_ALIAS);
 			locationView.addView(topEntry);
 		}
 	}
 	
 	private void setupLocation() {
-		OrgNode currentNode = this.node;
+		if(this.node != null)
+			getLocationEntry(this.node,
+					this.node.getChildrenStringArray(resolver), "");
 		
+		OrgNode currentNode = this.node;
 		while(currentNode != null) {
-			OrgNode spinnerNode = currentNode.getParent(resolver);
+			OrgNode spinnerNode = null;
+			try {
+				spinnerNode = currentNode.getParent(resolver);
+			} catch (OrgNodeNotFoundException e) {}
 			String selection = currentNode.name;
 			
-			if (currentNode.getParent(resolver) != null) {
+			if (spinnerNode != null) {
 				ArrayList<String> data = currentNode.getSiblingsStringArray(resolver);
 				getLocationEntry(spinnerNode, data, selection);
-				currentNode = currentNode.getParent(resolver);
+				currentNode = spinnerNode;
 			} else {
 				getTopLevelNode(selection);
 				currentNode = null;
@@ -103,7 +115,18 @@ public class LocationFragment extends SherlockFragment {
 			locationView.addView(location);
 	}
 	
+	public void setModifiable(boolean enabled) {
+		for(LocationEntry entry: locations)
+			entry.setEnabled(enabled);
+	}
+	
 	private LocationEntry getLocationEntry(OrgNode node, ArrayList<String> data, String selection) {
+		if(this.node != null && node != null && this.node.id == node.id) {
+			String editNodeName = ((EditActivity) getActivity()).getOrgNode().name;
+			if(TextUtils.isEmpty(editNodeName) == false)
+				data.remove(editNodeName); // Prevents refiling node "under itself"
+		}
+		
 		LocationEntry location = new LocationEntry(getActivity());
 		location.init(node, this, data, selection);
 		locations.add(location);
@@ -111,8 +134,9 @@ public class LocationFragment extends SherlockFragment {
 	}
 	
 	private LocationEntry getTopLevelNode(String selection) {
-		ArrayList<String> data = OrgProviderUtil.getFilenames(resolver);
+		ArrayList<String> data = OrgProviderUtils.getFileAliases(resolver);
 		data.remove(OrgFile.AGENDA_FILE);
+		data.remove(OrgFile.AGENDA_FILE_ALIAS);
 		LocationEntry entry = getLocationEntry(null, data, selection);
 		return entry;
 	}
@@ -120,14 +144,18 @@ public class LocationFragment extends SherlockFragment {
 	public void addChild(OrgNode spinnerNode, String spinnerSelection) {
 		OrgNode childNode;
 		if (spinnerNode != null) {
-			childNode = spinnerNode.getChild(spinnerSelection, resolver);
-			if(childNode == null)
+			try {
+				childNode = spinnerNode.getChild(spinnerSelection, resolver);
+				if(childNode.getChildren(resolver).size() == 0)
+					return;
+			} catch (OrgNodeNotFoundException e) {
 				return;
+			}
 		} else {
 			try {
-			OrgFile file = new OrgFile(spinnerSelection, resolver);
-			childNode = new OrgNode(file.nodeId, resolver);
-			} catch (IllegalArgumentException e) {
+				childNode = OrgProviderUtils.getOrgNodeFromFileAlias(
+						spinnerSelection, resolver);
+			} catch (OrgNodeNotFoundException e) {
 				return;
 			}
 		}
@@ -187,10 +215,7 @@ public class LocationFragment extends SherlockFragment {
 				.getSelectedItem();
 		
 		if (TextUtils.isEmpty(selection) == false) {
-			if(selection.equals(OrgFile.CAPTURE_FILE))
-				return OrgProviderUtil.getOrCreateCaptureFile(resolver).getOrgNode(resolver);
-			
-			return OrgProviderUtil.getOrCreateFileFromAlias(selection, resolver).getOrgNode(resolver);
+			return OrgProviderUtils.getOrCreateFileFromAlias(selection, resolver).getOrgNode(resolver);
 		} else
 			throw new IllegalStateException("Can't determine location");
 	}
@@ -208,13 +233,11 @@ public class LocationFragment extends SherlockFragment {
 			OrgNode parent = locations.get(index).getOrgNode();
 			try {
 				OrgNode child = parent.getChild(selection, resolver);
-				Log.d("MobileOrg", "getLocation returning " + child.id);
 				return child;
-			} catch (IllegalArgumentException e) {
+			} catch (OrgNodeNotFoundException e) {
 				throw new IllegalStateException("Can't determine location");
 			}
 		} else {
-			Log.d("MobileOrg", "Selection was empty, trying previous spinner");
 			return getSelectedNodeId(--index);
 		}
 	}

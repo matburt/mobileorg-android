@@ -21,7 +21,7 @@ public interface SynchronizerInterface {
 	 * @param contents Content of the new file
 	 */
 	public void putRemoteFile(String filename, String contents)
-        throws Exception, IOException;
+        throws IOException;
 
 	/**
 	 * Returns a BufferedReader to the remote file.
@@ -30,7 +30,7 @@ public interface SynchronizerInterface {
 	 *            Name of the file, without path
 	 */
 	public BufferedReader getRemoteFile(String filename)
-        throws Exception, IOException, CertificateException, SSLHandshakeException;
+        throws IOException, CertificateException, SSLHandshakeException;
 
 	/**
 	 * Use this to disconnect from any services and cleanup.

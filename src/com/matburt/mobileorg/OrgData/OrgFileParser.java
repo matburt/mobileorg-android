@@ -28,9 +28,8 @@ public class OrgFileParser {
 	}
 
 	private void init(OrgFile orgFile) {
-		orgFile.setResolver(resolver);
-		orgFile.removeFile();
-		orgFile.addFile();
+		orgFile.removeFile(resolver);
+		orgFile.addFile(resolver);
 		this.orgFile = orgFile;
 
 		this.parseStack = new ParseStack();

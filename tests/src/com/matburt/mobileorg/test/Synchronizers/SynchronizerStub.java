@@ -28,14 +28,14 @@ public class SynchronizerStub implements SynchronizerInterface {
 
 	@Override
 	public void putRemoteFile(String filename, String contents)
-			throws Exception, IOException {
+			throws IOException {
 		putRemoteFileCount++;
 		addFile(filename, contents);
 	}
 
 	@Override
-	public BufferedReader getRemoteFile(String filename) throws Exception,
-			IOException, CertificateException, SSLHandshakeException {
+	public BufferedReader getRemoteFile(String filename) throws IOException,
+			CertificateException, SSLHandshakeException {
 		getRemoteFileCount++;
 		String contents = files.get(filename);
 		if(contents == null)
