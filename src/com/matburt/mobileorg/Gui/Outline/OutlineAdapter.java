@@ -49,6 +49,12 @@ public class OutlineAdapter extends ArrayAdapter<OrgNode> {
 		levelColors = new int[] { theme.ccLBlue, theme.c3Yellow, theme.ceLCyan,
 				theme.c1Red, theme.c2Green, theme.c5Purple, theme.ccLBlue,
 				theme.c2Green, theme.ccLBlue, theme.c3Yellow, theme.ceLCyan };
+		init();
+	}
+	
+	public void init() {
+		clear();
+		this.expanded.clear();
 		
 		Cursor cursor = resolver.query(
 				OrgData.buildChildrenUri("-1"),
@@ -62,8 +68,8 @@ public class OutlineAdapter extends ArrayAdapter<OrgNode> {
 			}
 			cursor.moveToNext();
 		}
+		notifyDataSetInvalidated();
 	}
-	
 	
 	// TODO Clean up and refactor to separate class
 	@Override

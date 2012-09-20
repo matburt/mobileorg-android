@@ -135,7 +135,7 @@ public class OutlineActivity extends SherlockActivity {
 //		listView.setAdapter(new OutlineCursorAdapter(this, cursor, getContentResolver()));
 //		listView.setSelection(lastSelection);
      
-		adapter.notifyDataSetInvalidated();
+		adapter.init();
 		refreshTitle();
 	}
 	
