@@ -42,7 +42,7 @@ public class OutlineAdapter extends ArrayAdapter<OrgNode> {
 	private DefaultTheme theme;
 	
 	public OutlineAdapter(Context context) {
-		super(context, R.layout.outline_expandable_item);
+		super(context, R.layout.outline_item);
 		this.resolver = context.getContentResolver();
 		
 		theme = new DefaultTheme();
@@ -74,7 +74,7 @@ public class OutlineAdapter extends ArrayAdapter<OrgNode> {
 		
 		if (row == null)
 			row = LayoutInflater.from(getContext()).inflate(
-					R.layout.outline_expandable_item, parent, false);
+					R.layout.outline_item, parent, false);
 
 		TextView orgItem = (TextView) row.findViewById(R.id.outline_item_title);
 		TextView tagsLayout = (TextView) row.findViewById(R.id.outline_item_tags);

@@ -69,8 +69,8 @@ public class OutlineCursorAdapter extends SimpleCursorAdapter {
 		
 		if(holder == null) {
 			holder = new ViewHolder();
-			holder.orgItem = (TextView) v.findViewById(R.id.orgItem);
-			holder.tagsLayout = (TextView) v.findViewById(R.id.tagsLayout);
+			holder.orgItem = (TextView) v.findViewById(R.id.outline_item_title);
+			holder.tagsLayout = (TextView) v.findViewById(R.id.outline_item_tags);
 		}
 
 		OrgNode node = new OrgNode();
