@@ -8,7 +8,7 @@
         android:key="dropboxLogin"/>
     <EditTextPreference
         android:name="Path"
-        android:summary="@string/preference_dropbox_path_summary"
+        android:dialogMessage="@string/preference_dropbox_path_summary"
         android:title="@string/preference_dropbox_path"
         android:key="dropboxPath"/>
   </PreferenceCategory>

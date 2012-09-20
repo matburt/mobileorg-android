@@ -58,8 +58,8 @@
         <item>Current node only</item>
         <item>Node and all its children</item>
         <item>Node, its children and their children</item>
-        <item>3 Levels of recursion</item>
-        <item>4 Levels of recursion</item>
+        <item>3 levels of recursion</item>
+        <item>4 levels of recursion</item>
     </string-array>
 
 </resources>

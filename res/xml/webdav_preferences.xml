@@ -3,20 +3,18 @@
   <PreferenceCategory android:title="WebDAV">
     <EditTextPreference
         android:name="URL"
-        android:summary="Full URL path to your index.org file"
-        android:title="URL"
+        android:dialogMessage="@string/summary_web_url"
+        android:title="@string/url"
         android:key="webUrl"
 		android:inputType="textUri" />
     <EditTextPreference
         android:name="Username"
-        android:summary="Username to login"
-        android:title="Username"
+        android:title="@string/username"
         android:key="webUser" />
     <EditTextPreference
         android:name="Password"
-        android:summary="Password to login"
         android:password="true"
-        android:title="Password"
+        android:title="@string/password"
         android:key="webPass"
 		android:inputType="textPassword" />
   </PreferenceCategory>
