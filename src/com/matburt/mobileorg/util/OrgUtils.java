@@ -29,6 +29,11 @@ public class OrgUtils {
 				.getString("defaultTodo", "");
 	}
     
+	public static boolean useAdvancedCapturing(Context context) {
+		return PreferenceManager.getDefaultSharedPreferences(context)
+				.getBoolean("captureAdvanced", true);
+	}
+	
     public static boolean isSyncConfigured(Context context) {
     	String syncSource = PreferenceManager.getDefaultSharedPreferences(context)
 		.getString("syncSource", "");

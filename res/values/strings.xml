@@ -128,6 +128,8 @@
     <string name="preferences_widget_summary">Preferences for a Widget</string>
     <string name="preference_widget_title">Widget Preferences</string>
     <string name="preference_other">Other</string>
+    <string name="preference_capture_advanced">Advanced capturing mechanism that allows capturing files under arbitrary headings.</string>
+    <string name="preference_capture_advanced_title">Use advanced capturing</string>
     <string name="preference_version">Version</string>
     <string name="preference_storage_summary">Where to store the org files</string>
     <string name="preference_storage_title">Storage Mode</string>

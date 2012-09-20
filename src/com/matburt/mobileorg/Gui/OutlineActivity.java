@@ -179,12 +179,6 @@ public class OutlineActivity extends SherlockActivity
 		MenuInflater inflater = getSupportMenuInflater();
 	    inflater.inflate(R.menu.outline_menu, menu);
 	    
-	    try {
-	    	OrgNode node = new OrgNode(this.node_id, resolver);
-	    	if(node.areChildrenEditable(resolver))
-	    		menu.findItem(R.id.menu_capturechild).setVisible(true);
-	    } catch (OrgNodeNotFoundException e) {}
-	    
 		return true;
 	}
 
@@ -209,11 +203,7 @@ public class OutlineActivity extends SherlockActivity
 			return true;
 
 		case R.id.menu_capturechild:
-			runEditCaptureNodeChildActivity(this.node_id);
-			return true;
-			
-		case R.id.menu_capture:
-			runEditNewNodeActivity(null);
+			runEditCaptureActivity(this.node_id);
 			return true;
 
 		case R.id.menu_search:
@@ -262,12 +252,6 @@ public class OutlineActivity extends SherlockActivity
 		startService(new Intent(this, SyncService.class));
     }
 	
-	public void runEditNewNodeActivity(View view) {
-		Intent intent = new Intent(this, EditActivity.class);
-		intent.putExtra(EditActivity.ACTIONMODE, EditActivity.ACTIONMODE_CREATE);
-		startActivity(intent);
-	}
-	
 	private void runEditNodeActivity(long nodeId) {
 		Intent intent = new Intent(this, EditActivity.class);
 		intent.putExtra(EditActivity.ACTIONMODE, EditActivity.ACTIONMODE_EDIT);
@@ -275,9 +259,16 @@ public class OutlineActivity extends SherlockActivity
 		startActivity(intent);
 	}
 
-	private void runEditCaptureNodeChildActivity(long node_id) {
+	private void runEditCaptureActivity(long node_id) {
 		Intent intent = new Intent(this, EditActivity.class);
-		intent.putExtra(EditActivity.ACTIONMODE, EditActivity.ACTIONMODE_ADDCHILD);
+		
+		String captureMode = EditActivity.ACTIONMODE_CREATE;
+		if (OrgUtils.useAdvancedCapturing(this)) {
+			captureMode = node_id == -1 ? EditActivity.ACTIONMODE_CREATE
+					: EditActivity.ACTIONMODE_ADDCHILD;
+		}
+		
+		intent.putExtra(EditActivity.ACTIONMODE, captureMode);
 		intent.putExtra(EditActivity.NODE_ID, node_id);
 		startActivity(intent);
 	}
