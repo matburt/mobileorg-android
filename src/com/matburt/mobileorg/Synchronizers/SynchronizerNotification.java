@@ -8,7 +8,7 @@ import android.content.Intent;
 import android.widget.RemoteViews;
 
 import com.matburt.mobileorg.R;
-import com.matburt.mobileorg.Gui.OutlineActivity;
+import com.matburt.mobileorg.Gui.Outline.OutlineActivity;
 
 public class SynchronizerNotification {
 	private NotificationManager notificationManager;

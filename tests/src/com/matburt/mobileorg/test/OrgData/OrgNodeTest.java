@@ -51,7 +51,7 @@ public class OrgNodeTest extends ProviderTestCase2<OrgProvider> {
 		node.level = 3;
 		OrgNode parsedNode = new OrgNode();
 		final String testHeading = "*** TODO my simple test";
-		parsedNode.parseLine(testHeading, 3, true);
+		parsedNode.parseLine(testHeading, 3);
 		
 		assertTrue(node.equals(parsedNode));
 	}

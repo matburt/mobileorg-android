@@ -66,7 +66,7 @@
         </receiver>
 
         <activity
-            android:name=".Gui.OutlineActivity"
+            android:name=".Gui.Outline.OutlineActivity"
             android:label="MobileOrg" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -168,6 +168,7 @@
             android:name=".Services.TimeclockDialog"
             android:theme="@android:style/Theme.Dialog" >
         </activity>
+        <activity android:name=".Gui.Outline.OutlineActivityExpandable"></activity>
     </application>
 
 </manifest>

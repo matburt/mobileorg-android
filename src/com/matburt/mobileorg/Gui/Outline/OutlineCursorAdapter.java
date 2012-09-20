@@ -1,4 +1,4 @@
-package com.matburt.mobileorg.Gui;
+package com.matburt.mobileorg.Gui.Outline;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

@@ -1,4 +1,4 @@
-package com.matburt.mobileorg.Gui;
+package com.matburt.mobileorg.Gui.Outline;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -31,6 +31,7 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 import com.matburt.mobileorg.R;
+import com.matburt.mobileorg.Gui.ViewActivity;
 import com.matburt.mobileorg.Gui.Capture.EditActivity;
 import com.matburt.mobileorg.OrgData.OrgContract.OrgData;
 import com.matburt.mobileorg.OrgData.OrgNode;
@@ -199,7 +200,7 @@ public class OutlineActivity extends SherlockActivity
 			return true;
 
 		case R.id.menu_outline:
-			runExpandSelection(-1);
+			runExpandableOutline();
 			return true;
 
 		case R.id.menu_capturechild:
@@ -240,6 +241,11 @@ public class OutlineActivity extends SherlockActivity
         if (!this.checkVersionCode()) {
             this.showUpgradePopup();
         }
+    }
+    
+    private void runExpandableOutline() {
+		Intent intent = new Intent(this, OutlineActivityExpandable.class);
+		startActivity(intent);
     }
     
     public void runHelp(View view) {

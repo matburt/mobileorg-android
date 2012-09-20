@@ -10,6 +10,7 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.SimpleCursorAdapter;
 
+import com.matburt.mobileorg.Gui.Outline.OutlineCursorAdapter;
 import com.matburt.mobileorg.OrgData.OrgProviderUtils;
 
 public class SearchActivity extends ListActivity {
