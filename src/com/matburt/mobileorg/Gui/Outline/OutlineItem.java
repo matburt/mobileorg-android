@@ -106,7 +106,10 @@ public class OutlineItem extends RelativeLayout implements Checkable {
 					"Archive".length(), 0);
 		else if(name.startsWith(OrgFileParser.BLOCK_SEPARATOR_PREFIX)) {
 			titleSpan.delete(0, OrgFileParser.BLOCK_SEPARATOR_PREFIX.length());
-			setBackgroundColor(theme.c4Blue);
+			
+			titleSpan.setSpan(new ForegroundColorSpan(theme.c4Blue), 0,
+					titleSpan.length(), 0);
+			
 			titleView.setGravity(Gravity.CENTER_VERTICAL
 					| Gravity.CENTER_HORIZONTAL);
 		} else {
@@ -115,9 +118,9 @@ public class OutlineItem extends RelativeLayout implements Checkable {
 		
 		formatLinks(theme, titleSpan);
 	}
-	
+
+	private static final Pattern urlPattern = Pattern.compile("\\[\\[[^\\]]*\\]\\[([^\\]]*)\\]\\]");
 	private static void formatLinks(DefaultTheme theme, SpannableStringBuilder titleSpan) {
-		Pattern urlPattern = Pattern.compile("\\[\\[[^\\]]*\\]\\[([^\\]]*)\\]\\]");
 		Matcher matcher = urlPattern.matcher(titleSpan);
 		while(matcher.find()) {
 			titleSpan.delete(matcher.start(), matcher.end());

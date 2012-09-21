@@ -5,7 +5,6 @@ import java.util.Collections;
 
 import android.content.ContentResolver;
 import android.content.Context;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -157,7 +156,6 @@ public class OutlineAdapter extends ArrayAdapter<OrgNode> {
 	public void expand(int position) {
 		OrgNode node = getItem(position);
 		insertAll(node.getChildren(resolver), position + 1);
-		Log.d("MobileOrg", "Adapter tried to expand with : " + node.getChildren(resolver).size());
 		this.expanded.set(position, true);
 	}
 	

@@ -8,10 +8,13 @@ import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.matburt.mobileorg.OrgData.OrgContract.OrgData;
+import com.matburt.mobileorg.util.OrgFileNotFoundException;
+
 import android.content.ContentResolver;
 import android.text.TextUtils;
+import android.util.Log;
 import android.util.Pair;
-
 
 public class OrgFileParser {
 
@@ -50,7 +53,14 @@ public class OrgFileParser {
 			db.fastInsertNodePayload(parseStack.getCurrentNodeId(), this.payload.toString());
 
 		} catch (IOException e) {}
+		
 		db.endTransaction();
+
+		if(orgFile.filename.equals(OrgFile.AGENDA_FILE)) {
+			try {
+				combineBlockAgendas();
+			} catch (OrgFileNotFoundException e) {}
+		}
 	}
 
 	private void parseLine(String line) {
@@ -124,112 +134,66 @@ public class OrgFileParser {
 			return parseStack.peek().second;
 		}
 	}
-	
-	// TODO Re-enable combine agenda
-//	/**
-//	 * This toggles the use of the <after>TITLE: </after> field. It is now
-//	 * disabled, see https://github.com/matburt/mobileorg-android/issues/114
-//	 */
-	
-//	private void updateCalendar(String filename, Context context) {
-//	if (filename.equals("agendas.org") == false
-//			&& PreferenceManager.getDefaultSharedPreferences(context)
-//					.getBoolean("calendarEnabled", false)) {
-//		try {
-//			//CalendarSyncService cal = new CalendarSyncService(this.db, context);
-//			//cal.syncFile(filename);
-//		} catch(IllegalArgumentException e) {
-//			Log.d("MobileOrg", "Failed to sync calendar");
-//		}	
-//	}
-//}
-	
-	
-//	if(orgFile.filename.equals("agendas.org") && PreferenceManager.getDefaultSharedPreferences(context)
-//			.getBoolean("combineBlockAgendas", false) && useTitleField) {
-//		//combineBlockAgendas();
-	public static final String BLOCK_SEPARATOR_PREFIX = "#HEAD#";
-	
-//	private void combineBlockAgendas() {
-//		final String filename = "agendas.org";
-//		long agendaFileNodeID = 0;//db.getFileNodeId(filename);
-//		Cursor cursor = null;//db.getNodeChildren(agendaFileNodeID);
-//		
-//		cursor.moveToFirst();
-//		
-//		String previousBlockTitle = "";
-//		long previousBlockNode = -1;
-//				
-//		while(cursor.isAfterLast() == false) {
-//			String name = cursor.getString(cursor.getColumnIndex("name"));
-//			
-//			if(name.indexOf(">") == -1)
-//				continue;
-//			
-//			String blockTitle = name.substring(0, name.indexOf(">"));
-//			
-//			if(TextUtils.isEmpty(blockTitle) == false) { // Is a block agenda
-//				
-//				if(blockTitle.equals(previousBlockTitle) == false) { // Create new node to contain block agenda	
-//					previousBlockNode = db.addNode(agendaFileNodeID, blockTitle,
-//							"", "", "", db.getFileId(filename));
-//				}
-//
-//				String blockEntryName = name.substring(name.indexOf(">") + 1);
-//
-//				long nodeId = cursor.getLong(cursor.getColumnIndex("_id"));
-//
-//
-//				Cursor children = db.getNodeChildren(nodeId);
-//				children.moveToFirst();
-//						
-//				if(blockEntryName.startsWith("Day-agenda") && children.getCount() == 1) {
-//					blockEntryName = children.getString(children
-//							.getColumnIndex("name"));
-//					children = db.getNodeChildren(children.getLong(children
-//							.getColumnIndex("_id")));
-//					children.moveToFirst();
-//					cloneChildren(children, previousBlockNode, agendaFileNodeID,
-//							blockEntryName, filename);
-//				} else if(blockEntryName.startsWith("Week-agenda")) {
-//					while (children.isAfterLast() == false) {
-//						blockEntryName = children.getString(children
-//								.getColumnIndex("name"));
-//						Cursor children2 = db.getNodeChildren(children
-//								.getLong(children.getColumnIndex("_id")));
-//						children2.moveToFirst();
-//						cloneChildren(children2, previousBlockNode,
-//								agendaFileNodeID, blockEntryName, filename);
-//						children2.close();
-//						children.moveToNext();
-//					}
-//				} else
-//					cloneChildren(children, previousBlockNode, agendaFileNodeID,
-//							blockEntryName, filename);
-//				
-//				previousBlockTitle = blockTitle;
-//				db.deleteNode(cursor.getLong(cursor.getColumnIndex("_id")));
-//				children.close();
-//			}
-//			
-//			cursor.moveToNext();
-//		}
-//		
-//		cursor.close();
-//	}
-	
-//	private void cloneChildren(Cursor children, long previousBlockNode,
-//			Long agendaNodeFileID, String blockEntryName, String filename) {
-//		db.addNode(previousBlockNode, BLOCK_SEPARATOR_PREFIX
-//				+ blockEntryName, "", "", "", db.getFileId(filename));
-//		
-//		while(children.isAfterLast() == false) {
-//			db.cloneNode(
-//					children.getLong(children.getColumnIndex("_id")),
-//					previousBlockNode, db.getFileId("agendas.org"));
-//			children.moveToNext();
-//		}
-//	}
+
+	public static final String BLOCK_SEPARATOR_PREFIX = "#HEAD#";	
+	private void combineBlockAgendas() throws OrgFileNotFoundException {		
+		OrgNode agendaFile = OrgProviderUtils.getOrgNodeFromFilename(
+				OrgFile.AGENDA_FILE, resolver);
+		
+		String previousBlockTitle = "";
+		OrgNode previousBlockNode = null;
+		
+		for(OrgNode node: agendaFile.getChildren(resolver)) {
+			if(node.name.indexOf(">") == -1)
+				continue;
+			
+			String blockTitle = node.name.substring(0, node.name.indexOf(">"));
+			String blockEntryName = node.name.substring(node.name.indexOf(">") + 1);
+			
+			if(TextUtils.isEmpty(blockTitle) == false) { // Is a block agenda
+				if(blockTitle.equals(previousBlockTitle) == false) { // Create new node to contain block agenda	
+					previousBlockTitle = blockTitle;
+
+					previousBlockNode = new OrgNode();
+					previousBlockNode.fileId = agendaFile.fileId;
+					previousBlockNode.name = blockTitle;
+					previousBlockNode.parentId = agendaFile.id;
+					previousBlockNode.level = agendaFile.level + 1;
+					previousBlockNode.id = db.fastInsertNode(previousBlockNode);
+				}
+				
+				ArrayList<OrgNode> children = node.getChildren(resolver);
+				if(blockEntryName.startsWith("Day-agenda") || blockEntryName.startsWith("Week-agenda")) {
+					for(OrgNode node2: children)
+						for (OrgNode childNode: node2.getChildren(resolver))
+							cloneChildren(childNode, previousBlockNode, node2.name);
+				} else
+					cloneChildren(node, previousBlockNode, blockEntryName); // Normal cloning
+				
+				resolver.delete(OrgData.buildIdUri(node.id), null, null);
+			}
+		}
+	}
+
+	private void cloneChildren(OrgNode node, OrgNode parent, String blockTitle) {
+		Log.d("MobileOrg", "cloning " + node.name);
+		OrgNode blockSeparator = new OrgNode();
+		blockSeparator.name = BLOCK_SEPARATOR_PREFIX + blockTitle;
+		blockSeparator.fileId = parent.fileId;
+		blockSeparator.parentId = parent.id;
+		blockSeparator.level = parent.level + 1;
+		db.fastInsertNode(blockSeparator);
+		
+		for(OrgNode child: node.getChildren(resolver)) {
+			Log.d("MobileOrg", "cloning child" + child.name);
+			OrgNode clonedChild = new OrgNode(child);
+			clonedChild.parentId = parent.id;
+			clonedChild.fileId = parent.fileId;
+			clonedChild.level = parent.level + 1;
+			db.fastInsertNode(clonedChild);
+			resolver.delete(OrgData.buildIdUri(node.id), null, null);
+		}
+	}
     
 	/**
 	 * Parses the checksum file.

@@ -22,6 +22,7 @@ public class OrgNode {
 	public long id = -1;
 	public long parentId = -1;
 	public long fileId = -1;
+	
 	public long level = 0;
 	public String priority = "";
 	public String todo = "";
@@ -32,6 +33,15 @@ public class OrgNode {
 	private OrgNodePayload orgNodePayload = null;
 
 	public OrgNode() {
+	}
+	
+	public OrgNode(OrgNode node) {
+		this.level = node.level;
+		this.priority = node.priority;
+		this.todo = node.todo;
+		this.tags = node.tags;
+		this.name = node.name;
+		setPayload(node.getPayload());
 	}
 	
 	public OrgNode(long id, ContentResolver resolver) throws OrgNodeNotFoundException {
@@ -500,7 +510,7 @@ public class OrgNode {
 				
 				if(start > -1 && end > -1) {
 					String title = matcher.group(AFTER_GROUP).substring(
-							start + 7, end);
+							start + "TITLE: ".length(), end);
 					
 					name = title + ">" + name;
 				}
@@ -515,13 +525,6 @@ public class OrgNode {
 			name = heading;
 		}
     }
-
-//	private boolean isValidTodo(String todo) {
-//		for(HashMap<String, Integer> aTodo : this.todos) {
-//			if(aTodo.containsKey(todo)) return true;
-//		}
-//		return false;
-//	}
  
     private static final int TODO_GROUP = 1;
     private static final int PRIORITY_GROUP = 2;
