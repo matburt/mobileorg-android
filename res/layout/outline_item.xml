@@ -16,9 +16,8 @@
         android:layout_alignParentRight="true"
         android:layout_alignParentTop="true"
         android:gravity="left"
-        android:text="Title"
+        android:text=""
         android:textAppearance="?android:attr/textAppearanceMedium" >
-
     </TextView>
 
     <TextView
@@ -28,8 +27,7 @@
         android:layout_alignParentRight="true"
         android:layout_below="@+id/outline_item_title"
         android:paddingLeft="10dp"
-        android:text="Tag1:Tag2" >
-
+        android:text="" >
     </TextView>
 
 </RelativeLayout>

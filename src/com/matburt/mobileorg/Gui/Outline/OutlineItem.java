@@ -48,11 +48,22 @@ public class OutlineItem extends RelativeLayout implements Checkable {
 		setupPriority(node.priority, theme, titleSpan);
 		setupTodo(node.todo, titleSpan, theme, resolver);
 		applyLevelIndentation(node.level, titleSpan);
+		setupChildrenIndicator(node, resolver, theme, titleSpan);
 				
 		titleSpan.setSpan(new StyleSpan(Typeface.NORMAL), 0, titleSpan.length(), 0);
 		titleView.setText(titleSpan);
 	}
 	
+	public static void setupChildrenIndicator(OrgNode node,
+			ContentResolver resolver, DefaultTheme theme,
+			SpannableStringBuilder titleSpan) {
+		if (node.hasChildren(resolver)) {
+			titleSpan.append("...");
+			titleSpan.setSpan(new ForegroundColorSpan(theme.c7White),
+					titleSpan.length() - "...".length(), titleSpan.length(), 0);
+		}
+	}
+
 	public static void setupTodo(String todo, SpannableStringBuilder titleSpan, DefaultTheme theme, ContentResolver resolver) {
 		if(TextUtils.isEmpty(todo) == false) {
 			Spannable todoSpan = new SpannableString(todo + " ");
