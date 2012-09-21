@@ -2,6 +2,12 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
 
     <item
+        android:id="@+id/menu_capturechild"
+        android:icon="@drawable/ic_menu_add2"
+        android:showAsAction="always"
+        android:title="@string/menu_capture"
+        android:visible="true"/>
+    <item
         android:id="@+id/menu_view"
         android:icon="@drawable/ic_menu_view"
         android:showAsAction="always"
@@ -14,7 +20,7 @@
     <item
         android:id="@+id/menu_delete_file"
         android:icon="@drawable/ic_menu_delete"
-        android:showAsAction="always"
+        android:showAsAction="ifRoom"
         android:title="@string/menu_delete_file"/>
     <item
         android:id="@+id/menu_recover"

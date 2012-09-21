@@ -57,14 +57,16 @@ public class OutlineListView extends ListView {
 				long id) {
 			if(activeActionMode != null)
 				activeActionMode.finish();
-			setItemChecked(position, true);
 			
 			OrgNode node = adapter.getItem(position);
 			if(node.hasChildren(resolver)) {
+				setItemChecked(position, true);
 				adapter.collapseExpand(position);
 			}
-			else
-				OutlineActionMode.runEditNodeActivity(context, node.id);
+			else {
+				setItemChecked(position, false);
+				OutlineActionMode.runEditNodeActivity(node.id, context);
+			}
 		}
 	};
 	

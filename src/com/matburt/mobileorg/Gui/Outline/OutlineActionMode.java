@@ -75,7 +75,7 @@ public class OutlineActionMode implements ActionMode.Callback {
 		switch (item.getItemId()) {
 
 		case R.id.menu_edit:
-			runEditNodeActivity(context, node.id);
+			runEditNodeActivity(node.id, context);
 			break;
 		case R.id.menu_delete:
 			runDeleteNode();
@@ -99,6 +99,10 @@ public class OutlineActionMode implements ActionMode.Callback {
 			runRecover();
 			break;
 
+		case R.id.menu_capturechild:
+			runCaptureActivity(node.id, context);
+			break;
+			
 		default:
 			mode.finish();
 			return false;
@@ -109,10 +113,23 @@ public class OutlineActionMode implements ActionMode.Callback {
 	}
 
 	
-	public static void runEditNodeActivity(Context context, long nodeId) {
+	public static void runEditNodeActivity(long nodeId, Context context) {
 		Intent intent = new Intent(context, EditActivity.class);
 		intent.putExtra(EditActivity.ACTIONMODE, EditActivity.ACTIONMODE_EDIT);
 		intent.putExtra(EditActivity.NODE_ID, nodeId);
+		context.startActivity(intent);
+	}
+	
+	public static  void runCaptureActivity(long id, Context context) {
+		Intent intent = new Intent(context, EditActivity.class);
+		
+		String captureMode = EditActivity.ACTIONMODE_CREATE;
+		if (OrgUtils.useAdvancedCapturing(context)) {
+			captureMode = EditActivity.ACTIONMODE_ADDCHILD;
+		}
+		
+		intent.putExtra(EditActivity.ACTIONMODE, captureMode);
+		intent.putExtra(EditActivity.NODE_ID, id);
 		context.startActivity(intent);
 	}
 	

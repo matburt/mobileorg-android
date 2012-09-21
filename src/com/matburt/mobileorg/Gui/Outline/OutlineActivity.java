@@ -16,7 +16,6 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 import com.matburt.mobileorg.R;
-import com.matburt.mobileorg.Gui.Capture.EditActivity;
 import com.matburt.mobileorg.OrgData.OrgProviderUtils;
 import com.matburt.mobileorg.Services.SyncService;
 import com.matburt.mobileorg.Settings.SettingsActivity;
@@ -128,7 +127,7 @@ public class OutlineActivity extends SherlockActivity {
 			return true;
 
 		case R.id.menu_capturechild:
-			runCaptureActivity();
+			OutlineActionMode.runCaptureActivity(listView.getCheckedNodeId(), this);
 			return true;
 
 		case R.id.menu_search:
@@ -167,19 +166,6 @@ public class OutlineActivity extends SherlockActivity {
 		intent.putExtra(OutlineActivity.NODE_ID, id);
 		startActivity(intent);
     }
-
-	private void runCaptureActivity() {
-		Intent intent = new Intent(this, EditActivity.class);
-		
-		String captureMode = EditActivity.ACTIONMODE_CREATE;
-		if (OrgUtils.useAdvancedCapturing(this)) {
-			captureMode = EditActivity.ACTIONMODE_ADDCHILD;
-		}
-		
-		intent.putExtra(EditActivity.ACTIONMODE, captureMode);
-		intent.putExtra(EditActivity.NODE_ID, listView.getCheckedNodeId());
-		startActivity(intent);
-	}
 
 
 	private boolean runSearch() {

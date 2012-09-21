@@ -48,9 +48,13 @@ public class SearchActivity extends SherlockActivity {
 	private void doSearch(String query) {
 		Cursor result = OrgProviderUtils.search("%" + query.trim() + "%",
 				getContentResolver());
-		ArrayList<OrgNode> data = OrgProviderUtils.orgDataCursorToArrayList(result);
-		
+		ArrayList<OrgNode> data = OrgProviderUtils
+				.orgDataCursorToArrayList(result);
+
 		listAdapter.clear();
 		listAdapter.addAll(data);
+
+		getSupportActionBar().setTitle(
+				"Search results for \"" + query.trim() + "\"");
 	}
 }

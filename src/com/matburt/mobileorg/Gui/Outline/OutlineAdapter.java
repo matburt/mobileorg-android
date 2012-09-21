@@ -80,6 +80,9 @@ public class OutlineAdapter extends ArrayAdapter<OrgNode> {
 
 	
 	public void collapseExpand(int position) {
+		if((position + 1) > getCount() || (position + 1) > this.expanded.size())
+			return;
+		
 		if(this.expanded.get(position))
 			collapse(getItem(position), position);
 		else
