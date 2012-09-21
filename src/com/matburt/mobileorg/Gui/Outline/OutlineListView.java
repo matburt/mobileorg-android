@@ -38,6 +38,14 @@ public class OutlineListView extends ListView {
 		this.context = activity;
 	}
 
+	public long[] getState() {
+		return this.adapter.getState();
+	}
+	
+	public void setState(long[] state) {
+		this.adapter.setState(state);
+	}
+	
 	public void refresh() {
 		this.adapter.init();
 	}

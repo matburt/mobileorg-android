@@ -14,6 +14,7 @@ import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Gui.Theme.DefaultTheme;
 import com.matburt.mobileorg.OrgData.OrgNode;
 import com.matburt.mobileorg.OrgData.OrgProviderUtils;
+import com.matburt.mobileorg.util.OrgNodeNotFoundException;
 
 public class OutlineAdapter extends ArrayAdapter<OrgNode> {
 
@@ -30,15 +31,36 @@ public class OutlineAdapter extends ArrayAdapter<OrgNode> {
 		this.theme = new DefaultTheme();
 		init();
 	}
-	
+
 	public void init() {
 		clear();
-		this.expanded.clear();
 		
 		for (OrgNode node : OrgProviderUtils.getOrgNodeChildren(-1, resolver))
 			add(node);
 		
 		notifyDataSetInvalidated();
+	}
+	
+	
+	public long[] getState() {
+		int count = getCount();
+		long[] state = new long[count];
+		
+		for(int i = 0; i < count; i++)
+			state[i] = getItem(i).id;
+		
+		return state;
+	}
+	
+	public void setState(long[] state) {
+		clear();
+		
+		for(int i = 0; i < state.length; i++) {
+			try {
+				OrgNode node = new OrgNode(state[i], resolver);
+				add(node);
+			} catch (OrgNodeNotFoundException e) {}
+		}
 	}
 	
 	@Override
@@ -51,6 +73,12 @@ public class OutlineAdapter extends ArrayAdapter<OrgNode> {
 		return outlineItem;
 	}
 
+	
+	@Override
+	public void clear() {
+		super.clear();
+		this.expanded.clear();
+	}
 
 	@Override
 	public void add(OrgNode node) {

@@ -26,6 +26,8 @@ import com.matburt.mobileorg.util.OrgUtils;
 public class OutlineActivity extends SherlockActivity {
 
 	public final static String NODE_ID = "node_id";
+	private final static String OUTLINE_NODES = "nodes";
+	private final static String OUTLINE_CHECKED_POS = "selection";
 
 	private Long node_id;
 		
@@ -52,6 +54,30 @@ public class OutlineActivity extends SherlockActivity {
 		refreshDisplay();
 	}
 	
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+		outState.putLongArray(OUTLINE_NODES, listView.getState());
+		outState.putInt(OUTLINE_CHECKED_POS, listView.getCheckedItemPosition());
+	}
+
+	@Override
+	protected void onRestoreInstanceState(Bundle savedInstanceState) {
+		super.onRestoreInstanceState(savedInstanceState);
+		
+		long[] state = savedInstanceState.getLongArray(OUTLINE_NODES);
+		if(state != null)
+			listView.setState(state);
+		
+		int checkedPos= savedInstanceState.getInt(OUTLINE_CHECKED_POS, 0);
+		listView.setItemChecked(checkedPos, true);
+		if(checkedPos > 2)
+			checkedPos -= 2;
+		listView.setSelection(checkedPos);
+	}
+	
+
+
 	private void setupList() {
 		listView = (OutlineListView) findViewById(R.id.outline_list);
 		listView.setActivity(this);
