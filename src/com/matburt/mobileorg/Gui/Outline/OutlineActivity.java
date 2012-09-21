@@ -50,19 +50,14 @@ public class OutlineActivity extends SherlockActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		this.context = this;
+		this.resolver = getContentResolver();
 		
 		setContentView(R.layout.outline);
-		this.resolver = getContentResolver();
 				
 		Intent intent = getIntent();
 		node_id = intent.getLongExtra(NODE_ID, -1);
 
-		if (this.node_id == -1) {
-			displayNewUserDialog();
-			if (OrgUtils.isSyncConfigured(this) == false)
-				runShowWizard();
-		}
-
+		displayNewUserDialogs();
 		setupList();
 
 		this.syncReceiver = new SynchServiceReceiver();
@@ -84,9 +79,13 @@ public class OutlineActivity extends SherlockActivity {
 		listView.setAdapter(adapter);	
 	}
 	
-	private void displayNewUserDialog() {
-		if (OrgUtils.isUpgradedVersion(this)) {
-			showUpgradePopup();
+	private void displayNewUserDialogs() {
+		if (this.node_id == -1) {
+			if (OrgUtils.isUpgradedVersion(this)) {
+				showUpgradePopup();
+			}
+			if (OrgUtils.isSyncConfigured(this) == false)
+				runShowWizard(null);
 		}
 	}
 	
@@ -190,39 +189,32 @@ public class OutlineActivity extends SherlockActivity {
 		return false;
 	}
 
-    private void runShowWizard() {
-        startActivityForResult(new Intent(this, WizardActivity.class), 0);
+
+    public void runHelp(View view) {
+		Intent intent = new Intent(Intent.ACTION_VIEW,
+				Uri.parse("https://github.com/matburt/mobileorg-android/wiki"));
+    	startActivity(intent);
     }
+    
+    public void runSynchronize(View view) {
+		startService(new Intent(this, SyncService.class));
+    }
+
+	public void runShowSettings(View view) {
+		Intent intent = new Intent(this, SettingsActivity.class);
+		startActivity(intent);
+	}
+	
+    public void runShowWizard(View view) {
+        startActivity(new Intent(this, WizardActivity.class));
+    }
+    
     
     private void runExpandableOutline(long id) {
 		Intent intent = new Intent(this, OutlineActivity.class);
 		intent.putExtra(OutlineActivity.NODE_ID, id);
 		startActivity(intent);
     }
-    
-    private void runHelp(View view) {
-		Intent intent = new Intent(Intent.ACTION_VIEW,
-				Uri.parse("https://github.com/matburt/mobileorg-android/wiki"));
-    	startActivity(intent);
-    }
-
-	private void showUpgradePopup() {
-		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setMessage(OrgUtils.getStringFromResource(R.raw.upgrade, this));
-		builder.setCancelable(false);
-		builder.setPositiveButton(R.string.ok,
-				new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int id) {
-						dialog.dismiss();
-					}
-				});
-		builder.create().show();
-	}
-    
-    public void runSynchronize(View view) {
-		startService(new Intent(this, SyncService.class));
-    }
-
 
 	private void runCaptureActivity() {
 		Intent intent = new Intent(this, EditActivity.class);
@@ -249,10 +241,18 @@ public class OutlineActivity extends SherlockActivity {
 	private boolean runSearch() {
 		return onSearchRequested();
 	}
-	
-	public void runShowSettings(View view) {
-		Intent intent = new Intent(this, SettingsActivity.class);
-		startActivity(intent);
+
+	private void showUpgradePopup() {
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setMessage(OrgUtils.getStringFromResource(R.raw.upgrade, this));
+		builder.setCancelable(false);
+		builder.setPositiveButton(R.string.ok,
+				new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						dialog.dismiss();
+					}
+				});
+		builder.create().show();
 	}
 	
 

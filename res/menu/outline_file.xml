@@ -7,6 +7,11 @@
         android:showAsAction="always"
         android:title="@string/menu_view"/>
     <item
+        android:id="@+id/menu_edit"
+        android:icon="@drawable/ic_menu_edit"
+        android:showAsAction="always"
+        android:title="@string/menu_edit"/>
+    <item
         android:id="@+id/menu_delete_file"
         android:icon="@drawable/ic_menu_delete"
         android:showAsAction="always"
