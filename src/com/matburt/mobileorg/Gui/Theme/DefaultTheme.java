@@ -1,4 +1,4 @@
-package com.matburt.mobileorg.Gui.Outline.Theme;
+package com.matburt.mobileorg.Gui.Theme;
 
 import android.graphics.Color;
 
