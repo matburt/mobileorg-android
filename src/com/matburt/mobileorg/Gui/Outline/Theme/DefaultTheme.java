@@ -3,7 +3,9 @@ package com.matburt.mobileorg.Gui.Outline.Theme;
 import android.graphics.Color;
 
 public class DefaultTheme {
-
+	
+	public int gray = Color.GRAY;
+	
 	public int c0Black = Color.rgb(0x00, 0x00, 0x00);
 	public int c1Red = Color.rgb(0xd0, 0x00, 0x00);
 	public int c2Green = Color.rgb(0x00, 0xa0, 0x00);

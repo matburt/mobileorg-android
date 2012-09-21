@@ -4,7 +4,9 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:minHeight="@dimen/outline_item"
-    android:orientation="vertical" >
+    android:orientation="vertical"
+    android:paddingLeft="5dp"
+    android:paddingRight="5dp" >
 
     <TextView
         android:id="@+id/outline_item_title"
@@ -14,16 +16,9 @@
         android:layout_alignParentRight="true"
         android:layout_alignParentTop="true"
         android:gravity="left"
+        android:text="Title"
         android:textAppearance="?android:attr/textAppearanceMedium" >
-    </TextView>
 
-    <TextView
-        android:id="@+id/outline_item_date"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="16dp"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:visibility="invisible" >
     </TextView>
 
     <TextView
@@ -32,7 +27,9 @@
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_below="@+id/outline_item_title"
-        android:paddingLeft="10dp" >
+        android:paddingLeft="10dp"
+        android:text="Tag1:Tag2" >
+
     </TextView>
 
 </RelativeLayout>
