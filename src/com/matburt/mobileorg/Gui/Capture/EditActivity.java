@@ -15,6 +15,7 @@ import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.OrgData.OrgEdit;
 import com.matburt.mobileorg.OrgData.OrgNode;
 import com.matburt.mobileorg.OrgData.OrgProviderUtils;
+import com.matburt.mobileorg.Services.SyncService;
 import com.matburt.mobileorg.util.OrgNodeNotFoundException;
 import com.matburt.mobileorg.util.OrgUtils;
 
@@ -44,10 +45,19 @@ public class EditActivity extends SherlockFragmentActivity implements
 		setContentView(R.layout.edit);
 		this.resolver = getContentResolver();
 		
+		SyncService.stopAlarm(this); // Don't run background sync while editing node
+		
 		initState();
 		invalidateOptionsMenu();
 	}
 	
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		SyncService.startAlarm(this);
+	}
+
+
 	private void initState() {
 		Intent intent = getIntent();
 		this.actionMode = intent.getStringExtra(ACTIONMODE);
