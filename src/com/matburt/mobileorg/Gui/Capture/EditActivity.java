@@ -11,14 +11,9 @@ import android.util.Log;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
-import com.actionbarsherlock.view.SubMenu;
 import com.matburt.mobileorg.R;
-import com.matburt.mobileorg.Gui.ViewActivity;
 import com.matburt.mobileorg.OrgData.OrgEdit;
-import com.matburt.mobileorg.OrgData.OrgFile;
 import com.matburt.mobileorg.OrgData.OrgNode;
-import com.matburt.mobileorg.Services.TimeclockService;
-import com.matburt.mobileorg.util.OrgFileNotFoundException;
 import com.matburt.mobileorg.util.OrgNodeNotFoundException;
 import com.matburt.mobileorg.util.OrgUtils;
 
@@ -123,52 +118,8 @@ public class EditActivity extends SherlockFragmentActivity implements
 
 		if(isNodeModifiable() == false)
 			menu.findItem(R.id.nodeedit_save).setVisible(false);
-		
-		SubMenu subMenu = menu.addSubMenu(R.string.menu_advanced);
-		MenuItem subMenuItem = subMenu.getItem();
-		subMenuItem.setIcon(R.drawable.ic_menu_moreoverflow);
-		subMenuItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
-		MenuItem item = subMenu.add(R.string.menu_advanced,
-				R.string.contextmenu_view, 0, R.string.contextmenu_view);
-		item.setIcon(R.drawable.ic_menu_view);
-		
-		if (this.node != null && this.node.id >= 0 && isNodeModifiable()) {
-			createNodeSubMenu(subMenu);
-			subMenuItem.setVisible(true);
-		}
-		else if(this.node != null && this.node.isFilenode(getContentResolver())) {
-			createFileNodeSubMenu(subMenu);
-			subMenuItem.setVisible(true);
-		}
 	    
     	return super.onCreateOptionsMenu(menu);
-    }
-    
-    private void createNodeSubMenu(Menu subMenu) {
-		MenuItem item = subMenu.add(R.string.menu_advanced,
-				R.string.menu_delete, 0, R.string.menu_delete);
-		item.setIcon(R.drawable.ic_menu_delete);
-
-		item = subMenu.add(R.string.menu_advanced, R.string.menu_archive,
-				1, R.string.menu_archive);
-		item.setIcon(R.drawable.ic_menu_archive);
-		
-		item = subMenu.add(R.string.menu_advanced, R.string.menu_archive_tosibling,
-				1, R.string.menu_archive_tosibling);
-		item.setIcon(R.drawable.ic_menu_archive);
-
-		item = subMenu.add(R.string.menu_advanced, R.string.menu_clockin,
-				1, R.string.menu_clockin);
-		item.setIcon(R.drawable.ic_menu_today);
-    }
-    
-    private void createFileNodeSubMenu(Menu subMenu) {
-		MenuItem item = subMenu.add(R.string.menu_advanced,
-				R.string.menu_delete_file, 0, R.string.menu_delete_file);
-		item.setIcon(R.drawable.ic_menu_delete);
-		item = subMenu.add(R.string.menu_advanced, R.string.menu_recover,
-				1, R.string.menu_recover);
-		item.setIcon(R.drawable.ic_menu_archive);
     }
     
 	@Override
@@ -187,135 +138,10 @@ public class EditActivity extends SherlockFragmentActivity implements
 		case R.id.nodeedit_cancel:
 			doCancel();
 			return true;
-			
-		case R.string.menu_delete:
-			runDeleteNode();
-			return true;
-			
-		case R.string.menu_delete_file:
-			runDeleteFileNode();
-			return true;
-			
-		case R.string.menu_clockin:
-			runTimeClockingService();
-			return true;
-			
-		case R.string.menu_archive:
-			runArchiveNode(false);
-			return true;
-			
-		case R.string.menu_archive_tosibling:
-			runArchiveNode(true);
-			return true;
-			
-		case R.string.contextmenu_view:
-			runViewNodeActivity();
-			return true;
-			
-		case R.string.menu_recover:
-			runRecover();
-			return true;
 		}
 		return false;
 	}
-	
-	private void runDeleteNode() {	
-		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setMessage(R.string.outline_delete_prompt)
-				.setCancelable(false)
-				.setPositiveButton(R.string.yes,
-						new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int id) {
-								node.deleteNode(resolver);
-								finish();
-							}
-						})
-				.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int id) {
-						dialog.cancel();
-					}
-				});
-		builder.create().show();
-	}
-	
-	private void runArchiveNode(final boolean archiveToSibling) {	
-		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setMessage(R.string.outline_archive_prompt)
-				.setCancelable(false)
-				.setPositiveButton(R.string.yes,
-						new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int id) {
-								archiveNode(archiveToSibling);
-							}
-						})
-				.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int id) {
-						dialog.cancel();
-					}
-				});
-		builder.create().show();
-	}
 
-	private void archiveNode(boolean archiveToSibling) {
-		if(hasEdits())
-			saveEdits();
-		
-		if(archiveToSibling)
-			node.archiveNodeToSibling(resolver);
-		else
-			node.archiveNode(resolver);
-		OrgUtils.announceUpdate(getBaseContext());
-		finish();
-	}
-	
-	private void runDeleteFileNode() {
-		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setMessage(R.string.outline_delete_prompt)
-				.setCancelable(false)
-				.setPositiveButton(R.string.yes,
-						new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int id) {
-								deleteFileNode();
-							}
-						})
-				.setNegativeButton(R.string.no,
-						new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int id) {
-								dialog.cancel();
-							}
-						});
-		builder.create().show();
-	}
-	
-	private void deleteFileNode() {
-		try {
-			OrgFile file = new OrgFile(node.fileId, resolver);
-			file.removeFile(resolver);
-			OrgUtils.announceUpdate(this);
-			finish();
-		} catch (OrgFileNotFoundException e) {}
-	}
-	
-	private void runViewNodeActivity() {		
-		Intent intent = new Intent(this, ViewActivity.class);
-		intent.putExtra(ViewActivity.NODE_ID, node.id);
-		startActivity(intent);
-	}
-	
-	private void runTimeClockingService() {
-		Intent intent = new Intent(EditActivity.this, TimeclockService.class);
-		intent.putExtra(TimeclockService.NODE_ID, node.id);
-		startService(intent);
-	}
-	
-	private void runRecover() {
-		try {
-			OrgFile orgFile = this.node.getOrgFile(resolver);
-			Log.d("MobileOrg", orgFile.toString(resolver));
-		} catch (OrgFileNotFoundException e) {
-			e.printStackTrace();
-		}
-	}
 	
 	@Override
 	public void onBackPressed() {
@@ -412,6 +238,7 @@ public class EditActivity extends SherlockFragmentActivity implements
 
 		return newNode;
 	}
+	
 
 	@Override
 	public void onDatesModified() {

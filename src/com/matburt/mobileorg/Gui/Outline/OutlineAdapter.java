@@ -18,7 +18,6 @@ import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
 import android.util.TypedValue;
 import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -79,8 +78,9 @@ public class OutlineAdapter extends ArrayAdapter<OrgNode> {
 		View row = convertView;
 		
 		if (row == null)
-			row = LayoutInflater.from(getContext()).inflate(
-					R.layout.outline_item, parent, false);
+//			row = LayoutInflater.from(getContext()).inflate(
+//					R.layout.outline_item, parent, false);
+			row = new OutlineItem(getContext());
 
 		TextView orgItem = (TextView) row.findViewById(R.id.outline_item_title);
 		TextView tagsLayout = (TextView) row.findViewById(R.id.outline_item_tags);

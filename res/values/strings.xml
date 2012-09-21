@@ -15,10 +15,10 @@
     <string name="menu_adddeadline">Add Deadline</string>
     <string name="menu_addscheduled">Add Scheduled</string>
     <string name="menu_timestamp">Add Timestamp</string>
-    <string name="contextmenu_edit">Edit Node</string>
-    <string name="contextmenu_view">View Node</string>
+    <string name="menu_edit">Edit Node</string>
+    <string name="menu_view">View Node</string>
     <string name="menu_delete_file">Delete File</string>
-    <string name="contextmenu_node_delete">Delete Node</string>
+    <string name="menu_node_delete">Delete Node</string>
     <string name="menu_delete">Delete</string>
     <string name="menu_advanced">Advanced</string>
     <string name="menu_recover">Recover</string>
