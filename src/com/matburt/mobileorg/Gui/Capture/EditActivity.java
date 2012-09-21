@@ -14,6 +14,7 @@ import com.actionbarsherlock.view.MenuItem;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.OrgData.OrgEdit;
 import com.matburt.mobileorg.OrgData.OrgNode;
+import com.matburt.mobileorg.OrgData.OrgProviderUtils;
 import com.matburt.mobileorg.util.OrgNodeNotFoundException;
 import com.matburt.mobileorg.util.OrgUtils;
 
@@ -63,8 +64,13 @@ public class EditActivity extends SherlockFragmentActivity implements
 				this.nodeOlpPath = node.getOlpId(resolver);
 			} catch (OrgNodeNotFoundException e) {}
 		} else if (this.actionMode.equals(ACTIONMODE_ADDCHILD)) {
-			this.node = new OrgNode();
-			this.node.parentId = node_id;
+			this.node = new OrgNode();			
+
+			if(node_id >= 0)
+				this.node.parentId = node_id;
+			else
+				this.node.parentId = OrgProviderUtils
+						.getOrCreateCaptureFile(resolver).nodeId;
 			
 			try {
 				OrgNode parent = new OrgNode(node_id, resolver);

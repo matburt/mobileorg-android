@@ -55,6 +55,7 @@ public class SearchActivity extends SherlockActivity {
 		listAdapter.addAll(data);
 
 		getSupportActionBar().setTitle(
-				"Search results for \"" + query.trim() + "\"");
+				getString(R.string.search_results_for) + " \"" + query.trim()
+						+ "\"");
 	}
 }

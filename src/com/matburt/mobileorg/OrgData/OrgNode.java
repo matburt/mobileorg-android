@@ -409,7 +409,7 @@ public class OrgNode {
 			return new OrgEdit();
 	}
 	
-	private OrgNode getParentSafe(String olpPath, ContentResolver resolver) {
+	public OrgNode getParentSafe(String olpPath, ContentResolver resolver) {
 		OrgNode parent;
 		try {
 			parent = new OrgNode(this.parentId, resolver);

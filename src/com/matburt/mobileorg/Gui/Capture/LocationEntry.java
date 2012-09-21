@@ -40,9 +40,9 @@ public class LocationEntry extends Spinner {
 		this.data = data;
 		
 		// TODO Renable to allow adding of new files
-//		if(node == null) // This is a top level node
-//			this.data.add(createHeading);
-//		else
+		if(node == null) // This is a top level node
+			;//this.data.add(createHeading);
+		else
 			this.data.add("");
 		
 		setupSpinner(selection);
