@@ -1,5 +1,9 @@
 package com.matburt.mobileorg.util;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -12,6 +16,8 @@ import com.matburt.mobileorg.Synchronizers.Synchronizer;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.widget.ArrayAdapter;
@@ -104,4 +110,45 @@ public class OrgUtils {
 		intent.putExtra(Synchronizer.SYNC_DONE, true);
 		context.sendBroadcast(intent);
 	}
+	
+
+    public static String getStringFromResource(int resource, Context context) {
+        InputStream is = context.getResources().openRawResource(resource);
+        BufferedReader br = new BufferedReader(new InputStreamReader(is));
+        String readLine = null;
+        String contents = "";
+
+        try {
+            // While the BufferedReader readLine is not null 
+            while ((readLine = br.readLine()) != null) {
+                contents += readLine + "\n";
+            }
+
+            // Close the InputStream and BufferedReader
+            is.close();
+            br.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return contents;
+    }
+    
+
+    public static boolean isUpgradedVersion(Context context) {
+        SharedPreferences appSettings =
+            PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor editor = appSettings.edit();
+        int versionCode = appSettings.getInt("appVersion", 0);
+        try {
+            PackageInfo pInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
+            int newVersion = pInfo.versionCode;
+            if (versionCode != newVersion) {
+                editor.putInt("appVersion", newVersion);
+                editor.commit();
+                return true;
+            }
+        } catch (Exception e) { };
+        return false;
+    }
 }

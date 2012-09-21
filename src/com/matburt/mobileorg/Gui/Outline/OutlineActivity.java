@@ -1,10 +1,5 @@
 package com.matburt.mobileorg.Gui.Outline;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
@@ -12,12 +7,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
-import android.content.pm.PackageInfo;
 import android.net.Uri;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -26,6 +17,7 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockActivity;
+import com.actionbarsherlock.view.ActionMode;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
@@ -50,6 +42,7 @@ public class OutlineActivity extends SherlockActivity {
 	
 	private ListView listView;
 	private OutlineActionMode actionMode;
+	private ActionMode activeActionMode = null;
 	private OutlineAdapter adapter;
 	private SynchServiceReceiver syncReceiver;
 
@@ -67,7 +60,7 @@ public class OutlineActivity extends SherlockActivity {
 		if (this.node_id == -1) {
 			displayNewUserDialog();
 			if (OrgUtils.isSyncConfigured(this) == false)
-				showWizard();
+				runShowWizard();
 		}
 
 		setupList();
@@ -92,7 +85,7 @@ public class OutlineActivity extends SherlockActivity {
 	}
 	
 	private void displayNewUserDialog() {
-		if (!checkVersionCode()) {
+		if (OrgUtils.isUpgradedVersion(this)) {
 			showUpgradePopup();
 		}
 	}
@@ -109,15 +102,15 @@ public class OutlineActivity extends SherlockActivity {
 		super.onDestroy();
 	}
 		
-	/**
-	 * Refreshes the outline display. Should be called when the underlying 
-	 * data has been updated.
-	 */
-	private void refreshDisplay() {
+	public void refreshDisplay() {
 		adapter.init();
 		refreshTitle();
 	}
 	
+	
+	private void refreshTitle() {
+		this.getSupportActionBar().setTitle("MobileOrg " + getChangesString());
+	}
     
     private String getChangesString() {
     	int changes = OrgProviderUtils.getChangesCount(getContentResolver());
@@ -126,15 +119,15 @@ public class OutlineActivity extends SherlockActivity {
     	else
     		return "";
     }
-	
-	private void refreshTitle() {
-		this.getSupportActionBar().setTitle("MobileOrg " + getChangesString());
-	}
 
 	private OnItemClickListener outlineClickListener = new OnItemClickListener() {
 		@Override
 		public void onItemClick(AdapterView<?> parent, View v, int position,
 				long id) {
+			if(activeActionMode != null)
+				activeActionMode.finish();
+			listView.setItemChecked(position, true);
+			
 			OrgNode node = adapter.getItem(position);
 			if(node.hasChildren(resolver))
 				adapter.collapseExpand(position);
@@ -149,7 +142,7 @@ public class OutlineActivity extends SherlockActivity {
 		public boolean onItemLongClick(AdapterView<?> parent, View v, int position,
 				long id) {
 			actionMode.initActionMode(listView, position);
-			startActionMode(actionMode);
+			activeActionMode = startActionMode(actionMode);
 			return true;
 		}
 	};
@@ -197,14 +190,8 @@ public class OutlineActivity extends SherlockActivity {
 		return false;
 	}
 
-    private void showWizard() {
+    private void runShowWizard() {
         startActivityForResult(new Intent(this, WizardActivity.class), 0);
-    }
-
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (!this.checkVersionCode()) {
-            this.showUpgradePopup();
-        }
     }
     
     private void runExpandableOutline(long id) {
@@ -213,11 +200,24 @@ public class OutlineActivity extends SherlockActivity {
 		startActivity(intent);
     }
     
-    public void runHelp(View view) {
+    private void runHelp(View view) {
 		Intent intent = new Intent(Intent.ACTION_VIEW,
 				Uri.parse("https://github.com/matburt/mobileorg-android/wiki"));
     	startActivity(intent);
     }
+
+	private void showUpgradePopup() {
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setMessage(OrgUtils.getStringFromResource(R.raw.upgrade, this));
+		builder.setCancelable(false);
+		builder.setPositiveButton(R.string.ok,
+				new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						dialog.dismiss();
+					}
+				});
+		builder.create().show();
+	}
     
     public void runSynchronize(View view) {
 		startService(new Intent(this, SyncService.class));
@@ -254,6 +254,7 @@ public class OutlineActivity extends SherlockActivity {
 		Intent intent = new Intent(this, SettingsActivity.class);
 		startActivity(intent);
 	}
+	
 
 	private class SynchServiceReceiver extends BroadcastReceiver {
 		@Override
@@ -267,58 +268,4 @@ public class OutlineActivity extends SherlockActivity {
 			}
 		}
 	}
-	
-
-    private void showUpgradePopup() {
-        Log.i("MobileOrg", "Showing upgrade");
-		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setMessage(this.getRawContents(R.raw.upgrade));
-        builder.setCancelable(false);
-		builder.setPositiveButton(R.string.ok,
-                                  new DialogInterface.OnClickListener() {
-                                      public void onClick(DialogInterface dialog, int id) {
-                                          dialog.dismiss();
-                                      }
-                                  });
-		builder.create().show();
-    }
-
-    private String getRawContents(int resource) {
-        InputStream is = this.getResources().openRawResource(resource);
-        BufferedReader br = new BufferedReader(new InputStreamReader(is));
-        String readLine = null;
-        String contents = "";
-
-        try {
-            // While the BufferedReader readLine is not null 
-            while ((readLine = br.readLine()) != null) {
-                contents += readLine + "\n";
-            }
-
-            // Close the InputStream and BufferedReader
-            is.close();
-            br.close();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return contents;
-    }
-
-    private boolean checkVersionCode() {
-        SharedPreferences appSettings =
-            PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-        SharedPreferences.Editor editor = appSettings.edit();
-        int versionCode = appSettings.getInt("appVersion", 0);
-        try {
-            PackageInfo pInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
-            int newVersion = pInfo.versionCode;
-            if (versionCode != newVersion) {
-                editor.putInt("appVersion", newVersion);
-                editor.commit();
-                return false;
-            }
-        } catch (Exception e) { };
-        return true;
-    }
 }

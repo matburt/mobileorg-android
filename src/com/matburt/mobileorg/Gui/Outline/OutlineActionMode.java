@@ -39,7 +39,6 @@ public class OutlineActionMode implements ActionMode.Callback {
 	
 	public void initActionMode(ListView list, int position) {
 		list.setItemChecked(position, true);
-		list.setEnabled(false);
 		this.list = list;
 		this.adapter = (OutlineAdapter) list.getAdapter();
 		this.listPosition = position;
@@ -49,7 +48,6 @@ public class OutlineActionMode implements ActionMode.Callback {
 	@Override
 	public void onDestroyActionMode(ActionMode mode) {
 		this.list.setItemChecked(this.listPosition, true);
-		this.list.setEnabled(true);
 	}
 	
 	@Override
