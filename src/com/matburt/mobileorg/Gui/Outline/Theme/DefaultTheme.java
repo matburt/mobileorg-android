@@ -20,4 +20,8 @@ public class DefaultTheme {
 	public int cdLPurple = Color.rgb(0xff, 0x00, 0xff);
 	public int ceLCyan = Color.rgb(0x00, 0xff, 0xff);
 	public int cfLWhite = Color.rgb(0xff, 0xff, 0xff);
+
+	public final int[] levelColors = new int[] { ccLBlue, c3Yellow, ceLCyan,
+			c1Red, c2Green, c5Purple, ccLBlue, c2Green, ccLBlue, c3Yellow,
+			ceLCyan };
 }

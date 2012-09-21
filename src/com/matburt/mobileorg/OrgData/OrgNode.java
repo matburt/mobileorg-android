@@ -201,22 +201,7 @@ public class OrgNode {
 	}
 	
 	public ArrayList<OrgNode> getChildren(ContentResolver resolver) {
-		ArrayList<OrgNode> result = new ArrayList<OrgNode>();
-		
-		Cursor childCursor = resolver.query(OrgData.buildChildrenUri(id),
-				OrgData.DEFAULT_COLUMNS, null, null, null);
-		
-		childCursor.moveToFirst();
-		
-		while(childCursor.isAfterLast() == false) {
-			try {
-				result.add(new OrgNode(childCursor));
-			} catch (OrgNodeNotFoundException e) {}
-			childCursor.moveToNext();
-		}
-		
-		childCursor.close();
-		return result;
+		return OrgProviderUtils.getOrgNodeChildren(id, resolver);
 	}
 	
 	public ArrayList<String> getChildrenStringArray(ContentResolver resolver) {

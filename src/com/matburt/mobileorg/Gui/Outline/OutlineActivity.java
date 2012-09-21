@@ -76,7 +76,7 @@ public class OutlineActivity extends SherlockActivity {
 		
 		this.actionMode = new OutlineActionMode(this);
 		this.adapter = new OutlineAdapter(this);
-		listView.setAdapter(adapter);	
+		listView.setAdapter(adapter);
 	}
 	
 	private void displayNewUserDialogs() {
@@ -128,8 +128,9 @@ public class OutlineActivity extends SherlockActivity {
 			listView.setItemChecked(position, true);
 			
 			OrgNode node = adapter.getItem(position);
-			if(node.hasChildren(resolver))
+			if(node.hasChildren(resolver)) {
 				adapter.collapseExpand(position);
+			}
 			else
 				OutlineActionMode.runEditNodeActivity(context, node.id);
 		}

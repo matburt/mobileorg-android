@@ -351,4 +351,24 @@ public class OrgProviderUtils {
 		
 		return changes;
 	}
+	
+	public static ArrayList<OrgNode> getOrgNodeChildren(long nodeId, ContentResolver resolver) {
+		ArrayList<OrgNode> result = new ArrayList<OrgNode>();
+		
+		String sort = nodeId == -1 ? OrgData.NAME_SORT : null;
+		Cursor childCursor = resolver.query(OrgData.buildChildrenUri(nodeId),
+				OrgData.DEFAULT_COLUMNS, null, null, sort);
+		
+		childCursor.moveToFirst();
+		
+		while(childCursor.isAfterLast() == false) {
+			try {
+				result.add(new OrgNode(childCursor));
+			} catch (OrgNodeNotFoundException e) {}
+			childCursor.moveToNext();
+		}
+		
+		childCursor.close();
+		return result;
+	}
 }
