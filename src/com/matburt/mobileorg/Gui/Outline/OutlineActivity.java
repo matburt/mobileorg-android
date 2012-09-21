@@ -28,6 +28,7 @@ public class OutlineActivity extends SherlockActivity {
 	public final static String NODE_ID = "node_id";
 	private final static String OUTLINE_NODES = "nodes";
 	private final static String OUTLINE_CHECKED_POS = "selection";
+	private final static String OUTLINE_SCROLL_POS = "scrollPosition";
 
 	private Long node_id;
 		
@@ -44,7 +45,8 @@ public class OutlineActivity extends SherlockActivity {
 		Intent intent = getIntent();
 		node_id = intent.getLongExtra(NODE_ID, -1);
 
-		displayNewUserDialogs();
+		if (this.node_id == -1)
+			displayNewUserDialogs();
 		setupList();
 
 		this.syncReceiver = new SynchServiceReceiver();
@@ -59,6 +61,7 @@ public class OutlineActivity extends SherlockActivity {
 		super.onSaveInstanceState(outState);
 		outState.putLongArray(OUTLINE_NODES, listView.getState());
 		outState.putInt(OUTLINE_CHECKED_POS, listView.getCheckedItemPosition());
+		outState.putInt(OUTLINE_SCROLL_POS, listView.getFirstVisiblePosition());
 	}
 
 	@Override
@@ -71,9 +74,9 @@ public class OutlineActivity extends SherlockActivity {
 		
 		int checkedPos= savedInstanceState.getInt(OUTLINE_CHECKED_POS, 0);
 		listView.setItemChecked(checkedPos, true);
-		if(checkedPos > 2)
-			checkedPos -= 2;
-		listView.setSelection(checkedPos);
+		
+		int scrollPos = savedInstanceState.getInt(OUTLINE_SCROLL_POS, 0);
+		listView.setSelection(scrollPos);
 	}
 	
 
@@ -85,13 +88,11 @@ public class OutlineActivity extends SherlockActivity {
 	}
 	
 	private void displayNewUserDialogs() {
-		if (this.node_id == -1) {
-			if (OrgUtils.isUpgradedVersion(this)) {
-				showUpgradePopup();
-			}
-			if (OrgUtils.isSyncConfigured(this) == false)
-				runShowWizard(null);
-		}
+		if (OrgUtils.isSyncConfigured(this) == false)
+			runShowWizard(null);
+
+		if (OrgUtils.isUpgradedVersion(this))
+			showUpgradePopup();
 	}
 	
 	@Override

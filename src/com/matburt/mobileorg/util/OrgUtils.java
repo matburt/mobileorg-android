@@ -139,11 +139,11 @@ public class OrgUtils {
         SharedPreferences appSettings =
             PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = appSettings.edit();
-        int versionCode = appSettings.getInt("appVersion", 0);
+        int versionCode = appSettings.getInt("appVersion", -1);
         try {
             PackageInfo pInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
             int newVersion = pInfo.versionCode;
-            if (versionCode != newVersion) {
+            if (versionCode != -1 && versionCode != newVersion) {
                 editor.putInt("appVersion", newVersion);
                 editor.commit();
                 return true;

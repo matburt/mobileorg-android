@@ -63,6 +63,32 @@ public class OutlineAdapter extends ArrayAdapter<OrgNode> {
 		}
 	}
 	
+	public void refresh() {
+		ArrayList<Long> expandedNodeIds = new ArrayList<Long>();
+		int size = this.expanded.size();
+		for(int i = 0; i < size; i++) {
+			if(this.expanded.get(i))
+				expandedNodeIds.add(getItemId(i));
+		}
+		
+		init();
+		
+		expandNodes(expandedNodeIds);
+	}
+
+	private void expandNodes(ArrayList<Long> nodeIds) {
+		while (nodeIds.size() != 0) {
+			Long nodeId = nodeIds.get(0);
+			for (int nodesPosition = 0; nodesPosition < getCount(); nodesPosition++) {
+				if (getItemId(nodesPosition) == nodeId) {
+					expand(nodesPosition);
+					break;
+				}
+			}
+			nodeIds.remove(0);
+		}
+	}
+	
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {				
 		OutlineItem outlineItem = (OutlineItem) convertView;
@@ -135,7 +161,8 @@ public class OutlineAdapter extends ArrayAdapter<OrgNode> {
 		this.expanded.set(position, true);
 	}
 	
-	public long getNodeId(int position) {
+	@Override
+	public long getItemId(int position) {
 		OrgNode node = getItem(position);
 		return node.id;
 	}

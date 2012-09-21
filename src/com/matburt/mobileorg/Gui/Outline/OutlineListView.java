@@ -47,7 +47,9 @@ public class OutlineListView extends ListView {
 	}
 	
 	public void refresh() {
-		this.adapter.init();
+		int position = getFirstVisiblePosition();
+		this.adapter.refresh();
+		setSelection(position);
 	}
 	
 	public long getCheckedNodeId() {
@@ -55,7 +57,7 @@ public class OutlineListView extends ListView {
 			return -1;
 		else {
 			int position = getCheckedItemPosition();
-			return adapter.getNodeId(position);
+			return adapter.getItemId(position);
 		}
 	}
 	
