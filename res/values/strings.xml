@@ -15,11 +15,10 @@
     <string name="menu_adddeadline">Add Deadline</string>
     <string name="menu_addscheduled">Add Scheduled</string>
     <string name="menu_timestamp">Add Timestamp</string>
-    <string name="menu_edit">Edit Node</string>
-    <string name="menu_view">View Node</string>
-    <string name="menu_delete_file">Delete File</string>
-    <string name="menu_node_delete">Delete Node</string>
+    <string name="menu_edit">Edit</string>
+    <string name="menu_view">View</string>
     <string name="menu_delete">Delete</string>
+    <string name="menu_delete_file">Delete File</string>
     <string name="menu_advanced">Advanced</string>
     <string name="menu_recover">Recover</string>
     <string name="menu_clockin">Clock in</string>

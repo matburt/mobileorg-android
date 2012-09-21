@@ -54,7 +54,7 @@ public class OutlineItem extends RelativeLayout implements Checkable {
 		titleView.setText(titleSpan);
 	}
 	
-	public static void setupChildrenIndicator(OrgNode node,
+	public void setupChildrenIndicator(OrgNode node,
 			ContentResolver resolver, DefaultTheme theme,
 			SpannableStringBuilder titleSpan) {
 		if (node.hasChildren(resolver)) {

@@ -70,11 +70,9 @@ public class OutlineListView extends ListView {
 			
 			OrgNode node = adapter.getItem(position);
 			if(node.hasChildren(resolver)) {
-				setItemChecked(position, true);
 				adapter.collapseExpand(position);
 			}
 			else {
-				setItemChecked(position, false);
 				OutlineActionMode.runEditNodeActivity(node.id, context);
 			}
 		}
