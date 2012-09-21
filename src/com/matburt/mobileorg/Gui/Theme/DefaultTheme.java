@@ -24,6 +24,6 @@ public class DefaultTheme {
 	public int cfLWhite = Color.rgb(0xff, 0xff, 0xff);
 
 	public final int[] levelColors = new int[] { ccLBlue, c3Yellow, ceLCyan,
-			c1Red, c2Green, c5Purple, ccLBlue, c2Green, ccLBlue, c3Yellow,
+			c2Green, c5Purple, ccLBlue, c2Green, ccLBlue, c3Yellow,
 			ceLCyan };
 }

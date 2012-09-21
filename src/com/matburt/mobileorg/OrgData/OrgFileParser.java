@@ -163,7 +163,7 @@ public class OrgFileParser {
 				}
 				
 				ArrayList<OrgNode> children = node.getChildren(resolver);
-				if(blockEntryName.startsWith("Day-agenda") || blockEntryName.startsWith("Week-agenda")) {
+				if(blockTitle.startsWith("Day-agenda") || blockTitle.startsWith("Week-agenda")) {
 					for(OrgNode node2: children)
 						for (OrgNode childNode: node2.getChildren(resolver))
 							cloneChildren(childNode, previousBlockNode, node2.name);
