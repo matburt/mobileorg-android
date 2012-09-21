@@ -35,6 +35,7 @@ public class OutlineListView extends ListView {
 	
 	public void setActivity(SherlockActivity activity) {
 		this.activity = activity;
+		this.context = activity;
 	}
 
 	public void refresh() {
