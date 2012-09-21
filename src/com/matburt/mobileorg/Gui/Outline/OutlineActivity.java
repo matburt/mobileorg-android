@@ -2,7 +2,6 @@ package com.matburt.mobileorg.Gui.Outline;
 
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -10,20 +9,14 @@ import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.AdapterView.OnItemLongClickListener;
-import android.widget.ListView;
 import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockActivity;
-import com.actionbarsherlock.view.ActionMode;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Gui.Capture.EditActivity;
-import com.matburt.mobileorg.OrgData.OrgNode;
 import com.matburt.mobileorg.OrgData.OrgProviderUtils;
 import com.matburt.mobileorg.Services.SyncService;
 import com.matburt.mobileorg.Settings.SettingsActivity;
@@ -34,23 +27,16 @@ import com.matburt.mobileorg.util.OrgUtils;
 public class OutlineActivity extends SherlockActivity {
 
 	public final static String NODE_ID = "node_id";
-	private ContentResolver resolver;
 
 	private Long node_id;
-	
-	private Context context;
-	
-	private ListView listView;
-	private OutlineActionMode actionMode;
-	private ActionMode activeActionMode = null;
-	private OutlineAdapter adapter;
+		
+	private OutlineListView listView;
+
 	private SynchServiceReceiver syncReceiver;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		this.context = this;
-		this.resolver = getContentResolver();
 		
 		setContentView(R.layout.outline);
 				
@@ -68,15 +54,9 @@ public class OutlineActivity extends SherlockActivity {
 	}
 	
 	private void setupList() {
-		listView = (ListView) this.findViewById(R.id.outline_list);
-		listView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
-		listView.setOnItemClickListener(outlineClickListener);
-		listView.setOnItemLongClickListener(outlineLongClickListener);
+		listView = (OutlineListView) findViewById(R.id.outline_list);
+		listView.setActivity(this);
 		listView.setEmptyView(findViewById(R.id.outline_list_empty));
-		
-		this.actionMode = new OutlineActionMode(this);
-		this.adapter = new OutlineAdapter(this);
-		listView.setAdapter(adapter);
 	}
 	
 	private void displayNewUserDialogs() {
@@ -102,7 +82,7 @@ public class OutlineActivity extends SherlockActivity {
 	}
 		
 	public void refreshDisplay() {
-		adapter.init();
+		this.listView.refresh();
 		refreshTitle();
 	}
 	
@@ -118,35 +98,6 @@ public class OutlineActivity extends SherlockActivity {
     	else
     		return "";
     }
-
-	private OnItemClickListener outlineClickListener = new OnItemClickListener() {
-		@Override
-		public void onItemClick(AdapterView<?> parent, View v, int position,
-				long id) {
-			if(activeActionMode != null)
-				activeActionMode.finish();
-			listView.setItemChecked(position, true);
-			
-			OrgNode node = adapter.getItem(position);
-			if(node.hasChildren(resolver)) {
-				adapter.collapseExpand(position);
-			}
-			else
-				OutlineActionMode.runEditNodeActivity(context, node.id);
-		}
-	};
-	
-
-	private OnItemLongClickListener outlineLongClickListener = new OnItemLongClickListener() {
-		@Override
-		public boolean onItemLongClick(AdapterView<?> parent, View v, int position,
-				long id) {
-			actionMode.initActionMode(listView, position);
-			activeActionMode = startActionMode(actionMode);
-			return true;
-		}
-	};
-	
 	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -226,18 +177,10 @@ public class OutlineActivity extends SherlockActivity {
 		}
 		
 		intent.putExtra(EditActivity.ACTIONMODE, captureMode);
-		intent.putExtra(EditActivity.NODE_ID, getCheckedNodeId());
+		intent.putExtra(EditActivity.NODE_ID, listView.getCheckedNodeId());
 		startActivity(intent);
 	}
 
-	private long getCheckedNodeId() {
-		if(listView.getCheckedItemPosition() == ListView.INVALID_POSITION)
-			return -1;
-		else {
-			int position = listView.getCheckedItemPosition();
-			return adapter.getNodeId(position);
-		}
-	}
 
 	private boolean runSearch() {
 		return onSearchRequested();

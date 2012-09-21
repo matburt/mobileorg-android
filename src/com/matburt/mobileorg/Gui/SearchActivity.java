@@ -8,14 +8,13 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.SimpleCursorAdapter;
 
-import com.matburt.mobileorg.Gui.Outline.OutlineCursorAdapter;
+import com.matburt.mobileorg.Gui.Outline.OutlineAdapter;
 import com.matburt.mobileorg.OrgData.OrgProviderUtils;
 
 public class SearchActivity extends ListActivity {
 
-	private SimpleCursorAdapter adapter;
+	private OutlineAdapter adapter;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -42,7 +41,7 @@ public class SearchActivity extends ListActivity {
 	private void doSearch(String query) {
 		Cursor result = OrgProviderUtils.search("%"+ query.trim() + "%", getContentResolver());
 		
-		adapter = new OutlineCursorAdapter(this, result, getContentResolver());
+		adapter = new OutlineAdapter(this);
 		this.setListAdapter(adapter);
 				
 		this.getListView().setOnItemClickListener(showNode);
