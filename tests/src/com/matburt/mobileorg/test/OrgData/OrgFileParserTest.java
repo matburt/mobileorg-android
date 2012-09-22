@@ -10,6 +10,7 @@ import java.util.HashMap;
 import android.database.Cursor;
 import android.test.ProviderTestCase2;
 import android.test.mock.MockContentResolver;
+import android.util.Log;
 
 import com.matburt.mobileorg.OrgData.OrgContract.OrgData;
 import com.matburt.mobileorg.OrgData.OrgFile;
@@ -18,6 +19,7 @@ import com.matburt.mobileorg.OrgData.OrgNode;
 import com.matburt.mobileorg.OrgData.OrgProvider;
 import com.matburt.mobileorg.OrgData.OrgProviderUtils;
 import com.matburt.mobileorg.test.util.OrgTestFiles.SimpleOrgFiles;
+import com.matburt.mobileorg.test.util.OrgTestFiles;
 import com.matburt.mobileorg.test.util.OrgTestUtils;
 import com.matburt.mobileorg.util.OrgNodeNotFoundException;
 
@@ -135,5 +137,10 @@ public class OrgFileParserTest extends ProviderTestCase2<OrgProvider> {
 			if(tagsFromIndex.contains(tag) == false)
 				fail("Didn't find all tags");
 		}
+	}
+	
+	public void testGetTagsFromIndexEmptyTags() {
+		ArrayList<String> tagsFromIndex = OrgFileParser.getTagsFromIndex(OrgTestFiles.indexFileWithEmptyDrawers);
+		assertEquals(0, tagsFromIndex.size());
 	}
 }

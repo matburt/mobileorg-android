@@ -215,12 +215,12 @@ public class OrgFileParser {
 		return checksums;
 	}
 	
+	private static final String fileMatchPattern = "\\[file:(.*?)\\]\\[(.*?)\\]\\]";
 	/**
 	 * Parses the file list from index file.
 	 * @return HashMap with Filename->Filename Alias
 	 */
 	public static HashMap<String, String> getFilesFromIndex(String filecontents) {
-		final String fileMatchPattern = "\\[file:(.*?)\\]\\[(.*?)\\]\\]";
 		Pattern indexOrgFilePattern = Pattern.compile(fileMatchPattern);
 		Matcher indexOrgFileMatcher = indexOrgFilePattern.matcher(filecontents);
 		HashMap<String, String> allOrgFiles = new HashMap<String, String>();
@@ -232,9 +232,10 @@ public class OrgFileParser {
 		return allOrgFiles;
 	}
 	
+	
+	private static final Pattern getTodos = Pattern
+			.compile("#\\+TODO:([^\\|]+)(\\| ([^\\n]*))*");
 	public static ArrayList<HashMap<String, Boolean>> getTodosFromIndex(String filecontents) {
-		Pattern getTodos = Pattern
-				.compile("#\\+TODO:\\s+([^\\|]*)(\\| ([^\\n]*))*");
 		Matcher m = getTodos.matcher(filecontents);
 		ArrayList<HashMap<String, Boolean>> todoList = new ArrayList<HashMap<String, Boolean>>();
 		while (m.find()) {
@@ -242,12 +243,12 @@ public class OrgFileParser {
 			HashMap<String, Boolean> holding = new HashMap<String, Boolean>();
 			Boolean isDone = false;
 			for (int idx = 1; idx <= m.groupCount(); idx++) {
-				if (m.group(idx) != null && m.group(idx).length() > 0) {
+				if (m.group(idx) != null && m.group(idx).trim().length() > 0) {
 					if (m.group(idx).indexOf("|") != -1) {
 						isDone = true;
 						continue;
 					}
-					String[] grouping = m.group(idx).split("\\s+");
+					String[] grouping = m.group(idx).trim().split("\\s+");
 					for (String group : grouping) {
 						lastTodo = group.trim();
 						holding.put(group.trim(), isDone);
@@ -262,31 +263,36 @@ public class OrgFileParser {
 		return todoList;
 	}
 	
+	private static final Pattern getPriorities = Pattern
+			.compile("#\\+ALLPRIORITIES:([A-Z\\s]+)");
 	public static ArrayList<String> getPrioritiesFromIndex(String filecontents) {
-		Pattern getPriorities = Pattern
-				.compile("#\\+ALLPRIORITIES:\\s+([A-Z\\s]*)");
 		Matcher t = getPriorities.matcher(filecontents);
 
 		ArrayList<String> priorities = new ArrayList<String>();
 
-		if (t.find() && t.group(1) != null && t.group(1).length() > 0) {
-			String[] grouping = t.group(1).split("\\s+");
-			for (String group : grouping) {
-				priorities.add(group.trim());
+		if (t.find()) {
+			if (t.group(1) != null && t.group(1).trim().length() > 0) {
+				String[] grouping = t.group(1).trim().split("\\s+");
+				for (String group : grouping)
+					priorities.add(group.trim());
 			}
 		}
 		return priorities;
 	}
 	
+	
+	private static final Pattern getTags = Pattern.compile("#\\+TAGS:([^\\n]+)");
 	public static ArrayList<String> getTagsFromIndex(String filecontents) {
-		Pattern getTags = Pattern.compile("#\\+TAGS:\\s+([^\\n]*)");
-		
 		Matcher matcher = getTags.matcher(filecontents);
 		ArrayList<String> tagList = new ArrayList<String>();
 		
 		if(matcher.find()) {
-			String tags = matcher.group(1).replaceAll("[\\{\\}]", "");
+			String tags = matcher.group(1).trim().replaceAll("[\\{\\}]", "");
 			String[] split = tags.split("\\s+");
+			
+			if(split.length == 1 && split[0].equals(""))
+				return tagList;
+			
 			for(String tag: split)
 				tagList.add(tag);
 		}

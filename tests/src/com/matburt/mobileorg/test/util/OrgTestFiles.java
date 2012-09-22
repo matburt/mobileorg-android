@@ -22,6 +22,12 @@ public class OrgTestFiles {
 		public static final String orgFile = "* " + orgFileTopHeading + "\n** " + orgFileChildHeading;
 	}
 	
+	public static final String indexFileWithEmptyDrawers = "#+READONLY\n"
+			+ "#+TODO:\n"
+			+ "#+TAGS:\n"
+			+ "#+ALLPRIORITIES:\n"
+			+ "* [[file:GTD.org][GTD.org]]\n";
+	
 	public static class ComplexOrgFiles {
 		public static final String indexFile = "#+READONLY\n"
 				+ "#+TODO: TODO NEXT PLAN RSCH GOAL DEFERRED WAIT | SOMEDAY CANC DONE\n"
