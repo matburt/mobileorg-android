@@ -11,17 +11,21 @@ import java.util.regex.Pattern;
 
 import com.matburt.mobileorg.OrgData.OrgContract.OrgData;
 import com.matburt.mobileorg.util.OrgFileNotFoundException;
+import com.matburt.mobileorg.util.OrgUtils;
 
 import android.content.ContentResolver;
+import android.content.Context;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
 
 public class OrgFileParser {
 
+	private ContentResolver resolver;    
     private OrgDatabase db;
-    private ContentResolver resolver;    
  
+    private boolean combineAgenda = false;
+
     private ParseStack parseStack;
 	private StringBuilder payload;
 	private OrgFile orgFile;
@@ -45,6 +49,11 @@ public class OrgFileParser {
 		this.payload = new StringBuilder();
 	}
 	
+	public void parse(OrgFile orgFile, BufferedReader breader, Context context) {
+		this.combineAgenda = OrgUtils.getCombineBlockAgendas(context);
+		parse(orgFile, breader);
+	}
+	
 	public void parse(OrgFile orgFile, BufferedReader breader) {
 		init(orgFile);
 		db.beginTransaction();
@@ -60,7 +69,7 @@ public class OrgFileParser {
 		
 		db.endTransaction();
 
-		if(orgFile.filename.equals(OrgFile.AGENDA_FILE)) {
+		if(combineAgenda && orgFile.filename.equals(OrgFile.AGENDA_FILE)) {
 			try {
 				combineBlockAgendas();
 			} catch (OrgFileNotFoundException e) {}

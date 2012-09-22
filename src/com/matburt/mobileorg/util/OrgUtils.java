@@ -57,6 +57,11 @@ public class OrgUtils {
     		return true;
     }
     
+	public static boolean getCombineBlockAgendas(Context context) {
+		return PreferenceManager.getDefaultSharedPreferences(context)
+				.getBoolean("combineBlockAgendas", false);
+	}
+    
     public static void setupSpinnerWithEmpty(Spinner spinner, ArrayList<String> data,
 			String selection) {
 		data.add("");

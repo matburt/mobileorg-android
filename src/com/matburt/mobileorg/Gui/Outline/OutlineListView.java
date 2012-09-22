@@ -91,6 +91,7 @@ public class OutlineListView extends ListView {
 		}
 	};
 	
+	@SuppressWarnings("unused")
 	private void setParentChecked(int position) {
 		int parentPos = adapter.findParent(position);
 		if(parentPos >= 0)

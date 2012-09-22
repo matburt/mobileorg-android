@@ -208,7 +208,7 @@ public class Synchronizer {
 		if (orgFile.isEncrypted())
         	decryptAndParseFile(orgFile, breader);
         else {
-        	parser.parse(orgFile, breader);
+        	parser.parse(orgFile, breader, this.context);
         }
 	}
 	

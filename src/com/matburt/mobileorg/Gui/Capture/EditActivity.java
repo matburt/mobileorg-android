@@ -76,8 +76,14 @@ public class EditActivity extends SherlockFragmentActivity implements
 		} else if (this.actionMode.equals(ACTIONMODE_ADDCHILD)) {
 			this.node = new OrgNode();			
 
-			if(node_id >= 0)
-				this.node.parentId = node_id;
+			if(node_id >= 0) {
+				try {
+					OrgNode parent = new OrgNode(node_id, resolver);
+					this.node.parentId = parent.findOriginalNode(resolver).id;
+				} catch (OrgNodeNotFoundException e) {
+					this.node.parentId = node_id;					
+				}
+			}
 			else
 				this.node.parentId = OrgProviderUtils
 						.getOrCreateCaptureFile(resolver).nodeId;
