@@ -282,6 +282,27 @@ public class OrgProviderUtils {
 		}
 	}
 	
+	public static ArrayList<String> getActiveTodos(ContentResolver resolver) {
+		ArrayList<String> result = new ArrayList<String>();
+
+		Cursor cursor = resolver.query(Todos.CONTENT_URI,
+				Todos.DEFAULT_COLUMNS, null, null, null);
+		if(cursor == null)
+			return result;
+		
+		cursor.moveToFirst();
+		
+		while (cursor.isAfterLast() == false) {
+			int isdone = cursor.getInt(cursor.getColumnIndex(Todos.ISDONE));
+
+			if (isdone == 0)
+				result.add(cursor.getString(cursor.getColumnIndex(Todos.NAME)));
+			cursor.moveToNext();
+		}
+		cursor.close();
+		return result;
+	}
+	
 	public static boolean isTodoActive(String todo, ContentResolver resolver) {
 		if(TextUtils.isEmpty(todo))
 			return true;

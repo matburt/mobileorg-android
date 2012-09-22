@@ -1,6 +1,7 @@
 package com.matburt.mobileorg.Services;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 import android.annotation.SuppressLint;
 import android.content.ContentResolver;
@@ -19,6 +20,7 @@ import android.provider.CalendarContract.Reminders;
 import android.text.format.Time;
 
 import com.matburt.mobileorg.R;
+import com.matburt.mobileorg.OrgData.OrgFile;
 import com.matburt.mobileorg.OrgData.OrgNode;
 import com.matburt.mobileorg.OrgData.OrgNodeDate;
 import com.matburt.mobileorg.OrgData.OrgProviderUtils;
@@ -37,19 +39,43 @@ public class CalendarSyncService {
 	private SharedPreferences sharedPreferences;
 
 	private ContentResolver resolver;
+
+	private String calendarName = "";
+	private Integer reminderTime = 0;
+	private boolean reminderEnabled = false;
+	private boolean showDone = false;
+	private boolean showHabits = false;
+	private HashSet<String> activeTodos = new HashSet<String>();
 	
 	public CalendarSyncService(ContentResolver resolver, Context context) {
 		this.resolver = resolver;
 		this.context = context;
 		this.sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+		refreshPreferences();
 		setupCalendar();
+	}
+	
+	private void refreshPreferences() {
+		String intervalString = sharedPreferences.getString("calendarReminderInterval", null);
+		if(intervalString == null)
+			throw new IllegalArgumentException("Invalid calendar reminder interval");
+		this.reminderTime = Integer.valueOf(intervalString);
+		
+		this.reminderEnabled = sharedPreferences.getBoolean(
+				"calendarReminder", false);
+		this.showDone = sharedPreferences.getBoolean("calendarShowDone", true);
+		this.showHabits = sharedPreferences.getBoolean("calendarHabits", true);	
+		this.calendarName = PreferenceManager
+				.getDefaultSharedPreferences(context).getString("calendarName",
+						"");
+		this.activeTodos = new HashSet<String>(OrgProviderUtils.getActiveTodos(resolver));
 	}
 	
 	public void syncFiles() {
 		this.deleteAllEntries(context);
 		
 		ArrayList<String> files = OrgProviderUtils.getFilenames(resolver);
-		files.remove("agendas.org");
+		files.remove(OrgFile.AGENDA_FILE);
 		for(String filename: files)
 			insertFileEntries(filename);
 	}	
@@ -61,13 +87,13 @@ public class CalendarSyncService {
 	
 	public int deleteAllEntries(Context context) {
 		return context.getContentResolver()
-				.delete(intEvents.CONTENT_URI, "description LIKE ?",
+				.delete(intEvents.CONTENT_URI, intEvents.DESCRIPTION + " LIKE ?",
 						new String[] { CALENDAR_ORGANIZER + "%" });
 	}
 
 	public int deleteFileEntries(String filename, Context context) {
 		return context.getContentResolver().delete(intEvents.CONTENT_URI,
-				"description LIKE ?",
+				intEvents.DESCRIPTION + " LIKE ?",
 				new String[] { CALENDAR_ORGANIZER + ":" + filename + "%" });
 	}
 
@@ -123,11 +149,10 @@ public class CalendarSyncService {
 	}
 	
 	private void insertFileEntries(String filename) throws IllegalArgumentException {
-		boolean useHabits = sharedPreferences.getBoolean("calendarHabits", true);	
 		Cursor scheduled;
 		
 		try {
-			scheduled = OrgProviderUtils.getFileSchedule(filename, useHabits,
+			scheduled = OrgProviderUtils.getFileSchedule(filename, this.showHabits,
 					resolver);
 		} catch (OrgFileNotFoundException e) {
 			return;
@@ -146,7 +171,7 @@ public class CalendarSyncService {
 	
 	private void insertNode(OrgNode node, String filename)
 			throws IllegalArgumentException {
-		boolean isActive = OrgProviderUtils.isTodoActive(node.todo, resolver);
+		boolean isActive = this.activeTodos.contains(node.todo);
 
 		for (OrgNodeDate date : node.getOrgNodePayload().getDates()) {
 			insertEntry(node.name, isActive, node.getCleanedPayload(),
@@ -159,13 +184,10 @@ public class CalendarSyncService {
 	private String insertEntry(String name, boolean isTodoActive, String payload, 
 			String orgID, OrgNodeDate date, String filename, String location) throws IllegalArgumentException {
 		
-		if (sharedPreferences.getBoolean("calendarShowDone", true) == false
+		if (this.showDone == false
 				&& isTodoActive == false)
 			return null;
 		
-		final String calendarName = PreferenceManager
-				.getDefaultSharedPreferences(context).getString("calendarName",
-						"");
 		int calId = getCalendarID(calendarName);
 		
 		if(calId == -1)
@@ -192,8 +214,7 @@ public class CalendarSyncService {
 				intEvents.CONTENT_URI, values);
 		String nodeID = uri.getLastPathSegment();
 		
-		if (date.allDay == 0 && isTodoActive == true && sharedPreferences.getBoolean(
-				"calendarReminder", false))
+		if (date.allDay == 0 && isTodoActive == true && this.reminderEnabled)
 			addReminder(nodeID, date.beginTime, date.endTime);
 		
 		return nodeID;
@@ -203,13 +224,8 @@ public class CalendarSyncService {
 		if(beginTime < System.currentTimeMillis())
 			return;
 		
-		String intervalString = sharedPreferences.getString("calendarReminderInterval", null);
-		if(intervalString == null)
-			throw new IllegalArgumentException("Invalid calendar reminder interval");
-		long reminderTime = Integer.valueOf(intervalString);
-		
 		ContentValues values = new ContentValues();
-		values.put(intReminders.MINUTES, reminderTime);
+		values.put(intReminders.MINUTES, this.reminderTime);
 		values.put(intReminders.EVENT_ID, eventID);
 		values.put(intReminders.METHOD, intReminders.METHOD_ALERT);
 		context.getContentResolver().insert(
@@ -219,9 +235,9 @@ public class CalendarSyncService {
         alertvalues.put(intCalendarAlerts.EVENT_ID, eventID ); 
         alertvalues.put(intCalendarAlerts.BEGIN, beginTime ); 
         alertvalues.put(intCalendarAlerts.END, endTime ); 
-        alertvalues.put(intCalendarAlerts.ALERT_TIME, reminderTime ); 
+        alertvalues.put(intCalendarAlerts.ALERT_TIME, this.reminderTime ); 
         alertvalues.put(intCalendarAlerts.STATE, intCalendarAlerts.STATE_SCHEDULED); 
-        alertvalues.put(intCalendarAlerts.MINUTES, reminderTime ); 
+        alertvalues.put(intCalendarAlerts.MINUTES, this.reminderTime ); 
 		context.getContentResolver().insert(
 				intCalendarAlerts.CONTENT_URI,
 				alertvalues);
