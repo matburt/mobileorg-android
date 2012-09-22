@@ -12,6 +12,7 @@ import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.matburt.mobileorg.Gui.Outline.OutlineItem;
 import com.matburt.mobileorg.OrgData.OrgContract.OrgData;
 import com.matburt.mobileorg.util.FileUtils;
 import com.matburt.mobileorg.util.OrgFileNotFoundException;
@@ -317,6 +318,19 @@ public class OrgNode {
 		} catch (OrgFileNotFoundException e) {}
 
 		return true;
+	}
+	
+	public String getCleanedName() {
+		StringBuilder nameBuilder = new StringBuilder(this.name);
+		
+		Matcher matcher = OutlineItem.urlPattern.matcher(nameBuilder);
+		while(matcher.find()) {
+			nameBuilder.delete(matcher.start(), matcher.end());
+			nameBuilder.insert(matcher.start(), matcher.group(1));
+			matcher = OutlineItem.urlPattern.matcher(nameBuilder);
+		}
+		
+		return nameBuilder.toString();
 	}
 
 	

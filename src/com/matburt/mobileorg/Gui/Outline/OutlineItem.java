@@ -119,7 +119,7 @@ public class OutlineItem extends RelativeLayout implements Checkable {
 		formatLinks(theme, titleSpan);
 	}
 
-	private static final Pattern urlPattern = Pattern.compile("\\[\\[[^\\]]*\\]\\[([^\\]]*)\\]\\]");
+	public static final Pattern urlPattern = Pattern.compile("\\[\\[[^\\]]*\\]\\[([^\\]]*)\\]\\]");
 	private static void formatLinks(DefaultTheme theme, SpannableStringBuilder titleSpan) {
 		Matcher matcher = urlPattern.matcher(titleSpan);
 		while(matcher.find()) {

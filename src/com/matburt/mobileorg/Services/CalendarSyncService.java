@@ -179,9 +179,10 @@ public class CalendarSyncService {
 	private void insertNode(OrgNode node, String filename)
 			throws IllegalArgumentException {
 		boolean isActive = this.activeTodos.contains(node.todo);
-
+		String cleanedName = node.getCleanedName();
+		
 		for (OrgNodeDate date : node.getOrgNodePayload().getDates()) {
-			insertEntry(node.name, isActive, node.getCleanedPayload(),
+			insertEntry(cleanedName, isActive, node.getCleanedPayload(),
 					Long.toString(node.id), date, filename,
 					node.getOrgNodePayload().getProperty("LOCATION"));
 		}
