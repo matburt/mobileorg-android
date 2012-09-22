@@ -52,8 +52,8 @@ public class CalendarSyncService {
 		this.resolver = resolver;
 		this.context = context;
 		this.sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+		initCalendar();
 		refreshPreferences();
-		setupCalendar();
 	}
 	
 	private void refreshPreferences() {
@@ -114,6 +114,7 @@ public class CalendarSyncService {
 				result = new CharSequence[1];
 				result[0] = context
 						.getString(R.string.error_setting_no_calendar);
+				cursor.close();
 				return result;
 			}
 
@@ -221,12 +222,11 @@ public class CalendarSyncService {
 		if(beginTime < System.currentTimeMillis())
 			return;
 		
-		ContentValues values = new ContentValues();
-		values.put(intReminders.MINUTES, this.reminderTime);
-		values.put(intReminders.EVENT_ID, eventID);
-		values.put(intReminders.METHOD, intReminders.METHOD_ALERT);
-		context.getContentResolver().insert(
-				intReminders.CONTENT_URI, values);
+		ContentValues reminderValues = new ContentValues();
+		reminderValues.put(intReminders.MINUTES, this.reminderTime);
+		reminderValues.put(intReminders.EVENT_ID, eventID);
+		reminderValues.put(intReminders.METHOD, intReminders.METHOD_ALERT);
+		context.getContentResolver().insert(intReminders.CONTENT_URI, reminderValues);
 		
         ContentValues alertvalues = new ContentValues(); 
         alertvalues.put(intCalendarAlerts.EVENT_ID, eventID ); 
@@ -235,15 +235,14 @@ public class CalendarSyncService {
         alertvalues.put(intCalendarAlerts.ALERT_TIME, this.reminderTime ); 
         alertvalues.put(intCalendarAlerts.STATE, intCalendarAlerts.STATE_SCHEDULED); 
         alertvalues.put(intCalendarAlerts.MINUTES, this.reminderTime ); 
-		context.getContentResolver().insert(
-				intCalendarAlerts.CONTENT_URI,
+		context.getContentResolver().insert(intCalendarAlerts.CONTENT_URI,
 				alertvalues);
         
 		ContentValues eventValues = new ContentValues();
 		eventValues.put(intEvents.HAS_ALARM, 1);
 		context.getContentResolver().update(
 				ContentUris.withAppendedId(intEvents.CONTENT_URI,
-						Long.valueOf(eventID)), eventValues, null, null);	
+						Long.valueOf(eventID)), eventValues, null, null);
 	}
 	
 	private int getCalendarID(String calendarName) {
@@ -263,8 +262,8 @@ public class CalendarSyncService {
 				}
 				cursor.moveToNext();
 			}
+			cursor.close();
 		}
-		cursor.close();
 		return -1;
 	}
 
@@ -325,7 +324,7 @@ public class CalendarSyncService {
 	 * Hack to support phones with Android <3.0
 	 */
 	@SuppressLint("NewApi")
-	private void setupCalendar() {
+	private void initCalendar() {
 		try {
 			intCalendars.CONTENT_URI = Calendars.CONTENT_URI;
 			intCalendars._ID = Calendars._ID;
@@ -387,6 +386,7 @@ public class CalendarSyncService {
 		}
 		if (managedCursor != null) {
 			calendarUriBase = "content://com.android.calendar";
+			managedCursor.close();
 		} else {
 			calendars = Uri.parse("content://calendar/calendars");
 			try {
@@ -395,6 +395,7 @@ public class CalendarSyncService {
 			}
 			if (managedCursor != null) {
 				calendarUriBase = "content://calendar";
+				managedCursor.close();
 			}
 		}
 		
