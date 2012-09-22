@@ -96,4 +96,22 @@ public class OutlineListView extends ListView {
 		if(parentPos >= 0)
 			setItemChecked(parentPos, true);
 	}
+
+	public void collapseCurrent() {
+		int position = getCheckedItemPosition();
+		
+		if(position != ListView.INVALID_POSITION) {
+			if(adapter.getItem(position).level == 0) {
+				adapter.init();
+				return;
+			}
+			
+			int parent = adapter.findParent(position);
+			
+			if(parent >= 0) {
+				adapter.collapseExpand(parent);
+				setItemChecked(parent, true);
+			}
+		}
+	}
 }
