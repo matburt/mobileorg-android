@@ -2,7 +2,7 @@ package com.matburt.mobileorg.test.Synchronizers;
 
 import android.content.Context;
 
-import com.matburt.mobileorg.Synchronizers.SynchronizerNotification;
+import com.matburt.mobileorg.Gui.SynchronizerNotification;
 
 public class SynchronizerNotificationStub extends SynchronizerNotification {
 
