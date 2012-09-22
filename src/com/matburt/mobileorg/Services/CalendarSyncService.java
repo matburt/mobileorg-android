@@ -41,6 +41,7 @@ public class CalendarSyncService {
 	private ContentResolver resolver;
 
 	private String calendarName = "";
+	private int calendarId = -1;
 	private Integer reminderTime = 0;
 	private boolean reminderEnabled = false;
 	private boolean showDone = false;
@@ -68,6 +69,7 @@ public class CalendarSyncService {
 		this.calendarName = PreferenceManager
 				.getDefaultSharedPreferences(context).getString("calendarName",
 						"");
+		this.calendarId = getCalendarID(calendarName);
 		this.activeTodos = new HashSet<String>(OrgProviderUtils.getActiveTodos(resolver));
 	}
 	
@@ -184,21 +186,16 @@ public class CalendarSyncService {
 	private String insertEntry(String name, boolean isTodoActive, String payload, 
 			String orgID, OrgNodeDate date, String filename, String location) throws IllegalArgumentException {
 		
-		if (this.showDone == false
-				&& isTodoActive == false)
+		if (this.showDone == false && isTodoActive == false)
 			return null;
-		
-		int calId = getCalendarID(calendarName);
-		
-		if(calId == -1)
+				
+		if(this.calendarId == -1)
 			throw new IllegalArgumentException("Couldn't find selected calendar: " + calendarName);
-
-		final String embeddedNodeMetadata = CALENDAR_ORGANIZER + ":" + filename;
 		
 		ContentValues values = new ContentValues();
-		values.put(intEvents.CALENDAR_ID, calId);
+		values.put(intEvents.CALENDAR_ID, this.calendarId);
 		values.put(intEvents.TITLE, date.type + name);
-		values.put(intEvents.DESCRIPTION, embeddedNodeMetadata + "\n" + payload);
+		values.put(intEvents.DESCRIPTION, CALENDAR_ORGANIZER + ":" + filename + "\n" + payload);
 		values.put(intEvents.EVENT_LOCATION, location);
 		
 		// Sync with google will overwrite organizer :(
