@@ -132,7 +132,7 @@ public class Synchronizer {
 		announceProgressDownload(INDEX_FILE, 0, changedFiles.size() + 2);
 		HashMap<String,String> filenameMap = getAndParseIndexFile();
 		
-		Collections.sort(changedFiles);
+		Collections.sort(changedFiles, new OrgUtils.SortIgnoreCase());
 		
 		pull(parser, changedFiles, filenameMap, remoteChecksums);
 		announceProgressDownload("", changedFiles.size() + 1, changedFiles.size() + 2);

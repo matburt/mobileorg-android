@@ -36,9 +36,6 @@
         </receiver>
 
         <service android:name=".Services.MobileOrgWidget$MobileOrgWidgetService" >
-            <intent-filter>
-                <action android:name="com.matburt.mobileorg.Synchronizer.action.SYNC_UPDATE" />
-            </intent-filter>
         </service>
         <service android:name=".Services.SyncService" >
             <intent-filter>
@@ -72,8 +69,6 @@
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
-
-                <action android:name="com.matburt.mobileorg.Synchronizer.action.SYNC_UPDATE" />
             </intent-filter>
         </activity>
         <activity
@@ -81,8 +76,6 @@
             android:label="Org View" >
             <intent-filter>
                 <category android:name="android.intent.category.DEFAULT" />
-
-                <action android:name="com.matburt.mobileorg.Synchronizer.action.SYNC_UPDATE" />
             </intent-filter>
         </activity>
         <activity
@@ -156,11 +149,11 @@
             android:name=".Settings.Synchronizers.ScpSettingsActivity"
             android:label="Scp Settings" >
         </activity>
- 		<activity
+        <activity
             android:name=".Settings.Synchronizers.UbuntuOneSettingsActivity"
             android:label="Ubuntu One Settings" >
         </activity>
-        
+
         <service android:name=".Services.TimeclockService" >
         </service>
 
