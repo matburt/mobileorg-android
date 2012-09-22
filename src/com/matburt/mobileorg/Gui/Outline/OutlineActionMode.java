@@ -141,6 +141,7 @@ public class OutlineActionMode implements ActionMode.Callback {
 						new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog, int id) {
 								node.deleteNode(resolver);
+								OrgUtils.announceUpdate(context);
 							}
 						})
 				.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
