@@ -248,6 +248,7 @@ public class OutlineActivity extends SherlockActivity {
 				setSupportProgressBarIndeterminate(false);
 				int normalizedProgress = (Window.PROGRESS_END - Window.PROGRESS_START) / 100 * progress;
 				setSupportProgress(normalizedProgress);
+				refreshDisplay();
 			}
 		}
 	}

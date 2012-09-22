@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 
 import javax.net.ssl.SSLHandshakeException;
@@ -130,6 +131,8 @@ public class Synchronizer {
 		changedFiles.remove(INDEX_FILE);
 		announceProgressDownload(INDEX_FILE, 0, changedFiles.size() + 2);
 		HashMap<String,String> filenameMap = getAndParseIndexFile();
+		
+		Collections.sort(changedFiles);
 		
 		pull(parser, changedFiles, filenameMap, remoteChecksums);
 		announceProgressDownload("", changedFiles.size() + 1, changedFiles.size() + 2);
