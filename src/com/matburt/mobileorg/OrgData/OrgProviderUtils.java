@@ -324,12 +324,12 @@ public class OrgProviderUtils {
 		return false;
 	}
 	
-	public static Cursor getFileSchedule(String filename, boolean calendarHabits, ContentResolver resolver) throws OrgFileNotFoundException {
+	public static Cursor getFileSchedule(String filename, boolean showHabits, ContentResolver resolver) throws OrgFileNotFoundException {
 		OrgFile file = new OrgFile(filename, resolver);
 		
 		String whereQuery = OrgData.FILE_ID + "=? AND (" + OrgData.PAYLOAD + " LIKE '%<%>%'";
 
-		if(calendarHabits)
+		if(showHabits == false)
 			whereQuery += " AND NOT " + OrgData.PAYLOAD + " LIKE '%:STYLE: habit%'";
 		
 		whereQuery += ")";

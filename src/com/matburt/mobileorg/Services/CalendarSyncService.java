@@ -74,6 +74,7 @@ public class CalendarSyncService {
 	}
 	
 	public void syncFiles() {
+		refreshPreferences();
 		this.deleteAllEntries(context);
 		
 		ArrayList<String> files = OrgProviderUtils.getFilenames(resolver);
@@ -83,17 +84,20 @@ public class CalendarSyncService {
 	}	
 	
 	public void syncFile(String filename) throws IllegalArgumentException {
+		refreshPreferences();
 		deleteFileEntries(filename, context);
 		insertFileEntries(filename);
 	}
 	
 	public int deleteAllEntries(Context context) {
+		refreshPreferences();
 		return context.getContentResolver()
 				.delete(intEvents.CONTENT_URI, intEvents.DESCRIPTION + " LIKE ?",
 						new String[] { CALENDAR_ORGANIZER + "%" });
 	}
 
 	public int deleteFileEntries(String filename, Context context) {
+		refreshPreferences();
 		return context.getContentResolver().delete(intEvents.CONTENT_URI,
 				intEvents.DESCRIPTION + " LIKE ?",
 				new String[] { CALENDAR_ORGANIZER + ":" + filename + "%" });
@@ -212,7 +216,7 @@ public class CalendarSyncService {
 				intEvents.CONTENT_URI, values);
 		String nodeID = uri.getLastPathSegment();
 		
-		if (date.allDay == 0 && isTodoActive == true && this.reminderEnabled)
+		if (date.allDay == 0 	&& this.reminderEnabled)
 			addReminder(nodeID, date.beginTime, date.endTime);
 		
 		return nodeID;
