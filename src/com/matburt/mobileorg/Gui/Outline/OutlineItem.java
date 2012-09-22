@@ -39,7 +39,7 @@ public class OutlineItem extends RelativeLayout implements Checkable {
 		tagsView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
 	}
 	
-	public void setup(OrgNode node, DefaultTheme theme, ContentResolver resolver) {
+	public void setup(OrgNode node, boolean expanded, DefaultTheme theme, ContentResolver resolver) {
 		setupTags(node.tags, theme);
 		
 		SpannableStringBuilder titleSpan = new SpannableStringBuilder(node.name);
@@ -48,7 +48,9 @@ public class OutlineItem extends RelativeLayout implements Checkable {
 		setupPriority(node.priority, theme, titleSpan);
 		setupTodo(node.todo, titleSpan, theme, resolver);
 		applyLevelIndentation(node.level, titleSpan);
-		setupChildrenIndicator(node, resolver, theme, titleSpan);
+		
+		if(expanded == false)
+			setupChildrenIndicator(node, resolver, theme, titleSpan);
 				
 		titleSpan.setSpan(new StyleSpan(Typeface.NORMAL), 0, titleSpan.length(), 0);
 		titleView.setText(titleSpan);

@@ -94,7 +94,7 @@ public class OutlineAdapter extends ArrayAdapter<OrgNode> {
 		if (convertView == null)
 			outlineItem = new OutlineItem(getContext());
 
-		outlineItem.setup(getItem(position), theme, resolver);
+		outlineItem.setup(getItem(position), this.expanded.get(position), theme, resolver);
 		return outlineItem;
 	}
 
