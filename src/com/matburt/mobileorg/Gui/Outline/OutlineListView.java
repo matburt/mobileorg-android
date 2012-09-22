@@ -112,6 +112,7 @@ public class OutlineListView extends ListView {
 			if(parent >= 0) {
 				adapter.collapseExpand(parent);
 				setItemChecked(parent, true);
+				setSelection(parent - 2);
 			}
 		}
 	}
