@@ -153,33 +153,32 @@ public class OrgFileParser {
 		OrgNode agendaFile = OrgProviderUtils.getOrgNodeFromFilename(
 				OrgFile.AGENDA_FILE, resolver);
 		
-		String previousBlockTitle = "";
+		String previousAgendaBlockTitle = "";
 		OrgNode previousBlockNode = null;
 		
 		for(OrgNode node: agendaFile.getChildren(resolver)) {
 			if(node.name.indexOf(">") == -1)
 				continue;
 			
-			String blockTitle = node.name.substring(0, node.name.indexOf(">"));
+			String agendaBlockName = node.name.substring(0, node.name.indexOf(">"));
 			String blockEntryName = node.name.substring(node.name.indexOf(">") + 1);
 			
-			if(TextUtils.isEmpty(blockTitle) == false) { // Is a block agenda
-				if(blockTitle.equals(previousBlockTitle) == false) { // Create new node to contain block agenda	
-					previousBlockTitle = blockTitle;
+			if(TextUtils.isEmpty(agendaBlockName) == false) { // Is a block agenda
+				if(agendaBlockName.equals(previousAgendaBlockTitle) == false) { // Create new node to contain block agenda	
+					previousAgendaBlockTitle = agendaBlockName;
 
 					previousBlockNode = new OrgNode();
 					previousBlockNode.fileId = agendaFile.fileId;
-					previousBlockNode.name = blockTitle;
+					previousBlockNode.name = agendaBlockName;
 					previousBlockNode.parentId = agendaFile.id;
 					previousBlockNode.level = agendaFile.level + 1;
 					previousBlockNode.id = db.fastInsertNode(previousBlockNode);
 				}
 				
 				ArrayList<OrgNode> children = node.getChildren(resolver);
-				if(blockTitle.startsWith("Day-agenda") || blockTitle.startsWith("Week-agenda")) {
-					for(OrgNode node2: children)
-						for (OrgNode childNode: node2.getChildren(resolver))
-							cloneChildren(childNode, previousBlockNode, node2.name);
+				if(blockEntryName.startsWith("Day-agenda") || blockEntryName.startsWith("Week-agenda")) {
+					for(OrgNode child: children)
+						cloneChildren(child, previousBlockNode, child.name);
 				} else
 					cloneChildren(node, previousBlockNode, blockEntryName); // Normal cloning
 				
@@ -189,7 +188,6 @@ public class OrgFileParser {
 	}
 
 	private void cloneChildren(OrgNode node, OrgNode parent, String blockTitle) {
-		Log.d("MobileOrg", "cloning " + node.name);
 		OrgNode blockSeparator = new OrgNode();
 		blockSeparator.name = BLOCK_SEPARATOR_PREFIX + blockTitle;
 		blockSeparator.fileId = parent.fileId;
@@ -198,7 +196,6 @@ public class OrgFileParser {
 		db.fastInsertNode(blockSeparator);
 		
 		for(OrgNode child: node.getChildren(resolver)) {
-			Log.d("MobileOrg", "cloning child" + child.name);
 			OrgNode clonedChild = new OrgNode(child);
 			clonedChild.parentId = parent.id;
 			clonedChild.fileId = parent.fileId;

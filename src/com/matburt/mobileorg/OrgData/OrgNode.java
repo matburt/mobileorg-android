@@ -516,18 +516,9 @@ public class OrgNode {
 			
 			name += matcher.group(TITLE_GROUP);
 			
-			if(matcher.group(AFTER_GROUP) != null) {
-				int start = matcher.group(AFTER_GROUP).indexOf("TITLE:");
-				int end = matcher.group(AFTER_GROUP).indexOf("</after>");
+			if(matcher.group(AFTER_GROUP) != null)
+				name = matcher.group(AFTER_GROUP).trim() + ">" + name.trim();
 				
-				if(start > -1 && end > -1) {
-					String title = matcher.group(AFTER_GROUP).substring(
-							start + "TITLE: ".length(), end);
-					
-					name = title + ">" + name;
-				}
-			}
-			
 			tags = matcher.group(TAGS_GROUP);
 			if (tags == null)
 					tags = "";
@@ -546,12 +537,13 @@ public class OrgNode {
     private static final int AFTER_GROUP = 8;
     
 	private static final Pattern titlePattern = Pattern
-			.compile("^(\\s?(\\S+)\\s*)?" + "(?:\\[\\#([^]]+)\\])?" + // Priority
-					"(.*?)" + 											// Title
-					"\\s*(?::([^\\s]+):)?" + 							// Tags
+			.compile("^(\\s?([\\w_]+)\\s*)?" + 							// Todo keyword
+					"(?:\\[\\#([^]]+)\\])?" + 							// Priority
+					"(.*?)?" + "\\s*" +									// Title
+					"(?::([^\\s]+):)?" + 								// Tags
 					"(\\s*[!\\*])*" + 									// Habits
 					"(<before>.*</before>)?" + 							// Before
-					"(<after>.*</after>)?" + 							// After
+					"(?:<after>.*TITLE:(.*)</after>)?" + 				// After
 					"$");												// End of line
 	
 	

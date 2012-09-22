@@ -64,7 +64,7 @@ public class OutlineActionMode implements ActionMode.Callback {
 		}
 		else if(this.node != null && this.node.isFilenode(resolver)) {
 			if(this.node.name.equals(OrgFile.AGENDA_FILE_ALIAS))
-		        inflater.inflate(R.menu.outline_node_uneditable, menu);
+		        inflater.inflate(R.menu.outline_file_uneditable, menu);
 			else
 				inflater.inflate(R.menu.outline_file, menu);
 		} else
