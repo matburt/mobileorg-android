@@ -40,6 +40,12 @@ public class OrgUtils {
 				.getBoolean("captureAdvanced", true);
 	}
 	
+	public static int getLevelOfRecursion(Context context) {
+		return Integer.parseInt(PreferenceManager
+				.getDefaultSharedPreferences(context).getString(
+						"viewRecursionMax", "0"));
+	}
+	
     public static boolean isSyncConfigured(Context context) {
     	String syncSource = PreferenceManager.getDefaultSharedPreferences(context)
 		.getString("syncSource", "");
