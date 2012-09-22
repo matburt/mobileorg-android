@@ -16,6 +16,7 @@ import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
+import android.text.style.BackgroundColorSpan;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
 import android.util.TypedValue;
@@ -43,6 +44,12 @@ public class OutlineItem extends RelativeLayout implements Checkable {
 		setupTags(node.tags, theme);
 		
 		SpannableStringBuilder titleSpan = new SpannableStringBuilder(node.name);
+		
+		if(node.name.startsWith(OrgFileParser.BLOCK_SEPARATOR_PREFIX)) {
+			setupAgendaBlock(titleSpan, theme);
+			return;
+		}
+		
 		applyLevelFormating(theme, node.level, titleSpan);
 		setupTitle(node.name, theme, titleSpan);
 		setupPriority(node.priority, theme, titleSpan);
@@ -100,25 +107,33 @@ public class OutlineItem extends RelativeLayout implements Checkable {
 	}
 	
 	public void setupTitle(String name, DefaultTheme theme, SpannableStringBuilder titleSpan) {
+		titleView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
+		titleView.setGravity(Gravity.LEFT);
+
 		if (name.startsWith("COMMENT"))
 			titleSpan.setSpan(new ForegroundColorSpan(theme.gray), 0,
 					"COMMENT".length(), 0);
 		else if (name.equals("Archive"))
 			titleSpan.setSpan(new ForegroundColorSpan(theme.gray), 0,
 					"Archive".length(), 0);
-		else if(name.startsWith(OrgFileParser.BLOCK_SEPARATOR_PREFIX)) {
-			titleSpan.delete(0, OrgFileParser.BLOCK_SEPARATOR_PREFIX.length());
-			
-			titleSpan.setSpan(new ForegroundColorSpan(theme.c4Blue), 0,
-					titleSpan.length(), 0);
-			
-			titleView.setGravity(Gravity.CENTER_VERTICAL
-					| Gravity.CENTER_HORIZONTAL);
-		} else {
-			titleView.setGravity(Gravity.LEFT);
-		}
 		
 		formatLinks(theme, titleSpan);
+	}
+	
+	public void setupAgendaBlock(SpannableStringBuilder titleSpan, DefaultTheme theme) {
+		titleSpan.delete(0, OrgFileParser.BLOCK_SEPARATOR_PREFIX.length());
+
+		titleSpan.setSpan(new ForegroundColorSpan(theme.c7White), 0,
+				titleSpan.length(), 0);
+		titleSpan.setSpan(new StyleSpan(Typeface.BOLD), 0,
+				titleSpan.length(), 0);
+
+		titleView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 18);
+		//titleView.setBackgroundColor(theme.c4Blue);
+		titleView.setGravity(Gravity.CENTER_VERTICAL
+				| Gravity.CENTER_HORIZONTAL);
+
+		titleView.setText(titleSpan);
 	}
 
 	public static final Pattern urlPattern = Pattern.compile("\\[\\[[^\\]]*\\]\\[([^\\]]*)\\]\\]");

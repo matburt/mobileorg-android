@@ -58,8 +58,10 @@ public class OrgUtils {
     }
     
 	public static boolean getCombineBlockAgendas(Context context) {
-		return PreferenceManager.getDefaultSharedPreferences(context)
-				.getBoolean("combineBlockAgendas", false);
+		try {
+			return PreferenceManager.getDefaultSharedPreferences(context)
+					.getBoolean("combineBlockAgendas", false);
+		} catch (UnsupportedOperationException e) { return false; }
 	}
     
     public static void setupSpinnerWithEmpty(Spinner spinner, ArrayList<String> data,

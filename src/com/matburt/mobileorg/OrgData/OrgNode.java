@@ -539,8 +539,8 @@ public class OrgNode {
 	private static final Pattern titlePattern = Pattern
 			.compile("^(\\s?([\\w_]+)\\s*)?" + 							// Todo keyword
 					"(?:\\[\\#([^]]+)\\])?" + 							// Priority
-					"(.*?)?" + "\\s*" +									// Title
-					"(?::([^\\s]+):)?" + 								// Tags
+					"(.*?)" + "\\s*" + 		
+					"(?::([^\\s]+):)?" + 							// Tags
 					"(\\s*[!\\*])*" + 									// Habits
 					"(<before>.*</before>)?" + 							// Before
 					"(?:<after>.*TITLE:(.*)</after>)?" + 				// After

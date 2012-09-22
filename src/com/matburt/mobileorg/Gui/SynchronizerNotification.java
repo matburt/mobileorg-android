@@ -81,6 +81,9 @@ public class SynchronizerNotification {
 	}
 	
 	public void updateNotification(String message) {
+		if(notification == null)
+			return;
+		
 		if(message != null) {
 			notification.contentView.setTextViewText(R.id.status_text, message);
 			notificationManager.notify(notifyRef, notification);
@@ -92,6 +95,9 @@ public class SynchronizerNotification {
 	}
 
 	public void updateNotification(int progress, String message) {
+		if(notification == null)
+			return;
+		
 		if(message != null)
 			notification.contentView.setTextViewText(R.id.status_text, message);
 
