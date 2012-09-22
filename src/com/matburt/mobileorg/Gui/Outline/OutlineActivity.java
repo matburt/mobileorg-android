@@ -36,11 +36,13 @@ public class OutlineActivity extends SherlockActivity {
 	private OutlineListView listView;
 
 	private SynchServiceReceiver syncReceiver;
+	private MenuItem synchronizerMenuItem;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_PROGRESS);
+		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 		setContentView(R.layout.outline);
 				
 		Intent intent = getIntent();
@@ -130,6 +132,8 @@ public class OutlineActivity extends SherlockActivity {
 	public boolean onCreateOptionsMenu(Menu menu) {
 		MenuInflater inflater = getSupportMenuInflater();
 	    inflater.inflate(R.menu.outline_menu, menu);
+	    
+	    synchronizerMenuItem = menu.findItem(R.id.menu_sync);
 	    
 		return true;
 	}
@@ -223,17 +227,24 @@ public class OutlineActivity extends SherlockActivity {
 			int progress = intent.getIntExtra(Synchronizer.SYNC_PROGRESS_UPDATE, -1);
 			
 			if(syncStart) {
-				setSupportProgress(0);
+				synchronizerMenuItem.setVisible(false);
+				setSupportProgress(Window.PROGRESS_START);
 				setSupportProgressBarIndeterminate(true);
+				setSupportProgressBarIndeterminateVisibility(true);
 			} else if (syncDone) {
 				setSupportProgressBarVisibility(false);
+				setSupportProgressBarIndeterminateVisibility(false);
 				refreshDisplay();
+				synchronizerMenuItem.setVisible(true);
 
 				if (showToast)
 					Toast.makeText(context,
 							R.string.outline_synchronization_successful,
 							Toast.LENGTH_SHORT).show();
 			} else if (progress >= 0 && progress <= 100) {
+				if(progress == 100)
+					setSupportProgressBarIndeterminateVisibility(false);
+				
 				setSupportProgressBarIndeterminate(false);
 				int normalizedProgress = (Window.PROGRESS_END - Window.PROGRESS_START) / 100 * progress;
 				setSupportProgress(normalizedProgress);
