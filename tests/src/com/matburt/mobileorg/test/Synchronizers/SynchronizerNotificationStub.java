@@ -30,11 +30,6 @@ public class SynchronizerNotificationStub extends SynchronizerNotification {
 	}
 
 	@Override
-	public void updateNotification(int fileNumber, String message,
-			int totalFiles) {
-	}
-
-	@Override
 	public void finalizeNotification() {
 	}
 

@@ -136,7 +136,7 @@ SharedPreferences.OnSharedPreferenceChangeListener {
 										int which) {
 									OrgProviderUtils
 											.clearDB(getContentResolver());
-									OrgUtils.announceUpdate(getApplicationContext());
+									OrgUtils.announceSyncDone(getApplicationContext());
 									if (isCalendarEnabled())
 										getCalendarSyncService()
 												.deleteAllEntries(

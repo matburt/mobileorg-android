@@ -230,7 +230,7 @@ public class EditActivity extends SherlockFragmentActivity implements
 			this.node.updateAllNodes(resolver);
 		}
 		
-		OrgUtils.announceUpdate(this);
+		OrgUtils.announceSyncDone(this);
 	}
 	
 	public OrgNode getEditedNode() {

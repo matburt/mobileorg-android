@@ -111,12 +111,23 @@ public class OrgUtils {
 		return file.nodeId;
 	}
 	
-	public static void announceUpdate(Context context) {
+	public static void announceSyncDone(Context context) {
 		Intent intent = new Intent(Synchronizer.SYNC_UPDATE);
 		intent.putExtra(Synchronizer.SYNC_DONE, true);
 		context.sendBroadcast(intent);
 	}
 	
+	public static void announceSyncStart(Context context) {
+		Intent intent = new Intent(Synchronizer.SYNC_UPDATE);
+		intent.putExtra(Synchronizer.SYNC_START, true);
+		context.sendBroadcast(intent);
+	}
+	
+	public static void announceSyncUpdateProgress(int progress, Context context) {
+		Intent intent = new Intent(Synchronizer.SYNC_UPDATE);
+		intent.putExtra(Synchronizer.SYNC_PROGRESS_UPDATE, progress);
+		context.sendBroadcast(intent);
+	}
 
     public static String getStringFromResource(int resource, Context context) {
         InputStream is = context.getResources().openRawResource(resource);

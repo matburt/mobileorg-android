@@ -15,6 +15,7 @@ import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
+import com.actionbarsherlock.view.Window;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.OrgData.OrgProviderUtils;
 import com.matburt.mobileorg.Services.SyncService;
@@ -39,7 +40,7 @@ public class OutlineActivity extends SherlockActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
+		requestWindowFeature(Window.FEATURE_PROGRESS);
 		setContentView(R.layout.outline);
 				
 		Intent intent = getIntent();
@@ -216,12 +217,26 @@ public class OutlineActivity extends SherlockActivity {
 	private class SynchServiceReceiver extends BroadcastReceiver {
 		@Override
 		public void onReceive(Context context, Intent intent) {
-			if (intent.getBooleanExtra(Synchronizer.SYNC_DONE, false)) {
-				if (intent.getBooleanExtra("showToast", false))
+			boolean syncStart = intent.getBooleanExtra(Synchronizer.SYNC_START, false);
+			boolean syncDone = intent.getBooleanExtra(Synchronizer.SYNC_DONE, false);
+			boolean showToast = intent.getBooleanExtra(Synchronizer.SYNC_SHOW_TOAST, false);
+			int progress = intent.getIntExtra(Synchronizer.SYNC_PROGRESS_UPDATE, -1);
+			
+			if(syncStart) {
+				setSupportProgress(0);
+				setSupportProgressBarIndeterminate(true);
+			} else if (syncDone) {
+				setSupportProgressBarVisibility(false);
+				refreshDisplay();
+
+				if (showToast)
 					Toast.makeText(context,
 							R.string.outline_synchronization_successful,
 							Toast.LENGTH_SHORT).show();
-				refreshDisplay();
+			} else if (progress >= 0 && progress <= 100) {
+				setSupportProgressBarIndeterminate(false);
+				int normalizedProgress = (Window.PROGRESS_END - Window.PROGRESS_START) / 100 * progress;
+				setSupportProgress(normalizedProgress);
 			}
 		}
 	}

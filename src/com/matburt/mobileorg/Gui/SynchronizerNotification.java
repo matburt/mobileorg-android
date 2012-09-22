@@ -73,32 +73,30 @@ public class SynchronizerNotification {
 		notification.contentView.setImageViewResource(R.id.status_icon,
 				R.drawable.icon);
 		notification.contentView.setTextViewText(R.id.status_text,
-				"Synchronizing...");
+				context.getString(R.string.sync_synchronizing_changes));
 		notification.contentView.setProgressBar(R.id.status_progress, 100, 0,
-				false);
+				true);
 		
 		notificationManager.notify(notifyRef, notification);
 	}
-
+	
+	public void updateNotification(String message) {
+		if(message != null) {
+			notification.contentView.setTextViewText(R.id.status_text, message);
+			notificationManager.notify(notifyRef, notification);
+		}
+	}
+	
 	public void updateNotification(int progress) {
-		notification.contentView.setProgressBar(R.id.status_progress, 100,
-				progress, false);
-		notificationManager.notify(notifyRef, notification);
+		updateNotification(progress, null);
 	}
 
 	public void updateNotification(int progress, String message) {
-		notification.contentView.setTextViewText(R.id.status_text, message);
+		if(message != null)
+			notification.contentView.setTextViewText(R.id.status_text, message);
+
 		notification.contentView.setProgressBar(R.id.status_progress, 100,
 				progress, false);
-		notificationManager.notify(notifyRef, notification);
-	}
-
-	public void updateNotification(int fileNumber, String message,
-			int totalFiles) {
-		int partialProgress = ((40 / totalFiles) * fileNumber);
-		notification.contentView.setProgressBar(R.id.status_progress, 100,
-				60 + partialProgress, false);
-		notification.contentView.setTextViewText(R.id.status_text, message);
 		notificationManager.notify(notifyRef, notification);
 	}
 

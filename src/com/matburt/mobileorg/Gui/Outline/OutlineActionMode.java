@@ -141,7 +141,7 @@ public class OutlineActionMode implements ActionMode.Callback {
 						new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog, int id) {
 								node.deleteNode(resolver);
-								OrgUtils.announceUpdate(context);
+								OrgUtils.announceSyncDone(context);
 							}
 						})
 				.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
@@ -175,12 +175,12 @@ public class OutlineActionMode implements ActionMode.Callback {
 			node.archiveNodeToSibling(resolver);
 		else
 			node.archiveNode(resolver);
-		OrgUtils.announceUpdate(context);
+		OrgUtils.announceSyncDone(context);
 	}
 	
 	private void runDeleteFileNode() {
 		AlertDialog.Builder builder = new AlertDialog.Builder(context);
-		builder.setMessage(R.string.outline_delete_prompt)
+		builder.setMessage(R.string.outline_delete_file_prompt)
 				.setCancelable(false)
 				.setPositiveButton(R.string.yes,
 						new DialogInterface.OnClickListener() {
@@ -201,7 +201,7 @@ public class OutlineActionMode implements ActionMode.Callback {
 		try {
 			OrgFile file = new OrgFile(node.fileId, resolver);
 			file.removeFile(resolver);
-			OrgUtils.announceUpdate(context);
+			OrgUtils.announceSyncDone(context);
 		} catch (OrgFileNotFoundException e) {}
 	}
 	
