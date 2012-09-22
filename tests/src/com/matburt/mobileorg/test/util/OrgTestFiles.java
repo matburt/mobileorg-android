@@ -7,7 +7,7 @@ public class OrgTestFiles {
 		public static final String[] todos = {"TODO", "DONE"};
 		public static final String[] files = {"GTD.org"};
 		public static final String[] priorities = {"A", "B", "C"};
-		
+				
 		public static final String indexFile = "#+READONLY\n"
 				+ "#+TODO: TODO | DONE\n"
 				+ "#+TAGS: { Home Computer Errands } \n"

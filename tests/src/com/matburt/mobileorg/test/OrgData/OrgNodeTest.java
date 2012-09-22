@@ -1,6 +1,7 @@
 package com.matburt.mobileorg.test.OrgData;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 import android.database.Cursor;
 import android.test.ProviderTestCase2;
@@ -51,7 +52,37 @@ public class OrgNodeTest extends ProviderTestCase2<OrgProvider> {
 		node.level = 3;
 		OrgNode parsedNode = new OrgNode();
 		final String testHeading = "*** TODO my simple test";
-		parsedNode.parseLine(testHeading, 3);
+		HashSet<String> todos = new HashSet<String>();
+		todos.add(node.todo);
+		parsedNode.parseLine(testHeading, 3, todos);
+		
+		assertTrue(node.equals(parsedNode));
+	}
+	
+	public void testParseLineIntoNodeInvalidTodo() {
+		OrgNode node = new OrgNode();
+		node.name = "BLA my simple test";
+		node.todo = "";
+		node.level = 3;
+		OrgNode parsedNode = new OrgNode();
+		final String testHeading = "*** BLA my simple test";
+		HashSet<String> todos = new HashSet<String>();
+		todos.add("TODO");
+		parsedNode.parseLine(testHeading, 3, todos);
+		
+		assertTrue(node.equals(parsedNode));
+	}
+	
+	public void testParseLineIntoNodeComplicatedTodo() {
+		OrgNode node = new OrgNode();
+		node.name = "my simple test";
+		node.todo = "find_me";
+		node.level = 3;
+		OrgNode parsedNode = new OrgNode();
+		final String testHeading = "*** find_me my simple test";
+		HashSet<String> todos = new HashSet<String>();
+		todos.add(node.todo);
+		parsedNode.parseLine(testHeading, 3, todos);
 		
 		assertTrue(node.equals(parsedNode));
 	}

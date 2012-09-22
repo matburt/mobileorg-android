@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -24,6 +25,7 @@ public class OrgFileParser {
     private ParseStack parseStack;
 	private StringBuilder payload;
 	private OrgFile orgFile;
+	private HashSet<String> todos;
 	
 	public OrgFileParser(OrgDatabase db, ContentResolver resolver) {
 		this.db = db;
@@ -38,6 +40,8 @@ public class OrgFileParser {
 		this.parseStack = new ParseStack();
 		this.parseStack.add(0, orgFile.nodeId);
 
+		this.todos = new HashSet<String>(OrgProviderUtils.getTodos(resolver));
+		
 		this.payload = new StringBuilder();
 	}
 	
@@ -87,7 +91,7 @@ public class OrgFileParser {
 		}
         
 		final OrgNode node = new OrgNode();
-		node.parseLine(thisLine, numstars);
+		node.parseLine(thisLine, numstars, this.todos);
 		node.fileId = orgFile.id;
 		node.parentId = parseStack.getCurrentNodeId();
 		long newId = db.fastInsertNode(node);

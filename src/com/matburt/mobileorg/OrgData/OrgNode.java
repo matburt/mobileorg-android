@@ -1,6 +1,7 @@
 package com.matburt.mobileorg.OrgData;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -484,20 +485,17 @@ public class OrgNode {
 	}
 
 
-	public void parseLine(String thisLine, int numstars) {
+	public void parseLine(String thisLine, int numstars, HashSet<String> todos) {
         String heading = thisLine.substring(numstars+1);
         this.level = numstars;
         
     	Matcher matcher = titlePattern.matcher(heading);
 		if (matcher.find()) {
 			if (matcher.group(TODO_GROUP) != null) {
-				String tempTodo = matcher.group(TODO_GROUP).trim();
-				// TODO Only accept valid todo keywords as todo
-				if (TextUtils.isEmpty(tempTodo) == false) { //&& isValidTodo(tempTodo)) {
-					todo = tempTodo;
-				} else {
-					name = tempTodo + " ";
-				}
+				if (todos.contains(matcher.group(TODO_GROUP)))
+					todo = matcher.group(TODO_GROUP);
+				else
+					name = matcher.group(TODO_GROUP_WITH_SPACE);
 			}
 			if (matcher.group(PRIORITY_GROUP) != null)
 				priority = matcher.group(PRIORITY_GROUP);
@@ -526,14 +524,15 @@ public class OrgNode {
 		}
     }
  
-    private static final int TODO_GROUP = 1;
-    private static final int PRIORITY_GROUP = 2;
-    private static final int TITLE_GROUP = 3;
-    private static final int TAGS_GROUP = 4;
-    private static final int AFTER_GROUP = 7;
+    private static final int TODO_GROUP_WITH_SPACE = 1;
+    private static final int TODO_GROUP = 2;
+    private static final int PRIORITY_GROUP = 3;
+    private static final int TITLE_GROUP = 4;
+    private static final int TAGS_GROUP = 5;
+    private static final int AFTER_GROUP = 8;
     
 	private static final Pattern titlePattern = Pattern
-			.compile("^\\s?(?:([A-Z]{2,}:?\\s+)\\s*)?" + "(?:\\[\\#([^]]+)\\])?" + // Priority
+			.compile("^(\\s?(\\S+)\\s*)?" + "(?:\\[\\#([^]]+)\\])?" + // Priority
 					"(.*?)" + 											// Title
 					"\\s*(?::([^\\s]+):)?" + 							// Tags
 					"(\\s*[!\\*])*" + 									// Habits

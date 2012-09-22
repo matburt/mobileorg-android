@@ -16,7 +16,9 @@ import com.matburt.mobileorg.OrgData.OrgFile;
 import com.matburt.mobileorg.OrgData.OrgFileParser;
 import com.matburt.mobileorg.OrgData.OrgNode;
 import com.matburt.mobileorg.OrgData.OrgProvider;
+import com.matburt.mobileorg.OrgData.OrgProviderUtils;
 import com.matburt.mobileorg.test.util.OrgTestFiles.SimpleOrgFiles;
+import com.matburt.mobileorg.test.util.OrgTestUtils;
 import com.matburt.mobileorg.util.OrgNodeNotFoundException;
 
 public class OrgFileParserTest extends ProviderTestCase2<OrgProvider> {
@@ -76,6 +78,7 @@ public class OrgFileParserTest extends ProviderTestCase2<OrgProvider> {
 		BufferedReader breader = new BufferedReader(new InputStreamReader(is));
 		final String name = "file alias";
 		OrgFile orgFile = new OrgFile("GTD.org", name, "");
+		OrgProviderUtils.setTodos(OrgTestUtils.getTodos(), resolver);
 		parser.parse(orgFile, breader);
 
 		Cursor cursor = resolver.query(OrgData.CONTENT_URI, OrgData.DEFAULT_COLUMNS, OrgData.NAME + "=?",
