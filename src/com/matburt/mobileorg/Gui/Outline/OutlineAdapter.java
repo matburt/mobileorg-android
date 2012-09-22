@@ -133,7 +133,7 @@ public class OutlineAdapter extends ArrayAdapter<OrgNode> {
 
 	
 	public void collapseExpand(int position) {
-		if((position + 1) > getCount() || (position + 1) > this.expanded.size())
+		if(position >= getCount() || position >= this.expanded.size() || position < 0)
 			return;
 		
 		if(this.expanded.get(position))
@@ -166,8 +166,11 @@ public class OutlineAdapter extends ArrayAdapter<OrgNode> {
 	}
 	
 	public int findParent(int position) {
+		if(position >= getCount() || position < 0)
+			return -1;
+		
 		long currentLevel = getItem(position).level;
-		for(int activePos = position - 1; activePos > 0; activePos--) {
+		for(int activePos = position - 1; activePos >= 0; activePos--) {
 			if(getItem(activePos).level < currentLevel)
 				return activePos;
 		}
