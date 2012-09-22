@@ -74,6 +74,7 @@ public class OutlineListView extends ListView {
 			}
 			else {
 				OutlineActionMode.runEditNodeActivity(node.id, context);
+				//setParentChecked(position);
 			}
 		}
 	};
@@ -89,4 +90,10 @@ public class OutlineListView extends ListView {
 			return true;
 		}
 	};
+	
+	private void setParentChecked(int position) {
+		int parentPos = adapter.findParent(position);
+		if(parentPos >= 0)
+			setItemChecked(parentPos, true);
+	}
 }

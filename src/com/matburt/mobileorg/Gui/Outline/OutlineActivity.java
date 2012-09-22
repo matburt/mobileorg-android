@@ -172,8 +172,7 @@ public class OutlineActivity extends SherlockActivity {
 		return false;
 	}
 
-
-    public void runHelp(View view) {
+	public void runHelp(View view) {
 		Intent intent = new Intent(Intent.ACTION_VIEW,
 				Uri.parse("https://github.com/matburt/mobileorg-android/wiki"));
     	startActivity(intent);

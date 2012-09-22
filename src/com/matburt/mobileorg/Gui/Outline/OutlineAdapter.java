@@ -164,4 +164,14 @@ public class OutlineAdapter extends ArrayAdapter<OrgNode> {
 		OrgNode node = getItem(position);
 		return node.id;
 	}
+	
+	public int findParent(int position) {
+		long currentLevel = getItem(position).level;
+		for(int activePos = position - 1; activePos > 0; activePos--) {
+			if(getItem(activePos).level < currentLevel)
+				return activePos;
+		}
+		
+		return -1;
+	}
 }

@@ -37,6 +37,11 @@ public class OutlineActionMode implements ActionMode.Callback {
 		this.resolver = context.getContentResolver();
 	}
 	
+	public void initActionMode(ListView list, int position, int restorePosition) {
+		initActionMode(list, position);
+		this.listPosition = restorePosition;
+	}
+	
 	public void initActionMode(ListView list, int position) {
 		list.setItemChecked(position, true);
 		this.list = list;
