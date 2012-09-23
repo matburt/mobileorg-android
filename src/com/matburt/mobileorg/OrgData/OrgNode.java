@@ -302,6 +302,9 @@ public class OrgNode {
 			OrgFile agendaFile = new OrgFile(OrgFile.AGENDA_FILE, resolver);
 			if (agendaFile != null && agendaFile.nodeId == parentId) // Second level in agendas file
 				return false;
+			
+			if(fileId == agendaFile.id && name.startsWith(OrgFileParser.BLOCK_SEPARATOR_PREFIX))
+				return false;
 		} catch (OrgFileNotFoundException e) {}
 
 		return true;
