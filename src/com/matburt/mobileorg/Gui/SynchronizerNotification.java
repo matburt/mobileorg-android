@@ -1,14 +1,16 @@
-package com.matburt.mobileorg.Synchronizers;
+package com.matburt.mobileorg.Gui;
 
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.NotificationCompat.Builder;
 import android.widget.RemoteViews;
 
 import com.matburt.mobileorg.R;
-import com.matburt.mobileorg.Gui.OutlineActivity;
+import com.matburt.mobileorg.Gui.Outline.OutlineActivity;
 
 public class SynchronizerNotification {
 	private NotificationManager notificationManager;
@@ -20,28 +22,32 @@ public class SynchronizerNotification {
 		this.context = context;
 	}
 	
-    public void errorNotification(String errorMsg) {
+	public void errorNotification(String errorMsg) {
 		this.notificationManager = (NotificationManager) context
 				.getSystemService(Context.NOTIFICATION_SERVICE);
 		Intent notifyIntent = new Intent(context, OutlineActivity.class);
-		notifyIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+		notifyIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
+				| Intent.FLAG_ACTIVITY_SINGLE_TOP);
 
 		PendingIntent contentIntent = PendingIntent.getActivity(context, 0,
 				notifyIntent, 0);
 
-		notification = new Notification(R.drawable.icon,
-				"Synchronization Failed", System.currentTimeMillis());
+		Builder builder = new NotificationCompat.Builder(context);
+		builder.setContentIntent(contentIntent);
+		builder.setSmallIcon(R.drawable.icon);
+		builder.setContentTitle("Synchronization failed");
 		
-		notification.contentIntent = contentIntent;
-		notification.flags = notification.flags;
-		notification.contentView = new RemoteViews(context
-				.getPackageName(), R.layout.sync_notification);
-		
-		notification.contentView.setImageViewResource(R.id.status_icon, R.drawable.icon);
-        notification.contentView.setTextViewText(R.id.status_text, errorMsg);
-        notification.contentView.setProgressBar(R.id.status_progress, 100, 100, false);
+		notification = builder.getNotification();
+		notification.contentView = notification.contentView = new RemoteViews(
+				context.getPackageName(), R.layout.sync_notification);
+
+		notification.contentView.setImageViewResource(R.id.status_icon,
+				R.drawable.icon);
+		notification.contentView.setTextViewText(R.id.status_text, errorMsg);
+		notification.contentView.setProgressBar(R.id.status_progress, 100, 100,
+				false);
 		notificationManager.notify(notifyRef, notification);
-    }
+	}
 	
 	public void setupNotification() {
 		this.notificationManager = (NotificationManager) context
@@ -53,43 +59,50 @@ public class SynchronizerNotification {
 		PendingIntent contentIntent = PendingIntent.getActivity(context, 0,
 				notifyIntent, 0);
 
-		notification = new Notification(R.drawable.icon,
-				"Started synchronization", System.currentTimeMillis());
-
-		notification.contentIntent = contentIntent;
-		notification.flags = notification.flags
-				| Notification.FLAG_ONGOING_EVENT;
+		Builder builder = new NotificationCompat.Builder(context);
+		builder.setContentIntent(contentIntent);
+		builder.setSmallIcon(R.drawable.icon);
+		builder.setOngoing(true);
+		builder.setContentTitle("Started synchronization");
+		builder.setContentText("Started synchronization");
+		notification = builder.getNotification();
+		
 		notification.contentView = new RemoteViews(context.getPackageName(),
 				R.layout.sync_notification);
 
 		notification.contentView.setImageViewResource(R.id.status_icon,
 				R.drawable.icon);
 		notification.contentView.setTextViewText(R.id.status_text,
-				"Synchronizing...");
+				context.getString(R.string.sync_synchronizing_changes));
 		notification.contentView.setProgressBar(R.id.status_progress, 100, 0,
-				false);
+				true);
+		
 		notificationManager.notify(notifyRef, notification);
 	}
-
+	
+	public void updateNotification(String message) {
+		if(notification == null)
+			return;
+		
+		if(message != null) {
+			notification.contentView.setTextViewText(R.id.status_text, message);
+			notificationManager.notify(notifyRef, notification);
+		}
+	}
+	
 	public void updateNotification(int progress) {
-		notification.contentView.setProgressBar(R.id.status_progress, 100,
-				progress, false);
-		notificationManager.notify(notifyRef, notification);
+		updateNotification(progress, null);
 	}
 
 	public void updateNotification(int progress, String message) {
-		notification.contentView.setTextViewText(R.id.status_text, message);
+		if(notification == null)
+			return;
+		
+		if(message != null)
+			notification.contentView.setTextViewText(R.id.status_text, message);
+
 		notification.contentView.setProgressBar(R.id.status_progress, 100,
 				progress, false);
-		notificationManager.notify(notifyRef, notification);
-	}
-
-	public void updateNotification(int fileNumber, String message,
-			int totalFiles) {
-		int partialProgress = ((40 / totalFiles) * fileNumber);
-		notification.contentView.setProgressBar(R.id.status_progress, 100,
-				60 + partialProgress, false);
-		notification.contentView.setTextViewText(R.id.status_text, message);
 		notificationManager.notify(notifyRef, notification);
 	}
 

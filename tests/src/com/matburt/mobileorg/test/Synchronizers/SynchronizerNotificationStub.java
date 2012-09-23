@@ -2,7 +2,7 @@ package com.matburt.mobileorg.test.Synchronizers;
 
 import android.content.Context;
 
-import com.matburt.mobileorg.Synchronizers.SynchronizerNotification;
+import com.matburt.mobileorg.Gui.SynchronizerNotification;
 
 public class SynchronizerNotificationStub extends SynchronizerNotification {
 
@@ -27,11 +27,6 @@ public class SynchronizerNotificationStub extends SynchronizerNotification {
 
 	@Override
 	public void updateNotification(int progress, String message) {
-	}
-
-	@Override
-	public void updateNotification(int fileNumber, String message,
-			int totalFiles) {
 	}
 
 	@Override

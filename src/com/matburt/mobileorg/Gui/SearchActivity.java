@@ -1,25 +1,32 @@
 package com.matburt.mobileorg.Gui;
 
-import android.app.ListActivity;
+import java.util.ArrayList;
+
 import android.app.SearchManager;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.SimpleCursorAdapter;
 
+import com.actionbarsherlock.app.SherlockActivity;
+import com.matburt.mobileorg.R;
+import com.matburt.mobileorg.Gui.Outline.OutlineAdapter;
+import com.matburt.mobileorg.Gui.Outline.OutlineListView;
+import com.matburt.mobileorg.OrgData.OrgNode;
 import com.matburt.mobileorg.OrgData.OrgProviderUtils;
 
-public class SearchActivity extends ListActivity {
+public class SearchActivity extends SherlockActivity {
 
-	private SimpleCursorAdapter adapter;
+	private OutlineListView listView;
+	private OutlineAdapter listAdapter;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
+		setContentView(R.layout.search);
+		
+		this.listView = (OutlineListView) findViewById(R.id.search_list);
+		this.listAdapter = (OutlineAdapter) listView.getAdapter();
+		listView.setActivity(this);
 		Intent intent = getIntent();
 		handleIntent(intent);
 	}
@@ -39,21 +46,16 @@ public class SearchActivity extends ListActivity {
 	}
 
 	private void doSearch(String query) {
-		Cursor result = OrgProviderUtils.search("%"+ query.trim() + "%", getContentResolver());
-		
-		adapter = new OutlineCursorAdapter(this, result, getContentResolver());
-		this.setListAdapter(adapter);
-				
-		this.getListView().setOnItemClickListener(showNode);
+		Cursor result = OrgProviderUtils.search("%" + query.trim() + "%",
+				getContentResolver());
+		ArrayList<OrgNode> data = OrgProviderUtils
+				.orgDataCursorToArrayList(result);
+
+		listAdapter.clear();
+		listAdapter.addAll(data);
+
+		getSupportActionBar().setTitle(
+				getString(R.string.search_results_for) + " \"" + query.trim()
+						+ "\"");
 	}
-	
-	private OnItemClickListener showNode = new AdapterView.OnItemClickListener() {
-		@Override
-		public void onItemClick(AdapterView<?> parent, View view, int position,
-				long id) {
-			Intent intent = new Intent(getApplicationContext(), ViewFragment.class);
-			intent.putExtra("node_id", id);
-			startActivity(intent);
-		}
-	};
 }

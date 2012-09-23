@@ -1,6 +1,7 @@
 package com.matburt.mobileorg.OrgData;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -11,6 +12,7 @@ import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.matburt.mobileorg.Gui.Outline.OutlineItem;
 import com.matburt.mobileorg.OrgData.OrgContract.OrgData;
 import com.matburt.mobileorg.util.FileUtils;
 import com.matburt.mobileorg.util.OrgFileNotFoundException;
@@ -22,6 +24,7 @@ public class OrgNode {
 	public long id = -1;
 	public long parentId = -1;
 	public long fileId = -1;
+	
 	public long level = 0;
 	public String priority = "";
 	public String todo = "";
@@ -32,6 +35,15 @@ public class OrgNode {
 	private OrgNodePayload orgNodePayload = null;
 
 	public OrgNode() {
+	}
+	
+	public OrgNode(OrgNode node) {
+		this.level = node.level;
+		this.priority = node.priority;
+		this.todo = node.todo;
+		this.tags = node.tags;
+		this.name = node.name;
+		setPayload(node.getPayload());
 	}
 	
 	public OrgNode(long id, ContentResolver resolver) throws OrgNodeNotFoundException {
@@ -201,22 +213,7 @@ public class OrgNode {
 	}
 	
 	public ArrayList<OrgNode> getChildren(ContentResolver resolver) {
-		ArrayList<OrgNode> result = new ArrayList<OrgNode>();
-		
-		Cursor childCursor = resolver.query(OrgData.buildChildrenUri(id),
-				OrgData.DEFAULT_COLUMNS, null, null, null);
-		
-		childCursor.moveToFirst();
-		
-		while(childCursor.isAfterLast() == false) {
-			try {
-				result.add(new OrgNode(childCursor));
-			} catch (OrgNodeNotFoundException e) {}
-			childCursor.moveToNext();
-		}
-		
-		childCursor.close();
-		return result;
+		return OrgProviderUtils.getOrgNodeChildren(id, resolver);
 	}
 	
 	public ArrayList<String> getChildrenStringArray(ContentResolver resolver) {
@@ -305,6 +302,9 @@ public class OrgNode {
 			OrgFile agendaFile = new OrgFile(OrgFile.AGENDA_FILE, resolver);
 			if (agendaFile != null && agendaFile.nodeId == parentId) // Second level in agendas file
 				return false;
+			
+			if(fileId == agendaFile.id && name.startsWith(OrgFileParser.BLOCK_SEPARATOR_PREFIX))
+				return false;
 		} catch (OrgFileNotFoundException e) {}
 
 		return true;
@@ -321,6 +321,19 @@ public class OrgNode {
 		} catch (OrgFileNotFoundException e) {}
 
 		return true;
+	}
+	
+	public String getCleanedName() {
+		StringBuilder nameBuilder = new StringBuilder(this.name);
+		
+		Matcher matcher = OutlineItem.urlPattern.matcher(nameBuilder);
+		while(matcher.find()) {
+			nameBuilder.delete(matcher.start(), matcher.end());
+			nameBuilder.insert(matcher.start(), matcher.group(1));
+			matcher = OutlineItem.urlPattern.matcher(nameBuilder);
+		}
+		
+		return nameBuilder.toString();
 	}
 
 	
@@ -424,7 +437,7 @@ public class OrgNode {
 			return new OrgEdit();
 	}
 	
-	private OrgNode getParentSafe(String olpPath, ContentResolver resolver) {
+	public OrgNode getParentSafe(String olpPath, ContentResolver resolver) {
 		OrgNode parent;
 		try {
 			parent = new OrgNode(this.parentId, resolver);
@@ -489,38 +502,32 @@ public class OrgNode {
 	}
 
 
-	public void parseLine(String thisLine, int numstars) {
+	public void parseLine(String thisLine, int numstars, HashSet<String> todos) {
         String heading = thisLine.substring(numstars+1);
         this.level = numstars;
         
     	Matcher matcher = titlePattern.matcher(heading);
 		if (matcher.find()) {
 			if (matcher.group(TODO_GROUP) != null) {
-				String tempTodo = matcher.group(TODO_GROUP).trim();
-				// TODO Only accept valid todo keywords as todo
-				if (TextUtils.isEmpty(tempTodo) == false) { //&& isValidTodo(tempTodo)) {
-					todo = tempTodo;
-				} else {
-					name = tempTodo + " ";
-				}
+				if (todos.contains(matcher.group(TODO_GROUP)))
+					todo = matcher.group(TODO_GROUP);
+				else
+					name = matcher.group(TODO_GROUP);
 			}
+
 			if (matcher.group(PRIORITY_GROUP) != null)
 				priority = matcher.group(PRIORITY_GROUP);
+	
+			// TODO This should be done in regex
+			if(TextUtils.isEmpty(name) && matcher.group(TITLE_GROUP).length() > 1)
+				name = matcher.group(TITLE_GROUP).substring(1);
+			else
+				name += matcher.group(TITLE_GROUP);
 			
-			name += matcher.group(TITLE_GROUP);
 			
-			if(matcher.group(AFTER_GROUP) != null) {
-				int start = matcher.group(AFTER_GROUP).indexOf("TITLE:");
-				int end = matcher.group(AFTER_GROUP).indexOf("</after>");
+			if(matcher.group(AFTER_GROUP) != null)
+				name = matcher.group(AFTER_GROUP).trim() + ">" + name.trim();
 				
-				if(start > -1 && end > -1) {
-					String title = matcher.group(AFTER_GROUP).substring(
-							start + 7, end);
-					
-					name = title + ">" + name;
-				}
-			}
-			
 			tags = matcher.group(TAGS_GROUP);
 			if (tags == null)
 					tags = "";
@@ -530,13 +537,6 @@ public class OrgNode {
 			name = heading;
 		}
     }
-
-//	private boolean isValidTodo(String todo) {
-//		for(HashMap<String, Integer> aTodo : this.todos) {
-//			if(aTodo.containsKey(todo)) return true;
-//		}
-//		return false;
-//	}
  
     private static final int TODO_GROUP = 1;
     private static final int PRIORITY_GROUP = 2;
@@ -545,12 +545,13 @@ public class OrgNode {
     private static final int AFTER_GROUP = 7;
     
 	private static final Pattern titlePattern = Pattern
-			.compile("^\\s?(?:([A-Z]{2,}:?\\s+)\\s*)?" + "(?:\\[\\#([^]]+)\\])?" + // Priority
+			.compile("^\\s?([\\w_]+)?" + 								// Todo keyword
+					"(?:\\[\\#([^]]+)\\])?" + 							// Priority
 					"(.*?)" + 											// Title
-					"\\s*(?::([^\\s]+):)?" + 							// Tags
+					"\\s*" + "(?::([^\\s]+):)?" + 						// Tags (without trailing spaces)
 					"(\\s*[!\\*])*" + 									// Habits
 					"(<before>.*</before>)?" + 							// Before
-					"(<after>.*</after>)?" + 							// After
+					"(?:<after>.*TITLE:(.*)</after>)?" + 				// After
 					"$");												// End of line
 	
 	

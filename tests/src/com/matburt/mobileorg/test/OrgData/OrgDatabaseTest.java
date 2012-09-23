@@ -32,15 +32,6 @@ public class OrgDatabaseTest extends ProviderTestCase2<OrgProvider> {
 		this.db.close();
 	}
 	
-	
-	public void testNodeConstructor() {	
-		try { 
-			new OrgNode(null);
-			fail("IllegalArgumentException not thrown");
-		} catch(OrgNodeNotFoundException e) {	
-		}
-	}
-	
 	public void testNodeEquals() {
 		OrgNode node1 = OrgTestUtils.getDefaultOrgNode();
 		OrgNode node2 = OrgTestUtils.getDefaultOrgNode();

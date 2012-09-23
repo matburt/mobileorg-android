@@ -1,5 +1,8 @@
 package com.matburt.mobileorg.test.util;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+
 import android.content.ContentResolver;
 
 import com.matburt.mobileorg.OrgData.OrgFile;
@@ -97,5 +100,19 @@ public class OrgTestUtils {
 	public static OrgFile getDefaultOrgFile() {
 		OrgFile file = new OrgFile(defaultTestfilename, defaultTestfileAlias, "checksum");
 		return file;
+	}
+	
+	public static ArrayList<HashMap<String, Boolean>> getTodos() {
+		ArrayList<HashMap<String, Boolean>> result = new ArrayList<HashMap<String, Boolean>>();
+		
+		HashMap<String, Boolean> todo = new HashMap<String, Boolean>();
+		todo.put("TODO", false);
+		result.add(todo);
+		
+		HashMap<String, Boolean> done = new HashMap<String, Boolean>();
+		todo.put("DONE", true);
+		result.add(done);
+		
+		return result;
 	}
 }

@@ -7,7 +7,7 @@ public class OrgTestFiles {
 		public static final String[] todos = {"TODO", "DONE"};
 		public static final String[] files = {"GTD.org"};
 		public static final String[] priorities = {"A", "B", "C"};
-		
+				
 		public static final String indexFile = "#+READONLY\n"
 				+ "#+TODO: TODO | DONE\n"
 				+ "#+TAGS: { Home Computer Errands } \n"
@@ -21,6 +21,12 @@ public class OrgTestFiles {
 		public static final String orgFileChildHeading = "child heading";
 		public static final String orgFile = "* " + orgFileTopHeading + "\n** " + orgFileChildHeading;
 	}
+	
+	public static final String indexFileWithEmptyDrawers = "#+READONLY\n"
+			+ "#+TODO:\n"
+			+ "#+TAGS:\n"
+			+ "#+ALLPRIORITIES:\n"
+			+ "* [[file:GTD.org][GTD.org]]\n";
 	
 	public static class ComplexOrgFiles {
 		public static final String indexFile = "#+READONLY\n"

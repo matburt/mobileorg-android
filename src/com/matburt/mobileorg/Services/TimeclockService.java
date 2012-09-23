@@ -9,6 +9,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.IBinder;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.NotificationCompat.Builder;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
@@ -105,16 +107,19 @@ public class TimeclockService extends Service {
 		}
 	}
 	
-	private void showNotification(long node_id) {		
-		this.notification = new Notification(R.drawable.icon, node.name,
-				System.currentTimeMillis());
+	private void showNotification(long node_id) {
 		
 		PendingIntent contentIntent = PendingIntent.getActivity(this, 1,
 				new Intent(this, TimeclockDialog.class), 0);
 		
-		notification.contentIntent = contentIntent;
-		notification.flags = notification.flags
-				| Notification.FLAG_ONGOING_EVENT;
+		Builder builder = new NotificationCompat.Builder(this);
+		builder.setSmallIcon(R.drawable.icon);
+		builder.setContentTitle(node.name);
+		builder.setContentIntent(contentIntent);
+		builder.setOngoing(true);
+		
+		this.notification = builder.getNotification();
+
 		notification.contentView = new RemoteViews(this.getPackageName(),
 				R.layout.timeclock_notification);
 		

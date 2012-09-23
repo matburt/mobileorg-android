@@ -9,6 +9,7 @@ import android.content.SharedPreferences;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 
+import com.matburt.mobileorg.Gui.SynchronizerNotification;
 import com.matburt.mobileorg.OrgData.MobileOrgApplication;
 import com.matburt.mobileorg.OrgData.OrgDatabase;
 import com.matburt.mobileorg.OrgData.OrgFileParser;
@@ -18,13 +19,14 @@ import com.matburt.mobileorg.Synchronizers.SDCardSynchronizer;
 import com.matburt.mobileorg.Synchronizers.SSHSynchronizer;
 import com.matburt.mobileorg.Synchronizers.Synchronizer;
 import com.matburt.mobileorg.Synchronizers.SynchronizerInterface;
-import com.matburt.mobileorg.Synchronizers.SynchronizerNotification;
 import com.matburt.mobileorg.Synchronizers.UbuntuOneSynchronizer;
 import com.matburt.mobileorg.Synchronizers.WebDAVSynchronizer;
 
 public class SyncService extends Service implements
 		SharedPreferences.OnSharedPreferenceChangeListener {
+	private static final String ACTION = "action";
 	private static final String START_ALARM = "START_ALARM";
+	private static final String STOP_ALARM = "STOP_ALARM";
 
 	private SharedPreferences appSettings;
 	private MobileOrgApplication appInst;
@@ -49,18 +51,26 @@ public class SyncService extends Service implements
 	public void onDestroy() {
 		unsetAlarm();
 	}
+	
+	public static void stopAlarm(Context context) {
+		Intent intent = new Intent(context, SyncService.class);
+		intent.putExtra(ACTION, SyncService.STOP_ALARM);
+		context.startService(intent);
+	}
 
 	public static void startAlarm(Context context) {
 		Intent intent = new Intent(context, SyncService.class);
-		intent.putExtra("action", SyncService.START_ALARM);
+		intent.putExtra(ACTION, SyncService.START_ALARM);
 		context.startService(intent);
 	}
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		String action = intent.getStringExtra("action");
+		String action = intent.getStringExtra(ACTION);
 		if (action != null && action.equals(START_ALARM))
 			setAlarm();
+		else if (action != null && action.equals(STOP_ALARM))
+			unsetAlarm();
 		else if(!this.syncRunning) {
 			this.syncRunning = true;
 			runSynchronizer();
@@ -103,7 +113,7 @@ public class SyncService extends Service implements
 
 		Thread syncThread = new Thread() {
 			public void run() {
-				synchronizer.sync(parser);
+				synchronizer.runSynchronizer(parser);
 
 				if(calendarEnabled) {
 					CalendarSyncService cal = new CalendarSyncService(getContentResolver(), getBaseContext());
