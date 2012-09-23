@@ -199,7 +199,8 @@ public class OrgFileParser {
 			clonedChild.parentId = parent.id;
 			clonedChild.fileId = parent.fileId;
 			clonedChild.level = parent.level + 1;
-			db.fastInsertNode(clonedChild);
+			long id = db.fastInsertNode(clonedChild);
+			db.fastInsertNodePayload(id, child.getPayload());
 			resolver.delete(OrgData.buildIdUri(node.id), null, null);
 		}
 	}
