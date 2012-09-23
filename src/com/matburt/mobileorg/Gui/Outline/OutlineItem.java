@@ -16,7 +16,6 @@ import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
-import android.text.style.BackgroundColorSpan;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
 import android.util.TypedValue;
@@ -154,6 +153,7 @@ public class OutlineItem extends RelativeLayout implements Checkable {
 		if(tags != null && TextUtils.isEmpty(tags) == false) {
 			tagsView.setTextColor(theme.gray);
 			tagsView.setText(tags);
+			tagsView.setVisibility(View.VISIBLE);
 		} else
 			tagsView.setVisibility(View.GONE);
 	}

@@ -16,7 +16,6 @@ import com.matburt.mobileorg.util.OrgUtils;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.text.TextUtils;
-import android.util.Log;
 import android.util.Pair;
 
 public class OrgFileParser {

@@ -511,10 +511,16 @@ public class OrgNode {
 				else
 					name = matcher.group(TODO_GROUP_WITH_SPACE);
 			}
+
 			if (matcher.group(PRIORITY_GROUP) != null)
 				priority = matcher.group(PRIORITY_GROUP);
+	
+			// TODO This should be done in regex
+			if(TextUtils.isEmpty(name) && matcher.group(TITLE_GROUP).length() > 1)
+				name = matcher.group(TITLE_GROUP).substring(1);
+			else
+				name += matcher.group(TITLE_GROUP);
 			
-			name += matcher.group(TITLE_GROUP);
 			
 			if(matcher.group(AFTER_GROUP) != null)
 				name = matcher.group(AFTER_GROUP).trim() + ">" + name.trim();
@@ -529,7 +535,7 @@ public class OrgNode {
 		}
     }
  
-    private static final int TODO_GROUP_WITH_SPACE = 1;
+	private static final int TODO_GROUP_WITH_SPACE = 1;
     private static final int TODO_GROUP = 2;
     private static final int PRIORITY_GROUP = 3;
     private static final int TITLE_GROUP = 4;
@@ -537,7 +543,7 @@ public class OrgNode {
     private static final int AFTER_GROUP = 8;
     
 	private static final Pattern titlePattern = Pattern
-			.compile("^(\\s?([\\w_]+)\\s*)?" + 							// Todo keyword
+			.compile("^(([\\w_]+)?)" + 							// Todo keyword
 					"(?:\\[\\#([^]]+)\\])?" + 							// Priority
 					"(.*?)" + "\\s*" + 		
 					"(?::([^\\s]+):)?" + 							// Tags

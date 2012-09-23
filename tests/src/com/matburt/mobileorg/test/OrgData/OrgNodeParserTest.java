@@ -7,8 +7,21 @@ import android.test.AndroidTestCase;
 import com.matburt.mobileorg.OrgData.OrgNode;
 
 public class OrgNodeParserTest extends AndroidTestCase {
-
 	public void testParseLineIntoNodeSimple() {
+		OrgNode node = new OrgNode();
+		node.name = "my simple test";
+		node.todo = "";
+		node.level = 3;
+		OrgNode parsedNode = new OrgNode();
+		final String testHeading = "*** my simple test";
+		HashSet<String> todos = new HashSet<String>();
+		parsedNode.parseLine(testHeading, 3, todos);
+		
+		assertEquals(node.todo, parsedNode.todo);
+		assertEquals(node.name, parsedNode.name);
+	}
+	
+	public void testParseLineIntoNodeWithTodo() {
 		OrgNode node = new OrgNode();
 		node.name = "my simple test";
 		node.todo = "TODO";
@@ -19,7 +32,8 @@ public class OrgNodeParserTest extends AndroidTestCase {
 		todos.add(node.todo);
 		parsedNode.parseLine(testHeading, 3, todos);
 		
-		assertTrue(node.equals(parsedNode));
+		assertEquals(node.todo, parsedNode.todo);
+		assertEquals(node.name, parsedNode.name);
 	}
 	
 	public void testParseLineIntoNodeInvalidTodo() {
@@ -30,7 +44,6 @@ public class OrgNodeParserTest extends AndroidTestCase {
 		OrgNode parsedNode = new OrgNode();
 		final String testHeading = "*** BLA my simple test";
 		HashSet<String> todos = new HashSet<String>();
-		todos.add("TODO");
 		parsedNode.parseLine(testHeading, 3, todos);
 		
 		assertTrue(node.equals(parsedNode));
@@ -47,7 +60,23 @@ public class OrgNodeParserTest extends AndroidTestCase {
 		todos.add(node.todo);
 		parsedNode.parseLine(testHeading, 3, todos);
 		
-		assertTrue(node.equals(parsedNode));
+		assertEquals(node.todo, parsedNode.todo);
+		assertEquals(node.name, parsedNode.name);
+	}
+	
+	public void testParseLineIntoNodeTags() {
+		OrgNode node = new OrgNode();
+		node.name = "Archive";
+		node.level = 3;
+		node.tags = "tag1:tag2";
+		OrgNode parsedNode = new OrgNode();
+		final String testHeading = "*** Archive      :tag1:tag2:";
+		HashSet<String> todos = new HashSet<String>();
+		parsedNode.parseLine(testHeading, 3, todos);
+		
+		assertEquals(node.todo, parsedNode.todo);
+		assertEquals(node.tags, parsedNode.tags);
+		assertEquals(node.name, parsedNode.name);
 	}
 	
 	public void testParseLineIntoNodeAgendaTitle() {
