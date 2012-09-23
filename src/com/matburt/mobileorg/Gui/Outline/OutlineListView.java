@@ -104,6 +104,7 @@ public class OutlineListView extends ListView {
 		if(position != ListView.INVALID_POSITION) {
 			if(adapter.getItem(position).level == 0) {
 				adapter.init();
+				setItemChecked(position, false);
 				return;
 			}
 			
