@@ -79,6 +79,22 @@ public class OrgNodeParserTest extends AndroidTestCase {
 		assertEquals(node.name, parsedNode.name);
 	}
 	
+	
+	public void testParseLineIntoNodeWithSimpleScheduled() {
+		OrgNode node = new OrgNode();
+		node.name = "my simple test";
+		node.todo = "TODO";
+		node.level = 3;
+		OrgNode parsedNode = new OrgNode();
+		final String testHeading = "***  TODO my simple test";
+		HashSet<String> todos = new HashSet<String>();
+		todos.add(node.todo);
+		parsedNode.parseLine(testHeading, 3, todos);
+		
+		assertEquals(node.todo, parsedNode.todo);
+		assertEquals(node.name, parsedNode.name);
+	}
+	
 	public void testParseLineIntoNodeAgendaTitle() {
 		final String expectedTitle = "Home Core>Home";
 		final String testHeading = "* Home <after>KEYS=h#2 TITLE: Home Core</after>";

@@ -509,7 +509,7 @@ public class OrgNode {
 				if (todos.contains(matcher.group(TODO_GROUP)))
 					todo = matcher.group(TODO_GROUP);
 				else
-					name = matcher.group(TODO_GROUP_WITH_SPACE);
+					name = matcher.group(TODO_GROUP);
 			}
 
 			if (matcher.group(PRIORITY_GROUP) != null)
@@ -535,18 +535,17 @@ public class OrgNode {
 		}
     }
  
-	private static final int TODO_GROUP_WITH_SPACE = 1;
-    private static final int TODO_GROUP = 2;
-    private static final int PRIORITY_GROUP = 3;
-    private static final int TITLE_GROUP = 4;
-    private static final int TAGS_GROUP = 5;
-    private static final int AFTER_GROUP = 8;
+    private static final int TODO_GROUP = 1;
+    private static final int PRIORITY_GROUP = 2;
+    private static final int TITLE_GROUP = 3;
+    private static final int TAGS_GROUP = 4;
+    private static final int AFTER_GROUP = 7;
     
 	private static final Pattern titlePattern = Pattern
-			.compile("^(([\\w_]+)?)" + 							// Todo keyword
+			.compile("^\\s?([\\w_]+)?" + 								// Todo keyword
 					"(?:\\[\\#([^]]+)\\])?" + 							// Priority
-					"(.*?)" + "\\s*" + 		
-					"(?::([^\\s]+):)?" + 							// Tags
+					"(.*?)" + 											// Title
+					"\\s*" + "(?::([^\\s]+):)?" + 						// Tags (without trailing spaces)
 					"(\\s*[!\\*])*" + 									// Habits
 					"(<before>.*</before>)?" + 							// Before
 					"(?:<after>.*TITLE:(.*)</after>)?" + 				// After
