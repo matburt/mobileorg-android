@@ -7,34 +7,6 @@ import java.util.regex.Pattern;
 import android.text.TextUtils;
 
 public class OrgNodeTimeDate {
-	public enum TYPE {
-		Scheduled,
-		Deadline,
-		Timestamp,
-		InactiveTimestamp
-	};
-	
-	public static String typeToFormated(TYPE type) {
-		switch (type) {
-		case Scheduled:
-			return "SCHEDULED: ";
-		case Deadline:
-			return "DEADLINE: ";
-		case Timestamp:
-			return "";
-		default:
-			return "";
-		}
-	}
-	
-	public static String formatDate(TYPE type, String timestamp) {
-		if (TextUtils.isEmpty(timestamp))
-			return "";
-		else {
-			return OrgNodeTimeDate.typeToFormated(type) + "<" + timestamp + ">";
-		}
-	}
-	
 	public TYPE type = TYPE.Scheduled;
 
 	public int year = -1;
@@ -44,10 +16,18 @@ public class OrgNodeTimeDate {
 	public int startMinute = -1;
 	public int endTimeOfDay = -1;
 	public int endMinute = -1;
+	
+	public enum TYPE {
+		Scheduled,
+		Deadline,
+		Timestamp,
+		InactiveTimestamp
+	};
 
 	public OrgNodeTimeDate(TYPE type) {
 		this.type = type;
 	}
+
 
 	public void setToCurrentDate() {
 		final Calendar c = Calendar.getInstance();
@@ -56,12 +36,12 @@ public class OrgNodeTimeDate {
 		this.dayOfMonth = c.get(Calendar.DAY_OF_MONTH);
 	}
 	
+	private static final Pattern schedulePattern = Pattern
+			.compile("((\\d{4})-(\\d{1,2})-(\\d{1,2}))(?:[^\\d]*)"
+					+ "((\\d{1,2})\\:(\\d{2}))?(-((\\d{1,2})\\:(\\d{2})))?");
 	public void parseDate(String date) {
 		if(date == null)
 			return;
-		final Pattern schedulePattern = Pattern
-				.compile("((\\d{4})-(\\d{1,2})-(\\d{1,2}))(?:[^\\d]*)"
-						+ "((\\d{1,2})\\:(\\d{2}))?(-((\\d{1,2})\\:(\\d{2})))?");
 
 		Matcher propm = schedulePattern.matcher(date);
 
@@ -121,5 +101,27 @@ public class OrgNodeTimeDate {
 			return "";
 		else
 			return "-" + time;
+	}
+	
+	
+	public static String typeToFormated(TYPE type) {
+		switch (type) {
+		case Scheduled:
+			return "SCHEDULED: ";
+		case Deadline:
+			return "DEADLINE: ";
+		case Timestamp:
+			return "";
+		default:
+			return "";
+		}
+	}
+	
+	public static String formatDate(TYPE type, String timestamp) {
+		if (TextUtils.isEmpty(timestamp))
+			return "";
+		else {
+			return OrgNodeTimeDate.typeToFormated(type) + "<" + timestamp + ">";
+		}
 	}
 }

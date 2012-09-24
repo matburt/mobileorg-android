@@ -5,7 +5,7 @@
     android:gravity="center"
     android:orientation="vertical" >
 
-    <ListView
+    <com.matburt.mobileorg.Gui.Outline.OutlineListView
         android:id="@+id/outline_list"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
@@ -18,16 +18,14 @@
         android:orientation="vertical"
         android:visibility="gone" >
 
-        <TextView
-            android:id="@+id/EmptyMainText"
+        <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
             android:layout_gravity="center_horizontal"
-            android:layout_margin="5dp"
-            android:text="@string/empty_main"
-            android:textSize="20dp" >
-        </TextView>
+            android:contentDescription="Logo"
+            android:paddingTop="15dp"
+            android:src="@drawable/logo" />
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -50,19 +48,19 @@
                     android:orientation="vertical" >
 
                     <ImageButton
-                        android:id="@+id/outline_configure"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:id="@+id/outline_wizard"
+                        android:layout_width="@dimen/outline_dashitem_width"
+                        android:layout_height="@dimen/outline_dashitem_height"
                         android:layout_gravity="center_horizontal"
-                        android:background="@drawable/ic_menu_preferences"
-                        android:contentDescription="Configure button"
-                        android:onClick="runShowSettings" />
+                        android:background="@drawable/ic_menu_directions"
+                        android:contentDescription="Wizard button"
+                        android:onClick="runShowWizard" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_horizontal"
-                        android:text="Settings"
+                        android:text="Setup Wizard"
                         android:textStyle="bold" >
                     </TextView>
                 </LinearLayout>
@@ -75,20 +73,19 @@
                     android:orientation="vertical" >
 
                     <ImageButton
-                        android:id="@+id/outline_synchronize"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:id="@+id/outline_configure"
+                        android:layout_width="@dimen/outline_dashitem_width"
+                        android:layout_height="@dimen/outline_dashitem_height"
                         android:layout_gravity="center_horizontal"
-                        android:background="@drawable/ic_menu_refresh"
+                        android:background="@drawable/ic_menu_preferences"
                         android:contentDescription="Configure button"
-                        android:duplicateParentState="false"
-                        android:onClick="runSynchronize" />
+                        android:onClick="runShowSettings" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_horizontal"
-                        android:text="Synchronize"
+                        android:text="Settings"
                         android:textStyle="bold" >
                     </TextView>
                 </LinearLayout>
@@ -108,19 +105,20 @@
                     android:orientation="vertical" >
 
                     <ImageButton
-                        android:id="@+id/outline_capture"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:id="@+id/outline_synchronize"
+                        android:layout_width="@dimen/outline_dashitem_width"
+                        android:layout_height="@dimen/outline_dashitem_height"
                         android:layout_gravity="center_horizontal"
-                        android:background="@drawable/ic_menu_edit"
+                        android:background="@drawable/ic_menu_refresh"
                         android:contentDescription="Configure button"
-                        android:onClick="runEditNewNodeActivity" />
+                        android:duplicateParentState="false"
+                        android:onClick="runSynchronize" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_horizontal"
-                        android:text="Capture"
+                        android:text="Synchronize"
                         android:textStyle="bold" >
                     </TextView>
                 </LinearLayout>
@@ -134,10 +132,10 @@
 
                     <ImageButton
                         android:id="@+id/outline_website"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:layout_width="@dimen/outline_dashitem_width"
+                        android:layout_height="@dimen/outline_dashitem_height"
                         android:layout_gravity="center_horizontal"
-                        android:background="@drawable/icon"
+                        android:background="@drawable/ic_menu_home"
                         android:contentDescription="Configure button"
                         android:onClick="runHelp" />
 

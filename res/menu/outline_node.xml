@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <item
+        android:id="@+id/menu_capturechild"
+        android:icon="@drawable/ic_menu_add2"
+        android:showAsAction="always"
+        android:title="@string/menu_capture"
+        android:visible="true"/>
+    <item
+        android:id="@+id/menu_view"
+        android:icon="@drawable/ic_menu_view"
+        android:showAsAction="always"
+        android:title="@string/menu_view"/>
+    <item
+        android:id="@+id/menu_edit"
+        android:icon="@drawable/ic_menu_edit"
+        android:showAsAction="always"
+        android:title="@string/menu_edit"/>
+    <item
+        android:id="@+id/menu_delete"
+        android:icon="@drawable/ic_menu_delete"
+        android:showAsAction="ifRoom"
+        android:title="@string/menu_delete"/>
+    <item
+        android:id="@+id/menu_clockin"
+        android:icon="@drawable/ic_menu_today"
+        android:showAsAction="ifRoom"
+        android:title="@string/menu_clockin"/>
+    <item
+        android:id="@+id/menu_archive"
+        android:icon="@drawable/ic_menu_archive"
+        android:showAsAction="ifRoom"
+        android:title="@string/menu_archive"/>
+    <item
+        android:id="@+id/menu_archive_tosibling"
+        android:icon="@drawable/ic_menu_archive"
+        android:showAsAction="ifRoom"
+        android:title="@string/menu_archive_tosibling"/>
+
+</menu>

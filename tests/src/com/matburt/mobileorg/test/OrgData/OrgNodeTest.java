@@ -44,18 +44,6 @@ public class OrgNodeTest extends ProviderTestCase2<OrgProvider> {
 		assertEquals("*** TODO my simple test", node.toString());
 	}
 	
-	public void testParseLineIntoNodeSimple() {
-		OrgNode node = new OrgNode();
-		node.name = "my simple test";
-		node.todo = "TODO";
-		node.level = 3;
-		OrgNode parsedNode = new OrgNode();
-		final String testHeading = "*** TODO my simple test";
-		parsedNode.parseLine(testHeading, 3, true);
-		
-		assertTrue(node.equals(parsedNode));
-	}
-	
 	public void testAddNodeSimple() throws OrgNodeNotFoundException {
 		OrgNode node = OrgTestUtils.getDefaultOrgNode();
 		node.write(resolver);
