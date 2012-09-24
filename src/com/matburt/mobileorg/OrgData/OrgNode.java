@@ -1,9 +1,7 @@
 package com.matburt.mobileorg.OrgData;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import android.content.ContentResolver;
 import android.content.ContentValues;
@@ -14,6 +12,7 @@ import android.util.Log;
 
 import com.matburt.mobileorg.Gui.Outline.OutlineItem;
 import com.matburt.mobileorg.OrgData.OrgContract.OrgData;
+import com.matburt.mobileorg.OrgData.OrgFileParser.OrgNodePattern;
 import com.matburt.mobileorg.util.FileUtils;
 import com.matburt.mobileorg.util.OrgFileNotFoundException;
 import com.matburt.mobileorg.util.OrgNodeNotFoundException;
@@ -502,58 +501,31 @@ public class OrgNode {
 	}
 
 
-	public void parseLine(String thisLine, int numstars, HashSet<String> todos) {
-        String heading = thisLine.substring(numstars+1);
+	public void parseLine(String thisLine, int numstars, OrgNodePattern pattern) {
         this.level = numstars;
         
-    	Matcher matcher = titlePattern.matcher(heading);
-		if (matcher.find()) {
-			if (matcher.group(TODO_GROUP) != null) {
-				if (todos.contains(matcher.group(TODO_GROUP)))
-					todo = matcher.group(TODO_GROUP);
-				else
-					name = matcher.group(TODO_GROUP);
-			}
-
-			if (matcher.group(PRIORITY_GROUP) != null)
-				priority = matcher.group(PRIORITY_GROUP);
-	
-			// TODO This should be done in regex
-			if(TextUtils.isEmpty(name) && matcher.group(TITLE_GROUP).length() > 1)
-				name = matcher.group(TITLE_GROUP).substring(1);
-			else
-				name += matcher.group(TITLE_GROUP);
-			
-			
-			if(matcher.group(AFTER_GROUP) != null)
-				name = matcher.group(AFTER_GROUP).trim() + ">" + name.trim();
+    	Matcher matcher = pattern.titlePattern.matcher(thisLine);
+    	matcher.region(numstars + 1, thisLine.length());
+    	if (matcher.find()) {
+			if (matcher.group(OrgNodePattern.TODO_GROUP) != null)
+				todo = matcher.group(OrgNodePattern.TODO_GROUP);
 				
-			tags = matcher.group(TAGS_GROUP);
-			if (tags == null)
-					tags = "";
+			name = matcher.group(OrgNodePattern.NAME_GROUP);
+			
+			if (matcher.group(OrgNodePattern.PRIORITY_GROUP) != null)
+				priority = matcher.group(OrgNodePattern.PRIORITY_GROUP);
+
+			if (matcher.group(OrgNodePattern.TAGS_GROUP) != null);
+				tags = matcher.group(OrgNodePattern.TAGS_GROUP);
+			
+			if(matcher.group(OrgNodePattern.AFTER_GROUP) != null)
+				name = matcher.group(OrgNodePattern.AFTER_GROUP).trim() + ">" + name.trim();
 			
 		} else {
-			Log.w("MobileOrg", "Title not matched: " + heading);
-			name = heading;
+			Log.w("MobileOrg", "Title not matched: " + thisLine);
+			name = thisLine;
 		}
     }
- 
-    private static final int TODO_GROUP = 1;
-    private static final int PRIORITY_GROUP = 2;
-    private static final int TITLE_GROUP = 3;
-    private static final int TAGS_GROUP = 4;
-    private static final int AFTER_GROUP = 7;
-    
-	private static final Pattern titlePattern = Pattern
-			.compile("^\\s?([\\w_]+)?" + 								// Todo keyword
-					"(?:\\[\\#([^]]+)\\])?" + 							// Priority
-					"(.*?)" + 											// Title
-					"\\s*" + "(?::([^\\s]+):)?" + 						// Tags (without trailing spaces)
-					"(\\s*[!\\*])*" + 									// Habits
-					"(<before>.*</before>)?" + 							// Before
-					"(?:<after>.*TITLE:(.*)</after>)?" + 				// After
-					"$");												// End of line
-	
 	
 	public String toString() {
 		StringBuilder result = new StringBuilder();
