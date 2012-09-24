@@ -11,12 +11,12 @@
         <item name="android:background">@drawable/actionbar_background</item>
     </style>
 
-    <style name="Theme.MobileOrg.Light" parent="Theme.Sherlock.Light">
+    <style name="Theme.MobileOrg.Light" parent="Theme.Sherlock.Light.DarkActionBar">
         <item name="actionBarStyle">@style/Widget.Styled.ActionBar.Light</item>
         <item name="android:actionBarStyle">@style/Widget.Styled.ActionBar.Light</item>
     </style>
 
-    <style name="Widget.Styled.ActionBar.Light" parent="Widget.Sherlock.Light.ActionBar.Solid">
+    <style name="Widget.Styled.ActionBar.Light" parent="Widget.Sherlock.Light.ActionBar.Solid.Inverse">
         <item name="background">@drawable/actionbar_background</item>
         <item name="android:background">@drawable/actionbar_background</item>
     </style>

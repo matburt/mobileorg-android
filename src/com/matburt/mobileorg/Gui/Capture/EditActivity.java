@@ -43,6 +43,7 @@ public class EditActivity extends SherlockFragmentActivity implements
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.edit);
+		getSupportActionBar().setTitle(R.string.menu_capture);
 		
 		this.resolver = getContentResolver();
 		
