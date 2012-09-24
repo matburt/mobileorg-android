@@ -196,18 +196,18 @@ public class OrgUtils {
     public static void setTheme(Activity activity) {
     	String themeName = getThemeName(activity);
     	
-    	if(themeName.equals("Light"))
-    		activity.setTheme(R.style.Theme_MobileOrg_Light);
-    	else 
+    	if(themeName.equals("Dark"))
     		activity.setTheme(R.style.Theme_MobileOrg_Dark);
+    	else 
+    		activity.setTheme(R.style.Theme_MobileOrg_Light);
     }
     
     public static boolean isThemeLight(Context context) {
     	String themeName = getThemeName(context);
     	
-    	if(themeName.equals("Light"))
-    		return true;
-    	else
+    	if(themeName.equals("Dark"))
     		return false;
+    	else
+    		return true;
     }
 }

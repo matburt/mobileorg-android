@@ -64,6 +64,7 @@
     <string-array name="themes">
         <item>Light</item>
         <item>Dark</item>
+        <item>Monochrome</item>
     </string-array>
 
 </resources>

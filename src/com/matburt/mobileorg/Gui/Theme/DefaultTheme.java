@@ -35,8 +35,11 @@ public class DefaultTheme {
 	
 	
 	public static DefaultTheme getTheme(Context context) {
-		if(OrgUtils.isThemeLight(context))
+		final String themeName = OrgUtils.getThemeName(context);
+		if(themeName.equals("Light"))
 				return new WhiteTheme();
+		else if(themeName.equals("Monochrome"))
+			return new MonoTheme();
 		else
 			return new DefaultTheme();
 	}
