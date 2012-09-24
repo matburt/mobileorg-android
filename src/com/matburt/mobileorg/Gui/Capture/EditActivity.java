@@ -41,6 +41,7 @@ public class EditActivity extends SherlockFragmentActivity implements
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
+		OrgUtils.setTheme(this);
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.edit);
 		getSupportActionBar().setTitle(R.string.menu_capture);

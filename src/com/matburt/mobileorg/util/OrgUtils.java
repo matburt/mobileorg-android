@@ -9,11 +9,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
 
-import com.matburt.mobileorg.R;
-import com.matburt.mobileorg.OrgData.OrgFile;
-import com.matburt.mobileorg.OrgData.OrgNode;
-import com.matburt.mobileorg.Synchronizers.Synchronizer;
-
+import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -23,6 +19,11 @@ import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
+
+import com.matburt.mobileorg.R;
+import com.matburt.mobileorg.OrgData.OrgFile;
+import com.matburt.mobileorg.OrgData.OrgNode;
+import com.matburt.mobileorg.Synchronizers.Synchronizer;
 
 public class OrgUtils {
 	
@@ -184,5 +185,29 @@ public class OrgUtils {
             String s2 = (String) o2;
             return s1.toLowerCase().compareTo(s2.toLowerCase());
         }
+    }
+    
+    public static String getThemeName(Context context) {
+        SharedPreferences appSettings =
+                PreferenceManager.getDefaultSharedPreferences(context);
+        return appSettings.getString("theme", "Dark");
+    }
+    
+    public static void setTheme(Activity activity) {
+    	String themeName = getThemeName(activity);
+    	
+    	if(themeName.equals("Light"))
+    		activity.setTheme(R.style.Theme_MobileOrg_Light);
+    	else 
+    		activity.setTheme(R.style.Theme_MobileOrg_Dark);
+    }
+    
+    public static boolean isThemeLight(Context context) {
+    	String themeName = getThemeName(context);
+    	
+    	if(themeName.equals("Light"))
+    		return true;
+    	else
+    		return false;
     }
 }

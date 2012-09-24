@@ -13,6 +13,7 @@ import com.matburt.mobileorg.Gui.Outline.OutlineAdapter;
 import com.matburt.mobileorg.Gui.Outline.OutlineListView;
 import com.matburt.mobileorg.OrgData.OrgNode;
 import com.matburt.mobileorg.OrgData.OrgProviderUtils;
+import com.matburt.mobileorg.util.OrgUtils;
 
 public class SearchActivity extends SherlockActivity {
 
@@ -21,6 +22,7 @@ public class SearchActivity extends SherlockActivity {
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
+		OrgUtils.setTheme(this);
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.search);
 		

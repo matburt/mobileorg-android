@@ -42,6 +42,7 @@ SharedPreferences.OnSharedPreferenceChangeListener {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
+		OrgUtils.setTheme(this);
 		super.onCreate(savedInstanceState);
 
 		Intent prefsIntent = getIntent();

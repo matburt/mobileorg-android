@@ -33,6 +33,13 @@
             android:title="@string/title_auto_sync_interval" />
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/preference_viewing" >
+        <ListPreference
+            android:defaultValue="Dark"
+            android:entries="@array/themes"
+            android:entryValues="@array/themes"
+            android:key="theme"
+            android:title="@string/preference_theme_title" />
+
         <CheckBoxPreference
             android:key="combineBlockAgendas"
             android:summary="@string/preference_combine_block_agenda_summary"
