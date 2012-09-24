@@ -8,11 +8,9 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.matburt.mobileorg.Gui.Outline.OutlineItem;
 import com.matburt.mobileorg.OrgData.OrgContract.OrgData;
-import com.matburt.mobileorg.OrgData.OrgFileParser.OrgNodePattern;
 import com.matburt.mobileorg.util.FileUtils;
 import com.matburt.mobileorg.util.OrgFileNotFoundException;
 import com.matburt.mobileorg.util.OrgNodeNotFoundException;
@@ -499,33 +497,6 @@ public class OrgNode {
 		
 		return edits;
 	}
-
-
-	public void parseLine(String thisLine, int numstars, OrgNodePattern pattern) {
-        this.level = numstars;
-        
-    	Matcher matcher = pattern.titlePattern.matcher(thisLine);
-    	matcher.region(numstars + 1, thisLine.length());
-    	if (matcher.find()) {
-			if (matcher.group(OrgNodePattern.TODO_GROUP) != null)
-				todo = matcher.group(OrgNodePattern.TODO_GROUP);
-				
-			name = matcher.group(OrgNodePattern.NAME_GROUP);
-			
-			if (matcher.group(OrgNodePattern.PRIORITY_GROUP) != null)
-				priority = matcher.group(OrgNodePattern.PRIORITY_GROUP);
-
-			if (matcher.group(OrgNodePattern.TAGS_GROUP) != null);
-				tags = matcher.group(OrgNodePattern.TAGS_GROUP);
-			
-			if(matcher.group(OrgNodePattern.AFTER_GROUP) != null)
-				name = matcher.group(OrgNodePattern.AFTER_GROUP).trim() + ">" + name.trim();
-			
-		} else {
-			Log.w("MobileOrg", "Title not matched: " + thisLine);
-			name = thisLine;
-		}
-    }
 	
 	public String toString() {
 		StringBuilder result = new StringBuilder();

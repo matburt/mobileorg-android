@@ -27,7 +27,7 @@ public class OrgFileParser {
     private ParseStack parseStack;
 	private StringBuilder payload;
 	private OrgFile orgFile;
-	private OrgNodePattern orgNodePattern;
+	private OrgNodeParser orgNodeParser;
 	
 	public OrgFileParser(OrgDatabase db, ContentResolver resolver) {
 		this.db = db;
@@ -44,7 +44,8 @@ public class OrgFileParser {
 		
 		this.payload = new StringBuilder();
 		
-		this.orgNodePattern = new OrgNodePattern(OrgProviderUtils.getTodos(resolver));
+		this.orgNodeParser = new OrgNodeParser(
+				OrgProviderUtils.getTodos(resolver));
 	}
 	
 	public void parse(OrgFile orgFile, BufferedReader breader, Context context) {
@@ -96,8 +97,7 @@ public class OrgFileParser {
 				parseStack.pop();
 		}
         
-		final OrgNode node = new OrgNode();
-		node.parseLine(thisLine, numstars, this.orgNodePattern);
+		OrgNode node = this.orgNodeParser.parseLine(thisLine, numstars);
 		node.fileId = orgFile.id;
 		node.parentId = parseStack.getCurrentNodeId();
 		long newId = db.fastInsertNode(node);
@@ -135,44 +135,6 @@ public class OrgFileParser {
 		
 		public long getCurrentNodeId() {
 			return parseStack.peek().second;
-		}
-	}
-	
-	public static class OrgNodePattern {
-		public static final int TODO_GROUP = 1;
-		public static final int PRIORITY_GROUP = 2;
-		public static final int NAME_GROUP = 3;
-		public static final int TAGS_GROUP = 4;
-		public static final int AFTER_GROUP = 5;
-    
-		public Pattern titlePattern;
-
-		private static final String patternStart = "^\\s?";
-		private static final String patternEnd = 								
-			"(?:\\[\\#([^]]+)\\]\\s)?" + 							// Priority
-			"(.*?)" + 												// Title
-			"\\s*" + "(?::([^\\s]+):)?" + 							// Tags (without trailing spaces)
-			"(?:\\s*[!\\*])*" + 									// Habits
-			"(?:<before>.*</before>)?" + 							// Before
-			"(?:<after>.*TITLE:(.*)</after>)?" + 					// After
-			"$";													// End of line
-    
-		
-		public OrgNodePattern(ArrayList<String> todos) {
-			final String pattern = patternStart + "(?:(" + getTodoRegex(todos) + ")\\s)?" + patternEnd;
-			this.titlePattern = Pattern.compile(pattern);
-		}
-		
-		private String getTodoRegex(ArrayList<String> todos) {
-			if(todos.isEmpty())
-				return "";
-			
-			StringBuilder result = new StringBuilder();
-			for(String todo: todos)
-				result.append(todo).append("|");
-			result.deleteCharAt(result.length() - 1);
-			
-			return result.toString();
 		}
 	}
 	
