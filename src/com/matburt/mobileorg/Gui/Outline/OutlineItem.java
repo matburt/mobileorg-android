@@ -168,7 +168,7 @@ public class OutlineItem extends RelativeLayout implements Checkable {
 		if(checked)
 			setBackgroundResource(R.drawable.outline_selection);
 		else
-			setBackgroundResource(0);
+			setBackgroundResource(android.R.color.transparent);
 	}
 
 	@Override

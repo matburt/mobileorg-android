@@ -18,7 +18,7 @@
         android:debuggable="true"
         android:icon="@drawable/icon"
         android:label="MobileOrg"
-        android:theme="@style/Theme.Styled" >
+        android:theme="@style/Theme.MobileOrg.Dark" >
         <meta-data
             android:name="android.app.default_searchable"
             android:value=".Gui.SearchActivity" />
