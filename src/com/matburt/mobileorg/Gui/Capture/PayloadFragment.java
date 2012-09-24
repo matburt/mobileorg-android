@@ -85,8 +85,7 @@ public class PayloadFragment extends ViewFragment {
 		else
 			switchToView();
 		
-		if(editActivity.isNodeModifiable() == false)
-			setUnmodifiable();
+		setModifiable(editActivity.isPayloadEditable());
 	}
 	
 	@Override
@@ -108,8 +107,11 @@ public class PayloadFragment extends ViewFragment {
 		}
 	}
 	
-	public void setUnmodifiable() {
-		this.editButton.setVisibility(View.GONE);
+	public void setModifiable(boolean enabled) {
+		if(enabled)
+			this.editButton.setVisibility(View.VISIBLE);
+		else
+			this.editButton.setVisibility(View.GONE);
 	}
 
 	public void setPayload(String payload) {

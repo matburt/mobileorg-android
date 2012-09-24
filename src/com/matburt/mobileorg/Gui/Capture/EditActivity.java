@@ -13,6 +13,7 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.OrgData.OrgEdit;
+import com.matburt.mobileorg.OrgData.OrgFile;
 import com.matburt.mobileorg.OrgData.OrgNode;
 import com.matburt.mobileorg.OrgData.OrgProviderUtils;
 import com.matburt.mobileorg.Services.SyncService;
@@ -127,8 +128,17 @@ public class EditActivity extends SherlockFragmentActivity implements
 		return this.actionMode;
 	}
 	
-	public boolean isNodeModifiable() {
+	public boolean isNodeEditable() {	
 		return getOrgNode().isNodeEditable(resolver);
+	}
+	
+	public boolean isPayloadEditable() {
+		OrgNode node = getOrgNode();
+		
+		if(node.level == 0 && !node.name.equals(OrgFile.AGENDA_FILE_ALIAS))
+			return true;
+		else
+			return isNodeEditable();
 	}
 	
 	public boolean isNodeRefilable() {
@@ -142,7 +152,7 @@ public class EditActivity extends SherlockFragmentActivity implements
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getSupportMenuInflater().inflate(R.menu.edit, menu);
 
-		if(isNodeModifiable() == false)
+		if(isNodeEditable() == false)
 			menu.findItem(R.id.nodeedit_save).setVisible(false);
 	    
     	return super.onCreateOptionsMenu(menu);

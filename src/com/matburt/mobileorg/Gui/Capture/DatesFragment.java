@@ -68,7 +68,7 @@ public class DatesFragment extends SherlockFragment {
 		else
 			setupDates();
 		
-		setModifable(editActivity.isNodeModifiable());
+		setModifable(editActivity.isPayloadEditable());
 		editActivity.invalidateOptionsMenu();
 	}
 

@@ -56,7 +56,7 @@ public class HeadingFragment extends SherlockFragment {
 		else
 			updateDisplay(this.node);
 		
-		setModifiable(activity.isNodeModifiable());
+		setModifiable(activity.isNodeEditable());
 		
 		String actionMode = activity.getActionMode();
 		

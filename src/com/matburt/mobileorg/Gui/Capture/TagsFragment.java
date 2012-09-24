@@ -52,7 +52,7 @@ public class TagsFragment extends SherlockFragment {
 			setupTagEntries(node.getTags());
 		}
 		
-		setModifiable(activity.isNodeModifiable());
+		setModifiable(activity.isNodeEditable());
 		activity.invalidateOptionsMenu();
 	}
 	

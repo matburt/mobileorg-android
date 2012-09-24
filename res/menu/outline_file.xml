@@ -23,6 +23,11 @@
         android:showAsAction="ifRoom"
         android:title="@string/menu_delete_file"/>
     <item
+        android:id="@+id/menu_clockin"
+        android:icon="@drawable/ic_menu_today"
+        android:showAsAction="ifRoom"
+        android:title="@string/menu_clockin"/>
+    <item
         android:id="@+id/menu_recover"
         android:icon="@drawable/ic_menu_archive"
         android:showAsAction="ifRoom"
