@@ -27,7 +27,7 @@ public class OutlineAdapter extends ArrayAdapter<OrgNode> {
 		super(context, R.layout.outline_item);
 		this.resolver = context.getContentResolver();
 
-		this.theme = new DefaultTheme();
+		this.theme = DefaultTheme.getTheme(context);
 		init();
 	}
 
