@@ -41,8 +41,8 @@ public class EditActivity extends SherlockFragmentActivity implements
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
 		setContentView(R.layout.edit);
+		
 		this.resolver = getContentResolver();
 		
 		SyncService.stopAlarm(this); // Don't run background sync while editing node
@@ -121,6 +121,10 @@ public class EditActivity extends SherlockFragmentActivity implements
 		if(this.node == null)
 			this.node = new OrgNode();
 		return this.node;
+	}
+	
+	public String getActionMode() {
+		return this.actionMode;
 	}
 	
 	public boolean isNodeModifiable() {

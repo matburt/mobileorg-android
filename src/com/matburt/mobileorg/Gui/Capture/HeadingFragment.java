@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.Spinner;
 
@@ -56,6 +57,14 @@ public class HeadingFragment extends SherlockFragment {
 			updateDisplay(this.node);
 		
 		setModifiable(activity.isNodeModifiable());
+		
+		String actionMode = activity.getActionMode();
+		
+		if(actionMode.equals(EditActivity.ACTIONMODE_ADDCHILD) || actionMode.equals(EditActivity.ACTIONMODE_CREATE)) {
+			this.titleView.requestFocus();
+			getActivity().getWindow().setSoftInputMode(
+				    WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+		}
 	}
 
 	@Override

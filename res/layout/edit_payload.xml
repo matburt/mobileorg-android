@@ -15,6 +15,7 @@
         android:id="@+id/edit_payload_edittext"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
+        android:layout_below="@+id/edit_payload_save"
         android:visibility="gone" >
     </EditText>
 
