@@ -29,10 +29,16 @@ public class OutlineListView extends ListView {
 		setOnItemClickListener(outlineClickListener);
 		setOnItemLongClickListener(outlineLongClickListener);
 		this.actionMode = new OutlineActionMode(context);
-		this.adapter = new OutlineAdapter(context);
-		setAdapter(adapter);
+		setAdapter(new OutlineAdapter(context));
 	}
 	
+	
+	public void setAdapter(OutlineAdapter adapter) {
+		this.adapter = adapter;
+		super.setAdapter(adapter);
+	}
+
+
 	public void setActivity(SherlockActivity activity) {
 		this.activity = activity;
 		this.context = activity;
