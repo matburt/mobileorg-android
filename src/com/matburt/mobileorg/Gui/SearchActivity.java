@@ -13,6 +13,7 @@ import com.matburt.mobileorg.Gui.Outline.OutlineAdapter;
 import com.matburt.mobileorg.Gui.Outline.OutlineListView;
 import com.matburt.mobileorg.OrgData.OrgNode;
 import com.matburt.mobileorg.OrgData.OrgProviderUtils;
+import com.matburt.mobileorg.util.OrgUtils;
 
 public class SearchActivity extends SherlockActivity {
 
@@ -21,11 +22,14 @@ public class SearchActivity extends SherlockActivity {
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
+		OrgUtils.setTheme(this);
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.search);
 		
 		this.listView = (OutlineListView) findViewById(R.id.search_list);
 		this.listAdapter = (OutlineAdapter) listView.getAdapter();
+		listAdapter.clear();
+		
 		listView.setActivity(this);
 		Intent intent = getIntent();
 		handleIntent(intent);
@@ -51,11 +55,15 @@ public class SearchActivity extends SherlockActivity {
 		ArrayList<OrgNode> data = OrgProviderUtils
 				.orgDataCursorToArrayList(result);
 
-		listAdapter.clear();
-		listAdapter.addAll(data);
-
-		getSupportActionBar().setTitle(
+		if(result.getCount() == 0) {
+			getSupportActionBar().setTitle(
+					"No results found for " + " \"" + query.trim()
+							+ "\"");
+		} else {
+			listAdapter.insertAll(data, 0);
+			getSupportActionBar().setTitle(
 				getString(R.string.search_results_for) + " \"" + query.trim()
 						+ "\"");
+		}
 	}
 }

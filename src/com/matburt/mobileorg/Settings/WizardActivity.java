@@ -39,6 +39,7 @@ import com.matburt.mobileorg.Synchronizers.SSHSynchronizer;
 import com.matburt.mobileorg.Synchronizers.UbuntuOneSynchronizer;
 import com.matburt.mobileorg.Synchronizers.WebDAVSynchronizer;
 import com.matburt.mobileorg.Views.PageFlipView;
+import com.matburt.mobileorg.util.OrgUtils;
 
 public class WizardActivity extends Activity {
 
@@ -120,6 +121,7 @@ public class WizardActivity extends Activity {
     /** Called when the activity is first created. */
     @Override
         public void onCreate(Bundle savedInstanceState) {
+    	OrgUtils.setTheme(this);
     	super.onCreate(savedInstanceState);
     	setContentView(R.layout.wizard);
     	wizard = (PageFlipView) findViewById(R.id.wizard_parent);

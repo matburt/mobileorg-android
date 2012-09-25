@@ -27,7 +27,7 @@ public class OutlineAdapter extends ArrayAdapter<OrgNode> {
 		super(context, R.layout.outline_item);
 		this.resolver = context.getContentResolver();
 
-		this.theme = new DefaultTheme();
+		this.theme = DefaultTheme.getTheme(context);
 		init();
 	}
 
@@ -131,6 +131,12 @@ public class OutlineAdapter extends ArrayAdapter<OrgNode> {
 		super.remove(node);
 	}
 
+	public boolean getExpanded(int position) {
+		if(position < 0 || position > this.expanded.size())
+			return false;
+		
+		return this.expanded.get(position);
+	}
 	
 	public void collapseExpand(int position) {
 		if(position >= getCount() || position >= this.expanded.size() || position < 0)

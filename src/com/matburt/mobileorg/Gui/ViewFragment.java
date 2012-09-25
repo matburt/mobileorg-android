@@ -62,13 +62,20 @@ public class ViewFragment extends SherlockFragment {
 	
 	public void display(OrgNode node, int levelOfRecursion, ContentResolver resolver) {
 		OrgNode2Html htmlNode = new OrgNode2Html(resolver);
-		htmlNode.setupConfig(getActivity());
+		htmlNode.setupConfig(getActivity(), getFontColor());
 		String html = htmlNode.toHTML(node, levelOfRecursion);
 		displayHtml(html);
 	}
 
+	private String getFontColor() {
+		if(OrgUtils.isThemeLight(getActivity()))
+			return "black";
+		else
+			return "white";
+	}
+	
 	public void displayError() {
-		String html = "<html><body><font color='white'>"
+		String html = "<html><body><font color='" + getFontColor() + "'>"
 				+ getString(R.string.node_view_error_loading_node)
 				+ "</font></body></html>";
 		displayHtml(html);

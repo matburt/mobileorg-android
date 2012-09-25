@@ -57,13 +57,16 @@ public class CalendarSyncService {
 	}
 	
 	private void refreshPreferences() {
-		String intervalString = sharedPreferences.getString("calendarReminderInterval", null);
-		if(intervalString == null)
-			throw new IllegalArgumentException("Invalid calendar reminder interval");
-		this.reminderTime = Integer.valueOf(intervalString);
-		
 		this.reminderEnabled = sharedPreferences.getBoolean(
 				"calendarReminder", false);
+
+		if(reminderEnabled) {
+			String intervalString = sharedPreferences.getString("calendarReminderInterval", "0");
+			if(intervalString == null)
+				throw new IllegalArgumentException("Invalid calendar reminder interval");
+			this.reminderTime = Integer.valueOf(intervalString);
+		}
+		
 		this.showDone = sharedPreferences.getBoolean("calendarShowDone", true);
 		this.showHabits = sharedPreferences.getBoolean("calendarHabits", true);	
 		this.calendarName = PreferenceManager
@@ -105,7 +108,8 @@ public class CalendarSyncService {
 
 	
 	public CharSequence[] getCalendars(Context context) {
-		CharSequence[] result;
+		CharSequence[] result = new CharSequence[1];
+		result[0] = context.getString(R.string.error_setting_no_calendar);
 
 		try {
 			Cursor cursor = context.getContentResolver().query(
@@ -113,28 +117,24 @@ public class CalendarSyncService {
 					new String[] { intCalendars._ID,
 							intCalendars.CALENDAR_DISPLAY_NAME }, null, null,
 					null);
-
+			if(cursor == null)
+				return result;
+			
 			if (cursor.getCount() == 0) {
-				result = new CharSequence[1];
-				result[0] = context
-						.getString(R.string.error_setting_no_calendar);
 				cursor.close();
 				return result;
 			}
 
-			result = new CharSequence[cursor.getCount()];
-
-			if (cursor != null && cursor.moveToFirst()) {
+			if (cursor.moveToFirst()) {
+				result = new CharSequence[cursor.getCount()];
+				
 				for (int i = 0; i < cursor.getCount(); i++) {
 					result[i] = cursor.getString(1);
 					cursor.moveToNext();
 				}
 			}
 			cursor.close();
-		} catch (SQLException e) {
-			result = new CharSequence[1];
-			result[0] = context.getString(R.string.error_setting_no_calendar);
-		}
+		} catch (SQLException e) {}
 
 		return result;
 	}

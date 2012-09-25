@@ -1,5 +1,8 @@
 package com.matburt.mobileorg.Gui.Theme;
 
+import com.matburt.mobileorg.util.OrgUtils;
+
+import android.content.Context;
 import android.graphics.Color;
 
 public class DefaultTheme {
@@ -23,7 +26,21 @@ public class DefaultTheme {
 	public int ceLCyan = Color.rgb(0x00, 0xff, 0xff);
 	public int cfLWhite = Color.rgb(0xff, 0xff, 0xff);
 
-	public final int[] levelColors = new int[] { ccLBlue, c3Yellow, ceLCyan,
-			c2Green, c5Purple, ccLBlue, c2Green, ccLBlue, c3Yellow,
-			ceLCyan };
+	public int[] levelColors;
+	
+	public DefaultTheme() {
+		levelColors = new int[] { ccLBlue, c3Yellow, ceLCyan, c2Green,
+				c5Purple, ccLBlue, c2Green, ccLBlue, c3Yellow, ceLCyan };
+	}
+	
+	
+	public static DefaultTheme getTheme(Context context) {
+		final String themeName = OrgUtils.getThemeName(context);
+		if(themeName.equals("Light"))
+				return new WhiteTheme();
+		else if(themeName.equals("Monochrome"))
+			return new MonoTheme();
+		else
+			return new DefaultTheme();
+	}
 }

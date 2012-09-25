@@ -169,8 +169,7 @@
     <string name="preference_calendar_show_habits">Show habits</string>
     <string name="preference_calendar_show_done_summary">Show done items in the calendar</string>
     <string name="preference_calendar_show_done">Show done</string>
-    <string name="preference_fullscreen_title">Fullscreen</string>
-    <string name="preference_fullscreen_summary">Toggle fullscreen.</string>
+    <string name="preference_theme_title">Theme</string>
     <string name="preference_capture_advanced_title">Advanced capture</string>
     <string name="preference_capture_advanced">Advanced capturing mechanism that allows capturing files under arbitrary headings.</string>
     <string name="edit_date_start">Start</string>
@@ -184,8 +183,6 @@
     <string name="example_webURL">http://example.com/index.org</string>
     <string name="rerun_setup_wizard">Re-run setup wizard</string>
     <string name="configure_synchronizer_settings">Synchronizer settings</string>
-    <string name="summary_view_default_edit">When checked, the default behaviour for long clicking on nodes will be editing. If disabled, the default behavior will be viewing.</string>
-    <string name="title_view_default_edit">Edit on long click</string>
     <string name="summary_view_apply_formatting">Apply formatting of orgmode emphasis, bold, underline and strike-through when viewing.</string>
     <string name="title_view_apply_formatting">Apply view formatting</string>
     <string name="title_scp_host">Host</string>

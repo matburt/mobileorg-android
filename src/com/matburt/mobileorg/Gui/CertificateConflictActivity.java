@@ -10,6 +10,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.matburt.mobileorg.R;
+import com.matburt.mobileorg.util.OrgUtils;
 
 public class CertificateConflictActivity extends Activity {
 
@@ -19,6 +20,7 @@ public class CertificateConflictActivity extends Activity {
     private Button deny_button;
 
     public void onCreate(Bundle savedInstanceState) {
+		OrgUtils.setTheme(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.certconflict);
 
