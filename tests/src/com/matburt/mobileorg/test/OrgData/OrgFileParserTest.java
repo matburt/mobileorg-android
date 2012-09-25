@@ -18,6 +18,7 @@ import com.matburt.mobileorg.OrgData.OrgNode;
 import com.matburt.mobileorg.OrgData.OrgProvider;
 import com.matburt.mobileorg.OrgData.OrgProviderUtils;
 import com.matburt.mobileorg.test.util.OrgTestFiles;
+import com.matburt.mobileorg.test.util.OrgTestFiles.OrgIndexWithFileDirectorySpaces;
 import com.matburt.mobileorg.test.util.OrgTestFiles.SimpleOrgFiles;
 import com.matburt.mobileorg.test.util.OrgTestUtils;
 import com.matburt.mobileorg.util.OrgNodeNotFoundException;
@@ -109,6 +110,25 @@ public class OrgFileParserTest extends ProviderTestCase2<OrgProvider> {
 			if(files.get(file) == null)
 				fail("Didn't find all files");
 		}
+	}
+	
+	public void testGetFilesFromIndexWithSpaces() {
+		final String filename = OrgIndexWithFileDirectorySpaces.filename;
+		final String fileAlias = OrgIndexWithFileDirectorySpaces.fileAlias;
+		HashMap<String,String> files = OrgFileParser.getFilesFromIndex(OrgIndexWithFileDirectorySpaces.indexFile);
+		
+		assertTrue(files.containsKey(filename));
+		String retrievedFileAlias = files.get(filename);
+		assertEquals(fileAlias, retrievedFileAlias);
+	}
+	
+	public void testGetFilesFromIndexWithSpacesWithoutAlias() {
+		final String filename = OrgIndexWithFileDirectorySpaces.filenameWithoutAlias;
+		HashMap<String,String> files = OrgFileParser.getFilesFromIndex(OrgIndexWithFileDirectorySpaces.indexFile);
+		
+		assertTrue(files.containsKey(filename));
+		String retrievedFileAlias = files.get(filename);
+		assertEquals(filename, retrievedFileAlias);
 	}
 	
 	public void testGetTodosFromIndex() {

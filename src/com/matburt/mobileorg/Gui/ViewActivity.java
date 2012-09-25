@@ -24,6 +24,7 @@ public class ViewActivity extends SherlockFragmentActivity {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
+		OrgUtils.setTheme(this);
 		super.onCreate(savedInstanceState);
 
 		setContentView(R.layout.view);

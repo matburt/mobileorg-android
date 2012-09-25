@@ -22,5 +22,9 @@ public class WhiteTheme extends DefaultTheme {
 		cdLPurple = Color.rgb(0x80, 0x00, 0x80);
 		ceLCyan = Color.rgb(0x00, 0x80, 0x80);
 		cfLWhite = Color.rgb(0x00, 0x00, 0x00);
+
+		levelColors = new int[] { ccLBlue, c3Yellow, ceLCyan, c2Green,
+				c5Purple, ccLBlue, c2Green, ccLBlue, c3Yellow, ceLCyan };
+
 	}
 }

@@ -4,19 +4,18 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import com.matburt.mobileorg.OrgData.OrgContract.OrgData;
-import com.matburt.mobileorg.util.OrgFileNotFoundException;
-import com.matburt.mobileorg.util.OrgUtils;
 
 import android.content.ContentResolver;
 import android.content.Context;
 import android.text.TextUtils;
 import android.util.Pair;
+
+import com.matburt.mobileorg.OrgData.OrgContract.OrgData;
+import com.matburt.mobileorg.util.OrgFileNotFoundException;
+import com.matburt.mobileorg.util.OrgUtils;
 
 public class OrgFileParser {
 
@@ -28,7 +27,7 @@ public class OrgFileParser {
     private ParseStack parseStack;
 	private StringBuilder payload;
 	private OrgFile orgFile;
-	private HashSet<String> todos;
+	private OrgNodeParser orgNodeParser;
 	
 	public OrgFileParser(OrgDatabase db, ContentResolver resolver) {
 		this.db = db;
@@ -42,10 +41,11 @@ public class OrgFileParser {
 
 		this.parseStack = new ParseStack();
 		this.parseStack.add(0, orgFile.nodeId);
-
-		this.todos = new HashSet<String>(OrgProviderUtils.getTodos(resolver));
 		
 		this.payload = new StringBuilder();
+		
+		this.orgNodeParser = new OrgNodeParser(
+				OrgProviderUtils.getTodos(resolver));
 	}
 	
 	public void parse(OrgFile orgFile, BufferedReader breader, Context context) {
@@ -89,7 +89,6 @@ public class OrgFileParser {
 		}
 	}
 	
-    
 	private void parseHeading(String thisLine, int numstars) {
 		if (numstars == parseStack.getCurrentLevel()) { // Node on same level
 			parseStack.pop();
@@ -98,30 +97,22 @@ public class OrgFileParser {
 				parseStack.pop();
 		}
         
-		final OrgNode node = new OrgNode();
-		node.parseLine(thisLine, numstars, this.todos);
+		OrgNode node = this.orgNodeParser.parseLine(thisLine, numstars);
 		node.fileId = orgFile.id;
 		node.parentId = parseStack.getCurrentNodeId();
 		long newId = db.fastInsertNode(node);
 		parseStack.add(numstars, newId);      
     }
 
-	// TODO Replace with Regex matching
+	private static final Pattern starPattern = Pattern.compile("^(\\**)");
 	private static int numberOfStars(String thisLine) {
-		int numstars = 0;
-		int lineLength = thisLine.length();
-
-		for (int idx = 0; idx < lineLength; idx++) {
-			if (thisLine.charAt(idx) != '*')
-				break;
-			numstars++;
-		}
-
-		if (numstars >= lineLength || thisLine.charAt(numstars) != ' ')
-			numstars = 0;
-
-		return numstars;
+		Matcher matcher = starPattern.matcher(thisLine);
+		if(matcher.find()) {
+			return matcher.end(1) - matcher.start(1);
+		} else
+			return 0;
 	}
+	
     
 	private class ParseStack {
 		private Stack<Pair<Integer, Long>> parseStack;
@@ -146,7 +137,8 @@ public class OrgFileParser {
 			return parseStack.peek().second;
 		}
 	}
-
+	
+	
 	public static final String BLOCK_SEPARATOR_PREFIX = "#HEAD#";	
 	private void combineBlockAgendas() throws OrgFileNotFoundException {		
 		OrgNode agendaFile = OrgProviderUtils.getOrgNodeFromFilename(

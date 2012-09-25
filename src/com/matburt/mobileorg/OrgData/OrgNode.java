@@ -1,16 +1,13 @@
 package com.matburt.mobileorg.OrgData;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.matburt.mobileorg.Gui.Outline.OutlineItem;
 import com.matburt.mobileorg.OrgData.OrgContract.OrgData;
@@ -500,60 +497,6 @@ public class OrgNode {
 		
 		return edits;
 	}
-
-
-	public void parseLine(String thisLine, int numstars, HashSet<String> todos) {
-        String heading = thisLine.substring(numstars+1);
-        this.level = numstars;
-        
-    	Matcher matcher = titlePattern.matcher(heading);
-		if (matcher.find()) {
-			if (matcher.group(TODO_GROUP) != null) {
-				if (todos.contains(matcher.group(TODO_GROUP)))
-					todo = matcher.group(TODO_GROUP);
-				else
-					name = matcher.group(TODO_GROUP);
-			}
-
-			if (matcher.group(PRIORITY_GROUP) != null)
-				priority = matcher.group(PRIORITY_GROUP);
-	
-			// TODO This should be done in regex
-			if(TextUtils.isEmpty(name) && matcher.group(TITLE_GROUP).length() > 1)
-				name = matcher.group(TITLE_GROUP).substring(1);
-			else
-				name += matcher.group(TITLE_GROUP);
-			
-			
-			if(matcher.group(AFTER_GROUP) != null)
-				name = matcher.group(AFTER_GROUP).trim() + ">" + name.trim();
-				
-			tags = matcher.group(TAGS_GROUP);
-			if (tags == null)
-					tags = "";
-			
-		} else {
-			Log.w("MobileOrg", "Title not matched: " + heading);
-			name = heading;
-		}
-    }
- 
-    private static final int TODO_GROUP = 1;
-    private static final int PRIORITY_GROUP = 2;
-    private static final int TITLE_GROUP = 3;
-    private static final int TAGS_GROUP = 4;
-    private static final int AFTER_GROUP = 7;
-    
-	private static final Pattern titlePattern = Pattern
-			.compile("^\\s?([\\w_]+)?" + 								// Todo keyword
-					"(?:\\[\\#([^]]+)\\])?" + 							// Priority
-					"(.*?)" + 											// Title
-					"\\s*" + "(?::([^\\s]+):)?" + 						// Tags (without trailing spaces)
-					"(\\s*[!\\*])*" + 									// Habits
-					"(<before>.*</before>)?" + 							// Before
-					"(?:<after>.*TITLE:(.*)</after>)?" + 				// After
-					"$");												// End of line
-	
 	
 	public String toString() {
 		StringBuilder result = new StringBuilder();

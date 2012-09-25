@@ -16,15 +16,19 @@ public class OrgNode2Html {
 	public boolean wrapLines = false;
 	public boolean viewApplyFormating = true;
 
+	private String fontColor = "white";
+
 	public OrgNode2Html(ContentResolver resolver) {
 		this.resolver = resolver;
 	}
 	
-	public void setupConfig(Context context) {
+	public void setupConfig(Context context, String fontColor) {
 		this.wrapLines = PreferenceManager.getDefaultSharedPreferences(context)
 				.getBoolean("viewWrapLines", false);
 		this.viewApplyFormating = PreferenceManager.getDefaultSharedPreferences(context).getBoolean(
 				"viewApplyFormating", true);
+		
+		this.fontColor = fontColor;
 	}
 		
 	public String toHTML(OrgNode node) {
@@ -46,7 +50,7 @@ public class OrgNode2Html {
 	
 	private String convertToHTML(String text) {
 		if(text == null || text.trim().equals(""))
-			return "<html><body><font color='white'><pre>" + text + "</pre></font></body></html>";
+			return "<html><body><font color='" + fontColor + "'><pre>" + text + "</pre></font></body></html>";
 		
 		text = convertLinks(text);
 
@@ -58,10 +62,10 @@ public class OrgNode2Html {
 			
 			text = text.replaceAll("((\\s*\\|[^\\n]*\\|\\s*(?:<br/>)?\\n)+)", "<pre>$1</pre>");
 
-			text = "<html><body><font color='white'>" + text + "</font></body></html>";
+			text = "<html><body><font color='" + fontColor + "'>" + text + "</font></body></html>";
 		} else {
 			text = text.replaceAll("\\n", "<br/>\n");
-			text = "<html><body><font color='white'><pre>" + text + "</pre></font></body></html>";
+			text = "<html><body><font color='" + fontColor + "'><pre>" + text + "</pre></font></body></html>";
 		}
 
 		return text;

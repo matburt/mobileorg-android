@@ -1,10 +1,11 @@
 package com.matburt.mobileorg.test.OrgData;
 
-import java.util.HashSet;
+import java.util.ArrayList;
 
 import android.test.AndroidTestCase;
 
 import com.matburt.mobileorg.OrgData.OrgNode;
+import com.matburt.mobileorg.OrgData.OrgNodeParser;
 
 public class OrgNodeParserTest extends AndroidTestCase {
 	public void testParseLineIntoNodeSimple() {
@@ -12,10 +13,10 @@ public class OrgNodeParserTest extends AndroidTestCase {
 		node.name = "my simple test";
 		node.todo = "";
 		node.level = 3;
-		OrgNode parsedNode = new OrgNode();
 		final String testHeading = "*** my simple test";
-		HashSet<String> todos = new HashSet<String>();
-		parsedNode.parseLine(testHeading, 3, todos);
+		
+		OrgNodeParser orgNodeParser = new OrgNodeParser( new ArrayList<String>());
+		OrgNode parsedNode = orgNodeParser.parseLine(testHeading, 3);
 		
 		assertEquals(node.todo, parsedNode.todo);
 		assertEquals(node.name, parsedNode.name);
@@ -26,27 +27,29 @@ public class OrgNodeParserTest extends AndroidTestCase {
 		node.name = "my simple test";
 		node.todo = "TODO";
 		node.level = 3;
-		OrgNode parsedNode = new OrgNode();
 		final String testHeading = "*** TODO my simple test";
-		HashSet<String> todos = new HashSet<String>();
+		
+		ArrayList<String> todos = new ArrayList<String>();
 		todos.add(node.todo);
-		parsedNode.parseLine(testHeading, 3, todos);
+		OrgNodeParser orgNodeParser = new OrgNodeParser(todos);
+		OrgNode parsedNode = orgNodeParser.parseLine(testHeading, 3);
 		
 		assertEquals(node.todo, parsedNode.todo);
 		assertEquals(node.name, parsedNode.name);
 	}
-	
+
 	public void testParseLineIntoNodeInvalidTodo() {
 		OrgNode node = new OrgNode();
 		node.name = "BLA my simple test";
 		node.todo = "";
 		node.level = 3;
-		OrgNode parsedNode = new OrgNode();
 		final String testHeading = "*** BLA my simple test";
-		HashSet<String> todos = new HashSet<String>();
-		parsedNode.parseLine(testHeading, 3, todos);
 		
-		assertTrue(node.equals(parsedNode));
+		OrgNodeParser orgNodeParser = new OrgNodeParser( new ArrayList<String>());
+		OrgNode parsedNode = orgNodeParser.parseLine(testHeading, 3);
+		
+		assertEquals(node.todo, parsedNode.todo);
+		assertEquals(node.name, parsedNode.name);
 	}
 	
 	public void testParseLineIntoNodeComplicatedTodo() {
@@ -54,14 +57,47 @@ public class OrgNodeParserTest extends AndroidTestCase {
 		node.name = "my simple test";
 		node.todo = "find_me";
 		node.level = 3;
-		OrgNode parsedNode = new OrgNode();
 		final String testHeading = "*** find_me my simple test";
-		HashSet<String> todos = new HashSet<String>();
+		
+		ArrayList<String> todos = new ArrayList<String>();
 		todos.add(node.todo);
-		parsedNode.parseLine(testHeading, 3, todos);
+		OrgNodeParser orgNodeParser = new OrgNodeParser(todos);
+		OrgNode parsedNode = orgNodeParser.parseLine(testHeading, 3);
 		
 		assertEquals(node.todo, parsedNode.todo);
 		assertEquals(node.name, parsedNode.name);
+	}
+	
+	public void testParseLineIntoNodeLinkTitle() {
+		OrgNode node = new OrgNode();
+		node.name = "[[MobileOrg][MobileOrg]]";
+		node.todo = "";
+		node.level = 3;
+		final String testHeading = "*** [[MobileOrg][MobileOrg]]";
+		
+		OrgNodeParser orgNodeParser = new OrgNodeParser(new ArrayList<String>());
+		OrgNode parsedNode = orgNodeParser.parseLine(testHeading, 3);
+		
+		assertEquals(node.todo, parsedNode.todo);
+		assertEquals(node.name, parsedNode.name);
+	}
+	
+	public void testParseLineIntoNodePriority() {
+		OrgNode node = new OrgNode();
+		node.name = "my todo";
+		node.todo = "TODO";
+		node.priority = "A";
+		node.level = 3;
+		final String testHeading = "*** TODO [#A] my todo";
+		
+		ArrayList<String> todos = new ArrayList<String>();
+		todos.add(node.todo);
+		OrgNodeParser orgNodeParser = new OrgNodeParser(todos);
+		OrgNode parsedNode = orgNodeParser.parseLine(testHeading, 3);
+		
+		assertEquals(node.todo, parsedNode.todo);
+		assertEquals(node.name, parsedNode.name);
+		assertEquals(node.priority, parsedNode.priority);
 	}
 	
 	public void testParseLineIntoNodeTags() {
@@ -69,10 +105,10 @@ public class OrgNodeParserTest extends AndroidTestCase {
 		node.name = "Archive";
 		node.level = 3;
 		node.tags = "tag1:tag2";
-		OrgNode parsedNode = new OrgNode();
 		final String testHeading = "*** Archive      :tag1:tag2:";
-		HashSet<String> todos = new HashSet<String>();
-		parsedNode.parseLine(testHeading, 3, todos);
+		
+		OrgNodeParser orgNodeParser = new OrgNodeParser(new ArrayList<String>());
+		OrgNode parsedNode = orgNodeParser.parseLine(testHeading, 3);
 		
 		assertEquals(node.todo, parsedNode.todo);
 		assertEquals(node.tags, parsedNode.tags);
@@ -85,11 +121,11 @@ public class OrgNodeParserTest extends AndroidTestCase {
 		node.name = "my simple test";
 		node.todo = "TODO";
 		node.level = 3;
-		OrgNode parsedNode = new OrgNode();
 		final String testHeading = "***  TODO my simple test";
-		HashSet<String> todos = new HashSet<String>();
+		ArrayList<String> todos = new ArrayList<String>();
 		todos.add(node.todo);
-		parsedNode.parseLine(testHeading, 3, todos);
+		OrgNodeParser orgNodeParser = new OrgNodeParser(todos);
+		OrgNode parsedNode = orgNodeParser.parseLine(testHeading, 3);
 		
 		assertEquals(node.todo, parsedNode.todo);
 		assertEquals(node.name, parsedNode.name);
@@ -98,10 +134,9 @@ public class OrgNodeParserTest extends AndroidTestCase {
 	public void testParseLineIntoNodeAgendaTitle() {
 		final String expectedTitle = "Home Core>Home";
 		final String testHeading = "* Home <after>KEYS=h#2 TITLE: Home Core</after>";
-		HashSet<String> todos = new HashSet<String>();
 
-		OrgNode parsedNode = new OrgNode();
-		parsedNode.parseLine(testHeading, 1, todos);
+		OrgNodeParser orgNodeParser = new OrgNodeParser(new ArrayList<String>());
+		OrgNode parsedNode = orgNodeParser.parseLine(testHeading, 1);
 		
 		assertEquals(expectedTitle, parsedNode.name);
 	}
@@ -109,10 +144,9 @@ public class OrgNodeParserTest extends AndroidTestCase {
 	public void testParseLineIntoNodeAgendaTitleWithoutSpace() {
 		final String expectedTitle = "Home Core>Agenda";
 		final String testHeading = "* Agenda<after>KEYS=h#2 TITLE: Home Core</after>";
-		HashSet<String> todos = new HashSet<String>();
 
-		OrgNode parsedNode = new OrgNode();
-		parsedNode.parseLine(testHeading, 1, todos);
+		OrgNodeParser orgNodeParser = new OrgNodeParser(new ArrayList<String>());
+		OrgNode parsedNode = orgNodeParser.parseLine(testHeading, 1);
 		
 		assertEquals(expectedTitle, parsedNode.name);
 	}

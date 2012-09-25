@@ -1,10 +1,12 @@
 package com.matburt.mobileorg.Gui.Capture;
 
 import android.app.Activity;
+import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.inputmethod.InputMethodManager;
 import android.view.ViewGroup;
 import android.webkit.WebView;
 import android.widget.EditText;
@@ -28,12 +30,6 @@ public class PayloadFragment extends ViewFragment {
 	private ImageButton saveButton;
 	
 	private OnPayloadModifiedListener mListener;
-	
-	public interface OnPayloadModifiedListener {
-		public void onPayloadStartedEdit();
-		public void onPayloadEndedEdit();
-		public void onPayloadModified();
-	}
 	
 	@Override
 	public void onAttach(Activity activity) {
@@ -89,8 +85,7 @@ public class PayloadFragment extends ViewFragment {
 		else
 			switchToView();
 		
-		if(editActivity.isNodeModifiable() == false)
-			setUnmodifiable();
+		setModifiable(editActivity.isPayloadEditable());
 	}
 	
 	@Override
@@ -112,8 +107,11 @@ public class PayloadFragment extends ViewFragment {
 		}
 	}
 	
-	public void setUnmodifiable() {
-		this.editButton.setVisibility(View.GONE);
+	public void setModifiable(boolean enabled) {
+		if(enabled)
+			this.editButton.setVisibility(View.VISIBLE);
+		else
+			this.editButton.setVisibility(View.GONE);
 	}
 
 	public void setPayload(String payload) {
@@ -132,9 +130,9 @@ public class PayloadFragment extends ViewFragment {
 
 		if(payloadString != null)
 			payloadEdit.setText(payloadString);
-		payloadEdit.setVisibility(View.VISIBLE);
 		cancelButton.setVisibility(View.VISIBLE);
 		saveButton.setVisibility(View.VISIBLE);
+		payloadEdit.setVisibility(View.VISIBLE);
 		
 		mListener.onPayloadStartedEdit();
 	}
@@ -158,6 +156,10 @@ public class PayloadFragment extends ViewFragment {
 		public void onClick(View v) {
 			switchToEdit();
 			payloadEdit.requestFocus();
+			payloadEdit.setSelection(payloadEdit.length());
+			InputMethodManager keyboard = (InputMethodManager)
+                   getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                    keyboard.showSoftInput(payloadEdit, 0);
 		}
 	};
 	
@@ -179,4 +181,11 @@ public class PayloadFragment extends ViewFragment {
 			webView.requestFocus();
 		}
 	};
+	
+	
+	public interface OnPayloadModifiedListener {
+		public void onPayloadStartedEdit();
+		public void onPayloadEndedEdit();
+		public void onPayloadModified();
+	}
 }

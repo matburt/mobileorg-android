@@ -33,6 +33,13 @@
             android:title="@string/title_auto_sync_interval" />
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/preference_viewing" >
+        <ListPreference
+            android:defaultValue="Dark"
+            android:entries="@array/themes"
+            android:entryValues="@array/themes"
+            android:key="theme"
+            android:title="@string/preference_theme_title" />
+
         <CheckBoxPreference
             android:key="combineBlockAgendas"
             android:summary="@string/preference_combine_block_agenda_summary"
@@ -41,11 +48,6 @@
             android:key="viewWrapLines"
             android:summary="@string/summary_view_wrap_lines"
             android:title="@string/title_view_wrap_lines" />
-        <CheckBoxPreference
-            android:defaultValue="true"
-            android:key="viewDefaultEdit"
-            android:summary="@string/summary_view_default_edit"
-            android:title="@string/title_view_default_edit" />
         <CheckBoxPreference
             android:defaultValue="true"
             android:key="viewApplyFormatting"
