@@ -58,3 +58,11 @@ That's not entirely true.  The file exists but contains dummy values so if you w
 dropbox to work on your local builds then you will need to request your own keys from
 Dropbox.
 Happy hacking!
+
+Notes regarding debian(-like) amd64 build hosts
+-----------------------------------------------
+
+You might need to install 32bits version of some libraries.
+Depending of your system version, you could install the 'ia32-libs'
+package, on a 'multiarch' you will need: 'lib32z1', 'libc6-i386' and
+'lib32stdc++6'.
