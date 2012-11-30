@@ -121,6 +121,8 @@ public class PayloadFragment extends ViewFragment {
 	}
 	
 	public String getPayload() {
+		if(this.payloadEdit.getVisibility() == View.VISIBLE)
+			return payloadEdit.getText().toString();
 		return this.payload.get();
 	}
 	
