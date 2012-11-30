@@ -216,7 +216,11 @@ public class EditActivity extends SherlockFragmentActivity implements
 		
 		int numberOfEdits = 0;
 		try {
-			OrgNode clonedNode = new OrgNode(this.node.id, resolver);
+			OrgNode clonedNode;
+			if (node.id == -1)
+				clonedNode = new OrgNode();
+			else
+				clonedNode = new OrgNode(this.node.id, resolver);
 			numberOfEdits = clonedNode.generateApplyEditNodes(newNode, resolver).size();
 		} catch (OrgNodeNotFoundException e) {}
 		
