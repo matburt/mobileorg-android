@@ -1,5 +1,12 @@
 MobileOrg Upgrade Notes
 
+Changes for 0.9.5:
+
+- Whole new look and feel
+- Major refactoring thanks to hdweiss
+- Upgraded Dropbox library
+- Fix many bugs
+
 Changes for 0.9.0:
 
 - Basic Time Clocking support
