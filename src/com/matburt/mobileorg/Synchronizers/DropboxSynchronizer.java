@@ -5,25 +5,45 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.FileInputStream;
 
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.widget.Toast;
+import android.util.Log;
+import android.view.View;
+import android.os.Handler;
 
-import com.dropbox.client.DropboxAPI;
-import com.dropbox.client.DropboxAPI.Config;
-import com.dropbox.client.DropboxAPI.FileDownload;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.util.FileUtils;
+
+import com.dropbox.client2.DropboxAPI;
+import com.dropbox.client2.android.AndroidAuthSession;
+import com.dropbox.client2.android.AuthActivity;
+import com.dropbox.client2.session.AccessTokenPair;
+import com.dropbox.client2.session.AppKeyPair;
+import com.dropbox.client2.session.Session.AccessType;
+import com.dropbox.client2.session.TokenPair;
+import com.dropbox.client2.DropboxAPI.DropboxInputStream;
+import com.dropbox.client2.DropboxAPI.Entry;
+
+import com.dropbox.client2.exception.DropboxException;
+import com.dropbox.client2.exception.DropboxFileSizeException;
+import com.dropbox.client2.exception.DropboxIOException;
+import com.dropbox.client2.exception.DropboxParseException;
+import com.dropbox.client2.exception.DropboxPartialFileException;
+import com.dropbox.client2.exception.DropboxServerException;
+import com.dropbox.client2.exception.DropboxUnlinkedException;
 
 public class DropboxSynchronizer implements SynchronizerInterface {
 
 	private String remoteIndexPath;
 	private String remotePath;
+
+    private boolean isLoggedIn = false;
 	 
-	private DropboxAPI dropboxAPI = new DropboxAPI();
-    private com.dropbox.client.DropboxAPI.Config dropboxConfig;
+	private DropboxAPI<AndroidAuthSession> dropboxApi;
 	private Context context;
     
     public DropboxSynchronizer(Context context) {
@@ -39,15 +59,27 @@ public class DropboxSynchronizer implements SynchronizerInterface {
 
 		String dbPath = sharedPreferences.getString("dropboxPath","");
 		this.remotePath = dbPath.substring(0, dbPath.lastIndexOf("/")+1);
-    	
         connect();
     }
 
+    private AndroidAuthSession buildSession() {
+        AppKeyPair appKeyPair = new AppKeyPair(context.getString(R.string.dropbox_consumer_key),
+                                               context.getString(R.string.dropbox_consumer_secret));
+        AndroidAuthSession session;
+
+        String[] stored = getKeys();
+        if (stored != null) {
+            AccessTokenPair accessToken = new AccessTokenPair(stored[0], stored[1]);
+            session = new AndroidAuthSession(appKeyPair, AccessType.DROPBOX, accessToken);
+        } else {
+            session = new AndroidAuthSession(appKeyPair, AccessType.DROPBOX);
+        }
+
+        return session;
+    }
 
     public boolean isConfigured() {
-        if (this.remoteIndexPath.equals(""))
-            return false;
-        return true;
+        return isLoggedIn && !this.remoteIndexPath.equals("");
     }
 
     
@@ -58,21 +90,34 @@ public class DropboxSynchronizer implements SynchronizerInterface {
         writer.close();
     
         File uploadFile = orgFile.getFile();
-        this.dropboxAPI.putFile("dropbox", this.remotePath, uploadFile);
+        FileInputStream fis = new FileInputStream(uploadFile);
+        try {
+            this.dropboxApi.putFileOverwrite(this.remotePath + filename, fis, uploadFile.length(), null);
+        } catch (DropboxUnlinkedException e) {
+            Log.d("MobileOrg", "Dropbox account was unlinked...");
+            showToast("Dropbox Authentication Failed, re-run setup wizard");
+        } catch (DropboxException e) {
+            Log.d("MobileOrg", "Failed to upload " + filename + " because: " + e.toString());
+            showToast("Failed to upload " + filename + " because: " + e.toString());
+        } finally {
+            if (fis != null) {
+                try {
+                    fis.close();
+                } catch (IOException e) {}
+            }
+        }
     }
 
 	public BufferedReader getRemoteFile(String filename) throws IOException {
 		String filePath = this.remotePath + filename;
-		FileDownload fd = dropboxAPI.getFileStream("dropbox", filePath, null);
-
-		if (fd == null || fd.is == null || fd.isError()) {
-			throw new IOException(context.getResources().getString(R.string.dropbox_fetch_error,
-					filePath, "Error downloading file"));
-		}
-
-		BufferedReader fileReader = new BufferedReader(new InputStreamReader(fd.is));
-
-		return fileReader;
+        try {
+            DropboxInputStream is = dropboxApi.getFileStream(filePath, null);
+            BufferedReader fileReader = new BufferedReader(new InputStreamReader(is));
+            return fileReader;
+        } catch (DropboxException e) {
+            showToast("Failed to fetch remote file " + filename + " because: " + e.toString());
+        }
+        return null;
 	}
 
     
@@ -82,30 +127,16 @@ public class DropboxSynchronizer implements SynchronizerInterface {
      * and re-send every time.
      */
     private void connect() {
-    	if (dropboxConfig == null) {
-    		dropboxConfig = getConfig();
-    	}
-    	String keys[] = getKeys();
-    	if (keys != null) {
-	        dropboxConfig = dropboxAPI.authenticateToken(keys[0], keys[1], dropboxConfig);
-	        if (dropboxConfig != null) {
-	            return;
-	        }
-    	}
-    	showToast("Failed user authentication for stored login tokens.  Go to 'Configure Synchronizer Settings' and make sure you are logged in");
-    }
-    
-    
-    private Config getConfig() {
-    	if (dropboxConfig == null) {
-	    	dropboxConfig = dropboxAPI.getConfig(null, false);
-	    	dropboxConfig.consumerKey = context.getResources().getString(R.string.dropbox_consumer_key, "invalid");
-	    	dropboxConfig.consumerSecret = context.getResources().getString(R.string.dropbox_consumer_secret, "invalid");
-	    	dropboxConfig.server = "api.dropbox.com";
-	    	dropboxConfig.contentServer = "api-content.dropbox.com";
-	    	dropboxConfig.port=80;
-    	}
-    	return dropboxConfig;
+
+        AndroidAuthSession session = buildSession();
+        dropboxApi = new DropboxAPI<AndroidAuthSession>(session);
+        if (!dropboxApi.getSession().isLinked()) {
+            isLoggedIn = false;
+            showToast("Dropbox Authentication Failed, re-run setup wizard from the settings screen");
+        }
+        else {
+            isLoggedIn = true;
+        }
     }
     
     /**
@@ -131,8 +162,19 @@ public class DropboxSynchronizer implements SynchronizerInterface {
     }
 
     private void showToast(String msg) {
-        Toast error = Toast.makeText(this.context, msg, Toast.LENGTH_LONG);
-        error.show();
+        final String u_msg = msg;
+        final Handler mHandler = new Handler();
+        final Runnable mRunPost = new Runnable() {
+                public void run() {
+                    Toast.makeText(context, u_msg, Toast.LENGTH_LONG).show();
+                }
+            };
+
+            new Thread() {
+                    public void run() {
+                        mHandler.post(mRunPost);
+                    }
+                }.start();
     }
 
 

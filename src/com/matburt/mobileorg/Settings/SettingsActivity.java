@@ -20,7 +20,6 @@ import com.actionbarsherlock.app.SherlockPreferenceActivity;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.OrgData.OrgProviderUtils;
 import com.matburt.mobileorg.Services.CalendarSyncService;
-import com.matburt.mobileorg.Settings.Synchronizers.DropboxSettingsActivity;
 import com.matburt.mobileorg.Settings.Synchronizers.SDCardSettingsActivity;
 import com.matburt.mobileorg.Settings.Synchronizers.ScpSettingsActivity;
 import com.matburt.mobileorg.Settings.Synchronizers.UbuntuOneSettingsActivity;
@@ -222,10 +221,6 @@ SharedPreferences.OnSharedPreferenceChangeListener {
 		synchroIntent = new Intent(getApplicationContext(),
 				SDCardSettingsActivity.class);
 		SynchronizerPreferences.syncIntents.put("sdcard", synchroIntent);
-
-		synchroIntent = new Intent(getApplicationContext(),
-				DropboxSettingsActivity.class);
-		SynchronizerPreferences.syncIntents.put("dropbox", synchroIntent);
 
 		synchroIntent = new Intent(getApplicationContext(),
 				ScpSettingsActivity.class);

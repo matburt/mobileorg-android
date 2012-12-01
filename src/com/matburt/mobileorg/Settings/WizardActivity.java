@@ -33,13 +33,28 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.matburt.mobileorg.R;
-import com.matburt.mobileorg.Dropbox.Dropbox;
-import com.matburt.mobileorg.Dropbox.DropboxLoginListener;
 import com.matburt.mobileorg.Synchronizers.SSHSynchronizer;
 import com.matburt.mobileorg.Synchronizers.UbuntuOneSynchronizer;
 import com.matburt.mobileorg.Synchronizers.WebDAVSynchronizer;
 import com.matburt.mobileorg.Views.PageFlipView;
 import com.matburt.mobileorg.util.OrgUtils;
+
+import com.dropbox.client2.DropboxAPI;
+import com.dropbox.client2.android.AndroidAuthSession;
+import com.dropbox.client2.android.AuthActivity;
+import com.dropbox.client2.session.AccessTokenPair;
+import com.dropbox.client2.session.AppKeyPair;
+import com.dropbox.client2.session.Session.AccessType;
+import com.dropbox.client2.session.TokenPair;
+import com.dropbox.client2.exception.DropboxException;
+import com.dropbox.client2.exception.DropboxFileSizeException;
+import com.dropbox.client2.exception.DropboxIOException;
+import com.dropbox.client2.exception.DropboxParseException;
+import com.dropbox.client2.exception.DropboxPartialFileException;
+import com.dropbox.client2.exception.DropboxServerException;
+import com.dropbox.client2.exception.DropboxUnlinkedException;
+import com.dropbox.client2.DropboxAPI.Entry;
+import com.dropbox.client2.DropboxAPI.Account;
 
 public class WizardActivity extends Activity {
 
@@ -86,9 +101,9 @@ public class WizardActivity extends Activity {
     Button loginButton;
     ProgressDialog progress;
     //dropbox variables
-    Dropbox dropbox;
-    EditText dropboxEmail;
-    EditText dropboxPass;
+    DropboxAPI<AndroidAuthSession> dropboxApi;
+    TextView dropboxAccountInfo;
+    boolean dropboxLoginAttempted = false;
     boolean isLoggedIn=false;
     ArrayAdapter<String> dropboxFolders;
     //ubuntuone variables
@@ -138,10 +153,7 @@ public class WizardActivity extends Activity {
     	syncGroup.setOnCheckedChangeListener(new Page1Listener());
     	//setup dropbox
     	Resources r = getResources();
-    	String key=r.getString(R.string.dropbox_consumer_key, "invalid");
-    	String secret=r.getString(R.string.dropbox_consumer_secret, "invalid");
-    	dropbox = new Dropbox(this, key, secret);
-    	//setup dropbox progress dialog
+    	//setup progress dialog
     	progress = new ProgressDialog(this);
     	progress.setMessage(getString(R.string.please_wait));
     	progress.setTitle(getString(R.string.signing_in));
@@ -157,6 +169,28 @@ public class WizardActivity extends Activity {
         protected void onResume() {
         super.onResume();
         //wizard.restoreLastPage();
+
+        if (dropboxLoginAttempted && dropboxApi.getSession().authenticationSuccessful()) {
+            dropboxLoginAttempted = false;
+            try {
+                // MANDATORY call to complete auth.
+                // Sets the access token on the session
+                dropboxApi.getSession().finishAuthentication();
+                AccessTokenPair tokens = dropboxApi.getSession().getAccessTokenPair();
+                storeKeys(tokens.key, tokens.secret);
+                showToast("Logged in!");
+                try {
+                    Account accountInfo = dropboxApi.accountInfo();
+                    dropboxAccountInfo.setText("User: " + accountInfo.displayName + "; Id: " + 
+                                               String.valueOf(accountInfo.uid));
+                } catch (DropboxException e) {}
+                loginButton.setEnabled(false);
+                createDropboxList();
+                wizard.enablePage( 1 );
+            } catch (IllegalStateException e) {
+                showToast(String.format("Login failed: %s", e.toString()));
+            }
+        }
     }
     
     /**
@@ -283,23 +317,24 @@ public class WizardActivity extends Activity {
         //enable nav buttons on that page
         wizard.setNavButtonStateOnPage(1, true, PageFlipView.MIDDLE_PAGE);
         wizard.disableAllNextActions( 1 );
-        //get references to login forms
-    	dropboxEmail = (EditText) wizard
-    	    .findViewById(R.id.wizard_dropbox_email);
-    	dropboxPass = (EditText) wizard
-    	    .findViewById(R.id.wizard_dropbox_password);
-    	//setup listener for buttons
+    	dropboxAccountInfo = (TextView)findViewById(R.id.wizard_dropbox_accountinfo);
+
+        AppKeyPair appKeys = new AppKeyPair(getString(R.string.dropbox_consumer_key),
+                                            getString(R.string.dropbox_consumer_secret));
+        AndroidAuthSession session = new AndroidAuthSession(appKeys, AccessType.DROPBOX);
+        dropboxApi = new DropboxAPI<AndroidAuthSession>(session);
+
     	loginButton = (Button) wizard
     	    .findViewById(R.id.wizard_dropbox_login_button);
     	loginButton.setOnClickListener(new OnClickListener() {
                 @Override
                     public void onClick(View v) {
                     if (isLoggedIn) {
-                        // We're going to log out
-                        dropbox.deauthenticate();
+                        dropboxApi.getSession().unlink();
+                        //need to clear the keys
                     } else {
-                        // Try to log in
-                        loginDropbox();
+                        dropboxLoginAttempted = true;
+                        dropboxApi.getSession().startAuthentication(WizardActivity.this);
                     }
                 }
     	    });
@@ -395,38 +430,6 @@ public class WizardActivity extends Activity {
         loginThread.start();
     }
     
-    void loginDropbox() {
-        if (dropbox.isAuthenticated()) {
-            // If we're already authenticated, we don't need to get
-            // the login info
-            progress.show();
-            dropbox.login(dropboxListener);
-    	} 
-        else {
-            String email = dropboxEmail.getText().toString();
-            if (email.length() < 5 
-                || email.indexOf("@") < 0 
-                || email.indexOf(".") < 0) {
-                shake(dropboxEmail);
-                dropboxEmail.requestFocus();
-                showToast("Invalid e-mail");
-                return;
-            }
-            String password = dropboxPass.getText().toString();
-            if (password.length() < 6) {
-                shake(dropboxPass);
-                dropboxPass.requestFocus();
-                showToast("Password too short");
-                return;
-            }
-            // It's good to do Dropbox API (and any web API) calls
-            // in a separate thread, so we don't get a force-close
-            // due to the UI thread stalling.
-            progress.show();
-            dropbox.login(dropboxListener, email, password);
-        }
-    }
-
     void loginUbuntuOne() {
         final UbuntuOneSynchronizer uos = new UbuntuOneSynchronizer((Context)this);
         uos.username = ubuntuoneEmail.getText().toString();
@@ -467,39 +470,7 @@ public class WizardActivity extends Activity {
             .loadAnimation(this, R.anim.shake);
         b.startAnimation(shake);
     }
-    
-    /**
-     * Notifies our Activity when a login process succeeded or failed.
-     */
-    DropboxLoginListener dropboxListener = new DropboxLoginListener() {
-            
-            @Override
-                public void loginFailed(String message) {
-                progress.dismiss();
-                showToast("Login failed: "+message);
-                //shake buttons
-                shake(dropboxPass);
-                shake(dropboxEmail);
-                //setLoggedIn(false);
-            }
-            
-            @Override
-                public void loginSuccessfull() {
-                progress.dismiss();
-                showToast("Logged in!");
-                loginButton.setEnabled(false);
-                storeKeys(dropbox.getConfig().accessTokenKey, 
-                          dropbox.getConfig().accessTokenSecret);
-                createDropboxList();
-                //allow scrolling to next page
-                wizard.enablePage( 1 );
-                //setLoggedIn(true);		
-                //displayAccountInfo(mDropbox.accountInfo());
-            }
-            
-        };
-
-    
+        
     void storeKeys(String key, String secret) {
         // Save the access key for later
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
@@ -516,7 +487,7 @@ public class WizardActivity extends Activity {
         wizard.setNavButtonStateOnPage(2, true, PageFlipView.LAST_PAGE);
         wizard.setDoneButtonOnClickListener(new FinishWizardButtonListener());
         //setup directory browser
-        directory = new DirectoryBrowser.DropboxDirectoryBrowser(this,dropbox);
+        directory = new DirectoryBrowser.DropboxDirectoryBrowser(this, dropboxApi);
         //setup directory browser adapter
         directoryAdapter = new FolderAdapter( this, R.layout.folder_adapter_row, directory.list() );
         directoryAdapter.setDoneButton( (Button) findViewById(R.id.wizard_done_button) );

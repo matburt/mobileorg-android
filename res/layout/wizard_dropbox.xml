@@ -25,36 +25,20 @@
 	      android:textStyle="bold"
 	      android:paddingBottom="20dp"/>
 	   <TextView
-	      android:layout_width="wrap_content"
-	      android:layout_height="wrap_content"
-	      android:text="@string/email"
-	      android:textSize="20dp"/>
-	   <EditText
-	      android:id="@+id/wizard_dropbox_email"
 	      android:layout_width="fill_parent"
 	      android:layout_height="wrap_content"
-	      android:textSize="20dp"
-	      android:inputType="textEmailAddress"
-	      android:hint="@string/wizard_dropbox_email_hint"
-	      android:singleLine="true"/>
+	      android:gravity="center"
+	      android:text="@string/dropbox_login_info"
+	      android:paddingBottom="20dp"/>
 	   <TextView
-	      android:paddingTop="10dp"
-	      android:layout_width="wrap_content"
-	      android:layout_height="wrap_content"
-	      android:text="@string/password"
-	      android:textSize="20dp"/>
-	   <EditText
-	      android:id="@+id/wizard_dropbox_password"
+          android:id="@+id/wizard_dropbox_accountinfo"
 	      android:layout_width="fill_parent"
 	      android:layout_height="wrap_content"
-	      android:textSize="20dp"
-	      android:inputType="textPassword"
-	      android:password="true"
-	      android:singleLine="true"/>
+	      android:gravity="center"/>
 	   <Button
 	      android:layout_marginTop="10dp"
 	      android:id="@+id/wizard_dropbox_login_button"
-	      android:layout_width="wrap_content"
+	      android:layout_width="fill_parent"
 	      android:layout_height="wrap_content"
 	      android:text="@string/login"
 	      android:textSize="20dp"/>

@@ -14,7 +14,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.matburt.mobileorg.R;
-import com.matburt.mobileorg.Settings.Synchronizers.DropboxSettingsActivity;
 import com.matburt.mobileorg.Settings.Synchronizers.SDCardSettingsActivity;
 import com.matburt.mobileorg.Settings.Synchronizers.ScpSettingsActivity;
 import com.matburt.mobileorg.Settings.Synchronizers.UbuntuOneSettingsActivity;
@@ -85,9 +84,7 @@ public class SynchronizerPreferences extends Preference {
 	private String getSyncPreferenceString(SharedPreferences sharedPreferences) {
 		String syncSource = sharedPreferences.getString(SettingsActivity.KEY_SYNC_SOURCE, "");
 		// Summarize based on KEY_SYNC_SOURCE
-		if (syncSource.equals("dropbox")) {
-			return sharedPreferences.getString(DropboxSettingsActivity.KEY_DROPBOX_PATH, "");
-		} else if (syncSource.equals("scp")) {
+		if (syncSource.equals("scp")) {
 			String s = "";
 			if (sharedPreferences.getString(ScpSettingsActivity.KEY_SCP_USER, null) != null) {
 				s = sharedPreferences.getString(ScpSettingsActivity.KEY_SCP_USER, null)

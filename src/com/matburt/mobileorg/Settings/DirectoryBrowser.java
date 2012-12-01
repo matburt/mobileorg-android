@@ -7,10 +7,18 @@ import java.util.Arrays;
 import android.content.Context;
 import android.util.Log;
 
-import com.dropbox.client.DropboxAPI;
 import com.matburt.mobileorg.R;
-import com.matburt.mobileorg.Dropbox.Dropbox;
 import com.matburt.mobileorg.Synchronizers.UbuntuOneSynchronizer;
+
+import com.dropbox.client2.DropboxAPI;
+import com.dropbox.client2.android.AndroidAuthSession;
+import com.dropbox.client2.android.AuthActivity;
+import com.dropbox.client2.session.AccessTokenPair;
+import com.dropbox.client2.session.AppKeyPair;
+import com.dropbox.client2.session.Session.AccessType;
+import com.dropbox.client2.session.TokenPair;
+import com.dropbox.client2.DropboxAPI.Entry;
+import com.dropbox.client2.exception.DropboxException;
 
 public interface DirectoryBrowser {
 
@@ -148,7 +156,7 @@ public interface DirectoryBrowser {
     }
 	
 	public class DropboxDirectoryBrowser implements DirectoryBrowser {
-		Dropbox dropbox;
+		DropboxAPI<AndroidAuthSession> dropbox;
 		//array list for adapter
 		ArrayList<String> directoryNames = new ArrayList<String>();
 		//array list containing full path names 
@@ -157,8 +165,8 @@ public interface DirectoryBrowser {
 		Context context;
 		String upOneLevel = "Up one level";
 
-		DropboxDirectoryBrowser(Context context, Dropbox dropbox) {
-			this.dropbox = dropbox;
+		DropboxDirectoryBrowser(Context context, DropboxAPI dropboxApi) {
+			this.dropbox = dropboxApi;
 			setContext(context);
 			setLocale();
 			browseTo("/");
@@ -195,12 +203,19 @@ public interface DirectoryBrowser {
 				directoryNames.add( upOneLevel );
 				directoryListing.add( getParentPath(curDirectory) );
 			}
-			for(DropboxAPI.Entry dir:dropbox.listDirectory(directory)) {
-				if ( dir.is_dir ) {
-					directoryNames.add( dir.fileName() );
-					directoryListing.add( dir.path );
-				}
-			}
+
+            try {
+                Entry entries = dropbox.metadata(directory, 1000, null, true, null);
+
+                for (Entry e : entries.contents) {
+                    if (e.isDir) {
+                        directoryNames.add(e.fileName());
+                        directoryListing.add(e.path);
+                    }
+                }
+            } catch (DropboxException e) {
+                Log.d("MobileOrg", "Failed to list directory for dropbox: " + e.toString());
+            }
 		}
 	}
 }
