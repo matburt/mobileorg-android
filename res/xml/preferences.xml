@@ -11,13 +11,9 @@
             android:entries="@array/fileSources"
             android:entryValues="@array/fileSourcesVals"
             android:key="syncSource"
+            android:selectable="false"
             android:summary="@string/preference_sync_source_summary"
             android:title="@string/preference_sync_source_title" />
-
-        <com.matburt.mobileorg.Settings.SynchronizerPreferences
-            android:defaultValue="32"
-            android:key="syncPref"
-            android:title="Custom Preference" />
 
         <CheckBoxPreference
             android:key="doAutoSync"

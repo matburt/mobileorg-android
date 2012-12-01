@@ -62,8 +62,8 @@ SharedPreferences.OnSharedPreferenceChangeListener {
 				.getDefaultSharedPreferences(getApplicationContext());
 		appSettings.registerOnSharedPreferenceChangeListener(this);
 
-		SynchronizerPreferences sync = (SynchronizerPreferences) findPreference(KEY_SYNC_PREF);
-		sync.setParentActivity(this);
+		// SynchronizerPreferences sync = (SynchronizerPreferences) findPreference(KEY_SYNC_PREF);
+		// sync.setParentActivity(this);
 
 		// Manually invoke so that settings are pre-loaded and sync preference is enabled or disabled as appropriate 
 		onSharedPreferenceChanged(appSettings, KEY_SYNC_SOURCE);
@@ -110,11 +110,11 @@ SharedPreferences.OnSharedPreferenceChangeListener {
 		if (key.equals(KEY_SYNC_SOURCE)) {
 			if (sharedPreferences.getString(key, "").equals("null")) {
 				// Disable synchronizer settings
-				findPreference(KEY_SYNC_PREF).setEnabled(false);
+				//findPreference(KEY_SYNC_PREF).setEnabled(false);
 				findPreference(KEY_DO_AUTO_SYNC).setEnabled(false);
 			} else {
 				// Disable synchronizer settings
-				findPreference(KEY_SYNC_PREF).setEnabled(true);
+				//findPreference(KEY_SYNC_PREF).setEnabled(true);
 				findPreference(KEY_DO_AUTO_SYNC).setEnabled(true);
 			}
 		}
