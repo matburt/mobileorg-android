@@ -20,6 +20,7 @@ import com.matburt.mobileorg.OrgData.OrgNodePayload;
 
 public class PayloadFragment extends ViewFragment {
 	private static final String PAYLOAD = "payload";
+	private static final String EDITING = "editing";
 	
 	private RelativeLayout payloadView;
 	private EditText payloadEdit;
@@ -92,18 +93,26 @@ public class PayloadFragment extends ViewFragment {
 	public void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
 		
-		if(this.payloadEdit.getVisibility() == View.VISIBLE)
+		boolean isEditing = this.payloadEdit.getVisibility() == View.VISIBLE;
+		outState.putBoolean(EDITING, isEditing);
+
+		if(isEditing)
 			outState.putString(PAYLOAD, this.payloadEdit.getText().toString());
+		else
+			outState.putString(PAYLOAD, this.payload.get());
 	}
 	
 	public void restoreInstanceState(Bundle savedInstanceState) {
 		if(savedInstanceState != null) {
 			String payloadString = savedInstanceState.getString(PAYLOAD);
+			boolean isEditing = savedInstanceState.getBoolean(EDITING);
 			
-			if(payloadString != null)
+			if(isEditing)
 				switchToEdit(payloadString);
-			else
+			else {
+				this.payload.set(payloadString);
 				switchToView();
+			}
 		}
 	}
 	
