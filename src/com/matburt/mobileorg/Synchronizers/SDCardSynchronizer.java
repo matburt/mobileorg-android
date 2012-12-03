@@ -21,7 +21,7 @@ public class SDCardSynchronizer implements SynchronizerInterface {
 		this.remoteIndexPath = PreferenceManager.getDefaultSharedPreferences(
 				context).getString("indexFilePath", "");
 	
-		this.remotePath = new File(remoteIndexPath).getParent() + "/";
+		this.remotePath = new File(remoteIndexPath) + "/";
 	}
     
 

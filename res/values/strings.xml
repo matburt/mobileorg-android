@@ -168,8 +168,8 @@
     <string name="preference_calendar_reminder_interval">Reminder interval</string>
     <string name="preference_calendar_show_habits_summary">Shows habits in the calendar</string>
     <string name="preference_calendar_show_habits">Show habits</string>
-    <string name="preference_calendar_show_done_summary">Show done items in the calendar</string>
-    <string name="preference_calendar_show_done">Show done</string>
+    <string name="preference_calendar_show_done_summary">Show items with done TODO keywords the calendar</string>
+    <string name="preference_calendar_show_done">Show done todos</string>
     <string name="preference_theme_title">Theme</string>
     <string name="preference_capture_advanced_title">Advanced capture</string>
     <string name="preference_capture_advanced">Advanced capturing mechanism that allows capturing files under arbitrary headings.</string>

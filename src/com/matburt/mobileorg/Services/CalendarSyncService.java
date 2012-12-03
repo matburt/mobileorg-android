@@ -47,6 +47,7 @@ public class CalendarSyncService {
 	private boolean showDone = false;
 	private boolean showHabits = false;
 	private HashSet<String> activeTodos = new HashSet<String>();
+	private HashSet<String> allTodos = new HashSet<String>();
 	
 	public CalendarSyncService(ContentResolver resolver, Context context) {
 		this.resolver = resolver;
@@ -74,6 +75,7 @@ public class CalendarSyncService {
 						"");
 		this.calendarId = getCalendarID(calendarName);
 		this.activeTodos = new HashSet<String>(OrgProviderUtils.getActiveTodos(resolver));
+		this.allTodos = new HashSet<String>(OrgProviderUtils.getTodos(resolver));
 	}
 	
 	public void syncFiles() {
@@ -178,7 +180,11 @@ public class CalendarSyncService {
 	
 	private void insertNode(OrgNode node, String filename)
 			throws IllegalArgumentException {
-		boolean isActive = this.activeTodos.contains(node.todo);
+		boolean isActive = true;
+		
+		if(allTodos.contains(node.todo))
+			isActive = this.activeTodos.contains(node.todo);
+		
 		String cleanedName = node.getCleanedName();
 		
 		for (OrgNodeDate date : node.getOrgNodePayload().getDates()) {
