@@ -250,10 +250,7 @@ public class Synchronizer {
 		notify.finalizeNotification();
 		
 		String errorMessage = "";
-		if (IOException.class.isInstance(exception)) {
-			errorMessage = "Error occured during sync: "
-					+ exception.getLocalizedMessage();
-		} else if (CertificateException.class.isInstance(exception)) {
+        if (CertificateException.class.isInstance(exception)) {
 			errorMessage = "Certificate Error occured during sync: "
 					+ exception.getLocalizedMessage();
 		} else {

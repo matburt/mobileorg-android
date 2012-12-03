@@ -94,11 +94,9 @@ public class DropboxSynchronizer implements SynchronizerInterface {
         try {
             this.dropboxApi.putFileOverwrite(this.remotePath + filename, fis, uploadFile.length(), null);
         } catch (DropboxUnlinkedException e) {
-            Log.d("MobileOrg", "Dropbox account was unlinked...");
-            showToast("Dropbox Authentication Failed, re-run setup wizard");
+            throw new IOException("Dropbox Authentication Failed, re-run setup wizard");
         } catch (DropboxException e) {
-            Log.d("MobileOrg", "Failed to upload " + filename + " because: " + e.toString());
-            showToast("Failed to upload " + filename + " because: " + e.toString());
+            throw new IOException("Uploading " + filename + " because: " + e.toString());
         } finally {
             if (fis != null) {
                 try {
@@ -114,10 +112,11 @@ public class DropboxSynchronizer implements SynchronizerInterface {
             DropboxInputStream is = dropboxApi.getFileStream(filePath, null);
             BufferedReader fileReader = new BufferedReader(new InputStreamReader(is));
             return fileReader;
+        } catch (DropboxUnlinkedException e) {
+            throw new IOException("Dropbox Authentication Failed, re-run setup wizard");
         } catch (DropboxException e) {
-            showToast("Failed to fetch remote file " + filename + " because: " + e.toString());
+            throw new IOException("Fetching " + filename + ": " + e.toString());
         }
-        return null;
 	}
 
     
@@ -132,7 +131,8 @@ public class DropboxSynchronizer implements SynchronizerInterface {
         dropboxApi = new DropboxAPI<AndroidAuthSession>(session);
         if (!dropboxApi.getSession().isLinked()) {
             isLoggedIn = false;
-            showToast("Dropbox Authentication Failed, re-run setup wizard from the settings screen");
+            Log.d("MobileOrg", "Dropbox account was unlinked...");
+            //throw new IOException("Dropbox Authentication Failed, re-run setup wizard");
         }
         else {
             isLoggedIn = true;
