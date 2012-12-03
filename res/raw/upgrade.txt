@@ -1,5 +1,18 @@
 MobileOrg Upgrade Notes
 
+Changes for 0.9.6:
+
+- Fix error reporting in Dropbox Synchronizer
+- Fix UI inconsistency on capture screen
+- Fix a bug that would lose the payload when
+  changing screen orientation in capture
+- Fix an issue with Calendar synchronization
+  regarding including entries that don't have
+  a TODO keyword
+- Fix a bug where the sdcard synchronizer would
+  use the parent folder of the folder actually
+  selected
+
 Changes for 0.9.5:
 
 - Whole new look and feel
