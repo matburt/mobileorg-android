@@ -169,6 +169,7 @@ private static final String BASE_TOKEN_NAME = "Ubuntu One @ MobileOrg:";
 
         } catch (Exception e) {
             Log.e("MobileOrg", "Exception in Ubuntu One Put File: " + e.toString());
+			throw new IOException("Uploading: " + filename + ": " + e.toString());
         }
     }
 
