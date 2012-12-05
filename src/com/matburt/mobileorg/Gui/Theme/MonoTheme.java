@@ -24,5 +24,9 @@ public class MonoTheme extends DefaultTheme {
 		cfLWhite = Color.rgb(0x00, 0x00, 0x00);
 		
 		levelColors = new int[] { cfLWhite };
+		
+		defaultFontColor = "black";
+		defaultBackground = Color.rgb(0xff, 0xff, 0xff);
+		defaultForeground = Color.rgb(0x10, 0x10, 0x10);
 	}
 }

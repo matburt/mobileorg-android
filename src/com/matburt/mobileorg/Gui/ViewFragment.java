@@ -17,6 +17,7 @@ import android.webkit.WebViewClient;
 
 import com.actionbarsherlock.app.SherlockFragment;
 import com.matburt.mobileorg.R;
+import com.matburt.mobileorg.Gui.Theme.DefaultTheme;
 import com.matburt.mobileorg.OrgData.OrgNode;
 import com.matburt.mobileorg.util.OrgFileNotFoundException;
 import com.matburt.mobileorg.util.OrgNode2Html;
@@ -35,7 +36,9 @@ public class ViewFragment extends SherlockFragment {
 		this.webView = (WebView) view.findViewById(R.id.viewfragment_webview);
 		this.webView.setWebViewClient(new InternalWebViewClient());
 		this.webView.getSettings().setBuiltInZoomControls(true);
-		this.webView.setBackgroundColor(0x00000000);
+		
+		int backgroundColor = DefaultTheme.getTheme(getActivity()).defaultBackground;
+		this.webView.setBackgroundColor(backgroundColor);
 
 		return view;
 	}
@@ -47,35 +50,29 @@ public class ViewFragment extends SherlockFragment {
 	}
 	
 	public void display(String payload) {
-		OrgNode2Html htmlNode = new OrgNode2Html(resolver);
+		OrgNode2Html htmlNode = new OrgNode2Html(resolver, getActivity());
 		htmlNode.wrapLines = true;
 		String html = htmlNode.toHTML(payload);
 		displayHtml(html);
 	}
 	
 	public void displayPayload(OrgNode node) {
-		OrgNode2Html htmlNode = new OrgNode2Html(resolver);
+		OrgNode2Html htmlNode = new OrgNode2Html(resolver, getActivity());
 		htmlNode.wrapLines = true;
 		String html = htmlNode.payloadToHTML(node);
 		displayHtml(html);
 	}
 	
 	public void display(OrgNode node, int levelOfRecursion, ContentResolver resolver) {
-		OrgNode2Html htmlNode = new OrgNode2Html(resolver);
-		htmlNode.setupConfig(getActivity(), getFontColor());
+		OrgNode2Html htmlNode = new OrgNode2Html(resolver, getActivity());
 		String html = htmlNode.toHTML(node, levelOfRecursion);
 		displayHtml(html);
 	}
 
-	private String getFontColor() {
-		if(OrgUtils.isThemeLight(getActivity()))
-			return "black";
-		else
-			return "white";
-	}
 	
 	public void displayError() {
-		String html = "<html><body><font color='" + getFontColor() + "'>"
+		String fontColor = DefaultTheme.getTheme(getActivity()).defaultFontColor;
+		String html = "<html><body><font color='" + fontColor + "'>"
 				+ getString(R.string.node_view_error_loading_node)
 				+ "</font></body></html>";
 		displayHtml(html);

@@ -7,6 +7,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.preference.PreferenceManager;
 
+import com.matburt.mobileorg.Gui.Theme.DefaultTheme;
 import com.matburt.mobileorg.OrgData.OrgNode;
 
 public class OrgNode2Html {
@@ -16,21 +17,22 @@ public class OrgNode2Html {
 	public boolean wrapLines = false;
 	public boolean viewApplyFormating = true;
 
-	private String fontColor = "white";
+	public String fontColor = "white";
 
-	public OrgNode2Html(ContentResolver resolver) {
+	public OrgNode2Html(ContentResolver resolver, Context context) {
 		this.resolver = resolver;
+		setupConfig(context);
 	}
 	
-	public void setupConfig(Context context, String fontColor) {
+	private void setupConfig(Context context) {
 		this.wrapLines = PreferenceManager.getDefaultSharedPreferences(context)
 				.getBoolean("viewWrapLines", false);
 		this.viewApplyFormating = PreferenceManager.getDefaultSharedPreferences(context).getBoolean(
 				"viewApplyFormating", true);
 		
-		this.fontColor = fontColor;
+		this.fontColor = DefaultTheme.getTheme(context).defaultFontColor;
 	}
-		
+	
 	public String toHTML(OrgNode node) {
 		return toHTML(node, 0);
 	}

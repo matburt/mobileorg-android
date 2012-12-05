@@ -25,6 +25,9 @@ public class WhiteTheme extends DefaultTheme {
 
 		levelColors = new int[] { ccLBlue, c3Yellow, ceLCyan, c2Green,
 				c5Purple, ccLBlue, c2Green, ccLBlue, c3Yellow, ceLCyan };
-
+		
+		defaultFontColor = "black";
+		defaultBackground = Color.rgb(0xff, 0xff, 0xff);
+		defaultForeground = Color.rgb(0x10, 0x10, 0x10);
 	}
 }

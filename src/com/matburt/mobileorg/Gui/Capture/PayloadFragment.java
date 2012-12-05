@@ -6,8 +6,8 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.inputmethod.InputMethodManager;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.webkit.WebView;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -15,6 +15,7 @@ import android.widget.RelativeLayout;
 
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Gui.ViewFragment;
+import com.matburt.mobileorg.Gui.Theme.DefaultTheme;
 import com.matburt.mobileorg.OrgData.OrgNode;
 import com.matburt.mobileorg.OrgData.OrgNodePayload;
 
@@ -51,7 +52,9 @@ public class PayloadFragment extends ViewFragment {
 				R.layout.edit_payload, container, false);
 		this.webView = (WebView) payloadView
 				.findViewById(R.id.edit_payload_webview);
-		this.webView.setBackgroundColor(0x00000000);
+		
+		this.webView.setBackgroundColor(DefaultTheme.getTheme(getActivity()).defaultBackground);
+		
 		this.webView.setWebViewClient(new InternalWebViewClient());
 		this.webView.setOnClickListener(editListener);
 

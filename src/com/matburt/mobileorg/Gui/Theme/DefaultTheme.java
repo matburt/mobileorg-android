@@ -26,7 +26,12 @@ public class DefaultTheme {
 	public int ceLCyan = Color.rgb(0x00, 0xff, 0xff);
 	public int cfLWhite = Color.rgb(0xff, 0xff, 0xff);
 
+	public int defaultForeground = Color.rgb(0xc0, 0xc0, 0xc0);
+	public int defaultBackground = Color.rgb(0x00, 0x00, 0x00);
+	
 	public int[] levelColors;
+	
+	public String defaultFontColor = "white";
 	
 	public DefaultTheme() {
 		levelColors = new int[] { ccLBlue, c3Yellow, ceLCyan, c2Green,

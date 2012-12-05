@@ -201,13 +201,4 @@ public class OrgUtils {
     	else 
     		activity.setTheme(R.style.Theme_MobileOrg_Light);
     }
-    
-    public static boolean isThemeLight(Context context) {
-    	String themeName = getThemeName(context);
-    	
-    	if(themeName.equals("Dark"))
-    		return false;
-    	else
-    		return true;
-    }
 }

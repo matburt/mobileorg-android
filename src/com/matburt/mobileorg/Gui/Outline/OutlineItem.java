@@ -67,7 +67,7 @@ public class OutlineItem extends RelativeLayout implements Checkable {
 			SpannableStringBuilder titleSpan) {
 		if (node.hasChildren(resolver)) {
 			titleSpan.append("...");
-			titleSpan.setSpan(new ForegroundColorSpan(theme.c7White),
+			titleSpan.setSpan(new ForegroundColorSpan(theme.defaultForeground),
 					titleSpan.length() - "...".length(), titleSpan.length(), 0);
 		}
 	}
@@ -122,7 +122,7 @@ public class OutlineItem extends RelativeLayout implements Checkable {
 	public void setupAgendaBlock(SpannableStringBuilder titleSpan, DefaultTheme theme) {
 		titleSpan.delete(0, OrgFileParser.BLOCK_SEPARATOR_PREFIX.length());
 
-		titleSpan.setSpan(new ForegroundColorSpan(theme.c7White), 0,
+		titleSpan.setSpan(new ForegroundColorSpan(theme.defaultForeground), 0,
 				titleSpan.length(), 0);
 		titleSpan.setSpan(new StyleSpan(Typeface.BOLD), 0,
 				titleSpan.length(), 0);
