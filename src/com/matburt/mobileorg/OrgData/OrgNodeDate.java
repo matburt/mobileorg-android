@@ -72,4 +72,12 @@ public class OrgNodeDate {
 		cal.setTimeZone(TimeZone.getTimeZone("UTC"));
 		return cal.getTimeInMillis();
 	}
+	
+	/**
+	 * Whether an event is in the past. True if event ended 24 hours ago or
+	 * sometime in the future.
+	 */
+	public boolean isInPast() {
+		return System.currentTimeMillis() - DateUtils.DAY_IN_MILLIS >= endTime;
+	}
 }

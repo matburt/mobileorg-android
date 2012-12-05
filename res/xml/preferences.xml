@@ -111,6 +111,12 @@
         <CheckBoxPreference
             android:defaultValue="true"
             android:dependency="calendarEnabled"
+            android:key="calendarShowPast"
+            android:summary="@string/preference_calendar_show_past_summary"
+            android:title="@string/preference_calendar_show_past" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:dependency="calendarEnabled"
             android:key="calendarHabits"
             android:summary="@string/preference_calendar_show_habits_summary"
             android:title="@string/preference_calendar_show_habits" />

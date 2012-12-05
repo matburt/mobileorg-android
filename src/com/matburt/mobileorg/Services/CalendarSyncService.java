@@ -45,9 +45,11 @@ public class CalendarSyncService {
 	private Integer reminderTime = 0;
 	private boolean reminderEnabled = false;
 	private boolean showDone = false;
+	private boolean showPast = true;
 	private boolean showHabits = false;
 	private HashSet<String> activeTodos = new HashSet<String>();
 	private HashSet<String> allTodos = new HashSet<String>();
+
 	
 	public CalendarSyncService(ContentResolver resolver, Context context) {
 		this.resolver = resolver;
@@ -69,6 +71,7 @@ public class CalendarSyncService {
 		}
 		
 		this.showDone = sharedPreferences.getBoolean("calendarShowDone", true);
+		this.showPast = sharedPreferences.getBoolean("calendarShowPast", true);
 		this.showHabits = sharedPreferences.getBoolean("calendarHabits", true);	
 		this.calendarName = PreferenceManager
 				.getDefaultSharedPreferences(context).getString("calendarName",
@@ -203,6 +206,9 @@ public class CalendarSyncService {
 				
 		if(this.calendarId == -1)
 			throw new IllegalArgumentException("Couldn't find selected calendar: " + calendarName);
+		
+		if(this.showPast == false && date.isInPast())
+			return null;
 		
 		ContentValues values = new ContentValues();
 		values.put(intEvents.CALENDAR_ID, this.calendarId);
