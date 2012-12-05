@@ -19,7 +19,6 @@ import com.actionbarsherlock.app.SherlockPreferenceActivity;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.OrgData.OrgProviderUtils;
 import com.matburt.mobileorg.Services.CalendarSyncService;
-import com.matburt.mobileorg.Services.SyncService;
 import com.matburt.mobileorg.Settings.Synchronizers.SDCardSettingsActivity;
 import com.matburt.mobileorg.Settings.Synchronizers.ScpSettingsActivity;
 import com.matburt.mobileorg.Settings.Synchronizers.UbuntuOneSettingsActivity;

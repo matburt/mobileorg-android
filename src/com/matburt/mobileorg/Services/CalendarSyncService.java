@@ -16,7 +16,6 @@ import android.net.Uri;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.text.format.Time;
-import android.util.Log;
 
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.OrgData.OrgFile;
@@ -75,9 +74,7 @@ public class CalendarSyncService extends Service implements
 	}
 
 	@Override
-	public int onStartCommand(Intent intent, int flags, int startId) {
-		Log.d("MobileOrg", "Cal:onstartCommand()");
-		
+	public int onStartCommand(Intent intent, int flags, int startId) {		
 		refreshPreferences();
 		final String[] fileList = intent.getStringArrayExtra(FILELIST);
 		final boolean clearDB = intent.getBooleanExtra(CLEARDB, false);
@@ -142,7 +139,6 @@ public class CalendarSyncService extends Service implements
 	}
 	
 	public void syncFiles(String[] files) {
-		Log.d("MobileOrg", "starting to sync cal " + files.length);
 		for(String file: files) {
 			if(file.equals(OrgFile.AGENDA_FILE) == false)
 				syncFile(file);
