@@ -83,12 +83,18 @@ public class CalendarSyncService extends Service implements
 		final boolean clearDB = intent.getBooleanExtra(CLEARDB, false);
 		this.syncThread = new Thread() {
 			public void run() {
-				if(clearDB)
-					deleteAllEntries(getApplicationContext());
-				else if (fileList != null)
-					syncFiles(fileList);
-				else
-					syncFiles();
+				if(clearDB) {
+					if(fileList != null)
+						deleteFileEntries(fileList);
+					else 
+						deleteAllEntries();
+				}
+				else {
+					if (fileList != null)
+						syncFiles(fileList);
+					else
+						syncFiles();
+				}
 				
 				syncThread = null;
 			}
@@ -122,7 +128,7 @@ public class CalendarSyncService extends Service implements
 	}
 	
 	private void syncFiles() {
-		this.deleteAllEntries(context);
+		deleteAllEntries();
 		
 		ArrayList<String> files = OrgProviderUtils.getFilenames(resolver);
 		files.remove(OrgFile.AGENDA_FILE);
@@ -131,31 +137,36 @@ public class CalendarSyncService extends Service implements
 	}	
 	
 	private void syncFile(String filename) throws IllegalArgumentException {
-		deleteFileEntries(filename, context);
+		deleteFileEntries(filename);
 		insertFileEntries(filename);
 	}
 	
 	public void syncFiles(String[] files) {
 		Log.d("MobileOrg", "starting to sync cal " + files.length);
 		for(String file: files) {
-			syncFile(file);
+			if(file.equals(OrgFile.AGENDA_FILE) == false)
+				syncFile(file);
 		}
 	}
 	
-	public int deleteAllEntries(Context context) {
+	public int deleteAllEntries() {
 		refreshPreferences();
 		return context.getContentResolver()
 				.delete(calendar.events.CONTENT_URI, calendar.events.DESCRIPTION + " LIKE ?",
 						new String[] { CALENDAR_ORGANIZER + "%" });
 	}
 
-	public int deleteFileEntries(String filename, Context context) {
+	public int deleteFileEntries(String filename) {
 		refreshPreferences();
 		return context.getContentResolver().delete(calendar.events.CONTENT_URI,
 				calendar.events.DESCRIPTION + " LIKE ?",
 				new String[] { CALENDAR_ORGANIZER + ":" + filename + "%" });
 	}
-
+	public void deleteFileEntries(String[] files) {
+		for(String file: files) {
+			deleteFileEntries(file);
+		}
+	}
 	
 	public static CharSequence[] getCalendars(Context context) {
 		CharSequence[] result = new CharSequence[1];
