@@ -11,6 +11,7 @@ import java.util.regex.Pattern;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.text.TextUtils;
+import android.util.Log;
 import android.util.Pair;
 
 import com.matburt.mobileorg.OrgData.OrgContract.OrgData;
@@ -104,7 +105,7 @@ public class OrgFileParser {
 		parseStack.add(numstars, newId);      
     }
 
-	private static final Pattern starPattern = Pattern.compile("^(\\**)");
+	private static final Pattern starPattern = Pattern.compile("^(\\**)\\s");
 	private static int numberOfStars(String thisLine) {
 		Matcher matcher = starPattern.matcher(thisLine);
 		if(matcher.find()) {
@@ -223,7 +224,10 @@ public class OrgFileParser {
 		Matcher indexOrgFileMatcher = indexOrgFilePattern.matcher(filecontents);
 		HashMap<String, String> allOrgFiles = new HashMap<String, String>();
 		
+		Log.d("MobileOrg", filecontents);
+		
 		while (indexOrgFileMatcher.find()) {
+			Log.d("MobileOrg", "Key: " + indexOrgFileMatcher.group(1) + ":" + indexOrgFileMatcher.group(2));
 			allOrgFiles.put(indexOrgFileMatcher.group(1), indexOrgFileMatcher.group(2));
 		}
 

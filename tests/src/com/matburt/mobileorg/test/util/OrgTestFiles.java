@@ -43,10 +43,16 @@ public class OrgTestFiles {
 		public static final String agendasFile = "* new 1\n** test2";
 	}
 	
+	public static class OrgFileWithEmphasisedNode {
+		public static final int numberOfHeadings = 1;
+		public static final String emphasisedPayload = "*test*";
+		public static final String orgFile = "* new\n" + emphasisedPayload;
+	}
+	
 	public static class OrgIndexWithFileDirectorySpaces {
 		public static final String fileAlias = "Mixed Todo.org";
 		public static final String filename = "Mixed Activities/Mixed Todo.org";
-		public static final String filenameWithoutAlias = "Mixed Activities/Mixed Todo.org";
+		public static final String filenameWithoutAlias = "Mixed Activities2/Mixed Todo.org";
 		public static final String indexFile = "#+READONLY\n"
 				+ "#+TODO: TODO | DONE\n"
 				+ "#+TAGS: { Home Computer Errands } \n"

@@ -10,6 +10,7 @@ import java.util.HashMap;
 import android.database.Cursor;
 import android.test.ProviderTestCase2;
 import android.test.mock.MockContentResolver;
+import android.util.Log;
 
 import com.matburt.mobileorg.OrgData.OrgContract.OrgData;
 import com.matburt.mobileorg.OrgData.OrgFile;
@@ -18,6 +19,7 @@ import com.matburt.mobileorg.OrgData.OrgNode;
 import com.matburt.mobileorg.OrgData.OrgProvider;
 import com.matburt.mobileorg.OrgData.OrgProviderUtils;
 import com.matburt.mobileorg.test.util.OrgTestFiles;
+import com.matburt.mobileorg.test.util.OrgTestFiles.OrgFileWithEmphasisedNode;
 import com.matburt.mobileorg.test.util.OrgTestFiles.OrgIndexWithFileDirectorySpaces;
 import com.matburt.mobileorg.test.util.OrgTestFiles.SimpleOrgFiles;
 import com.matburt.mobileorg.test.util.OrgTestUtils;
@@ -119,6 +121,9 @@ public class OrgFileParserTest extends ProviderTestCase2<OrgProvider> {
 		
 		assertTrue(files.containsKey(filename));
 		String retrievedFileAlias = files.get(filename);
+		
+		Log.d("MobileOrg", files.toString());
+		
 		assertEquals(fileAlias, retrievedFileAlias);
 	}
 	
@@ -161,5 +166,20 @@ public class OrgFileParserTest extends ProviderTestCase2<OrgProvider> {
 	public void testGetTagsFromIndexEmptyTags() {
 		ArrayList<String> tagsFromIndex = OrgFileParser.getTagsFromIndex(OrgTestFiles.indexFileWithEmptyDrawers);
 		assertEquals(0, tagsFromIndex.size());
+	}
+	
+	
+	/*
+	 * Tests for bug when a *emphasised* word begins a line. The parser could
+	 * mistakenly parse it as new OrgNode.
+	 */
+	public void testParseFileWithEmphasisNode() {
+		InputStream is = new ByteArrayInputStream(OrgFileWithEmphasisedNode.orgFile.getBytes());
+		BufferedReader breader = new BufferedReader(new InputStreamReader(is));
+		OrgFile orgFile = new OrgFile("new file", "file alias", "");
+		parser.parse(orgFile, breader);
+		
+		assertEquals(OrgFileWithEmphasisedNode.numberOfHeadings, db.fastInsertNodeCalls);
+		assertTrue(db.fastInsertNodePayloadCalls >= 1);
 	}
 }
