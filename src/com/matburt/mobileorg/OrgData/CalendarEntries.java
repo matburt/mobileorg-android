@@ -35,5 +35,11 @@ public class CalendarEntries {
 		public long id = -1;
 		public long dtStart = 0;
 		public long dtEnd = 0;
+		
+		public boolean isEquals(OrgNodeDate entry) {
+			return this.dtStart == entry.beginTime
+					&& this.dtEnd == entry.endTime 
+					&& entry.getTitle().startsWith(this.title);
+		}
 	}
 }

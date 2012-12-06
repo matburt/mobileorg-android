@@ -21,5 +21,9 @@ public class MobileOrgStartupIntentReceiver extends BroadcastReceiver {
 		if (this.shouldStartService(context)) {
 			SyncService.startAlarm(context);
 		}
+		
+		Intent calIntent = new Intent(context, CalendarSyncService.class);
+		calIntent.putExtra(CalendarSyncService.FILELIST, new String[] {});
+		context.startService(calIntent);
 	}
 }

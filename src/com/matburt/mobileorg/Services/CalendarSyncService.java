@@ -1,7 +1,6 @@
 package com.matburt.mobileorg.Services;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 
 import android.app.Service;
@@ -17,6 +16,7 @@ import android.net.Uri;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.text.format.Time;
+import android.util.Log;
 
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.OrgData.CalendarEntries;
@@ -107,19 +107,19 @@ public class CalendarSyncService extends Service implements
 
 	
 	private void syncFiles() {
-		deleteEntries();
+		//deleteEntries();
 		
 		ArrayList<String> files = OrgProviderUtils.getFilenames(resolver);
 		files.remove(OrgFile.AGENDA_FILE);
 		for(String filename: files)
-			insertFileEntries(filename);
+			syncFile(filename);
 	}	
 	
 	public void syncFiles(String[] files) {
 		for(String filename: files) {
 			if(filename.equals(OrgFile.AGENDA_FILE) == false) {
-				deleteFileEntries(filename);
-				insertFileEntries(filename);
+				//deleteFileEntries(filename);
+				syncFile(filename);
 			}
 		}
 	}
@@ -144,23 +144,24 @@ public class CalendarSyncService extends Service implements
 		}
 	}
 
-	
-	private String[] eventsProjection = new String[] {
-			calendar.events.CALENDAR_ID, calendar.events.DTSTART,
-			calendar.events.DTEND, calendar.events.DESCRIPTION, calendar.events.TITLE };
 
-	public MultiMap<CalendarEntry> getFileEntries(String filename) {
+	public MultiMap<CalendarEntry> getCalendarEntries(String filename) {
 		refreshPreferences();
+		
+		String[] eventsProjection = new String[] {
+				calendar.events.CALENDAR_ID, calendar.events.DTSTART,
+				calendar.events.DTEND, calendar.events.DESCRIPTION, calendar.events.TITLE };
 		
 		Cursor query = context.getContentResolver().query(calendar.events.CONTENT_URI,
 				eventsProjection, calendar.events.DESCRIPTION + " LIKE ?",
-				new String[] { CALENDAR_ORGANIZER + ":" + filename + "%" }, filename);
+				new String[] { CALENDAR_ORGANIZER + ":" + filename + "%" }, null);
+		query.moveToFirst();
 		
 		MultiMap<CalendarEntry> map = new MultiMap<CalendarEntry>();
-		CalendarEntries entries = new CalendarEntries(calendar.events, query);
+		CalendarEntries entriesParser = new CalendarEntries(calendar.events, query);
 		
 		while(query.isAfterLast() == false) {
-			CalendarEntry entry = entries.getEntryFromCursor(query);
+			CalendarEntry entry = entriesParser.getEntryFromCursor(query);
 			map.put(entry.dtStart, entry);
 			
 			query.moveToNext();
@@ -169,50 +170,91 @@ public class CalendarSyncService extends Service implements
 		return map;
 	}
 
+	
+	
+	private int inserted = 0;
+	private int deleted = 0;
+	private int found = 0;
+	
 	private void syncFile(String filename) {
-		MultiMap<CalendarEntry> entries = getFileEntries(filename);
-
-		Cursor scheduled;
-
+		inserted = 0;
+		deleted = 0;
+		found = 0;
+		
+		Cursor scheduledQuery;
 		try {
-			scheduled = OrgProviderUtils.getFileSchedule(filename,
+			scheduledQuery = OrgProviderUtils.getFileSchedule(filename,
 					this.showHabits, resolver);
 		} catch (OrgFileNotFoundException e) {
 			return;
 		}
 
-		while (scheduled.isAfterLast() == false) {
+		MultiMap<CalendarEntry> entries = getCalendarEntries(filename);
+
+		while (scheduledQuery.isAfterLast() == false) {
 			try {
-				OrgNode node = new OrgNode(scheduled);
-
-				boolean isActive = true;
-
-				if (allTodos.contains(node.todo))
-					isActive = this.activeTodos.contains(node.todo);
-
-				String cleanedName = node.getCleanedName();
-
-				for (OrgNodeDate date : node.getOrgNodePayload().getDates()) {
-					if (isNodeInserted() == false) {						
-						insertEntry(cleanedName, isActive,
-								node.getCleanedPayload(),
-								Long.toString(node.id), date, filename,
-								node.getOrgNodePayload()
-										.getProperty("LOCATION"));
-					}
-				}
+				OrgNode node = new OrgNode(scheduledQuery);
+				process(node, entries, filename);
 			} catch (OrgNodeNotFoundException e) {
 			}
-			scheduled.moveToNext();
+			scheduledQuery.moveToNext();
 		}
-		
-		// TDOO For every entry not removed from entries, delete it
+		scheduledQuery.close();
 
-		scheduled.close();
+		removeCalendarEntries(entries);
+		
+		Log.d("MobileOrg", "Calendar " + filename + "> Inserted: " + inserted + " and deleted: " + deleted + " unchanged: " + found);
+	}
+
+	
+	private void process(OrgNode node, MultiMap<CalendarEntry> entries, String filename) {
+		boolean isActive = true;
+		if (allTodos.contains(node.todo))
+			isActive = this.activeTodos.contains(node.todo);
+
+		for (OrgNodeDate date : node.getOrgNodePayload().getDates(node.getCleanedName())) {
+			try {
+				CalendarEntry insertedEntry = getInsertedEntry(date, entries);
+				entries.remove(date.beginTime, insertedEntry);
+				found++;
+			} catch (IllegalArgumentException e) {
+				String insertedEntry = insertEntry(isActive, node.getCleanedPayload(),
+						Long.toString(node.id), date, filename, node
+								.getOrgNodePayload().getProperty("LOCATION"));
+				
+				if(insertedEntry != null)
+					inserted++;
+			}
+		}
 	}
 	
-	public boolean isNodeInserted() {
-		return false;
+	/**
+	 * Checks if the given entry is contained in entries.
+	 * @throws IllegalArgumentException When entry is not found
+	 */
+	private CalendarEntry getInsertedEntry(OrgNodeDate date,
+			MultiMap<CalendarEntry> entries) throws IllegalArgumentException {
+		ArrayList<CalendarEntry> matches = entries.get(date.beginTime);
+		
+		if(matches == null)
+			throw new IllegalArgumentException();
+		
+		for(CalendarEntry entry: matches) {
+			if(entry.isEquals(date))
+				return entry;
+		}
+		
+		throw new IllegalArgumentException();
+	}
+	
+	private void removeCalendarEntries(MultiMap<CalendarEntry> entries) {
+		for(Long entryKey: entries.keySet()) {
+			for(CalendarEntry entry: entries.get(entryKey)) {
+				Log.d("MobileOrg", "Deleting entry for " + entry.title);
+				deleteEntry(entry.id);
+				deleted++;
+			}
+		}
 	}
 	
 	public void insertNode(long node_id) {
@@ -257,18 +299,17 @@ public class CalendarSyncService extends Service implements
 		
 		if(allTodos.contains(node.todo))
 			isActive = this.activeTodos.contains(node.todo);
-		
-		String cleanedName = node.getCleanedName();
-		
-		for (OrgNodeDate date : node.getOrgNodePayload().getDates()) {
-			insertEntry(cleanedName, isActive, node.getCleanedPayload(),
+				
+		for (OrgNodeDate date : node.getOrgNodePayload().getDates(
+				node.getCleanedName())) {
+			insertEntry(isActive, node.getCleanedPayload(),
 					Long.toString(node.id), date, filename,
 					node.getOrgNodePayload().getProperty("LOCATION"));
 		}
 	}
 
 	// TODO Speed up using bulkInserts
-	private String insertEntry(String name, boolean isTodoActive, String payload, 
+	private String insertEntry(boolean isTodoActive, String payload, 
 			String orgID, OrgNodeDate date, String filename, String location) throws IllegalArgumentException {
 		
 		if (this.showDone == false && isTodoActive == false)
@@ -282,7 +323,7 @@ public class CalendarSyncService extends Service implements
 		
 		ContentValues values = new ContentValues();
 		values.put(calendar.events.CALENDAR_ID, this.calendarId);
-		values.put(calendar.events.TITLE, date.type + name);
+		values.put(calendar.events.TITLE, date.getTitle());
 		values.put(calendar.events.DESCRIPTION, CALENDAR_ORGANIZER + ":" + filename + "\n" + payload);
 		values.put(calendar.events.EVENT_LOCATION, location);
 		
@@ -388,11 +429,10 @@ public class CalendarSyncService extends Service implements
 	}
 
 	
-	@SuppressWarnings("unused")
-	private int deleteEntry(String nodeCalendarID) {
+	private int deleteEntry(long nodeCalendarID) {
 		return context.getContentResolver().delete(
 				ContentUris.withAppendedId(calendar.events.CONTENT_URI,
-						Long.valueOf(nodeCalendarID)), null, null);
+						nodeCalendarID), null, null);
 	}
 	
 	

@@ -2,6 +2,7 @@ package com.matburt.mobileorg.util;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Set;
 
 public class MultiMap<T> {
 
@@ -20,5 +21,17 @@ public class MultiMap<T> {
 	
 	public ArrayList<T> get(Long key) {
 		return entryMap.get(key);
+	}
+
+	public void remove(long key, T value) {
+		ArrayList<T> valueList = entryMap.get(key);
+		
+		if(valueList != null) {
+			valueList.remove(value);
+		}
+	}
+	
+	public Set<Long> keySet() {
+		return entryMap.keySet();
 	}
 }

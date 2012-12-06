@@ -16,6 +16,7 @@ public class OrgNodeDate {
 	public long endTime = 0;
 	public int allDay = 0;
 	public String type = "";
+	private String title = "";
 
 	private static final SimpleDateFormat dateTimeformatter = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 	private static final SimpleDateFormat dateformatter = new SimpleDateFormat("yyyy-MM-dd");
@@ -79,5 +80,13 @@ public class OrgNodeDate {
 	 */
 	public boolean isInPast() {
 		return System.currentTimeMillis() - DateUtils.DAY_IN_MILLIS >= endTime;
+	}
+	
+	public void setTitle(String title) {
+		this.title = title;
+	}
+	
+	public String getTitle() {
+		return this.type + this.title;
 	}
 }
