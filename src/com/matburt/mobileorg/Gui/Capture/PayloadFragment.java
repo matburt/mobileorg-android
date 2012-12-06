@@ -82,7 +82,7 @@ public class PayloadFragment extends ViewFragment {
 		EditActivity editActivity = (EditActivity) getActivity();
 		
 		OrgNode node = editActivity.getOrgNode();
-		this.payload = node.getOrgNodePayload();
+		this.payload = new OrgNodePayload(node.getOrgNodePayload().get());
 		
 		if(savedInstanceState != null)
 			restoreInstanceState(savedInstanceState);
@@ -109,13 +109,12 @@ public class PayloadFragment extends ViewFragment {
 		if(savedInstanceState != null) {
 			String payloadString = savedInstanceState.getString(PAYLOAD);
 			boolean isEditing = savedInstanceState.getBoolean(EDITING);
+			this.payload.set(payloadString);
 			
 			if(isEditing)
 				switchToEdit(payloadString);
-			else {
-				this.payload.set(payloadString);
+			else
 				switchToView();
-			}
 		}
 	}
 	
