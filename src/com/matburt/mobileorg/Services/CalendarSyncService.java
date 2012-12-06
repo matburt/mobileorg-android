@@ -28,10 +28,13 @@ import com.matburt.mobileorg.OrgData.OrgProviderUtils;
 import com.matburt.mobileorg.util.MultiMap;
 import com.matburt.mobileorg.util.OrgFileNotFoundException;
 import com.matburt.mobileorg.util.OrgNodeNotFoundException;
+import com.matburt.mobileorg.util.OrgUtils;
 
 public class CalendarSyncService extends Service implements
 		SharedPreferences.OnSharedPreferenceChangeListener {
 	public final static String CLEARDB = "clearDB";
+	public final static String PULL = "pull";
+	public static final String PUSH = "push";
 	public final static String FILELIST = "filelist";
 
 	private final static String CALENDAR_ORGANIZER = "MobileOrg";
@@ -51,8 +54,6 @@ public class CalendarSyncService extends Service implements
 	private boolean showHabits = false;
 	private HashSet<String> activeTodos = new HashSet<String>();
 	private HashSet<String> allTodos = new HashSet<String>();
-
-	private Thread syncThread = null;
 
 	@Override
 	public IBinder onBind(Intent intent) {
@@ -82,25 +83,30 @@ public class CalendarSyncService extends Service implements
 		refreshPreferences();
 		final String[] fileList = intent.getStringArrayExtra(FILELIST);
 		final boolean clearDB = intent.getBooleanExtra(CLEARDB, false);
-		this.syncThread = new Thread() {
+		final boolean pull = intent.getBooleanExtra(PULL, false);
+		final boolean push = intent.getBooleanExtra(PUSH, false);
+		
+		new Thread() {
 			public void run() {
 				if (clearDB) {
 					if (fileList != null)
 						deleteFileEntries(fileList);
 					else
 						deleteEntries();
-				} else {
+				} 
+				
+				if (push) {
 					if (fileList != null)
 						syncFiles(fileList);
 					else
 						syncFiles();
 				}
-
-				syncThread = null;
+				
+				if(pull) {
+					assimilateCalendar();
+				}
 			}
-		};
-
-		this.syncThread.run();
+		}.run();
 
 		return 0;
 	}
@@ -146,12 +152,12 @@ public class CalendarSyncService extends Service implements
 
 	private int inserted = 0;
 	private int deleted = 0;
-	private int found = 0;
+	private int unchanged = 0;
 
 	private void syncFile(String filename) {
 		inserted = 0;
 		deleted = 0;
-		found = 0;
+		unchanged = 0;
 
 		Cursor scheduledQuery;
 		try {
@@ -175,8 +181,8 @@ public class CalendarSyncService extends Service implements
 
 		removeCalendarEntries(entries);
 
-		Log.d("MobileOrg", "Calendar " + filename + "> Inserted: " + inserted
-				+ " and deleted: " + deleted + " unchanged: " + found);
+		Log.d("MobileOrg", "Calendar (" + filename + ") Inserted: " + inserted
+				+ " and deleted: " + deleted + " unchanged: " + unchanged);
 	}
 
 	private void syncNode(OrgNode node, MultiMap<CalendarEntry> entries,
@@ -190,7 +196,7 @@ public class CalendarSyncService extends Service implements
 			try {
 				CalendarEntry insertedEntry = getInsertedEntry(date, entries);
 				entries.remove(date.beginTime, insertedEntry);
-				found++;
+				unchanged++;
 			} catch (IllegalArgumentException e) {
 				String insertedEntry = insertEntry(isActive,
 						node.getCleanedPayload(), Long.toString(node.id), date,
@@ -203,13 +209,54 @@ public class CalendarSyncService extends Service implements
 		}
 	}
 
-	
-	private MultiMap<CalendarEntry> getCalendarEntries(String filename) {
-		refreshPreferences();
-
+	private void assimilateCalendar() {
+		Cursor query = getUnassimilatedCalendarCursor();
+		
+		CalendarEntries entriesParser = new CalendarEntries(calendar.events,
+				query);
+		
+		while(query.isAfterLast() == false) {
+			CalendarEntry entry = entriesParser.getEntryFromCursor(query);
+			OrgNode node = entry.getOrgNode();
+			
+			OrgFile captureFile = OrgProviderUtils
+					.getOrCreateCaptureFile(getContentResolver());
+			node.fileId = captureFile.id;
+			node.parentId = captureFile.nodeId;
+			node.level = 1;
+			
+			node.write(getContentResolver());
+			OrgUtils.announceSyncDone(this);
+			
+			deleteEntry(entry);
+			
+			query.moveToNext();
+		}
+		
+		query.close();
+	}
+			
+	private Cursor getUnassimilatedCalendarCursor() {
 		String[] eventsProjection = new String[] { calendar.events.CALENDAR_ID,
 				calendar.events.DTSTART, calendar.events.DTEND,
-				calendar.events.DESCRIPTION, calendar.events.TITLE };
+				calendar.events.DESCRIPTION, calendar.events.TITLE,
+				calendar.events.EVENT_LOCATION };
+
+		Cursor query = context.getContentResolver().query(
+				calendar.events.CONTENT_URI, eventsProjection,
+				calendar.events.DESCRIPTION + " NOT LIKE ?",
+				new String[] { CALENDAR_ORGANIZER + "%" },
+				null);
+		query.moveToFirst();
+		
+		return query;
+	}
+	
+	private Cursor getCalendarCursor(String filename) {
+		String[] eventsProjection = new String[] { calendar.events.CALENDAR_ID,
+				calendar.events.DTSTART, calendar.events.DTEND,
+				calendar.events.DESCRIPTION, calendar.events.TITLE,
+				calendar.events.EVENT_LOCATION };
 
 		Cursor query = context.getContentResolver().query(
 				calendar.events.CONTENT_URI, eventsProjection,
@@ -217,6 +264,14 @@ public class CalendarSyncService extends Service implements
 				new String[] { CALENDAR_ORGANIZER + ":" + filename + "%" },
 				null);
 		query.moveToFirst();
+		
+		return query;
+	}
+	
+	private MultiMap<CalendarEntry> getCalendarEntries(String filename) {
+		refreshPreferences();
+
+		Cursor query = getCalendarCursor(filename);
 
 		MultiMap<CalendarEntry> map = new MultiMap<CalendarEntry>();
 		CalendarEntries entriesParser = new CalendarEntries(calendar.events,
@@ -234,9 +289,7 @@ public class CalendarSyncService extends Service implements
 	
 	/**
 	 * Checks if the given entry is contained given multiMap.
-	 * 
-	 * @throws IllegalArgumentException
-	 *             When entry is not found
+	 * @throws IllegalArgumentException When entry is not found
 	 */
 	private CalendarEntry getInsertedEntry(OrgNodeDate date,
 			MultiMap<CalendarEntry> entries) throws IllegalArgumentException {
@@ -258,7 +311,7 @@ public class CalendarSyncService extends Service implements
 		for (Long entryKey : entries.keySet()) {
 			for (CalendarEntry entry : entries.get(entryKey)) {
 				Log.d("MobileOrg", "Deleting entry for " + entry.title);
-				deleteEntry(entry.id);
+				deleteEntry(entry);
 				deleted++;
 			}
 		}
@@ -336,10 +389,10 @@ public class CalendarSyncService extends Service implements
 	}
 
 
-	private int deleteEntry(long nodeCalendarID) {
+	private int deleteEntry(CalendarEntry entry) {
 		return context.getContentResolver().delete(
 				ContentUris.withAppendedId(calendar.events.CONTENT_URI,
-						nodeCalendarID), null, null);
+						entry.id), null, null);
 	}
 	
 	private int getCalendarID(String calendarName) {

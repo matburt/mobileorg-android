@@ -3,6 +3,7 @@ package com.matburt.mobileorg.OrgData;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -72,6 +73,12 @@ public class OrgNodeDate {
 		cal.set(Calendar.MILLISECOND, 0);
 		cal.setTimeZone(TimeZone.getTimeZone("UTC"));
 		return cal.getTimeInMillis();
+	}
+	
+	public static String getDate(long dtStart, long dtEnd) {
+		String start = dateTimeformatter.format(new Date(dtStart));
+		// TODO Complete
+		return start;
 	}
 	
 	/**
