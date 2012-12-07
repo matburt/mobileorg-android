@@ -34,6 +34,7 @@ public class CalendarComptabilityWrappers {
 		public String HAS_ALARM = "hasAlarm";	
 		public String ORGANIZER = "organizer";
 		public String EVENT_TIMEZONE = "eventTimezone";
+		public String _ID = "_id";
 	};
 	
 	public class intCalendars {
@@ -86,6 +87,7 @@ public class CalendarComptabilityWrappers {
 			events.DTSTART = Events.DTSTART;
 			events.HAS_ALARM = Events.HAS_ALARM;
 			events.EVENT_TIMEZONE = Events.EVENT_TIMEZONE;
+			events._ID = Events._ID;
 
 			reminders.CONTENT_URI = Reminders.CONTENT_URI;
 			reminders.MINUTES = Reminders.MINUTES;

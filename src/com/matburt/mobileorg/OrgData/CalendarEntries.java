@@ -18,7 +18,7 @@ public class CalendarEntries {
 		dtStartColumn = cursor.getColumnIndexOrThrow(events.DTSTART);
 		dtEndColumn = cursor.getColumnIndexOrThrow(events.DTEND);
 		titleColumn = cursor.getColumnIndexOrThrow(events.TITLE);
-		idColumn = cursor.getColumnIndexOrThrow(events.CALENDAR_ID);
+		idColumn = cursor.getColumnIndexOrThrow(events._ID);
 		descriptionColumn = cursor.getColumnIndexOrThrow(events.DESCRIPTION);
 		locationColumn = cursor.getColumnIndexOrThrow(events.EVENT_LOCATION);
 	}
@@ -45,10 +45,16 @@ public class CalendarEntries {
 		public long dtStart = 0;
 		public long dtEnd = 0;
 		
-		public boolean isEquals(OrgNodeDate entry) {
-			return this.dtStart == entry.beginTime
-					&& this.dtEnd == entry.endTime 
-					&& entry.getTitle().startsWith(this.title);
+		@Override
+		public boolean equals(Object o) {
+			if (o instanceof OrgNodeDate) {
+				OrgNodeDate entry = (OrgNodeDate) o;
+				return this.dtStart == entry.beginTime
+						&& this.dtEnd == entry.endTime
+						&& entry.getTitle().startsWith(this.title);
+			}
+			
+			return super.equals(o);
 		}
 		
 		public OrgNode getOrgNode() {

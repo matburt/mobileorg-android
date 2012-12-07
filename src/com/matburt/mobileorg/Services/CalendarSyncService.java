@@ -102,7 +102,7 @@ public class CalendarSyncService extends Service implements
 						syncFiles();
 				}
 				
-				if(pull) {
+				if (pull) {
 					assimilateCalendar();
 				}
 			}
@@ -173,8 +173,7 @@ public class CalendarSyncService extends Service implements
 			try {
 				OrgNode node = new OrgNode(scheduledQuery);
 				syncNode(node, entries, filename);
-			} catch (OrgNodeNotFoundException e) {
-			}
+			} catch (OrgNodeNotFoundException e) {}
 			scheduledQuery.moveToNext();
 		}
 		scheduledQuery.close();
@@ -187,28 +186,27 @@ public class CalendarSyncService extends Service implements
 
 	private void syncNode(OrgNode node, MultiMap<CalendarEntry> entries,
 			String filename) {
-		boolean isActive = true;
-		if (allTodos.contains(node.todo))
-			isActive = this.activeTodos.contains(node.todo);
-
 		for (OrgNodeDate date : node.getOrgNodePayload().getDates(
 				node.getCleanedName())) {
-			try {
-				CalendarEntry insertedEntry = getInsertedEntry(date, entries);
-				entries.remove(date.beginTime, insertedEntry);
-				unchanged++;
-			} catch (IllegalArgumentException e) {
-				String insertedEntry = insertEntry(isActive,
-						node.getCleanedPayload(), Long.toString(node.id), date,
-						filename,
-						node.getOrgNodePayload().getProperty("LOCATION"));
-
-				if (insertedEntry != null)
-					inserted++;
-			}
+			if (shouldInsert(node.todo, date))
+				tryToInsertNode(entries, date, filename, node);
 		}
 	}
 
+	private void tryToInsertNode(MultiMap<CalendarEntry> entries,
+			OrgNodeDate date, String filename, OrgNode node) {
+		CalendarEntry insertedEntry = entries.findValue(date.beginTime, date);
+		
+		if (insertedEntry != null) {
+			entries.remove(date.beginTime, insertedEntry);
+			unchanged++;
+		} else {
+			insertEntry(date, node.getCleanedPayload(), filename, node
+					.getOrgNodePayload().getProperty("LOCATION"));
+			inserted++;
+		}
+	}
+	
 	private void assimilateCalendar() {
 		Cursor query = getUnassimilatedCalendarCursor();
 		
@@ -240,7 +238,7 @@ public class CalendarSyncService extends Service implements
 		String[] eventsProjection = new String[] { calendar.events.CALENDAR_ID,
 				calendar.events.DTSTART, calendar.events.DTEND,
 				calendar.events.DESCRIPTION, calendar.events.TITLE,
-				calendar.events.EVENT_LOCATION };
+				calendar.events.EVENT_LOCATION, calendar.events._ID};
 
 		Cursor query = context.getContentResolver().query(
 				calendar.events.CONTENT_URI, eventsProjection,
@@ -256,7 +254,7 @@ public class CalendarSyncService extends Service implements
 		String[] eventsProjection = new String[] { calendar.events.CALENDAR_ID,
 				calendar.events.DTSTART, calendar.events.DTEND,
 				calendar.events.DESCRIPTION, calendar.events.TITLE,
-				calendar.events.EVENT_LOCATION };
+				calendar.events.EVENT_LOCATION, calendar.events._ID };
 
 		Cursor query = context.getContentResolver().query(
 				calendar.events.CONTENT_URI, eventsProjection,
@@ -286,51 +284,38 @@ public class CalendarSyncService extends Service implements
 
 		return map;
 	}
-	
-	/**
-	 * Checks if the given entry is contained given multiMap.
-	 * @throws IllegalArgumentException When entry is not found
-	 */
-	private CalendarEntry getInsertedEntry(OrgNodeDate date,
-			MultiMap<CalendarEntry> entries) throws IllegalArgumentException {
-		ArrayList<CalendarEntry> matches = entries.get(date.beginTime);
-
-		if (matches == null)
-			throw new IllegalArgumentException();
-
-		for (CalendarEntry entry : matches) {
-			if (entry.isEquals(date))
-				return entry;
-		}
-
-		throw new IllegalArgumentException();
-	}
 
 	
 	private void removeCalendarEntries(MultiMap<CalendarEntry> entries) {
 		for (Long entryKey : entries.keySet()) {
 			for (CalendarEntry entry : entries.get(entryKey)) {
-				Log.d("MobileOrg", "Deleting entry for " + entry.title);
 				deleteEntry(entry);
 				deleted++;
 			}
 		}
 	}
 
-
-	private String insertEntry(boolean isTodoActive, String payload,
-			String orgID, OrgNodeDate date, String filename, String location)
-			throws IllegalArgumentException {
-
+	private boolean shouldInsert(String todo, OrgNodeDate date) {
+		boolean isTodoActive = true;
+		if (allTodos.contains(todo))
+			isTodoActive = this.activeTodos.contains(todo);
+		
 		if (this.showDone == false && isTodoActive == false)
-			return null;
+			return false;
+		
+
+		if (this.showPast == false && date.isInPast())
+			return false;
+		
+		return true;
+	}
+
+	private String insertEntry(OrgNodeDate date, String payload,
+			String filename, String location) throws IllegalArgumentException {
 
 		if (this.calendarId == -1)
 			throw new IllegalArgumentException(
 					"Couldn't find selected calendar: " + calendarName);
-
-		if (this.showPast == false && date.isInPast())
-			return null;
 
 		ContentValues values = new ContentValues();
 		values.put(calendar.events.CALENDAR_ID, this.calendarId);

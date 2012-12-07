@@ -34,4 +34,18 @@ public class MultiMap<T> {
 	public Set<Long> keySet() {
 		return entryMap.keySet();
 	}
+	
+	public T findValue(long key, Object object) throws IllegalArgumentException {
+		ArrayList<T> matches = entryMap.get(key);
+
+		if (matches == null)
+			return null;
+
+		for (T match : matches) {
+			if (match.equals(object))
+				return match;
+		}
+
+		return null;
+	}
 }
