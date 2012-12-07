@@ -83,8 +83,16 @@ public class OrgNodeDate {
 		else
 			date = dateTimeformatter.format(new Date(dtStart));
 		
-		if (dtEnd <= 0)
-			return date;
+		if (dtEnd > 0 && dtStart != dtEnd) {
+			long timeDiff = dtEnd - dtStart;
+			
+			if(timeDiff <= DateUtils.DAY_IN_MILLIS) {
+				SimpleDateFormat timeformatter = new SimpleDateFormat("HH:mm");
+				String endTime = timeformatter.format(new Date(dtEnd));
+				
+				date += "-" + endTime;
+			}	
+		}
 		
 		return date;
 	}

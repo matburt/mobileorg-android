@@ -239,7 +239,6 @@ public class CalendarSyncService extends Service implements
 			node.level = 1;
 						
 			node.write(getContentResolver());
-			OrgUtils.announceSyncDone(this);
 			
 			if (this.pullDelete)
 				calendarWrapper.deleteEntry(entry);
@@ -248,6 +247,7 @@ public class CalendarSyncService extends Service implements
 		}
 		
 		query.close();
+		OrgUtils.announceSyncDone(this);
 	}
 
 

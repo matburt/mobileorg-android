@@ -151,10 +151,12 @@ public class CalendarWrapper {
 
 	public Cursor getUnassimilatedCalendarCursor() {
 		Cursor query = context.getContentResolver().query(
-				calendar.events.CONTENT_URI, calendar.eventsProjection,
-				calendar.events.DESCRIPTION + " NOT LIKE ?",
-				new String[] { CALENDAR_ORGANIZER + "%" },
-				null);
+				calendar.events.CONTENT_URI,
+				calendar.eventsProjection,
+				calendar.events.CALENDAR_ID + "=? AND "
+						+ calendar.events.DESCRIPTION + " NOT LIKE ?",
+				new String[] { Integer.toString(this.calendarId),
+						CALENDAR_ORGANIZER + "%" }, null);
 		query.moveToFirst();
 		
 		return query;
