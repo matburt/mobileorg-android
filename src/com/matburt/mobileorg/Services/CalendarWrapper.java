@@ -27,13 +27,13 @@ public class CalendarWrapper {
 	private int calendarId = -1;
 	private Integer reminderTime = 0;
 	private boolean reminderEnabled = false;
-
 	
 	public CalendarWrapper(Context context) {
 		this.context = context;
 		this.sharedPreferences = PreferenceManager
 				.getDefaultSharedPreferences(context);
 		this.calendar = new CalendarComptabilityWrappers(context);
+
 	}
 	
 	public int deleteEntries() {
@@ -150,13 +150,8 @@ public class CalendarWrapper {
 	}
 
 	public Cursor getUnassimilatedCalendarCursor() {
-		String[] eventsProjection = new String[] { calendar.events.CALENDAR_ID,
-				calendar.events.DTSTART, calendar.events.DTEND,
-				calendar.events.DESCRIPTION, calendar.events.TITLE,
-				calendar.events.EVENT_LOCATION, calendar.events._ID};
-
 		Cursor query = context.getContentResolver().query(
-				calendar.events.CONTENT_URI, eventsProjection,
+				calendar.events.CONTENT_URI, calendar.eventsProjection,
 				calendar.events.DESCRIPTION + " NOT LIKE ?",
 				new String[] { CALENDAR_ORGANIZER + "%" },
 				null);
@@ -166,13 +161,8 @@ public class CalendarWrapper {
 	}
 	
 	public Cursor getCalendarCursor(String filename) {
-		String[] eventsProjection = new String[] { calendar.events.CALENDAR_ID,
-				calendar.events.DTSTART, calendar.events.DTEND,
-				calendar.events.DESCRIPTION, calendar.events.TITLE,
-				calendar.events.EVENT_LOCATION, calendar.events._ID };
-
 		Cursor query = context.getContentResolver().query(
-				calendar.events.CONTENT_URI, eventsProjection,
+				calendar.events.CONTENT_URI, calendar.eventsProjection,
 				calendar.events.DESCRIPTION + " LIKE ?",
 				new String[] { CALENDAR_ORGANIZER + ":" + filename + "%" },
 				null);

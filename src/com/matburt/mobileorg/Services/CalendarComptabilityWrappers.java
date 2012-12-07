@@ -16,10 +16,16 @@ public class CalendarComptabilityWrappers {
 	public intReminders reminders = new intReminders();
 	public intCalendarAlerts calendarAlerts = new intCalendarAlerts();
 	private Context context;
+
+	public String[] eventsProjection;
 	
 	public CalendarComptabilityWrappers(Context context) {
 		this.context = context;
 		initCalendar();
+		
+		this.eventsProjection = new String[] { events.CALENDAR_ID,
+				events.DTSTART, events.DTEND, events.DESCRIPTION, events.TITLE,
+				events.EVENT_LOCATION, events._ID, events.ALL_DAY };
 	}
 	
 	public class intEvents {

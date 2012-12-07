@@ -230,7 +230,7 @@ public class CalendarSyncService extends Service implements
 				
 		while(query.isAfterLast() == false) {
 			CalendarEntry entry = entriesParser.getEntryFromCursor(query);
-			OrgNode node = entry.getOrgNode();
+			OrgNode node = entry.convertToOrgNode();
 			
 			OrgFile captureFile = OrgProviderUtils
 					.getOrCreateCaptureFile(getContentResolver());

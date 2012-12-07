@@ -12,6 +12,7 @@ public class CalendarEntriesParser {
 	private int titleColumn;
 	private int descriptionColumn;
 	private int locationColumn;
+	private int allDayColumn;
 
 	public CalendarEntriesParser(intEvents events, Cursor cursor) {		
 		dtStartColumn = cursor.getColumnIndexOrThrow(events.DTSTART);
@@ -20,6 +21,7 @@ public class CalendarEntriesParser {
 		idColumn = cursor.getColumnIndexOrThrow(events._ID);
 		descriptionColumn = cursor.getColumnIndexOrThrow(events.DESCRIPTION);
 		locationColumn = cursor.getColumnIndexOrThrow(events.EVENT_LOCATION);
+		allDayColumn = cursor.getColumnIndexOrThrow(events.ALL_DAY);
 	}
 
 	public CalendarEntry getEntryFromCursor(Cursor cursor) {
@@ -31,6 +33,7 @@ public class CalendarEntriesParser {
 		entry.id = cursor.getLong(idColumn);
 		entry.description = cursor.getString(descriptionColumn);
 		entry.location = cursor.getString(locationColumn);
+		entry.allDay = cursor.getInt(allDayColumn);
 		
 		return entry;
 	}

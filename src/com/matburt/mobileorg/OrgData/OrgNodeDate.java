@@ -75,10 +75,18 @@ public class OrgNodeDate {
 		return cal.getTimeInMillis();
 	}
 	
-	public static String getDate(long dtStart, long dtEnd) {
-		String start = dateTimeformatter.format(new Date(dtStart));
-		// TODO Complete
-		return start;
+	public static String getDate(long dtStart, long dtEnd, boolean allDay) {
+		String date;
+		
+		if (allDay)
+			date = dateformatter.format(new Date(dtStart));
+		else
+			date = dateTimeformatter.format(new Date(dtStart));
+		
+		if (dtEnd <= 0)
+			return date;
+		
+		return date;
 	}
 	
 	/**
