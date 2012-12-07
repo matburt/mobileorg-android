@@ -5,22 +5,16 @@ import java.util.HashSet;
 
 import android.app.Service;
 import android.content.ContentResolver;
-import android.content.ContentUris;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
-import android.database.SQLException;
-import android.net.Uri;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
-import android.text.format.Time;
 import android.util.Log;
 
-import com.matburt.mobileorg.R;
-import com.matburt.mobileorg.OrgData.CalendarEntries;
-import com.matburt.mobileorg.OrgData.CalendarEntries.CalendarEntry;
+import com.matburt.mobileorg.OrgData.CalendarEntriesParser;
+import com.matburt.mobileorg.OrgData.CalendarEntry;
 import com.matburt.mobileorg.OrgData.OrgFile;
 import com.matburt.mobileorg.OrgData.OrgNode;
 import com.matburt.mobileorg.OrgData.OrgNodeDate;
@@ -37,18 +31,12 @@ public class CalendarSyncService extends Service implements
 	public static final String PUSH = "push";
 	public final static String FILELIST = "filelist";
 
-	private final static String CALENDAR_ORGANIZER = "MobileOrg";
-
-	private CalendarComptabilityWrappers calendar;
-
 	private Context context;
 	private SharedPreferences sharedPreferences;
 	private ContentResolver resolver;
 
-	private String calendarName = "";
-	private int calendarId = -1;
-	private Integer reminderTime = 0;
-	private boolean reminderEnabled = false;
+	private CalendarWrapper calendarWrapper;
+
 	private boolean showDone = false;
 	private boolean showPast = true;
 	private boolean showHabits = false;
@@ -68,7 +56,7 @@ public class CalendarSyncService extends Service implements
 		this.sharedPreferences = PreferenceManager
 				.getDefaultSharedPreferences(context);
 		this.sharedPreferences.registerOnSharedPreferenceChangeListener(this);
-		this.calendar = new CalendarComptabilityWrappers(context);
+		this.calendarWrapper = new CalendarWrapper(context);
 		refreshPreferences();
 	}
 
@@ -90,9 +78,9 @@ public class CalendarSyncService extends Service implements
 			public void run() {
 				if (clearDB) {
 					if (fileList != null)
-						deleteFileEntries(fileList);
+						calendarWrapper.deleteFileEntries(fileList);
 					else
-						deleteEntries();
+						calendarWrapper.deleteEntries();
 				} 
 				
 				if (push) {
@@ -112,8 +100,6 @@ public class CalendarSyncService extends Service implements
 	}
 
 	private void syncFiles() {
-		// deleteEntries();
-
 		ArrayList<String> files = OrgProviderUtils.getFilenames(resolver);
 		files.remove(OrgFile.AGENDA_FILE);
 		for (String filename : files)
@@ -123,30 +109,9 @@ public class CalendarSyncService extends Service implements
 	private void syncFiles(String[] files) {
 		for (String filename : files) {
 			if (filename.equals(OrgFile.AGENDA_FILE) == false) {
-				// deleteFileEntries(filename);
 				syncFile(filename);
 			}
 		}
-	}
-
-	private int deleteEntries() {
-		refreshPreferences();
-		return context.getContentResolver().delete(calendar.events.CONTENT_URI,
-				calendar.events.DESCRIPTION + " LIKE ?",
-				new String[] { CALENDAR_ORGANIZER + "%" });
-	}
-
-	private void deleteFileEntries(String[] files) {
-		for (String file : files) {
-			deleteFileEntries(file);
-		}
-	}
-	
-	private int deleteFileEntries(String filename) {
-		refreshPreferences();
-		return context.getContentResolver().delete(calendar.events.CONTENT_URI,
-				calendar.events.DESCRIPTION + " LIKE ?",
-				new String[] { CALENDAR_ORGANIZER + ":" + filename + "%" });
 	}
 
 
@@ -188,7 +153,7 @@ public class CalendarSyncService extends Service implements
 			String filename) {
 		for (OrgNodeDate date : node.getOrgNodePayload().getDates(
 				node.getCleanedName())) {
-			if (shouldInsert(node.todo, date))
+			if (shouldInsertEntry(node.todo, date))
 				tryToInsertNode(entries, date, filename, node);
 		}
 	}
@@ -201,16 +166,16 @@ public class CalendarSyncService extends Service implements
 			entries.remove(date.beginTime, insertedEntry);
 			unchanged++;
 		} else {
-			insertEntry(date, node.getCleanedPayload(), filename, node
+			calendarWrapper.insertEntry(date, node.getCleanedPayload(), filename, node
 					.getOrgNodePayload().getProperty("LOCATION"));
 			inserted++;
 		}
 	}
 	
 	private void assimilateCalendar() {
-		Cursor query = getUnassimilatedCalendarCursor();
+		Cursor query = calendarWrapper.getUnassimilatedCalendarCursor();
 		
-		CalendarEntries entriesParser = new CalendarEntries(calendar.events,
+		CalendarEntriesParser entriesParser = new CalendarEntriesParser(calendarWrapper.calendar.events,
 				query);
 		
 		while(query.isAfterLast() == false) {
@@ -226,53 +191,22 @@ public class CalendarSyncService extends Service implements
 			node.write(getContentResolver());
 			OrgUtils.announceSyncDone(this);
 			
-			deleteEntry(entry);
+			calendarWrapper.deleteEntry(entry);
 			
 			query.moveToNext();
 		}
 		
 		query.close();
 	}
-			
-	private Cursor getUnassimilatedCalendarCursor() {
-		String[] eventsProjection = new String[] { calendar.events.CALENDAR_ID,
-				calendar.events.DTSTART, calendar.events.DTEND,
-				calendar.events.DESCRIPTION, calendar.events.TITLE,
-				calendar.events.EVENT_LOCATION, calendar.events._ID};
-
-		Cursor query = context.getContentResolver().query(
-				calendar.events.CONTENT_URI, eventsProjection,
-				calendar.events.DESCRIPTION + " NOT LIKE ?",
-				new String[] { CALENDAR_ORGANIZER + "%" },
-				null);
-		query.moveToFirst();
-		
-		return query;
-	}
 	
-	private Cursor getCalendarCursor(String filename) {
-		String[] eventsProjection = new String[] { calendar.events.CALENDAR_ID,
-				calendar.events.DTSTART, calendar.events.DTEND,
-				calendar.events.DESCRIPTION, calendar.events.TITLE,
-				calendar.events.EVENT_LOCATION, calendar.events._ID };
-
-		Cursor query = context.getContentResolver().query(
-				calendar.events.CONTENT_URI, eventsProjection,
-				calendar.events.DESCRIPTION + " LIKE ?",
-				new String[] { CALENDAR_ORGANIZER + ":" + filename + "%" },
-				null);
-		query.moveToFirst();
-		
-		return query;
-	}
 	
 	private MultiMap<CalendarEntry> getCalendarEntries(String filename) {
 		refreshPreferences();
 
-		Cursor query = getCalendarCursor(filename);
+		Cursor query = calendarWrapper.getCalendarCursor(filename);
 
 		MultiMap<CalendarEntry> map = new MultiMap<CalendarEntry>();
-		CalendarEntries entriesParser = new CalendarEntries(calendar.events,
+		CalendarEntriesParser entriesParser = new CalendarEntriesParser(calendarWrapper.calendar.events,
 				query);
 
 		while (query.isAfterLast() == false) {
@@ -285,17 +219,17 @@ public class CalendarSyncService extends Service implements
 		return map;
 	}
 
-	
 	private void removeCalendarEntries(MultiMap<CalendarEntry> entries) {
 		for (Long entryKey : entries.keySet()) {
 			for (CalendarEntry entry : entries.get(entryKey)) {
-				deleteEntry(entry);
+				calendarWrapper.deleteEntry(entry);
 				deleted++;
 			}
 		}
 	}
+	
 
-	private boolean shouldInsert(String todo, OrgNodeDate date) {
+	private boolean shouldInsertEntry(String todo, OrgNodeDate date) {
 		boolean isTodoActive = true;
 		if (allTodos.contains(todo))
 			isTodoActive = this.activeTodos.contains(todo);
@@ -310,156 +244,15 @@ public class CalendarSyncService extends Service implements
 		return true;
 	}
 
-	private String insertEntry(OrgNodeDate date, String payload,
-			String filename, String location) throws IllegalArgumentException {
-
-		if (this.calendarId == -1)
-			throw new IllegalArgumentException(
-					"Couldn't find selected calendar: " + calendarName);
-
-		ContentValues values = new ContentValues();
-		values.put(calendar.events.CALENDAR_ID, this.calendarId);
-		values.put(calendar.events.TITLE, date.getTitle());
-		values.put(calendar.events.DESCRIPTION, CALENDAR_ORGANIZER + ":"
-				+ filename + "\n" + payload);
-		values.put(calendar.events.EVENT_LOCATION, location);
-
-		// Sync with google will overwrite organizer :(
-		// values.put(intEvents.ORGANIZER, embeddedNodeMetadata);
-
-		values.put(calendar.events.DTSTART, date.beginTime);
-		values.put(calendar.events.DTEND, date.endTime);
-		values.put(calendar.events.ALL_DAY, date.allDay);
-		values.put(calendar.events.HAS_ALARM, 0);
-		values.put(calendar.events.EVENT_TIMEZONE, Time.getCurrentTimezone());
-
-		Uri uri = context.getContentResolver().insert(
-				calendar.events.CONTENT_URI, values);
-		String nodeID = uri.getLastPathSegment();
-
-		if (date.allDay == 0 && this.reminderEnabled)
-			addReminder(nodeID, date.beginTime, date.endTime);
-
-		return nodeID;
-	}
-
-	private void addReminder(String eventID, long beginTime, long endTime) {
-		if (beginTime < System.currentTimeMillis())
-			return;
-
-		ContentValues reminderValues = new ContentValues();
-		reminderValues.put(calendar.reminders.MINUTES, this.reminderTime);
-		reminderValues.put(calendar.reminders.EVENT_ID, eventID);
-		reminderValues.put(calendar.reminders.METHOD,
-				calendar.reminders.METHOD_ALERT);
-		context.getContentResolver().insert(calendar.reminders.CONTENT_URI,
-				reminderValues);
-
-		ContentValues alertvalues = new ContentValues();
-		alertvalues.put(calendar.calendarAlerts.EVENT_ID, eventID);
-		alertvalues.put(calendar.calendarAlerts.BEGIN, beginTime);
-		alertvalues.put(calendar.calendarAlerts.END, endTime);
-		alertvalues.put(calendar.calendarAlerts.ALERT_TIME, this.reminderTime);
-		alertvalues.put(calendar.calendarAlerts.STATE,
-				calendar.calendarAlerts.STATE_SCHEDULED);
-		alertvalues.put(calendar.calendarAlerts.MINUTES, this.reminderTime);
-		context.getContentResolver().insert(
-				calendar.calendarAlerts.CONTENT_URI, alertvalues);
-
-		ContentValues eventValues = new ContentValues();
-		eventValues.put(calendar.events.HAS_ALARM, 1);
-		context.getContentResolver().update(
-				ContentUris.withAppendedId(calendar.events.CONTENT_URI,
-						Long.valueOf(eventID)), eventValues, null, null);
-	}
-
-
-	private int deleteEntry(CalendarEntry entry) {
-		return context.getContentResolver().delete(
-				ContentUris.withAppendedId(calendar.events.CONTENT_URI,
-						entry.id), null, null);
-	}
-	
-	private int getCalendarID(String calendarName) {
-		Cursor cursor = context.getContentResolver().query(
-				calendar.calendars.CONTENT_URI,
-				new String[] { calendar.calendars._ID,
-						calendar.calendars.CALENDAR_DISPLAY_NAME }, null, null,
-				null);
-		if (cursor != null && cursor.moveToFirst()) {
-			for (int i = 0; i < cursor.getCount(); i++) {
-				int calId = cursor.getInt(0);
-				String calName = cursor.getString(1);
-
-				if (calName.equals(calendarName)) {
-					cursor.close();
-					return calId;
-				}
-				cursor.moveToNext();
-			}
-			cursor.close();
-		}
-		return -1;
-	}
-
-	public static CharSequence[] getCalendars(Context context) {
-		CharSequence[] result = new CharSequence[1];
-		result[0] = context.getString(R.string.error_setting_no_calendar);
-
-		try {
-			CalendarComptabilityWrappers calendar = new CalendarComptabilityWrappers(
-					context);
-			Cursor cursor = context.getContentResolver().query(
-					calendar.calendars.CONTENT_URI,
-					new String[] { calendar.calendars._ID,
-							calendar.calendars.CALENDAR_DISPLAY_NAME }, null,
-					null, null);
-			if (cursor == null)
-				return result;
-
-			if (cursor.getCount() == 0) {
-				cursor.close();
-				return result;
-			}
-
-			if (cursor.moveToFirst()) {
-				result = new CharSequence[cursor.getCount()];
-
-				for (int i = 0; i < cursor.getCount(); i++) {
-					result[i] = cursor.getString(1);
-					cursor.moveToNext();
-				}
-			}
-			cursor.close();
-		} catch (SQLException e) {
-		}
-
-		return result;
-	}
-
 
 	private void refreshPreferences() {
-		this.reminderEnabled = sharedPreferences.getBoolean("calendarReminder",
-				false);
-
-		if (reminderEnabled) {
-			String intervalString = sharedPreferences.getString(
-					"calendarReminderInterval", "0");
-			if (intervalString == null)
-				throw new IllegalArgumentException(
-						"Invalid calendar reminder interval");
-			this.reminderTime = Integer.valueOf(intervalString);
-		}
-
 		this.showDone = sharedPreferences.getBoolean("calendarShowDone", true);
 		this.showPast = sharedPreferences.getBoolean("calendarShowPast", true);
 		this.showHabits = sharedPreferences.getBoolean("calendarHabits", true);
-		this.calendarName = PreferenceManager.getDefaultSharedPreferences(
-				context).getString("calendarName", "");
-		this.calendarId = getCalendarID(calendarName);
 		this.activeTodos = new HashSet<String>(
 				OrgProviderUtils.getActiveTodos(resolver));
 		this.allTodos = new HashSet<String>(OrgProviderUtils.getTodos(resolver));
+		calendarWrapper.refreshPreferences();
 	}
 
 	@Override

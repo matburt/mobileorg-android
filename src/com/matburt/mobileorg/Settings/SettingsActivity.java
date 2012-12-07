@@ -19,6 +19,7 @@ import com.actionbarsherlock.app.SherlockPreferenceActivity;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.OrgData.OrgProviderUtils;
 import com.matburt.mobileorg.Services.CalendarSyncService;
+import com.matburt.mobileorg.Services.CalendarWrapper;
 import com.matburt.mobileorg.Settings.Synchronizers.SDCardSettingsActivity;
 import com.matburt.mobileorg.Settings.Synchronizers.ScpSettingsActivity;
 import com.matburt.mobileorg.Settings.Synchronizers.UbuntuOneSettingsActivity;
@@ -138,7 +139,7 @@ SharedPreferences.OnSharedPreferenceChangeListener {
 	private void populateCalendarNames() {
 		ListPreference calendarName = (ListPreference) findPreference("calendarName");
 
-		CharSequence[] calendars = CalendarSyncService.getCalendars(
+		CharSequence[] calendars = CalendarWrapper.getCalendars(
 				getApplicationContext());
 
 		calendarName.setEntries(calendars);
