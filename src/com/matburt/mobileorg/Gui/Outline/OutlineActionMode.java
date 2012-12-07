@@ -5,6 +5,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.util.Log;
 import android.widget.ListView;
 
 import com.actionbarsherlock.view.ActionMode;
@@ -232,16 +233,11 @@ public class OutlineActionMode implements ActionMode.Callback {
 	}
 	
 	private void runRecover() {
-		// TODO Re-enable
-//		try {
-//			OrgFile orgFile = this.node.getOrgFile(resolver);
-//			Log.d("MobileOrg", orgFile.toString(resolver));
-//		} catch (OrgFileNotFoundException e) {
-//			e.printStackTrace();
-//		}
-		
-		Intent calIntent = new Intent(context, CalendarSyncService.class);
-		calIntent.putExtra(CalendarSyncService.PULL, true);
-		context.startService(calIntent);
+		try {
+			OrgFile orgFile = this.node.getOrgFile(resolver);
+			Log.d("MobileOrg", orgFile.toString(resolver));
+		} catch (OrgFileNotFoundException e) {
+			e.printStackTrace();
+		}
 	}
 }

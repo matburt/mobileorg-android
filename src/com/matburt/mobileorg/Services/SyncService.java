@@ -122,6 +122,7 @@ public class SyncService extends Service implements
 				
 				if(calendarEnabled) {
 					Intent calIntent = new Intent(getBaseContext(), CalendarSyncService.class);
+					calIntent.putExtra(CalendarSyncService.PUSH, true);
 					calIntent.putExtra(CalendarSyncService.FILELIST, files);
 					getBaseContext().startService(calIntent);
 				}

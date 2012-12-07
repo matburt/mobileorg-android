@@ -28,7 +28,7 @@ public class CalendarSyncService extends Service implements
 		SharedPreferences.OnSharedPreferenceChangeListener {
 	public final static String CLEARDB = "clearDB";
 	public final static String PULL = "pull";
-	public static final String PUSH = "push";
+	public final static String PUSH = "push";
 	public final static String FILELIST = "filelist";
 
 	private Context context;
@@ -40,6 +40,9 @@ public class CalendarSyncService extends Service implements
 	private boolean showDone = false;
 	private boolean showPast = true;
 	private boolean showHabits = false;
+	private boolean pullEnabled = false;
+	private boolean pullDelete = false;
+
 	private HashSet<String> activeTodos = new HashSet<String>();
 	private HashSet<String> allTodos = new HashSet<String>();
 
@@ -88,13 +91,16 @@ public class CalendarSyncService extends Service implements
 						syncFiles(fileList);
 					else
 						syncFiles();
+					
+					if (pullEnabled)
+						assimilateCalendar();
 				}
 				
 				if (pull) {
 					assimilateCalendar();
 				}
 			}
-		}.run();
+		}.start();
 
 		return 0;
 	}
@@ -172,33 +178,20 @@ public class CalendarSyncService extends Service implements
 		}
 	}
 	
-	private void assimilateCalendar() {
-		Cursor query = calendarWrapper.getUnassimilatedCalendarCursor();
+	private boolean shouldInsertEntry(String todo, OrgNodeDate date) {
+		boolean isTodoActive = true;
+		if (allTodos.contains(todo))
+			isTodoActive = this.activeTodos.contains(todo);
 		
-		CalendarEntriesParser entriesParser = new CalendarEntriesParser(calendarWrapper.calendar.events,
-				query);
+		if (this.showDone == false && isTodoActive == false)
+			return false;
 		
-		while(query.isAfterLast() == false) {
-			CalendarEntry entry = entriesParser.getEntryFromCursor(query);
-			OrgNode node = entry.getOrgNode();
-			
-			OrgFile captureFile = OrgProviderUtils
-					.getOrCreateCaptureFile(getContentResolver());
-			node.fileId = captureFile.id;
-			node.parentId = captureFile.nodeId;
-			node.level = 1;
-			
-			node.write(getContentResolver());
-			OrgUtils.announceSyncDone(this);
-			
-			calendarWrapper.deleteEntry(entry);
-			
-			query.moveToNext();
-		}
+
+		if (this.showPast == false && date.isInPast())
+			return false;
 		
-		query.close();
+		return true;
 	}
-	
 	
 	private MultiMap<CalendarEntry> getCalendarEntries(String filename) {
 		refreshPreferences();
@@ -228,31 +221,46 @@ public class CalendarSyncService extends Service implements
 		}
 	}
 	
-
-	private boolean shouldInsertEntry(String todo, OrgNodeDate date) {
-		boolean isTodoActive = true;
-		if (allTodos.contains(todo))
-			isTodoActive = this.activeTodos.contains(todo);
+	
+	private void assimilateCalendar() {
+		Cursor query = calendarWrapper.getUnassimilatedCalendarCursor();
 		
-		if (this.showDone == false && isTodoActive == false)
-			return false;
+		CalendarEntriesParser entriesParser = new CalendarEntriesParser(
+				calendarWrapper.calendar.events, query);
+				
+		while(query.isAfterLast() == false) {
+			CalendarEntry entry = entriesParser.getEntryFromCursor(query);
+			OrgNode node = entry.getOrgNode();
+			
+			OrgFile captureFile = OrgProviderUtils
+					.getOrCreateCaptureFile(getContentResolver());
+			node.fileId = captureFile.id;
+			node.parentId = captureFile.nodeId;
+			node.level = 1;
+						
+			node.write(getContentResolver());
+			OrgUtils.announceSyncDone(this);
+			
+			if (this.pullDelete)
+				calendarWrapper.deleteEntry(entry);
+			
+			query.moveToNext();
+		}
 		
-
-		if (this.showPast == false && date.isInPast())
-			return false;
-		
-		return true;
+		query.close();
 	}
 
 
 	private void refreshPreferences() {
+		this.pullEnabled = sharedPreferences.getBoolean("calendarPull", false);
+		this.pullDelete = sharedPreferences.getBoolean("calendarPullDelete", false);
 		this.showDone = sharedPreferences.getBoolean("calendarShowDone", true);
 		this.showPast = sharedPreferences.getBoolean("calendarShowPast", true);
 		this.showHabits = sharedPreferences.getBoolean("calendarHabits", true);
 		this.activeTodos = new HashSet<String>(
 				OrgProviderUtils.getActiveTodos(resolver));
 		this.allTodos = new HashSet<String>(OrgProviderUtils.getTodos(resolver));
-		calendarWrapper.refreshPreferences();
+		this.calendarWrapper.refreshPreferences();
 	}
 
 	@Override

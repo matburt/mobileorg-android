@@ -120,6 +120,18 @@
             android:key="calendarHabits"
             android:summary="@string/preference_calendar_show_habits_summary"
             android:title="@string/preference_calendar_show_habits" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:dependency="calendarEnabled"
+            android:key="calendarPull"
+            android:summary="@string/preference_calendar_pull_summary"
+            android:title="@string/preference_calendar_pull" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:dependency="calendarPull"
+            android:key="calendarPullDelete"
+            android:summary="@string/preference_calendar_pull_delete_summary"
+            android:title="@string/preference_calendar_pull_delete" />
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/preference_other" >
         <PreferenceScreen
