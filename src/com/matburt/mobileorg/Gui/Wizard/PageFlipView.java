@@ -1,4 +1,4 @@
-package com.matburt.mobileorg.Views;
+package com.matburt.mobileorg.Gui.Wizard;
 
 import android.app.Activity;
 import android.content.Context;

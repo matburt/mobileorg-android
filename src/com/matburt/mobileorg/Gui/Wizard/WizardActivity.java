@@ -1,4 +1,4 @@
-package com.matburt.mobileorg.Settings;
+package com.matburt.mobileorg.Gui.Wizard;
 
 import java.util.ArrayList;
 
@@ -40,10 +40,12 @@ import com.dropbox.client2.session.AccessTokenPair;
 import com.dropbox.client2.session.AppKeyPair;
 import com.dropbox.client2.session.Session.AccessType;
 import com.matburt.mobileorg.R;
+import com.matburt.mobileorg.Gui.Wizard.DirectoryBrowser.DropboxDirectoryBrowser;
+import com.matburt.mobileorg.Gui.Wizard.DirectoryBrowser.LocalDirectoryBrowser;
+import com.matburt.mobileorg.Gui.Wizard.DirectoryBrowser.UbuntuOneDirectoryBrowser;
 import com.matburt.mobileorg.Synchronizers.SSHSynchronizer;
 import com.matburt.mobileorg.Synchronizers.UbuntuOneSynchronizer;
 import com.matburt.mobileorg.Synchronizers.WebDAVSynchronizer;
-import com.matburt.mobileorg.Views.PageFlipView;
 import com.matburt.mobileorg.util.OrgUtils;
 
 public class WizardActivity extends Activity {

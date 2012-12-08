@@ -1,4 +1,4 @@
-package com.matburt.mobileorg.Views;
+package com.matburt.mobileorg.Gui.Wizard;
 
 import android.content.Context;
 import android.util.AttributeSet;
