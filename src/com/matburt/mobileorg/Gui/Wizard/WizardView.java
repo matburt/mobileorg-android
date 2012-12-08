@@ -181,6 +181,10 @@ public class WizardView extends HorizontalScrollView implements
 		View v = LayoutInflater.from(getContext()).inflate(resId, null);
 		container.addView(v);
 	}
+	
+	public void addPage(View view) {
+		container.addView(view);
+	}
 
 	// delete all pages after and including given page
 	public void removePagesAfter(int page) {
