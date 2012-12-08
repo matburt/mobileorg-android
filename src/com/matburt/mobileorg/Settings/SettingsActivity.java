@@ -14,12 +14,12 @@ import android.os.Bundle;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceManager;
-import android.util.Log;
 
 import com.actionbarsherlock.app.SherlockPreferenceActivity;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.OrgData.OrgProviderUtils;
 import com.matburt.mobileorg.Services.CalendarSyncService;
+import com.matburt.mobileorg.Services.CalendarWrapper;
 import com.matburt.mobileorg.Settings.Synchronizers.SDCardSettingsActivity;
 import com.matburt.mobileorg.Settings.Synchronizers.ScpSettingsActivity;
 import com.matburt.mobileorg.Settings.Synchronizers.UbuntuOneSettingsActivity;
@@ -37,7 +37,6 @@ SharedPreferences.OnSharedPreferenceChangeListener {
 	public static final String KEY_CALENDAR_NAME = "calendarName";
 	public static final String KEY_CALENDAR_REMINDER_INTERVAL = "calendarReminderInterval";
 	public static final String KEY_DO_AUTO_SYNC = "doAutoSync";
-	private boolean updateCalendar = false;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -76,18 +75,6 @@ SharedPreferences.OnSharedPreferenceChangeListener {
 
 	@Override
 	public void onPause() {
-		if (this.updateCalendar) {
-			this.updateCalendar = false;
-
-			if (isCalendarEnabled()) {
-				Log.d("MobileOrg", "onPause(): syncFiles");
-				getCalendarSyncService().syncFiles();
-			} else {
-				Log.d("MobileOrg", "onPause(): deleteAllEntries");
-				getCalendarSyncService().deleteAllEntries(
-						getApplicationContext());
-			}
-		}
 		getPreferenceScreen().getSharedPreferences().unregisterOnSharedPreferenceChangeListener(this);
 		super.onPause();
 	}
@@ -100,10 +87,6 @@ SharedPreferences.OnSharedPreferenceChangeListener {
 	@Override
 	public void onSharedPreferenceChanged(SharedPreferences sharedPreferences,
 			String key) {
-		if(key.startsWith("calendar")) {
-			Log.d("MobileOrg", "Set to update calendar");
-			this.updateCalendar = true;
-		}
 		// Set up the initial values following the Settings design guidelines for Ice Cream Sandwich
 		// Settings should show their current value instead of a description
 		setPreferenceSummary(sharedPreferences, key);
@@ -137,20 +120,16 @@ SharedPreferences.OnSharedPreferenceChangeListener {
 									OrgProviderUtils
 											.clearDB(getContentResolver());
 									OrgUtils.announceSyncDone(getApplicationContext());
-									if (isCalendarEnabled())
-										getCalendarSyncService()
-												.deleteAllEntries(
-														getApplicationContext());
+									
+									Intent clearCalDBIntent = new Intent(getBaseContext(), CalendarSyncService.class);
+									clearCalDBIntent.putExtra(CalendarSyncService.CLEARDB, true);
+									startService(clearCalDBIntent);
 								}
 
 							}).setNegativeButton(R.string.no, null).show();
 			return false;
 		}
 	};
-
-	private CalendarSyncService getCalendarSyncService() {
-		return new CalendarSyncService(getContentResolver(), this);
-	}
 
 	private boolean isCalendarEnabled() {
 		return getPreferenceManager().getSharedPreferences().getBoolean(
@@ -160,7 +139,7 @@ SharedPreferences.OnSharedPreferenceChangeListener {
 	private void populateCalendarNames() {
 		ListPreference calendarName = (ListPreference) findPreference("calendarName");
 
-		CharSequence[] calendars = getCalendarSyncService().getCalendars(
+		CharSequence[] calendars = CalendarWrapper.getCalendars(
 				getApplicationContext());
 
 		calendarName.setEntries(calendars);

@@ -3,12 +3,6 @@ package com.matburt.mobileorg.Gui.Outline;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.matburt.mobileorg.R;
-import com.matburt.mobileorg.Gui.Theme.DefaultTheme;
-import com.matburt.mobileorg.OrgData.OrgFileParser;
-import com.matburt.mobileorg.OrgData.OrgNode;
-import com.matburt.mobileorg.OrgData.OrgProviderUtils;
-
 import android.content.ContentResolver;
 import android.content.Context;
 import android.graphics.Typeface;
@@ -24,6 +18,12 @@ import android.view.View;
 import android.widget.Checkable;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+
+import com.matburt.mobileorg.R;
+import com.matburt.mobileorg.Gui.Theme.DefaultTheme;
+import com.matburt.mobileorg.OrgData.OrgFileParser;
+import com.matburt.mobileorg.OrgData.OrgNode;
+import com.matburt.mobileorg.OrgData.OrgProviderUtils;
 
 public class OutlineItem extends RelativeLayout implements Checkable {
 		

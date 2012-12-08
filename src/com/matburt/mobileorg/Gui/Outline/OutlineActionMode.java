@@ -17,6 +17,7 @@ import com.matburt.mobileorg.Gui.ViewActivity;
 import com.matburt.mobileorg.Gui.Capture.EditActivity;
 import com.matburt.mobileorg.OrgData.OrgFile;
 import com.matburt.mobileorg.OrgData.OrgNode;
+import com.matburt.mobileorg.Services.CalendarSyncService;
 import com.matburt.mobileorg.Services.TimeclockService;
 import com.matburt.mobileorg.util.OrgFileNotFoundException;
 import com.matburt.mobileorg.util.OrgUtils;
@@ -209,6 +210,12 @@ public class OutlineActionMode implements ActionMode.Callback {
 		try {
 			OrgFile file = new OrgFile(node.fileId, resolver);
 			file.removeFile(resolver);
+			
+			Intent calDeleteIntent = new Intent(context, CalendarSyncService.class);
+			calDeleteIntent.putExtra(CalendarSyncService.CLEARDB, true);
+			calDeleteIntent.putExtra(CalendarSyncService.FILELIST, new String[] {file.filename});
+			context.startService(calDeleteIntent);
+			
 			OrgUtils.announceSyncDone(context);
 		} catch (OrgFileNotFoundException e) {}
 	}

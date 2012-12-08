@@ -3,6 +3,7 @@ package com.matburt.mobileorg.OrgData;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -16,6 +17,7 @@ public class OrgNodeDate {
 	public long endTime = 0;
 	public int allDay = 0;
 	public String type = "";
+	private String title = "";
 
 	private static final SimpleDateFormat dateTimeformatter = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 	private static final SimpleDateFormat dateformatter = new SimpleDateFormat("yyyy-MM-dd");
@@ -73,11 +75,41 @@ public class OrgNodeDate {
 		return cal.getTimeInMillis();
 	}
 	
+	public static String getDate(long dtStart, long dtEnd, boolean allDay) {
+		String date;
+		
+		if (allDay)
+			date = dateformatter.format(new Date(dtStart));
+		else
+			date = dateTimeformatter.format(new Date(dtStart));
+		
+		if (dtEnd > 0 && dtStart != dtEnd) {
+			long timeDiff = dtEnd - dtStart;
+			
+			if(timeDiff <= DateUtils.DAY_IN_MILLIS) {
+				SimpleDateFormat timeformatter = new SimpleDateFormat("HH:mm");
+				String endTime = timeformatter.format(new Date(dtEnd));
+				
+				date += "-" + endTime;
+			}	
+		}
+		
+		return date;
+	}
+	
 	/**
 	 * Whether an event is in the past. True if event ended 24 hours ago or
 	 * sometime in the future.
 	 */
 	public boolean isInPast() {
 		return System.currentTimeMillis() - DateUtils.DAY_IN_MILLIS >= endTime;
+	}
+	
+	public void setTitle(String title) {
+		this.title = title;
+	}
+	
+	public String getTitle() {
+		return this.type + this.title;
 	}
 }

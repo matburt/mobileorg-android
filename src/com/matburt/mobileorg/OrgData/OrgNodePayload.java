@@ -216,24 +216,27 @@ public class OrgNodePayload {
 	}
 	
 	
-	public ArrayList<OrgNodeDate> getDates() {
+	public ArrayList<OrgNodeDate> getDates(String title) {
 		ArrayList<OrgNodeDate> result = new ArrayList<OrgNodeDate>();
 
 		try {
 			OrgNodeDate scheduledEntry = new OrgNodeDate(getScheduled());
 			scheduledEntry.type = "SC: ";
+			scheduledEntry.setTitle(title);
 			result.add(scheduledEntry);
 		} catch (IllegalArgumentException e) {}
 		
 		try {
 			OrgNodeDate deadlineEntry = new OrgNodeDate(getDeadline());
 			deadlineEntry.type = "DL: ";
+			deadlineEntry.setTitle(title);
 			result.add(deadlineEntry);
 		} catch (IllegalArgumentException e) {}
 
 		try {
 			OrgNodeDate timestampEntry = new OrgNodeDate(getTimestamp());
 			timestampEntry.type = "";
+			timestampEntry.setTitle(title);
 			result.add(timestampEntry);
 		} catch (IllegalArgumentException e) {}
 		
