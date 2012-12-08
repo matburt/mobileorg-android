@@ -51,6 +51,7 @@ public class SSHWizard extends Wizard {
 			}
 		});
 		
+		setupDoneButton(view);
 		wizardView.addPage(view);
 		wizardView.setNavButtonStateOnPage(1, true, WizardView.LAST_PAGE);
 		wizardView.enablePage(1);

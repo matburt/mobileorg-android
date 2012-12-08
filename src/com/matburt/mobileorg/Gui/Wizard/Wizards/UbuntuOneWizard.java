@@ -109,6 +109,7 @@ public class UbuntuOneWizard extends Wizard {
 		// when list of root items is very long and network connection
 		// is slow
 
+		setupDoneButton(view);
 		wizardView.addPage(view);
 		wizardView.enablePage(1);
 		wizardView.setNavButtonStateOnPage(2, true, WizardView.LAST_PAGE);

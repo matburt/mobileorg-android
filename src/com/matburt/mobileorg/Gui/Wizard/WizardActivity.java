@@ -26,8 +26,6 @@ public class WizardActivity extends Activity implements RadioGroup.OnCheckedChan
 		// when wizard first starts can't go to next page
 		wizardView.setNavButtonStateOnPage(0, false, WizardView.FIRST_PAGE);
 
-		// setup page 1
-		// get ids and pointers to sync radio buttons
 		RadioGroup syncGroup = (RadioGroup) findViewById(R.id.sync_group);
 		syncGroup.clearCheck();
 		syncGroup.setOnCheckedChangeListener(this);
@@ -51,13 +49,15 @@ public class WizardActivity extends Activity implements RadioGroup.OnCheckedChan
 	@Override
 	protected void onResume() {
 		super.onResume();
-		//dropboxWizard.handleDropboxResume(wizardView);
+		
+		if(activeWizard != null)
+			activeWizard.refresh();
 	}
 
 	@Override
 	public void onCheckedChanged(RadioGroup arg, int checkedId) {
 		this.activeWizard = Wizard.getWizard(getWizardType(checkedId), wizardView,
-				getApplicationContext());
+				this);
 		// allow scrolling to next page
 		wizardView.enablePage(0);
 	}

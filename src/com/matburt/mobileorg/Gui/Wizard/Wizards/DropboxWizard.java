@@ -93,13 +93,18 @@ public class DropboxWizard extends Wizard {
 		folderList.setAdapter(directoryAdapter);
 		directoryAdapter.notifyDataSetChanged();
 		
-		
+		setupDoneButton(view);
 		wizardView.addPage(view);
 		wizardView.enablePage(1);
 		// enable nav buttons on that page
 		wizardView.setNavButtonStateOnPage(2, true, WizardView.LAST_PAGE);
 		
 		return view;
+	}
+	
+	@Override
+	public void refresh() {
+		handleDropboxResume();
 	}
 	
 	public void handleDropboxResume() {

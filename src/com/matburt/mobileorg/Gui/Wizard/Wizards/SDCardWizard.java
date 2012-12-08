@@ -42,6 +42,7 @@ public class SDCardWizard extends Wizard {
 		folderList.setAdapter(directoryAdapter);
 		directoryAdapter.notifyDataSetChanged();
 
+		setupDoneButton(view);
 		wizardView.addPage(view);
 		wizardView.setNavButtonStateOnPage(1, true, WizardView.LAST_PAGE);
 		return view;
