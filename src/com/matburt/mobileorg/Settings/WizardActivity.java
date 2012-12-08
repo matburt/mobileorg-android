@@ -399,6 +399,7 @@ public class WizardActivity extends Activity {
         final String passActual = sshPass.getText().toString();
         final String userActual = sshUser.getText().toString();
         final String hostActual = sshHost.getText().toString();
+        final String pubFileActual =  sshPubFileActual.getText().toString();
         String portNumGiven = sshPort.getText().toString();
         int portNum;
         if (portNumGiven.trim().equals("")) {
@@ -419,7 +420,8 @@ public class WizardActivity extends Activity {
         Thread loginThread = new Thread() {
                 public void run() {
                     SSHSynchronizer sds = new SSHSynchronizer(ctxt);
-                    String extra = sds.testConnection(pathActual, userActual, passActual, hostActual, portActual);
+                    String extra = sds.testConnection(pathActual, userActual, passActual,
+                                                      hostActual, portActual, pubFileActual);
                     if (extra != null) {
                         showToastRemote("Login failed: " + extra);
                         return;
@@ -587,6 +589,7 @@ public class WizardActivity extends Activity {
                 editor.putString("scpUser", sshUser.getText().toString());
                 editor.putString("scpPass", sshPass.getText().toString());
                 editor.putString("scpHost", sshHost.getText().toString());
+                editor.putString("scpPubFile", sshPubFileActual.getText().toString());
                 if (sshPort.getText().toString().trim().equals("")) {
                 editor.putString("scpPort", "22");
                 }
