@@ -16,7 +16,7 @@ import android.widget.HorizontalScrollView;
 
 import com.matburt.mobileorg.R;
 
-public class PageFlipView extends HorizontalScrollView implements
+public class WizardView extends HorizontalScrollView implements
 		View.OnTouchListener {
 	private static final String TAG = "PageFlipView";
 	private static final int SWIPE_THRESHOLD_VELOCITY = 50;
@@ -34,11 +34,11 @@ public class PageFlipView extends HorizontalScrollView implements
 	private int maxEnabledPage = -1;
 	private int currentPage = 0;
 
-	public PageFlipView(Context context) {
+	public WizardView(Context context) {
 		super(context);
 	}
 
-	public PageFlipView(Context context, AttributeSet attrs) {
+	public WizardView(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		nextPageButtonListener = new NextPageButtonListener();
 		previousPageButtonListener = new PreviousPageButtonListener();
@@ -120,25 +120,6 @@ public class PageFlipView extends HorizontalScrollView implements
 		}
 	}
 
-	public void setDoneButtonOnClickListener(View.OnClickListener e) {
-		Button done = (Button) container.findViewById(R.id.wizard_done_button);
-		done.setOnClickListener(e);
-	}
-
-	// DEPRECATED
-	// public void hideNavButtons(int page) {
-	// View pageContainer = (View) container.getChildAt(page);
-	// //last page doesn't have a next button
-	// if ( page != container.getChildCount() - 1 )
-	// pageContainer.findViewById(R.id.wizard_next_button)
-	// .setVisibility(View.GONE);
-	// //first page doesn't have a previous button
-	// if ( page != 0 )
-	// pageContainer.findViewById(R.id.wizard_previous_button)
-	// .setVisibility(View.GONE);
-	//
-	// }
-
 	// enable prev/next buttons for give page and allow scrolling
 	// to next page
 	public void enablePage(int page) {
@@ -198,7 +179,7 @@ public class PageFlipView extends HorizontalScrollView implements
 	// adds a new page with the given resource id
 	public void addPage(int resId) {
 		View v = LayoutInflater.from(getContext()).inflate(resId, null);
-		container.addView(v);// ,container.getChildCount()-1);
+		container.addView(v);
 	}
 
 	// delete all pages after and including given page
@@ -270,13 +251,13 @@ public class PageFlipView extends HorizontalScrollView implements
 	}
 
 	// hide keyboard if showing
-	void hideKeyboard() {
+	private void hideKeyboard() {
 		InputMethodManager imm = (InputMethodManager) ((Activity) getContext())
 				.getSystemService(Context.INPUT_METHOD_SERVICE);
 		imm.hideSoftInputFromWindow(getWindowToken(), 0);
 	}
 
-	void scrollRight() {
+	private void scrollRight() {
 		hideKeyboard();
 		// unfocus login boxes
 		View selectedBox = findFocus();
@@ -290,7 +271,7 @@ public class PageFlipView extends HorizontalScrollView implements
 
 	}
 
-	void scrollLeft() {
+	private void scrollLeft() {
 		hideKeyboard();
 		// unfocus login boxes
 		View selectedBox = findFocus();
@@ -302,7 +283,7 @@ public class PageFlipView extends HorizontalScrollView implements
 		smoothScrollTo(currentPage * featureWidth, 0);
 	}
 
-	class PageSwipeDetector extends SimpleOnGestureListener {
+	private class PageSwipeDetector extends SimpleOnGestureListener {
 		@Override
 		public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
 				float velocityY) {
@@ -321,7 +302,6 @@ public class PageFlipView extends HorizontalScrollView implements
 
 		@Override
 		public boolean onDown(MotionEvent e) {
-			Log.v(TAG, "onDown");
 			return true;
 		}
 	}

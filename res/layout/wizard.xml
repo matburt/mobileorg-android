@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.matburt.mobileorg.Gui.Wizard.PageFlipView xmlns:android="http://schemas.android.com/apk/res/android"
+<com.matburt.mobileorg.Gui.Wizard.WizardView xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/wizard_parent"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
@@ -38,4 +38,4 @@
         </ScrollView>
     </com.matburt.mobileorg.Gui.Wizard.WideLinearLayout>
 
-</com.matburt.mobileorg.Gui.Wizard.PageFlipView>
+</com.matburt.mobileorg.Gui.Wizard.WizardView>

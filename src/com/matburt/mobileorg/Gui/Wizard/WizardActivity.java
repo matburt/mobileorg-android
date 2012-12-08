@@ -1,30 +1,19 @@
 package com.matburt.mobileorg.Gui.Wizard;
 
-import java.util.ArrayList;
-
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
-import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 import android.preference.PreferenceManager;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.RadioButton;
@@ -45,12 +34,10 @@ import com.matburt.mobileorg.Synchronizers.UbuntuOneSynchronizer;
 import com.matburt.mobileorg.Synchronizers.WebDAVSynchronizer;
 import com.matburt.mobileorg.util.OrgUtils;
 
-public class WizardActivity extends Activity {
+public class WizardActivity extends Activity implements RadioGroup.OnCheckedChangeListener {
 
 	private final class UIHandler extends Handler {
 		public static final int DISPLAY_UI_TOAST = 0;
-
-		// public static final int DISPLAY_UI_DIALOG = 1;
 
 		public UIHandler(Looper looper) {
 			super(looper);
@@ -59,7 +46,7 @@ public class WizardActivity extends Activity {
 		@Override
 		public void handleMessage(Message msg) {
 			switch (msg.what) {
-			case UIHandler.DISPLAY_UI_TOAST: {
+			case DISPLAY_UI_TOAST: {
 				Context context = getApplicationContext();
 				Toast t = Toast.makeText(context, (String) msg.obj,
 						Toast.LENGTH_LONG);
@@ -72,51 +59,41 @@ public class WizardActivity extends Activity {
 		}
 	}
 
-	static String TAG = "WizardActivity";
-
 	// container
-	PageFlipView wizard;
+	private WizardView wizardView;
 	// page 1 variables
-	String syncSource;
-	int syncWebDav, syncDropBox, syncUbuntuOne, syncSdCard, syncNull, syncSSH;
-	RadioGroup syncGroup;
+	private String syncSource;
+	private int syncWebDav, syncDropBox, syncUbuntuOne, syncSdCard, syncNull, syncSSH;
+	private RadioGroup syncGroup;
 	// page 2 variables
-	View loginPage;
-	boolean loginAdded = false;
-	Button loginButton;
-	ProgressDialog progress;
+	private Button loginButton;
+	private ProgressDialog progress;
 	// dropbox variables
-	DropboxAPI<AndroidAuthSession> dropboxApi;
-	TextView dropboxAccountInfo;
-	boolean dropboxLoginAttempted = false;
-	boolean isLoggedIn = false;
-	ArrayAdapter<String> dropboxFolders;
+	private DropboxAPI<AndroidAuthSession> dropboxApi;
+	private TextView dropboxAccountInfo;
+	private boolean dropboxLoginAttempted = false;
+	private boolean isLoggedIn = false;
 	// ubuntuone variables
-	EditText ubuntuoneEmail;
-	EditText ubuntuonePass;
+	private EditText ubuntuoneEmail;
+	private EditText ubuntuonePass;
 	// sd card variables
-	DirectoryBrowser directory;
-	FolderAdapter directoryAdapter;
-	String indexFilePath = "";
+	private DirectoryBrowser<?> directory;
+	private FolderAdapter directoryAdapter;
 	// webdav variables
-	EditText webdavUser;
-	EditText webdavPass;
-	EditText webdavUrl;
-	Button webdavLoginButton;
+	private EditText webdavUser;
+	private EditText webdavPass;
+	private EditText webdavUrl;
+	private Button webdavLoginButton;
 	// ssh variables
-	EditText sshUser;
-	EditText sshPass;
-	EditText sshPath;
-	EditText sshHost;
-	EditText sshPort;
-	Button sshLoginButton;
+	private EditText sshUser;
+	private EditText sshPass;
+	private EditText sshPath;
+	private EditText sshHost;
+	private EditText sshPort;
 	// page 3 variables
-	ListView folderList;
-	ArrayList<String> folders;
-	Button doneButton;
-	String dropboxPath = "";
+	private ListView folderList;
 
-	UIHandler uiHandler;
+	private UIHandler uiHandler;
 
 	/** Called when the activity is first created. */
 	@Override
@@ -124,10 +101,20 @@ public class WizardActivity extends Activity {
 		OrgUtils.setTheme(this);
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.wizard);
-		wizard = (PageFlipView) findViewById(R.id.wizard_parent);
+		
+		wizardView = (WizardView) findViewById(R.id.wizard_parent);
+		// when wizard first starts can't go to next page
+		wizardView.setNavButtonStateOnPage(0, false, WizardView.FIRST_PAGE);
+
+
+		
 		// setup page 1
 		// get ids and pointers to sync radio buttons
 		syncGroup = (RadioGroup) findViewById(R.id.sync_group);
+		syncGroup.clearCheck();
+		syncGroup.setOnCheckedChangeListener(this);
+
+		
 		syncWebDav = ((RadioButton) findViewById(R.id.sync_webdav)).getId();
 		syncDropBox = ((RadioButton) findViewById(R.id.sync_dropbox)).getId();
 		syncUbuntuOne = ((RadioButton) findViewById(R.id.sync_ubuntuone))
@@ -135,26 +122,18 @@ public class WizardActivity extends Activity {
 		syncSdCard = ((RadioButton) findViewById(R.id.sync_sdcard)).getId();
 		syncNull = ((RadioButton) findViewById(R.id.sync_null)).getId();
 		syncSSH = ((RadioButton) findViewById(R.id.sync_ssh)).getId();
-		syncGroup.clearCheck();
-		syncGroup.setOnCheckedChangeListener(new Page1Listener());
-		// setup dropbox
-		Resources r = getResources();
+
 		// setup progress dialog
 		progress = new ProgressDialog(this);
 		progress.setMessage(getString(R.string.please_wait));
 		progress.setTitle(getString(R.string.signing_in));
-		// when wizard first starts can't go to next page
-		wizard.setNavButtonStateOnPage(0, false, PageFlipView.FIRST_PAGE);
 	}
 
-	/**
-	 * Upon being resumed we can retrieve the current state. This allows us to
-	 * update the state if it was changed at any time while paused.
-	 */
+
+
 	@Override
 	protected void onResume() {
 		super.onResume();
-		// wizard.restoreLastPage();
 
 		if (dropboxLoginAttempted
 				&& dropboxApi.getSession().authenticationSuccessful()) {
@@ -176,113 +155,108 @@ public class WizardActivity extends Activity {
 				}
 				loginButton.setEnabled(false);
 				createDropboxList();
-				wizard.enablePage(1);
+				wizardView.enablePage(1);
 			} catch (IllegalStateException e) {
 				showToast(String.format("Login failed: %s", e.toString()));
 			}
 		}
 	}
 
-	/**
-	 * Any time we are paused we need to save away the current state, so it will
-	 * be restored correctly when we are resumed.
-	 */
 	@Override
 	protected void onPause() {
 		super.onPause();
-		wizard.saveCurrentPage();
+		wizardView.saveCurrentPage();
 	}
 
-	class Page1Listener implements RadioGroup.OnCheckedChangeListener {
 
-		@Override
-		public void onCheckedChanged(RadioGroup arg, int checkedId) {
-			if (checkedId == syncWebDav) {
-				syncSource = "webdav";
-				createWebDAVConfig();
-			} else if (checkedId == syncDropBox) {
-				syncSource = "dropbox";
-				createDropboxLogin();
-			} else if (checkedId == syncUbuntuOne) {
-				syncSource = "ubuntu";
-				createUbuntuLogin();
-			} else if (checkedId == syncSdCard) {
-				syncSource = "sdcard";
-				createSDcardFolderSelector();
-			} else if (checkedId == syncSSH) {
-				syncSource = "scp";
-				createSSHConfig();
-			} else if (checkedId == syncNull) {
-				syncSource = "null";
-				createNullConfig();
-			}
-			// allow scrolling to next page
-			wizard.enablePage(0);
-			// debug
-			// createDropboxList();
-			// wizard.enablePage(1);
+	@Override
+	public void onCheckedChanged(RadioGroup arg, int checkedId) {
+		if (checkedId == syncWebDav) {
+			syncSource = "webdav";
+			createWebDAVConfig();
+		} else if (checkedId == syncDropBox) {
+			syncSource = "dropbox";
+			createDropboxLogin();
+		} else if (checkedId == syncUbuntuOne) {
+			syncSource = "ubuntu";
+			createUbuntuLogin();
+		} else if (checkedId == syncSdCard) {
+			syncSource = "sdcard";
+			createSDcardFolderSelector();
+		} else if (checkedId == syncSSH) {
+			syncSource = "scp";
+			createSSHConfig();
+		} else if (checkedId == syncNull) {
+			syncSource = "null";
+			createNullConfig();
 		}
+		// allow scrolling to next page
+		wizardView.enablePage(0);
 	}
 
-	void createNullConfig() {
-		wizard.removePagesAfter(1);
-		wizard.addPage(R.layout.wizard_null);
-		doneButton = (Button) findViewById(R.id.wizard_done_button);
-		wizard.setNavButtonStateOnPage(1, true, PageFlipView.LAST_PAGE);
-		wizard.setDoneButtonOnClickListener(new FinishWizardButtonListener());
-		wizard.enablePage(1);
+	private void setupDoneButton() {
+		Button done = (Button) wizardView.findViewById(R.id.wizard_done_button);
+		done.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				saveSettings();
+				finish();
+			}
+		});
+	}
+	
+	
+	private void createNullConfig() {
+		wizardView.removePagesAfter(1);
+		wizardView.addPage(R.layout.wizard_null);
+		wizardView.setNavButtonStateOnPage(1, true, WizardView.LAST_PAGE);
+		wizardView.enablePage(1);
 	}
 
-	void createSSHConfig() {
-		wizard.removePagesAfter(1);
-		wizard.addPage(R.layout.wizard_ssh);
-		sshUser = (EditText) wizard.findViewById(R.id.wizard_ssh_username);
-		sshPass = (EditText) wizard.findViewById(R.id.wizard_ssh_password);
-		sshPath = (EditText) wizard.findViewById(R.id.wizard_ssh_path);
-		sshHost = (EditText) wizard.findViewById(R.id.wizard_ssh_host);
-		sshPort = (EditText) wizard.findViewById(R.id.wizard_ssh_port);
-		webdavLoginButton = (Button) wizard
+	private void createSSHConfig() {
+		wizardView.removePagesAfter(1);
+		wizardView.addPage(R.layout.wizard_ssh);
+		sshUser = (EditText) wizardView.findViewById(R.id.wizard_ssh_username);
+		sshPass = (EditText) wizardView.findViewById(R.id.wizard_ssh_password);
+		sshPath = (EditText) wizardView.findViewById(R.id.wizard_ssh_path);
+		sshHost = (EditText) wizardView.findViewById(R.id.wizard_ssh_host);
+		sshPort = (EditText) wizardView.findViewById(R.id.wizard_ssh_port);
+		webdavLoginButton = (Button) wizardView
 				.findViewById(R.id.wizard_ssh_login_button);
-		doneButton = (Button) findViewById(R.id.wizard_done_button);
 		webdavLoginButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				loginSSH();
 			}
 		});
-		wizard.setNavButtonStateOnPage(1, true, PageFlipView.LAST_PAGE);
-		wizard.setDoneButtonOnClickListener(new FinishWizardButtonListener());
-		wizard.enablePage(1);
+		wizardView.setNavButtonStateOnPage(1, true, WizardView.LAST_PAGE);
+		wizardView.enablePage(1);
 	}
 
-	void createWebDAVConfig() {
-		wizard.removePagesAfter(1);
-		wizard.addPage(R.layout.wizard_webdav);
-		webdavUser = (EditText) wizard
+	private void createWebDAVConfig() {
+		wizardView.removePagesAfter(1);
+		wizardView.addPage(R.layout.wizard_webdav);
+		webdavUser = (EditText) wizardView
 				.findViewById(R.id.wizard_webdav_username);
-		webdavPass = (EditText) wizard
+		webdavPass = (EditText) wizardView
 				.findViewById(R.id.wizard_webdav_password);
-		webdavUrl = (EditText) wizard.findViewById(R.id.wizard_webdav_url);
-		webdavLoginButton = (Button) wizard
+		webdavUrl = (EditText) wizardView.findViewById(R.id.wizard_webdav_url);
+		webdavLoginButton = (Button) wizardView
 				.findViewById(R.id.wizard_webdav_login_button);
-		doneButton = (Button) findViewById(R.id.wizard_done_button);
 		webdavLoginButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				loginWebdav();
 			}
 		});
-		wizard.setNavButtonStateOnPage(1, true, PageFlipView.LAST_PAGE);
-		wizard.setDoneButtonOnClickListener(new FinishWizardButtonListener());
-		wizard.enablePage(1);
+		wizardView.setNavButtonStateOnPage(1, true, WizardView.LAST_PAGE);
+		wizardView.enablePage(1);
 	}
 
-	void createSDcardFolderSelector() {
-		wizard.removePagesAfter(1);
-		// add folder listview to wizard
-		wizard.addPage(R.layout.wizard_folder_pick_list);
-		wizard.setNavButtonStateOnPage(1, true, PageFlipView.LAST_PAGE);
-		wizard.setDoneButtonOnClickListener(new FinishWizardButtonListener());
+	private void createSDcardFolderSelector() {
+		wizardView.removePagesAfter(1);
+		wizardView.addPage(R.layout.wizard_folder_pick_list);
+		wizardView.setNavButtonStateOnPage(1, true, WizardView.LAST_PAGE);
 
 		directory = new LocalDirectoryBrowser(this);
 		directoryAdapter = new FolderAdapter(this, R.layout.folder_adapter_row,
@@ -291,18 +265,16 @@ public class WizardActivity extends Activity {
 				.setDoneButton((Button) findViewById(R.id.wizard_done_button));
 		directoryAdapter.setDirectoryBrowser(directory);
 
-		folderList = (ListView) wizard.findViewById(R.id.wizard_folder_list);
+		folderList = (ListView) wizardView.findViewById(R.id.wizard_folder_list);
 		folderList.setAdapter(directoryAdapter);
 		directoryAdapter.notifyDataSetChanged();
 	}
 
-	void createDropboxLogin() {
-		wizard.removePagesAfter(1);
-		// add login page to wizard
-		wizard.addPage(R.layout.wizard_dropbox);
-		// enable nav buttons on that page
-		wizard.setNavButtonStateOnPage(1, true, PageFlipView.MIDDLE_PAGE);
-		wizard.disableAllNextActions(1);
+	private void createDropboxLogin() {
+		wizardView.removePagesAfter(1);
+		wizardView.addPage(R.layout.wizard_dropbox);
+		wizardView.setNavButtonStateOnPage(1, true, WizardView.MIDDLE_PAGE);
+		wizardView.disableAllNextActions(1);
 		dropboxAccountInfo = (TextView) findViewById(R.id.wizard_dropbox_accountinfo);
 
 		AppKeyPair appKeys = new AppKeyPair(
@@ -312,7 +284,7 @@ public class WizardActivity extends Activity {
 				AccessType.DROPBOX);
 		dropboxApi = new DropboxAPI<AndroidAuthSession>(session);
 
-		loginButton = (Button) wizard
+		loginButton = (Button) wizardView
 				.findViewById(R.id.wizard_dropbox_login_button);
 		loginButton.setOnClickListener(new OnClickListener() {
 			@Override
@@ -328,37 +300,58 @@ public class WizardActivity extends Activity {
 			}
 		});
 	}
-
-	void createUbuntuLogin() {
-		wizard.removePagesAfter(1);
-		// add login page to wizard
-		wizard.addPage(R.layout.wizard_ubuntuone);
+	
+	private void createDropboxList() {
+		wizardView.addPage(R.layout.wizard_folder_pick_list);
+		wizardView.enablePage(1);
 		// enable nav buttons on that page
-		wizard.setNavButtonStateOnPage(1, true, PageFlipView.MIDDLE_PAGE);
-		wizard.disableAllNextActions(1);
-		// get references to login forms
-		ubuntuoneEmail = (EditText) wizard
+		wizardView.setNavButtonStateOnPage(2, true, WizardView.LAST_PAGE);
+		
+		
+		// setup directory browser
+		directory = new DropboxDirectoryBrowser(this, dropboxApi);
+		// setup directory browser adapter
+		directoryAdapter = new FolderAdapter(this, R.layout.folder_adapter_row,
+				directory.listFiles());
+		directoryAdapter
+				.setDoneButton((Button) findViewById(R.id.wizard_done_button));
+		// bind adapter to browser
+		directoryAdapter.setDirectoryBrowser(directory);
+		// bind adapter to listview
+		folderList = (ListView) wizardView.findViewById(R.id.wizard_folder_list);
+		folderList.setAdapter(directoryAdapter);
+		directoryAdapter.notifyDataSetChanged();
+		// TODO Technically, this should be an async task app may crash
+		// when list of root items is very long and network connection
+		// is slow
+	}
+	
+	
+
+	private void createUbuntuLogin() {
+		wizardView.removePagesAfter(1);
+		wizardView.addPage(R.layout.wizard_ubuntuone);
+		wizardView.setNavButtonStateOnPage(1, true, WizardView.MIDDLE_PAGE);
+		wizardView.disableAllNextActions(1);
+		ubuntuoneEmail = (EditText) wizardView
 				.findViewById(R.id.wizard_ubuntu_email);
-		ubuntuonePass = (EditText) wizard
+		ubuntuonePass = (EditText) wizardView
 				.findViewById(R.id.wizard_ubuntu_password);
-		// setup listener for buttons
-		loginButton = (Button) wizard
+		loginButton = (Button) wizardView
 				.findViewById(R.id.wizard_ubuntu_login_button);
 		loginButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				if (isLoggedIn) {
-					// We're going to log out
-					// dropbox.deauthenticate();
-				} else {
-					// Try to log in
+				if (isLoggedIn == false) {
 					loginUbuntuOne();
 				}
 			}
 		});
 	}
 
-	void loginSSH() {
+	
+	
+	private void loginSSH() {
 		final String pathActual = sshPath.getText().toString();
 		final String passActual = sshPass.getText().toString();
 		final String userActual = sshUser.getText().toString();
@@ -394,7 +387,7 @@ public class WizardActivity extends Activity {
 		loginThread.start();
 	}
 
-	void loginWebdav() {
+	private void loginWebdav() {
 		final String urlActual = webdavUrl.getText().toString();
 		final String passActual = webdavPass.getText().toString();
 		final String userActual = webdavUser.getText().toString();
@@ -420,7 +413,7 @@ public class WizardActivity extends Activity {
 		loginThread.start();
 	}
 
-	void loginUbuntuOne() {
+	private void loginUbuntuOne() {
 		final UbuntuOneSynchronizer uos = new UbuntuOneSynchronizer(
 				(Context) this);
 		uos.username = ubuntuoneEmail.getText().toString();
@@ -435,32 +428,55 @@ public class WizardActivity extends Activity {
 		if (uos.login()) {
 			showToastRemote("Login Successfull");
 			loginButton.setEnabled(false);
-			wizard.enablePage(1);
+			wizardView.enablePage(1);
 			uos.getBaseUser();
 			createUbuntuOneList();
 		} else {
 			showToastRemote("Login Failed");
 		}
-
 	}
 
-	void showToast(String msg) {
+
+	private void createUbuntuOneList() {
+		wizardView.addPage(R.layout.wizard_folder_pick_list);
+		wizardView.enablePage(1);
+
+		wizardView.setNavButtonStateOnPage(2, true, WizardView.LAST_PAGE);
+
+		UbuntuOneSynchronizer uos = new UbuntuOneSynchronizer((Context) this);
+		uos.getBaseUser();
+		directory = new UbuntuOneDirectoryBrowser(this, uos);
+
+		directoryAdapter = new FolderAdapter(this, R.layout.folder_adapter_row,
+				directory.listFiles());
+		directoryAdapter
+				.setDoneButton((Button) findViewById(R.id.wizard_done_button));
+
+		directoryAdapter.setDirectoryBrowser(directory);
+
+		folderList = (ListView) wizardView.findViewById(R.id.wizard_folder_list);
+		folderList.setAdapter(directoryAdapter);
+		directoryAdapter.notifyDataSetChanged();
+		// debug
+		// TODO Technically, this should be an async task app may crash
+		// when list of root items is very long and network connection
+		// is slow
+	}
+	
+
+	private void showToast(String msg) {
 		Toast error = Toast.makeText(this, msg, Toast.LENGTH_LONG);
 		error.show();
 	}
 
-	protected void showToastRemote(String message) {
+	private void showToastRemote(String message) {
 		Message msg = uiHandler.obtainMessage(UIHandler.DISPLAY_UI_TOAST);
 		msg.obj = message;
 		uiHandler.sendMessage(msg);
 	}
 
-	void shake(View b) {
-		Animation shake = AnimationUtils.loadAnimation(this, R.anim.shake);
-		b.startAnimation(shake);
-	}
 
-	void storeKeys(String key, String secret) {
+	private void storeKeys(String key, String secret) {
 		// Save the access key for later
 		SharedPreferences prefs = PreferenceManager
 				.getDefaultSharedPreferences(getBaseContext());
@@ -469,191 +485,36 @@ public class WizardActivity extends Activity {
 		edit.putString("dbPrivSecret", secret);
 		edit.commit();
 	}
-
-	void createDropboxList() {
-		wizard.addPage(R.layout.wizard_folder_pick_list);
-		wizard.enablePage(1);
-		// enable nav buttons on that page
-		wizard.setNavButtonStateOnPage(2, true, PageFlipView.LAST_PAGE);
-		wizard.setDoneButtonOnClickListener(new FinishWizardButtonListener());
-		// setup directory browser
-		directory = new DropboxDirectoryBrowser(this,
-				dropboxApi);
-		// setup directory browser adapter
-		directoryAdapter = new FolderAdapter(this, R.layout.folder_adapter_row,
-				directory.listFiles());
-		directoryAdapter
-				.setDoneButton((Button) findViewById(R.id.wizard_done_button));
-		// bind adapter to browser
-		directoryAdapter.setDirectoryBrowser(directory);
-		// bind adapter to listview
-		folderList = (ListView) wizard.findViewById(R.id.wizard_folder_list);
-		folderList.setAdapter(directoryAdapter);
-		directoryAdapter.notifyDataSetChanged();
-		// debug
-		// TODO Technically, this should be an async task app may crash
-		// when list of root items is very long and network connection
-		// is slow
-	}
-
-	void createUbuntuOneList() {
-		wizard.addPage(R.layout.wizard_folder_pick_list);
-		wizard.enablePage(1);
-
-		// enable nav buttons on that page
-		wizard.setNavButtonStateOnPage(2, true, PageFlipView.LAST_PAGE);
-		wizard.setDoneButtonOnClickListener(new FinishWizardButtonListener());
-
-		// setup directory browser
-		UbuntuOneSynchronizer uos = new UbuntuOneSynchronizer((Context) this);
-		uos.getBaseUser();
-		directory = new UbuntuOneDirectoryBrowser(this, uos);
-
-		// setup directory browser adapter
-		directoryAdapter = new FolderAdapter(this, R.layout.folder_adapter_row,
-				directory.listFiles());
-		directoryAdapter
-				.setDoneButton((Button) findViewById(R.id.wizard_done_button));
-
-		// bind adapter to browser
-		directoryAdapter.setDirectoryBrowser(directory);
-
-		// bind adapter to listview
-		folderList = (ListView) wizard.findViewById(R.id.wizard_folder_list);
-		folderList.setAdapter(directoryAdapter);
-		directoryAdapter.notifyDataSetChanged();
-		// debug
-		// TODO Technically, this should be an async task app may crash
-		// when list of root items is very long and network connection
-		// is slow
-	}
-
-	class FolderListListener implements AdapterView.OnItemClickListener {
-		@Override
-		public void onItemClick(AdapterView<?> parent, View v, int position,
-				long id) {
-			// showToast(position+" "+folders.get(position));
-			dropboxPath = folders.get(position);
-			doneButton.setEnabled(true);
-		}
-	}
-
-	class FinishWizardButtonListener implements View.OnClickListener {
-		@Override
-		public void onClick(View v) {
-			// end wizard
-			SharedPreferences appSettings = PreferenceManager
-					.getDefaultSharedPreferences(getBaseContext());
-			SharedPreferences.Editor editor = appSettings.edit();
-			editor.putString("syncSource", syncSource);
-			if (syncSource.equals("webdav")) {
-				editor.putString("webUrl", webdavUrl.getText().toString());
-				editor.putString("webPass", webdavPass.getText().toString());
-				editor.putString("webUser", webdavUser.getText().toString());
-			} else if (syncSource.equals("scp")) {
-				editor.putString("scpPath", sshPath.getText().toString());
-				editor.putString("scpUser", sshUser.getText().toString());
-				editor.putString("scpPass", sshPass.getText().toString());
-				editor.putString("scpHost", sshHost.getText().toString());
-				if (sshPort.getText().toString().trim().equals("")) {
-					editor.putString("scpPort", "22");
-				} else {
-					editor.putString("scpPort", sshPort.getText().toString());
-				}
-			} else if (syncSource.equals("dropbox"))
-				editor.putString("dropboxPath",
-						directoryAdapter.getCheckedDirectory() + "/");
-			else if (syncSource.equals("ubuntu"))
-				editor.putString("ubuntuOnePath",
-						directoryAdapter.getCheckedDirectory() + "/");
-			else if (syncSource.equals("sdcard"))
-				editor.putString("indexFilePath",
-						directoryAdapter.getCheckedDirectory());
-			editor.putString("storageMode", "sdcard");
-			editor.commit();
-			finish();
-		}
-	}
-}
-
-class FolderAdapter extends ArrayAdapter<String> {
-	int currentChecked = -1;
-	DirectoryBrowser directory;
-	Context context;
-	Button doneButton;
-
-	FolderAdapter(Context context, int resource, ArrayList<String> list) {
-		super(context, resource, list);
-		this.context = context;
-	}
-
-	public void setDirectoryBrowser(DirectoryBrowser d) {
-		directory = d;
-	}
-
-	public String getCheckedDirectory() {
-		if (currentChecked == -1)
-			return "";
-		// (Toast.makeText(context, directory.getAbsolutePath(currentChecked),
-		// Toast.LENGTH_LONG)).show();
-		return directory.getAbsolutePath(currentChecked);
-	}
-
-	public void setDoneButton(Button b) {
-		doneButton = b;
-	}
-
-	@Override
-	public View getView(int position, View convertView, ViewGroup parent) {
-		View row = convertView;
-		TextView folder = null;
-		CheckBox check = null;
-		if (row == null) {
-			LayoutInflater inflater = LayoutInflater.from(context);
-			row = inflater.inflate(R.layout.folder_adapter_row, parent, false);
-			folder = (TextView) row.findViewById(R.id.folder);
-			folder.setOnClickListener(new View.OnClickListener() {
-
-				@Override
-				public void onClick(View folder) {
-					int position = (Integer) folder.getTag();
-					// FolderAdapter.this.clear();
-					directory.browseTo(position);
-					currentChecked = -1;
-					FolderAdapter.this.notifyDataSetChanged();
-					doneButton.setEnabled(false);
-				}
-			});
-			check = (CheckBox) row.findViewById(R.id.checkbox);
-			check.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-
-				public void onCheckedChanged(CompoundButton buttonView,
-						boolean isChecked) {
-					// update last checked position
-					int position = (Integer) buttonView.getTag();
-					if (isChecked)
-						currentChecked = position;
-					else if (currentChecked == position)
-						currentChecked = -1;
-					FolderAdapter.this.notifyDataSetChanged();
-					if (isChecked)
-						doneButton.setEnabled(true);
-				}
-			});
-		}
-		folder = (TextView) row.findViewById(R.id.folder);
-		folder.setText(directory.getDirectoryName(position));
-		folder.setTag(new Integer(position));
-		check = (CheckBox) row.findViewById(R.id.checkbox);
-		// disable the "Up one level" checkbox; otherwise make sure its enabled
-		if (position == 0 && !directory.isCurrentDirectoryRoot())
-			check.setEnabled(false);
-		else
-			check.setEnabled(true);
-		check.setTag(new Integer(position));
-		// set check state. only one can be checked
-		boolean status = (currentChecked == position) ? true : false;
-		check.setChecked(status);
-		return (row);
+	
+	private void saveSettings() {
+		SharedPreferences appSettings = PreferenceManager
+				.getDefaultSharedPreferences(getBaseContext());
+		SharedPreferences.Editor editor = appSettings.edit();
+		editor.putString("syncSource", syncSource);
+		if (syncSource.equals("webdav")) {
+			editor.putString("webUrl", webdavUrl.getText().toString());
+			editor.putString("webPass", webdavPass.getText().toString());
+			editor.putString("webUser", webdavUser.getText().toString());
+		} else if (syncSource.equals("scp")) {
+			editor.putString("scpPath", sshPath.getText().toString());
+			editor.putString("scpUser", sshUser.getText().toString());
+			editor.putString("scpPass", sshPass.getText().toString());
+			editor.putString("scpHost", sshHost.getText().toString());
+			if (sshPort.getText().toString().trim().equals("")) {
+				editor.putString("scpPort", "22");
+			} else {
+				editor.putString("scpPort", sshPort.getText().toString());
+			}
+		} else if (syncSource.equals("dropbox"))
+			editor.putString("dropboxPath",
+					directoryAdapter.getCheckedDirectory() + "/");
+		else if (syncSource.equals("ubuntu"))
+			editor.putString("ubuntuOnePath",
+					directoryAdapter.getCheckedDirectory() + "/");
+		else if (syncSource.equals("sdcard"))
+			editor.putString("indexFilePath",
+					directoryAdapter.getCheckedDirectory());
+		editor.putString("storageMode", "sdcard");
+		editor.commit();
 	}
 }
