@@ -27,6 +27,7 @@ public class DropboxWizard extends Wizard {
 	
 	private TextView dropboxAccountInfo;
 	private DropboxAPI<AndroidAuthSession> dropboxApi;
+	private FolderAdapter directoryAdapter;
 	
 	private boolean isLoggedIn = false;
 	private boolean dropboxLoginAttempted = false;
@@ -82,7 +83,7 @@ public class DropboxWizard extends Wizard {
 		// setup directory browser
 		DropboxDirectoryBrowser directory = new DropboxDirectoryBrowser(context, dropboxApi);
 		// setup directory browser adapter
-		FolderAdapter directoryAdapter = new FolderAdapter(context, R.layout.folder_adapter_row,
+		directoryAdapter = new FolderAdapter(context, R.layout.folder_adapter_row,
 				directory.listFiles());
 		directoryAdapter
 				.setDoneButton((Button) view.findViewById(R.id.wizard_done_button));
@@ -157,6 +158,7 @@ public class DropboxWizard extends Wizard {
 		Editor editor = prefs.edit();
 		
 		editor.putString("syncSource", "dropbox");
+		editor.putString("dropboxPath", directoryAdapter.getCheckedDirectory() + "/");
 		editor.commit();
 	}
 }
