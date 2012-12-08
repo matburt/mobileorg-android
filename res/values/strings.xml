@@ -106,6 +106,8 @@
     <string name="log_in_to_ubuntuone">Log in to Ubuntu One</string>
     <string name="log_in_to_webdav">Log in to your WebDAV server</string>
     <string name="log_in_to_ssh">Log in to your SSH server</string>
+    <string name="ssh_inform_choose_pub_file">OR select a file containing your public key (requires a file explorer program to be installed)</string>
+    <string name="ssh_choose_file_button">Select your public key file</string>
     <string name="null_sync_description">This is a capture only synchronizer.  It will not attempt to synchronize to any source.</string>
     <string name="dropbox_login_info">This will redirect you to a login form.  After logging in it will return you to this screen to continue.</string>
     <string name="url">URL</string>

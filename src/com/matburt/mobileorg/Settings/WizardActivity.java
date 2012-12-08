@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.res.Resources;
@@ -124,6 +125,8 @@ public class WizardActivity extends Activity {
     EditText sshPath;
     EditText sshHost;
     EditText sshPort;
+    TextView sshPubFileActual;
+    Button sshPubFileSelect;
     Button sshLoginButton;
     //page 3 variables
     ListView folderList;
@@ -247,6 +250,16 @@ public class WizardActivity extends Activity {
         wizard.setDoneButtonOnClickListener(new FinishWizardButtonListener());
         wizard.enablePage(1);
     }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == 1) {
+            if(resultCode==RESULT_OK){
+                String filePath = data.getData().getPath();
+                sshPubFileActual.setText(filePath);
+            }
+        }
+    }
     
     void createSSHConfig() {
         wizard.removePagesAfter(1);
@@ -256,6 +269,18 @@ public class WizardActivity extends Activity {
         sshPath = (EditText) wizard.findViewById(R.id.wizard_ssh_path);
         sshHost = (EditText) wizard.findViewById(R.id.wizard_ssh_host);
         sshPort = (EditText) wizard.findViewById(R.id.wizard_ssh_port);
+        sshPubFileActual = (TextView) wizard.findViewById(R.id.wizard_ssh_pub_file_actual);
+        sshPubFileSelect = (Button)wizard.findViewById(R.id.wizard_ssh_choose_pub_file);
+        sshPubFileSelect.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    try {
+                        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                        intent.setType("file/*");
+                        startActivityForResult(intent,1);
+                    } catch (Exception e) {    }
+                }
+            });
         webdavLoginButton = (Button) wizard.findViewById(R.id.wizard_ssh_login_button);
         doneButton = (Button) findViewById(R.id.wizard_done_button);
         webdavLoginButton.setOnClickListener(new OnClickListener() {
