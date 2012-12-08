@@ -62,20 +62,25 @@ public class Synchronizer {
 		return true;
 	}
 	
-	public void runSynchronizer(OrgFileParser parser) {
+ 	/**
+ 	 * @return List of files that where changed.
+ 	 */
+	public ArrayList<String> runSynchronizer(OrgFileParser parser) {
 		if (!syncher.isConfigured()) {
 			notify.errorNotification("Sync not configured");
-			return;
+			return new ArrayList<String>();
 		}
 		
 		try {
 			announceStartSync();
-			pull(parser);
+			ArrayList<String> changedFiles = pull(parser);
 			pushCaptures();
 			announceSyncDone();
+			return changedFiles;
 		} catch (Exception e) {
 			showErrorNotification(e);
 			OrgUtils.announceSyncDone(context);
+			return new ArrayList<String>();
 		}
 	}
 
@@ -120,13 +125,14 @@ public class Synchronizer {
 	 * This method will download index.org and checksums.dat from the remote
 	 * host. Using those files, it determines the other files that need updating
 	 * and downloads them.
+	 * @return 
 	 */
-	public void pull(OrgFileParser parser) throws SSLHandshakeException, CertificateException, IOException {
+	public ArrayList<String> pull(OrgFileParser parser) throws SSLHandshakeException, CertificateException, IOException {
 		HashMap<String,String> remoteChecksums = getAndParseChecksumFile();
 		ArrayList<String> changedFiles = getFilesThatChangedRemotely(remoteChecksums);
 		
 		if(changedFiles.size() == 0)
-			return;
+			return changedFiles;
 		
 		changedFiles.remove(INDEX_FILE);
 		announceProgressDownload(INDEX_FILE, 0, changedFiles.size() + 2);
@@ -136,6 +142,8 @@ public class Synchronizer {
 		
 		pull(parser, changedFiles, filenameMap, remoteChecksums);
 		announceProgressDownload("", changedFiles.size() + 1, changedFiles.size() + 2);
+		
+		return changedFiles;
 	}
 	
 	private void pull(OrgFileParser parser, ArrayList<String> filesToGet,

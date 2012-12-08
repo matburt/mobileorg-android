@@ -11,7 +11,6 @@ import java.util.regex.Pattern;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.text.TextUtils;
-import android.util.Log;
 import android.util.Pair;
 
 import com.matburt.mobileorg.OrgData.OrgContract.OrgData;
@@ -223,11 +222,8 @@ public class OrgFileParser {
 		Pattern indexOrgFilePattern = Pattern.compile(fileMatchPattern);
 		Matcher indexOrgFileMatcher = indexOrgFilePattern.matcher(filecontents);
 		HashMap<String, String> allOrgFiles = new HashMap<String, String>();
-		
-		Log.d("MobileOrg", filecontents);
-		
+				
 		while (indexOrgFileMatcher.find()) {
-			Log.d("MobileOrg", "Key: " + indexOrgFileMatcher.group(1) + ":" + indexOrgFileMatcher.group(2));
 			allOrgFiles.put(indexOrgFileMatcher.group(1), indexOrgFileMatcher.group(2));
 		}
 

@@ -1,5 +1,7 @@
 package com.matburt.mobileorg.Services;
 
+import java.util.ArrayList;
+
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -50,6 +52,8 @@ public class SyncService extends Service implements
 	@Override
 	public void onDestroy() {
 		unsetAlarm();
+		this.appSettings.unregisterOnSharedPreferenceChangeListener(this);
+		super.onDestroy();
 	}
 	
 	public static void stopAlarm(Context context) {
@@ -113,11 +117,14 @@ public class SyncService extends Service implements
 
 		Thread syncThread = new Thread() {
 			public void run() {
-				synchronizer.runSynchronizer(parser);
-
+				ArrayList<String> changedFiles = synchronizer.runSynchronizer(parser);				
+				String[] files = changedFiles.toArray(new String[changedFiles.size()]);
+				
 				if(calendarEnabled) {
-					CalendarSyncService cal = new CalendarSyncService(getContentResolver(), getBaseContext());
-					cal.syncFiles();
+					Intent calIntent = new Intent(getBaseContext(), CalendarSyncService.class);
+					calIntent.putExtra(CalendarSyncService.PUSH, true);
+					calIntent.putExtra(CalendarSyncService.FILELIST, files);
+					getBaseContext().startService(calIntent);
 				}
 				synchronizer.close();
 				db.close();

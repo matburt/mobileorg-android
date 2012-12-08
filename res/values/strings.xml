@@ -161,6 +161,10 @@
     <string name="preference_calendar_synch_title">Synchronize with calendar</string>
     <string name="preference_calendar_name_summary">Choose calendar MobileOrg will use</string>
     <string name="preference_calendar_name">Calendar name</string>
+    <string name="preference_calendar_pull_summary">Assimilate calendar entries not inserted by MobileOrg and add them to capture file. EXPERIMENTAL!</string>
+    <string name="preference_calendar_pull">Assimilate calendar entries</string>
+    <string name="preference_calendar_pull_delete_summary">Delete entries that have been assimilated from the calendar</string>
+    <string name="preference_calendar_pull_delete">Delete on assimilation</string>
     <string name="preference_clear_calendar_promt">Clear phone calendar</string>
     <string name="preference_clear_calendar_promt_message">Are you sure you want to clear the phones\' calendar?</string>
     <string name="preference_calendar_reminder_summary">Add reminders for scheduled items to calendar</string>

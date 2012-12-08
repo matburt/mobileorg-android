@@ -3,38 +3,27 @@ package com.matburt.mobileorg.Synchronizers;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.FileInputStream;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
-import android.widget.Toast;
-import android.util.Log;
-import android.view.View;
 import android.os.Handler;
-
-import com.matburt.mobileorg.R;
-import com.matburt.mobileorg.util.FileUtils;
+import android.preference.PreferenceManager;
+import android.util.Log;
+import android.widget.Toast;
 
 import com.dropbox.client2.DropboxAPI;
+import com.dropbox.client2.DropboxAPI.DropboxInputStream;
 import com.dropbox.client2.android.AndroidAuthSession;
-import com.dropbox.client2.android.AuthActivity;
+import com.dropbox.client2.exception.DropboxException;
+import com.dropbox.client2.exception.DropboxUnlinkedException;
 import com.dropbox.client2.session.AccessTokenPair;
 import com.dropbox.client2.session.AppKeyPair;
 import com.dropbox.client2.session.Session.AccessType;
-import com.dropbox.client2.session.TokenPair;
-import com.dropbox.client2.DropboxAPI.DropboxInputStream;
-import com.dropbox.client2.DropboxAPI.Entry;
-
-import com.dropbox.client2.exception.DropboxException;
-import com.dropbox.client2.exception.DropboxFileSizeException;
-import com.dropbox.client2.exception.DropboxIOException;
-import com.dropbox.client2.exception.DropboxParseException;
-import com.dropbox.client2.exception.DropboxPartialFileException;
-import com.dropbox.client2.exception.DropboxServerException;
-import com.dropbox.client2.exception.DropboxUnlinkedException;
+import com.matburt.mobileorg.R;
+import com.matburt.mobileorg.util.FileUtils;
 
 public class DropboxSynchronizer implements SynchronizerInterface {
 
