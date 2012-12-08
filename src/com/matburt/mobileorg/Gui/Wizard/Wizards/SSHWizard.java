@@ -32,9 +32,7 @@ public class SSHWizard extends Wizard {
 		createSSHConfig();
 	}
 	
-	public View createSSHConfig() {
-		wizardView.removePagesAfter(1);
-				
+	public View createSSHConfig() {				
 		View view = LayoutInflater.from(context).inflate(
 				R.layout.wizard_ssh, null);
 		

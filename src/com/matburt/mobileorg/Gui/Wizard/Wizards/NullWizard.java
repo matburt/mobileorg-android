@@ -19,9 +19,7 @@ public class NullWizard extends Wizard {
 		createNullConfig();
 	}
 	
-	public void createNullConfig() {
-		wizardView.removePagesAfter(1);
-		
+	public void createNullConfig() {		
 		View view = LayoutInflater.from(context).inflate(
 				R.layout.wizard_null, null);
 

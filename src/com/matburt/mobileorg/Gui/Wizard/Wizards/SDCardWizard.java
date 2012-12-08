@@ -27,9 +27,7 @@ public class SDCardWizard extends Wizard {
 		createSDcardFolderSelector();
 	}
 	
-	public View createSDcardFolderSelector() {
-		wizardView.removePagesAfter(1);
-		
+	public View createSDcardFolderSelector() {		
 		View view = LayoutInflater.from(context).inflate(
 				R.layout.wizard_folder_pick_list, null);
 

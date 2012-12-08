@@ -37,9 +37,7 @@ public class UbuntuOneWizard extends Wizard {
 		createUbuntuLogin();
 	}
 
-	private View createUbuntuLogin() {
-		wizardView.removePagesAfter(1);
-		
+	private View createUbuntuLogin() {		
 		View view = LayoutInflater.from(context).inflate(
 				R.layout.wizard_ubuntuone, null);
 		
@@ -103,7 +101,7 @@ public class UbuntuOneWizard extends Wizard {
 
 		directoryAdapter.setDirectoryBrowser(directory);
 
-		ListView folderList = (ListView) wizardView.findViewById(R.id.wizard_folder_list);
+		ListView folderList = (ListView) view.findViewById(R.id.wizard_folder_list);
 		folderList.setAdapter(directoryAdapter);
 		directoryAdapter.notifyDataSetChanged();
 		// debug
@@ -122,9 +120,7 @@ public class UbuntuOneWizard extends Wizard {
 				.getDefaultSharedPreferences(context);
 		SharedPreferences.Editor editor = appSettings.edit();
 		
-		
 		editor.putString("syncSource", "ubuntu");
-
 		editor.putString("ubuntuOnePath",
 				directoryAdapter.getCheckedDirectory() + "/");
 		

@@ -26,6 +26,7 @@ public abstract class Wizard {
 		progress.setMessage(context.getString(R.string.please_wait));
 		progress.setTitle(context.getString(R.string.signing_in));
 
+		wizardView.removePagesAfter(1);
 		setupFirstPage();
 	}
 

@@ -42,9 +42,7 @@ public class DropboxWizard extends Wizard {
 		createDropboxLogin();
 	}
 	
-	public View createDropboxLogin() {
-		wizardView.removePagesAfter(1);
-		
+	public View createDropboxLogin() {		
 		View view = LayoutInflater.from(context).inflate(R.layout.wizard_dropbox, null);
 		
 		dropboxAccountInfo = (TextView) view.findViewById(R.id.wizard_dropbox_accountinfo);
