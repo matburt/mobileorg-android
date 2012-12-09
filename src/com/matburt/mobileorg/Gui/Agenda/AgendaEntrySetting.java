@@ -6,11 +6,13 @@ import java.util.Arrays;
 import android.os.Bundle;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 
 import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.matburt.mobileorg.R;
+import com.matburt.mobileorg.OrgData.OrgProviderUtils;
 
 public class AgendaEntrySetting extends SherlockActivity {
 	public static final String AGENDA_NUMBER = "agenda_number";
@@ -25,7 +27,9 @@ public class AgendaEntrySetting extends SherlockActivity {
 	private EditText priorityView;
 	private EditText tagsView;
 	private CheckBox filterHabitsView;
+
 	private CheckBox activeTodosView;
+	private LinearLayout fileListView;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +48,8 @@ public class AgendaEntrySetting extends SherlockActivity {
 		this.agendaPos = getIntent().getIntExtra(AGENDA_NUMBER, -1);
 		this.entryPos = getIntent().getIntExtra(ENTRY_NUMBER, -1);
 	
+		this.fileListView = (LinearLayout) findViewById(R.id.agenda_entry_files);
+		
 		setupSettings(OrgAgenda.getAgendaEntry(agendaPos, entryPos, this));
 	}
 	
@@ -55,6 +61,8 @@ public class AgendaEntrySetting extends SherlockActivity {
 		tagsView.setText(combineToString(agenda.tags));
 		filterHabitsView.setChecked(agenda.filterHabits);
 		activeTodosView.setChecked(agenda.activeTodos);
+
+		setupFileList(agenda);
 	}
 
 	public OrgQueryBuilder getQueryFromSettings() {
@@ -66,6 +74,8 @@ public class AgendaEntrySetting extends SherlockActivity {
 		agenda.todos = splitToArrayList(todoView.getText().toString());
 		agenda.filterHabits = filterHabitsView.isChecked();
 		agenda.activeTodos = activeTodosView.isChecked();
+		
+		agenda.files = getFileList();
 		
 		return agenda;
 	}
@@ -90,6 +100,31 @@ public class AgendaEntrySetting extends SherlockActivity {
 		
 		String[] split = string.split(":");
 		return new ArrayList<String>(Arrays.asList(split));
+	}
+	
+	private void setupFileList(OrgQueryBuilder agenda) {
+		ArrayList<String> filenames = OrgProviderUtils
+				.getFilenames(getContentResolver());
+		for (String filename : filenames) {
+			CheckBox checkBox = new CheckBox(this);
+			checkBox.setText(filename);
+			checkBox.setChecked(agenda.files.contains(filename));
+
+			fileListView.addView(checkBox);
+		}
+	}
+
+	private ArrayList<String> getFileList() {
+		ArrayList<String> files = new ArrayList<String>();
+
+		int fileSize = fileListView.getChildCount();
+		for (int i = 0; i < fileSize; i++) {
+			CheckBox checkBox = (CheckBox) fileListView.getChildAt(i);
+			if (checkBox.isChecked())
+				files.add(checkBox.getText().toString());
+		}
+
+		return files;
 	}
 
 
