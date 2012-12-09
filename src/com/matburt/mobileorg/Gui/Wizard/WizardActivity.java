@@ -1,11 +1,13 @@
 package com.matburt.mobileorg.Gui.Wizard;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 
 import com.matburt.mobileorg.R;
+import com.matburt.mobileorg.Gui.Wizard.Wizards.SSHWizard;
 import com.matburt.mobileorg.Gui.Wizard.Wizards.Wizard;
 import com.matburt.mobileorg.util.OrgUtils;
 
@@ -52,6 +54,19 @@ public class WizardActivity extends Activity implements RadioGroup.OnCheckedChan
 		
 		if(activeWizard != null)
 			activeWizard.refresh();
+	}
+	
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		if (requestCode == SSHWizard.SSH_CHOOSE_PUB) {
+			if (resultCode == RESULT_OK) {
+				String filePath = data.getData().getPath();
+				
+				if (activeWizard instanceof SSHWizard)
+					((SSHWizard) activeWizard).setPubFile(filePath);
+			}
+		}
 	}
 
 	@Override

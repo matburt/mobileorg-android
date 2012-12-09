@@ -53,6 +53,26 @@
           android:paddingTop="10dp"
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
+          android:text="@string/ssh_inform_choose_pub_file"
+          android:textSize="20dp"/>
+      <Button
+          android:layout_marginTop="20dp"
+          android:id="@+id/wizard_ssh_choose_pub_file"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:text="@string/ssh_choose_file_button"
+          android:textSize="20dp"/>
+      <TextView
+          android:id="@+id/wizard_ssh_pub_file_actual"
+          android:paddingTop="10dp"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:text=""
+          android:textSize="20dp"/>
+      <TextView
+          android:paddingTop="10dp"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
           android:text="@string/path"
           android:textSize="20dp"/>
       <EditText

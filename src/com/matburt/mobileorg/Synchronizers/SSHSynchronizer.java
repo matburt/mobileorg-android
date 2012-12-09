@@ -26,6 +26,7 @@ public class SSHSynchronizer implements SynchronizerInterface {
 	private String path;
     private String pass;
     private int port;
+    private String pubFile;
 
 	private Session session;
 
@@ -37,6 +38,7 @@ public class SSHSynchronizer implements SynchronizerInterface {
 		path = appSettings.getString("scpPath", "");
 		user = appSettings.getString("scpUser", "");
         host = appSettings.getString("scpHost", "");
+        pubFile = appSettings.getString("scpPubFile", "");
         String tmpPort = appSettings.getString("scpPort", "");
         if (tmpPort.equals("")) {
             port = 22;
@@ -53,12 +55,13 @@ public class SSHSynchronizer implements SynchronizerInterface {
         }
 	}
 
-    public String testConnection(String path, String user, String pass, String host, int port) {
+    public String testConnection(String path, String user, String pass, String host, int port, String pubFile) {
         this.path = path;
         this.user = user;
         this.pass = pass;
         this.host = host;
         this.port = port;
+        this.pubFile = pubFile;
 
         if (this.path.indexOf("index.org") < 0) {
             Log.i("MobileOrg", "Invalid ssh path, must point to index.org");
@@ -68,7 +71,7 @@ public class SSHSynchronizer implements SynchronizerInterface {
         if (this.path.equals("") ||
             this.user.equals("") ||
             this.host.equals("") ||
-            this.pass.equals("")) {
+            (this.pass.equals("") && this.pubFile.equals(""))) {
             Log.i("MobileOrg", "Test Connection Failed for not being configured");
             return "Missing configuration values";
         }
@@ -112,7 +115,8 @@ public class SSHSynchronizer implements SynchronizerInterface {
 		if (this.appSettings.getString("scpPath", "").equals("") ||
             this.appSettings.getString("scpUser", "").equals("") ||
             this.appSettings.getString("scpHost", "").equals("") ||
-            this.appSettings.getString("scpPass", "").equals(""))
+            (this.appSettings.getString("scpPass", "").equals("") &&
+             this.appSettings.getString("scpPubFile", "").equals("")))
 			return false;
 		return true;
 	}
@@ -121,7 +125,12 @@ public class SSHSynchronizer implements SynchronizerInterface {
 		JSch jsch = new JSch();
 		try {
 			session = jsch.getSession(user, host, port);
-			session.setPassword(pass);
+            if (!pubFile.equals("")) {
+                jsch.addIdentity(pubFile);
+            }
+            else {
+                session.setPassword(pass);
+            }
 
 			java.util.Properties config = new java.util.Properties();
 			config.put("StrictHostKeyChecking", "no");
