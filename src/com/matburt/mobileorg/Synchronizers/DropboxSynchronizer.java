@@ -150,21 +150,21 @@ public class DropboxSynchronizer implements SynchronizerInterface {
         }
     }
 
-    private void showToast(String msg) {
-        final String u_msg = msg;
-        final Handler mHandler = new Handler();
-        final Runnable mRunPost = new Runnable() {
-                public void run() {
-                    Toast.makeText(context, u_msg, Toast.LENGTH_LONG).show();
-                }
-            };
+	private void showToast(String msg) {
+		final String u_msg = msg;
+		final Handler mHandler = new Handler();
+		final Runnable mRunPost = new Runnable() {
+			public void run() {
+				Toast.makeText(context, u_msg, Toast.LENGTH_LONG).show();
+			}
+		};
 
-            new Thread() {
-                    public void run() {
-                        mHandler.post(mRunPost);
-                    }
-                }.start();
-    }
+		new Thread() {
+			public void run() {
+				mHandler.post(mRunPost);
+			}
+		}.start();
+	}
 
 
 	@Override
