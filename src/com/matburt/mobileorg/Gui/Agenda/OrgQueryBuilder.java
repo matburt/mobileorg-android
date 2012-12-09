@@ -11,6 +11,7 @@ import android.database.sqlite.SQLiteDatabase;
 import com.matburt.mobileorg.OrgData.OrgContract.OrgData;
 import com.matburt.mobileorg.OrgData.OrgDatabase.Tables;
 import com.matburt.mobileorg.OrgData.OrgFile;
+import com.matburt.mobileorg.OrgData.OrgProviderUtils;
 import com.matburt.mobileorg.util.OrgFileNotFoundException;
 import com.matburt.mobileorg.util.SelectionBuilder;
 
@@ -54,6 +55,10 @@ public class OrgQueryBuilder implements Serializable {
 		builder.table(Tables.ORGDATA);
 
 		getFileSelection(builder, context);
+		
+		if (activeTodos)
+			builder.where(getSelection(OrgProviderUtils.getActiveTodos(context
+					.getContentResolver()), OrgData.TODO));
 		
 		if(todos != null && todos.size() > 0)
 			builder.where(getSelection(todos, OrgData.TODO));

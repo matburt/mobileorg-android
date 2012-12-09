@@ -29,6 +29,7 @@ public class OutlineItem extends RelativeLayout implements Checkable {
 		
 	private TextView titleView;
 	private TextView tagsView;
+	private boolean levelFormatting = true;
 	
 	public OutlineItem(Context context) {
 		super(context);
@@ -37,6 +38,10 @@ public class OutlineItem extends RelativeLayout implements Checkable {
 		tagsView = (TextView) findViewById(R.id.outline_item_tags);
 		titleView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
 		tagsView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
+	}
+	
+	public void setLevelFormating(boolean enabled) {
+		this.levelFormatting = enabled;
 	}
 	
 	public void setup(OrgNode node, boolean expanded, DefaultTheme theme, ContentResolver resolver) {
@@ -49,11 +54,14 @@ public class OutlineItem extends RelativeLayout implements Checkable {
 			return;
 		}
 		
-		applyLevelFormating(theme, node.level, titleSpan);
+		if (levelFormatting)
+			applyLevelFormating(theme, node.level, titleSpan);
 		setupTitle(node.name, theme, titleSpan);
 		setupPriority(node.priority, theme, titleSpan);
 		setupTodo(node.todo, titleSpan, theme, resolver);
-		applyLevelIndentation(node.level, titleSpan);
+		
+		if (levelFormatting)
+			applyLevelIndentation(node.level, titleSpan);
 		
 		if(expanded == false)
 			setupChildrenIndicator(node, resolver, theme, titleSpan);

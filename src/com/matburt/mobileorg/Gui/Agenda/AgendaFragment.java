@@ -61,6 +61,7 @@ public class AgendaFragment extends SherlockFragment {
 		mergeAdapter.addView(titleView);
 
 		OutlineAdapter adapter = new OutlineAdapter(getActivity());
+		adapter.setLevelIndentation(false);
 		adapter.setState(query.getNodes(db, getActivity()));
 		mergeAdapter.addAdapter(adapter);
 	}
