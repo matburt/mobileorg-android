@@ -17,6 +17,7 @@ import android.preference.PreferenceManager;
 
 import com.actionbarsherlock.app.SherlockPreferenceActivity;
 import com.matburt.mobileorg.R;
+import com.matburt.mobileorg.Gui.Wizard.WizardActivity;
 import com.matburt.mobileorg.OrgData.OrgProviderUtils;
 import com.matburt.mobileorg.Services.CalendarSyncService;
 import com.matburt.mobileorg.Services.CalendarWrapper;
@@ -104,7 +105,6 @@ SharedPreferences.OnSharedPreferenceChangeListener {
 	}
 
 	private Preference.OnPreferenceClickListener onClearDBClick = new Preference.OnPreferenceClickListener() {
-
 		@Override
 		public boolean onPreferenceClick(Preference preference) {
 			new AlertDialog.Builder(SettingsActivity.this)

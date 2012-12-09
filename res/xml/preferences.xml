@@ -2,9 +2,10 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
 
     <PreferenceCategory android:title="@string/preference_synchronization" >
-        <com.matburt.mobileorg.Settings.WizardPreferences
-            android:key="wizardPref"
-            android:title="Wizard Preference" />
+        <Preference
+            android:title="@string/rerun_setup_wizard" >
+            <intent android:action="com.matburt.mobileorg.Settings.SETUP_WIZARD" />
+        </Preference>
 
         <ListPreference
             android:defaultValue="webdav"
