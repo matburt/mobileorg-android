@@ -27,6 +27,7 @@ public class AgendaFragment extends SherlockFragment {
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
+		super.onCreateView(inflater, container, savedInstanceState);
 		this.db = new OrgDatabase(getActivity()).getReadableDatabase();
 
 		this.agendaList = new ListView(getActivity());

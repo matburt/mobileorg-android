@@ -17,7 +17,7 @@ import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.view.Window;
 import com.matburt.mobileorg.R;
-import com.matburt.mobileorg.Gui.Agenda.AgendaActivity;
+import com.matburt.mobileorg.Gui.Agenda.AgendasActivity;
 import com.matburt.mobileorg.OrgData.OrgProviderUtils;
 import com.matburt.mobileorg.Services.SyncService;
 import com.matburt.mobileorg.Settings.SettingsActivity;
@@ -204,7 +204,7 @@ public class OutlineActivity extends SherlockActivity {
     }
 
     private void runAgenda() {
-        startActivity(new Intent(this, AgendaActivity.class));
+        startActivity(new Intent(this, AgendasActivity.class));
     }
 
 	private boolean runSearch() {

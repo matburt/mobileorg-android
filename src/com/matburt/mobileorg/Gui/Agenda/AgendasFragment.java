@@ -2,12 +2,11 @@ package com.matburt.mobileorg.Gui.Agenda;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.FragmentTransaction;
 import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ContextMenu.ContextMenuInfo;
 import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
@@ -59,16 +58,20 @@ public class AgendasFragment extends SherlockFragment {
 	};
 	
 	private void showBlockAgendaFragment(int position) {
-		FragmentTransaction transaction = getFragmentManager().beginTransaction();
-		transaction.hide(this);
+//		FragmentTransaction transaction = getFragmentManager().beginTransaction();
+//		transaction.hide(this);
+//		
+//		AgendaFragment blockFragment = new AgendaFragment();
+//		blockFragment.agendaPos = position;
+//		//transaction.add("agendaFragment", blockFragment, "agendaBlockFragment");
+//		//transaction.show(blockFragment);
+//		transaction.addToBackStack(getTag());
+//		
+//		transaction.commit();
 		
-		AgendaFragment blockFragment = new AgendaFragment();
-		blockFragment.agendaPos = position;
-		//transaction.add(R.id.main_main, blockFragment, "agendaBlockFragment");
-		transaction.show(blockFragment);
-		transaction.addToBackStack(getTag());
-		
-		transaction.commit();
+		Intent intent = new Intent(getActivity(), AgendaActivity.class);
+		intent.putExtra(AgendaActivity.POSITION, position);
+		startActivity(intent);
 	}
 	
 	

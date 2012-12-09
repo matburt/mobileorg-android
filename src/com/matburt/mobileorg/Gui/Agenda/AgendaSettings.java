@@ -3,15 +3,16 @@ package com.matburt.mobileorg.Gui.Agenda;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.ContextMenu;
-import android.view.View;
 import android.view.ContextMenu.ContextMenuInfo;
+import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.Menu;
@@ -20,6 +21,7 @@ import com.matburt.mobileorg.R;
 
 public class AgendaSettings extends SherlockActivity {
 	public static final String AGENDA_NUMBER = "agenda_number";
+	private static final String AGENDA_TITLE = "agenda_title";
 
 	private int agendaPos;
 
@@ -33,6 +35,14 @@ public class AgendaSettings extends SherlockActivity {
         this.titleView = (TextView) findViewById(R.id.agenda_title);
         this.agendaList = (ListView) findViewById(R.id.agenda_list);
         
+        Button createButton = (Button) findViewById(R.id.agenda_create);
+        createButton.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				createAgendaBlockEntry();
+			}
+		});
+        
         agendaList.setOnItemClickListener(agendaItemClick);
         agendaList.setOnCreateContextMenuListener(this);
         registerForContextMenu(agendaList);
@@ -43,7 +53,27 @@ public class AgendaSettings extends SherlockActivity {
         	this.agendaPos = OrgAgenda.addAgenda(this);
     }
     
+    
     @Override
+    protected void onSaveInstanceState(Bundle outState) {
+    	outState.putString(AGENDA_TITLE, titleView.getText().toString());
+    	super.onSaveInstanceState(outState);
+    }
+    
+    
+    @Override
+	protected void onRestoreInstanceState(Bundle savedInstanceState) {
+    	super.onRestoreInstanceState(savedInstanceState);
+   
+    	if (savedInstanceState != null) {
+    		String title = savedInstanceState.getString(AGENDA_TITLE);
+    		if(title != null)
+    			titleView.setText(title);
+    	}    	
+	}
+
+
+	@Override
 	protected void onResume() {
 		super.onResume();
 		refresh();
@@ -102,13 +132,13 @@ public class AgendaSettings extends SherlockActivity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		
 		switch(item.getItemId()) {
-		case R.id.agenda_block_create:
-			createAgendaBlockEntry();
-			break;
-			
 		case R.id.agenda_block_save:
 			saveAgendaBlock();
-			Toast.makeText(this, "Saved", Toast.LENGTH_SHORT).show();
+			finish();
+			break;
+			
+		case R.id.agenda_block_cancel:
+			finish();
 			break;
 			
 		default:

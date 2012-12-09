@@ -25,19 +25,21 @@ public class AgendaEntrySetting extends SherlockActivity {
 	private EditText priorityView;
 	private EditText tagsView;
 	private CheckBox filterHabitsView;
+	private CheckBox activeTodosView;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.agenda_block_setting);
+		setContentView(R.layout.agenda_entry_setting);
 		
-		this.titleView = (EditText) findViewById(R.id.agenda_block_title);
-		this.priorityView = (EditText) findViewById(R.id.agenda_block_priority);
-		this.todoView = (EditText) findViewById(R.id.agenda_block_todo);
-		this.tagsView = (EditText) findViewById(R.id.agenda_block_tag);
-		this.payloadView = (EditText) findViewById(R.id.agenda_block_payload);
+		this.titleView = (EditText) findViewById(R.id.agenda_entry_title);
+		this.priorityView = (EditText) findViewById(R.id.agenda_entry_priority);
+		this.todoView = (EditText) findViewById(R.id.agenda_entry_todo);
+		this.tagsView = (EditText) findViewById(R.id.agenda_entry_tag);
+		this.payloadView = (EditText) findViewById(R.id.agenda_entry_payload);
 
-		this.filterHabitsView = (CheckBox) findViewById(R.id.agenda_block_habits);
+		this.filterHabitsView = (CheckBox) findViewById(R.id.agenda_entry_habits);
+		this.activeTodosView = (CheckBox) findViewById(R.id.agenda_entry_active_todos);
 
 		this.agendaPos = getIntent().getIntExtra(AGENDA_NUMBER, -1);
 		this.entryPos = getIntent().getIntExtra(ENTRY_NUMBER, -1);
@@ -52,6 +54,7 @@ public class AgendaEntrySetting extends SherlockActivity {
 		priorityView.setText(combineToString(agenda.priorities));
 		tagsView.setText(combineToString(agenda.tags));
 		filterHabitsView.setChecked(agenda.filterHabits);
+		activeTodosView.setChecked(agenda.activeTodos);
 	}
 
 	public OrgQueryBuilder getQueryFromSettings() {
@@ -62,6 +65,7 @@ public class AgendaEntrySetting extends SherlockActivity {
 		agenda.priorities = splitToArrayList(priorityView.getText().toString());
 		agenda.todos = splitToArrayList(todoView.getText().toString());
 		agenda.filterHabits = filterHabitsView.isChecked();
+		agenda.activeTodos = activeTodosView.isChecked();
 		
 		return agenda;
 	}
@@ -92,7 +96,7 @@ public class AgendaEntrySetting extends SherlockActivity {
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		super.onCreateOptionsMenu(menu);
-		getSupportMenuInflater().inflate(R.menu.agenda_block, menu);
+		getSupportMenuInflater().inflate(R.menu.agenda_entry, menu);
 		return true;
 	}
 
@@ -104,7 +108,7 @@ public class AgendaEntrySetting extends SherlockActivity {
 					entryPos, this);
 			finish();
 			break;
-		case R.id.agenda_block_cancel:
+		case R.id.agenda_entry_cancel:
 			finish();
 			break;
 		
