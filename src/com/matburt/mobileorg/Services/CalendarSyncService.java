@@ -71,7 +71,11 @@ public class CalendarSyncService extends Service implements
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
+		if (intent == null)
+			return 0;
+		
 		refreshPreferences();
+		
 		final String[] fileList = intent.getStringArrayExtra(FILELIST);
 		final boolean clearDB = intent.getBooleanExtra(CLEARDB, false);
 		final boolean pull = intent.getBooleanExtra(PULL, false);
