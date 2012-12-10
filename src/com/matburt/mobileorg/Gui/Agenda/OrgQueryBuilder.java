@@ -74,7 +74,7 @@ public class OrgQueryBuilder implements Serializable {
 			builder.where(getLikeSelection(payloads, OrgData.PAYLOAD));
 		
 		if(filterHabits)
-			builder.where("NOT " + OrgData.PAYLOAD + " LIKE ?", "'%:STYLE: habit%'");
+			builder.where("NOT " + OrgData.PAYLOAD + " LIKE ?", "%:STYLE: habit%");
 		
 		return builder;
 	}
