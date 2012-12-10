@@ -113,7 +113,7 @@ public class TimeclockService extends Service {
 				new Intent(this, TimeclockDialog.class), 0);
 		
 		Builder builder = new NotificationCompat.Builder(this);
-		builder.setSmallIcon(R.drawable.icon);
+		builder.setSmallIcon(R.drawable.timeclock_icon);
 		builder.setContentTitle(node.name);
 		builder.setContentIntent(contentIntent);
 		builder.setOngoing(true);
@@ -124,7 +124,7 @@ public class TimeclockService extends Service {
 				R.layout.timeclock_notification);
 		
 		notification.contentView.setImageViewResource(R.id.timeclock_notification_icon,
-				R.drawable.icon);
+				R.drawable.timeclock_icon);
 		notification.contentView.setTextViewText(R.id.timeclock_notification_text,
 				node.name);
 		
