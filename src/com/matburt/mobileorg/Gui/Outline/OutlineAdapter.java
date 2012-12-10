@@ -23,6 +23,8 @@ public class OutlineAdapter extends ArrayAdapter<OrgNode> {
 
 	private DefaultTheme theme;
 	
+	private boolean levelIndentation = true;
+	
 	public OutlineAdapter(Context context) {
 		super(context, R.layout.outline_item);
 		this.resolver = context.getContentResolver();
@@ -94,10 +96,14 @@ public class OutlineAdapter extends ArrayAdapter<OrgNode> {
 		if (convertView == null)
 			outlineItem = new OutlineItem(getContext());
 
+		outlineItem.setLevelFormating(levelIndentation);
 		outlineItem.setup(getItem(position), this.expanded.get(position), theme, resolver);
 		return outlineItem;
 	}
 
+	public void setLevelIndentation(boolean enabled) {
+		this.levelIndentation = enabled;
+	}
 	
 	@Override
 	public void clear() {

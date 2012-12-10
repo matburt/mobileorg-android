@@ -3,6 +3,7 @@
 
     <string name="app_name">MobileOrgActivity</string>
     <string name="menu_outline">Outline</string>
+    <string name="menu_agenda">Agenda</string>
     <string name="menu_capture">Capture</string>
     <string name="menu_capture_simple">Simple Capture</string>
     <string name="menu_settings">Settings</string>

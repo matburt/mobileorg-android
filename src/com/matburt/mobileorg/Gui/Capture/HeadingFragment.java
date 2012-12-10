@@ -46,9 +46,9 @@ public class HeadingFragment extends SherlockFragment {
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
 		
-		EditActivity activity = ((EditActivity)getActivity());
+		EditHost activity = ((EditHost)getActivity());
 		
-		this.resolver = activity.getContentResolver();
+		this.resolver = getActivity().getContentResolver();
 		this.node = activity.getOrgNode();
 		
 		if(savedInstanceState != null)
@@ -128,15 +128,15 @@ public class HeadingFragment extends SherlockFragment {
 	}
 
 	
-	private String getTitle() {
+	public String getTitle() {
 		return titleView.getText().toString();
 	}
 	
-	private String getTodo() {
+	public String getTodo() {
 		return todoStateView.getSelectedItem().toString();
 	}
 	
-	private String getPriority() {
+	public String getPriority() {
 		return priorityView.getSelectedItem().toString();
 	}
 }
