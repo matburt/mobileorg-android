@@ -5,6 +5,7 @@ import java.util.Collections;
 
 import android.content.ContentResolver;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -41,17 +42,23 @@ public class LocationFragment extends SherlockFragment {
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
 		
-		EditActivity activity = (EditActivity) getActivity();
+		FragmentActivity activity = getActivity();
 		this.resolver = activity.getContentResolver();
 
 		restoreFromBundle(savedInstanceState);
 
-		if(this.node == null)
-			this.node = activity.getParentOrgNode();
+		boolean isModifiable = true;
+		try {
+			EditActivity editActivity = (EditActivity) activity;
 
-		initLocationView();
+			if (this.node == null)
+				this.node = editActivity.getParentOrgNode();
+
+			isModifiable = editActivity.isNodeRefilable();
+		} catch (ClassCastException e) {}
 		
-		setModifiable(activity.isNodeRefilable());
+		initLocationView();
+		setModifiable(isModifiable);
 	}
 	
 	@Override

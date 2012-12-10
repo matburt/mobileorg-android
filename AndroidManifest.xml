@@ -24,7 +24,7 @@
             android:value=".Gui.SearchActivity" />
 
         <receiver
-            android:name=".Services.MobileOrgWidget"
+            android:name=".Gui.Widget.MobileOrgWidget"
             android:label="MobileOrg Tasks" >
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
@@ -192,6 +192,22 @@
         <activity android:name=".Gui.Agenda.AgendasActivity" >
         </activity>
         <activity android:name=".Gui.Agenda.AgendaActivity" >
+        </activity>
+
+        <receiver android:name=".Gui.Widget.CaptureWidgetProvider" >
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/capture_widget_provider" />
+        </receiver>
+
+        <activity android:name=".Gui.Widget.CaptureWidgetConfig" >
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+            </intent-filter>
         </activity>
     </application>
 
