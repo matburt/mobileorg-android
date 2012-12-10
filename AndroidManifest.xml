@@ -188,6 +188,11 @@
 
         <service android:name=".Services.CalendarSyncService" >
         </service>
+
+        <activity android:name=".Gui.Agenda.AgendasActivity" >
+        </activity>
+        <activity android:name=".Gui.Agenda.AgendaActivity" >
+        </activity>
     </application>
 
 </manifest>

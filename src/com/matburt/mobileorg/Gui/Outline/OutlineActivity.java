@@ -17,6 +17,7 @@ import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.view.Window;
 import com.matburt.mobileorg.R;
+import com.matburt.mobileorg.Gui.Agenda.AgendasActivity;
 import com.matburt.mobileorg.Gui.Wizard.WizardActivity;
 import com.matburt.mobileorg.OrgData.OrgProviderUtils;
 import com.matburt.mobileorg.Services.SyncService;
@@ -158,6 +159,10 @@ public class OutlineActivity extends SherlockActivity {
 			runExpandableOutline(-1);
 			return true;
 
+		case R.id.menu_agenda:
+			runAgenda();
+			return true;
+			
 		case R.id.menu_capturechild:
 			OutlineActionMode.runCaptureActivity(listView.getCheckedNodeId(), this);
 			return true;
@@ -198,6 +203,9 @@ public class OutlineActivity extends SherlockActivity {
 		startActivity(intent);
     }
 
+    private void runAgenda() {
+        startActivity(new Intent(this, AgendasActivity.class));
+    }
 
 	private boolean runSearch() {
 		return onSearchRequested();

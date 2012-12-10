@@ -264,6 +264,7 @@ public class CalendarSyncService extends Service implements
 		this.activeTodos = new HashSet<String>(
 				OrgProviderUtils.getActiveTodos(resolver));
 		this.allTodos = new HashSet<String>(OrgProviderUtils.getTodos(resolver));
+		this.allTodos.remove("");
 		this.calendarWrapper.refreshPreferences();
 	}
 
