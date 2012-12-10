@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -28,6 +29,7 @@ public class OrgFileParser {
 	private StringBuilder payload;
 	private OrgFile orgFile;
 	private OrgNodeParser orgNodeParser;
+	private HashSet<String> excludedTags;
 	
 	public OrgFileParser(OrgDatabase db, ContentResolver resolver) {
 		this.db = db;
@@ -50,6 +52,8 @@ public class OrgFileParser {
 	
 	public void parse(OrgFile orgFile, BufferedReader breader, Context context) {
 		this.combineAgenda = OrgUtils.getCombineBlockAgendas(context);
+		this.excludedTags = OrgUtils.getExcludedTags(context);
+		
 		parse(orgFile, breader);
 	}
 	
@@ -126,7 +130,25 @@ public class OrgFileParser {
 		
 		public void add(int level, long nodeId, String tags) {
 			parseStack.push(new Pair<Integer, Long>(level, nodeId));
-			tagStack.push(tags);
+			tagStack.push(stripTags(tags));
+		}
+		
+		private String stripTags(String tags) {
+			if (excludedTags == null || TextUtils.isEmpty(tags))
+				return tags;
+			
+			StringBuilder result = new StringBuilder();
+			for (String tag: tags.split(":")) {
+				if (excludedTags.contains(tag) == false) {
+					result.append(tag);
+					result.append(":");
+				}
+			}
+			
+			if(!TextUtils.isEmpty(result))
+				result.deleteCharAt(result.lastIndexOf(":"));
+			
+			return result.toString();
 		}
 		
 		public void pop() {
