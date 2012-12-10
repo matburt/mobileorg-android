@@ -64,7 +64,8 @@ public class OrgQueryBuilder implements Serializable {
 			builder.where(getSelection(todos, OrgData.TODO));
 		
 		if(tags != null && tags.size() > 0)
-			builder.where(getLikeSelection(tags, OrgData.TAGS));
+			builder.where(getLikeSelection(tags, OrgData.TAGS) + " OR "
+					+ getLikeSelection(tags, OrgData.TAGS_INHERITED));
 		
 		if(priorities != null && priorities.size() > 0)
 			builder.where(getSelection(priorities, OrgData.PRIORITY));		
