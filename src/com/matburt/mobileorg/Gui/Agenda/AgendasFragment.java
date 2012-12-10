@@ -108,7 +108,7 @@ public class AgendasFragment extends SherlockFragment {
 		super.onCreateOptionsMenu(menu, inflater);
 		
 		MenuItem create = menu.add("Create");
-		create.setIcon(R.drawable.ic_menu_add);
+		create.setIcon(R.drawable.ic_menu_add2);
 		create.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
 	}
 	

@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -28,6 +29,7 @@ public class OrgFileParser {
 	private StringBuilder payload;
 	private OrgFile orgFile;
 	private OrgNodeParser orgNodeParser;
+	private HashSet<String> excludedTags;
 	
 	public OrgFileParser(OrgDatabase db, ContentResolver resolver) {
 		this.db = db;
@@ -40,7 +42,7 @@ public class OrgFileParser {
 		this.orgFile = orgFile;
 
 		this.parseStack = new ParseStack();
-		this.parseStack.add(0, orgFile.nodeId);
+		this.parseStack.add(0, orgFile.nodeId, "");
 		
 		this.payload = new StringBuilder();
 		
@@ -50,6 +52,8 @@ public class OrgFileParser {
 	
 	public void parse(OrgFile orgFile, BufferedReader breader, Context context) {
 		this.combineAgenda = OrgUtils.getCombineBlockAgendas(context);
+		this.excludedTags = OrgUtils.getExcludedTags(context);
+		
 		parse(orgFile, breader);
 	}
 	
@@ -98,10 +102,11 @@ public class OrgFileParser {
 		}
         
 		OrgNode node = this.orgNodeParser.parseLine(thisLine, numstars);
+		node.tags_inherited = parseStack.getCurrentTags();
 		node.fileId = orgFile.id;
 		node.parentId = parseStack.getCurrentNodeId();
 		long newId = db.fastInsertNode(node);
-		parseStack.add(numstars, newId);      
+		parseStack.add(numstars, newId, node.tags);      
     }
 
 	private static final Pattern starPattern = Pattern.compile("^(\\**)\\s");
@@ -116,17 +121,39 @@ public class OrgFileParser {
     
 	private class ParseStack {
 		private Stack<Pair<Integer, Long>> parseStack;
+		private Stack<String> tagStack;
 
 		public ParseStack() {
 			this.parseStack = new Stack<Pair<Integer, Long>>();
+			this.tagStack = new Stack<String>();
 		}
 		
-		public void add(int level, long nodeId) {
+		public void add(int level, long nodeId, String tags) {
 			parseStack.push(new Pair<Integer, Long>(level, nodeId));
+			tagStack.push(stripTags(tags));
+		}
+		
+		private String stripTags(String tags) {
+			if (excludedTags == null || TextUtils.isEmpty(tags))
+				return tags;
+			
+			StringBuilder result = new StringBuilder();
+			for (String tag: tags.split(":")) {
+				if (excludedTags.contains(tag) == false) {
+					result.append(tag);
+					result.append(":");
+				}
+			}
+			
+			if(!TextUtils.isEmpty(result))
+				result.deleteCharAt(result.lastIndexOf(":"));
+			
+			return result.toString();
 		}
 		
 		public void pop() {
 			this.parseStack.pop();
+			this.tagStack.pop();
 		}
 		
 		public int getCurrentLevel() {
@@ -135,6 +162,10 @@ public class OrgFileParser {
 		
 		public long getCurrentNodeId() {
 			return parseStack.peek().second;
+		}
+		
+		public String getCurrentTags() {
+			return tagStack.peek();
 		}
 	}
 	

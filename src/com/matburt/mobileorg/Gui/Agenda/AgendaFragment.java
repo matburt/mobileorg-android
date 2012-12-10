@@ -52,7 +52,9 @@ public class AgendaFragment extends SherlockFragment {
 
 		this.agendaList.setAdapter(mergeAdapter);
 		this.agendaList.setOnItemClickListener(agendaClickListener);
-		//getSherlockActivity().getSupportActionBar().setTitle(blockAgenda.title);
+		
+		((AgendaActivity) getActivity()).getSupportActionBar().setTitle("Agenda: " +
+				blockAgenda.title);
 	}
 	
 	public void addAgenda(OrgQueryBuilder query) {

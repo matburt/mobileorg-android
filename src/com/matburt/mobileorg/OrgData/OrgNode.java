@@ -26,6 +26,7 @@ public class OrgNode {
 	public String priority = "";
 	public String todo = "";
 	public String tags = "";
+	public String tags_inherited = "";
 	public String name = "";
 	private String payload = "";
 	
@@ -39,6 +40,7 @@ public class OrgNode {
 		this.priority = node.priority;
 		this.todo = node.todo;
 		this.tags = node.tags;
+		this.tags_inherited = node.tags_inherited;
 		this.name = node.name;
 		setPayload(node.getPayload());
 	}
@@ -70,6 +72,8 @@ public class OrgNode {
 					.getColumnIndexOrThrow(OrgData.PRIORITY));
 			todo = cursor.getString(cursor.getColumnIndexOrThrow(OrgData.TODO));
 			tags = cursor.getString(cursor.getColumnIndexOrThrow(OrgData.TAGS));
+			tags_inherited = cursor.getString(cursor
+					.getColumnIndexOrThrow(OrgData.TAGS_INHERITED));
 			name = cursor.getString(cursor.getColumnIndexOrThrow(OrgData.NAME));
 			payload = cursor.getString(cursor
 					.getColumnIndexOrThrow(OrgData.PAYLOAD));
@@ -169,6 +173,7 @@ public class OrgNode {
 		values.put(OrgData.PAYLOAD, payload);
 		values.put(OrgData.PRIORITY, priority);
 		values.put(OrgData.TAGS, tags);
+		values.put(OrgData.TAGS_INHERITED, tags_inherited);
 		return values;
 	}
 	
@@ -182,6 +187,7 @@ public class OrgNode {
 		values.put(OrgData.PAYLOAD, payload);
 		values.put(OrgData.PRIORITY, priority);
 		values.put(OrgData.TAGS, tags);
+		values.put(OrgData.TAGS_INHERITED, tags_inherited);
 		return values;
 	}
 	

@@ -10,11 +10,12 @@ import com.matburt.mobileorg.OrgData.OrgContract.OrgData;
 
 public class OrgDatabase extends SQLiteOpenHelper {
 	private static final String DATABASE_NAME = "MobileOrg.db";
-	private static final int DATABASE_VERSION = 4;
+	private static final int DATABASE_VERSION = 5;
 
 	private int orgdata_nameColumn;
 	private int orgdata_todoColumn;
 	private int orgdata_tagsColumn;
+	private int orgdata_tagsInheritedColumn;
 	private int orgdata_priorityColumn;
 	private int orgdata_parentidColumn;
 	private int orgdata_fileidColumn;
@@ -72,6 +73,7 @@ public class OrgDatabase extends SQLiteOpenHelper {
 				+ "priority text,"
 				+ "todo text,"
 				+ "tags text,"
+				+ "tags_inherited text,"
 				+ "payload text,"
 				+ "name text)");
 	}
@@ -86,6 +88,10 @@ public class OrgDatabase extends SQLiteOpenHelper {
 			db.execSQL("DROP TABLE IF EXISTS edits");
 			db.execSQL("DROP TABLE IF EXISTS orgdata");
 			break;
+			
+		case 5:
+			db.execSQL("alter table orgdata add tags_inherited text");
+			break;
 		}
 		onCreate(db);
 	}
@@ -98,6 +104,7 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		orgdataInsertHelper.bind(orgdata_priorityColumn, node.priority);
 		orgdataInsertHelper.bind(orgdata_fileidColumn, node.fileId);
 		orgdataInsertHelper.bind(orgdata_tagsColumn, node.tags);
+		orgdataInsertHelper.bind(orgdata_tagsInheritedColumn, node.tags_inherited);
 		orgdataInsertHelper.bind(orgdata_levelColumn, node.level);
 		return orgdataInsertHelper.execute();
 	}
@@ -121,6 +128,7 @@ public class OrgDatabase extends SQLiteOpenHelper {
 			this.orgdata_parentidColumn = orgdataInsertHelper.getColumnIndex(OrgData.PARENT_ID);
 			this.orgdata_fileidColumn = orgdataInsertHelper.getColumnIndex(OrgData.FILE_ID);
 			this.orgdata_tagsColumn = orgdataInsertHelper.getColumnIndex(OrgData.TAGS);
+			this.orgdata_tagsInheritedColumn = orgdataInsertHelper.getColumnIndex(OrgData.TAGS_INHERITED);
 			this.orgdata_levelColumn = orgdataInsertHelper.getColumnIndex(OrgData.LEVEL);
 		}
 		orgdataInsertHelper.prepareForInsert();
