@@ -22,6 +22,7 @@ public class OrgContract {
 		String LEVEL = "level";
 		String PRIORITY = "priority";
 		String TAGS = "tags";
+		String TAGS_INHERITED = "tags_inherited";
 		String PAYLOAD = "payload";
 	}
 	
@@ -90,7 +91,7 @@ public class OrgContract {
 		public static final String NAME_SORT = NAME + " ASC";
 
 		
-		public static final String[] DEFAULT_COLUMNS = { ID, NAME, TODO, TAGS,
+		public static final String[] DEFAULT_COLUMNS = { ID, NAME, TODO, TAGS, TAGS_INHERITED,
 				PARENT_ID, PAYLOAD, LEVEL, PRIORITY, FILE_ID };
 	}
 	

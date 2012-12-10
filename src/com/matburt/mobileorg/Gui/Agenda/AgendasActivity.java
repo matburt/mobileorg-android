@@ -11,5 +11,7 @@ public class AgendasActivity extends SherlockFragmentActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.agendas);
+		
+		getSupportActionBar().setTitle("Agenda");
 	}
 }

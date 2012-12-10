@@ -13,6 +13,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashSet;
 
 import android.app.Activity;
 import android.content.ContentResolver;
@@ -63,6 +64,22 @@ public class OrgUtils {
     	else
     		return true;
     }
+    
+	public static HashSet<String> getExcludedTags(Context context) {
+		String tags = PreferenceManager.getDefaultSharedPreferences(context).getString(
+				"excludeTagsInheritance", null);
+		
+		if (tags == null)
+			return null;
+		
+		HashSet<String> tagsSet = new HashSet<String>();
+		for (String tag: tags.split(":")) {
+			if(TextUtils.isEmpty(tag) == false)
+				tagsSet.add(tag);
+		}
+		
+		return tagsSet;
+	}
     
 	public static boolean getCombineBlockAgendas(Context context) {
 		try {

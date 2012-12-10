@@ -153,6 +153,8 @@
     <string name="preference_ubuntuone_path_summary">UbuntuOne path to index.org file</string>
     <string name="preference_clear_db_dialog_title">Clear DB?</string>
     <string name="preference_clear_db_dialog_message">Are you sure want to clear DB?</string>
+    <string name="preference_exclude_tags">Exclude tags inheritance</string>
+    <string name="preference_exclude_tags_summary">Tags separated by \":\" to exclude from inheritance.</string>
     <string name="preference_combine_block_agenda_summary">Combines block agendas into one node, with separators. Needs resync of agenda file to take effect</string>
     <string name="preference_combine_block_agenda_title">Combine block agendas</string>
     <string name="preference_calendar">Calendar</string>

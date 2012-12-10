@@ -45,7 +45,7 @@ public class OutlineItem extends RelativeLayout implements Checkable {
 	}
 	
 	public void setup(OrgNode node, boolean expanded, DefaultTheme theme, ContentResolver resolver) {
-		setupTags(node.tags, theme);
+		setupTags(node.tags, node.tags_inherited, theme);
 		
 		SpannableStringBuilder titleSpan = new SpannableStringBuilder(node.name);
 		
@@ -157,10 +157,14 @@ public class OutlineItem extends RelativeLayout implements Checkable {
 		}
 	}
 	
-	public void setupTags(String tags, DefaultTheme theme) {
-		if(tags != null && TextUtils.isEmpty(tags) == false) {
+	public void setupTags(String tags, String tagsInherited, DefaultTheme theme) {
+		if(TextUtils.isEmpty(tags) == false || TextUtils.isEmpty(tagsInherited) == false) {
+			if (TextUtils.isEmpty(tagsInherited) == false)
+				tagsView.setText(tags + "::" + tagsInherited);
+			else
+				tagsView.setText(tags);
+
 			tagsView.setTextColor(theme.gray);
-			tagsView.setText(tags);
 			tagsView.setVisibility(View.VISIBLE);
 		} else
 			tagsView.setVisibility(View.GONE);
