@@ -10,6 +10,20 @@
         android:layout_height="wrap_content"
         android:paddingTop="3dip" >
 
+        <EditText
+            android:id="@+id/widget_title"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/title"
+            android:inputType="text|textMultiLine|textAutoCorrect|textCapSentences" />
+    </LinearLayout>
+
+    <LinearLayout
+        style="@style/EditBorders"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="3dip" >
+
         <fragment
             android:name="com.matburt.mobileorg.Gui.Capture.LocationFragment"
             android:layout_width="fill_parent"
@@ -20,19 +34,20 @@
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
+        android:gravity="center"
         android:orientation="horizontal" >
-
-        <Button
-            android:id="@+id/widget_save"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/save" />
 
         <Button
             android:id="@+id/widget_cancel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/cancel" />
+
+        <Button
+            android:id="@+id/widget_save"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/save" />
     </LinearLayout>
 
 </LinearLayout>

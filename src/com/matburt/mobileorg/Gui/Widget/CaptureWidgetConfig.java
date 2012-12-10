@@ -6,16 +6,20 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.EditText;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.matburt.mobileorg.R;
+import com.matburt.mobileorg.Gui.Capture.EditActivity;
+import com.matburt.mobileorg.Gui.Capture.EditHost;
 import com.matburt.mobileorg.Gui.Capture.LocationFragment;
 import com.matburt.mobileorg.OrgData.OrgNode;
 
-public class CaptureWidgetConfig extends SherlockFragmentActivity {
+public class CaptureWidgetConfig extends SherlockFragmentActivity implements EditHost {
 
 	private int mAppWidgetId;
 	private LocationFragment locationFragment;
+	private EditText titleView;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -44,7 +48,9 @@ public class CaptureWidgetConfig extends SherlockFragmentActivity {
 			}
 		});
         
-		locationFragment = (LocationFragment) getSupportFragmentManager()
+        titleView = (EditText) findViewById(R.id.widget_title);
+
+        locationFragment = (LocationFragment) getSupportFragmentManager()
 				.findFragmentByTag("captureLocationFragment");
 	}
 
@@ -63,9 +69,9 @@ public class CaptureWidgetConfig extends SherlockFragmentActivity {
 	private void save() {
         OrgNode node = locationFragment.getLocationSelection();
         String locationOlpId = node.getOlpId(getContentResolver());
+        String title = titleView.getText().toString();
         
-		CaptureWidgetProvider.writeConfig(mAppWidgetId, locationOlpId,
-				getApplicationContext());
+		CaptureWidgetProvider.writeConfig(mAppWidgetId, this, locationOlpId, title);
 	}
 	
 	private void cancelConfig() {
@@ -73,5 +79,32 @@ public class CaptureWidgetConfig extends SherlockFragmentActivity {
         resultValue.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, mAppWidgetId);
         setResult(RESULT_CANCELED, resultValue);
         finish();
+	}
+
+
+	@Override
+	public boolean isNodeEditable() {
+		return true;
+	}
+
+
+	@Override
+	public OrgNode getOrgNode() {
+		return null;
+	}
+
+	@Override
+	public String getActionMode() {
+		return EditActivity.ACTIONMODE_ADDCHILD;
+	}
+
+	@Override
+	public boolean isNodeRefilable() {
+		return true;
+	}
+
+	@Override
+	public OrgNode getParentOrgNode() {
+		return null;
 	}
 }

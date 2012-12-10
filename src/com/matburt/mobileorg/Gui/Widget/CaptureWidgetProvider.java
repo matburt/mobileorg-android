@@ -11,9 +11,12 @@ import android.widget.RemoteViews;
 
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Gui.Capture.EditActivity;
+import com.matburt.mobileorg.OrgData.OrgNode;
+import com.matburt.mobileorg.OrgData.OrgProviderUtils;
 
 public class CaptureWidgetProvider extends AppWidgetProvider {
 	public static final String LOCATION = "location";
+	public static final String TITLE = "title";
 	
 	@Override
 	public void onUpdate(Context context, AppWidgetManager appWidgetManager,
@@ -31,17 +34,16 @@ public class CaptureWidgetProvider extends AppWidgetProvider {
 
 	public static void updateWidget(int appWidgetId,
 			AppWidgetManager appWidgetManager, Context context) {
-		SharedPreferences prefs = context.getSharedPreferences("widget_"
-				+ appWidgetId, Context.MODE_PRIVATE);
+		SharedPreferences prefs = getPreferences(appWidgetId, context);
 		if (null == prefs)
 			return;
 		
 		RemoteViews views = new RemoteViews(context.getPackageName(),
 				R.layout.capture_widget);
 		
-		String location = prefs.getString(LOCATION, "???");
+		String title = prefs.getString(TITLE, "???");
 		views.setTextViewText(R.id.capture_widget_text,
-				prefs.getString("name", location));
+				prefs.getString("name", title));
 
 		Intent intent = getWidgetIntent(appWidgetId, context);
 		
@@ -55,16 +57,29 @@ public class CaptureWidgetProvider extends AppWidgetProvider {
 	
 	private static Intent getWidgetIntent(int appWidgetId, Context context) {
 		Intent intent = new Intent(context, EditActivity.class);
+		intent.putExtra(EditActivity.ACTIONMODE, EditActivity.ACTIONMODE_ADDCHILD);
+
+		SharedPreferences prefs = getPreferences(appWidgetId, context);
+		String olpLocation = prefs.getString(LOCATION, "");
+		try {
+			OrgNode parentNode = OrgProviderUtils.getOrgNodeFromOlpPath(
+					olpLocation, context.getContentResolver());
+			intent.putExtra(EditActivity.NODE_ID, parentNode.id);
+		} catch (Exception e) {}
 
 		return intent;
 	}
 	
-	public static void writeConfig(int appWidgetId, String locationOlp, Context context) {
+	public static void writeConfig(int appWidgetId, Context context, String locationOlp, String title) {
+		Editor edit = getPreferences(appWidgetId, context).edit();
+		edit.putString(LOCATION, locationOlp);
+		edit.putString(TITLE, title);
+		edit.commit();
+	}
+	
+	public static SharedPreferences getPreferences(int appWidgetId, Context context) {
 		SharedPreferences prefs = context.getSharedPreferences("widget_"
 				+ appWidgetId, Context.MODE_PRIVATE);
-
-		Editor edit = prefs.edit();
-		edit.putString(LOCATION, locationOlp);
-		edit.commit();
+		return prefs;
 	}
 }

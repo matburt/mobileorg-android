@@ -20,7 +20,7 @@ import com.matburt.mobileorg.Services.SyncService;
 import com.matburt.mobileorg.util.OrgNodeNotFoundException;
 import com.matburt.mobileorg.util.OrgUtils;
 
-public class EditActivity extends SherlockFragmentActivity implements
+public class EditActivity extends SherlockFragmentActivity implements EditHost,
 		PayloadFragment.OnPayloadModifiedListener,
 		DatesFragment.OnDatesModifiedListener {
 	public final static String NODE_ID = "node_id";
@@ -38,7 +38,7 @@ public class EditActivity extends SherlockFragmentActivity implements
 	private String actionMode;
 
 	private ContentResolver resolver;
-
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		OrgUtils.setTheme(this);
