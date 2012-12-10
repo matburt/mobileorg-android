@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
@@ -24,6 +25,7 @@ public class EditActivity extends SherlockFragmentActivity implements EditHost,
 		PayloadFragment.OnPayloadModifiedListener,
 		DatesFragment.OnDatesModifiedListener {
 	public final static String NODE_ID = "node_id";
+	public final static String OLP_LOCATION = "olp_location";
 	public final static String ACTIONMODE = "actionMode";
 	public final static String ACTIONMODE_CREATE = "create";
 	public final static String ACTIONMODE_EDIT = "edit";
@@ -64,7 +66,16 @@ public class EditActivity extends SherlockFragmentActivity implements EditHost,
 	private void initState() {
 		Intent intent = getIntent();
 		this.actionMode = intent.getStringExtra(ACTIONMODE);
-		long node_id = intent.getLongExtra(NODE_ID, -1);	
+		long node_id = intent.getLongExtra(NODE_ID, -1);
+		String olpLocation = intent.getStringExtra(OLP_LOCATION);
+		
+		if (TextUtils.isEmpty(olpLocation) == false) {
+			try {
+				OrgNode parentNode = OrgProviderUtils.getOrgNodeFromOlpPath(
+						olpLocation, getContentResolver());
+				node_id = parentNode.id;
+			} catch (Exception e) {}
+		}
 		
 		if (this.actionMode == null) {
 			this.node = OrgUtils.getCaptureIntentContents(intent);

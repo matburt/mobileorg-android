@@ -194,7 +194,8 @@
         <activity android:name=".Gui.Agenda.AgendaActivity" >
         </activity>
 
-        <receiver android:name=".Gui.Widget.CaptureWidgetProvider" >
+        <receiver android:name=".Gui.Widget.CaptureWidgetProvider"
+            android:label="MobileOrg Capture" >
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>

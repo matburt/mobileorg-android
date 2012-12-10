@@ -11,8 +11,6 @@ import android.widget.RemoteViews;
 
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Gui.Capture.EditActivity;
-import com.matburt.mobileorg.OrgData.OrgNode;
-import com.matburt.mobileorg.OrgData.OrgProviderUtils;
 
 public class CaptureWidgetProvider extends AppWidgetProvider {
 	public static final String LOCATION = "location";
@@ -61,11 +59,7 @@ public class CaptureWidgetProvider extends AppWidgetProvider {
 
 		SharedPreferences prefs = getPreferences(appWidgetId, context);
 		String olpLocation = prefs.getString(LOCATION, "");
-		try {
-			OrgNode parentNode = OrgProviderUtils.getOrgNodeFromOlpPath(
-					olpLocation, context.getContentResolver());
-			intent.putExtra(EditActivity.NODE_ID, parentNode.id);
-		} catch (Exception e) {}
+		intent.putExtra(EditActivity.OLP_LOCATION, olpLocation);
 
 		return intent;
 	}
