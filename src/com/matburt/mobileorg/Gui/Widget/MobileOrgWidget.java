@@ -1,4 +1,4 @@
-package com.matburt.mobileorg.Services;
+package com.matburt.mobileorg.Gui.Widget;
 
 import android.app.PendingIntent;
 import android.app.Service;

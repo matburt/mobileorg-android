@@ -40,18 +40,20 @@ public class LocationFragment extends SherlockFragment {
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
-		
-		EditActivity activity = (EditActivity) getActivity();
-		this.resolver = activity.getContentResolver();
+
+		this.resolver = getActivity().getContentResolver();
+		EditHost activity = (EditHost) getActivity();
 
 		restoreFromBundle(savedInstanceState);
 
-		if(this.node == null)
-			this.node = activity.getParentOrgNode();
+		EditHost editActivity = (EditHost) activity;
+
+		if (this.node == null)
+			this.node = editActivity.getParentOrgNode();
 
 		initLocationView();
-		
-		setModifiable(activity.isNodeRefilable());
+
+		setModifiable(editActivity.isNodeRefilable());
 	}
 	
 	@Override

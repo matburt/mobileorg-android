@@ -1,9 +1,14 @@
 package com.matburt.mobileorg.util;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutput;
+import java.io.ObjectOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -17,6 +22,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
+import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 
@@ -201,4 +207,41 @@ public class OrgUtils {
     	else 
     		activity.setTheme(R.style.Theme_MobileOrg_Light);
     }
+    
+	public static byte[] serializeObject(Object o) {
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+
+		try {
+			ObjectOutput out = new ObjectOutputStream(bos);
+			out.writeObject(o);
+			out.close();
+
+			byte[] buf = bos.toByteArray();
+
+			return buf;
+		} catch (IOException ioe) {
+			Log.e("serializeObject", "error", ioe);
+
+			return null;
+		}
+	}
+
+	public static Object deserializeObject(byte[] b) {
+		try {
+			ObjectInputStream in = new ObjectInputStream(
+					new ByteArrayInputStream(b));
+			Object object = in.readObject();
+			in.close();
+
+			return object;
+		} catch (ClassNotFoundException cnfe) {
+			Log.e("deserializeObject", "class not found error", cnfe);
+
+			return null;
+		} catch (IOException ioe) {
+			Log.e("deserializeObject", "io error", ioe);
+
+			return null;
+		}
+	}
 }
