@@ -11,6 +11,7 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.matburt.mobileorg.OrgData.CalendarEntriesParser;
@@ -184,7 +185,7 @@ public class CalendarSyncService extends Service implements
 	
 	private boolean shouldInsertEntry(String todo, OrgNodeDate date) {
 		boolean isTodoActive = true;
-		if (allTodos.contains(todo))
+		if (TextUtils.isEmpty(todo) == false && allTodos.contains(todo))
 			isTodoActive = this.activeTodos.contains(todo);
 		
 		if (this.showDone == false && isTodoActive == false)
@@ -264,7 +265,6 @@ public class CalendarSyncService extends Service implements
 		this.activeTodos = new HashSet<String>(
 				OrgProviderUtils.getActiveTodos(resolver));
 		this.allTodos = new HashSet<String>(OrgProviderUtils.getTodos(resolver));
-		this.allTodos.remove("");
 		this.calendarWrapper.refreshPreferences();
 	}
 
