@@ -20,6 +20,7 @@ import com.matburt.mobileorg.OrgData.OrgProvider;
 import com.matburt.mobileorg.OrgData.OrgProviderUtils;
 import com.matburt.mobileorg.test.util.OrgTestFiles;
 import com.matburt.mobileorg.test.util.OrgTestFiles.OrgFileWithEmphasisedNode;
+import com.matburt.mobileorg.test.util.OrgTestFiles.OrgFileWithStarNewlineNode;
 import com.matburt.mobileorg.test.util.OrgTestFiles.OrgIndexWithFileDirectorySpaces;
 import com.matburt.mobileorg.test.util.OrgTestFiles.SimpleOrgFiles;
 import com.matburt.mobileorg.test.util.OrgTestUtils;
@@ -180,6 +181,20 @@ public class OrgFileParserTest extends ProviderTestCase2<OrgProvider> {
 		parser.parse(orgFile, breader);
 		
 		assertEquals(OrgFileWithEmphasisedNode.numberOfHeadings, db.fastInsertNodeCalls);
+		assertTrue(db.fastInsertNodePayloadCalls >= 1);
+	}
+	
+	/*
+	 * Tests for bug causing crash when lines containing '*' followed by
+	 * newline.
+	 */
+	public void testParseFileWithStarNewline() {
+		InputStream is = new ByteArrayInputStream(OrgFileWithStarNewlineNode.orgFile.getBytes());
+		BufferedReader breader = new BufferedReader(new InputStreamReader(is));
+		OrgFile orgFile = new OrgFile("new file", "file alias", "");
+		parser.parse(orgFile, breader);
+		
+		assertEquals(OrgFileWithStarNewlineNode.numberOfHeadings, db.fastInsertNodeCalls);
 		assertTrue(db.fastInsertNodePayloadCalls >= 1);
 	}
 }

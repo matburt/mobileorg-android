@@ -49,6 +49,12 @@ public class OrgTestFiles {
 		public static final String orgFile = "* new\n" + emphasisedPayload;
 	}
 	
+	public static class OrgFileWithStarNewlineNode {
+		public static final int numberOfHeadings = 2;
+		public static final String emptyHeading = "*";
+		public static final String orgFile = "* new\n" + emptyHeading + "\n" + "** new 2";
+	}
+	
 	public static class OrgIndexWithFileDirectorySpaces {
 		public static final String fileAlias = "Mixed Todo.org";
 		public static final String filename = "Mixed Activities/Mixed Todo.org";
