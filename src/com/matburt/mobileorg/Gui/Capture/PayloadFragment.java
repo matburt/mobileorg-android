@@ -16,7 +16,6 @@ import android.widget.RelativeLayout;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Gui.ViewFragment;
 import com.matburt.mobileorg.Gui.Theme.DefaultTheme;
-import com.matburt.mobileorg.OrgData.OrgNode;
 import com.matburt.mobileorg.OrgData.OrgNodePayload;
 
 public class PayloadFragment extends ViewFragment {
@@ -81,8 +80,7 @@ public class PayloadFragment extends ViewFragment {
 		super.onActivityCreated(savedInstanceState);
 		EditActivity editActivity = (EditActivity) getActivity();
 		
-		OrgNode node = editActivity.getOrgNode();
-		this.payload = new OrgNodePayload(node.getOrgNodePayload().get());
+		this.payload = editActivity.getOrgNodePayload();
 		
 		if(savedInstanceState != null)
 			restoreInstanceState(savedInstanceState);

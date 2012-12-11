@@ -456,7 +456,8 @@ public class OrgNode {
 		return parent;
 	}
 	
-	public void generateApplyWriteEdits(OrgNode newNode, String olpPath, ContentResolver resolver) {
+	public void generateApplyWriteEdits(OrgNode newNode, String olpPath,
+			ContentResolver resolver) {
 		ArrayList<OrgEdit> generateEditNodes = generateApplyEditNodes(newNode, olpPath, resolver);
 		boolean generateEdits = !getFilename(resolver).equals(FileUtils.CAPTURE_FILE);
 				
@@ -469,7 +470,8 @@ public class OrgNode {
 		return generateApplyEditNodes(newNode, "", resolver);
 	}
 	
-	public ArrayList<OrgEdit> generateApplyEditNodes(OrgNode newNode, String olpPath, ContentResolver resolver) {
+	public ArrayList<OrgEdit> generateApplyEditNodes(OrgNode newNode,
+			String olpPath, ContentResolver resolver) {
 		ArrayList<OrgEdit> edits = new ArrayList<OrgEdit>();
 
 		if (!name.equals(newNode.name)) {

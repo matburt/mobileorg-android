@@ -16,6 +16,7 @@ import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.OrgData.OrgEdit;
 import com.matburt.mobileorg.OrgData.OrgFile;
 import com.matburt.mobileorg.OrgData.OrgNode;
+import com.matburt.mobileorg.OrgData.OrgNodePayload;
 import com.matburt.mobileorg.OrgData.OrgProviderUtils;
 import com.matburt.mobileorg.Services.SyncService;
 import com.matburt.mobileorg.util.OrgNodeNotFoundException;
@@ -36,8 +37,10 @@ public class EditActivity extends SherlockFragmentActivity implements EditHost,
 	 * can't be found on save.
 	 */
 	private String nodeOlpPath = "";
-	private OrgNode node;
 	private String actionMode;
+
+	private OrgNode node;
+	private OrgNodePayload editPayload;
 
 	private ContentResolver resolver;
 	
@@ -135,6 +138,13 @@ public class EditActivity extends SherlockFragmentActivity implements EditHost,
 		if(this.node == null)
 			this.node = new OrgNode();
 		return this.node;
+	}
+	
+	public OrgNodePayload getOrgNodePayload() {
+		if (this.editPayload == null)
+			this.editPayload = new OrgNodePayload(node.getPayload());
+	
+		return this.editPayload;
 	}
 	
 	public String getActionMode() {

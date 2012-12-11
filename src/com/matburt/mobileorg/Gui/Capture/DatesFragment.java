@@ -14,7 +14,6 @@ import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Gui.Capture.DateTableRow.DateTableRowListener;
-import com.matburt.mobileorg.OrgData.OrgNode;
 import com.matburt.mobileorg.OrgData.OrgNodePayload;
 import com.matburt.mobileorg.OrgData.OrgNodeTimeDate;
 
@@ -30,7 +29,7 @@ public class DatesFragment extends SherlockFragment {
 	DateTableRow deadlineEntry = null;
 	DateTableRow timestampEntry = null;
 
-	private OrgNode node;
+	private OrgNodePayload payload;
 	
 	private OnDatesModifiedListener mListener;
 	
@@ -61,7 +60,7 @@ public class DatesFragment extends SherlockFragment {
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
 		EditActivity editActivity = (EditActivity) getActivity();
-		this.node = editActivity.getOrgNode();
+		this.payload = editActivity.getOrgNodePayload();
 		
 		if(savedInstanceState != null)
 			restoreInstanceState(savedInstanceState);
@@ -74,7 +73,6 @@ public class DatesFragment extends SherlockFragment {
 
 	public void setupDates() {
 		removeDateEntries();
-		OrgNodePayload payload = this.node.getOrgNodePayload();
 		payload.getCleanedPayload(); // Hack
 		
 		addDateScheduled(payload.getScheduled());
@@ -165,7 +163,6 @@ public class DatesFragment extends SherlockFragment {
 	}
 
 	private void announceDateModified(OrgNodeTimeDate.TYPE type) {
-		OrgNodePayload payload = this.node.getOrgNodePayload();
 		switch (type) {
 		case Scheduled:
 			payload.insertOrReplaceDate(type, getScheduled());
