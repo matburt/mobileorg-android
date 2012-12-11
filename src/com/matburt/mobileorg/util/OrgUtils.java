@@ -33,6 +33,7 @@ import com.matburt.mobileorg.OrgData.OrgNode;
 import com.matburt.mobileorg.Synchronizers.Synchronizer;
 
 public class OrgUtils {
+	private static final int DEFAULT_FONTSIZE = 14;
 	
 	public static String getTimestamp() {
 		SimpleDateFormat sdf = new SimpleDateFormat("[yyyy-MM-dd EEE HH:mm]");		
@@ -53,6 +54,19 @@ public class OrgUtils {
 		return Integer.parseInt(PreferenceManager
 				.getDefaultSharedPreferences(context).getString(
 						"viewRecursionMax", "0"));
+	}
+	
+	public static int getFontSize(Context context) {
+		try {
+			int fontSize = Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(
+					context).getString("fontSize", "14"));
+			
+			if (fontSize > 2)
+				return fontSize;
+		} catch (NumberFormatException e) {
+		}
+		
+		return DEFAULT_FONTSIZE;
 	}
 	
     public static boolean isSyncConfigured(Context context) {

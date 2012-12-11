@@ -12,7 +12,6 @@ import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
-import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.Checkable;
@@ -24,6 +23,7 @@ import com.matburt.mobileorg.Gui.Theme.DefaultTheme;
 import com.matburt.mobileorg.OrgData.OrgFileParser;
 import com.matburt.mobileorg.OrgData.OrgNode;
 import com.matburt.mobileorg.OrgData.OrgProviderUtils;
+import com.matburt.mobileorg.util.OrgUtils;
 
 public class OutlineItem extends RelativeLayout implements Checkable {
 		
@@ -36,8 +36,9 @@ public class OutlineItem extends RelativeLayout implements Checkable {
 		View.inflate(getContext(), R.layout.outline_item, this);
 		titleView = (TextView) findViewById(R.id.outline_item_title);
 		tagsView = (TextView) findViewById(R.id.outline_item_tags);
-		titleView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
-		tagsView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
+		
+		int fontSize = OrgUtils.getFontSize(getContext());
+		tagsView.setTextSize(fontSize);
 	}
 	
 	public void setLevelFormating(boolean enabled) {
@@ -114,8 +115,8 @@ public class OutlineItem extends RelativeLayout implements Checkable {
 	}
 	
 	public void setupTitle(String name, DefaultTheme theme, SpannableStringBuilder titleSpan) {
-		titleView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
 		titleView.setGravity(Gravity.LEFT);
+		titleView.setTextSize(OrgUtils.getFontSize(getContext()));
 
 		if (name.startsWith("COMMENT"))
 			titleSpan.setSpan(new ForegroundColorSpan(theme.gray), 0,
@@ -135,7 +136,7 @@ public class OutlineItem extends RelativeLayout implements Checkable {
 		titleSpan.setSpan(new StyleSpan(Typeface.BOLD), 0,
 				titleSpan.length(), 0);
 
-		titleView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 18);
+		titleView.setTextSize(OrgUtils.getFontSize(getContext()) + 4);
 		//titleView.setBackgroundColor(theme.c4Blue);
 		titleView.setGravity(Gravity.CENTER_VERTICAL
 				| Gravity.CENTER_HORIZONTAL);

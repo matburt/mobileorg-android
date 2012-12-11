@@ -36,6 +36,14 @@
             android:key="theme"
             android:title="@string/preference_theme_title" />
 
+        <EditTextPreference
+            android:key="fontSize"
+            android:defaultValue="14"
+            android:maxLength="3"
+            android:numeric="integer"
+            android:summary="@string/preference_fontsize_summary"
+            android:title="@string/preference_fontsize" />
+
         <CheckBoxPreference
             android:key="combineBlockAgendas"
             android:summary="@string/preference_combine_block_agenda_summary"

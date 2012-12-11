@@ -151,6 +151,11 @@
     <string name="preference_ubuntuone_path">Path</string>
     <string name="preference_ubuntuone_login_summary">Login to retrieve an OAuth token</string>
     <string name="preference_ubuntuone_path_summary">UbuntuOne path to index.org file</string>
+    
+    
+    <string name="preference_fontsize_summary">Font size used in outline.</string>
+    <string name="preference_fontsize">Font size</string>
+    
     <string name="preference_clear_db_dialog_title">Clear DB?</string>
     <string name="preference_clear_db_dialog_message">Are you sure want to clear DB?</string>
     <string name="preference_exclude_tags">Exclude tags inheritance</string>
