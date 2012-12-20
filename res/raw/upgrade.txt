@@ -1,5 +1,15 @@
 MobileOrg Upgrade Notes
 
+Changes for 0.9.7:
+- Many bug fixes
+- Calendar improvements
+- Pull data from Calendar
+- SSH Key based auth
+- Dynamic Agenda
+- All new capture widget
+- Support inherited tags
+- Font size preferencees
+
 Changes for 0.9.6:
 
 - Fix error reporting in Dropbox Synchronizer
