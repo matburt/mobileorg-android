@@ -27,7 +27,6 @@ public class SSHWizard extends Wizard {
 	private EditText sshPort;
 	
 	private TextView sshPubFileActual;
-	private final String pubFileActual =  sshPubFileActual.getText().toString();
 
 	public SSHWizard(WizardView wizardView, Context context) {
 		super(wizardView, context);
@@ -86,6 +85,7 @@ public class SSHWizard extends Wizard {
 		final String passActual = sshPass.getText().toString();
 		final String userActual = sshUser.getText().toString();
 		final String hostActual = sshHost.getText().toString();
+        final String pubFileActual = sshPubFileActual.getText().toString();
 		String portNumGiven = sshPort.getText().toString();
 		int portNum;
 		if (portNumGiven.trim().equals("")) {
