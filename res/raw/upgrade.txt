@@ -1,5 +1,9 @@
 MobileOrg Upgrade Notes
 
+Changes for 0.9.8:
+- Fix the issue preventing Dropbox sync
+- Other bug fixes and cleanups
+
 Changes for 0.9.7:
 - Many bug fixes
 - Calendar improvements
