@@ -92,7 +92,7 @@
     <string name="password">Password</string>
     <string name="host">Host</string>
     <string name="port">Port</string>
-    <string name="path">Path</string>
+    <string name="path">Absolute Path</string>
     <string name="login">Log in</string>
     <string name="login_webdav">Check Login</string>
     <string name="login_ssh">Check SSH Login</string>
