@@ -57,7 +57,8 @@ The private keys used to access Dropbox accounts for users are not included.
 That's not entirely true.  The file exists but contains dummy values so if you want
 dropbox to work on your local builds then you will need to request your own keys from
 Dropbox.
-Happy hacking!
+
+You'll also need to provide your app key in the AndroidManifest.xml file under: com.dropbox.client2.android.AuthActivity
 
 Notes regarding debian(-like) amd64 build hosts
 -----------------------------------------------
