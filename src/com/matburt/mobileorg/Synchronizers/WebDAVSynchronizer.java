@@ -236,8 +236,8 @@ public class WebDAVSynchronizer implements SynchronizerInterface {
         } catch (IOException e) {
             return null;
         }
-        con.setReadTimeout(4000);
-        con.setConnectTimeout(6000);
+        con.setReadTimeout(60000);
+        con.setConnectTimeout(60000);
         con.addRequestProperty("Expect", "100-continue");
         con.addRequestProperty("Authorization",
                                "Basic "+Base64.encodeToString((this.username + ":" + this.password).getBytes(),
