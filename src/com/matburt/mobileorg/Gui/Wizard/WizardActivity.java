@@ -1,14 +1,18 @@
 package com.matburt.mobileorg.Gui.Wizard;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Gui.Wizard.Wizards.SSHWizard;
 import com.matburt.mobileorg.Gui.Wizard.Wizards.Wizard;
+import com.matburt.mobileorg.Settings.SettingsActivity;
 import com.matburt.mobileorg.util.OrgUtils;
 
 public class WizardActivity extends Activity implements RadioGroup.OnCheckedChangeListener {
@@ -39,8 +43,40 @@ public class WizardActivity extends Activity implements RadioGroup.OnCheckedChan
 		syncSdCard = ((RadioButton) findViewById(R.id.sync_sdcard)).getId();
 		syncNull = ((RadioButton) findViewById(R.id.sync_null)).getId();
 		syncSSH = ((RadioButton) findViewById(R.id.sync_ssh)).getId();
+		
+		// this works, but makes it impossible to push the next page button,
+		// because getMeasuredWidth() won't return the right value yet in
+		// Wizardview.scrollRight()
+		
+		// selectPrevSource(this, syncGroup);
 	}
 
+	private void selectPrevSource(Context context, RadioGroup syncGroup) {
+		SharedPreferences srcPrefs = PreferenceManager
+				.getDefaultSharedPreferences(context);
+		String syncSource = srcPrefs.getString("syncSource", "");
+		
+		int id = -1;
+		if (syncSource == "")
+			return;
+		
+		if (syncSource.equals("webdav")) 
+			id = syncWebDav;
+		else if (syncSource.equals("sdcard")) 
+			id = syncSdCard;
+		else if (syncSource.equals("dropbox")) 
+			id = syncDropBox;
+		else if (syncSource.equals("ubuntu")) 
+			id = syncUbuntuOne;
+        else if (syncSource.equals("scp")) 
+			id = syncSSH;
+		else if (syncSource.equals("null")) 
+			id = syncNull;		
+		else 
+			return;
+		
+		syncGroup.check(id);
+	}
 
 	@Override
 	protected void onPause() {
