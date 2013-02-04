@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.view.ViewTreeObserver;
 
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Gui.Wizard.Wizards.SSHWizard;
@@ -15,10 +16,12 @@ import com.matburt.mobileorg.Gui.Wizard.Wizards.Wizard;
 import com.matburt.mobileorg.Settings.SettingsActivity;
 import com.matburt.mobileorg.util.OrgUtils;
 
-public class WizardActivity extends Activity implements RadioGroup.OnCheckedChangeListener {
+public class WizardActivity extends Activity implements RadioGroup.OnCheckedChangeListener, ViewTreeObserver.OnGlobalLayoutListener  {
 
 	private WizardView wizardView;
 	private Wizard activeWizard;
+	
+	private RadioGroup syncGroup;
 
 	private int syncWebDav, syncDropBox, syncUbuntuOne, syncSdCard, syncNull, syncSSH;
 
@@ -32,7 +35,7 @@ public class WizardActivity extends Activity implements RadioGroup.OnCheckedChan
 		// when wizard first starts can't go to next page
 		wizardView.setNavButtonStateOnPage(0, false, WizardView.FIRST_PAGE);
 
-		RadioGroup syncGroup = (RadioGroup) findViewById(R.id.sync_group);
+		syncGroup = (RadioGroup) findViewById(R.id.sync_group);
 		syncGroup.clearCheck();
 		syncGroup.setOnCheckedChangeListener(this);
 
@@ -44,14 +47,13 @@ public class WizardActivity extends Activity implements RadioGroup.OnCheckedChan
 		syncNull = ((RadioButton) findViewById(R.id.sync_null)).getId();
 		syncSSH = ((RadioButton) findViewById(R.id.sync_ssh)).getId();
 		
-		// this works, but makes it impossible to push the next page button,
-		// because getMeasuredWidth() won't return the right value yet in
-		// Wizardview.scrollRight()
-		
-		// selectPrevSource(this, syncGroup);
+		ViewTreeObserver observer = wizardView.getViewTreeObserver();
+		if (observer.isAlive()) { 
+		  observer.addOnGlobalLayoutListener(this);
+		}
 	}
 
-	private void selectPrevSource(Context context, RadioGroup syncGroup) {
+	private void selectPrevSource(Context context) {
 		SharedPreferences srcPrefs = PreferenceManager
 				.getDefaultSharedPreferences(context);
 		String syncSource = srcPrefs.getString("syncSource", "");
@@ -129,5 +131,11 @@ public class WizardActivity extends Activity implements RadioGroup.OnCheckedChan
 		}
 		
 		return Wizard.TYPE.Null;
+	}
+
+	@Override
+	public void onGlobalLayout() {
+		wizardView.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+		selectPrevSource(this);
 	}
 }
