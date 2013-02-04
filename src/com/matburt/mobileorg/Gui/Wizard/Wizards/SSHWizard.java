@@ -63,6 +63,7 @@ public class SSHWizard extends Wizard {
 			}
 		});
 		
+		loadSettings();
 		
 		Button webdavLoginButton = (Button) view
 				.findViewById(R.id.wizard_ssh_login_button);
@@ -118,6 +119,17 @@ public class SSHWizard extends Wizard {
 	
 	public void setPubFile(String pubfile) {
 		this.sshPubFileActual.setText(pubfile);
+	}
+	
+	private void loadSettings() {
+		SharedPreferences appSettings = PreferenceManager
+				.getDefaultSharedPreferences(context);
+		sshPath.setText(appSettings.getString("scpPath", ""));
+		sshUser.setText(appSettings.getString("scpUser", ""));
+		sshPass.setText(appSettings.getString("scpPass", ""));
+		sshHost.setText(appSettings.getString("scpHost", ""));
+		sshPort.setText(appSettings.getString("scpPort", ""));
+		sshPubFileActual.setText(appSettings.getString("scpPubFile", ""));
 	}
 	
 	public void saveSettings() {
