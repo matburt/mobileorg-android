@@ -1,20 +1,27 @@
 package com.matburt.mobileorg.Gui.Wizard;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.view.ViewTreeObserver;
 
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Gui.Wizard.Wizards.SSHWizard;
 import com.matburt.mobileorg.Gui.Wizard.Wizards.Wizard;
+import com.matburt.mobileorg.Settings.SettingsActivity;
 import com.matburt.mobileorg.util.OrgUtils;
 
-public class WizardActivity extends Activity implements RadioGroup.OnCheckedChangeListener {
+public class WizardActivity extends Activity implements RadioGroup.OnCheckedChangeListener, ViewTreeObserver.OnGlobalLayoutListener  {
 
 	private WizardView wizardView;
 	private Wizard activeWizard;
+	
+	private RadioGroup syncGroup;
 
 	private int syncWebDav, syncDropBox, syncUbuntuOne, syncSdCard, syncNull, syncSSH;
 
@@ -28,7 +35,7 @@ public class WizardActivity extends Activity implements RadioGroup.OnCheckedChan
 		// when wizard first starts can't go to next page
 		wizardView.setNavButtonStateOnPage(0, false, WizardView.FIRST_PAGE);
 
-		RadioGroup syncGroup = (RadioGroup) findViewById(R.id.sync_group);
+		syncGroup = (RadioGroup) findViewById(R.id.sync_group);
 		syncGroup.clearCheck();
 		syncGroup.setOnCheckedChangeListener(this);
 
@@ -39,8 +46,39 @@ public class WizardActivity extends Activity implements RadioGroup.OnCheckedChan
 		syncSdCard = ((RadioButton) findViewById(R.id.sync_sdcard)).getId();
 		syncNull = ((RadioButton) findViewById(R.id.sync_null)).getId();
 		syncSSH = ((RadioButton) findViewById(R.id.sync_ssh)).getId();
+		
+		ViewTreeObserver observer = wizardView.getViewTreeObserver();
+		if (observer.isAlive()) { 
+		  observer.addOnGlobalLayoutListener(this);
+		}
 	}
 
+	private void selectPrevSource(Context context) {
+		SharedPreferences srcPrefs = PreferenceManager
+				.getDefaultSharedPreferences(context);
+		String syncSource = srcPrefs.getString("syncSource", "");
+		
+		int id = -1;
+		if (syncSource == "")
+			return;
+		
+		if (syncSource.equals("webdav")) 
+			id = syncWebDav;
+		else if (syncSource.equals("sdcard")) 
+			id = syncSdCard;
+		else if (syncSource.equals("dropbox")) 
+			id = syncDropBox;
+		else if (syncSource.equals("ubuntu")) 
+			id = syncUbuntuOne;
+        else if (syncSource.equals("scp")) 
+			id = syncSSH;
+		else if (syncSource.equals("null")) 
+			id = syncNull;		
+		else 
+			return;
+		
+		syncGroup.check(id);
+	}
 
 	@Override
 	protected void onPause() {
@@ -93,5 +131,11 @@ public class WizardActivity extends Activity implements RadioGroup.OnCheckedChan
 		}
 		
 		return Wizard.TYPE.Null;
+	}
+
+	@Override
+	public void onGlobalLayout() {
+		wizardView.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+		selectPrevSource(this);
 	}
 }
