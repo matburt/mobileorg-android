@@ -141,7 +141,7 @@
     <string name="preference_storage">Speicher</string>
     <string name="preference_recursion_level">Unterpunkte</string>
     <string name="preference_recursion_level_summary">Wie viele Unterpunkte beim Betrachten angezeigt werden sollen</string>
-    <string name="preference_viewing">Betrachten</string>
+    <string name="preference_view">Betrachten</string>
     <string name="preference_synchronization">Synchronisation</string>
     <string name="preference_sync_source_summary">Mit welcher Quelle die Org Daten abgeglichen werden sollen</string>
     <string name="preference_sync_source">Synchronization mode</string>

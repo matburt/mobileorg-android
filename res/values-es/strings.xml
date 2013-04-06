@@ -125,7 +125,7 @@
   <string name="preference_storage">Almacenamiento</string>
   <string name="preference_recursion_level">Nivel de recursión</string>
   <string name="preference_recursion_level_summary">Cuántos niveles de nodos-hijo mostrar en lista</string>
-  <string name="preference_viewing">Vista</string>
+  <string name="preference_view">Vista</string>
   <string name="preference_synchronization">Sincronización</string>
   <string name="preference_sync_source_summary">De dónde sincronizar los datos de org</string>
   <string name="preference_sync_source">Modo de sincronización</string>

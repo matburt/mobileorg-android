@@ -125,7 +125,7 @@
   <string name="preference_storage">存储</string>
   <string name="preference_recursion_level">层次深度</string>
   <string name="preference_recursion_level_summary">可显示的子节点的层次数</string>
-  <string name="preference_viewing">查看</string>
+  <string name="preference_view">查看</string>
   <string name="preference_synchronization">同步</string>
   <string name="preference_sync_source_summary">从哪儿同步 Org 文件</string>
   <string name="preference_sync_source">同步节点</string>
