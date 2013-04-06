@@ -144,7 +144,7 @@ public class OutlineActionMode implements ActionMode.Callback {
 	
 	private void runDeleteNode() {	
 		AlertDialog.Builder builder = new AlertDialog.Builder(context);
-		builder.setMessage(R.string.outline_delete_prompt)
+		builder.setMessage(R.string.prompt_node_delete)
 				.setCancelable(false)
 				.setPositiveButton(R.string.yes,
 						new DialogInterface.OnClickListener() {
@@ -163,7 +163,7 @@ public class OutlineActionMode implements ActionMode.Callback {
 	
 	private void runArchiveNode(final boolean archiveToSibling) {	
 		AlertDialog.Builder builder = new AlertDialog.Builder(context);
-		builder.setMessage(R.string.outline_archive_prompt)
+		builder.setMessage(R.string.prompt_node_archive)
 				.setCancelable(false)
 				.setPositiveButton(R.string.yes,
 						new DialogInterface.OnClickListener() {
@@ -189,7 +189,7 @@ public class OutlineActionMode implements ActionMode.Callback {
 	
 	private void runDeleteFileNode() {
 		AlertDialog.Builder builder = new AlertDialog.Builder(context);
-		builder.setMessage(R.string.outline_delete_file_prompt)
+		builder.setMessage(R.string.prompt_delete_file)
 				.setCancelable(false)
 				.setPositiveButton(R.string.yes,
 						new DialogInterface.OnClickListener() {

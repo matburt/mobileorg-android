@@ -19,7 +19,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/cert_changed"
+        android:text="@string/prompt_cert_changed"
         android:paddingBottom="20dp"/>
     <TextView
         android:id="@+id/cert_hash_details"

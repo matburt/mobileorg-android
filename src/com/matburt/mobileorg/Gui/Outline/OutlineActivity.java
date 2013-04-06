@@ -246,7 +246,7 @@ public class OutlineActivity extends SherlockActivity {
 
 				if (showToast)
 					Toast.makeText(context,
-							R.string.outline_synchronization_successful,
+							R.string.sync_successful,
 							Toast.LENGTH_SHORT).show();
 			} else if (progress >= 0 && progress <= 100) {
 				if(progress == 100)

@@ -215,7 +215,7 @@ public class EditActivity extends SherlockFragmentActivity implements EditHost,
 		}
 		
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setMessage(R.string.node_edit_prompt)
+		builder.setMessage(R.string.prompt_node_edit)
 				.setCancelable(false)
 				.setPositiveButton(R.string.yes,
 						new DialogInterface.OnClickListener() {

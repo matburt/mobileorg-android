@@ -88,11 +88,11 @@ public class FileDecryptionActivity extends Activity
 			if (pi.versionCode >= mMinRequiredVersion) {
 				return true;
 			} else {
-				Toast.makeText(this, R.string.apg_version_not_supported,
+				Toast.makeText(this, R.string.error_apg_version_not_supported,
 						Toast.LENGTH_SHORT).show();
 			}
 		} catch (NameNotFoundException e) {
-			Toast.makeText(this, R.string.apg_not_found, Toast.LENGTH_SHORT)
+			Toast.makeText(this, R.string.error_apg_not_found, Toast.LENGTH_SHORT)
 					.show();
 		}
 		return false;

@@ -51,6 +51,7 @@ SharedPreferences.OnSharedPreferenceChangeListener {
 		populateSyncSources();
 		populateTodoKeywords();
 		try {
+			
 			populateCalendarNames();
 		} catch (Exception e) {
 			// Don't crash because of fault in calendar synchronizer!
