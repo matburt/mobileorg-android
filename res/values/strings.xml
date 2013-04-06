@@ -36,7 +36,7 @@
     <string name="sync_synchronizing_changes">Synchronizing changes</string>
     <string name="sync_error_server_certificate">Error with server certificate:</string>
     <string name="sync_wait">Synchronizing, please wait…</string>
-    <string name="sync_failed">Synchronization failed, try again?</string>
+    <string name="sync_failed">Synchronization failed</string>
     <string name="sync_plugin">MobileOrg Synchronization</string>
     <string name="sync_plugin_info">This plugin allows you to trigger a MobileOrg Sync from Locale or Tasker.  If you are okay with this click \'Accept\' otherwise click \'Deny\'</string>
     <string name="sync_plugin_message">Synchronize</string>
