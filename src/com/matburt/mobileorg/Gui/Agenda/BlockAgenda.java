@@ -7,6 +7,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.matburt.mobileorg.util.OrgUtils;
 
@@ -146,6 +147,8 @@ public class BlockAgenda implements Serializable {
 			
 			writeAgendas(agendas, context);
 			
-		} catch (IOException e) {}
+		} catch (IOException e) {
+			Log.e("MobileOrg", e.getLocalizedMessage());
+		}
 	}
 }
