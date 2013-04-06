@@ -275,4 +275,21 @@ public class OrgUtils {
 			return null;
 		}
 	}
+	
+	
+	/**
+	 * @param keyID the ID of the StringArray that contains the labels
+	 * @param valID the ID of the StringArray that contains the values
+	 * @param value the value to search for
+	 */
+	public static String lookUpValueFromArray(Context context, int keyID, int valID, String value) {
+		String[] keys = context.getResources().getStringArray(keyID);
+		String[] values = context.getResources().getStringArray(valID);
+		for (int i = 0; i < values.length; i++) {
+			if (values[i].equals(value)) {
+				return keys[i];
+			}
+		}
+		return null;
+	}
 }

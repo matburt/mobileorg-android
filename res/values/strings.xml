@@ -200,6 +200,17 @@
     <string name="preference_view_apply_formatting_summary">Apply formatting of orgmode emphasis, bold, underline and strike-through when viewing.</string>
     <string name="preference_view_apply_formatting">Apply view formatting</string>
 
+    <!-- preference keys -->
+    <string name="key_autoSyncInterval">autoSyncInterval</string>
+    <string name="key_viewRecursionMax">viewRecursionMax</string>
+    <string name="key_defaultTodo">defaultTodo</string>
+    <string name="key_calendarName">calendarName</string>
+    <string name="key_calendarReminderInterval">calendarReminderInterval</string>
+    <string name="key_calendarReminderInterval">calendarReminderInterval</string>
+    <string name="key_theme">theme</string>
+    <string name="key_fontSize">fontSize</string>
+    <string name="key_syncSource">syncSource</string>
+
     <!-- preference synchronizers (obsolete?) -->
     <string name="edit_date_start">Start</string>
     <string name="edit_date_end">End</string>
