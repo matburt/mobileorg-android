@@ -29,6 +29,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.matburt.mobileorg.util.OrgUtils;
+
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -405,6 +407,11 @@ private static final String BASE_TOKEN_NAME = "Ubuntu One @ MobileOrg:";
 		// } catch (IOException e) {
 		// 	e.printStackTrace();
 		// }
+	}
+
+	@Override
+	public boolean isConnectable() {
+		return OrgUtils.isNetworkOnline(context);
 	}
 }
 		

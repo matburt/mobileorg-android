@@ -71,6 +71,11 @@ public class Synchronizer {
 			return new ArrayList<String>();
 		}
 		
+		if (!syncher.isConnectable()) {
+			notify.errorNotification("No network connection available");
+			return new ArrayList<String>();
+		}
+		
 		try {
 			announceStartSync();
 			ArrayList<String> changedFiles = pull(parser);

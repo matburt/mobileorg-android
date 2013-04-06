@@ -199,7 +199,9 @@
     <string name="preference_setup_wizard">Setup Wizard</string>
     <string name="preference_view_apply_formatting_summary">Apply formatting of orgmode emphasis, bold, underline and strike-through when viewing.</string>
     <string name="preference_view_apply_formatting">Apply view formatting</string>
-
+    <string name="preference_sync_wifi_only">Sync with Wifi only</string>
+    <string name="preference_sync_wifi_only_summary">Only try to synchronize when Wireless is up</string>
+    
     <!-- preference keys -->
     <string name="key_autoSyncInterval">autoSyncInterval</string>
     <string name="key_viewRecursionMax">viewRecursionMax</string>
@@ -210,6 +212,7 @@
     <string name="key_theme">theme</string>
     <string name="key_fontSize">fontSize</string>
     <string name="key_syncSource">syncSource</string>
+    <string name="key_syncWifiOnly">syncWifiOnly</string>
 
     <!-- preference synchronizers (obsolete?) -->
     <string name="edit_date_start">Start</string>

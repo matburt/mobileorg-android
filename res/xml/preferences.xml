@@ -25,6 +25,12 @@
                     android:key="@string/key_autoSyncInterval"
                     android:summary="@string/preference_autosync_interval_summary"
                     android:title="@string/preference_autosync_interval" />
+
+                <CheckBoxPreference
+                    android:defaultValue="false"
+                    android:key="@string/key_syncWifiOnly"
+                    android:summary="@string/preference_sync_wifi_only_summary"
+                    android:title="@string/preference_sync_wifi_only" />
             </PreferenceCategory>
             <PreferenceCategory android:title="@string/preference_advanced" >
                 <CheckBoxPreference

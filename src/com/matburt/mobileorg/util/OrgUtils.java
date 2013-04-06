@@ -21,6 +21,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.net.NetworkInfo.State;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Log;
@@ -291,5 +294,47 @@ public class OrgUtils {
 			}
 		}
 		return null;
+	}
+	
+	
+	public static boolean isWifiOnline(Context context) {
+		ConnectivityManager conMan = (ConnectivityManager) context
+				.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+		State wifi = conMan.getNetworkInfo(ConnectivityManager.TYPE_WIFI)
+				.getState();
+
+		if (wifi == NetworkInfo.State.CONNECTED)
+			return true;
+		else
+			return false;
+	}
+
+	public static boolean isMobileOnline(Context context) {
+		ConnectivityManager conMan = (ConnectivityManager) context
+				.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+		State mobile = conMan.getNetworkInfo(ConnectivityManager.TYPE_MOBILE)
+				.getState();
+
+		if (mobile == NetworkInfo.State.CONNECTED)
+			return true;
+		else
+			return false;
+	}
+	
+	
+	public static boolean isNetworkOnline(Context context) {
+		SharedPreferences prefs = PreferenceManager
+				.getDefaultSharedPreferences(context);
+		boolean wifiOnly = prefs.getBoolean(
+				context.getResources().getString(R.string.key_syncWifiOnly),
+				false);
+
+		if (wifiOnly)
+			return OrgUtils.isWifiOnline(context);
+		else
+			return OrgUtils.isWifiOnline(context)
+					|| OrgUtils.isMobileOnline(context);
 	}
 }
