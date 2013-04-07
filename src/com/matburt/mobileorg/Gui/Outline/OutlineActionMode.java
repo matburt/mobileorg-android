@@ -221,10 +221,14 @@ public class OutlineActionMode implements ActionMode.Callback {
 		} catch (OrgFileNotFoundException e) {}
 	}
 	
-	private void runViewNodeActivity() {		
+	public static void runViewNodeActivity(long nodeId, Context context) {
 		Intent intent = new Intent(context, ViewActivity.class);
-		intent.putExtra(ViewActivity.NODE_ID, node.id);
+		intent.putExtra(ViewActivity.NODE_ID, nodeId);
 		context.startActivity(intent);
+	}
+	
+	private void runViewNodeActivity() {		
+		runViewNodeActivity(node.id, context);
 	}
 	
 	private void runTimeClockingService() {
