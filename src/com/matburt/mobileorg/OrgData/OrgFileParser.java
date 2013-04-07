@@ -293,7 +293,7 @@ public class OrgFileParser {
 	}
 	
 	private static final Pattern getPriorities = Pattern
-			.compile("#\\+ALLPRIORITIES:([A-Z\\s]+)");
+			.compile("#\\+ALLPRIORITIES:([^\\n]+)");
 	public static ArrayList<String> getPrioritiesFromIndex(String filecontents) {
 		Matcher t = getPriorities.matcher(filecontents);
 
