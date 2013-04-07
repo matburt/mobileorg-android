@@ -28,6 +28,8 @@ public class EditActivityControllerAddChild extends EditActivityController {
 			OrgNode parent = new OrgNode(node_id, resolver);
 			this.nodeOlpPath = parent.getOlpId(resolver);
 		} catch (OrgNodeNotFoundException e) {}
+		
+		this.node.addAutomaticTimestamp();
 	}
 	
 	private void setupTodoAndParentId(long parentId) {

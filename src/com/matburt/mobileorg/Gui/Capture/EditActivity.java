@@ -3,7 +3,6 @@ package com.matburt.mobileorg.Gui.Capture;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentManager;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
@@ -114,13 +113,8 @@ public class EditActivity extends SherlockFragmentActivity implements EditHost,
 	
 	public void saveEdits() {
 		OrgNode newNode = getEditedNode();
-		
-		boolean addTimestamp = PreferenceManager.getDefaultSharedPreferences(
-				this).getBoolean("captureWithTimestamp", false);
-		if(addTimestamp)
-			newNode.getOrgNodePayload().add(OrgUtils.getTimestamp());
-		
 		controller.saveEdits(newNode);
+		
 		OrgUtils.announceSyncDone(this);
 	}
 	

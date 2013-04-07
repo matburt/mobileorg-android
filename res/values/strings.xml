@@ -203,7 +203,9 @@
     <string name="preference_sync_wifi_only_summary">Only try to synchronize when Wireless is up</string>
     <string name="preference_view_on_click">View on click</string>
     <string name="preference_view_on_click_summary">Changes default action from editing to viewing of outline entries</string>
-    
+    <string name="preference_capture_with_timestamp">Capture with timestamp</string>
+    <string name="preference_capture_with_timestamp_summary">Captured nodes will have a timestamp added</string>
+
     <!-- preference keys -->
     <string name="key_autoSyncInterval">autoSyncInterval</string>
     <string name="key_viewRecursionMax">viewRecursionMax</string>
@@ -233,8 +235,6 @@
     <string name="summary_scp_path">Full path to index.org on the server</string>
     <string name="title_index_file_path">Full local path to index.org</string>
     <string name="summary_web_url">Full URL path to your index.org file</string>
-    <string name="title_capture_with_timestamp">Capture with timestamp</string>
-    <string name="summary_capture_with_timestamp">Captured nodes will have a timestamp added</string>
     <string name="title_agenda_title">Use agenda titles</string>
     <string name="summary_agenda_title">Enables use of custom agenda titles. Needs resync of agenda file to take effect</string>
 

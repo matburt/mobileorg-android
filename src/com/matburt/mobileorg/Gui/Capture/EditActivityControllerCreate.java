@@ -11,11 +11,13 @@ public class EditActivityControllerCreate extends EditActivityController {
 	public EditActivityControllerCreate(String defaultTodo) {
 		this.node = new OrgNode();
 		this.node.todo = defaultTodo;
+		this.node.addAutomaticTimestamp();
 	}
 	
 	public EditActivityControllerCreate(Intent intent, String defaultTodo) {
 		this.node = OrgUtils.getCaptureIntentContents(intent);
 		this.node.todo = defaultTodo;
+		this.node.addAutomaticTimestamp();
 	}
 	
 	@Override

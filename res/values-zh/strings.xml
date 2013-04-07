@@ -102,8 +102,8 @@
   <string name="wizard_dropbox_email_hint">uri@frankandrobot.com</string>
   
     <!-- preference strings -->
-  <string name="title_capture_with_timestamp">用时间戳捕获</string>
-  <string name="summary_capture_with_timestamp">捕获节点会添加一个时间戳</string>
+  <string name="preference_capture_with_timestamp">用时间戳捕获</string>
+  <string name="preference_capture_with_timestamp_summary">捕获节点会添加一个时间戳</string>
   <string name="title_agenda_title">使用日程标题</string>
   <string name="summary_agenda_title">允许定制日程标题。需要重新同步日程文件才能生效</string>
   <string name="preference_autosync">后台同步</string>

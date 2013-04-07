@@ -97,6 +97,12 @@
                     android:key="@string/key_defaultTodo"
                     android:summary="@string/preference_default_todo_summary"
                     android:title="@string/preference_default_todo" />
+
+                <CheckBoxPreference
+                    android:defaultValue="false"
+                    android:key="captureWithTimestamp"
+                    android:summary="@string/preference_capture_with_timestamp_summary"
+                    android:title="@string/preference_capture_with_timestamp" />
             </PreferenceCategory>
         </PreferenceScreen>
         <PreferenceScreen android:title="@string/preference_calendar" >

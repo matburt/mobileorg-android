@@ -5,8 +5,10 @@ import java.util.regex.Matcher;
 
 import android.content.ContentResolver;
 import android.content.ContentValues;
+import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
+import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -15,6 +17,7 @@ import com.matburt.mobileorg.OrgData.OrgContract.OrgData;
 import com.matburt.mobileorg.util.FileUtils;
 import com.matburt.mobileorg.util.OrgFileNotFoundException;
 import com.matburt.mobileorg.util.OrgNodeNotFoundException;
+import com.matburt.mobileorg.util.OrgUtils;
 
 public class OrgNode {
 	public static final String ARCHIVE_NODE = "Archive";
@@ -597,5 +600,13 @@ public class OrgNode {
 			edit.write(resolver);
 		}
 		setPayload(rawPayload.toString());
+	}
+	
+	public void addAutomaticTimestamp() {
+		Context context = MobileOrgApplication.getContext();
+		boolean addTimestamp = PreferenceManager.getDefaultSharedPreferences(
+				context).getBoolean("captureWithTimestamp", false);
+		if(addTimestamp)
+			setPayload(getPayload() + OrgUtils.getTimestamp());
 	}
 }

@@ -102,8 +102,8 @@
   <string name="wizard_dropbox_email_hint">uri@frankandrobot.com</string>
 
     <!-- preference strings -->
-  <string name="title_capture_with_timestamp">Capturar con fecha y hora</string>
-  <string name="summary_capture_with_timestamp">Notas capturadas contendrán fecha y hora</string>
+  <string name="preference_capture_with_timestamp">Capturar con fecha y hora</string>
+  <string name="preference_capture_with_timestamp_summary">Notas capturadas contendrán fecha y hora</string>
   <string name="title_agenda_title">Usar títulos de la agenda</string>
   <string name="summary_agenda_title">Habilita el uso de títulos de agenda personalizados. Requiere volver a sincronizar para entrar en vigor.</string>
   <string name="preference_autosync">Sincronización en segundo plano</string>

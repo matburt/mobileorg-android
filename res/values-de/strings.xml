@@ -118,8 +118,8 @@
 
 <!-- preference strings -->
 
-    <string name="title_capture_with_timestamp">Mit Zeitstempel erfassen</string>
-    <string name="summary_capture_with_timestamp">Neu erfasste Punkte werden einen Zeitstempel erhalten</string>
+    <string name="preference_capture_with_timestamp">Mit Zeitstempel erfassen</string>
+    <string name="preference_capture_with_timestamp_summary">Neu erfasste Punkte werden einen Zeitstempel erhalten</string>
     <string name="title_agenda_title">Agendatitel benutzen</string>
     <string name="summary_agenda_title">Erlaubt es, benutzerdefinierte Agendatitel zu benutzen. Die Agenda Datei muss neu synchronisiert werden, damit diese Änderung in Kraft tritt.</string>
     <string name="preference_autosync">Hintergrundsynchronisation</string>
