@@ -506,6 +506,7 @@ public class OrgNode {
 			edits.add(new OrgEdit(this, OrgEdit.TYPE.REFILE, newId, resolver));
 			this.parentId = newNode.parentId;
 			this.fileId = newNode.fileId;
+			this.level = parent.level + 1;
 		}
 		
 		return edits;
