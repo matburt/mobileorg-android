@@ -38,4 +38,19 @@ public class EditActivityControllerEdit extends EditActivityController {
 	public String getActionMode() {
 		return ACTIONMODE_EDIT;
 	}
+	
+	@Override
+	public boolean hasEdits(OrgNode newNode) {
+		int numberOfEdits = 0;
+		try {
+			OrgNode clonedNode = new OrgNode(node.id, resolver);
+			numberOfEdits = clonedNode
+					.generateApplyEditNodes(newNode, resolver).size();
+		} catch (OrgNodeNotFoundException e) {}
+		
+		if(numberOfEdits > 0)
+			return true;
+		else
+			return false;
+	}
 }

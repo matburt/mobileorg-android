@@ -3,13 +3,11 @@ package com.matburt.mobileorg.Gui.Capture;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.matburt.mobileorg.OrgData.OrgFile;
 import com.matburt.mobileorg.OrgData.OrgNode;
 import com.matburt.mobileorg.OrgData.OrgNodePayload;
 import com.matburt.mobileorg.OrgData.OrgProviderUtils;
-import com.matburt.mobileorg.util.OrgNodeNotFoundException;
 
 public abstract class EditActivityController {
 	public final static String NODE_ID = "node_id";
@@ -49,7 +47,6 @@ public abstract class EditActivityController {
 	public static EditActivityController getController(String editMode,
 			long node_id, String olpLocation, Intent intent,
 			ContentResolver resolver, String defaultTodo) {
-		Log.d("MobileOrg", "getController with editMode " + editMode);
 		if (editMode == null) {
 			return new EditActivityControllerCreate(intent, defaultTodo);
 		} else if (editMode.equals(ACTIONMODE_CREATE)) {
@@ -66,6 +63,7 @@ public abstract class EditActivityController {
 	public abstract OrgNode getParentOrgNode();
 	public abstract void saveEdits(OrgNode newNode);
 	public abstract String getActionMode();
+	public abstract boolean hasEdits(OrgNode newNode);
 	
 	public OrgNode getOrgNode() {
 		return this.node;
@@ -94,24 +92,5 @@ public abstract class EditActivityController {
 	
 	public boolean isNodeRefilable() {
 		return getOrgNode().isNodeEditable(resolver);
-	}
-	
-	public boolean hasEdits(OrgNode newNode) {		
-		int numberOfEdits = 0;
-		try {
-			OrgNode origNode = getOrgNode();
-			OrgNode clonedNode;
-			if (origNode.id == -1)
-				clonedNode = new OrgNode();
-			else
-				clonedNode = new OrgNode(origNode.id, resolver);
-			numberOfEdits = clonedNode
-					.generateApplyEditNodes(newNode, resolver).size();
-		} catch (OrgNodeNotFoundException e) {}
-		
-		if(numberOfEdits > 0)
-			return true;
-		else
-			return false;
 	}
 }

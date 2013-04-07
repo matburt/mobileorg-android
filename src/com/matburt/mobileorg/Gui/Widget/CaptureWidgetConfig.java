@@ -122,5 +122,10 @@ public class CaptureWidgetConfig extends SherlockFragmentActivity implements Edi
 		@Override
 		public void saveEdits(OrgNode newNode) {			
 		}
+
+		@Override
+		public boolean hasEdits(OrgNode newNode) {
+			return false;
+		}
 	}
 }

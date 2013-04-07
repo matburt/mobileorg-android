@@ -84,4 +84,9 @@ public class EditActivityControllerAddChild extends EditActivityController {
 	public String getActionMode() {
 		return ACTIONMODE_ADDCHILD;
 	}
+
+	@Override
+	public boolean hasEdits(OrgNode newNode) {
+		return !this.node.equals(newNode);
+	}
 }
