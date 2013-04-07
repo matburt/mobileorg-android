@@ -10,7 +10,6 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.matburt.mobileorg.Gui.Outline.OutlineItem;
 import com.matburt.mobileorg.OrgData.OrgContract.OrgData;
@@ -394,7 +393,6 @@ public class OrgNode {
 	private String getStrippedNameForOlpPathLink() {
 		String result = this.name;
 		result = result.replaceAll("\\[[^\\]]*\\]", ""); // Strip out "[*]"
-		Log.d("MobileOrg", "getStrippedNameForOlpPathLink() : " + this.name + "->" + result);
 		return result;
 	}
 	

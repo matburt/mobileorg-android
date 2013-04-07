@@ -8,14 +8,24 @@
     android:paddingLeft="5dp"
     android:paddingRight="5dp" >
 
+    <Button
+        android:id="@+id/outline_item_todo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:background="@android:color/transparent"
+        android:focusable="false"
+        android:gravity="left"
+        android:layout_centerVertical="true"
+        android:minHeight="30dp"
+        android:minWidth="40dp" />
+
     <TextView
         android:id="@+id/outline_item_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentRight="true"
         android:layout_alignParentTop="true"
-        android:gravity="left"
+        android:layout_toRightOf="@+id/outline_item_todo"
         android:text=""
         android:textAppearance="?android:attr/textAppearanceMedium" >
     </TextView>

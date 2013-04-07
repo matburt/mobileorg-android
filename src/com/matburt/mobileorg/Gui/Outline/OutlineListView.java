@@ -33,7 +33,6 @@ public class OutlineListView extends ListView {
 		setAdapter(new OutlineAdapter(context));
 	}
 	
-	
 	public void setAdapter(OutlineAdapter adapter) {
 		this.adapter = adapter;
 		super.setAdapter(adapter);
