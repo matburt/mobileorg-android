@@ -30,7 +30,7 @@ public class EditActivity extends SherlockFragmentActivity implements EditHost,
 		SyncService.stopAlarm(this); // Don't run background sync while editing node
 		
 		controller = EditActivityController.getController(getIntent(),
-				getContentResolver());
+				getContentResolver(), OrgUtils.getDefaultTodo(this));
 		invalidateOptionsMenu();
 	}
 	

@@ -3,6 +3,7 @@ package com.matburt.mobileorg.Gui.Capture;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.matburt.mobileorg.OrgData.OrgFile;
 import com.matburt.mobileorg.OrgData.OrgNode;
@@ -18,14 +19,13 @@ public abstract class EditActivityController {
 	public final static String ACTIONMODE_EDIT = "edit";
 	public final static String ACTIONMODE_ADDCHILD = "add_child";
 	
-	
 	protected ContentResolver resolver;
 	
 	protected OrgNode node;
 	private OrgNodePayload editPayload;
 
 	public static EditActivityController getController(Intent intent,
-			ContentResolver resolver) {
+			ContentResolver resolver, String defaultTodo) {
 		String actionMode = intent.getStringExtra(ACTIONMODE);
 		long node_id = intent.getLongExtra(NODE_ID, -1);
 		String olpLocation = intent.getStringExtra(OLP_LOCATION);
@@ -40,7 +40,7 @@ public abstract class EditActivityController {
 
 		EditActivityController controller = EditActivityController
 				.getController(actionMode, node_id, olpLocation, intent,
-						resolver);
+						resolver, defaultTodo);
 		controller.resolver = resolver;
 
 		return controller;
@@ -48,15 +48,16 @@ public abstract class EditActivityController {
 	
 	public static EditActivityController getController(String editMode,
 			long node_id, String olpLocation, Intent intent,
-			ContentResolver resolver) {
+			ContentResolver resolver, String defaultTodo) {
+		Log.d("MobileOrg", "getController with editMode " + editMode);
 		if (editMode == null) {
-			return new EditActivityControllerCreate(intent);
+			return new EditActivityControllerCreate(intent, defaultTodo);
 		} else if (editMode.equals(ACTIONMODE_CREATE)) {
-			return new EditActivityControllerCreate();
+			return new EditActivityControllerCreate(defaultTodo);
 		} else if (editMode.equals(ACTIONMODE_EDIT)) {
 			return new EditActivityControllerEdit(node_id, resolver);
 		} else if (editMode.equals(ACTIONMODE_ADDCHILD)) {
-			return new EditActivityControllerAddChild(node_id, resolver);
+			return new EditActivityControllerAddChild(node_id, resolver, defaultTodo);
 		} else {
 			throw new IllegalArgumentException("unknown editMode : " + editMode);
 		}
@@ -65,7 +66,6 @@ public abstract class EditActivityController {
 	public abstract OrgNode getParentOrgNode();
 	public abstract void saveEdits(OrgNode newNode);
 	public abstract String getActionMode();
-	
 	
 	public OrgNode getOrgNode() {
 		return this.node;

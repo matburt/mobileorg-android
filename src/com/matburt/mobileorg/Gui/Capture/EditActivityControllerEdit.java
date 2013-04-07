@@ -10,6 +10,7 @@ public class EditActivityControllerEdit extends EditActivityController {
 	private String nodeOlpPath;
 
 	public EditActivityControllerEdit(long node_id, ContentResolver resolver) {
+		this.resolver = resolver;
 		try {
 			this.node = new OrgNode(node_id, resolver).findOriginalNode(resolver);
 			this.nodeOlpPath = node.getOlpId(resolver);
