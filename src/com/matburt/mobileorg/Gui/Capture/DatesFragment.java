@@ -59,17 +59,21 @@ public class DatesFragment extends SherlockFragment {
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
-		EditActivity editActivity = (EditActivity) getActivity();
-		this.payload = editActivity.getOrgNodePayload();
+		EditHost host = (EditHost) getActivity();
+		this.payload = host.getController().getOrgNodePayload();
 		
 		if(savedInstanceState != null)
 			restoreInstanceState(savedInstanceState);
 		else
 			setupDates();
 		
-		setModifable(editActivity.isPayloadEditable());
-		editActivity.invalidateOptionsMenu();
-	}
+		setModifable(host.getController().isPayloadEditable());
+		
+		try {
+			EditActivity activity = (EditActivity) host;
+			activity.invalidateOptionsMenu();
+		}
+		catch (ClassCastException e) {}	}
 
 	public void setupDates() {
 		removeDateEntries();

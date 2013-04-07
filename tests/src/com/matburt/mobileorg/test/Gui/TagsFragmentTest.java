@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.test.ActivityInstrumentationTestCase2;
 
 import com.matburt.mobileorg.Gui.Capture.EditActivity;
+import com.matburt.mobileorg.Gui.Capture.EditActivityController;
 import com.matburt.mobileorg.Gui.Capture.TagsFragment;
 import com.matburt.mobileorg.OrgData.OrgContract.OrgData;
 import com.matburt.mobileorg.OrgData.OrgNode;
@@ -47,8 +48,8 @@ public class TagsFragmentTest extends ActivityInstrumentationTestCase2<EditActiv
 		this.nodeId = node.id;
 
 		Intent intent = new Intent();
-		intent.putExtra(EditActivity.ACTIONMODE, EditActivity.ACTIONMODE_EDIT);
-		intent.putExtra(EditActivity.NODE_ID, node.id);
+		intent.putExtra(EditActivityController.ACTIONMODE, EditActivityController.ACTIONMODE_EDIT);
+		intent.putExtra(EditActivityController.NODE_ID, node.id);
 		setActivityIntent(intent);
 		
 		setActivityInitialTouchMode(false);

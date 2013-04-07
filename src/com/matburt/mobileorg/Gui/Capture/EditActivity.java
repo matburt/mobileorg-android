@@ -1,48 +1,24 @@
 package com.matburt.mobileorg.Gui.Capture;
 
 import android.app.AlertDialog;
-import android.content.ContentResolver;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.text.TextUtils;
-import android.util.Log;
+import android.support.v4.app.FragmentManager;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.matburt.mobileorg.R;
-import com.matburt.mobileorg.OrgData.OrgEdit;
-import com.matburt.mobileorg.OrgData.OrgFile;
 import com.matburt.mobileorg.OrgData.OrgNode;
-import com.matburt.mobileorg.OrgData.OrgNodePayload;
-import com.matburt.mobileorg.OrgData.OrgProviderUtils;
 import com.matburt.mobileorg.Services.SyncService;
-import com.matburt.mobileorg.util.OrgNodeNotFoundException;
 import com.matburt.mobileorg.util.OrgUtils;
 
 public class EditActivity extends SherlockFragmentActivity implements EditHost,
 		PayloadFragment.OnPayloadModifiedListener,
 		DatesFragment.OnDatesModifiedListener {
-	public final static String NODE_ID = "node_id";
-	public final static String OLP_LOCATION = "olp_location";
-	public final static String ACTIONMODE = "actionMode";
-	public final static String ACTIONMODE_CREATE = "create";
-	public final static String ACTIONMODE_EDIT = "edit";
-	public final static String ACTIONMODE_ADDCHILD = "add_child";
 
-	/**
-	 * Used by create or add_child, in case underlying data changes and parent
-	 * can't be found on save.
-	 */
-	private String nodeOlpPath = "";
-	private String actionMode;
-
-	private OrgNode node;
-	private OrgNodePayload editPayload;
-
-	private ContentResolver resolver;
+	private EditActivityController controller;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -50,13 +26,16 @@ public class EditActivity extends SherlockFragmentActivity implements EditHost,
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.edit);
 		getSupportActionBar().setTitle(R.string.menu_capture);
-		
-		this.resolver = getContentResolver();
-		
+				
 		SyncService.stopAlarm(this); // Don't run background sync while editing node
 		
-		initState();
+		controller = EditActivityController.getController(getIntent(),
+				getContentResolver());
 		invalidateOptionsMenu();
+	}
+	
+	public EditActivityController getController() {
+		return this.controller;
 	}
 	
 	@Override
@@ -64,118 +43,13 @@ public class EditActivity extends SherlockFragmentActivity implements EditHost,
 		super.onDestroy();
 		SyncService.startAlarm(this);
 	}
-
-
-	private void initState() {
-		Intent intent = getIntent();
-		this.actionMode = intent.getStringExtra(ACTIONMODE);
-		long node_id = intent.getLongExtra(NODE_ID, -1);
-		String olpLocation = intent.getStringExtra(OLP_LOCATION);
-		
-		if (TextUtils.isEmpty(olpLocation) == false) {
-			try {
-				OrgNode parentNode = OrgProviderUtils.getOrgNodeFromOlpPath(
-						olpLocation, getContentResolver());
-				node_id = parentNode.id;
-			} catch (Exception e) {}
-		}
-		
-		if (this.actionMode == null) {
-			this.node = OrgUtils.getCaptureIntentContents(intent);
-			this.actionMode = ACTIONMODE_CREATE;
-		} else if (this.actionMode.equals(ACTIONMODE_CREATE)) {
-			this.node = new OrgNode();
-		} else if (this.actionMode.equals(ACTIONMODE_EDIT)) {
-			try {
-				this.node = new OrgNode(node_id, getContentResolver()).findOriginalNode(resolver);
-				this.nodeOlpPath = node.getOlpId(resolver);
-			} catch (OrgNodeNotFoundException e) {}
-		} else if (this.actionMode.equals(ACTIONMODE_ADDCHILD)) {
-			this.node = new OrgNode();			
-
-			if(node_id >= 0) {
-				try {
-					OrgNode parent = new OrgNode(node_id, resolver);
-					this.node.parentId = parent.findOriginalNode(resolver).id;
-				} catch (OrgNodeNotFoundException e) {
-					this.node.parentId = node_id;					
-				}
-			}
-			else
-				this.node.parentId = OrgProviderUtils
-						.getOrCreateCaptureFile(resolver).nodeId;
-			
-			try {
-				OrgNode parent = new OrgNode(node_id, resolver);
-				this.nodeOlpPath = parent.getOlpId(resolver);
-			} catch (OrgNodeNotFoundException e) {}
-		}
-	}
 	
-	public OrgNode getParentOrgNode() {
-		if (this.actionMode.equals(ACTIONMODE_EDIT)) {
-			OrgNode parent;
-			try {
-				parent = node.getParent(resolver);
-			} catch (OrgNodeNotFoundException e) {
-				parent = new OrgNode();
-				parent.parentId = -2;
-			}
-			return parent;
-		} else if (this.actionMode.equals(ACTIONMODE_CREATE))
-			return null;
-		else if (this.actionMode.equals(ACTIONMODE_ADDCHILD)) {			
-			try {
-				OrgNode parent = new OrgNode(this.node.parentId, resolver);
-				return parent;
-			} catch (OrgNodeNotFoundException e) {}
-		}
-		
-		return new OrgNode();
-	}
-	
-	public OrgNode getOrgNode() {
-		if(this.node == null)
-			this.node = new OrgNode();
-		return this.node;
-	}
-	
-	public OrgNodePayload getOrgNodePayload() {
-		if (this.editPayload == null)
-			this.editPayload = new OrgNodePayload(node.getPayload());
-	
-		return this.editPayload;
-	}
-	
-	public String getActionMode() {
-		return this.actionMode;
-	}
-	
-	public boolean isNodeEditable() {	
-		return getOrgNode().isNodeEditable(resolver);
-	}
-	
-	public boolean isPayloadEditable() {
-		OrgNode node = getOrgNode();
-		
-		if(node.level == 0 && !node.name.equals(OrgFile.AGENDA_FILE_ALIAS))
-			return true;
-		else
-			return isNodeEditable();
-	}
-	
-	public boolean isNodeRefilable() {
-		if(this.actionMode.equals(ACTIONMODE_CREATE))
-			return false;
-		else
-			return getOrgNode().isNodeEditable(resolver);
-	}
 	
     @Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getSupportMenuInflater().inflate(R.menu.edit, menu);
 
-		if(isNodeEditable() == false)
+		if(controller.isNodeEditable() == false)
 			menu.findItem(R.id.nodeedit_save).setVisible(false);
 	    
     	return super.onCreateOptionsMenu(menu);
@@ -234,23 +108,9 @@ public class EditActivity extends SherlockFragmentActivity implements EditHost,
 	
 	public boolean hasEdits() {
 		OrgNode newNode = getEditedNode();
-		
-		int numberOfEdits = 0;
-		try {
-			OrgNode clonedNode;
-			if (node.id == -1)
-				clonedNode = new OrgNode();
-			else
-				clonedNode = new OrgNode(this.node.id, resolver);
-			numberOfEdits = clonedNode.generateApplyEditNodes(newNode, resolver).size();
-		} catch (OrgNodeNotFoundException e) {}
-		
-		if(numberOfEdits > 0)
-			return true;
-		else
-			return false;
+		return controller.hasEdits(newNode);
 	}
-	
+
 	
 	public void saveEdits() {
 		OrgNode newNode = getEditedNode();
@@ -260,42 +120,28 @@ public class EditActivity extends SherlockFragmentActivity implements EditHost,
 		if(addTimestamp)
 			newNode.getOrgNodePayload().add(OrgUtils.getTimestamp());
 		
-		if (this.actionMode.equals(ACTIONMODE_CREATE)) {
-			newNode.level = 1;
-			newNode.write(resolver);
-		} else if (this.actionMode.equals(ACTIONMODE_ADDCHILD)) {
-			try {
-				OrgEdit edit = newNode.createParentNewheading(resolver);
-				edit.write(resolver);
-			} catch (IllegalStateException e) {
-				Log.e("MobileOrg", e.getLocalizedMessage());
-			}
-			newNode.write(resolver);
-
-		} else if (this.actionMode.equals(ACTIONMODE_EDIT)) {
-			this.node.generateApplyWriteEdits(newNode, this.nodeOlpPath, resolver);
-			this.node.updateAllNodes(resolver);
-		}
-		
+		controller.saveEdits(newNode);
 		OrgUtils.announceSyncDone(this);
 	}
 	
 	public OrgNode getEditedNode() {
-		HeadingFragment headingFragment = (HeadingFragment) getSupportFragmentManager()
+		FragmentManager fragmentManager = getSupportFragmentManager();
+		
+		HeadingFragment headingFragment = (HeadingFragment) fragmentManager
 				.findFragmentByTag("headingFragment");
 		OrgNode newNode = headingFragment.getEditedOrgNode();
-		
-		TagsFragment tagsFragment = (TagsFragment) getSupportFragmentManager()
+
+		TagsFragment tagsFragment = (TagsFragment) fragmentManager
 				.findFragmentByTag("tagsFragment");
 		newNode.tags = tagsFragment.getTags();
-		
-		LocationFragment locationFragment = (LocationFragment) getSupportFragmentManager()
+
+		LocationFragment locationFragment = (LocationFragment) fragmentManager
 				.findFragmentByTag("locationFragment");
 		OrgNode newParent = locationFragment.getLocationSelection();
 		newNode.parentId = newParent.id;
 		newNode.fileId = newParent.fileId;
-		
-		PayloadFragment payloadFragment = (PayloadFragment) getSupportFragmentManager()
+
+		PayloadFragment payloadFragment = (PayloadFragment) fragmentManager
 				.findFragmentByTag("payloadFragment");
 		newNode.setPayload(payloadFragment.getPayload());
 

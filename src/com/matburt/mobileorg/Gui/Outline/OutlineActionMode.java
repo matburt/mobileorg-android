@@ -15,6 +15,7 @@ import com.actionbarsherlock.view.MenuItem;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Gui.ViewActivity;
 import com.matburt.mobileorg.Gui.Capture.EditActivity;
+import com.matburt.mobileorg.Gui.Capture.EditActivityController;
 import com.matburt.mobileorg.OrgData.OrgFile;
 import com.matburt.mobileorg.OrgData.OrgNode;
 import com.matburt.mobileorg.Services.CalendarSyncService;
@@ -124,21 +125,21 @@ public class OutlineActionMode implements ActionMode.Callback {
 	
 	public static void runEditNodeActivity(long nodeId, Context context) {
 		Intent intent = new Intent(context, EditActivity.class);
-		intent.putExtra(EditActivity.ACTIONMODE, EditActivity.ACTIONMODE_EDIT);
-		intent.putExtra(EditActivity.NODE_ID, nodeId);
+		intent.putExtra(EditActivityController.ACTIONMODE, EditActivityController.ACTIONMODE_EDIT);
+		intent.putExtra(EditActivityController.NODE_ID, nodeId);
 		context.startActivity(intent);
 	}
 	
 	public static  void runCaptureActivity(long id, Context context) {
 		Intent intent = new Intent(context, EditActivity.class);
 		
-		String captureMode = EditActivity.ACTIONMODE_CREATE;
+		String captureMode = EditActivityController.ACTIONMODE_CREATE;
 		if (OrgUtils.useAdvancedCapturing(context)) {
-			captureMode = EditActivity.ACTIONMODE_ADDCHILD;
+			captureMode = EditActivityController.ACTIONMODE_ADDCHILD;
 		}
 		
-		intent.putExtra(EditActivity.ACTIONMODE, captureMode);
-		intent.putExtra(EditActivity.NODE_ID, id);
+		intent.putExtra(EditActivityController.ACTIONMODE, captureMode);
+		intent.putExtra(EditActivityController.NODE_ID, id);
 		context.startActivity(intent);
 	}
 	
