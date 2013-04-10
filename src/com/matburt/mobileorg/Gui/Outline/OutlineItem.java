@@ -62,16 +62,21 @@ public class OutlineItem extends RelativeLayout implements Checkable {
 	};
 	
 	private Dialog createTodoDialog() {
-		final ArrayList<String> todos = OrgProviderUtils.getTodos(getContext()
-				.getContentResolver());
+		ArrayList<String> todos = PreferenceUtils.getSelectedTodos();
+		
+		if (todos.size() == 0)
+			todos = OrgProviderUtils.getTodos(getContext()
+					.getContentResolver());
+			
+		final ArrayList<String> todoList = todos;
 		AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
 		builder.setTitle(getResources().getString(R.string.todo_state))
-				.setItems(todos.toArray(new CharSequence[todos.size()]),
+				.setItems(todoList.toArray(new CharSequence[todoList.size()]),
 						new DialogInterface.OnClickListener() {
 							@Override
 							public void onClick(DialogInterface dialog,
 									int which) {
-								String selectedTodo = todos.get(which);
+								String selectedTodo = todoList.get(which);
 								setNewTodo(selectedTodo);
 							}
 						});

@@ -205,8 +205,8 @@
     <string name="preference_view_on_click_summary">Changes default action from editing to viewing of outline entries</string>
     <string name="preference_capture_with_timestamp">Capture with timestamp</string>
     <string name="preference_capture_with_timestamp_summary">Captured nodes will have a timestamp added</string>
-    <string name="preference_selected_todos">Selected Todo keywords</string>
-    <string name="preference_selected_todos_summary">Select the TODO keywords available in outlines quick select. Separated by space.</string>
+    <string name="preference_selected_todos">Quick Todo keywords</string>
+    <string name="preference_selected_todos_summary">Select the TODO keywords available in outline for quick select. Separated by space.</string>
     
     <!-- preference keys -->
     <string name="key_autoSyncInterval">autoSyncInterval</string>
@@ -219,6 +219,7 @@
     <string name="key_fontSize">fontSize</string>
     <string name="key_syncSource">syncSource</string>
     <string name="key_syncWifiOnly">syncWifiOnly</string>
+    <string name="key_quick_todos">quickTodos</string>
 
     <!-- preference synchronizers (obsolete?) -->
     <string name="edit_date_start">Start</string>

@@ -38,6 +38,7 @@ public class SettingsActivity extends SherlockPreferenceActivity implements
 	private String KEY_CALENDAR_REMINDER_INTERVAL;
 	private String KEY_THEME;
 	private String KEY_FONT_SIZE;
+	private String KEY_QUICK_TODOS;
 
 	
 	private SharedPreferences appSettings;
@@ -67,6 +68,7 @@ public class SettingsActivity extends SherlockPreferenceActivity implements
 		this.KEY_CALENDAR_REMINDER_INTERVAL = getString(R.string.key_calendarReminderInterval);
 		this.KEY_THEME = getString(R.string.key_theme);
 		this.KEY_FONT_SIZE = getString(R.string.key_fontSize);
+		this.KEY_QUICK_TODOS = getString(R.string.key_quick_todos);
 		
 		initSettings();
 	}
@@ -80,6 +82,7 @@ public class SettingsActivity extends SherlockPreferenceActivity implements
 		updatePreferenceSummary(KEY_CALENDAR_REMINDER_INTERVAL);
 		updatePreferenceSummary(KEY_THEME);
 		updatePreferenceSummary(KEY_FONT_SIZE);
+		updatePreferenceSummary(KEY_QUICK_TODOS);
 	}
 
 
@@ -135,6 +138,8 @@ public class SettingsActivity extends SherlockPreferenceActivity implements
 			summary = appSettings.getString(key, "");
 		} else if (key.equals(KEY_FONT_SIZE)) {
 			summary = appSettings.getString(key, "");			
+		} else if (key.equals(KEY_QUICK_TODOS)) {
+			summary = appSettings.getString(key, "");
 		}
 
 		if (TextUtils.isEmpty(summary) == false)

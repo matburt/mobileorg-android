@@ -1,5 +1,6 @@
 package com.matburt.mobileorg.util;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 
 import com.matburt.mobileorg.OrgData.MobileOrgApplication;
@@ -108,4 +109,24 @@ public class PreferenceUtils {
 	    return false;
 	}
 
+	public static ArrayList<String> getSelectedTodos() {
+		Context context = MobileOrgApplication.getContext();
+	    SharedPreferences appSettings =
+		        PreferenceManager.getDefaultSharedPreferences(context);
+	    
+	    ArrayList<String> todos = new ArrayList<String>();
+	    
+	    String todoString = appSettings.getString("selectedTodos", "").trim();
+	    if (TextUtils.isEmpty(todoString))
+	    	return todos;
+	    
+	    for (String todo : todoString.split(" ")) {
+	    	if (TextUtils.isEmpty(todo))
+	    		continue;
+	    	else
+	    		todos.add(todo);
+	    }
+	    
+	    return todos;
+	}
 }

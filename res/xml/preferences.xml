@@ -100,7 +100,7 @@
 
                 <EditTextPreference
                     android:defaultValue=""
-                    android:key="selectedTodos"
+                    android:key="@string/key_quick_todos"
                     android:summary="@string/preference_selected_todos_summary"
                     android:title="@string/preference_selected_todos" />
 
