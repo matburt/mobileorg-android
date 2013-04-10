@@ -24,6 +24,7 @@ import com.matburt.mobileorg.Services.SyncService;
 import com.matburt.mobileorg.Settings.SettingsActivity;
 import com.matburt.mobileorg.Synchronizers.Synchronizer;
 import com.matburt.mobileorg.util.OrgUtils;
+import com.matburt.mobileorg.util.PreferenceUtils;
 
 public class OutlineActivity extends SherlockActivity {
 
@@ -93,10 +94,10 @@ public class OutlineActivity extends SherlockActivity {
 	}
 	
 	private void displayNewUserDialogs() {
-		if (OrgUtils.isSyncConfigured(this) == false)
+		if (PreferenceUtils.isSyncConfigured() == false)
 			runShowWizard(null);
 
-		if (OrgUtils.isUpgradedVersion(this))
+		if (PreferenceUtils.isUpgradedVersion())
 			showUpgradePopup();
 	}
 	
@@ -246,7 +247,7 @@ public class OutlineActivity extends SherlockActivity {
 
 				if (showToast)
 					Toast.makeText(context,
-							R.string.outline_synchronization_successful,
+							R.string.sync_successful,
 							Toast.LENGTH_SHORT).show();
 			} else if (progress >= 0 && progress <= 100) {
 				if(progress == 100)

@@ -2,6 +2,7 @@ package com.matburt.mobileorg.Gui.Outline;
 
 import android.content.ContentResolver;
 import android.content.Context;
+import android.preference.PreferenceManager;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.AdapterView;
@@ -31,7 +32,6 @@ public class OutlineListView extends ListView {
 		this.actionMode = new OutlineActionMode(context);
 		setAdapter(new OutlineAdapter(context));
 	}
-	
 	
 	public void setAdapter(OutlineAdapter adapter) {
 		this.adapter = adapter;
@@ -79,7 +79,14 @@ public class OutlineListView extends ListView {
 				adapter.collapseExpand(position);
 			}
 			else {
-				OutlineActionMode.runEditNodeActivity(node.id, context);
+				boolean viewOnClick = PreferenceManager
+						.getDefaultSharedPreferences(context).getBoolean(
+								"viewOnClick", false);
+				
+				if (viewOnClick)
+					OutlineActionMode.runViewNodeActivity(node.id, context);
+				else
+					OutlineActionMode.runEditNodeActivity(node.id, context);
 				//setParentChecked(position);
 			}
 		}

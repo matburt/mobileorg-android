@@ -2,6 +2,7 @@ package com.matburt.mobileorg.Gui.Agenda;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.View;
@@ -51,26 +52,25 @@ public class AgendaSettings extends SherlockActivity {
         
         if(this.agendaPos == -1)
         	this.agendaPos = OrgAgenda.addAgenda(this);
-    }
-    
-    
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-    	outState.putString(AGENDA_TITLE, titleView.getText().toString());
-    	super.onSaveInstanceState(outState);
-    }
-    
-    
-    @Override
-	protected void onRestoreInstanceState(Bundle savedInstanceState) {
-    	super.onRestoreInstanceState(savedInstanceState);
-   
+        
+        
     	if (savedInstanceState != null) {
     		String title = savedInstanceState.getString(AGENDA_TITLE);
-    		if(title != null)
-    			titleView.setText(title);
-    	}    	
-	}
+    		titleView.setText(title);
+    	} else {
+    		String agendaTitle = OrgAgenda.getAgenda(agendaPos, this).title;
+    		this.titleView.setText(agendaTitle);
+    	}
+    }
+
+
+	@Override
+    protected void onSaveInstanceState(Bundle outState) {
+    	super.onSaveInstanceState(outState);
+    	outState.putString(AGENDA_TITLE, titleView.getText().toString());
+		Log.d("MobileOrg", "onSaveInstanceState saved : "
+				+ titleView.getText().toString());
+    }
 
 
 	@Override
@@ -84,8 +84,6 @@ public class AgendaSettings extends SherlockActivity {
 				android.R.layout.simple_list_item_1,
 				OrgAgenda.getAgendaQueryTitles(agendaPos, this));
 		agendaList.setAdapter(adapter);
-		String agendaTitle = OrgAgenda.getAgenda(agendaPos, this).title;
-		this.titleView.setText(agendaTitle);
 		getSupportActionBar().setTitle("Block settings");
 	}
 

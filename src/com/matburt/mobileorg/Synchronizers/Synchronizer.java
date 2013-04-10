@@ -17,7 +17,7 @@ import android.util.Log;
 
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Gui.FileDecryptionActivity;
-import com.matburt.mobileorg.Gui.SynchronizerNotification;
+import com.matburt.mobileorg.Gui.SynchronizerNotificationCompat;
 import com.matburt.mobileorg.OrgData.OrgContract.Edits;
 import com.matburt.mobileorg.OrgData.OrgContract.Files;
 import com.matburt.mobileorg.OrgData.OrgEdit;
@@ -49,9 +49,9 @@ public class Synchronizer {
 	private Context context;
 	private ContentResolver resolver;
 	private SynchronizerInterface syncher;
-	private SynchronizerNotification notify;
+	private SynchronizerNotificationCompat notify;
 
-	public Synchronizer(Context context, SynchronizerInterface syncher, SynchronizerNotification notify) {
+	public Synchronizer(Context context, SynchronizerInterface syncher, SynchronizerNotificationCompat notify) {
 		this.context = context;
 		this.resolver = context.getContentResolver();
 		this.syncher = syncher;
@@ -68,6 +68,11 @@ public class Synchronizer {
 	public ArrayList<String> runSynchronizer(OrgFileParser parser) {
 		if (!syncher.isConfigured()) {
 			notify.errorNotification("Sync not configured");
+			return new ArrayList<String>();
+		}
+		
+		if (!syncher.isConnectable()) {
+			notify.errorNotification("No network connection available");
 			return new ArrayList<String>();
 		}
 		

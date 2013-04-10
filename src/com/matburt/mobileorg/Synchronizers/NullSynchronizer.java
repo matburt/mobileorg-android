@@ -22,4 +22,9 @@ public class NullSynchronizer implements SynchronizerInterface {
     @Override
 	public void postSynchronize() {
     }
+
+	@Override
+	public boolean isConnectable() {
+		return true;
+	}
 }

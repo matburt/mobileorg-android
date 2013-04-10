@@ -1,29 +1,27 @@
 package com.matburt.mobileorg.Gui;
 
-import android.annotation.TargetApi;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.NotificationCompat.Builder;
+import android.widget.RemoteViews;
 
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Gui.Outline.OutlineActivity;
 
-@TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
-public class SynchronizerNotification extends SynchronizerNotificationCompat {
+public class SynchronizerNotificationCompat {
 	private NotificationManager notificationManager;
 	private Notification notification;
 	private int notifyRef = 1;
 	private Context context;
 
-	public SynchronizerNotification(Context context) {
-		super(context);
+	public SynchronizerNotificationCompat(Context context) {
 		this.context = context;
 	}
 	
-	@Override
 	public void errorNotification(String errorMsg) {
 		this.notificationManager = (NotificationManager) context
 				.getSystemService(Context.NOTIFICATION_SERVICE);
@@ -33,20 +31,24 @@ public class SynchronizerNotification extends SynchronizerNotificationCompat {
 
 		PendingIntent contentIntent = PendingIntent.getActivity(context, 0,
 				notifyIntent, 0);
-		
-		Notification.Builder builder = new Notification.Builder(context);
+
+		Builder builder = new NotificationCompat.Builder(context);
 		builder.setContentIntent(contentIntent);
 		builder.setSmallIcon(R.drawable.icon);
-		builder.setContentTitle(context.getString(R.string.sync_failed));
-		builder.setContentText(errorMsg);
+		builder.setContentTitle("Synchronization failed");
+		
 		notification = builder.getNotification();
+		notification.contentView = notification.contentView = new RemoteViews(
+				context.getPackageName(), R.layout.sync_notification);
 
+		notification.contentView.setImageViewResource(R.id.status_icon,
+				R.drawable.icon);
+		notification.contentView.setTextViewText(R.id.status_text, errorMsg);
+		notification.contentView.setProgressBar(R.id.status_progress, 100, 100,
+				false);
 		notificationManager.notify(notifyRef, notification);
 	}
 	
-
-	@Override
-	@SuppressWarnings("deprecation")
 	public void setupNotification() {
 		this.notificationManager = (NotificationManager) context
 				.getSystemService(Context.NOTIFICATION_SERVICE);
@@ -57,44 +59,53 @@ public class SynchronizerNotification extends SynchronizerNotificationCompat {
 		PendingIntent contentIntent = PendingIntent.getActivity(context, 0,
 				notifyIntent, 0);
 
-		Notification.Builder builder = new Notification.Builder(context);
+		Builder builder = new NotificationCompat.Builder(context);
 		builder.setContentIntent(contentIntent);
 		builder.setSmallIcon(R.drawable.icon);
 		builder.setOngoing(true);
-		builder.setContentTitle(context.getString(R.string.sync_synchronizing_changes));
-		builder.setProgress(100, 0, true);
+		builder.setContentTitle("Started synchronization");
+		builder.setContentText("Started synchronization");
 		notification = builder.getNotification();
+		
+		notification.contentView = new RemoteViews(context.getPackageName(),
+				R.layout.sync_notification);
+
+		notification.contentView.setImageViewResource(R.id.status_icon,
+				R.drawable.icon);
+		notification.contentView.setTextViewText(R.id.status_text,
+				context.getString(R.string.sync_synchronizing_changes));
+		notification.contentView.setProgressBar(R.id.status_progress, 100, 0,
+				true);
 		
 		notificationManager.notify(notifyRef, notification);
 	}
 	
-	@Override
 	public void updateNotification(String message) {
 		if(notification == null)
 			return;
 		
 		if(message != null) {
+			notification.contentView.setTextViewText(R.id.status_text, message);
 			notificationManager.notify(notifyRef, notification);
 		}
 	}
 	
-	@Override
 	public void updateNotification(int progress) {
 		updateNotification(progress, null);
 	}
 
-	@Override
 	public void updateNotification(int progress, String message) {
 		if(notification == null)
 			return;
-
-		notification.contentView.setProgressBar(android.R.id.progress, 100,
-				progress, false);
 		
+		if(message != null)
+			notification.contentView.setTextViewText(R.id.status_text, message);
+
+		notification.contentView.setProgressBar(R.id.status_progress, 100,
+				progress, false);
 		notificationManager.notify(notifyRef, notification);
 	}
 
-	@Override
 	public void finalizeNotification() {
 		notificationManager.cancel(notifyRef);
 	}

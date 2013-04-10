@@ -16,7 +16,7 @@ import android.util.Pair;
 
 import com.matburt.mobileorg.OrgData.OrgContract.OrgData;
 import com.matburt.mobileorg.util.OrgFileNotFoundException;
-import com.matburt.mobileorg.util.OrgUtils;
+import com.matburt.mobileorg.util.PreferenceUtils;
 
 public class OrgFileParser {
 
@@ -51,8 +51,8 @@ public class OrgFileParser {
 	}
 	
 	public void parse(OrgFile orgFile, BufferedReader breader, Context context) {
-		this.combineAgenda = OrgUtils.getCombineBlockAgendas(context);
-		this.excludedTags = OrgUtils.getExcludedTags(context);
+		this.combineAgenda = PreferenceUtils.getCombineBlockAgendas();
+		this.excludedTags = PreferenceUtils.getExcludedTags();
 		
 		parse(orgFile, breader);
 	}
@@ -293,7 +293,7 @@ public class OrgFileParser {
 	}
 	
 	private static final Pattern getPriorities = Pattern
-			.compile("#\\+ALLPRIORITIES:([A-Z\\s]+)");
+			.compile("#\\+ALLPRIORITIES:([^\\n]+)");
 	public static ArrayList<String> getPrioritiesFromIndex(String filecontents) {
 		Matcher t = getPriorities.matcher(filecontents);
 

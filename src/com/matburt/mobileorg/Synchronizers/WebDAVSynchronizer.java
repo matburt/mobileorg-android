@@ -34,6 +34,7 @@ import android.util.Log;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Gui.CertificateConflictActivity;
 import com.matburt.mobileorg.util.FileUtils;
+import com.matburt.mobileorg.util.OrgUtils;
 
 public class WebDAVSynchronizer implements SynchronizerInterface {
 
@@ -320,5 +321,10 @@ public class WebDAVSynchronizer implements SynchronizerInterface {
 
 	@Override
 	public void postSynchronize() {		
+	}
+
+	@Override
+	public boolean isConnectable() {
+		return OrgUtils.isNetworkOnline(context);
 	}
 }

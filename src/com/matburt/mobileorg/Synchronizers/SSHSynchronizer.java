@@ -17,6 +17,7 @@ import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
+import com.matburt.mobileorg.util.OrgUtils;
 
 public class SSHSynchronizer implements SynchronizerInterface {
 	private final String LT = "MobileOrg";
@@ -32,7 +33,10 @@ public class SSHSynchronizer implements SynchronizerInterface {
 
 	private SharedPreferences appSettings;
 
+	private Context context;
+
 	public SSHSynchronizer(Context context) {
+		this.context = context;
 		this.appSettings = PreferenceManager
 				.getDefaultSharedPreferences(context.getApplicationContext());
 		path = appSettings.getString("scpPath", "");
@@ -112,11 +116,11 @@ public class SSHSynchronizer implements SynchronizerInterface {
 
 	@Override
 	public boolean isConfigured() {
-		if (this.appSettings.getString("scpPath", "").equals("") ||
-            this.appSettings.getString("scpUser", "").equals("") ||
-            this.appSettings.getString("scpHost", "").equals("") ||
-            (this.appSettings.getString("scpPass", "").equals("") &&
-             this.appSettings.getString("scpPubFile", "").equals("")))
+		if (this.appSettings.getString("scpPath", "").equals("")
+				|| this.appSettings.getString("scpUser", "").equals("")
+				|| this.appSettings.getString("scpHost", "").equals("")
+				|| (this.appSettings.getString("scpPass", "").equals("") && this.appSettings
+						.getString("scpPubFile", "").equals("")))
 			return false;
 		return true;
 	}
@@ -186,5 +190,10 @@ public class SSHSynchronizer implements SynchronizerInterface {
 	public void postSynchronize() {
 		if(this.session != null)
 			this.session.disconnect();
+	}
+
+	@Override
+	public boolean isConnectable() {
+		return OrgUtils.isNetworkOnline(context);
 	}
 }

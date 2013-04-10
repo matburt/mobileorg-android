@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.test.ActivityInstrumentationTestCase2;
 
 import com.matburt.mobileorg.Gui.Capture.EditActivity;
+import com.matburt.mobileorg.Gui.Capture.EditActivityController;
 import com.matburt.mobileorg.Gui.Capture.LocationFragment;
 import com.matburt.mobileorg.OrgData.OrgContract.OrgData;
 import com.matburt.mobileorg.OrgData.OrgFile;
@@ -45,8 +46,8 @@ public class LocationFragmentTest extends ActivityInstrumentationTestCase2<EditA
 	
 	private void prepareActivityWithNode(OrgNode node, String actionMode) {
 		Intent intent = new Intent();
-		intent.putExtra(EditActivity.ACTIONMODE, actionMode);
-		intent.putExtra(EditActivity.NODE_ID, node.id);
+		intent.putExtra(EditActivityController.ACTIONMODE, actionMode);
+		intent.putExtra(EditActivityController.NODE_ID, node.id);
 		setActivityIntent(intent);
 		
 		setActivityInitialTouchMode(false);
@@ -62,7 +63,7 @@ public class LocationFragmentTest extends ActivityInstrumentationTestCase2<EditA
 		node.write(resolver);
 		this.nodeId = node.id;
 		
-		prepareActivityWithNode(node, EditActivity.ACTIONMODE_EDIT);
+		prepareActivityWithNode(node, EditActivityController.ACTIONMODE_EDIT);
 		
 		assertNotNull(this.activity);
 		assertNotNull(this.locationFragment);
@@ -71,7 +72,7 @@ public class LocationFragmentTest extends ActivityInstrumentationTestCase2<EditA
 	public void test_Create_Simple() {
 		OrgNode node = new OrgNode();
 		
-		prepareActivityWithNode(node, EditActivity.ACTIONMODE_CREATE);
+		prepareActivityWithNode(node, EditActivityController.ACTIONMODE_CREATE);
 		OrgNode locationNode = locationFragment.getLocationSelection();
 		
 		OrgNode captureFile = OrgProviderUtils.getOrCreateCaptureFile(resolver).getOrgNode(resolver);
@@ -83,7 +84,7 @@ public class LocationFragmentTest extends ActivityInstrumentationTestCase2<EditA
 		OrgFile file = OrgProviderUtils.getOrCreateFile("test file.org", "delete me", resolver);
 		OrgNode fileNode = file.getOrgNode(resolver);
 		
-		prepareActivityWithNode(fileNode, EditActivity.ACTIONMODE_ADDCHILD);
+		prepareActivityWithNode(fileNode, EditActivityController.ACTIONMODE_ADDCHILD);
 		OrgNode locationNode = locationFragment.getLocationSelection();
 				
 		assertEquals(fileNode.name, locationNode.name);
@@ -94,7 +95,7 @@ public class LocationFragmentTest extends ActivityInstrumentationTestCase2<EditA
 	public void test_Addchild_ToplevelFileWithAddChild() {
 		OrgNode fileNode = OrgProviderUtils.getOrCreateCaptureFile(resolver).getOrgNode(resolver);
 		
-		prepareActivityWithNode(fileNode, EditActivity.ACTIONMODE_ADDCHILD);
+		prepareActivityWithNode(fileNode, EditActivityController.ACTIONMODE_ADDCHILD);
 		
 		activity.runOnUiThread(new Runnable() {
 			public void run() {
@@ -112,7 +113,7 @@ public class LocationFragmentTest extends ActivityInstrumentationTestCase2<EditA
 	public void test_Addchild_NestedChild() {
 		OrgNode node = OrgTestUtils.setupParentScenario(resolver);
 		
-		prepareActivityWithNode(node, EditActivity.ACTIONMODE_ADDCHILD);
+		prepareActivityWithNode(node, EditActivityController.ACTIONMODE_ADDCHILD);
 		OrgNode locationNode = locationFragment.getLocationSelection();
 		
 		OrgTestUtils.cleanupParentScenario(resolver);
@@ -123,7 +124,7 @@ public class LocationFragmentTest extends ActivityInstrumentationTestCase2<EditA
 	public void test_Edit_NestedChild() {
 		OrgNode node = OrgTestUtils.setupParentScenario(resolver);
 		
-		prepareActivityWithNode(node, EditActivity.ACTIONMODE_EDIT);
+		prepareActivityWithNode(node, EditActivityController.ACTIONMODE_EDIT);
 		OrgNode locationNode = locationFragment.getLocationSelection();
 		
 		OrgTestUtils.cleanupParentScenario(resolver);

@@ -1,10 +1,14 @@
 package com.matburt.mobileorg.Gui.Outline;
 
+import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Typeface;
 import android.text.Spannable;
 import android.text.SpannableString;
@@ -14,6 +18,7 @@ import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
 import android.view.Gravity;
 import android.view.View;
+import android.widget.Button;
 import android.widget.Checkable;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -23,12 +28,16 @@ import com.matburt.mobileorg.Gui.Theme.DefaultTheme;
 import com.matburt.mobileorg.OrgData.OrgFileParser;
 import com.matburt.mobileorg.OrgData.OrgNode;
 import com.matburt.mobileorg.OrgData.OrgProviderUtils;
+import com.matburt.mobileorg.util.OrgNodeNotFoundException;
 import com.matburt.mobileorg.util.OrgUtils;
+import com.matburt.mobileorg.util.PreferenceUtils;
 
 public class OutlineItem extends RelativeLayout implements Checkable {
 		
 	private TextView titleView;
 	private TextView tagsView;
+	private Button todoButton;
+	private TextView levelView;
 	private boolean levelFormatting = true;
 	
 	public OutlineItem(Context context) {
@@ -36,16 +45,71 @@ public class OutlineItem extends RelativeLayout implements Checkable {
 		View.inflate(getContext(), R.layout.outline_item, this);
 		titleView = (TextView) findViewById(R.id.outline_item_title);
 		tagsView = (TextView) findViewById(R.id.outline_item_tags);
+		todoButton = (Button) findViewById(R.id.outline_item_todo);
+		levelView = (TextView) findViewById(R.id.outline_item_level);
+		todoButton.setOnClickListener(todoClick);		
 		
-		int fontSize = OrgUtils.getFontSize(getContext());
+		int fontSize = PreferenceUtils.getFontSize();
 		tagsView.setTextSize(fontSize);
+		todoButton.setTextSize(fontSize);
 	}
+	
+	private OnClickListener todoClick = new OnClickListener() {
+		@Override
+		public void onClick(View v) {
+			createTodoDialog().show();
+		}
+	};
+	
+	private Dialog createTodoDialog() {
+		ArrayList<String> todos = PreferenceUtils.getSelectedTodos();
+		
+		if (todos.size() == 0)
+			todos = OrgProviderUtils.getTodos(getContext()
+					.getContentResolver());
+			
+		final ArrayList<String> todoList = todos;
+		AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+		builder.setTitle(getResources().getString(R.string.todo_state))
+				.setItems(todoList.toArray(new CharSequence[todoList.size()]),
+						new DialogInterface.OnClickListener() {
+							@Override
+							public void onClick(DialogInterface dialog,
+									int which) {
+								String selectedTodo = todoList.get(which);
+								setNewTodo(selectedTodo);
+							}
+						});
+		return builder.create();
+	}
+	
+	private void setNewTodo(String selectedTodo) {
+		if (selectedTodo.equals(node.todo))
+			return;
+
+		ContentResolver resolver = getContext().getContentResolver();
+		
+		OrgNode newNode;
+		try {
+			newNode = new OrgNode(node.id, resolver);
+		} catch (OrgNodeNotFoundException e) {
+			e.printStackTrace();
+			return;
+		}
+		newNode.todo = selectedTodo;
+		node.generateApplyWriteEdits(newNode, null, resolver);
+		node.write(resolver);
+		OrgUtils.announceSyncDone(getContext());
+	}
+	
+	private OrgNode node;
 	
 	public void setLevelFormating(boolean enabled) {
 		this.levelFormatting = enabled;
 	}
 	
 	public void setup(OrgNode node, boolean expanded, DefaultTheme theme, ContentResolver resolver) {
+		this.node = node;
 		setupTags(node.tags, node.tags_inherited, theme);
 		
 		SpannableStringBuilder titleSpan = new SpannableStringBuilder(node.name);
@@ -59,7 +123,7 @@ public class OutlineItem extends RelativeLayout implements Checkable {
 			applyLevelFormating(theme, node.level, titleSpan);
 		setupTitle(node.name, theme, titleSpan);
 		setupPriority(node.priority, theme, titleSpan);
-		setupTodo(node.todo, titleSpan, theme, resolver);
+		setupTodo(node.todo, theme, resolver);
 		
 		if (levelFormatting)
 			applyLevelIndentation(node.level, titleSpan);
@@ -71,9 +135,8 @@ public class OutlineItem extends RelativeLayout implements Checkable {
 		titleView.setText(titleSpan);
 	}
 	
-	public void setupChildrenIndicator(OrgNode node,
-			ContentResolver resolver, DefaultTheme theme,
-			SpannableStringBuilder titleSpan) {
+	public void setupChildrenIndicator(OrgNode node, ContentResolver resolver,
+			DefaultTheme theme, SpannableStringBuilder titleSpan) {
 		if (node.hasChildren(resolver)) {
 			titleSpan.append("...");
 			titleSpan.setSpan(new ForegroundColorSpan(theme.defaultForeground),
@@ -81,7 +144,7 @@ public class OutlineItem extends RelativeLayout implements Checkable {
 		}
 	}
 
-	public static void setupTodo(String todo, SpannableStringBuilder titleSpan, DefaultTheme theme, ContentResolver resolver) {
+	public void setupTodo(String todo, DefaultTheme theme, ContentResolver resolver) {
 		if(TextUtils.isEmpty(todo) == false) {
 			Spannable todoSpan = new SpannableString(todo + " ");
 			
@@ -89,7 +152,10 @@ public class OutlineItem extends RelativeLayout implements Checkable {
 			
 			todoSpan.setSpan(new ForegroundColorSpan(active ? theme.c1Red : theme.caLGreen), 0,
 					todo.length(), 0);
-			titleSpan.insert(0, todoSpan);
+			todoButton.setText(todoSpan);
+			todoButton.setVisibility(VISIBLE);
+		} else {
+			todoButton.setVisibility(GONE);
 		}
 	}
 	
@@ -102,9 +168,12 @@ public class OutlineItem extends RelativeLayout implements Checkable {
 		}
 	}
 	
-	public static void applyLevelIndentation(long level, SpannableStringBuilder item) {
+	public void applyLevelIndentation(long level, SpannableStringBuilder item) {
+		String indentString = "";
 		for(int i = 0; i < level; i++)
-			item.insert(0, "   ");
+			indentString += "   ";
+	
+		this.levelView.setText(indentString);
 	}
 	
 	public static void applyLevelFormating(DefaultTheme theme, long level, SpannableStringBuilder item) {
@@ -116,7 +185,7 @@ public class OutlineItem extends RelativeLayout implements Checkable {
 	
 	public void setupTitle(String name, DefaultTheme theme, SpannableStringBuilder titleSpan) {
 		titleView.setGravity(Gravity.LEFT);
-		titleView.setTextSize(OrgUtils.getFontSize(getContext()));
+		titleView.setTextSize(PreferenceUtils.getFontSize());
 
 		if (name.startsWith("COMMENT"))
 			titleSpan.setSpan(new ForegroundColorSpan(theme.gray), 0,
@@ -136,7 +205,7 @@ public class OutlineItem extends RelativeLayout implements Checkable {
 		titleSpan.setSpan(new StyleSpan(Typeface.BOLD), 0,
 				titleSpan.length(), 0);
 
-		titleView.setTextSize(OrgUtils.getFontSize(getContext()) + 4);
+		titleView.setTextSize(PreferenceUtils.getFontSize() + 4);
 		//titleView.setBackgroundColor(theme.c4Blue);
 		titleView.setGravity(Gravity.CENTER_VERTICAL
 				| Gravity.CENTER_HORIZONTAL);

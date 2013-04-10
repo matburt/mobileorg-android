@@ -59,4 +59,9 @@ public class SynchronizerStub implements SynchronizerInterface {
 		putRemoteFileCount = 0;
 		getRemoteFileCount = 0;
 	}
+
+	@Override
+	public boolean isConnectable() {
+		return true;
+	}
 }

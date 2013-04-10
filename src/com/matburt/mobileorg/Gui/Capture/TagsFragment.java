@@ -43,17 +43,22 @@ public class TagsFragment extends SherlockFragment {
 		super.onActivityCreated(savedInstanceState);
 		this.resolver = getActivity().getContentResolver();
 		
-		EditActivity activity = (EditActivity) getActivity();
+		EditHost host = (EditHost) getActivity();
 		
 		if(savedInstanceState != null)
 			restoreFromBundle(savedInstanceState);
 		else {
-			OrgNode node = activity.getOrgNode();
+			OrgNode node = host.getController().getOrgNode();
 			setupTagEntries(node.getTags());
 		}
 		
-		setModifiable(activity.isNodeEditable());
-		activity.invalidateOptionsMenu();
+		setModifiable(host.getController().isNodeEditable());
+		
+		try {
+			EditActivity activity = (EditActivity) host;
+			activity.invalidateOptionsMenu();
+		}
+		catch (ClassCastException e) {}
 	}
 	
 	public void restoreFromBundle(Bundle savedInstanceState) {

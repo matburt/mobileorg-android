@@ -215,4 +215,16 @@ public class OrgNodeTest extends ProviderTestCase2<OrgProvider> {
 		
 		assertEquals(fileNode.id, nodeFromOlpPath.id);
 	}
+	
+	/**
+	 * Checks if cookies ([1/3]) are stripped out of olp paths.
+	 */
+	public void testGetOlpLinkWithCookie() {
+		OrgNode node = OrgTestUtils.setupParentScenario(resolver);
+		node.name += " [1/3]";
+		
+		String olp = node.getOlpId(resolver);
+		assertEquals(OrgTestUtils.setupParentScenarioChild2ChildOlpId, olp.trim());
+	}
+	
 }

@@ -78,16 +78,17 @@ public class PayloadFragment extends ViewFragment {
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
-		EditActivity editActivity = (EditActivity) getActivity();
+		EditHost editActivity = (EditHost) getActivity();
 		
-		this.payload = editActivity.getOrgNodePayload();
+		
+		this.payload = editActivity.getController().getOrgNodePayload();
 		
 		if(savedInstanceState != null)
 			restoreInstanceState(savedInstanceState);
 		else
 			switchToView();
 		
-		setModifiable(editActivity.isPayloadEditable());
+		setModifiable(editActivity.getController().isPayloadEditable());
 	}
 	
 	@Override
