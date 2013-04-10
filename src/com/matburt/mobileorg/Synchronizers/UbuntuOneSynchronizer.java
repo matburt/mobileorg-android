@@ -17,6 +17,8 @@ import oauth.signpost.signature.HmacSha1MessageSigner;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
+import org.apache.http.params.HttpParams;
+import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.ClientProtocolException;
@@ -268,6 +270,9 @@ private static final String BASE_TOKEN_NAME = "Ubuntu One @ MobileOrg:";
 		try {
             Log.i("MobileOrg", "Logging into Ubuntu One");
 			DefaultHttpClient httpClient = new DefaultHttpClient();
+            final HttpParams httpParameters = httpClient.getParams();
+            HttpConnectionParams.setConnectionTimeout(httpParameters, 60000);
+            HttpConnectionParams.setSoTimeout(httpParameters, 60000);
 			httpClient.getCredentialsProvider().setCredentials(
 					new AuthScope(LOGIN_HOST, LOGIN_PORT),
 					new UsernamePasswordCredentials(this.username, this.password));
@@ -322,6 +327,9 @@ private static final String BASE_TOKEN_NAME = "Ubuntu One @ MobileOrg:";
 	protected HttpResponse executeRequest(HttpUriRequest request)
 			throws ClientProtocolException, IOException {
 		DefaultHttpClient httpClient = new DefaultHttpClient();
+        final HttpParams httpParameters = httpClient.getParams();
+        HttpConnectionParams.setConnectionTimeout(httpParameters, 60000);
+        HttpConnectionParams.setSoTimeout(httpParameters, 60000);
 		HttpResponse response = null;
 		int retries = 3;
 
@@ -381,6 +389,9 @@ private static final String BASE_TOKEN_NAME = "Ubuntu One @ MobileOrg:";
 			String ping_url = PING_URL + username;
 			HttpGet request = new HttpGet(ping_url);
 			DefaultHttpClient httpClient = new DefaultHttpClient();
+            final HttpParams httpParameters = httpClient.getParams();
+            HttpConnectionParams.setConnectionTimeout(httpParameters, 60000);
+            HttpConnectionParams.setSoTimeout(httpParameters, 60000);
 			HttpResponse response = null;
 			int retries = 3;
 
