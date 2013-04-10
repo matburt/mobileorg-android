@@ -22,6 +22,7 @@ import com.matburt.mobileorg.Services.CalendarSyncService;
 import com.matburt.mobileorg.Services.TimeclockService;
 import com.matburt.mobileorg.util.OrgFileNotFoundException;
 import com.matburt.mobileorg.util.OrgUtils;
+import com.matburt.mobileorg.util.PreferenceUtils;
 
 public class OutlineActionMode implements ActionMode.Callback {
 
@@ -134,7 +135,7 @@ public class OutlineActionMode implements ActionMode.Callback {
 		Intent intent = new Intent(context, EditActivity.class);
 		
 		String captureMode = EditActivityController.ACTIONMODE_CREATE;
-		if (OrgUtils.useAdvancedCapturing(context)) {
+		if (PreferenceUtils.useAdvancedCapturing()) {
 			captureMode = EditActivityController.ACTIONMODE_ADDCHILD;
 		}
 		

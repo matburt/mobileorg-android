@@ -12,6 +12,7 @@ import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.OrgData.OrgNode;
 import com.matburt.mobileorg.Services.SyncService;
 import com.matburt.mobileorg.util.OrgUtils;
+import com.matburt.mobileorg.util.PreferenceUtils;
 
 public class EditActivity extends SherlockFragmentActivity implements EditHost,
 		PayloadFragment.OnPayloadModifiedListener,
@@ -29,7 +30,7 @@ public class EditActivity extends SherlockFragmentActivity implements EditHost,
 		SyncService.stopAlarm(this); // Don't run background sync while editing node
 		
 		controller = EditActivityController.getController(getIntent(),
-				getContentResolver(), OrgUtils.getDefaultTodo(this));
+				getContentResolver(), PreferenceUtils.getDefaultTodo());
 		invalidateOptionsMenu();
 	}
 	

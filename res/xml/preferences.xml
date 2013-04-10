@@ -98,6 +98,12 @@
                     android:summary="@string/preference_default_todo_summary"
                     android:title="@string/preference_default_todo" />
 
+                <EditTextPreference
+                    android:defaultValue=""
+                    android:key="selectedTodos"
+                    android:summary="@string/preference_selected_todos_summary"
+                    android:title="@string/preference_selected_todos" />
+
                 <CheckBoxPreference
                     android:defaultValue="false"
                     android:key="captureWithTimestamp"
