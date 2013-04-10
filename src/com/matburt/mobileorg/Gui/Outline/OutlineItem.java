@@ -36,6 +36,7 @@ public class OutlineItem extends RelativeLayout implements Checkable {
 	private TextView titleView;
 	private TextView tagsView;
 	private Button todoButton;
+	private TextView levelView;
 	private boolean levelFormatting = true;
 	
 	public OutlineItem(Context context) {
@@ -44,6 +45,7 @@ public class OutlineItem extends RelativeLayout implements Checkable {
 		titleView = (TextView) findViewById(R.id.outline_item_title);
 		tagsView = (TextView) findViewById(R.id.outline_item_tags);
 		todoButton = (Button) findViewById(R.id.outline_item_todo);
+		levelView = (TextView) findViewById(R.id.outline_item_level);
 		todoButton.setOnClickListener(todoClick);		
 		
 		int fontSize = OrgUtils.getFontSize(getContext());
@@ -160,9 +162,12 @@ public class OutlineItem extends RelativeLayout implements Checkable {
 		}
 	}
 	
-	public static void applyLevelIndentation(long level, SpannableStringBuilder item) {
+	public void applyLevelIndentation(long level, SpannableStringBuilder item) {
+		String indentString = "";
 		for(int i = 0; i < level; i++)
-			item.insert(0, "   ");
+			indentString += "   ";
+	
+		this.levelView.setText(indentString);
 	}
 	
 	public static void applyLevelFormating(DefaultTheme theme, long level, SpannableStringBuilder item) {
