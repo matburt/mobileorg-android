@@ -2,9 +2,9 @@ package com.matburt.mobileorg.test.Synchronizers;
 
 import android.content.Context;
 
-import com.matburt.mobileorg.Gui.SynchronizerNotification;
+import com.matburt.mobileorg.Gui.SynchronizerNotificationCompat;
 
-public class SynchronizerNotificationStub extends SynchronizerNotification {
+public class SynchronizerNotificationStub extends SynchronizerNotificationCompat {
 
 	int errorNotificationNum = 0;
 	

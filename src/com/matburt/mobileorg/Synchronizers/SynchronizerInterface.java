@@ -15,6 +15,11 @@ public interface SynchronizerInterface {
 	public boolean isConfigured();
 
 	/**
+	 * Called before running the synchronizer to ensure it can connect.
+	 */
+	public boolean isConnectable();
+	
+	/**
 	 * Replaces the file on the remote end with the given content.
 	 * 
 	 * @param filename Name of the file, without path

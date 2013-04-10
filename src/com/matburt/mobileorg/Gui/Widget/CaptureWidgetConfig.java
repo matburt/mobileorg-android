@@ -10,7 +10,7 @@ import android.widget.EditText;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.matburt.mobileorg.R;
-import com.matburt.mobileorg.Gui.Capture.EditActivity;
+import com.matburt.mobileorg.Gui.Capture.EditActivityController;
 import com.matburt.mobileorg.Gui.Capture.EditHost;
 import com.matburt.mobileorg.Gui.Capture.LocationFragment;
 import com.matburt.mobileorg.OrgData.OrgNode;
@@ -20,6 +20,7 @@ public class CaptureWidgetConfig extends SherlockFragmentActivity implements Edi
 	private int mAppWidgetId;
 	private LocationFragment locationFragment;
 	private EditText titleView;
+	private EditActivityControllerCaptureWidget controller;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -83,28 +84,48 @@ public class CaptureWidgetConfig extends SherlockFragmentActivity implements Edi
 
 
 	@Override
-	public boolean isNodeEditable() {
-		return true;
+	public EditActivityController getController() {
+		if (this.controller == null)
+			this.controller = new EditActivityControllerCaptureWidget();
+		return this.controller;
 	}
+	
+	public class EditActivityControllerCaptureWidget extends EditActivityController {
+
+		@Override
+		public boolean isNodeEditable() {
+			return true;
+		}
 
 
-	@Override
-	public OrgNode getOrgNode() {
-		return null;
-	}
+		@Override
+		public OrgNode getOrgNode() {
+			return null;
+		}
 
-	@Override
-	public String getActionMode() {
-		return EditActivity.ACTIONMODE_ADDCHILD;
-	}
+		@Override
+		public String getActionMode() {
+			return EditActivityController.ACTIONMODE_ADDCHILD;
+		}
 
-	@Override
-	public boolean isNodeRefilable() {
-		return true;
-	}
+		@Override
+		public boolean isNodeRefilable() {
+			return true;
+		}
 
-	@Override
-	public OrgNode getParentOrgNode() {
-		return null;
+		@Override
+		public OrgNode getParentOrgNode() {
+			return null;
+		}
+
+
+		@Override
+		public void saveEdits(OrgNode newNode) {			
+		}
+
+		@Override
+		public boolean hasEdits(OrgNode newNode) {
+			return false;
+		}
 	}
 }

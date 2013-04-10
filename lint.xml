@@ -7,4 +7,5 @@
     <issue id="MissingTranslation" severity="warning">
         <ignore path="res/values-de" />
     </issue>
+    <issue id="NewApi" severity="ignore" />
 </lint>

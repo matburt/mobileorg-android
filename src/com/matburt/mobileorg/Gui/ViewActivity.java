@@ -12,6 +12,7 @@ import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.OrgData.OrgNode;
 import com.matburt.mobileorg.util.OrgNodeNotFoundException;
 import com.matburt.mobileorg.util.OrgUtils;
+import com.matburt.mobileorg.util.PreferenceUtils;
 
 public class ViewActivity extends SherlockFragmentActivity {
 	public static String NODE_ID = "node_id";
@@ -43,7 +44,7 @@ public class ViewActivity extends SherlockFragmentActivity {
 
 		try {
 			this.node = new OrgNode(nodeId, resolver);
-			viewNode(OrgUtils.getLevelOfRecursion(this));
+			viewNode(PreferenceUtils.getLevelOfRecursion());
 		} catch (OrgNodeNotFoundException e) {
 			nodeViewFragment.displayError();
 		}

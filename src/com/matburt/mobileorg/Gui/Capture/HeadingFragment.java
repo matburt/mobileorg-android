@@ -46,21 +46,22 @@ public class HeadingFragment extends SherlockFragment {
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
 		
-		EditHost activity = ((EditHost)getActivity());
+		EditHost host = ((EditHost)getActivity());
 		
 		this.resolver = getActivity().getContentResolver();
-		this.node = activity.getOrgNode();
+		this.node = host.getController().getOrgNode();
 		
 		if(savedInstanceState != null)
 			restoreInstanceState(savedInstanceState);
 		else
 			updateDisplay(this.node);
 		
-		setModifiable(activity.isNodeEditable());
+		setModifiable(host.getController().isNodeEditable());
 		
-		String actionMode = activity.getActionMode();
+		String actionMode = host.getController().getActionMode();
 		
-		if(actionMode.equals(EditActivity.ACTIONMODE_ADDCHILD) || actionMode.equals(EditActivity.ACTIONMODE_CREATE)) {
+		if (actionMode.equals(EditActivityController.ACTIONMODE_ADDCHILD)
+				|| actionMode.equals(EditActivityController.ACTIONMODE_CREATE)) {
 			this.titleView.requestFocus();
 			getActivity().getWindow().setSoftInputMode(
 				    WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
@@ -92,9 +93,6 @@ public class HeadingFragment extends SherlockFragment {
 	public void updateDisplay(String title, String todo, String priority) {
 		titleView.setText(title);
 		titleView.setSelection(title.length());
-		
-		if(node.id == -1 && todo.equals(""))
-			todo = OrgUtils.getDefaultTodo(getActivity());
 		
 		OrgUtils.setupSpinnerWithEmpty(todoStateView, OrgProviderUtils.getTodos(resolver),
 				todo);

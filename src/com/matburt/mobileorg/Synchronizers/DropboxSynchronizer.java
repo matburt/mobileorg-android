@@ -24,6 +24,7 @@ import com.dropbox.client2.session.AppKeyPair;
 import com.dropbox.client2.session.Session.AccessType;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.util.FileUtils;
+import com.matburt.mobileorg.util.OrgUtils;
 
 public class DropboxSynchronizer implements SynchronizerInterface {
 
@@ -169,5 +170,10 @@ public class DropboxSynchronizer implements SynchronizerInterface {
 
 	@Override
 	public void postSynchronize() {
+	}
+
+	@Override
+	public boolean isConnectable() {
+		return OrgUtils.isNetworkOnline(context);
 	}
 }

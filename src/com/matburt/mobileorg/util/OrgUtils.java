@@ -13,14 +13,15 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.HashSet;
 
 import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageInfo;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.net.NetworkInfo.State;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Log;
@@ -33,74 +34,12 @@ import com.matburt.mobileorg.OrgData.OrgNode;
 import com.matburt.mobileorg.Synchronizers.Synchronizer;
 
 public class OrgUtils {
-	private static final int DEFAULT_FONTSIZE = 14;
 	
 	public static String getTimestamp() {
 		SimpleDateFormat sdf = new SimpleDateFormat("[yyyy-MM-dd EEE HH:mm]");		
 		return sdf.format(new Date());
 	}
-	
-	public static String getDefaultTodo(Context context) {
-		return PreferenceManager.getDefaultSharedPreferences(context)
-				.getString("defaultTodo", "");
-	}
-    
-	public static boolean useAdvancedCapturing(Context context) {
-		return PreferenceManager.getDefaultSharedPreferences(context)
-				.getBoolean("captureAdvanced", true);
-	}
-	
-	public static int getLevelOfRecursion(Context context) {
-		return Integer.parseInt(PreferenceManager
-				.getDefaultSharedPreferences(context).getString(
-						"viewRecursionMax", "0"));
-	}
-	
-	public static int getFontSize(Context context) {
-		try {
-			int fontSize = Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(
-					context).getString("fontSize", "14"));
-			
-			if (fontSize > 2)
-				return fontSize;
-		} catch (NumberFormatException e) {
-		}
-		
-		return DEFAULT_FONTSIZE;
-	}
-	
-    public static boolean isSyncConfigured(Context context) {
-    	String syncSource = PreferenceManager.getDefaultSharedPreferences(context)
-		.getString("syncSource", "");
-    	
-    	if(TextUtils.isEmpty(syncSource))
-    		return false;
-    	else
-    		return true;
-    }
-    
-	public static HashSet<String> getExcludedTags(Context context) {
-		String tags = PreferenceManager.getDefaultSharedPreferences(context).getString(
-				"excludeTagsInheritance", null);
-		
-		if (tags == null)
-			return null;
-		
-		HashSet<String> tagsSet = new HashSet<String>();
-		for (String tag: tags.split(":")) {
-			if(TextUtils.isEmpty(tag) == false)
-				tagsSet.add(tag);
-		}
-		
-		return tagsSet;
-	}
-    
-	public static boolean getCombineBlockAgendas(Context context) {
-		try {
-			return PreferenceManager.getDefaultSharedPreferences(context)
-					.getBoolean("combineBlockAgendas", false);
-		} catch (UnsupportedOperationException e) { return false; }
-	}
+
     
     public static void setupSpinnerWithEmpty(Spinner spinner, ArrayList<String> data,
 			String selection) {
@@ -198,24 +137,6 @@ public class OrgUtils {
     }
     
 
-    public static boolean isUpgradedVersion(Context context) {
-        SharedPreferences appSettings =
-            PreferenceManager.getDefaultSharedPreferences(context);
-        SharedPreferences.Editor editor = appSettings.edit();
-        int versionCode = appSettings.getInt("appVersion", -1);
-        try {
-            PackageInfo pInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
-            int newVersion = pInfo.versionCode;
-            if (versionCode != -1 && versionCode != newVersion) {
-                editor.putInt("appVersion", newVersion);
-                editor.commit();
-                return true;
-            }
-        } catch (Exception e) { };
-        return false;
-    }
-    
-	
     public static class SortIgnoreCase implements Comparator<Object> {
         public int compare(Object o1, Object o2) {
             String s1 = (String) o1;
@@ -224,14 +145,8 @@ public class OrgUtils {
         }
     }
     
-    public static String getThemeName(Context context) {
-        SharedPreferences appSettings =
-                PreferenceManager.getDefaultSharedPreferences(context);
-        return appSettings.getString("theme", "Dark");
-    }
-    
     public static void setTheme(Activity activity) {
-    	String themeName = getThemeName(activity);
+    	String themeName = PreferenceUtils.getThemeName();
     	
     	if(themeName.equals("Dark"))
     		activity.setTheme(R.style.Theme_MobileOrg_Dark);
@@ -274,5 +189,64 @@ public class OrgUtils {
 
 			return null;
 		}
+	}
+	
+	
+	/**
+	 * @param keyID the ID of the StringArray that contains the labels
+	 * @param valID the ID of the StringArray that contains the values
+	 * @param value the value to search for
+	 */
+	public static String lookUpValueFromArray(Context context, int keyID, int valID, String value) {
+		String[] keys = context.getResources().getStringArray(keyID);
+		String[] values = context.getResources().getStringArray(valID);
+		for (int i = 0; i < values.length; i++) {
+			if (values[i].equals(value)) {
+				return keys[i];
+			}
+		}
+		return null;
+	}
+	
+	
+	public static boolean isWifiOnline(Context context) {
+		ConnectivityManager conMan = (ConnectivityManager) context
+				.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+		State wifi = conMan.getNetworkInfo(ConnectivityManager.TYPE_WIFI)
+				.getState();
+
+		if (wifi == NetworkInfo.State.CONNECTED)
+			return true;
+		else
+			return false;
+	}
+
+	public static boolean isMobileOnline(Context context) {
+		ConnectivityManager conMan = (ConnectivityManager) context
+				.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+		State mobile = conMan.getNetworkInfo(ConnectivityManager.TYPE_MOBILE)
+				.getState();
+
+		if (mobile == NetworkInfo.State.CONNECTED)
+			return true;
+		else
+			return false;
+	}
+	
+	
+	public static boolean isNetworkOnline(Context context) {
+		SharedPreferences prefs = PreferenceManager
+				.getDefaultSharedPreferences(context);
+		boolean wifiOnly = prefs.getBoolean(
+				context.getResources().getString(R.string.key_syncWifiOnly),
+				false);
+
+		if (wifiOnly)
+			return OrgUtils.isWifiOnline(context);
+		else
+			return OrgUtils.isWifiOnline(context)
+					|| OrgUtils.isMobileOnline(context);
 	}
 }

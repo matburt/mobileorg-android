@@ -11,6 +11,7 @@ import android.widget.RemoteViews;
 
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Gui.Capture.EditActivity;
+import com.matburt.mobileorg.Gui.Capture.EditActivityController;
 
 public class CaptureWidgetProvider extends AppWidgetProvider {
 	public static final String LOCATION = "location";
@@ -55,11 +56,11 @@ public class CaptureWidgetProvider extends AppWidgetProvider {
 	
 	private static Intent getWidgetIntent(int appWidgetId, Context context) {
 		Intent intent = new Intent(context, EditActivity.class);
-		intent.putExtra(EditActivity.ACTIONMODE, EditActivity.ACTIONMODE_ADDCHILD);
+		intent.putExtra(EditActivityController.ACTIONMODE, EditActivityController.ACTIONMODE_ADDCHILD);
 
 		SharedPreferences prefs = getPreferences(appWidgetId, context);
 		String olpLocation = prefs.getString(LOCATION, "");
-		intent.putExtra(EditActivity.OLP_LOCATION, olpLocation);
+		intent.putExtra(EditActivityController.OLP_LOCATION, olpLocation);
 
 		return intent;
 	}

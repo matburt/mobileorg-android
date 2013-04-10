@@ -73,7 +73,7 @@ public class ViewFragment extends SherlockFragment {
 	public void displayError() {
 		String fontColor = DefaultTheme.getTheme(getActivity()).defaultFontColor;
 		String html = "<html><body><font color='" + fontColor + "'>"
-				+ getString(R.string.node_view_error_loading_node)
+				+ getString(R.string.error_loading_node)
 				+ "</font></body></html>";
 		displayHtml(html);
 	}

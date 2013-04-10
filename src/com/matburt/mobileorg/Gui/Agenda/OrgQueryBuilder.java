@@ -96,7 +96,7 @@ public class OrgQueryBuilder implements Serializable {
 	private String getSelection(ArrayList<String> values, String column) {
 		StringBuilder builder = new StringBuilder();
 		
-		if(values == null)
+		if(values == null || values.size() == 0)
 			return "";
 		
 		for (String value: values) {

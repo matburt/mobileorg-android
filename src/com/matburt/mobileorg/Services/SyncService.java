@@ -12,6 +12,7 @@ import android.os.IBinder;
 import android.preference.PreferenceManager;
 
 import com.matburt.mobileorg.Gui.SynchronizerNotification;
+import com.matburt.mobileorg.Gui.SynchronizerNotificationCompat;
 import com.matburt.mobileorg.OrgData.MobileOrgApplication;
 import com.matburt.mobileorg.OrgData.OrgDatabase;
 import com.matburt.mobileorg.OrgData.OrgFileParser;
@@ -104,8 +105,13 @@ public class SyncService extends Service implements
 		else
 			synchronizer = null;
 		
-		return new Synchronizer(c, synchronizer,
-				new SynchronizerNotification(c));
+		SynchronizerNotificationCompat notification;
+		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB)
+			notification = new SynchronizerNotification(this);
+		else
+			notification = new SynchronizerNotificationCompat(this);
+		
+		return new Synchronizer(c, synchronizer, notification);
     }
 
 	private void runSynchronizer() {

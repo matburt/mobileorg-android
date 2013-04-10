@@ -14,6 +14,7 @@ import android.widget.RemoteViews;
 
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Gui.Capture.EditActivity;
+import com.matburt.mobileorg.Gui.Capture.EditActivityController;
 import com.matburt.mobileorg.Synchronizers.Synchronizer;
 
 public class MobileOrgWidget extends AppWidgetProvider {
@@ -48,7 +49,7 @@ public class MobileOrgWidget extends AppWidgetProvider {
                                           R.layout.widget);
             
             Intent intent = new Intent(context, EditActivity.class);
-            intent.setAction(EditActivity.ACTIONMODE_CREATE);
+            intent.setAction(EditActivityController.ACTIONMODE_CREATE);
             PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
             updateViews.setOnClickPendingIntent(R.id.widget, pendingIntent);
 

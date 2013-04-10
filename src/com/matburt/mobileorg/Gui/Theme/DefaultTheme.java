@@ -3,7 +3,7 @@ package com.matburt.mobileorg.Gui.Theme;
 import android.content.Context;
 import android.graphics.Color;
 
-import com.matburt.mobileorg.util.OrgUtils;
+import com.matburt.mobileorg.util.PreferenceUtils;
 
 public class DefaultTheme {
 	
@@ -40,7 +40,7 @@ public class DefaultTheme {
 	
 	
 	public static DefaultTheme getTheme(Context context) {
-		final String themeName = OrgUtils.getThemeName(context);
+		final String themeName = PreferenceUtils.getThemeName();
 		if(themeName.equals("Light"))
 				return new WhiteTheme();
 		else if(themeName.equals("Monochrome"))

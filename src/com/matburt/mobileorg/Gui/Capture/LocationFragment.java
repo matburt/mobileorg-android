@@ -42,18 +42,16 @@ public class LocationFragment extends SherlockFragment {
 		super.onActivityCreated(savedInstanceState);
 
 		this.resolver = getActivity().getContentResolver();
-		EditHost activity = (EditHost) getActivity();
+		EditHost host = (EditHost) getActivity();
 
 		restoreFromBundle(savedInstanceState);
 
-		EditHost editActivity = (EditHost) activity;
-
 		if (this.node == null)
-			this.node = editActivity.getParentOrgNode();
+			this.node = host.getController().getParentOrgNode();
 
 		initLocationView();
 
-		setModifiable(editActivity.isNodeRefilable());
+		setModifiable(host.getController().isNodeRefilable());
 	}
 	
 	@Override
@@ -124,7 +122,7 @@ public class LocationFragment extends SherlockFragment {
 	
 	private LocationEntry getLocationEntry(OrgNode node, ArrayList<String> data, String selection) {
 		if(this.node != null && node != null && this.node.id == node.id) {
-			String editNodeName = ((EditActivity) getActivity()).getOrgNode().name;
+			String editNodeName = ((EditActivity) getActivity()).getController().getOrgNode().name;
 			if(TextUtils.isEmpty(editNodeName) == false)
 				data.remove(editNodeName); // Prevents refiling node "under itself"
 		}

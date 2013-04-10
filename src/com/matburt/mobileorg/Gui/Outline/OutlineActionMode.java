@@ -15,12 +15,14 @@ import com.actionbarsherlock.view.MenuItem;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Gui.ViewActivity;
 import com.matburt.mobileorg.Gui.Capture.EditActivity;
+import com.matburt.mobileorg.Gui.Capture.EditActivityController;
 import com.matburt.mobileorg.OrgData.OrgFile;
 import com.matburt.mobileorg.OrgData.OrgNode;
 import com.matburt.mobileorg.Services.CalendarSyncService;
 import com.matburt.mobileorg.Services.TimeclockService;
 import com.matburt.mobileorg.util.OrgFileNotFoundException;
 import com.matburt.mobileorg.util.OrgUtils;
+import com.matburt.mobileorg.util.PreferenceUtils;
 
 public class OutlineActionMode implements ActionMode.Callback {
 
@@ -124,27 +126,27 @@ public class OutlineActionMode implements ActionMode.Callback {
 	
 	public static void runEditNodeActivity(long nodeId, Context context) {
 		Intent intent = new Intent(context, EditActivity.class);
-		intent.putExtra(EditActivity.ACTIONMODE, EditActivity.ACTIONMODE_EDIT);
-		intent.putExtra(EditActivity.NODE_ID, nodeId);
+		intent.putExtra(EditActivityController.ACTIONMODE, EditActivityController.ACTIONMODE_EDIT);
+		intent.putExtra(EditActivityController.NODE_ID, nodeId);
 		context.startActivity(intent);
 	}
 	
 	public static  void runCaptureActivity(long id, Context context) {
 		Intent intent = new Intent(context, EditActivity.class);
 		
-		String captureMode = EditActivity.ACTIONMODE_CREATE;
-		if (OrgUtils.useAdvancedCapturing(context)) {
-			captureMode = EditActivity.ACTIONMODE_ADDCHILD;
+		String captureMode = EditActivityController.ACTIONMODE_CREATE;
+		if (PreferenceUtils.useAdvancedCapturing()) {
+			captureMode = EditActivityController.ACTIONMODE_ADDCHILD;
 		}
 		
-		intent.putExtra(EditActivity.ACTIONMODE, captureMode);
-		intent.putExtra(EditActivity.NODE_ID, id);
+		intent.putExtra(EditActivityController.ACTIONMODE, captureMode);
+		intent.putExtra(EditActivityController.NODE_ID, id);
 		context.startActivity(intent);
 	}
 	
 	private void runDeleteNode() {	
 		AlertDialog.Builder builder = new AlertDialog.Builder(context);
-		builder.setMessage(R.string.outline_delete_prompt)
+		builder.setMessage(R.string.prompt_node_delete)
 				.setCancelable(false)
 				.setPositiveButton(R.string.yes,
 						new DialogInterface.OnClickListener() {
@@ -163,7 +165,7 @@ public class OutlineActionMode implements ActionMode.Callback {
 	
 	private void runArchiveNode(final boolean archiveToSibling) {	
 		AlertDialog.Builder builder = new AlertDialog.Builder(context);
-		builder.setMessage(R.string.outline_archive_prompt)
+		builder.setMessage(R.string.prompt_node_archive)
 				.setCancelable(false)
 				.setPositiveButton(R.string.yes,
 						new DialogInterface.OnClickListener() {
@@ -189,7 +191,7 @@ public class OutlineActionMode implements ActionMode.Callback {
 	
 	private void runDeleteFileNode() {
 		AlertDialog.Builder builder = new AlertDialog.Builder(context);
-		builder.setMessage(R.string.outline_delete_file_prompt)
+		builder.setMessage(R.string.prompt_delete_file)
 				.setCancelable(false)
 				.setPositiveButton(R.string.yes,
 						new DialogInterface.OnClickListener() {
@@ -220,10 +222,14 @@ public class OutlineActionMode implements ActionMode.Callback {
 		} catch (OrgFileNotFoundException e) {}
 	}
 	
-	private void runViewNodeActivity() {		
+	public static void runViewNodeActivity(long nodeId, Context context) {
 		Intent intent = new Intent(context, ViewActivity.class);
-		intent.putExtra(ViewActivity.NODE_ID, node.id);
+		intent.putExtra(ViewActivity.NODE_ID, nodeId);
 		context.startActivity(intent);
+	}
+	
+	private void runViewNodeActivity() {		
+		runViewNodeActivity(node.id, context);
 	}
 	
 	private void runTimeClockingService() {

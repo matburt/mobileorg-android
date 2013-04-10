@@ -1,6 +1,7 @@
 package com.matburt.mobileorg.Gui.Agenda;
 
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
@@ -18,22 +19,28 @@ public class OrgAgenda implements Serializable {
 	
 	public ArrayList<OrgQueryBuilder> queries = new ArrayList<OrgQueryBuilder>();
 
-	public static ArrayList<OrgAgenda> readAgendas(Context context) throws IOException {
-		FileInputStream fis = context.openFileInput(AGENDA_CONFIG_FILE);
-		byte[] serializedObject = new byte[fis.available()];
-		fis.read(serializedObject);
-		fis.close();
-		
-		@SuppressWarnings("unchecked")
-		ArrayList<OrgAgenda> result = (ArrayList<OrgAgenda>) OrgUtils
-		.deserializeObject(serializedObject);
-		return result;
+	public static ArrayList<OrgAgenda> readAgendas(Context context)
+			throws IOException {
+		try {
+			FileInputStream fis = context.openFileInput(AGENDA_CONFIG_FILE);
+			byte[] serializedObject = new byte[fis.available()];
+			fis.read(serializedObject);
+			fis.close();
+
+			@SuppressWarnings("unchecked")
+			ArrayList<OrgAgenda> result = (ArrayList<OrgAgenda>) OrgUtils
+					.deserializeObject(serializedObject);
+			return result;
+		} catch (FileNotFoundException e) {
+			return new ArrayList<OrgAgenda>();
+		}
 	}
 	
 	public static void writeAgendas(ArrayList<OrgAgenda> agendas, Context context) throws IOException {
 		byte[] serializeObject = OrgUtils.serializeObject(agendas);
 		FileOutputStream fos = context.openFileOutput(AGENDA_CONFIG_FILE, Context.MODE_PRIVATE);
 		fos.write(serializeObject);
+		fos.flush();
 		fos.close();
 	}
 
@@ -50,6 +57,7 @@ public class OrgAgenda implements Serializable {
 			
 			return result;
 		} catch (IOException e) {
+			e.printStackTrace();
 			return result;
 		}
     }
@@ -59,7 +67,9 @@ public class OrgAgenda implements Serializable {
 			ArrayList<OrgAgenda> agendas = readAgendas(context);
 			agendas.remove(position);
 			writeAgendas(agendas, context);
-		} catch (IOException e) {}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	public static void replaceAgenda(OrgAgenda agenda, int position, Context context) {
@@ -68,7 +78,9 @@ public class OrgAgenda implements Serializable {
 			agendas.remove(position);
 			agendas.add(position, agenda);
 			writeAgendas(agendas, context);
-		} catch (IOException e) {}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public static OrgAgenda getAgenda(int agendaPos, Context context) {
@@ -77,7 +89,9 @@ public class OrgAgenda implements Serializable {
 			
 			if(agendaPos >= 0 && agendaPos < agendas.size())
 				return agendas.get(agendaPos);
-		} catch (IOException e) {}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		return new OrgAgenda();
 	}
 
@@ -89,7 +103,9 @@ public class OrgAgenda implements Serializable {
 			agendas.add(agenda);
 			writeAgendas(agendas, context);
 			return agendas.size() - 1;
-		} catch (IOException e) {}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		return -1;
 	}
 	
@@ -122,7 +138,9 @@ public class OrgAgenda implements Serializable {
 			agenda.queries.remove(entryPos);
 			
 			writeAgendas(agendas, context);
-		} catch (IOException e) {}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	
@@ -143,6 +161,8 @@ public class OrgAgenda implements Serializable {
 			
 			writeAgendas(agendas, context);
 			
-		} catch (IOException e) {}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 }
