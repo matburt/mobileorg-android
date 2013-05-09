@@ -41,6 +41,7 @@ public class CalendarComptabilityWrappers {
 		public String ORGANIZER = "organizer";
 		public String EVENT_TIMEZONE = "eventTimezone";
 		public String _ID = "_id";
+		public String AVAILABILITY = "availability";
 	};
 	
 	public class intCalendars {
