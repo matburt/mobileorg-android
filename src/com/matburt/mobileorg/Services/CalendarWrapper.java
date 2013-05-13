@@ -56,7 +56,7 @@ public class CalendarWrapper {
 				new String[] { CALENDAR_ORGANIZER + ":" + filename + "%" });
 	}
 	
-        public String insertEntry(OrgNodeDate date, String payload,
+	public String insertEntry(OrgNodeDate date, String payload,
 			String filename, String location, String busy) throws IllegalArgumentException {
 
 		if (this.calendarId == -1)
@@ -70,22 +70,22 @@ public class CalendarWrapper {
 				+ filename + "\n" + payload);
 		values.put(calendar.events.EVENT_LOCATION, location);
 
-                // If a busy state was given, send that info to calendar
-                if (busy != null) {
-                        // Trying to be reasonably tolerant with respect to the accepted values.
-                        if (busy.equals("nil") || busy.equals("0") ||
-                            busy.equals("no")  || busy.equals("available"))
-                                values.put(calendar.events.AVAILABILITY, calendar.events.AVAILABILITY_FREE);
-                
-                        else if (busy.equals("t")   || busy.equals("1") ||
-                                 busy.equals("yes") || busy.equals("busy"))
-                                values.put(calendar.events.AVAILABILITY, calendar.events.AVAILABILITY_BUSY);
-                    
-                        else if (busy.equals("2") || busy.equals("tentative") || busy.equals("maybe"))
-                                values.put(calendar.events.AVAILABILITY, calendar.events.AVAILABILITY_TENTATIVE);
-                }
-                
-                // Sync with google will overwrite organizer :(
+		// If a busy state was given, send that info to calendar
+		if (busy != null) {
+			// Trying to be reasonably tolerant with respect to the accepted values.
+			if (busy.equals("nil") || busy.equals("0") ||
+			    busy.equals("no")  || busy.equals("available"))
+				values.put(calendar.events.AVAILABILITY, calendar.events.AVAILABILITY_FREE);
+		
+			else if (busy.equals("t")   || busy.equals("1") ||
+				 busy.equals("yes") || busy.equals("busy"))
+				values.put(calendar.events.AVAILABILITY, calendar.events.AVAILABILITY_BUSY);
+
+			else if (busy.equals("2") || busy.equals("tentative") || busy.equals("maybe"))
+				values.put(calendar.events.AVAILABILITY, calendar.events.AVAILABILITY_TENTATIVE);
+		}
+		
+		// Sync with google will overwrite organizer :(
 		// values.put(intEvents.ORGANIZER, embeddedNodeMetadata);
 
 		values.put(calendar.events.DTSTART, date.beginTime);
