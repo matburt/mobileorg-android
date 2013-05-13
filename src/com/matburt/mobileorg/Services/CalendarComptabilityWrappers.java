@@ -41,6 +41,10 @@ public class CalendarComptabilityWrappers {
 		public String ORGANIZER = "organizer";
 		public String EVENT_TIMEZONE = "eventTimezone";
 		public String _ID = "_id";
+		public String AVAILABILITY = "availability";
+		public Integer AVAILABILITY_BUSY = 0;
+		public Integer AVAILABILITY_FREE = 1;
+		public Integer AVAILABILITY_TENTATIVE = 2;
 	};
 	
 	public class intCalendars {

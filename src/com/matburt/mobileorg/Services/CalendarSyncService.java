@@ -19,6 +19,7 @@ import com.matburt.mobileorg.OrgData.CalendarEntry;
 import com.matburt.mobileorg.OrgData.OrgFile;
 import com.matburt.mobileorg.OrgData.OrgNode;
 import com.matburt.mobileorg.OrgData.OrgNodeDate;
+import com.matburt.mobileorg.OrgData.OrgNodePayload;
 import com.matburt.mobileorg.OrgData.OrgProviderUtils;
 import com.matburt.mobileorg.util.MultiMap;
 import com.matburt.mobileorg.util.OrgFileNotFoundException;
@@ -31,6 +32,8 @@ public class CalendarSyncService extends Service implements
 	public final static String PULL = "pull";
 	public final static String PUSH = "push";
 	public final static String FILELIST = "filelist";
+	// The name of the org-property holding the availability status.
+	public final static String ORG_PROP_BUSY = "BUSY";
 
 	private Context context;
 	private SharedPreferences sharedPreferences;
@@ -172,17 +175,18 @@ public class CalendarSyncService extends Service implements
 	private void tryToInsertNode(MultiMap<CalendarEntry> entries,
 			OrgNodeDate date, String filename, OrgNode node) {
 		CalendarEntry insertedEntry = entries.findValue(date.beginTime, date);
-		
+		OrgNodePayload payload = node.getOrgNodePayload();
+
 		if (insertedEntry != null) {
 			entries.remove(date.beginTime, insertedEntry);
 			unchanged++;
 		} else {
-			calendarWrapper.insertEntry(date, node.getCleanedPayload(), filename, node
-					.getOrgNodePayload().getProperty("LOCATION"));
+			calendarWrapper.insertEntry(date, node.getCleanedPayload(), filename, 
+						payload.getProperty("LOCATION"), payload.getProperty(ORG_PROP_BUSY));
 			inserted++;
 		}
 	}
-	
+
 	private boolean shouldInsertEntry(String todo, OrgNodeDate date) {
 		boolean isTodoActive = true;
 		if (TextUtils.isEmpty(todo) == false && allTodos.contains(todo))
