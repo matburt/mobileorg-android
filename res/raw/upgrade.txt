@@ -1,5 +1,13 @@
 MobileOrg Upgrade Notes
 
+Changes for 0.9.10:
+- Support for BUSY/AVAILABLE
+- Clean up Settings activity
+- Wifi only settings for sync
+- Add timestamp setting
+- Clickable todo items in outlines
+- Bug Fixes and other smaller things
+
 Changes for 0.9.8:
 - Fix the issue preventing Dropbox sync
 - Other bug fixes and cleanups
