@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.matburt.mobileorg"
-    android:versionCode="910"
-    android:versionName="0.9.10" >
+    android:versionCode="912"
+    android:versionName="0.9.12" >
 
     <uses-sdk
         android:minSdkVersion="8"
@@ -178,7 +178,7 @@
             <intent-filter>
 
                 <!-- Change this to be db- followed by your app key -->
-                <data android:scheme="db-2y6mph4a6httm78" />
+                <data android:scheme="db-et6v9bbqd4pu0ak" />
 
                 <action android:name="android.intent.action.VIEW" />
 

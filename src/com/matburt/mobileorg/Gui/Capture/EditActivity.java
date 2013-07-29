@@ -49,7 +49,7 @@ public class EditActivity extends SherlockFragmentActivity implements EditHost,
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getSupportMenuInflater().inflate(R.menu.edit, menu);
 
-		if(controller.isNodeEditable() == false)
+		if(controller != null && controller.isNodeEditable() == false)
 			menu.findItem(R.id.nodeedit_save).setVisible(false);
 	    
     	return super.onCreateOptionsMenu(menu);

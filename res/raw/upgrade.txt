@@ -1,5 +1,8 @@
 MobileOrg Upgrade Notes
 
+Changes for 0.9.11 & 12:
+- Fix bugs and crashes that crept into the .10 release
+
 Changes for 0.9.10:
 - Support for BUSY/AVAILABLE
 - Clean up Settings activity
