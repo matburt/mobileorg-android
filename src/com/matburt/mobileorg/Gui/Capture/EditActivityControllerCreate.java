@@ -22,7 +22,7 @@ public class EditActivityControllerCreate extends EditActivityController {
 	
 	@Override
 	public boolean isNodeEditable() {
-		return false;
+		return true;
 	}
 	
 	public OrgNode getParentOrgNode() {
