@@ -97,6 +97,27 @@
 
                 <data android:mimeType="text/*" />
             </intent-filter>
+            
+            <intent-filter>
+                <action android:name="com.matburt.mobileorg.CAPTURE" />
+                <action android:name="android.intent.action.SEND" />
+ 
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="com.google.android.voicesearch.SELF_NOTE" />
+ 
+                <data android:mimeType="text/plain" />
+            </intent-filter>
+
+            <intent-filter>
+                <action android:name="com.matburt.mobileorg.CAPTURE" />
+                <action android:name="com.google.android.gm.action.AUTO_SEND" >
+                </action>
+ 
+                <category android:name="android.intent.category.DEFAULT" />
+ 
+                <data android:mimeType="*/*" >
+                </data>
+            </intent-filter>
         </activity>
         <activity android:name=".Gui.SearchActivity" >
             <intent-filter>
