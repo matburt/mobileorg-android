@@ -1,5 +1,9 @@
 MobileOrg Upgrade Notes
 
+Changes for 0.9.13:
+- Fix a bug where you couldn't capture from the share menu (#400)
+- Implement capture from Google Now
+
 Changes for 0.9.11 & 12:
 - Fix bugs and crashes that crept into the .10 release
 
