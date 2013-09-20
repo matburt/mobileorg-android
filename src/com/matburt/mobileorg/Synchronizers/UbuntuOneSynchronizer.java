@@ -164,7 +164,7 @@ private static final String BASE_TOKEN_NAME = "Ubuntu One @ MobileOrg:";
             url = uri.toURL();
 
             request = new HttpPut(url.toString());
-            request.setEntity(new StringEntity(contents));
+            request.setEntity(new StringEntity(contents, "UTF-8"));
             httpClient = new DefaultHttpClient();
 
             signRequest(request);
