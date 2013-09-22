@@ -12,6 +12,15 @@ repositories {
     mavenCentral()
 }
 
+def getVersionName = { ->
+    def stdout = new ByteArrayOutputStream()
+    exec {
+        commandLine 'git', 'describe', '--tags'
+        standardOutput = stdout
+    }
+    return stdout.toString().trim()
+}
+
 android {
     compileSdkVersion 18
     buildToolsVersion "18.1.0"
@@ -20,7 +29,7 @@ android {
         minSdkVersion 8
         targetSdkVersion 17
         versionCode 913
-        versionName "0.9.13"
+        versionName getVersionName()
     }
 
     signingConfigs {

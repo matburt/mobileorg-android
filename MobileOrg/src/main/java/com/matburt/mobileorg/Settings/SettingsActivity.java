@@ -1,14 +1,13 @@
 package com.matburt.mobileorg.Settings;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageItemInfo;
+import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Bundle;
 import android.preference.ListPreference;
@@ -16,8 +15,8 @@ import android.preference.Preference;
 import android.text.TextUtils;
 
 import com.actionbarsherlock.app.SherlockPreferenceActivity;
-import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.OrgData.OrgProviderUtils;
+import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Services.CalendarSyncService;
 import com.matburt.mobileorg.Services.CalendarWrapper;
 import com.matburt.mobileorg.Settings.Synchronizers.SDCardSettingsActivity;
@@ -25,6 +24,9 @@ import com.matburt.mobileorg.Settings.Synchronizers.ScpSettingsActivity;
 import com.matburt.mobileorg.Settings.Synchronizers.UbuntuOneSettingsActivity;
 import com.matburt.mobileorg.Settings.Synchronizers.WebDAVSettingsActivity;
 import com.matburt.mobileorg.util.OrgUtils;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @SuppressWarnings("deprecation")
 public class SettingsActivity extends SherlockPreferenceActivity implements
@@ -54,10 +56,10 @@ public class SettingsActivity extends SherlockPreferenceActivity implements
 		populateSyncSources();
 		populateTodoKeywords();
 		populateCalendarNames();
-
+        populateVersionName();
 		findPreference("clearDB").setOnPreferenceClickListener(onClearDBClick);
 	}
-	
+
 	private void init() {
 		this.appSettings = getPreferenceScreen().getSharedPreferences();
 		
@@ -146,7 +148,16 @@ public class SettingsActivity extends SherlockPreferenceActivity implements
 			pref.setSummary(summary);
 	}
 
-	private void populateCalendarNames() {
+    private void populateVersionName() {
+        Preference version = findPreference(getResources().getString(R.string.preference_version));
+        try {
+            PackageInfo packageInfo = getPackageManager().getPackageInfo(getPackageName(),0);
+            version.setSummary(packageInfo.versionName);
+        } catch (PackageManager.NameNotFoundException e) {
+        }
+    }
+
+    private void populateCalendarNames() {
 		try {
 			ListPreference calendarName = (ListPreference) findPreference(KEY_CALENDAR_NAME);
 
