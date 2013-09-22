@@ -14,7 +14,6 @@
   <string name="menu_adddeadline">Deadline hinzufügen</string>
   <string name="menu_addscheduled">Termin hinzufügen</string>
   <string name="menu_timestamp">Zeitstempel hinzufügen</string>
-  <string name="menu_edit">Bearbeiten</string>
   <string name="menu_view">Ansehen</string>
   <string name="menu_delete">Löschen</string>
   <string name="menu_delete_file">Datei Löschen</string>
@@ -45,9 +44,6 @@
   <string name="sync_successful">Synchonisierung erfolgreich</string>
 
   <string name="preference_autosync">Synchronisierung im Hintergrund</string>
-  <string name="preference_autosync_summary">Automatisch die MobileOrg Daten im Hintergrund synchronisieren</string>
-  <string name="preference_autosync_interval">Synchronisationsintervall</string>
-  <string name="preference_autosync_interval_summary">Wie häufig im Hintergrund abgeglichen werden soll</string>
 
   <string name="error_sqlio">Problem beim Lesen der Datenbank. Ist das Medium fehlerhaft oder die SD-Karte nicht verfügbar?</string>
   <string name="error_generic_database">Allgemeiner Datenbankfehler: %s</string>
@@ -122,7 +118,6 @@
     <string name="preference_capture_with_timestamp_summary">Neu erfasste Punkte werden einen Zeitstempel erhalten</string>
     <string name="title_agenda_title">Agendatitel benutzen</string>
     <string name="summary_agenda_title">Erlaubt es, benutzerdefinierte Agendatitel zu benutzen. Die Agenda Datei muss neu synchronisiert werden, damit diese Änderung in Kraft tritt.</string>
-    <string name="preference_autosync">Hintergrundsynchronisation</string>
     <string name="preference_autosync_summary">Synchronisiert MobileOrg automatisch im Hintergrund</string>
     <string name="preference_autosync_interval">Synchronisationsintervall</string>
     <string name="preference_autosync_interval_summary">Wie oft die Synchronisation im Hintergrund stattfinden soll</string>

@@ -80,7 +80,6 @@
     <string name="menu_adddeadline">Add Deadline</string>
     <string name="menu_addscheduled">Add Scheduled</string>
     <string name="menu_timestamp">Add Timestamp</string>
-    <string name="menu_edit">Edit</string>
     <string name="menu_view">View</string>
     <string name="menu_delete">Delete</string>
     <string name="menu_delete_file">Delete File</string>
@@ -213,7 +212,6 @@
     <string name="key_viewRecursionMax">viewRecursionMax</string>
     <string name="key_defaultTodo">defaultTodo</string>
     <string name="key_calendarName">calendarName</string>
-    <string name="key_calendarReminderInterval">calendarReminderInterval</string>
     <string name="key_calendarReminderInterval">calendarReminderInterval</string>
     <string name="key_theme">theme</string>
     <string name="key_fontSize">fontSize</string>
