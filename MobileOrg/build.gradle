@@ -19,6 +19,30 @@ android {
     defaultConfig {
         minSdkVersion 8
         targetSdkVersion 17
+        versionCode 913
+        versionName "0.9.13"
+    }
+
+    signingConfigs {
+        matburt {
+            storeFile file("other.keystore")
+            storePassword "android"
+            keyAlias "androiddebugkey"
+            keyPassword "android"
+        }
+    }
+
+    buildTypes {
+        release {
+            signingConfig signingConfigs.matburt
+        }
+        donate {
+            packageNameSuffix ".donate"
+            signingConfig signingConfigs.matburt
+        }
+        debug {
+            debuggable true
+        }
     }
 }
 
