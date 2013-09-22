@@ -80,8 +80,8 @@
     <orderEntry type="library" exported="" name="httpcore-4.0.1" level="project" />
     <orderEntry type="library" exported="" name="json_simple-1.1" level="project" />
     <orderEntry type="library" exported="" name="ComActionbarsherlockActionbarsherlock440.aar" level="project" />
-    <orderEntry type="library" exported="" name="jsch-0.1.45" level="project" />
     <orderEntry type="library" exported="" name="dropbox-android-sdk-1.5.3" level="project" />
+    <orderEntry type="library" exported="" name="jsch-0.1.50" level="project" />
   </component>
 </module>
 
