@@ -1,9 +1,0 @@
-<component name="libraryTable">
-  <library name="jsch-0.1.45">
-    <CLASSES>
-      <root url="jar://$PROJECT_DIR$/MobileOrg/libs/jsch-0.1.45.jar!/" />
-    </CLASSES>
-    <JAVADOC />
-    <SOURCES />
-  </library>
-</component>

@@ -1,21 +1,11 @@
 package com.matburt.mobileorg.Synchronizers;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.security.cert.CertificateException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-
-import javax.net.ssl.SSLHandshakeException;
-
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Gui.FileDecryptionActivity;
 import com.matburt.mobileorg.Gui.SynchronizerNotificationCompat;
 import com.matburt.mobileorg.OrgData.OrgContract.Edits;
@@ -24,9 +14,19 @@ import com.matburt.mobileorg.OrgData.OrgEdit;
 import com.matburt.mobileorg.OrgData.OrgFile;
 import com.matburt.mobileorg.OrgData.OrgFileParser;
 import com.matburt.mobileorg.OrgData.OrgProviderUtils;
+import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.util.FileUtils;
 import com.matburt.mobileorg.util.OrgFileNotFoundException;
 import com.matburt.mobileorg.util.OrgUtils;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.security.cert.CertificateException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+
+import javax.net.ssl.SSLHandshakeException;
 
 /**
  * This class implements many of the operations that need to be done on
@@ -84,7 +84,8 @@ public class Synchronizer {
 			return changedFiles;
 		} catch (Exception e) {
 			showErrorNotification(e);
-			OrgUtils.announceSyncDone(context);
+            Log.e("Synchronizer", "Error synchronizing", e);
+            OrgUtils.announceSyncDone(context);
 			return new ArrayList<String>();
 		}
 	}
