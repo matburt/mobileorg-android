@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageInfo;
 import android.content.pm.PackageItemInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -149,10 +148,10 @@ public class SettingsActivity extends SherlockPreferenceActivity implements
 	}
 
     private void populateVersionName() {
-        Preference version = findPreference(getResources().getString(R.string.preference_version));
+        Preference version = findPreference(getResources().getString(R.string.key_version));
         try {
-            PackageInfo packageInfo = getPackageManager().getPackageInfo(getPackageName(),0);
-            version.setSummary(packageInfo.versionName);
+            String versionName = getPackageManager().getPackageInfo(getPackageName(),0).versionName;
+            version.setSummary(versionName);
         } catch (PackageManager.NameNotFoundException e) {
         }
     }

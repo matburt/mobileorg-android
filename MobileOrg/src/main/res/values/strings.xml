@@ -218,6 +218,7 @@
     <string name="key_syncSource">syncSource</string>
     <string name="key_syncWifiOnly">syncWifiOnly</string>
     <string name="key_quick_todos">quickTodos</string>
+    <string name="key_version">version</string>
 
     <!-- preference synchronizers (obsolete?) -->
     <string name="edit_date_start">Start</string>
