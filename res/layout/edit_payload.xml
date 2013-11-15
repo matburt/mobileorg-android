@@ -16,8 +16,8 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/edit_payload_save"
-        android:visibility="gone" >
-    </EditText>
+        android:visibility="gone"
+        android:inputType="text|textMultiLine|textAutoCorrect|textCapSentences" />
 
     <ImageButton
         android:id="@+id/edit_payload_edit"
