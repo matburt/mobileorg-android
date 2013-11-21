@@ -129,7 +129,10 @@ public class SSHSynchronizer implements SynchronizerInterface {
 		JSch jsch = new JSch();
 		try {
 			session = jsch.getSession(user, host, port);
-            if (!pubFile.equals("")) {
+            if (!pubFile.equals("") && !pass.equals("")) {
+                jsch.addIdentity(pubFile, pass);
+            }
+            else if (!pubFile.equals("")) {
                 jsch.addIdentity(pubFile);
             }
             else {
