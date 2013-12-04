@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.matburt.mobileorg" >
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_CALENDAR" />
+    <uses-permission android:name="android.permission.WRITE_CALENDAR" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+
+    <application
+        android:name=".OrgData.MobileOrgApplication"
+        android:icon="@drawable/icon"
+        android:label="MobileOrg"
+        android:theme="@style/Theme.MobileOrg.Dark" >
+        <meta-data
+            android:name="android.app.default_searchable"
+            android:value=".Gui.SearchActivity" />
+
+        <receiver
+            android:name=".Gui.Widget.MobileOrgWidget"
+            android:label="MobileOrg Tasks" >
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_mobileorg" />
+        </receiver>
+
+        <service android:name=".Gui.Widget.MobileOrgWidget$MobileOrgWidgetService" >
+        </service>
+        <service android:name=".Services.SyncService" >
+            <intent-filter>
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <action android:name="com.matburt.mobileorg.SYNC_SERVICE" />
+            </intent-filter>
+        </service>
+
+        <provider
+            android:name=".OrgData.OrgProvider"
+            android:authorities="com.matburt.mobileorg.OrgData.OrgProvider" />
+
+        <receiver android:name=".Plugin.Synchronize" >
+            <intent-filter>
+                <action android:name="com.twofortyfouram.locale.intent.action.FIRE_SETTING" />
+            </intent-filter>
+        </receiver>
+        <receiver android:name=".Services.MobileOrgStartupIntentReceiver" >
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+
+                <category android:name="android.intent.category.HOME" />
+            </intent-filter>
+        </receiver>
+
+        <activity
+            android:name=".Gui.Outline.OutlineActivity"
+            android:label="MobileOrg" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".Gui.ViewActivity"
+            android:label="Org View" >
+            <intent-filter>
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".Gui.Capture.EditActivity"
+            android:exported="true"
+            android:label="Org Capture"
+            android:windowSoftInputMode="adjustPan" >
+            <intent-filter>
+                <action android:name="com.matburt.mobileorg.CAPTURE" />
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:mimeType="text/*" />
+            </intent-filter>
+            
+            <intent-filter>
+                <action android:name="com.matburt.mobileorg.CAPTURE" />
+                <action android:name="android.intent.action.SEND" />
+ 
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="com.google.android.voicesearch.SELF_NOTE" />
+ 
+                <data android:mimeType="text/plain" />
+            </intent-filter>
+
+            <intent-filter>
+                <action android:name="com.matburt.mobileorg.CAPTURE" />
+                <action android:name="com.google.android.gm.action.AUTO_SEND" >
+                </action>
+ 
+                <category android:name="android.intent.category.DEFAULT" />
+ 
+                <data android:mimeType="*/*" >
+                </data>
+            </intent-filter>
+        </activity>
+        <activity android:name=".Gui.SearchActivity" >
+            <intent-filter>
+                <action android:name="android.intent.action.SEARCH" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.app.searchable"
+                android:resource="@xml/searchable" />
+        </activity>
+        <activity
+            android:name=".Plugin.SyncEditActivity"
+            android:exported="true"
+            android:icon="@drawable/icon"
+            android:label="@string/sync_plugin" >
+            <intent-filter>
+                <action android:name="com.twofortyfouram.locale.intent.action.EDIT_SETTING" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".Settings.SettingsActivity"
+            android:label="MobileOrg Settings" >
+        </activity>
+        <activity
+            android:name=".Gui.Wizard.WizardActivity"
+            android:label="MobileOrg Wizard" >
+            <intent-filter>
+                <action android:name="com.matburt.mobileorg.Settings.SETUP_WIZARD" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".Gui.CertificateConflictActivity"
+            android:label="MobileOrg Certificate Conflict" >
+        </activity>
+        <activity android:name=".Gui.FileDecryptionActivity" >
+        </activity>
+        <activity
+            android:name=".Settings.Synchronizers.WebDAVSettingsActivity"
+            android:label="WebDAV Settings" >
+        </activity>
+        <activity
+            android:name=".Settings.Synchronizers.SDCardSettingsActivity"
+            android:label="SDCard Settings" >
+        </activity>
+        <activity
+            android:name=".Settings.Synchronizers.ScpSettingsActivity"
+            android:label="Scp Settings" >
+        </activity>
+        <activity
+            android:name=".Settings.Synchronizers.UbuntuOneSettingsActivity"
+            android:label="Ubuntu One Settings" >
+        </activity>
+
+        <service android:name=".Services.TimeclockService" >
+        </service>
+
+        <activity
+            android:name=".Services.TimeclockDialog"
+            android:theme="@android:style/Theme.Dialog" >
+        </activity>
+        <activity android:name=".Gui.Agenda.AgendaSettings" >
+        </activity>
+        <activity android:name=".Gui.Agenda.AgendaEntrySetting" >
+        </activity>
+        <activity
+            android:name="com.dropbox.client2.android.AuthActivity"
+            android:configChanges="orientation|keyboard"
+            android:launchMode="singleTask" >
+            <intent-filter>
+
+                <!-- Change this to be db- followed by your app key -->
+                <data android:scheme="db-et6v9bbqd4pu0ak" />
+
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.BROWSABLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
+        <service android:name=".Services.CalendarSyncService" >
+        </service>
+
+        <activity android:name=".Gui.Agenda.AgendasActivity" >
+        </activity>
+        <activity android:name=".Gui.Agenda.AgendaActivity" >
+        </activity>
+
+        <receiver android:name=".Gui.Widget.CaptureWidgetProvider"
+            android:label="MobileOrg Capture" >
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/capture_widget_provider" />
+        </receiver>
+
+        <activity android:name=".Gui.Widget.CaptureWidgetConfig" >
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>

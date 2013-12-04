@@ -1,11 +1,4 @@
-*~
-gen
-bin
-local.properties
-matburt-key.keystore
-dbprivate.xml
-proguard.cfg
-.settings
-.classpath
-.project
-/libs/ActionBarSherlock
+.gradle
+/local.properties
+/.idea/workspace.xml
+.DS_Store
