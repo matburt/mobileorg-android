@@ -14,4 +14,4 @@ And a dedicated Google Group for discussions and announcements:
 
 If you want to hack on the code:
 
-[HACKING.md](mobileorg-android/blob/master/HACKING.md)
+[HACKING.md](HACKING.md)
