@@ -1,6 +1,7 @@
 package com.matburt.mobileorg.OrgData;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.regex.Matcher;
 
 import android.content.ContentResolver;
@@ -167,6 +168,11 @@ public class OrgNode {
 		}
 		
 		return this;
+	}
+
+	public boolean isHabit() {
+		preparePayload();
+		return orgNodePayload.getProperty("STYLE").equals("habit");
 	}
 	
 	private ContentValues getSimpleContentValues() {

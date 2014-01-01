@@ -66,5 +66,16 @@
         <item>Dark</item>
         <item>Monochrome</item>
     </string-array>
+    <string-array name="agendaQueryTypes">
+        <item>All entries</item>
+        <item>Agenda</item>
+    </string-array>
+    <string-array name="agendaSpanValues">
+        <item>Day</item>
+        <item>Week</item>
+        <item>Month</item>
+        <item>Year</item>
+        <item>Custom</item>
+    </string-array>
 
 </resources>
