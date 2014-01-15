@@ -41,6 +41,12 @@ public class AgendaFragment extends SherlockFragment {
 		super.onResume();
 		showBlockAgenda(agendaPos);
 	}
+
+	@Override
+	public void onDestroyView() {
+		super.onDestroyView();
+		db.close();
+	}
 	
 	public void showBlockAgenda(int agendaPos) {
 		this.mergeAdapter = new MergeAdapter();

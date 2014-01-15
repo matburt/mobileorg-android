@@ -205,6 +205,26 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical" />
         </LinearLayout>
+
+        <LinearLayout
+            style="@style/EditBorders"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingTop="3dip" >
+
+            <TextView
+                android:id="@+id/agenda_entry_deadline_warning_days_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Deadline Warning days" />
+
+            <EditText
+                android:id="@+id/agenda_entry_deadline_warning_days"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:inputType="number" />
+        </LinearLayout>
     </LinearLayout>
 
 </ScrollView>

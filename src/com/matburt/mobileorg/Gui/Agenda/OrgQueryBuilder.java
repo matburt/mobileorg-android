@@ -40,6 +40,7 @@ public class OrgQueryBuilder implements Serializable {
 
 	public boolean filterHabits = false;
 	public boolean activeTodos = false;
+	public int deadlineWarningDays = 14;
 	
 	public OrgQueryBuilder(String title) {
 		this.title = title;
@@ -50,34 +51,65 @@ public class OrgQueryBuilder implements Serializable {
 	 */
 	public long[] getNodes(SQLiteDatabase db, Context context) {
 		long[] result = null;
-		
-		Cursor cursor = getQuery(context).query(db, OrgData.DEFAULT_COLUMNS, OrgData.DEFAULT_SORT);
-		ContentResolver resolver = context.getContentResolver();
-		
-		result = new long[cursor.getCount()];
-		cursor.moveToFirst();
-		
 		int i = 0;
-		while(cursor.isAfterLast() == false) {
-			long id = cursor.getLong(cursor.getColumnIndex(OrgData.ID));
+		ContentResolver resolver = context.getContentResolver();
+		Cursor cursor = getQuery(context).query(db, OrgData.DEFAULT_COLUMNS, OrgData.DEFAULT_SORT);
+		try {
+			result = new long[cursor.getCount()];
+			cursor.moveToFirst();
 			switch (type) {
 			case ALL:
-				result[i++] = id;
+				while(cursor.isAfterLast() == false) {
+					long id = cursor.getLong(cursor.getColumnIndex(OrgData.ID));
+					result[i++] = id;
+					cursor.moveToNext();
+				}
 				break;
 			case AGENDA:
-				try {
-					OrgNode node = new OrgNode(id, resolver);
+				int nDays;
+				Calendar today, start, next, end, warn;
 
-					if (matchesAgendaQuery(node)) {
-						result[i++] = id;
+				today = Calendar.getInstance();
+				today.set(Calendar.HOUR_OF_DAY, 0);
+				today.set(Calendar.MINUTE, 0);
+				today.set(Calendar.SECOND, 0);
+				today.set(Calendar.MILLISECOND, 0);
+				start = (Calendar) today.clone();
+				if (span.equalsIgnoreCase("Month")) {
+					start.set(Calendar.DAY_OF_MONTH, 1);
+				} else if (span.equalsIgnoreCase("Year")) {
+					start.set(Calendar.DAY_OF_YEAR, 1);
+				}
+				nDays = Math.max(1, spanToNDays(start));
+				next = (Calendar) start.clone();
+				next.add(Calendar.DATE, 1);
+				end = (Calendar) start.clone();
+				end.add(Calendar.DATE, nDays);
+				warn = (Calendar) today.clone();
+				if (deadlineWarningDays != 0) {
+					warn.add(Calendar.DATE, deadlineWarningDays + 1);
+				}
+				while(cursor.isAfterLast() == false) {
+					long id = cursor.getLong(cursor.getColumnIndex(OrgData.ID));
+					try {
+						OrgNode node = new OrgNode(id, resolver);
+
+						if ((OrgProviderUtils.isTodoActive(node.todo, resolver)
+						     && (hasDate(node, start, end, warn)
+						         || (node.isHabit()
+						             && hasDate(node, start, next, next))))
+						    || hasDateInRange(node, start, end)) {
+							result[i++] = id;
+						}
+					} catch (OrgNodeNotFoundException e) {
 					}
-				} catch (OrgNodeNotFoundException e) {
+					cursor.moveToNext();
 				}
 				break;
 			}
-			cursor.moveToNext();
+		} finally {
+			cursor.close();
 		}
-		cursor.close();
 		return Arrays.copyOf(result, i);
 	}
 
@@ -120,10 +152,10 @@ public class OrgQueryBuilder implements Serializable {
 			return 14;
 		} else if (span.equalsIgnoreCase("Month")) {
 			int daysInMonth = startDay.getActualMaximum(Calendar.DAY_OF_MONTH);
-			return startDay.get(Calendar.DAY_OF_MONTH) - daysInMonth;
+			return daysInMonth - startDay.get(Calendar.DAY_OF_MONTH);
 		} else if (span.equalsIgnoreCase("Year")) {
 			int daysInYear = startDay.getActualMaximum(Calendar.DAY_OF_YEAR);
-			return startDay.get(Calendar.DAY_OF_YEAR) - daysInYear;
+			return daysInYear - startDay.get(Calendar.DAY_OF_YEAR);
 		}
 		return 1;
 	}
@@ -137,10 +169,40 @@ public class OrgQueryBuilder implements Serializable {
 	}
 
 	/**
+	 * Returns whether the node has a date matching the given criteria.
+	 * The criteria are somewhat complex:
+	 *
+	 * <ol>
+	 * <li>Scheduled dates must begin before <code>end</code>.
+	 * <li>Deadlines must either begin before <code>end</code>, or, if the node
+	 *     is unscheduled, the deadline must begin before <code>warn</code>.
+	 * <li>Timestamps must begin on or after <code>start</code> but before
+	 *     <code>begin</code>.
+	 * </ol>
+	 */
+	private static boolean hasDate(OrgNode node, Calendar start, Calendar end,
+	                               Calendar warn) {
+		OrgNodePayload payload = node.getOrgNodePayload();
+		long startTime = start.getTimeInMillis();
+		long endTime = end.getTimeInMillis();
+		long warnTime = warn.getTimeInMillis();
+		OrgNodeDate scheduled = getDate(payload.getScheduled());
+		OrgNodeDate deadline = getDate(payload.getDeadline());
+		OrgNodeDate timestamp = getDate(payload.getTimestamp());
+
+		return ((scheduled != null && scheduled.beginTime < endTime)
+		        || (deadline != null &&
+		            (deadline.beginTime < endTime
+		             || (scheduled == null && deadline.beginTime < warnTime)))
+		        || (timestamp != null && timestamp.beginTime >= startTime
+		            && timestamp.beginTime < endTime));
+	}
+
+	/**
 	 * Returns whether the node has a date in the half-open interval.
 	 */
-	private static boolean hasDateTimeInRange(OrgNode node,
-	                                          Calendar start, Calendar end) {
+	private static boolean hasDateInRange(OrgNode node,
+	                                      Calendar start, Calendar end) {
 		OrgNodePayload payload = node.getOrgNodePayload();
 		long startTime = start.getTimeInMillis();
 		long endTime = end.getTimeInMillis();
@@ -148,37 +210,12 @@ public class OrgQueryBuilder implements Serializable {
 		OrgNodeDate deadline = getDate(payload.getDeadline());
 		OrgNodeDate timestamp = getDate(payload.getTimestamp());
 
-		return ((scheduled != null && scheduled.beginTime < endTime)
-		        || (deadline != null && deadline.beginTime < endTime)
+		return ((scheduled != null && scheduled.beginTime >= startTime
+		         && scheduled.beginTime < endTime)
+		        || (deadline != null && deadline.beginTime >= startTime
+		            && deadline.beginTime < endTime)
 		        || (timestamp != null && timestamp.beginTime >= startTime
 		            && timestamp.beginTime < endTime));
-	}
-
-	/**
-	 * Returns whether the node matches the Agenda query criteria.
-	 */
-	private boolean matchesAgendaQuery(OrgNode node) {
-		int nDays;
-		Calendar startDay = Calendar.getInstance();
-		Calendar nextDay;
-		Calendar end;
-
-		if (span.equalsIgnoreCase("Month")) {
-			startDay.set(Calendar.DAY_OF_MONTH, 0);
-		} else if (span.equalsIgnoreCase("Year")) {
-			startDay.set(Calendar.DAY_OF_YEAR, 0);
-		}
-		nDays = Math.max(1, spanToNDays(startDay));
-		nextDay = (Calendar) startDay.clone();
-		nextDay.set(Calendar.HOUR_OF_DAY, 0);
-		nextDay.set(Calendar.MINUTE, 0);
-		nextDay.set(Calendar.SECOND, 0);
-		nextDay.set(Calendar.MILLISECOND, 0);
-		nextDay.add(Calendar.DATE, 1);
-		end = (Calendar) nextDay.clone();
-		end.add(Calendar.DATE, nDays);
-		return (hasDateTimeInRange(node, startDay, nextDay)
-		        || (!node.isHabit() && hasDateTimeInRange(node, nextDay, end)));
 	}
 	
 	public SelectionBuilder getQuery(Context context) {

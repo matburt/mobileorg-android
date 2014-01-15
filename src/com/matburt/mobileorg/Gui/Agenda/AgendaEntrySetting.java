@@ -38,6 +38,7 @@ public class AgendaEntrySetting extends SherlockActivity {
 
 	private CheckBox activeTodosView;
 	private LinearLayout fileListView;
+	private EditText deadlineWarningDaysView;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -60,6 +61,8 @@ public class AgendaEntrySetting extends SherlockActivity {
 		this.entryPos = getIntent().getIntExtra(ENTRY_NUMBER, -1);
 	
 		this.fileListView = (LinearLayout) findViewById(R.id.agenda_entry_files);
+		this.deadlineWarningDaysView =
+		    (EditText) findViewById(R.id.agenda_entry_deadline_warning_days);
 		
 		setupSettings(OrgAgenda.getAgendaEntry(agendaPos, entryPos, this));
 	}
@@ -107,6 +110,8 @@ public class AgendaEntrySetting extends SherlockActivity {
 		tagsView.setText(combineToString(agenda.tags));
 		filterHabitsView.setChecked(agenda.filterHabits);
 		activeTodosView.setChecked(agenda.activeTodos);
+		deadlineWarningDaysView
+		    .setText(String.valueOf(agenda.deadlineWarningDays));
 
 		setupFileList(agenda);
 	}
@@ -125,6 +130,8 @@ public class AgendaEntrySetting extends SherlockActivity {
 		agenda.activeTodos = activeTodosView.isChecked();
 		
 		agenda.files = getFileList();
+		agenda.deadlineWarningDays =
+		    Integer.parseInt(deadlineWarningDaysView.getText().toString());
 		
 		return agenda;
 	}
