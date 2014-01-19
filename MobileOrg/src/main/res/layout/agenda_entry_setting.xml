@@ -13,6 +13,25 @@
             style="@style/EditBorders"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingTop="3dip" >
+
+            <TextView
+                android:id="@+id/agenda_entry_type_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Query type" />
+
+            <Spinner
+                android:id="@+id/agenda_entry_type"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+
+        <LinearLayout
+            style="@style/EditBorders"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
             android:paddingTop="3dip" >
 
             <EditText
@@ -22,6 +41,31 @@
                 android:layout_gravity="center_horizontal"
                 android:hint="Title"
                 android:textAppearance="?android:attr/textAppearanceLarge" />
+        </LinearLayout>
+
+        <LinearLayout
+            style="@style/EditBorders"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingTop="3dip" >
+
+            <TextView
+                android:id="@+id/agenda_entry_span_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Number of days in agenda" />
+
+            <Spinner
+                android:id="@+id/agenda_entry_span"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <EditText
+                android:id="@+id/agenda_entry_span_custom"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:visibility="invisible" />
         </LinearLayout>
 
         <LinearLayout
@@ -160,6 +204,26 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="vertical" />
+        </LinearLayout>
+
+        <LinearLayout
+            style="@style/EditBorders"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingTop="3dip" >
+
+            <TextView
+                android:id="@+id/agenda_entry_deadline_warning_days_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Deadline Warning days" />
+
+            <EditText
+                android:id="@+id/agenda_entry_deadline_warning_days"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:inputType="number" />
         </LinearLayout>
     </LinearLayout>
 

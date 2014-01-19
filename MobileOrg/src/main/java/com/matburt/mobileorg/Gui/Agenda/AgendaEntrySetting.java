@@ -4,9 +4,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import android.os.Bundle;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemSelectedListener;
+import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.Spinner;
 
 import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.Menu;
@@ -22,6 +27,9 @@ public class AgendaEntrySetting extends SherlockActivity {
 	private int entryPos;
 	
 	private EditText titleView;
+	private Spinner typeView;
+	private Spinner spanView;
+	private EditText spanCustomView;
 	private EditText payloadView;
 	private EditText todoView;
 	private EditText priorityView;
@@ -30,6 +38,7 @@ public class AgendaEntrySetting extends SherlockActivity {
 
 	private CheckBox activeTodosView;
 	private LinearLayout fileListView;
+	private EditText deadlineWarningDaysView;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -37,6 +46,9 @@ public class AgendaEntrySetting extends SherlockActivity {
 		setContentView(R.layout.agenda_entry_setting);
 		
 		this.titleView = (EditText) findViewById(R.id.agenda_entry_title);
+		this.typeView = (Spinner) findViewById(R.id.agenda_entry_type);
+		this.spanView = (Spinner) findViewById(R.id.agenda_entry_span);
+		this.spanCustomView = (EditText) findViewById(R.id.agenda_entry_span_custom);
 		this.priorityView = (EditText) findViewById(R.id.agenda_entry_priority);
 		this.todoView = (EditText) findViewById(R.id.agenda_entry_todo);
 		this.tagsView = (EditText) findViewById(R.id.agenda_entry_tag);
@@ -49,25 +61,67 @@ public class AgendaEntrySetting extends SherlockActivity {
 		this.entryPos = getIntent().getIntExtra(ENTRY_NUMBER, -1);
 	
 		this.fileListView = (LinearLayout) findViewById(R.id.agenda_entry_files);
+		this.deadlineWarningDaysView =
+		    (EditText) findViewById(R.id.agenda_entry_deadline_warning_days);
 		
 		setupSettings(OrgAgenda.getAgendaEntry(agendaPos, entryPos, this));
 	}
 	
 	public void setupSettings(OrgQueryBuilder agenda) {
+		int spinnerItem = android.R.layout.simple_spinner_item;
+		int spinnerDropdownItem = android.R.layout.simple_spinner_dropdown_item;
+		int queryTypes = R.array.agendaQueryTypes;
+		int spanValues = R.array.agendaSpanValues;
+		ArrayAdapter<CharSequence> typeAdapter =
+		    ArrayAdapter.createFromResource(this, queryTypes, spinnerItem);
+		ArrayAdapter<CharSequence> spanAdapter =
+		    ArrayAdapter.createFromResource(this, spanValues, spinnerItem);
+
 		titleView.setText(agenda.title);
+
+		typeAdapter.setDropDownViewResource(spinnerDropdownItem);
+		typeView.setAdapter(typeAdapter);
+		typeView.setSelection(agenda.type.ordinal());
+		spanAdapter.setDropDownViewResource(spinnerDropdownItem);
+		spanView.setAdapter(spanAdapter);
+		spanView.setOnItemSelectedListener(new OnItemSelectedListener() {
+				@Override
+				public void onItemSelected(AdapterView<?> parentView,
+				                           View selectedItemView, int position,
+				                           long id) {
+					String selected =
+						parentView.getItemAtPosition(position).toString();
+					if (selected.equalsIgnoreCase("Custom")) {
+						spanCustomView.setVisibility(View.VISIBLE);
+					} else {
+						spanCustomView.setVisibility(View.INVISIBLE);
+						spanCustomView.setText(selected);
+					}
+				}
+
+				@Override
+				public void onNothingSelected(AdapterView<?> parentView) {
+				}
+			});
+		spanView.setSelection(spanAdapter.getPosition(agenda.span));
 		payloadView.setText(combineToString(agenda.payloads));
 		todoView.setText(combineToString(agenda.todos));
 		priorityView.setText(combineToString(agenda.priorities));
 		tagsView.setText(combineToString(agenda.tags));
 		filterHabitsView.setChecked(agenda.filterHabits);
 		activeTodosView.setChecked(agenda.activeTodos);
+		deadlineWarningDaysView
+		    .setText(String.valueOf(agenda.deadlineWarningDays));
 
 		setupFileList(agenda);
 	}
 
 	public OrgQueryBuilder getQueryFromSettings() {
 		OrgQueryBuilder agenda = new OrgQueryBuilder(titleView.getText().toString());
+		int selPos = typeView.getSelectedItemPosition();
 		
+		agenda.type = OrgQueryBuilder.Type.values()[selPos];
+		agenda.span = spanCustomView.getText().toString();
 		agenda.tags = splitToArrayList(tagsView.getText().toString());
 		agenda.payloads = splitToArrayList(payloadView.getText().toString());
 		agenda.priorities = splitToArrayList(priorityView.getText().toString());
@@ -76,6 +130,8 @@ public class AgendaEntrySetting extends SherlockActivity {
 		agenda.activeTodos = activeTodosView.isChecked();
 		
 		agenda.files = getFileList();
+		agenda.deadlineWarningDays =
+		    Integer.parseInt(deadlineWarningDaysView.getText().toString());
 		
 		return agenda;
 	}

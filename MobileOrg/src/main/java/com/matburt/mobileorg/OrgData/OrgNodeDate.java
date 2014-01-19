@@ -2,9 +2,7 @@ package com.matburt.mobileorg.OrgData;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -41,8 +39,6 @@ public class OrgNodeDate {
 				if(schedule.group(BEGIN_TIME) == null) { // event is an entire day event
 					this.beginTime = dateformatter.parse(schedule.group(DATE)).getTime();
 					
-					// All day events need to be in UTC and end time is exactly one day after
-					this.beginTime = getDayInUTC(beginTime);	
 					this.endTime = this.beginTime + DateUtils.DAY_IN_MILLIS;
 					this.allDay = 1;
 				}
@@ -62,17 +58,6 @@ public class OrgNodeDate {
 			}
 		} else
 			throw new IllegalArgumentException("Could not create date out of entry");
-	}
-	
-	private static long getDayInUTC(long time) {
-		Calendar cal = Calendar.getInstance();
-		cal.setTimeInMillis(time);
-		cal.set(Calendar.HOUR, 0);
-		cal.set(Calendar.MINUTE, 0);
-		cal.set(Calendar.SECOND, 0);
-		cal.set(Calendar.MILLISECOND, 0);
-		cal.setTimeZone(TimeZone.getTimeZone("UTC"));
-		return cal.getTimeInMillis();
 	}
 	
 	public static String getDate(long dtStart, long dtEnd, boolean allDay) {
