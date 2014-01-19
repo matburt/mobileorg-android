@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/MobileOrg/MobileOrg.iml" filepath="$PROJECT_DIR$/MobileOrg/MobileOrg.iml" />
+      <module fileurl="file://$PROJECT_DIR$/libraries/libraries.iml" filepath="$PROJECT_DIR$/libraries/libraries.iml" />
       <module fileurl="file://$PROJECT_DIR$/libraries/locale/locale.iml" filepath="$PROJECT_DIR$/libraries/locale/locale.iml" />
       <module fileurl="file://$PROJECT_DIR$/mobileorg-android.iml" filepath="$PROJECT_DIR$/mobileorg-android.iml" />
     </modules>

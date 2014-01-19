@@ -3,7 +3,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:0.5.+'
+        classpath 'com.android.tools.build:gradle:0.7.+'
     }
 }
 apply plugin: 'android'
@@ -11,6 +11,15 @@ apply plugin: 'android'
 repositories {
     mavenCentral()
 }
+
+dependencies {
+    compile 'com.actionbarsherlock:actionbarsherlock:4.4.0@aar'
+    compile 'com.android.support:support-v4:13.0.+'
+    compile 'com.jcraft:jsch:0.1.50'
+    compile project(':libraries:locale')
+    compile fileTree(dir: 'libs', include: '*.jar')
+}
+
 
 def getVersionName = { ->
     def stdout = new ByteArrayOutputStream()
@@ -22,8 +31,8 @@ def getVersionName = { ->
 }
 
 android {
-    compileSdkVersion 18
-    buildToolsVersion "18.1.0"
+    compileSdkVersion 19
+    buildToolsVersion "19.0.1"
 
     defaultConfig {
         minSdkVersion 8
@@ -53,12 +62,11 @@ android {
             debuggable true
         }
     }
+
+    packagingOptions { // This is a fix for a bug in the Android gradle plugin v. 0.7.0
+        exclude 'META-INF/DEPENDENCIES'
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/NOTICE'
+    }
 }
 
-dependencies {
-    compile 'com.actionbarsherlock:actionbarsherlock:4.4.0@aar'
-    compile 'com.android.support:support-v4:13.0.+'
-    compile 'com.jcraft:jsch:0.1.50'
-    compile project(':libraries:locale')
-    compile fileTree(dir: 'libs', include: '*.jar')
-}
