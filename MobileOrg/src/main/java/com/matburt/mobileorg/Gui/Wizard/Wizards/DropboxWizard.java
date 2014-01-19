@@ -3,6 +3,7 @@ package com.matburt.mobileorg.Gui.Wizard.Wizards;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.os.StrictMode;
 import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,9 +20,9 @@ import com.dropbox.client2.exception.DropboxException;
 import com.dropbox.client2.session.AccessTokenPair;
 import com.dropbox.client2.session.AppKeyPair;
 import com.dropbox.client2.session.Session.AccessType;
-import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Gui.Wizard.FolderAdapter;
 import com.matburt.mobileorg.Gui.Wizard.WizardView;
+import com.matburt.mobileorg.R;
 
 public class DropboxWizard extends Wizard {
 	
@@ -35,6 +36,11 @@ public class DropboxWizard extends Wizard {
 
 	public DropboxWizard(WizardView wizardView, Context context) {
 		super(wizardView, context);
+
+        /* TODO This is a hack to prevent NetworkOnMainThreadException to happen. This could be
+           fixed properly by moving all communication with the dropbox API to a thread. */
+        StrictMode.ThreadPolicy policy = new StrictMode. ThreadPolicy.Builder().permitAll().build();
+        StrictMode.setThreadPolicy(policy);
 	}
 	
 
