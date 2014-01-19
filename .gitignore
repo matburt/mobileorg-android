@@ -1,7 +1,34 @@
-.gradle
-/local.properties
-/.idea/workspace.xml
-/.idea/dictionaries
-/.idea/tasks.xml
-/.idea/misc.xml
+# Android
+gen/
+build/
+local.properties
+.gradle/
+# Old Android
+bin/
+
+# Idea
+# According to this
+# see http://devnet.jetbrains.com/docs/DOC-1186
+# I shouldn't ignore most of this stuff.. but looking at the content
+# I see environment stuffs in it.
+# And I don't see any particular advantage in having the idea stuff
+# in my repo
+# it would be helpful for code templates but it's simply not worth
+# the effort currently
+*.iws
+*.iml
+*.ipr
+.idea
+out
+
+# Eclipse
+.project
+.classpath
+.settings
+
+# Mac
 .DS_Store
+
+# Generic
+*~
+.swp

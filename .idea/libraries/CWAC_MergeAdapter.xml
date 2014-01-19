@@ -1,9 +1,0 @@
-<component name="libraryTable">
-  <library name="CWAC-MergeAdapter">
-    <CLASSES>
-      <root url="jar://$PROJECT_DIR$/MobileOrg/libs/CWAC-MergeAdapter.jar!/" />
-    </CLASSES>
-    <JAVADOC />
-    <SOURCES />
-  </library>
-</component>

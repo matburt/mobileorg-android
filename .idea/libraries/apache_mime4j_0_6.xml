@@ -1,9 +1,0 @@
-<component name="libraryTable">
-  <library name="apache-mime4j-0.6">
-    <CLASSES>
-      <root url="jar://$PROJECT_DIR$/MobileOrg/libs/apache-mime4j-0.6.jar!/" />
-    </CLASSES>
-    <JAVADOC />
-    <SOURCES />
-  </library>
-</component>

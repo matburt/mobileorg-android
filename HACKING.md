@@ -13,6 +13,13 @@ Android Studio Setup
 --------------------
 
 
+Notes regarding Dropbox
+-----------------------
+
+You will need an API key for the dropbox platform if you want to use
+dropbox with your own build. Adding the app key to the Manifest.xml
+file and inserting the correct keys into values/dropbox.xml will make
+dropbox authentication work.
 
 
 Notes regarding pull requests
@@ -20,14 +27,6 @@ Notes regarding pull requests
 Make sure that any changes or additions that you make will also build from the
 command line.  This is a requirement before changes will be accepted into the
 mainline branch.
-
-Notes regarding dropbox.xml
----------------------------
-
-You will need an API key for the dropbox platform if you want to use
-dropbox with your own build. Adding the app key to the Manifest.xml
-file and inserting the correct keys into values/dropbox.xml will make
-dropbox authentication work.
 
 
 Notes regarding debian(-like) amd64 build hosts
