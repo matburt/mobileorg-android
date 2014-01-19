@@ -11,11 +11,13 @@ Make sure you have the most recent versions.
 
 Android Studio Setup
 --------------------
-
+Select "Check out from Version Control" on the welcome page and insert
+the url to the git repository. Use default settings and a project
+should be checked out and built. Remember to configure the path to the
+Android SDK.
 
 Notes regarding Dropbox
 -----------------------
-
 You will need an API key for the dropbox platform if you want to use
 dropbox with your own build. Adding the app key to the Manifest.xml
 file and inserting the correct keys into values/dropbox.xml will make
