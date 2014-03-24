@@ -237,8 +237,8 @@ public class OrgFileParser {
 		for (String line : filecontents.split("[\\n\\r]+")) {
 			if (TextUtils.isEmpty(line))
 				continue;
-			String[] chksTuple = line.split("\\s+");
-			if(chksTuple.length >= 2)
+			String[] chksTuple = line.split("  ", 2);
+			if(chksTuple.length == 2)
 				checksums.put(chksTuple[1], chksTuple[0]);
 		}
 		return checksums;
