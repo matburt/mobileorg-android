@@ -1,5 +1,9 @@
 package com.matburt.mobileorg.util;
 
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -110,6 +114,22 @@ public class OrgNode2Html {
 			result.append("\n<br/>\n");
 		}
 
+        if (node.getPropertiesPayload() != null) {
+            
+            HashMap propsHash = node.getPropertiesPayload();
+            Set tempSet = propsHash.keySet();
+            TreeSet propsKeys = new TreeSet(tempSet);
+            Iterator propsIterator = propsKeys.iterator();
+
+            while (propsIterator.hasNext()) {
+                String key = propsIterator.next().toString();
+                String value = propsHash.get(key).toString();
+                result.append("<i>" + key + ":</i><br/>");
+                result.append(value + "<br/><br/>");
+            }
+
+        }
+        
 		result.append("<br/>\n");
 		return result.toString();
 	}
