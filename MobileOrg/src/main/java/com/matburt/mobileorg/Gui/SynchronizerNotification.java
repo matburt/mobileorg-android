@@ -22,24 +22,25 @@ public class SynchronizerNotification extends SynchronizerNotificationCompat {
 		super(context);
 		this.context = context;
 	}
-	
+    
 	@Override
 	public void errorNotification(String errorMsg) {
-		this.notificationManager = (NotificationManager) context
-				.getSystemService(Context.NOTIFICATION_SERVICE);
+		this.notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 		Intent notifyIntent = new Intent(context, OutlineActivity.class);
 		notifyIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
-				| Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                              | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        notifyIntent.putExtra("ERROR_MESSAGE", errorMsg);
+        notifyIntent.setAction("com.matburt.mobileorg.SYNC_FAILED");
 
-		PendingIntent contentIntent = PendingIntent.getActivity(context, 0,
-				notifyIntent, 0);
+		PendingIntent contentIntent = PendingIntent.getActivity(context, 0, notifyIntent, 0);
 		
 		Notification.Builder builder = new Notification.Builder(context);
 		builder.setContentIntent(contentIntent);
 		builder.setSmallIcon(R.drawable.icon);
 		builder.setContentTitle(context.getString(R.string.sync_failed));
 		builder.setContentText(errorMsg);
-		notification = builder.getNotification();
+        notification = builder.getNotification();
+        notification.flags = Notification.FLAG_AUTO_CANCEL;
 
 		notificationManager.notify(notifyRef, notification);
 	}
