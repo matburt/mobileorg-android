@@ -9,6 +9,7 @@ import java.util.regex.Pattern;
 
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
 import com.matburt.mobileorg.Gui.Theme.DefaultTheme;
@@ -20,6 +21,9 @@ public class OrgNode2Html {
 	
 	public boolean wrapLines = false;
 	public boolean viewApplyFormating = true;
+    public boolean viewNodePropertiesEnabled = false;
+    public String propertiesDrawerFiles = "";
+    public String propertiesDrawerFields = "";
 
 	public String fontColor = "white";
 
@@ -30,11 +34,18 @@ public class OrgNode2Html {
 	
 	private void setupConfig(Context context) {
 		this.wrapLines = PreferenceManager.getDefaultSharedPreferences(context)
-				.getBoolean("viewWrapLines", false);
-		this.viewApplyFormating = PreferenceManager.getDefaultSharedPreferences(context).getBoolean(
-				"viewApplyFormating", true);
+			.getBoolean("viewWrapLines", false);
+		this.viewApplyFormating = PreferenceManager.getDefaultSharedPreferences(context)
+            .getBoolean("viewApplyFormating", true);
 		
 		this.fontColor = DefaultTheme.getTheme(context).defaultFontColor;
+
+        this.viewNodePropertiesEnabled = PreferenceManager.getDefaultSharedPreferences(context)
+            .getBoolean("viewNodePropertiesEnabled", false);
+        this.propertiesDrawerFiles = PreferenceManager.getDefaultSharedPreferences(context)
+            .getString("key_properties_drawer_include_files", "");
+        this.propertiesDrawerFields = PreferenceManager.getDefaultSharedPreferences(context)
+            .getString("key_properties_drawer_include_fields", "");
 	}
 	
 	public String toHTML(OrgNode node) {
@@ -114,18 +125,59 @@ public class OrgNode2Html {
 			result.append("\n<br/>\n");
 		}
 
-        if (node.getPropertiesPayload() != null) {
-            
-            HashMap propsHash = node.getPropertiesPayload();
-            Set tempSet = propsHash.keySet();
-            TreeSet propsKeys = new TreeSet(tempSet);
-            Iterator propsIterator = propsKeys.iterator();
+        if (this.viewNodePropertiesEnabled == true) {
 
-            while (propsIterator.hasNext()) {
-                String key = propsIterator.next().toString();
-                String value = propsHash.get(key).toString();
-                result.append("<i>" + key + ":</i><br/>");
-                result.append(value + "<br/><br/>");
+            HashMap includeFiles = new HashMap();
+            
+            if (!this.propertiesDrawerFiles.equals("")) {
+
+                // We use ';' to separate filenames. Although some
+                // filesystems allow it as part of a filename, it's
+                // probably less likely to be an issue for many people
+                // than using space or a comma as the separator,
+                // whilst hopefully being more readable than
+                // e.g. '/' or '\' as the separator.
+                
+                Pattern filesPattern = Pattern.compile("([^;]+)");
+                Matcher filesMatcher = filesPattern.matcher(this.propertiesDrawerFiles);
+                while(filesMatcher.find())
+                    includeFiles.put(filesMatcher.group(1), true);
+                
+            }         
+
+            if ((this.propertiesDrawerFiles.equals("") || includeFiles.containsKey(node.getFilename(resolver))) &&
+                node.getPropertiesPayload() != null)
+            {
+            
+                HashMap propsHash = node.getPropertiesPayload();
+                Set tempSet = propsHash.keySet();
+                // Put keys in tempSet into propsKeys in their 'natural'
+                // (lexicographic) order
+                TreeSet propsKeys = new TreeSet(tempSet); 
+                Iterator propsIterator = propsKeys.iterator();
+
+                HashMap includeFields = new HashMap();
+
+                if (!this.propertiesDrawerFields.equals("")) {
+                    Pattern fieldsPattern = Pattern.compile("(\\S+)");
+                    Matcher fieldsMatcher = fieldsPattern.matcher(this.propertiesDrawerFields);
+                    while(fieldsMatcher.find())
+                        includeFields.put(fieldsMatcher.group(1).toUpperCase(), true);
+                }
+                
+                while (propsIterator.hasNext()) {
+
+                    String key = propsIterator.next().toString();
+
+                    if (this.propertiesDrawerFields.equals("") ||
+                        (!includeFields.isEmpty() && includeFields.containsKey(key)))
+                    {
+                        String value = propsHash.get(key).toString();
+                        result.append("<i>" + key + ":</i><br/>");
+                        result.append(value + "<br/><br/>");   
+                    }
+                }
+                
             }
 
         }

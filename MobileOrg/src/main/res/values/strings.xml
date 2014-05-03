@@ -198,16 +198,28 @@
     <string name="preference_setup_wizard">Setup Wizard</string>
     <string name="preference_view_apply_formatting_summary">Apply formatting of orgmode emphasis, bold, underline and strike-through when viewing.</string>
     <string name="preference_view_apply_formatting">Apply view formatting</string>
+
+    <string name="preference_properties_drawer">Properties drawer</string>
+    <string name="preference_view_node_properties_enabled_summary">Display contents of nodes\' properties drawers.</string>
+    <string name="preference_view_node_properties_enabled">Display node properties</string>
+    <string name="preference_properties_drawer_fields_summary">Restrict display to specific fields. List of fields, separated by space(s). Leave empty for no restriction.</string>
+    <string name="preference_properties_drawer_fields">Fields</string>
+    <string name="preference_properties_drawer_files_summary">Restrict display to specific files. List of filenames separated by \';\'. Leave empty for no restriction.</string>
+    <string name="preference_properties_drawer_files">Files</string>
+    
     <string name="preference_sync_wifi_only">Sync with Wifi only</string>
     <string name="preference_sync_wifi_only_summary">Only try to synchronize when Wireless is up</string>
     <string name="preference_view_on_click">View on click</string>
     <string name="preference_view_on_click_summary">Changes default action from editing to viewing of outline entries</string>
+
     <string name="preference_capture_with_timestamp">Capture with timestamp</string>
     <string name="preference_capture_with_timestamp_summary">Captured nodes will have a timestamp added</string>
     <string name="preference_selected_todos">Quick Todo keywords</string>
     <string name="preference_selected_todos_summary">Select the TODO keywords available in outline for quick select. Separated by space.</string>
     
     <!-- preference keys -->
+    <string name="key_properties_drawer_include_fields">propertiesDrawerIncludeFields</string>
+    <string name="key_properties_drawer_include_files">propertiesDrawerIncludeFiles</string>
     <string name="key_autoSyncInterval">autoSyncInterval</string>
     <string name="key_viewRecursionMax">viewRecursionMax</string>
     <string name="key_defaultTodo">defaultTodo</string>

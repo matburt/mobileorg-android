@@ -73,7 +73,7 @@ public class OrgNodePayload {
         if (this.payload != null) {
             
             Pattern propsRegex = Pattern.compile(":PROPERTIES:\\s*\n(.*):END:", Pattern.DOTALL);
-            Pattern propertyRegex = Pattern.compile("^\\s*:([\\p{Lu}\\d]+):\\s*(.+)$", Pattern.MULTILINE);
+            Pattern propertyRegex = Pattern.compile("^\\s*:([^:]+):\\s*(.+)$", Pattern.MULTILINE);
             Matcher propsMatcher = propsRegex.matcher(this.payload);
             
             if (propsMatcher.find()) {

@@ -84,6 +84,27 @@
                     android:entryValues="@array/viewRecursionLevelsVals"
                     android:key="@string/key_viewRecursionMax"
                     android:title="@string/preference_recursion_level" />
+                <PreferenceScreen android:title="@string/preference_properties_drawer" >
+                  <CheckBoxPreference
+                      android:key="viewNodePropertiesEnabled"
+                      android:summary="@string/preference_view_node_properties_enabled_summary"
+                      android:title="@string/preference_view_node_properties_enabled"
+                      android:defaultValue="false" />
+
+                  <EditTextPreference
+                      android:defaultValue=""
+                      android:dependency="viewNodePropertiesEnabled"
+                      android:key="key_properties_drawer_include_files"
+                      android:summary="@string/preference_properties_drawer_files_summary"
+                      android:title="@string/preference_properties_drawer_files" />
+                  
+                  <EditTextPreference
+                      android:defaultValue=""
+                      android:dependency="viewNodePropertiesEnabled"
+                      android:key="key_properties_drawer_include_fields"
+                      android:summary="@string/preference_properties_drawer_fields_summary"
+                      android:title="@string/preference_properties_drawer_fields" />
+                </PreferenceScreen>
             </PreferenceCategory>
             <PreferenceCategory android:title="@string/preference_edit" >
                 <CheckBoxPreference
