@@ -136,9 +136,9 @@ public class OrgNode2Html {
 	
 	private static String getFormatingRegex(String character, String tag, String text) {
 		return text.replaceAll(
-				"(\\s)\\" + character + 
-				"(\\S[\\S\\s]*\\S)" + 
-				"\\" + character + "(\\s)"
+				"(^|\\s)\\" + character + 
+				"(\\S[\\S\\s]*?\\S)" + 
+				"\\" + character + "(\\s|$)"
 				, "$1<" + tag + ">$2</" + tag + ">$3");
 	}
 
