@@ -3,6 +3,7 @@ package com.matburt.mobileorg.OrgData;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -63,7 +64,40 @@ public class OrgNodePayload {
 		
 		return this.id;
 	}
-	
+
+    public HashMap getPropertiesPayload()
+    {
+        
+        HashMap propsHashMap = new HashMap();
+        
+        if (this.payload != null) {
+            
+            Pattern propsRegex = Pattern.compile(":PROPERTIES:\\s*\n(.*):END:", Pattern.DOTALL);
+            Pattern propertyRegex = Pattern.compile("^\\s*:([^:]+):\\s*(.+)$", Pattern.MULTILINE);
+            Matcher propsMatcher = propsRegex.matcher(this.payload);
+            
+            if (propsMatcher.find()) {
+                
+                String properties = propsMatcher.group(1);
+                Matcher propertyMatcher = propertyRegex.matcher(properties);
+                
+                while (propertyMatcher.find()) {
+                    String property = propertyMatcher.group(1);
+                    String value = propertyMatcher.group(2);
+                    propsHashMap.put(property, value);
+                }
+                
+            }
+            
+        }
+
+        if (!propsHashMap.isEmpty()) {
+            return propsHashMap;
+        }
+        
+        return null;
+        
+    }
 	
 	private void prepareCleanedPayload() {
 		if(this.cleanPayload == null)

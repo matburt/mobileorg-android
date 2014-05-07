@@ -2,6 +2,7 @@ package com.matburt.mobileorg.OrgData;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.regex.Matcher;
 
 import android.content.ContentResolver;
@@ -412,6 +413,11 @@ public class OrgNode {
 		preparePayload();
 		return this.orgNodePayload.get();
 	}
+
+    public HashMap getPropertiesPayload() {
+        preparePayload();
+        return this.orgNodePayload.getPropertiesPayload();
+    }
 	
 	public void setPayload(String payload) {
 		this.orgNodePayload = null;
