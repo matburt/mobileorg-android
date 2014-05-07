@@ -33,6 +33,8 @@ public class OutlineActivity extends SherlockActivity {
 	private final static String OUTLINE_CHECKED_POS = "selection";
 	private final static String OUTLINE_SCROLL_POS = "scrollPosition";
 
+    public final static String SYNC_FAILED = "com.matburt.mobileorg.SYNC_FAILED";
+
 	private Long node_id;
 		
 	private OutlineListView listView;
@@ -83,9 +85,8 @@ public class OutlineActivity extends SherlockActivity {
 		
 		int scrollPos = savedInstanceState.getInt(OUTLINE_SCROLL_POS, 0);
 		listView.setSelection(scrollPos);
-	}
-	
 
+	}
 
 	private void setupList() {
 		listView = (OutlineListView) findViewById(R.id.outline_list);
@@ -106,6 +107,15 @@ public class OutlineActivity extends SherlockActivity {
 		super.onResume();
 		refreshTitle();
 	}
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        if (intent.getAction().equals(SYNC_FAILED)) {
+            Bundle extrasBundle = intent.getExtras();
+            String errorMsg = extrasBundle.getString("ERROR_MESSAGE");
+            showSyncFailPopup(errorMsg);
+        }
+    }
 
 	@Override
 	protected void onDestroy() {
@@ -224,7 +234,19 @@ public class OutlineActivity extends SherlockActivity {
 				});
 		builder.create().show();
 	}
-	
+
+    private void showSyncFailPopup(String errorMsg) {
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setMessage(errorMsg);
+		builder.setCancelable(false);
+		builder.setPositiveButton(R.string.ok,
+				new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						dialog.dismiss();
+					}
+				});
+		builder.create().show();
+	}
 
 	private class SynchServiceReceiver extends BroadcastReceiver {
 		@Override
