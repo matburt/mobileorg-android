@@ -3,7 +3,8 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:0.7.+'
+        classpath 'com.android.tools.build:gradle:0.9.+'
+        classpath 'com.github.jcandksolutions.gradle:android-unit-test:1.0.+'
     }
 }
 apply plugin: 'android'
@@ -11,15 +12,6 @@ apply plugin: 'android'
 repositories {
     mavenCentral()
 }
-
-dependencies {
-    compile 'com.actionbarsherlock:actionbarsherlock:4.4.0@aar'
-    compile 'com.android.support:support-v4:13.0.+'
-    compile 'com.jcraft:jsch:0.1.50'
-    compile project(':libraries:locale')
-    compile fileTree(dir: 'libs', include: '*.jar')
-}
-
 
 def getVersionName = { ->
     def stdout = new ByteArrayOutputStream()
@@ -35,6 +27,7 @@ android {
     buildToolsVersion "19.0.1"
 
     defaultConfig {
+        packageName "com.matburt.mobileorg"
         minSdkVersion 9
         targetSdkVersion 17
         versionCode 913
@@ -68,5 +61,21 @@ android {
         exclude 'META-INF/LICENSE'
         exclude 'META-INF/NOTICE'
     }
+}
+
+apply plugin: 'android-unit-test'
+
+dependencies {
+    compile 'com.actionbarsherlock:actionbarsherlock:4.4.0@aar'
+    compile 'com.android.support:support-v4:13.0.+'
+    compile 'com.jcraft:jsch:0.1.50'
+    testCompile "junit:junit:4+"
+    testCompile 'org.robolectric:robolectric:2.3+'
+    compile project(':libraries:locale')
+    compile fileTree(dir: 'libs', include: '*.jar')
+
+    // These are only here to help IntelliJ find junit and robolectric classes
+    androidTestCompile "junit:junit:4+"
+    androidTestCompile 'org.robolectric:robolectric:2.3+'
 }
 
