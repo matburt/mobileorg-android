@@ -191,7 +191,7 @@ public class OrgNode2Html {
 		Matcher matcher = linkPattern.matcher(text);
 		text = matcher.replaceAll("<a href=\"$1\">$2</a>");
 		
-		Pattern urlPattern = Pattern.compile("[^(?:<a href=\"\\s*)](http[s]?://\\S+)");
+		Pattern urlPattern = Pattern.compile("(http[s]?://\\S+)");
 		matcher = urlPattern.matcher(text);
 		text = matcher.replaceAll("<a href=\"$1\">$1</a>");
 		
