@@ -30,6 +30,10 @@ def getVersionName = { ->
     return stdout.toString().trim()
 }
 
+
+
+
+
 android {
     compileSdkVersion 19
     buildToolsVersion "19.0.1"
@@ -41,22 +45,39 @@ android {
         versionName getVersionName()
     }
 
+    // Use personl keystore to sign apk's if available
+    // ~/.gradle/gradle.properties should look like:
+    // customStorePassword = storepassword
+    // customKeyAlias = keyalias
+    // customKeyPassword = keypassword
+    // customStoreFile = /path/to/storefile
     signingConfigs {
-        matburt {
-            storeFile file("other.keystore")
-            storePassword "android"
-            keyAlias "androiddebugkey"
-            keyPassword "android"
+        custom {
+            if (project.hasProperty('customStoreFile') &&
+                project.hasProperty('customStorePassword') &&
+                    project.hasProperty('customKeyAlias') &&
+                    project.hasProperty('customKeyPassword')) {
+                storeFile = file(customStoreFile)
+                storePassword = customStorePassword
+                keyPassword = customKeyPassword
+                keyAlias customKeyAlias
+            } else {
+                // Use default
+                storeFile file("other.keystore")
+                storePassword "android"
+                keyAlias "androiddebugkey"
+                keyPassword "android"
+            }
         }
     }
 
     buildTypes {
         release {
-            signingConfig signingConfigs.matburt
+            signingConfig signingConfigs.custom
         }
         donate {
             packageNameSuffix ".donate"
-            signingConfig signingConfigs.matburt
+            signingConfig signingConfigs.custom
         }
         debug {
             debuggable true
