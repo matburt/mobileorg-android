@@ -14,6 +14,7 @@ import android.util.Log;
 
 import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelSftp;
+import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
@@ -21,15 +22,17 @@ import com.matburt.mobileorg.util.OrgUtils;
 
 public class SSHSynchronizer implements SynchronizerInterface {
 	private final String LT = "MobileOrg";
+        private final String knownHosts = "/sdcard/.known_hosts";
 
 	private String user;
 	private String host;
 	private String path;
-    private String pass;
-    private int port;
-    private String pubFile;
+        private String pass;
+        private int port;
+        private String pubFile;
 
 	private Session session;
+        private JSch jsch;
 
 	private SharedPreferences appSettings;
 
@@ -39,24 +42,26 @@ public class SSHSynchronizer implements SynchronizerInterface {
 		this.context = context;
 		this.appSettings = PreferenceManager
 				.getDefaultSharedPreferences(context.getApplicationContext());
-		path = appSettings.getString("scpPath", "");
-		user = appSettings.getString("scpUser", "");
-        host = appSettings.getString("scpHost", "");
-        pubFile = appSettings.getString("scpPubFile", "");
-        String tmpPort = appSettings.getString("scpPort", "");
-        if (tmpPort.equals("")) {
-            port = 22;
-        }
-        else {
-            port = Integer.parseInt(tmpPort);
-        }
-        pass = appSettings.getString("scpPass", "");
+	    path = appSettings.getString("scpPath", "");
+	    user = appSettings.getString("scpUser", "");
+	    host = appSettings.getString("scpHost", "");
+	    pubFile = appSettings.getString("scpPubFile", "");
+	    String tmpPort = appSettings.getString("scpPort", "");
+	    if (tmpPort.equals("")) {
+		port = 22;
+	    }
+	    else {
+		port = Integer.parseInt(tmpPort);
+	    }
+	    pass = appSettings.getString("scpPass", "");
 
-        try {
-            this.connect();
-        } catch (Exception e) {
-            Log.e("MobileOrg", "SSH Connection failed");
-        }
+	    try {
+		jsch = new JSch();
+		jsch.setKnownHosts(knownHosts);
+		this.connect();
+	    } catch (Exception e) {
+		Log.e("MobileOrg", "SSH Connection failed");
+	    }
 	}
 
     public String testConnection(String path, String user, String pass, String host, int port, String pubFile) {
@@ -80,6 +85,7 @@ public class SSHSynchronizer implements SynchronizerInterface {
             return "Missing configuration values";
         }
 
+	Log.d(LT, "Connecting: " + user + "@" + host + ":" + port);
         try {
             this.connect();
             BufferedReader r = this.getRemoteFile(this.getFileName());
@@ -125,10 +131,21 @@ public class SSHSynchronizer implements SynchronizerInterface {
 		return true;
 	}
 
-    public void connect() throws JSchException {
-		JSch jsch = new JSch();
-		try {
-			session = jsch.getSession(user, host, port);
+    private Session getSession() throws Exception {
+	// Avoid exception: "com.jcraft.jsch.JSchException: session is down"
+	// Following solution based on:
+	// https://stackoverflow.com/questions/16127200/jsch-how-to-keep-the-session-alive-and-up
+	// However, testChannel.exit() mentioned there does not exist.
+	try {
+	    ChannelExec testChannel = (ChannelExec) session.openChannel("exec");
+	    testChannel.setCommand("true");
+	    testChannel.connect();
+	    Log.d(LT, "SSH session usable");
+	    testChannel.disconnect();
+	} catch (Throwable t) {
+	    Log.d(LT, "Rebuilding broken session: "
+		  + user + "@" + host + ":" + port);
+	    session = jsch.getSession(user, host, port);
             if (!pubFile.equals("") && !pass.equals("")) {
                 jsch.addIdentity(pubFile, pass);
             }
@@ -139,20 +156,37 @@ public class SSHSynchronizer implements SynchronizerInterface {
                 session.setPassword(pass);
             }
 
-			java.util.Properties config = new java.util.Properties();
-			config.put("StrictHostKeyChecking", "no");
-			session.setConfig(config);
+	    java.util.Properties config = new java.util.Properties();
+	    // Beware!  "StrictHostKeyChecking no" is insecure.
+	    // With "StrictHostKeyChecking yes", lines in known_hosts must
+	    // start with the hostname or IP address in brackets, followed
+	    // by the port.  Otherwise, com.jcraft.jsch.Session.checkHost()
+	    // throws a NullPointerException.
+	    // [host.example.org]:22222 ssh-rsa ...
+	    config.put("StrictHostKeyChecking", "yes");
+	    // Generate hashed file via: ssh-keygen -H -f known_hosts
+	    config.put("HashKnownHosts", "yes");
+	    session.setConfig(config);
 
-			session.connect();
-			Log.d(LT, "SSH Connected");
-		} catch (JSchException e) {
-			Log.d(LT, e.getLocalizedMessage());
+	    session.connect();
+	}
+	return session;
+    }
+
+    public void connect() throws Exception {
+	try {
+	    session = getSession();
+	    Log.d(LT, "SSH Connected");
+	} catch (JSchException e) {
+	    Log.d(LT, e.getLocalizedMessage());
             throw e;
-		}
+	}
     }
 
     public void putRemoteFile(String filename, String contents) throws IOException {
         try {
+	    session = getSession();
+
             Channel channel = session.openChannel("sftp");
             channel.connect();
             ChannelSftp sftpChannel = (ChannelSftp) channel;
@@ -169,6 +203,7 @@ public class SSHSynchronizer implements SynchronizerInterface {
 	public BufferedReader getRemoteFile(String filename) throws IOException {
         StringBuilder contents = null;
         try {
+	    session = getSession();
             Channel channel = session.openChannel( "sftp" );
             channel.connect();
             ChannelSftp sftpChannel = (ChannelSftp) channel;
