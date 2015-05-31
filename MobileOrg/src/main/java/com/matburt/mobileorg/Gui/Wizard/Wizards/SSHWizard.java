@@ -16,32 +16,33 @@ import android.widget.TextView;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Gui.Wizard.WizardView;
 import com.matburt.mobileorg.Synchronizers.SSHSynchronizer;
+import com.matburt.mobileorg.util.MOUserInfo;
 
 public class SSHWizard extends Wizard {
 	public static final int SSH_CHOOSE_PUB = 1;
-	
+
 	private EditText sshUser;
 	private EditText sshPass;
 	private EditText sshPath;
 	private EditText sshHost;
 	private EditText sshPort;
-	
+
 	private TextView sshPubFileActual;
 
 	public SSHWizard(WizardView wizardView, Context context) {
 		super(wizardView, context);
 	}
-	
+
 
 	@Override
 	public void setupFirstPage() {
 		createSSHConfig();
 	}
-	
-	public View createSSHConfig() {				
+
+	public View createSSHConfig() {
 		View view = LayoutInflater.from(context).inflate(
 				R.layout.wizard_ssh, null);
-		
+
 		sshUser = (EditText) view.findViewById(R.id.wizard_ssh_username);
 		sshPass = (EditText) view.findViewById(R.id.wizard_ssh_password);
 		sshPath = (EditText) view.findViewById(R.id.wizard_ssh_path);
@@ -62,9 +63,9 @@ public class SSHWizard extends Wizard {
 				}
 			}
 		});
-		
+
 		loadSettings();
-		
+
 		Button webdavLoginButton = (Button) view
 				.findViewById(R.id.wizard_ssh_login_button);
 		webdavLoginButton.setOnClickListener(new OnClickListener() {
@@ -73,20 +74,20 @@ public class SSHWizard extends Wizard {
 				loginSSH();
 			}
 		});
-		
+
 		setupDoneButton(view);
 		wizardView.addPage(view);
 		wizardView.setNavButtonStateOnPage(1, true, WizardView.LAST_PAGE);
 		wizardView.enablePage(1);
 		return view;
 	}
-	
+
 	private void loginSSH() {
 		final String pathActual = sshPath.getText().toString();
 		final String passActual = sshPass.getText().toString();
 		final String userActual = sshUser.getText().toString();
 		final String hostActual = sshHost.getText().toString();
-        final String pubFileActual = sshPubFileActual.getText().toString();
+		final String pubFileActual = sshPubFileActual.getText().toString();
 		String portNumGiven = sshPort.getText().toString();
 		int portNum;
 		if (portNumGiven.trim().equals("")) {
@@ -108,19 +109,23 @@ public class SSHWizard extends Wizard {
 				String extra = sds.testConnection(pathActual, userActual,
 						passActual, hostActual, portActual, pubFileActual);
 				if (extra != null) {
-					showToastRemote("Login failed: " + extra);
-					return;
+				    MOUserInfo ui = sds.getUserInfo();
+				    if (ui.hostKeyNeedsConfirmation()) {
+					showKeyAlertRemote(ui);
+				    }
+				    showToastRemote("Login failed: " + extra);
+				    return;
 				}
 				showToastRemote("Login succeeded");
 			}
 		};
 		loginThread.start();
 	}
-	
+
 	public void setPubFile(String pubfile) {
 		this.sshPubFileActual.setText(pubfile);
 	}
-	
+
 	private void loadSettings() {
 		SharedPreferences appSettings = PreferenceManager
 				.getDefaultSharedPreferences(context);
@@ -131,12 +136,12 @@ public class SSHWizard extends Wizard {
 		sshPort.setText(appSettings.getString("scpPort", ""));
 		sshPubFileActual.setText(appSettings.getString("scpPubFile", ""));
 	}
-	
+
 	public void saveSettings() {
 		SharedPreferences appSettings = PreferenceManager
 				.getDefaultSharedPreferences(context);
 		SharedPreferences.Editor editor = appSettings.edit();
-		
+
 		editor.putString("syncSource", "scp");
 
 		editor.putString("scpPath", sshPath.getText().toString());
@@ -148,9 +153,9 @@ public class SSHWizard extends Wizard {
 		} else {
 			editor.putString("scpPort", sshPort.getText().toString());
 		}
-		
+
 		editor.putString("scpPubFile", sshPubFileActual.getText().toString());
-		
+
 		editor.commit();
 	}
 }

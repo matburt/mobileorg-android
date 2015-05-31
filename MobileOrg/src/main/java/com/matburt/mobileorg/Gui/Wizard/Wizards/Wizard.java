@@ -2,10 +2,13 @@ package com.matburt.mobileorg.Gui.Wizard.Wizards;
 
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Gui.Wizard.WizardView;
+import com.matburt.mobileorg.util.MOUserInfo;
 
+import android.app.AlertDialog;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -33,10 +36,10 @@ public abstract class Wizard {
 		wizardView.removePagesAfter(1);
 		setupFirstPage();
 	}
-	
+
 	public void setupDoneButton(View view) {
 		Button doneButton = (Button) view.findViewById(R.id.wizard_done_button);
-		doneButton.setOnClickListener(new OnClickListener() {			
+		doneButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				saveSettings();
@@ -46,12 +49,13 @@ public abstract class Wizard {
 	}
 
 	public abstract void setupFirstPage();
-	
+
 	public void refresh() {
 	}
 
 	public final class UIHandler extends Handler {
 		public static final int DISPLAY_UI_TOAST = 0;
+		public static final int DISPLAY_UI_ALERT = 1;
 
 		public UIHandler(Looper looper) {
 			super(looper);
@@ -65,6 +69,22 @@ public abstract class Wizard {
 						Toast.LENGTH_LONG);
 				progress.dismiss();
 				t.show();
+				break;
+			}
+			case DISPLAY_UI_ALERT: {
+			        final MOUserInfo ui = (MOUserInfo) msg.obj;
+			        progress.dismiss();
+				new AlertDialog.Builder(context)
+				    .setTitle("Unknown public key")
+				    .setMessage(ui.getMessage())
+				    .setIcon(android.R.drawable.ic_dialog_alert)
+				    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+					    public void onClick(DialogInterface dialog, int whichButton) {
+						ui.confirmNewKey();
+					    }})
+				    .setNegativeButton(android.R.string.no, null)
+				    .show();
+				break;
 			}
 			default:
 				break;
@@ -75,6 +95,12 @@ public abstract class Wizard {
 	public void showToastRemote(String message) {
 		Message msg = uiHandler.obtainMessage(UIHandler.DISPLAY_UI_TOAST);
 		msg.obj = message;
+		uiHandler.sendMessage(msg);
+	}
+
+    	public void showKeyAlertRemote(MOUserInfo ui) {
+		Message msg = uiHandler.obtainMessage(UIHandler.DISPLAY_UI_ALERT);
+		msg.obj = ui;
 		uiHandler.sendMessage(msg);
 	}
 

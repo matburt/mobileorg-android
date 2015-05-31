@@ -2,6 +2,7 @@ package com.matburt.mobileorg.Synchronizers;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -18,11 +19,11 @@ import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
+import com.matburt.mobileorg.util.MOUserInfo;
 import com.matburt.mobileorg.util.OrgUtils;
 
 public class SSHSynchronizer implements SynchronizerInterface {
 	private final String LT = "MobileOrg";
-        private final String knownHosts = "/sdcard/.known_hosts";
 
 	private String user;
 	private String host;
@@ -30,6 +31,8 @@ public class SSHSynchronizer implements SynchronizerInterface {
         private String pass;
         private int port;
         private String pubFile;
+
+        private static MOUserInfo ui = new MOUserInfo();
 
 	private Session session;
         private JSch jsch;
@@ -39,8 +42,21 @@ public class SSHSynchronizer implements SynchronizerInterface {
 	private Context context;
 
 	public SSHSynchronizer(Context context) {
-		this.context = context;
-		this.appSettings = PreferenceManager
+	    this.context = context;
+	    File knownHosts = new File(context.getFilesDir(), "known_hosts");
+	    try {
+		if (!knownHosts.isFile()) {
+		    knownHosts.createNewFile();
+		}
+	    } catch (IOException e) {
+		Log.e(LT, "SSH failure - known_hosts IOException: " + e.toString());
+            }
+            if (!knownHosts.isFile()) {
+	 	Log.e(LT, "SSH failure - known_hosts not accessible: " + knownHosts.getAbsolutePath());
+		return;
+	    }
+
+	    this.appSettings = PreferenceManager
 				.getDefaultSharedPreferences(context.getApplicationContext());
 	    path = appSettings.getString("scpPath", "");
 	    user = appSettings.getString("scpUser", "");
@@ -57,7 +73,7 @@ public class SSHSynchronizer implements SynchronizerInterface {
 
 	    try {
 		jsch = new JSch();
-		jsch.setKnownHosts(knownHosts);
+		jsch.setKnownHosts(knownHosts.getAbsolutePath());
 		this.connect();
 	    } catch (Exception e) {
 		Log.e("MobileOrg", "SSH Connection failed");
@@ -81,7 +97,7 @@ public class SSHSynchronizer implements SynchronizerInterface {
             this.user.equals("") ||
             this.host.equals("") ||
             (this.pass.equals("") && this.pubFile.equals(""))) {
-            Log.i("MobileOrg", "Test Connection Failed for not being configured");
+            Log.i(LT, "Test Connection Failed for not being configured");
             return "Missing configuration values";
         }
 
@@ -92,7 +108,7 @@ public class SSHSynchronizer implements SynchronizerInterface {
             r.close();
         }
         catch (Exception e) {
-            Log.i("MobileOrg", "SSH Get index file failed");
+            Log.i(LT, "SSH Get index file failed");
             return "Failed to find index file with error: " + e.toString();
         }
         this.postSynchronize();
@@ -158,19 +174,23 @@ public class SSHSynchronizer implements SynchronizerInterface {
 
 	    java.util.Properties config = new java.util.Properties();
 	    // Beware!  "StrictHostKeyChecking no" is insecure.
-	    // With "StrictHostKeyChecking yes", lines in known_hosts must
+	    // With "StrictHostKeyChecking ask", lines in known_hosts must
 	    // start with the hostname or IP address in brackets, followed
 	    // by the port.  Otherwise, com.jcraft.jsch.Session.checkHost()
 	    // throws a NullPointerException.
 	    // [host.example.org]:22222 ssh-rsa ...
-	    config.put("StrictHostKeyChecking", "yes");
+	    config.put("StrictHostKeyChecking", "ask");
 	    // Generate hashed file via: ssh-keygen -H -f known_hosts
 	    config.put("HashKnownHosts", "yes");
 	    session.setConfig(config);
-
+	    session.setUserInfo(ui);
 	    session.connect();
 	}
 	return session;
+    }
+
+    public static MOUserInfo getUserInfo () {
+	return ui;
     }
 
     public void connect() throws Exception {
