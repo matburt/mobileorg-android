@@ -11,6 +11,7 @@ import java.io.InputStreamReader;
 
 import android.content.Context;
 import android.preference.PreferenceManager;
+import android.util.Log;
 
 public class SDCardSynchronizer implements SynchronizerInterface {	
 
@@ -43,6 +44,15 @@ public class SDCardSynchronizer implements SynchronizerInterface {
 	public BufferedReader getRemoteFile(String filename) throws FileNotFoundException {
 		String filePath = this.remotePath + filename;
 		File file = new File(filePath);
+
+		if(!file.exists()){
+			try {
+				file.createNewFile();
+			} catch (IOException e) {
+				Log.e(this.getClass().getSimpleName(), "Error Create new file", e);
+			}
+		}
+
 		FileInputStream fileIS = new FileInputStream(file);
 		return new BufferedReader(new InputStreamReader(fileIS));
 	}
