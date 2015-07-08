@@ -99,9 +99,8 @@
   <string name="log_in_to_ssh">登陆到您的 SSH 服务器</string>
   <string name="null_sync_description">这只是个捕获同步。它不会与任何源进行同步。</string>
   <string name="url">URL</string>
-  <string name="wizard_dropbox_email_hint">uri@frankandrobot.com</string>
-  
-    <!-- preference strings -->
+
+  <!-- preference strings -->
   <string name="preference_capture_with_timestamp">用时间戳捕获</string>
   <string name="preference_capture_with_timestamp_summary">捕获节点会添加一个时间戳</string>
   <string name="title_agenda_title">使用日程标题</string>
@@ -156,5 +155,60 @@
   <string name="preference_calendar_show_done">显示己完成</string>
   <string name="edit_date_start">开始</string>
   <string name="edit_date_end">结束</string>
-  <string name="edit_date_date">日期</string>  
+  <string name="edit_date_date">日期</string>
+  <string name="configure_synchronizer_settings">同步设置</string>
+  <string name="internal">内部</string>
+  <string name="key_autoSyncInterval">自动同步间隔</string>
+  <string name="key_calendarName">日历名称</string>
+  <string name="key_calendarReminderInterval">日历提醒间隔</string>
+  <string name="key_defaultTodo">默认TODO</string>
+  <string name="key_version">版本</string>
+  <string name="wizard_ubuntuone">UbuntuOne账户</string>
+  <string name="title_scp_port">端口</string>
+  <string name="title_scp_path">路径</string>
+  <string name="title_scp_host">主机</string>
+  <string name="title_index_file_path">index.org的本地路径</string>
+  <string name="summary_web_url">index.org文件的URL全路径</string>
+  <string name="summary_scp_path">index.org文件在服务器上的全路径</string>
+  <string name="storage_location">存储位置</string>
+  <string name="storage_card">存储卡</string>
+  <string name="search_results_for"></string>
+  <string name="prompt_node_archive">您确定要将此节点存档吗？</string>
+  <string name="preferences">配置</string>
+  <string name="preference_theme">主题</string>
+  <string name="preference_ubuntuone_login_summary">登录以获取OAuth令牌</string>
+  <string name="preference_ubuntuone_login">登录</string>
+  <string name="preference_ubuntuone_path">路径</string>
+  <string name="preference_ubuntuone_path_summary">index.org文件在UbuntuOne中的路径</string>
+  <string name="ssh_choose_file_button">选择您的私钥</string>
+  <string name="prompt_delete_file">您确定要删除这个文件么？</string>
+  <string name="key_fontSize">字体尺寸</string>
+  <string name="key_properties_drawer_include_fields"></string>
+  <string name="key_quick_todos">快速Todo</string>
+  <string name="key_syncSource">同步源</string>
+  <string name="key_syncWifiOnly">仅Wifi同步</string>
+  <string name="key_theme">主题</string>
+  <string name="log_in_to_ubuntuone">登陆至Ubuntu One</string>
+  <string name="menu_advanced">高级</string>
+  <string name="menu_agenda">日程</string>
+  <string name="menu_archive">归档</string>
+  <string name="menu_capture_simple">简易捕获</string>
+  <string name="menu_delete">删除</string>
+  <string name="menu_delete_file">删除文件</string>
+  <string name="preference_advanced">高级</string>
+  <string name="preference_calendar_display">显示</string>
+  <string name="preference_actions"></string>
+  <string name="preference_edit">编辑</string>
+  <string name="preference_fontsize">字体尺寸</string>
+  <string name="preference_fontsize_summary">大纲模式字体尺寸</string>
+  <string name="preference_general">一般</string>
+  <string name="preference_interface">界面</string>
+  <string name="preference_properties_drawer_fields"></string>
+  <string name="preference_properties_drawer_fields_summary"></string>
+  <string name="preference_properties_drawer_files">文件</string>
+  <string name="preference_setup_wizard">设置向导</string>
+  <string name="main_settings">设置</string>
+  <string name="main_setup_wizard">设置向导</string>
+  <string name="main_synchronize">同步</string>
+  <string name="main_website">网站</string>
 </resources>
