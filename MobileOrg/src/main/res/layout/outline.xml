@@ -60,7 +60,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_horizontal"
-                        android:text="Setup Wizard"
+                        android:text="@string/main_setup_wizard"
                         android:textStyle="bold" >
                     </TextView>
                 </LinearLayout>
@@ -85,7 +85,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_horizontal"
-                        android:text="Settings"
+                        android:text="@string/main_settings"
                         android:textStyle="bold" >
                     </TextView>
                 </LinearLayout>
@@ -118,7 +118,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_horizontal"
-                        android:text="Synchronize"
+                        android:text="@string/main_synchronize"
                         android:textStyle="bold" >
                     </TextView>
                 </LinearLayout>
@@ -143,7 +143,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_horizontal"
-                        android:text="Website"
+                        android:text="@string/main_website"
                         android:textStyle="bold" >
                     </TextView>
                 </LinearLayout>
