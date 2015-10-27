@@ -164,6 +164,9 @@
     <string name="preference_fontsize">Font size</string>
     <string name="preference_clear_db_dialog_title">Clear DB?</string>
     <string name="preference_clear_db_dialog_message">Are you sure want to clear DB?</string>
+    <string name="preference_encryption">Encryption</string>
+    <string name="preference_encryption_pass">Password</string>
+    <string name="preference_encryption_pass_summary">Password as used in Emacs org-mobile-encryption-password</string>
     <string name="preference_exclude_tags">Exclude tags inheritance</string>
     <string name="preference_exclude_tags_summary">Tags separated by \":\" to exclude from inheritance.</string>
     <string name="preference_combine_block_agenda_summary">Combines block agendas into one node, with separators. Needs resync of agenda file to take effect</string>
@@ -226,6 +229,7 @@
     <string name="key_calendarName">calendarName</string>
     <string name="key_calendarReminderInterval">calendarReminderInterval</string>
     <string name="key_theme">theme</string>
+    <string name="key_encryption_password">encryptionPassword</string>
     <string name="key_fontSize">fontSize</string>
     <string name="key_syncSource">syncSource</string>
     <string name="key_syncWifiOnly">syncWifiOnly</string>
