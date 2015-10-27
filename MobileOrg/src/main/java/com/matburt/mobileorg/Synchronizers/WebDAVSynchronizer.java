@@ -182,18 +182,22 @@ public class WebDAVSynchronizer implements SynchronizerInterface {
 		putUrlFile(urlActual, contents);
 	}
 
+	@Override
 	public BufferedReader getRemoteFile(String filename) throws IOException, CertificateException,
                                                                    SSLHandshakeException {
+
+		InputStream mainFile = getRemoteFileStream(filename);
+        return new BufferedReader(new InputStreamReader(mainFile));
+	}
+
+	@Override
+	public InputStream getRemoteFileStream(String filename) throws IOException,
+			CertificateException, SSLHandshakeException
+	{
 		String orgUrl = this.remotePath + filename;
         InputStream mainFile = null;
         try {
             mainFile = this.getUrlStream(orgUrl);
-
-            if (mainFile == null) {
-                return null;
-            } 
-
-            return new BufferedReader(new InputStreamReader(mainFile));
         }
         catch (CertificateException e) {
             Log.w("MobileOrg", "Conflicting certificate found: " + e.toString());
@@ -205,9 +209,11 @@ public class WebDAVSynchronizer implements SynchronizerInterface {
             handleChangedCertificate();
             throw e;
         }
-	}
 
-    /* See: http://stackoverflow.com/questions/1217141/self-signed-ssl-acceptance-android */
+        return mainFile;
+}
+
+	/* See: http://stackoverflow.com/questions/1217141/self-signed-ssl-acceptance-android */
     private void handleTrustRelationship(Context c) {
         try {
             HttpsURLConnection.setDefaultHostnameVerifier(new HostnameVerifier(){

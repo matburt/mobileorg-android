@@ -2,10 +2,15 @@ package com.matburt.mobileorg.Synchronizers;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringReader;
+import java.security.cert.CertificateException;
+
+import javax.net.ssl.SSLHandshakeException;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -169,25 +174,50 @@ public class SSHSynchronizer implements SynchronizerInterface {
 	public BufferedReader getRemoteFile(String filename) throws IOException {
         StringBuilder contents = null;
         try {
-            Channel channel = session.openChannel( "sftp" );
-            channel.connect();
-            ChannelSftp sftpChannel = (ChannelSftp) channel;
-            Log.i("MobileOrg", "SFTP Getting: " + this.getRootUrl() + filename);
-            InputStream in = sftpChannel.get(this.getRootUrl() + filename);
-
+            InputStream in = getRemoteFileStream(filename);
             BufferedReader r = new BufferedReader(new InputStreamReader(in));
             contents = new StringBuilder();
             String line;
             while ((line = r.readLine()) != null) {
                 contents.append(line + "\n");
             }
-            sftpChannel.exit();
         } catch (Exception e) {
             Log.e("MobileOrg", "Exception in getRemoteFile: " + e.toString());
             throw new IOException(e);
         }
         return new BufferedReader(new StringReader(contents.toString()));
     }
+
+	@Override
+	public InputStream getRemoteFileStream(String filename) throws IOException,
+			CertificateException, SSLHandshakeException 
+	{
+        ByteArrayInputStream bis = null;
+        try {
+	    session = getSession();
+            Channel channel = session.openChannel( "sftp" );
+            channel.connect();
+            ChannelSftp sftpChannel = (ChannelSftp) channel;
+            Log.i("MobileOrg", "SFTP Getting: " + this.getRootUrl() + filename);
+            InputStream in = sftpChannel.get(this.getRootUrl() + filename);
+
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            final int bufSize = 1024;
+            int bytesRead = 0;
+            byte[] buffer = new byte[bufSize];
+            while ((bytesRead = in.read(buffer, 0, bufSize))>= 0) {
+            	bos.write(buffer, 0, bytesRead);
+            }
+            sftpChannel.exit();
+            bis = new ByteArrayInputStream(bos.toByteArray());
+
+        } catch (Exception e) {
+            Log.e("MobileOrg", "Exception in getRemoteFile: " + e.toString());
+            throw new IOException(e);
+        }
+
+        return bis;
+	}
 
 	@Override
 	public void postSynchronize() {

@@ -71,6 +71,9 @@ public class SyncService extends Service implements
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
+		if (intent == null) {
+			return 0;
+		}
 		String action = intent.getStringExtra(ACTION);
 		if (action != null && action.equals(START_ALARM))
 			setAlarm();

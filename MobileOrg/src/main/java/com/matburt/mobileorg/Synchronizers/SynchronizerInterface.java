@@ -2,6 +2,7 @@ package com.matburt.mobileorg.Synchronizers;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.security.cert.CertificateException;
 
 import javax.net.ssl.SSLHandshakeException;
@@ -36,6 +37,15 @@ public interface SynchronizerInterface {
 	 */
 	public BufferedReader getRemoteFile(String filename)
         throws IOException, CertificateException, SSLHandshakeException;
+
+	/**
+	 * Returns a BufferedReader to the remote file.
+	 *
+	 * @param filename
+	 *            Name of the file, without path
+	 */
+	public InputStream getRemoteFileStream(String filename)
+		throws IOException, CertificateException, SSLHandshakeException;
 
 	/**
 	 * Use this to disconnect from any services and cleanup.

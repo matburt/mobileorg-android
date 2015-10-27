@@ -1,5 +1,6 @@
 package com.matburt.mobileorg.Synchronizers;
 
+import android.annotation.SuppressLint;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -18,15 +19,23 @@ import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.util.FileUtils;
 import com.matburt.mobileorg.util.OrgFileNotFoundException;
 import com.matburt.mobileorg.util.OrgUtils;
+import com.matburt.mobileorg.util.PreferenceUtils;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringReader;
+import java.nio.charset.StandardCharsets;
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 
 import javax.net.ssl.SSLHandshakeException;
+
+import org.matzsoft.cipher.OpenSSLPBEInputStream;
 
 /**
  * This class implements many of the operations that need to be done on
@@ -45,6 +54,7 @@ public class Synchronizer {
 	
 	public static final String CAPTURE_FILE = "mobileorg.org";
 	public static final String INDEX_FILE = "index.org";
+	private static final String logTag = "Synchronizer";
 
 	private Context context;
 	private ContentResolver resolver;
@@ -84,7 +94,7 @@ public class Synchronizer {
 			return changedFiles;
 		} catch (Exception e) {
 			showErrorNotification(e);
-            Log.e("Synchronizer", "Error synchronizing", e);
+            Log.e(logTag, "Error synchronizing", e);
             OrgUtils.announceSyncDone(context);
 			return new ArrayList<String>();
 		}
@@ -211,31 +221,58 @@ public class Synchronizer {
 	private void getAndParseFile(OrgFile orgFile, OrgFileParser parser)
 			throws CertificateException, IOException {
 		
-		BufferedReader breader = syncher.getRemoteFile(orgFile.filename);
-
 		// TODO Generate checksum of file and compare to remoteChecksum
 		
 		try {
 			new OrgFile(orgFile.filename, resolver).removeFile(resolver);
 		} catch (OrgFileNotFoundException e) { /* file did not exist */ }
 		
-		if (orgFile.isEncrypted())
-        	decryptAndParseFile(orgFile, breader);
-        else {
+		if (orgFile.isEncrypted()) {
+			InputStream is = syncher.getRemoteFileStream(orgFile.filename);
+        	decryptAndParseFile(parser, orgFile, is);
+		} else {
+			BufferedReader breader = syncher.getRemoteFile(orgFile.filename);
         	parser.parse(orgFile, breader, this.context);
         }
 	}
 	
-	private void decryptAndParseFile(OrgFile orgFile, BufferedReader reader) {
+	@SuppressLint("NewApi")
+	private void decryptAndParseFile(OrgFileParser parser, OrgFile orgFile, InputStream isr) {
+		final String ALGORITHM = "PBEWITHMD5AND256BITAES-CBC-OPENSSL";
+		final String password = PreferenceUtils.getEncryptionPass();
+
+		byte[] decData = null;
+		final int bufSize = 8192;
+
 		try {
-			Intent intent = new Intent(context, FileDecryptionActivity.class);
-			intent.putExtra("data", FileUtils.read(reader).getBytes());
-			intent.putExtra("filename", orgFile.filename);
-			intent.putExtra("filenameAlias", orgFile.name);
-			intent.putExtra("checksum", orgFile.checksum);
-			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-			context.startActivity(intent);	
-		} catch(IOException e) {}
+			// Read the bytes
+			ByteArrayOutputStream bos = new ByteArrayOutputStream();
+			byte[] rawData = new byte[bufSize];
+			while ((isr.read(rawData, 0, bufSize)) >= 0) {
+				bos.write(rawData);
+			}
+			ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
+
+			String rawDataStr = new String(bos.toByteArray(), StandardCharsets.UTF_8);
+			rawDataStr = rawDataStr.substring(0, Math.min(20, rawDataStr.length()));
+			Log.d(logTag, "Decipher file: " + orgFile.name + " with key: " + password); // + " data: " + rawDataStr);
+
+			// Decrypt to text
+			OpenSSLPBEInputStream decIS = new OpenSSLPBEInputStream(bis, ALGORITHM, 1, password.toCharArray());
+			decData = new byte[decIS.available()];
+			decIS.read(decData);
+
+			decIS.close();
+		} catch (IOException e) {
+			Log.e(logTag, e.getMessage());
+			Log.e(logTag, "Decryption Error for :" + orgFile.filename);
+		}
+
+		String strData = new String(decData, StandardCharsets.UTF_8);
+		Log.d(logTag, "Decrypted data: " + strData.substring(0, Math.min(20, strData.length())) + "...");
+
+		BufferedReader decReader = new BufferedReader(new StringReader(strData));
+		parser.parse(orgFile, decReader, this.context);
 	}
 	
 

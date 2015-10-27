@@ -8,7 +8,10 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.security.cert.CertificateException;
 import java.util.ArrayList;
+
+import javax.net.ssl.SSLHandshakeException;
 
 import oauth.signpost.commonshttp.CommonsHttpOAuthConsumer;
 import oauth.signpost.exception.OAuthException;
@@ -211,6 +214,13 @@ private static final String BASE_TOKEN_NAME = "Ubuntu One @ MobileOrg:";
         }
         return null;
     }
+
+	@Override
+	public InputStream getRemoteFileStream(String filename) throws IOException,
+			CertificateException, SSLHandshakeException {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
     public ArrayList<String> getDirectoryList(String directory) {
         ArrayList<String> directories = new ArrayList<String>();
@@ -424,5 +434,6 @@ private static final String BASE_TOKEN_NAME = "Ubuntu One @ MobileOrg:";
 	public boolean isConnectable() {
 		return OrgUtils.isNetworkOnline(context);
 	}
+
 }
 		

@@ -1,10 +1,12 @@
 package com.matburt.mobileorg.Synchronizers;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 
 import android.content.Context;
@@ -96,19 +98,25 @@ public class DropboxSynchronizer implements SynchronizerInterface {
         }
     }
 
+    @Override
 	public BufferedReader getRemoteFile(String filename) throws IOException {
+		return new BufferedReader(
+				new InputStreamReader(
+						getRemoteFileStream(filename)));
+	}
+
+    @Override
+	public InputStream getRemoteFileStream(String filename) throws IOException {
 		String filePath = this.remotePath + filename;
         try {
             DropboxInputStream is = dropboxApi.getFileStream(filePath, null);
-            BufferedReader fileReader = new BufferedReader(new InputStreamReader(is));
-            return fileReader;
+            return new BufferedInputStream(is);
         } catch (DropboxUnlinkedException e) {
             throw new IOException("Dropbox Authentication Failed, re-run setup wizard");
         } catch (DropboxException e) {
             throw new IOException("Fetching " + filename + ": " + e.toString());
         }
 	}
-
     
     /**
      * This handles authentication if the user's token & secret

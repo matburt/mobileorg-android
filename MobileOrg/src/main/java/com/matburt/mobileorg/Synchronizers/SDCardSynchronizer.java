@@ -7,8 +7,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
-
 import android.content.Context;
 import android.preference.PreferenceManager;
 
@@ -40,13 +40,21 @@ public class SDCardSynchronizer implements SynchronizerInterface {
 		writer.close();
 	}
 
+	@Override
 	public BufferedReader getRemoteFile(String filename) throws FileNotFoundException {
+		return new BufferedReader(
+				new InputStreamReader(
+						getRemoteFileStream(filename)));
+	}
+
+	@Override
+	public InputStream getRemoteFileStream(String filename) throws FileNotFoundException {
 		String filePath = this.remotePath + filename;
 		File file = new File(filePath);
 		FileInputStream fileIS = new FileInputStream(file);
-		return new BufferedReader(new InputStreamReader(fileIS));
-	}
 
+		return fileIS;
+	}
 
 	@Override
 	public void postSynchronize() {		
