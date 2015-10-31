@@ -3,7 +3,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:0.7.+'
+        classpath 'com.android.tools.build:gradle:1.1.+'
     }
 }
 apply plugin: 'android'
@@ -31,8 +31,8 @@ def getVersionName = { ->
 }
 
 android {
-    compileSdkVersion 19
-    buildToolsVersion "19.0.1"
+    compileSdkVersion 21
+    buildToolsVersion "21.1.2"
 
     defaultConfig {
         minSdkVersion 9
@@ -55,7 +55,7 @@ android {
             signingConfig signingConfigs.matburt
         }
         donate {
-            packageNameSuffix ".donate"
+            applicationIdSuffix ".donate"
             signingConfig signingConfigs.matburt
         }
         debug {
