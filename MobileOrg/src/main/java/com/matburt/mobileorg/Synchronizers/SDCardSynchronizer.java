@@ -5,6 +5,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,6 +32,7 @@ public class SDCardSynchronizer implements SynchronizerInterface {
         return true;
     }
 
+	@Override
 	public void putRemoteFile(String filename, String contents) throws IOException {
 		String outfilePath = this.remotePath + filename;
 		
@@ -38,6 +40,23 @@ public class SDCardSynchronizer implements SynchronizerInterface {
 		BufferedWriter writer = new BufferedWriter(new FileWriter(file, true));
 		writer.write(contents);
 		writer.close();
+	}
+
+	@Override
+	public void putRemoteFile(String filename, InputStream contents) throws IOException {
+		String outfilePath = this.remotePath + filename;
+
+		final int bufSize = 8192;
+		int bytesRead = 0;
+		byte[] buffer = new byte[bufSize];
+
+		File file = new File(outfilePath);
+		FileOutputStream fos = new FileOutputStream(file, false);
+
+		while ( (bytesRead = contents.read(buffer, 0, bufSize)) >= 0 ) {
+			fos.write(buffer, 0, bytesRead);
+		}
+		fos.close();
 	}
 
 	@Override

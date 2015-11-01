@@ -12,9 +12,15 @@ public class NullSynchronizer implements SynchronizerInterface {
         return true;
     }
 
+    @Override
     public void putRemoteFile(String filename, String contents) {
     }
 
+    @Override
+    public void putRemoteFile(String filename, InputStream contents) {
+    }
+
+    @Override
     public BufferedReader getRemoteFile(String filename) {
         return null;
     }

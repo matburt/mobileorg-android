@@ -80,6 +80,10 @@ public class PreferenceUtils {
 		return appSettings.getString("encryptionPassword", "");
 	}
 
+	public static boolean isEncryptionEnabled() {
+		return !getEncryptionPass().isEmpty();
+	}
+
 	public static boolean useAdvancedCapturing() {
 		Context context = MobileOrgApplication.getContext();
 		return PreferenceManager.getDefaultSharedPreferences(context)

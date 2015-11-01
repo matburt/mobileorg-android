@@ -188,23 +188,30 @@ public class SSHSynchronizer implements SynchronizerInterface {
 	}
     }
 
+    @Override
     public void putRemoteFile(String filename, String contents) throws IOException {
+        ByteArrayInputStream bas = new ByteArrayInputStream(contents.getBytes());
+        putRemoteFile(filename, contents);
+	}
+
+    @Override
+    public void putRemoteFile(String filename, InputStream contents) throws IOException {
         try {
-	    session = getSession();
+            session = getSession();
 
             Channel channel = session.openChannel("sftp");
             channel.connect();
             ChannelSftp sftpChannel = (ChannelSftp) channel;
-            ByteArrayInputStream bas = new ByteArrayInputStream(contents.getBytes());
 
-            sftpChannel.put(bas, this.getRootUrl() + filename);
+            sftpChannel.put(contents, this.getRootUrl() + filename);
             sftpChannel.exit();
         } catch (Exception e) {
             Log.e("MobileOrg", "Exception in putRemoteFile: " + e.toString());
             throw new IOException(e);
         }
-	}
+    }
 
+    @Override
 	public BufferedReader getRemoteFile(String filename) throws IOException {
         StringBuilder contents = null;
         try {

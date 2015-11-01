@@ -158,11 +158,7 @@ public class OrgFile {
 		total += resolver.delete(OrgData.buildIdUri(nodeId), null, null);
 		return total;
 	}
-	
-	public boolean isEncrypted() {
-		return !PreferenceUtils.getEncryptionPass().isEmpty();
-	}
-	
+
 	public boolean generateEditsForFile() {
 		if(filename.equals(CAPTURE_FILE))
 			return false;

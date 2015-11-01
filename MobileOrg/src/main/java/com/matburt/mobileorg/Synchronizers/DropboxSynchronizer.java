@@ -8,6 +8,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -80,7 +81,25 @@ public class DropboxSynchronizer implements SynchronizerInterface {
         BufferedWriter writer =  orgFile.getWriter();
         writer.write(contents);
         writer.close();
-    
+
+        putRemoteFile(filename, orgFile);
+    }
+
+    public void putRemoteFile(String filename, InputStream contents) throws IOException {
+        FileUtils orgFile = new FileUtils(filename, context);
+        final int bufSize = 8192;
+        int bytesRead = 0;
+        byte[] buffer = new byte[bufSize];
+        OutputStream os =  orgFile.getFileOutputStream();
+        while ( (bytesRead = contents.read(buffer, 0, bytesRead)) >= 0) {
+            os.write(buffer, 0, bytesRead);
+        }
+        os.close();
+
+        putRemoteFile(filename, orgFile);
+    }
+
+    private void putRemoteFile(String filename, FileUtils orgFile) throws IOException {
         File uploadFile = orgFile.getFile();
         FileInputStream fis = new FileInputStream(uploadFile);
         try {

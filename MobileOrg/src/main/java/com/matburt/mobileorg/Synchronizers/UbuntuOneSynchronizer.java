@@ -134,6 +134,7 @@ private static final String BASE_TOKEN_NAME = "Ubuntu One @ MobileOrg:";
 		}
 	}
 
+    @Override
     public void putRemoteFile(String filename, String contents) throws IOException {
         try {
             buildConsumer();
@@ -180,6 +181,12 @@ private static final String BASE_TOKEN_NAME = "Ubuntu One @ MobileOrg:";
         }
     }
 
+    @Override
+    public void putRemoteFile(String filename, InputStream contents) throws IOException {
+        // TODO Auto-generated method stub
+    }
+
+    @Override
     public BufferedReader getRemoteFile(String filename) {
         try { 
             buildConsumer();
