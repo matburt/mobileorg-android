@@ -54,6 +54,7 @@ public class Synchronizer {
 	
 	public static final String CAPTURE_FILE = "mobileorg.org";
 	public static final String INDEX_FILE = "index.org";
+	public static final String CHECKSUM_FILE = "checksums.dat";
 	private static final String logTag = "Synchronizer";
 	private static final String ALGORITHM = "PBEWITHMD5AND256BITAES-CBC-OPENSSL";
 
@@ -124,13 +125,13 @@ public class Synchronizer {
 		if (localContents.equals("")) {
 			return;
 		}
-		String remoteContent = null;
+		BufferedReader reader = null;
 		if (PreferenceUtils.isEncryptionEnabled()) {
-			BufferedReader br = decryptFileStream(syncher.getRemoteFileStream(filename));
-			remoteContent = FileUtils.read(br);
+			reader = decryptFileStream(syncher.getRemoteFileStream(filename));
 		} else {
-			remoteContent = FileUtils.read(syncher.getRemoteFile(filename));
+			reader = syncher.getRemoteFile(filename);
 		}
+		String remoteContent = FileUtils.read(reader);
 
 		if (remoteContent.indexOf("{\"error\":") == -1) {
 			localContents = remoteContent + "\n" + localContents;
@@ -196,7 +197,14 @@ public class Synchronizer {
 	}
 
 	private HashMap<String, String> getAndParseIndexFile() throws SSLHandshakeException, CertificateException, IOException {
-		String remoteIndexContents = FileUtils.read(syncher.getRemoteFile(INDEX_FILE));
+		BufferedReader reader = null;
+		if (PreferenceUtils.isEncryptionEnabled()) {
+			reader = decryptFileStream(syncher.getRemoteFileStream(INDEX_FILE));
+		} else {
+			reader = syncher.getRemoteFile(INDEX_FILE);
+		}
+		String remoteIndexContents = FileUtils.read(reader);
+
 		OrgProviderUtils.setTodos(
 				OrgFileParser.getTodosFromIndex(remoteIndexContents), resolver);
 		OrgProviderUtils.setPriorities(
@@ -210,7 +218,7 @@ public class Synchronizer {
 	}
 	
 	private HashMap<String, String> getAndParseChecksumFile() throws SSLHandshakeException, CertificateException, IOException {
-		String remoteChecksumContents = FileUtils.read(syncher.getRemoteFile("checksums.dat"));
+		String remoteChecksumContents = FileUtils.read(syncher.getRemoteFile(CHECKSUM_FILE));
 
 		HashMap<String, String> remoteChecksums = OrgFileParser
 				.getChecksums(remoteChecksumContents);
@@ -245,9 +253,8 @@ public class Synchronizer {
 
 		BufferedReader breader = null;
 		if (PreferenceUtils.isEncryptionEnabled()) {
-			InputStream is = syncher.getRemoteFileStream(orgFile.filename);
 			Log.d(logTag, "Decipher file: " + orgFile.name + " with key: " + PreferenceUtils.getEncryptionPass());
-        	breader = decryptFileStream(is);
+        	breader = decryptFileStream(syncher.getRemoteFileStream(orgFile.filename));
 		} else {
 			breader = syncher.getRemoteFile(orgFile.filename);
         }
