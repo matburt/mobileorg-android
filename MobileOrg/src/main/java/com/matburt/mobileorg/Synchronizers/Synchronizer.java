@@ -272,8 +272,9 @@ public class Synchronizer {
 			// Read the bytes
 			ByteArrayOutputStream bos = new ByteArrayOutputStream();
 			byte[] rawData = new byte[bufSize];
-			while ((isr.read(rawData, 0, bufSize)) >= 0) {
-				bos.write(rawData);
+			int bytesRead = 0;
+			while ((bytesRead = isr.read(rawData, 0, bufSize)) >= 0) {
+				bos.write(rawData, 0, bytesRead);
 			}
 			ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
 
