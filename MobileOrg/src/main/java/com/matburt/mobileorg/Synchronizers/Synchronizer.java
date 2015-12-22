@@ -1,12 +1,11 @@
 package com.matburt.mobileorg.Synchronizers;
 
+import android.annotation.SuppressLint;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.Intent;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.matburt.mobileorg.Gui.FileDecryptionActivity;
 import com.matburt.mobileorg.Gui.SynchronizerNotificationCompat;
 import com.matburt.mobileorg.OrgData.OrgContract.Edits;
 import com.matburt.mobileorg.OrgData.OrgContract.Files;
@@ -18,15 +17,25 @@ import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.util.FileUtils;
 import com.matburt.mobileorg.util.OrgFileNotFoundException;
 import com.matburt.mobileorg.util.OrgUtils;
+import com.matburt.mobileorg.util.PreferenceUtils;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringReader;
+import java.nio.charset.StandardCharsets;
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 
 import javax.net.ssl.SSLHandshakeException;
+
+import org.matzsoft.cipher.OpenSSLPBEInputStream;
+import org.matzsoft.cipher.OpenSSLPBEOutputStream;
 
 /**
  * This class implements many of the operations that need to be done on
@@ -45,6 +54,9 @@ public class Synchronizer {
 	
 	public static final String CAPTURE_FILE = "mobileorg.org";
 	public static final String INDEX_FILE = "index.org";
+	public static final String CHECKSUM_FILE = "checksums.dat";
+	private static final String logTag = "Synchronizer";
+	private static final String ALGORITHM = "PBEWITHMD5AND256BITAES-CBC-OPENSSL";
 
 	private Context context;
 	private ContentResolver resolver;
@@ -84,7 +96,7 @@ public class Synchronizer {
 			return changedFiles;
 		} catch (Exception e) {
 			showErrorNotification(e);
-            Log.e("Synchronizer", "Error synchronizing", e);
+            Log.e(logTag, "Error synchronizing", e);
             OrgUtils.announceSyncDone(context);
 			return new ArrayList<String>();
 		}
@@ -110,14 +122,29 @@ public class Synchronizer {
 		
 		localContents += OrgEdit.editsToString(resolver);
 
-		if (localContents.equals(""))
+		if (localContents.equals("")) {
 			return;
-		String remoteContent = FileUtils.read(syncher.getRemoteFile(filename));
+		}
+		BufferedReader reader = null;
+		if (PreferenceUtils.isEncryptionEnabled()) {
+			reader = decryptFileStream(syncher.getRemoteFileStream(filename));
+		} else {
+			reader = syncher.getRemoteFile(filename);
+		}
+		String remoteContent = FileUtils.read(reader);
 
-		if (remoteContent.indexOf("{\"error\":") == -1)
+		if (remoteContent.indexOf("{\"error\":") == -1) {
 			localContents = remoteContent + "\n" + localContents;
+		}
 
-		syncher.putRemoteFile(filename, localContents);
+		if (PreferenceUtils.isEncryptionEnabled()) {
+			ByteArrayInputStream bis = new ByteArrayInputStream(localContents.getBytes());
+			ByteArrayInputStream encDataStream = encryptFileStream(bis);
+
+			syncher.putRemoteFile(filename, encDataStream);
+		} else {
+			syncher.putRemoteFile(filename, localContents);
+		}
 		
 		try {
 			new OrgFile(filename, resolver).removeFile(resolver);
@@ -170,7 +197,14 @@ public class Synchronizer {
 	}
 
 	private HashMap<String, String> getAndParseIndexFile() throws SSLHandshakeException, CertificateException, IOException {
-		String remoteIndexContents = FileUtils.read(syncher.getRemoteFile(INDEX_FILE));
+		BufferedReader reader = null;
+		if (PreferenceUtils.isEncryptionEnabled()) {
+			reader = decryptFileStream(syncher.getRemoteFileStream(INDEX_FILE));
+		} else {
+			reader = syncher.getRemoteFile(INDEX_FILE);
+		}
+		String remoteIndexContents = FileUtils.read(reader);
+
 		OrgProviderUtils.setTodos(
 				OrgFileParser.getTodosFromIndex(remoteIndexContents), resolver);
 		OrgProviderUtils.setPriorities(
@@ -184,7 +218,7 @@ public class Synchronizer {
 	}
 	
 	private HashMap<String, String> getAndParseChecksumFile() throws SSLHandshakeException, CertificateException, IOException {
-		String remoteChecksumContents = FileUtils.read(syncher.getRemoteFile("checksums.dat"));
+		String remoteChecksumContents = FileUtils.read(syncher.getRemoteFile(CHECKSUM_FILE));
 
 		HashMap<String, String> remoteChecksums = OrgFileParser
 				.getChecksums(remoteChecksumContents);
@@ -211,33 +245,76 @@ public class Synchronizer {
 	private void getAndParseFile(OrgFile orgFile, OrgFileParser parser)
 			throws CertificateException, IOException {
 		
-		BufferedReader breader = syncher.getRemoteFile(orgFile.filename);
-
 		// TODO Generate checksum of file and compare to remoteChecksum
 		
 		try {
 			new OrgFile(orgFile.filename, resolver).removeFile(resolver);
 		} catch (OrgFileNotFoundException e) { /* file did not exist */ }
-		
-		if (orgFile.isEncrypted())
-        	decryptAndParseFile(orgFile, breader);
-        else {
-        	parser.parse(orgFile, breader, this.context);
+
+		BufferedReader breader = null;
+		if (PreferenceUtils.isEncryptionEnabled()) {
+			Log.d(logTag, "Decipher file: " + orgFile.name + " with key: " + PreferenceUtils.getEncryptionPass());
+        	breader = decryptFileStream(syncher.getRemoteFileStream(orgFile.filename));
+		} else {
+			breader = syncher.getRemoteFile(orgFile.filename);
         }
+		parser.parse(orgFile, breader, this.context);
 	}
 	
-	private void decryptAndParseFile(OrgFile orgFile, BufferedReader reader) {
+	@SuppressLint("NewApi")
+	private BufferedReader decryptFileStream(InputStream isr) {
+		final String password = PreferenceUtils.getEncryptionPass();
+
+		byte[] decData = null;
+		final int bufSize = 8192;
+
 		try {
-			Intent intent = new Intent(context, FileDecryptionActivity.class);
-			intent.putExtra("data", FileUtils.read(reader).getBytes());
-			intent.putExtra("filename", orgFile.filename);
-			intent.putExtra("filenameAlias", orgFile.name);
-			intent.putExtra("checksum", orgFile.checksum);
-			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-			context.startActivity(intent);	
-		} catch(IOException e) {}
+			// Read the bytes
+			ByteArrayOutputStream bos = new ByteArrayOutputStream();
+			byte[] rawData = new byte[bufSize];
+			int bytesRead = 0;
+			while ((bytesRead = isr.read(rawData, 0, bufSize)) >= 0) {
+				bos.write(rawData, 0, bytesRead);
+			}
+			ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
+
+			String rawDataStr = new String(bos.toByteArray(), StandardCharsets.UTF_8);
+			rawDataStr = rawDataStr.substring(0, Math.min(20, rawDataStr.length()));
+			//Log.d(logTag, "Decipher data: " + rawDataStr);
+
+			// Decrypt to text
+			OpenSSLPBEInputStream decIS = new OpenSSLPBEInputStream(bis, ALGORITHM, 1, password.toCharArray());
+			decData = new byte[decIS.available()];
+			decIS.read(decData);
+
+			decIS.close();
+		} catch (IOException e) {
+			Log.e(logTag, "Decryption Error:" + e.getMessage());
+		}
+
+		String strData = new String(decData, StandardCharsets.UTF_8);
+		Log.d(logTag, "Decrypted data: " + strData.substring(0, Math.min(20, strData.length())) + "...");
+
+		BufferedReader decReader = new BufferedReader(new StringReader(strData));
+		return decReader;
 	}
-	
+
+	private ByteArrayInputStream encryptFileStream(ByteArrayInputStream bis) throws IOException {
+		final String password = PreferenceUtils.getEncryptionPass();
+
+		final int bufSize = 8192;
+		byte[] encData = new byte[bufSize];
+		int bytesRead = 0;
+
+		ByteArrayOutputStream byteOS = new ByteArrayOutputStream();
+		OpenSSLPBEOutputStream encOS = new OpenSSLPBEOutputStream(byteOS, ALGORITHM, 1, password.toCharArray());
+		while ( (bytesRead = bis.read(encData, 0, bufSize)) >= 0) {
+			encOS.write(encData, 0, bytesRead);
+		}
+		encOS.flush();
+		encOS.close();
+		return new ByteArrayInputStream(byteOS.toByteArray());
+	}
 
 	private void announceStartSync() {
 		notify.setupNotification();

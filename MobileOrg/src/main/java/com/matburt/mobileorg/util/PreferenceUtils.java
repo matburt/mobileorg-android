@@ -74,6 +74,16 @@ public class PreferenceUtils {
 	    return appSettings.getString("theme", "Dark");
 	}
 
+	public static String getEncryptionPass() {
+		Context context = MobileOrgApplication.getContext();
+		SharedPreferences appSettings = PreferenceManager.getDefaultSharedPreferences(context);
+		return appSettings.getString("encryptionPassword", "");
+	}
+
+	public static boolean isEncryptionEnabled() {
+		return !getEncryptionPass().isEmpty();
+	}
+
 	public static boolean useAdvancedCapturing() {
 		Context context = MobileOrgApplication.getContext();
 		return PreferenceManager.getDefaultSharedPreferences(context)

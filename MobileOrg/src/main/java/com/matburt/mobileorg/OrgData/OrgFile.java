@@ -2,6 +2,7 @@ package com.matburt.mobileorg.OrgData;
 
 import android.content.ContentResolver;
 import android.content.ContentValues;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 
@@ -9,6 +10,7 @@ import com.matburt.mobileorg.OrgData.OrgContract.Files;
 import com.matburt.mobileorg.OrgData.OrgContract.OrgData;
 import com.matburt.mobileorg.util.OrgFileNotFoundException;
 import com.matburt.mobileorg.util.OrgNodeNotFoundException;
+import com.matburt.mobileorg.util.PreferenceUtils;
 
 public class OrgFile {
 	public static final String CAPTURE_FILE = "mobileorg.org";
@@ -156,12 +158,7 @@ public class OrgFile {
 		total += resolver.delete(OrgData.buildIdUri(nodeId), null, null);
 		return total;
 	}
-	
-	public boolean isEncrypted() {
-		return filename.endsWith(".gpg") || filename.endsWith(".pgp")
-				|| filename.endsWith(".enc") || filename.endsWith(".asc");
-	}
-	
+
 	public boolean generateEditsForFile() {
 		if(filename.equals(CAPTURE_FILE))
 			return false;
