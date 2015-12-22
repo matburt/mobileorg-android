@@ -12,6 +12,7 @@ import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Gui.Wizard.FolderAdapter;
 import com.matburt.mobileorg.Gui.Wizard.LocalDirectoryBrowser;
 import com.matburt.mobileorg.Gui.Wizard.WizardView;
+import com.matburt.mobileorg.Settings.SettingsActivity;
 
 public class SDCardWizard extends Wizard {
 	
@@ -53,7 +54,7 @@ public class SDCardWizard extends Wizard {
 				.getDefaultSharedPreferences(context);
 		SharedPreferences.Editor editor = appSettings.edit();
 		
-		editor.putString("syncSource", "sdcard");
+		editor.putString(SettingsActivity.KEY_SYNC_SOURCE, "sdcard");
 		editor.putString("indexFilePath",
 				directoryAdapter.getCheckedDirectory());
 		
