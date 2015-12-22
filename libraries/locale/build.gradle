@@ -1,16 +1,4 @@
-buildscript {
-    repositories {
-        maven { url 'http://repo1.maven.org/maven2' }
-    }
-    dependencies {
-        classpath 'com.android.tools.build:gradle:1.1.+'
-    }
-}
-
-apply plugin: 'android-library'
-
-dependencies {
-}
+apply plugin: 'com.android.library'
 
 android {
     compileSdkVersion 21

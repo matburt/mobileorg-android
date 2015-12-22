@@ -1,16 +1,4 @@
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath 'com.android.tools.build:gradle:1.1.+'
-    }
-}
-apply plugin: 'android'
-
-repositories {
-    mavenCentral()
-}
+apply plugin: 'com.android.application'
 
 dependencies {
     compile 'com.actionbarsherlock:actionbarsherlock:4.4.0@aar'
@@ -63,9 +51,9 @@ android {
         }
     }
 
-    packagingOptions { // This is a fix for a bug in the Android gradle plugin v. 0.7.0
-        exclude 'META-INF/DEPENDENCIES'
+    packagingOptions {
         exclude 'META-INF/LICENSE'
+        exclude 'META-INF/DEPENDENCIES'
         exclude 'META-INF/NOTICE'
     }
 }
