@@ -4,6 +4,9 @@ dependencies {
     compile 'com.actionbarsherlock:actionbarsherlock:4.4.0@aar'
     compile 'com.android.support:support-v4:13.0.+'
     compile 'com.jcraft:jsch:0.1.50'
+    compile 'org.apache.httpcomponents:httpcore:4.0.1'
+    compile 'org.apache.httpcomponents:httpmime:4.0.3'
+    compile 'org.apache.james:apache-mime4j:0.6'
     compile project(':libraries:locale')
     compile fileTree(dir: 'libs', include: '*.jar')
 }
