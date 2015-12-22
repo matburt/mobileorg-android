@@ -50,6 +50,15 @@
                     android:title="@string/preference_combine_block_agenda" />
             </PreferenceCategory>
         </PreferenceScreen>
+        <PreferenceScreen android:title="@string/preference_encryption">
+            <PreferenceCategory android:title="@string/preference_encryption">
+                <EditTextPreference
+                    android:key="@string/key_encryption_password"
+                    android:title="@string/preference_encryption_pass"
+                    android:summary="@string/preference_encryption_pass_summary"
+                    android:inputType="textPassword" />
+            </PreferenceCategory>
+        </PreferenceScreen>
         <PreferenceScreen android:title="@string/preference_interface" >
             <PreferenceCategory android:title="@string/preference_general" >
                 <ListPreference

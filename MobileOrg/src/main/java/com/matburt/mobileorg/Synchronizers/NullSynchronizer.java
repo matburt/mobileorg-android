@@ -1,6 +1,7 @@
 package com.matburt.mobileorg.Synchronizers;
 
 import java.io.BufferedReader;
+import java.io.InputStream;
 
 public class NullSynchronizer implements SynchronizerInterface {
 
@@ -11,15 +12,25 @@ public class NullSynchronizer implements SynchronizerInterface {
         return true;
     }
 
+    @Override
     public void putRemoteFile(String filename, String contents) {
     }
 
+    @Override
+    public void putRemoteFile(String filename, InputStream contents) {
+    }
+
+    @Override
     public BufferedReader getRemoteFile(String filename) {
         return null;
     }
 
+	@Override
+	public InputStream getRemoteFileStream(String filename) {
+		return null;
+	}
 
-    @Override
+	@Override
 	public void postSynchronize() {
     }
 
@@ -27,4 +38,5 @@ public class NullSynchronizer implements SynchronizerInterface {
 	public boolean isConnectable() {
 		return true;
 	}
+
 }

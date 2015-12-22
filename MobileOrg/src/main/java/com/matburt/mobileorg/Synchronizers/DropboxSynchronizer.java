@@ -1,11 +1,14 @@
 package com.matburt.mobileorg.Synchronizers;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -78,7 +81,25 @@ public class DropboxSynchronizer implements SynchronizerInterface {
         BufferedWriter writer =  orgFile.getWriter();
         writer.write(contents);
         writer.close();
-    
+
+        putRemoteFile(filename, orgFile);
+    }
+
+    public void putRemoteFile(String filename, InputStream contents) throws IOException {
+        FileUtils orgFile = new FileUtils(filename, context);
+        final int bufSize = 8192;
+        int bytesRead = 0;
+        byte[] buffer = new byte[bufSize];
+        OutputStream os =  orgFile.getFileOutputStream();
+        while ( (bytesRead = contents.read(buffer, 0, bytesRead)) >= 0) {
+            os.write(buffer, 0, bytesRead);
+        }
+        os.close();
+
+        putRemoteFile(filename, orgFile);
+    }
+
+    private void putRemoteFile(String filename, FileUtils orgFile) throws IOException {
         File uploadFile = orgFile.getFile();
         FileInputStream fis = new FileInputStream(uploadFile);
         try {
@@ -96,19 +117,25 @@ public class DropboxSynchronizer implements SynchronizerInterface {
         }
     }
 
+    @Override
 	public BufferedReader getRemoteFile(String filename) throws IOException {
+		return new BufferedReader(
+				new InputStreamReader(
+						getRemoteFileStream(filename)));
+	}
+
+    @Override
+	public InputStream getRemoteFileStream(String filename) throws IOException {
 		String filePath = this.remotePath + filename;
         try {
             DropboxInputStream is = dropboxApi.getFileStream(filePath, null);
-            BufferedReader fileReader = new BufferedReader(new InputStreamReader(is));
-            return fileReader;
+            return new BufferedInputStream(is);
         } catch (DropboxUnlinkedException e) {
             throw new IOException("Dropbox Authentication Failed, re-run setup wizard");
         } catch (DropboxException e) {
             throw new IOException("Fetching " + filename + ": " + e.toString());
         }
 	}
-
     
     /**
      * This handles authentication if the user's token & secret

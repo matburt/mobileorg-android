@@ -10,6 +10,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 
 import android.content.Context;
@@ -92,29 +93,38 @@ public class FileUtils {
 	
 	public BufferedWriter getWriter(boolean append) throws IOException {
 		String storageMode = getStorageMode();
-		BufferedWriter writer = null;
+		BufferedWriter writer = new BufferedWriter(
+				new OutputStreamWriter(getFileOutputStream(append)));
+
+		return writer;
+	}
+
+	public OutputStream getFileOutputStream() throws IOException {
+		return getFileOutputStream(false);
+	}
+
+	public OutputStream getFileOutputStream(boolean append) throws IOException {
+		String storageMode = getStorageMode();
+		FileOutputStream fs = null;
 
 		if (storageMode.equals("internal") || storageMode.equals("")) {
-			FileOutputStream fs;
 			String normalized = fileName.replace("/", "_");
-			if(append)
+			if(append) {
 				fs = context.openFileOutput(normalized, Context.MODE_APPEND);
-			else
+			} else {
 				fs = context.openFileOutput(normalized, Context.MODE_PRIVATE);
-			writer = new BufferedWriter(new OutputStreamWriter(fs));
-
+			}
 		} else if (storageMode.equals("sdcard")) {
 			File root = Environment.getExternalStorageDirectory();
 			File morgDir = new File(root, "mobileorg");
 			morgDir.mkdir();
 			if (morgDir.canWrite()) {
 				File orgFileCard = new File(morgDir, fileName);
-				FileWriter orgFWriter = new FileWriter(orgFileCard, append);
-				writer = new BufferedWriter(orgFWriter);
+				fs = new FileOutputStream(orgFileCard, append);
 			}
 		}
 
-		return writer;
+		return fs;
 	}
 
 	public File getFile() {

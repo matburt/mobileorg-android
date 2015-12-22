@@ -1,10 +1,12 @@
 package com.matburt.mobileorg.Synchronizers;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
@@ -176,24 +178,35 @@ public class WebDAVSynchronizer implements SynchronizerInterface {
         i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         this.context.startActivity(i);
     }
-	
+
+    @Override
 	public void putRemoteFile(String filename, String contents) throws IOException {
 		String urlActual = this.getRootUrl() + filename;
 		putUrlFile(urlActual, contents);
 	}
 
+    @Override
+    public void putRemoteFile(String filename, InputStream contents) throws IOException {
+        String urlActual = this.getRootUrl() + filename;
+        putUrlFile(urlActual, contents);
+    }
+
+    @Override
 	public BufferedReader getRemoteFile(String filename) throws IOException, CertificateException,
                                                                    SSLHandshakeException {
+
+		InputStream mainFile = getRemoteFileStream(filename);
+        return new BufferedReader(new InputStreamReader(mainFile));
+	}
+
+	@Override
+	public InputStream getRemoteFileStream(String filename) throws IOException,
+			CertificateException, SSLHandshakeException
+	{
 		String orgUrl = this.remotePath + filename;
         InputStream mainFile = null;
         try {
             mainFile = this.getUrlStream(orgUrl);
-
-            if (mainFile == null) {
-                return null;
-            } 
-
-            return new BufferedReader(new InputStreamReader(mainFile));
         }
         catch (CertificateException e) {
             Log.w("MobileOrg", "Conflicting certificate found: " + e.toString());
@@ -205,9 +218,11 @@ public class WebDAVSynchronizer implements SynchronizerInterface {
             handleChangedCertificate();
             throw e;
         }
-	}
 
-    /* See: http://stackoverflow.com/questions/1217141/self-signed-ssl-acceptance-android */
+        return mainFile;
+}
+
+	/* See: http://stackoverflow.com/questions/1217141/self-signed-ssl-acceptance-android */
     private void handleTrustRelationship(Context c) {
         try {
             HttpsURLConnection.setDefaultHostnameVerifier(new HostnameVerifier(){
@@ -296,7 +311,35 @@ public class WebDAVSynchronizer implements SynchronizerInterface {
 		}
 	}
 
-	private String getRootUrl() {
+    private void putUrlFile(String url, InputStream content) throws IOException {
+        try {
+            HttpURLConnection con = this.createConnection(url);
+            con.setRequestMethod("PUT");
+            con.setDoOutput(true);
+            final int bufSize = 8192;
+            int bytesRead = 0;
+            byte[] buffer = new byte[bufSize];
+
+            OutputStream out = con.getOutputStream();
+
+            while ( (bytesRead = content.read(buffer, 0, bufSize)) >= 0 ) {
+                out.write(buffer, 0, bytesRead);
+            }
+            out.flush();
+            out.close();
+
+            con.getInputStream();
+            if (con.getResponseCode() < HttpURLConnection.HTTP_OK || con.getResponseCode() > 299) {
+                throw new IOException(r.getString(R.string.error_url_fetch_detail,
+                        url, con.getResponseMessage()));
+            }
+        } catch (UnsupportedEncodingException e) {
+            throw new IOException(r.getString(
+                    R.string.error_unsupported_encoding, FileUtils.CAPTURE_FILE));
+        }
+    }
+
+    private String getRootUrl() {
 		URL manageUrl;
 		try {
 			manageUrl = new URL(this.remoteIndexPath);
