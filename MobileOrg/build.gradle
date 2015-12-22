@@ -7,6 +7,9 @@ dependencies {
     compile 'org.apache.httpcomponents:httpcore:4.0.1'
     compile 'org.apache.httpcomponents:httpmime:4.0.3'
     compile 'org.apache.james:apache-mime4j:0.6'
+    compile 'com.googlecode.json-simple:json-simple:1.1'
+    compile 'oauth.signpost:signpost-core:1.2.1.1'
+    compile 'oauth.signpost:signpost-commonshttp4:1.2.1.1'
     compile project(':libraries:locale')
     compile fileTree(dir: 'libs', include: '*.jar')
 }
@@ -54,10 +57,5 @@ android {
         }
     }
 
-    packagingOptions {
-        exclude 'META-INF/LICENSE'
-        exclude 'META-INF/DEPENDENCIES'
-        exclude 'META-INF/NOTICE'
-    }
 }
 
