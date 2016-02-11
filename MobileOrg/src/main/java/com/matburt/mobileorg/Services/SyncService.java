@@ -71,14 +71,16 @@ public class SyncService extends Service implements
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		String action = intent.getStringExtra(ACTION);
-		if (action != null && action.equals(START_ALARM))
-			setAlarm();
-		else if (action != null && action.equals(STOP_ALARM))
-			unsetAlarm();
-		else if(!this.syncRunning) {
-			this.syncRunning = true;
-			runSynchronizer();
+		if (intent != null) {
+			String action = intent.getStringExtra(ACTION);
+			if (action != null && action.equals(START_ALARM))
+				setAlarm();
+			else if (action != null && action.equals(STOP_ALARM))
+				unsetAlarm();
+			else if (!this.syncRunning) {
+				this.syncRunning = true;
+				runSynchronizer();
+			}
 		}
 		return 0;
 	}
