@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="outline_item">32sp</dimen>
+    <dimen name="outline_item">50sp</dimen>
     
     <dimen name="outline_dashitem_height">70dp</dimen>
     <dimen name="outline_dashitem_width">70dp</dimen>

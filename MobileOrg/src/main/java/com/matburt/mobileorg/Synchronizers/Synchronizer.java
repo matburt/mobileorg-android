@@ -210,7 +210,7 @@ public class Synchronizer {
 	
 	private void getAndParseFile(OrgFile orgFile, OrgFileParser parser)
 			throws CertificateException, IOException {
-		
+		Log.v("getter","parsing : "+orgFile);
 		BufferedReader breader = syncher.getRemoteFile(orgFile.filename);
 
 		// TODO Generate checksum of file and compare to remoteChecksum

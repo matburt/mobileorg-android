@@ -128,7 +128,7 @@ public class OutlineItem extends RelativeLayout implements Checkable {
 		if (levelFormatting)
 			applyLevelIndentation(node.level, titleSpan);
 		
-		if(expanded == false)
+		if(!expanded)
 			setupChildrenIndicator(node, resolver, theme, titleSpan);
 				
 		titleSpan.setSpan(new StyleSpan(Typeface.NORMAL), 0, titleSpan.length(), 0);
@@ -145,7 +145,7 @@ public class OutlineItem extends RelativeLayout implements Checkable {
 	}
 
 	public void setupTodo(String todo, DefaultTheme theme, ContentResolver resolver) {
-		if(TextUtils.isEmpty(todo) == false) {
+		if(!TextUtils.isEmpty(todo)) {
 			Spannable todoSpan = new SpannableString(todo + " ");
 			
 			boolean active = OrgProviderUtils.isTodoActive(todo, resolver);
@@ -160,7 +160,7 @@ public class OutlineItem extends RelativeLayout implements Checkable {
 	}
 	
 	public static void setupPriority(String priority, DefaultTheme theme, SpannableStringBuilder titleSpan) {
-		if (priority != null && TextUtils.isEmpty(priority) == false) {
+		if (priority != null && !TextUtils.isEmpty(priority)) {
 			Spannable prioritySpan = new SpannableString(priority + " ");
 			prioritySpan.setSpan(new ForegroundColorSpan(theme.c3Yellow), 0,
 					priority.length(), 0);
@@ -228,8 +228,8 @@ public class OutlineItem extends RelativeLayout implements Checkable {
 	}
 	
 	public void setupTags(String tags, String tagsInherited, DefaultTheme theme) {
-		if(TextUtils.isEmpty(tags) == false || TextUtils.isEmpty(tagsInherited) == false) {
-			if (TextUtils.isEmpty(tagsInherited) == false)
+		if(!TextUtils.isEmpty(tags) || !TextUtils.isEmpty(tagsInherited)) {
+			if (!TextUtils.isEmpty(tagsInherited))
 				tagsView.setText(tags + "::" + tagsInherited);
 			else
 				tagsView.setText(tags);

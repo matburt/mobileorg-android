@@ -3,7 +3,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:0.7.+'
+        classpath 'com.android.tools.build:gradle:1.5.0'
     }
 }
 apply plugin: 'android'
@@ -31,8 +31,8 @@ def getVersionName = { ->
 }
 
 android {
-    compileSdkVersion 19
-    buildToolsVersion "19.0.1"
+    compileSdkVersion 23
+    buildToolsVersion "23.0.2"
 
     defaultConfig {
         minSdkVersion 9
@@ -40,6 +40,8 @@ android {
         versionCode 913
         versionName getVersionName()
     }
+
+    useLibrary 'org.apache.http.legacy'
 
     signingConfigs {
         matburt {
@@ -55,7 +57,7 @@ android {
             signingConfig signingConfigs.matburt
         }
         donate {
-            packageNameSuffix ".donate"
+            applicationIdSuffix ".donate"
             signingConfig signingConfigs.matburt
         }
         debug {

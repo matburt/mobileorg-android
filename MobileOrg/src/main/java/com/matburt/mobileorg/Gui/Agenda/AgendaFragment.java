@@ -2,6 +2,7 @@ package com.matburt.mobileorg.Gui.Agenda;
 
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -52,13 +53,12 @@ public class AgendaFragment extends SherlockFragment {
 		this.mergeAdapter = new MergeAdapter();
 		
 		OrgAgenda blockAgenda = OrgAgenda.getAgenda(agendaPos, getActivity());
-		
 		for (OrgQueryBuilder agenda : blockAgenda.queries)
 			addAgenda(agenda);
 
 		this.agendaList.setAdapter(mergeAdapter);
 		this.agendaList.setOnItemClickListener(agendaClickListener);
-		
+
 		((AgendaActivity) getActivity()).getSupportActionBar().setTitle("Agenda: " +
 				blockAgenda.title);
 	}

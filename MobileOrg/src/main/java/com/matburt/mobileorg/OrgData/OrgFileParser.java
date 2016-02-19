@@ -12,6 +12,7 @@ import java.util.regex.Pattern;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.text.TextUtils;
+import android.util.Log;
 import android.util.Pair;
 
 import com.matburt.mobileorg.OrgData.OrgContract.OrgData;
@@ -80,6 +81,7 @@ public class OrgFileParser {
 	}
 
 	private void parseLine(String line) {
+		Log.v("parsing", "parseLine : " + line);
 		if (TextUtils.isEmpty(line))
 			return;
 

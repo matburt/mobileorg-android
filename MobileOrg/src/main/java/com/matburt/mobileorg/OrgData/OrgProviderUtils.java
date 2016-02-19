@@ -51,7 +51,7 @@ public class OrgProviderUtils {
 				null, null, Files.DEFAULT_SORT);
 		cursor.moveToFirst();
 
-		while (cursor.isAfterLast() == false) {
+		while (!cursor.isAfterLast()) {
 			OrgFile orgFile = new OrgFile();
 			
 			try {
@@ -122,6 +122,7 @@ public class OrgProviderUtils {
 			resolver.insert(Priorities.CONTENT_URI, values);
 		}
 	}
+
 	public static ArrayList<String> getPriorities(ContentResolver resolver) {
 		Cursor cursor = resolver.query(Priorities.CONTENT_URI, new String[] { Priorities.NAME },
 				null, null, Priorities.ID);
