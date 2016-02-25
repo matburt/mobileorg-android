@@ -1,8 +1,5 @@
 package com.matburt.mobileorg.Gui.Wizard.Wizards;
 
-import com.matburt.mobileorg.R;
-import com.matburt.mobileorg.Gui.Wizard.WizardView;
-
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -13,6 +10,9 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.Toast;
+
+import com.matburt.mobileorg.Gui.Wizard.WizardView;
+import com.matburt.mobileorg.R;
 
 public abstract class Wizard {
 

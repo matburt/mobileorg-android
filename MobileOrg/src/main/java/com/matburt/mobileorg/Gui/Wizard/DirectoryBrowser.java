@@ -1,11 +1,11 @@
 package com.matburt.mobileorg.Gui.Wizard;
 
-import java.io.File;
-import java.util.ArrayList;
-
 import android.content.Context;
 
 import com.matburt.mobileorg.R;
+
+import java.io.File;
+import java.util.ArrayList;
 
 public abstract class DirectoryBrowser<T> {
 

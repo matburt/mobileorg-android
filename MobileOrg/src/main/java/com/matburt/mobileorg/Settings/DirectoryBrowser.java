@@ -1,9 +1,5 @@
 package com.matburt.mobileorg.Settings;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-
 import android.content.Context;
 import android.util.Log;
 
@@ -13,6 +9,10 @@ import com.dropbox.client2.android.AndroidAuthSession;
 import com.dropbox.client2.exception.DropboxException;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Synchronizers.UbuntuOneSynchronizer;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 public interface DirectoryBrowser {
 
@@ -50,7 +50,7 @@ public interface DirectoryBrowser {
 	    public void setContext(Context context) { this.context = context; }
 
 	    public void setLocale() { 
-		upOneLevel = context.getString(R.string.up_one_level); 
+		upOneLevel = context.getString(R.string.up_one_level);
 	    }
 
 		public ArrayList<String> list() { return directoryNames; }
@@ -109,7 +109,7 @@ public interface DirectoryBrowser {
 		public void setContext(Context context) { this.context = context; }
 
 		public void setLocale() { 
-			upOneLevel = context.getString(R.string.up_one_level); 
+			upOneLevel = context.getString(R.string.up_one_level);
 		}
 
 		public ArrayList<String> list() { return directoryNames; }
@@ -169,7 +169,7 @@ public interface DirectoryBrowser {
 		public void setContext(Context context) { this.context = context; }
 
 		public void setLocale() { 
-			upOneLevel = context.getString(R.string.up_one_level); 
+			upOneLevel = context.getString(R.string.up_one_level);
 		}
 
 		public ArrayList<String> list() { return directoryNames; }

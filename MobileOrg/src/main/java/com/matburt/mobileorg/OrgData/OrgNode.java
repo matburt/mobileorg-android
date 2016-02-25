@@ -1,10 +1,5 @@
 package com.matburt.mobileorg.OrgData;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.regex.Matcher;
-
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
@@ -12,13 +7,18 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
+import android.util.Log;
 
-import com.matburt.mobileorg.Gui.Outline.OutlineItem;
+//import com.matburt.mobileorg.Gui.Outline.OutlineItem;
 import com.matburt.mobileorg.OrgData.OrgContract.OrgData;
 import com.matburt.mobileorg.util.FileUtils;
 import com.matburt.mobileorg.util.OrgFileNotFoundException;
 import com.matburt.mobileorg.util.OrgNodeNotFoundException;
 import com.matburt.mobileorg.util.OrgUtils;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.regex.Matcher;
 
 public class OrgNode {
 	public static final String ARCHIVE_NODE = "Archive";
@@ -64,6 +64,7 @@ public class OrgNode {
 	}
 	
 	public void set(Cursor cursor) throws OrgNodeNotFoundException {
+		Log.v("detail", "building payload");
 		if (cursor != null && cursor.getCount() > 0) {
 			if(cursor.isBeforeFirst() || cursor.isAfterLast())
 				cursor.moveToFirst();
@@ -82,6 +83,7 @@ public class OrgNode {
 			name = cursor.getString(cursor.getColumnIndexOrThrow(OrgData.NAME));
 			payload = cursor.getString(cursor
 					.getColumnIndexOrThrow(OrgData.PAYLOAD));
+			Log.v("detail","and payload is :"+payload.toString());
 		} else {
 			throw new OrgNodeNotFoundException(
 					"Failed to create OrgNode from cursor");
@@ -117,7 +119,18 @@ public class OrgNode {
 		else
 			updateNode(resolver);
 	}
-	
+
+    /**
+     * Generate the family tree with all descendants nodes and starting at the current one
+     * @return the ArrayList<OrgNode> containing all nodes
+     */
+    public ArrayList<OrgNode> getDescandants(ContentResolver resolver){
+        ArrayList<OrgNode> result = new ArrayList<OrgNode>();
+        result.add(this);
+        for(OrgNode child: getChildren(resolver)) result.addAll(child.getDescandants(resolver));
+        return result;
+    }
+
 	private long addNode(ContentResolver resolver) {
 		Uri uri = resolver.insert(OrgData.CONTENT_URI, getContentValues());
 		this.id = Long.parseLong(OrgData.getId(uri));
@@ -339,14 +352,15 @@ public class OrgNode {
 	public String getCleanedName() {
 		StringBuilder nameBuilder = new StringBuilder(this.name);
 		
-		Matcher matcher = OutlineItem.urlPattern.matcher(nameBuilder);
-		while(matcher.find()) {
-			nameBuilder.delete(matcher.start(), matcher.end());
-			nameBuilder.insert(matcher.start(), matcher.group(1));
-			matcher = OutlineItem.urlPattern.matcher(nameBuilder);
-		}
-		
-		return nameBuilder.toString();
+//		Matcher matcher = OutlineItem.urlPattern.matcher(nameBuilder);
+//		while(matcher.find()) {
+//			nameBuilder.delete(matcher.start(), matcher.end());
+//			nameBuilder.insert(matcher.start(), matcher.group(1));
+//			matcher = OutlineItem.urlPattern.matcher(nameBuilder);
+//		}
+//
+//		return nameBuilder.toString();
+		return this.name;
 	}
 
 	
@@ -529,19 +543,19 @@ public class OrgNode {
 			result.append("*");
 		result.append(" ");
 
-		if (TextUtils.isEmpty(todo) == false)
+		if (!TextUtils.isEmpty(todo))
 			result.append(todo + " ");
 
-		if (TextUtils.isEmpty(priority) == false)
+		if (!TextUtils.isEmpty(priority))
 			result.append("[#" + priority + "] ");
 
 		result.append(name);
 		
-		if(tags != null && TextUtils.isEmpty(tags) == false)
+		if(tags != null && !TextUtils.isEmpty(tags))
 			result.append(" ").append(":" + tags + ":");
 		
 
-		if (payload != null && TextUtils.isEmpty(payload) == false)
+		if (payload != null && !TextUtils.isEmpty(payload))
 			result.append("\n").append(payload);
 
 		return result.toString();

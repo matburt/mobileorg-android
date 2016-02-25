@@ -13,8 +13,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Gui.Wizard.WizardView;
+import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Synchronizers.SSHSynchronizer;
 
 public class SSHWizard extends Wizard {

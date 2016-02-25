@@ -10,9 +10,9 @@ import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.text.format.Time;
 
-import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.OrgData.CalendarEntry;
 import com.matburt.mobileorg.OrgData.OrgNodeDate;
+import com.matburt.mobileorg.R;
 
 public class CalendarWrapper {
 

@@ -1,9 +1,5 @@
 package com.matburt.mobileorg.Gui;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.InputStreamReader;
-
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
@@ -13,10 +9,14 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.OrgData.OrgDatabase;
 import com.matburt.mobileorg.OrgData.OrgFile;
 import com.matburt.mobileorg.OrgData.OrgFileParser;
+import com.matburt.mobileorg.R;
+
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.InputStreamReader;
 
 public class FileDecryptionActivity extends Activity
 {

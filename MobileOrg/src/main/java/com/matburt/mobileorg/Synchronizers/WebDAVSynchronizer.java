@@ -1,5 +1,19 @@
 package com.matburt.mobileorg.Synchronizers;
 
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
+import android.content.res.Resources;
+import android.preference.PreferenceManager;
+import android.util.Base64;
+import android.util.Log;
+
+import com.matburt.mobileorg.Gui.CertificateConflictActivity;
+import com.matburt.mobileorg.R;
+import com.matburt.mobileorg.util.FileUtils;
+import com.matburt.mobileorg.util.OrgUtils;
+
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -21,20 +35,6 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLHandshakeException;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.X509TrustManager;
-
-import android.content.Context;
-import android.content.Intent;
-import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
-import android.content.res.Resources;
-import android.preference.PreferenceManager;
-import android.util.Base64;
-import android.util.Log;
-
-import com.matburt.mobileorg.R;
-import com.matburt.mobileorg.Gui.CertificateConflictActivity;
-import com.matburt.mobileorg.util.FileUtils;
-import com.matburt.mobileorg.util.OrgUtils;
 
 public class WebDAVSynchronizer implements SynchronizerInterface {
 

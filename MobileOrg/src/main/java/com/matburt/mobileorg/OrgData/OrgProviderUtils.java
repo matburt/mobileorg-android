@@ -1,11 +1,5 @@
 package com.matburt.mobileorg.OrgData;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.database.Cursor;
@@ -20,6 +14,12 @@ import com.matburt.mobileorg.OrgData.OrgContract.Todos;
 import com.matburt.mobileorg.util.FileUtils;
 import com.matburt.mobileorg.util.OrgFileNotFoundException;
 import com.matburt.mobileorg.util.OrgNodeNotFoundException;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class OrgProviderUtils {
 	
@@ -379,15 +379,19 @@ public class OrgProviderUtils {
 		String sort = nodeId == -1 ? OrgData.NAME_SORT : null;
 		Cursor childCursor = resolver.query(OrgData.buildChildrenUri(nodeId),
 				OrgData.DEFAULT_COLUMNS, null, null, sort);
-		
-		ArrayList<OrgNode> result = orgDataCursorToArrayList(childCursor);
-		childCursor.close();
-		return result;
+
+		if(childCursor!=null) {
+			ArrayList<OrgNode> result = orgDataCursorToArrayList(childCursor);
+			childCursor.close();
+			return result;
+		}else{
+			return new ArrayList<OrgNode>();
+		}
 	}
 	
 	public static ArrayList<OrgNode> orgDataCursorToArrayList(Cursor cursor) {
 		ArrayList<OrgNode> result = new ArrayList<OrgNode>();
-		
+
 		cursor.moveToFirst();
 		
 		while(cursor.isAfterLast() == false) {

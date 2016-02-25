@@ -1,7 +1,5 @@
 package com.matburt.mobileorg.Gui.Wizard.Wizards;
 
-import java.io.File;
-
 import android.content.Context;
 import android.util.Log;
 
@@ -10,6 +8,8 @@ import com.dropbox.client2.DropboxAPI.Entry;
 import com.dropbox.client2.android.AndroidAuthSession;
 import com.dropbox.client2.exception.DropboxException;
 import com.matburt.mobileorg.Gui.Wizard.DirectoryBrowser;
+
+import java.io.File;
 
 public class DropboxDirectoryBrowser extends DirectoryBrowser<String> {
 	

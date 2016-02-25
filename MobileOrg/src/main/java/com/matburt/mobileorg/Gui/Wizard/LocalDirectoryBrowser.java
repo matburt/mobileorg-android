@@ -1,9 +1,9 @@
 package com.matburt.mobileorg.Gui.Wizard;
 
+import android.content.Context;
+
 import java.io.File;
 import java.util.Arrays;
-
-import android.content.Context;
 
 public class LocalDirectoryBrowser extends DirectoryBrowser<File> {
 

@@ -1,5 +1,10 @@
 package com.matburt.mobileorg.util;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.os.Environment;
+import android.preference.PreferenceManager;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -11,11 +16,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-
-import android.content.Context;
-import android.content.SharedPreferences;
-import android.os.Environment;
-import android.preference.PreferenceManager;
 
 public class FileUtils {
 

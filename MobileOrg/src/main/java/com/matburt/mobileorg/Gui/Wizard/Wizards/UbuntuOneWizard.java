@@ -12,9 +12,9 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Gui.Wizard.FolderAdapter;
 import com.matburt.mobileorg.Gui.Wizard.WizardView;
+import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Synchronizers.UbuntuOneSynchronizer;
 
 public class UbuntuOneWizard extends Wizard {

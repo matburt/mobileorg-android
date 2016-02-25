@@ -1,8 +1,5 @@
 package com.matburt.mobileorg.Services;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-
 import android.app.Service;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -25,6 +22,9 @@ import com.matburt.mobileorg.util.MultiMap;
 import com.matburt.mobileorg.util.OrgFileNotFoundException;
 import com.matburt.mobileorg.util.OrgNodeNotFoundException;
 import com.matburt.mobileorg.util.OrgUtils;
+
+import java.util.ArrayList;
+import java.util.HashSet;
 
 public class CalendarSyncService extends Service implements
 		SharedPreferences.OnSharedPreferenceChangeListener {

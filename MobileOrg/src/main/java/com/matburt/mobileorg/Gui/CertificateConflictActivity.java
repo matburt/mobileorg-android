@@ -20,7 +20,7 @@ public class CertificateConflictActivity extends Activity {
     private Button deny_button;
 
     public void onCreate(Bundle savedInstanceState) {
-		OrgUtils.setTheme(this);
+//		OrgUtils.setTheme(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.certconflict);
 

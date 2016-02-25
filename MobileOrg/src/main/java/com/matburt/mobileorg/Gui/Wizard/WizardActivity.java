@@ -6,14 +6,13 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.view.ViewTreeObserver;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
-import android.view.ViewTreeObserver;
 
-import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Gui.Wizard.Wizards.SSHWizard;
 import com.matburt.mobileorg.Gui.Wizard.Wizards.Wizard;
-import com.matburt.mobileorg.Settings.SettingsActivity;
+import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.util.OrgUtils;
 
 public class WizardActivity extends Activity implements RadioGroup.OnCheckedChangeListener, ViewTreeObserver.OnGlobalLayoutListener  {
@@ -27,7 +26,7 @@ public class WizardActivity extends Activity implements RadioGroup.OnCheckedChan
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		OrgUtils.setTheme(this);
+//		OrgUtils.setTheme(this);
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.wizard);
 		

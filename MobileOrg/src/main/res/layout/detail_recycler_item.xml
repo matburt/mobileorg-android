@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/LinearLayout1"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:minHeight="@dimen/outline_item"
+    android:orientation="vertical"
+    android:paddingLeft="5dp"
+    android:paddingRight="5dp" >
+
+    <TextView
+        android:id="@+id/outline_item_level"
+        android:layout_width="wrap_content"
+        android:layout_height="fill_parent"
+        android:layout_alignParentLeft="true"
+        android:text=""
+        android:textAppearance="?android:attr/textAppearanceMedium" >
+    </TextView>
+
+    <Button
+        android:id="@+id/outline_item_todo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_toRightOf="@+id/outline_item_level"
+        android:background="@android:color/transparent"
+        android:focusable="false"
+        android:minHeight="30dp"
+        android:minWidth="40dp"
+        android:text="" />
+
+    <TextView
+        android:id="@+id/outline_item_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerVertical="true"
+        android:layout_toRightOf="@+id/outline_item_todo"
+        android:text=""
+        android:textAppearance="?android:attr/textAppearanceMedium" >
+    </TextView>
+
+    <TextView
+        android:id="@+id/outline_item_tags"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/outline_item_title"
+        android:paddingLeft="10dp"
+        android:text="" >
+    </TextView>
+
+</RelativeLayout>

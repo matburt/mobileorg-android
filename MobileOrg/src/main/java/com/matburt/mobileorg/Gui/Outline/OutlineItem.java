@@ -1,15 +1,12 @@
 package com.matburt.mobileorg.Gui.Outline;
 
-import java.util.ArrayList;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Typeface;
+import android.support.v7.widget.RecyclerView;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
@@ -23,83 +20,94 @@ import android.widget.Checkable;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Gui.Theme.DefaultTheme;
 import com.matburt.mobileorg.OrgData.OrgFileParser;
 import com.matburt.mobileorg.OrgData.OrgNode;
 import com.matburt.mobileorg.OrgData.OrgProviderUtils;
+import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.util.OrgNodeNotFoundException;
 import com.matburt.mobileorg.util.OrgUtils;
 import com.matburt.mobileorg.util.PreferenceUtils;
 
-public class OutlineItem extends RelativeLayout implements Checkable {
-		
-	private TextView titleView;
+import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+public class OutlineItem extends RecyclerView.ViewHolder {
+    public final View mView;
+    public TextView titleView;
 	private TextView tagsView;
 	private Button todoButton;
-	private TextView levelView;
+	public TextView levelView;
 	private boolean levelFormatting = true;
 	
-	public OutlineItem(Context context) {
-		super(context);
-		View.inflate(getContext(), R.layout.outline_item, this);
-		titleView = (TextView) findViewById(R.id.outline_item_title);
-		tagsView = (TextView) findViewById(R.id.outline_item_tags);
-		todoButton = (Button) findViewById(R.id.outline_item_todo);
-		levelView = (TextView) findViewById(R.id.outline_item_level);
-		todoButton.setOnClickListener(todoClick);		
-		
+	public OutlineItem(View view) {
+		super(view);
+        mView = view;
+		tagsView = (TextView) view.findViewById(R.id.outline_item_tags);
+        titleView = (TextView) view.findViewById(R.id.outline_item_title);
+        todoButton = (Button) view.findViewById(R.id.outline_item_todo);
+        levelView = (TextView) view.findViewById(R.id.outline_item_level);
+
+//		todoButton.setOnClickListener(todoClick);
+
 		int fontSize = PreferenceUtils.getFontSize();
 		tagsView.setTextSize(fontSize);
 		todoButton.setTextSize(fontSize);
 	}
+
+	@Override
+	public String toString() {
+		return super.toString() + " '" + levelView.getText() + "'";
+	}
 	
-	private OnClickListener todoClick = new OnClickListener() {
-		@Override
-		public void onClick(View v) {
-			createTodoDialog().show();
-		}
-	};
+//	private OnClickListener todoClick = new OnClickListener() {
+//		@Override
+//		public void onClick(View v) {
+//			createTodoDialog().show();
+//		}
+//	};
 	
 	private Dialog createTodoDialog() {
-		ArrayList<String> todos = PreferenceUtils.getSelectedTodos();
-		
-		if (todos.size() == 0)
-			todos = OrgProviderUtils.getTodos(getContext()
-					.getContentResolver());
-			
-		final ArrayList<String> todoList = todos;
-		AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-		builder.setTitle(getResources().getString(R.string.todo_state))
-				.setItems(todoList.toArray(new CharSequence[todoList.size()]),
-						new DialogInterface.OnClickListener() {
-							@Override
-							public void onClick(DialogInterface dialog,
-									int which) {
-								String selectedTodo = todoList.get(which);
-								setNewTodo(selectedTodo);
-							}
-						});
-		return builder.create();
+//		ArrayList<String> todos = PreferenceUtils.getSelectedTodos();
+//
+//		if (todos.size() == 0)
+//			todos = OrgProviderUtils.getTodos(getContext()
+//					.getContentResolver());
+//
+//		final ArrayList<String> todoList = todos;
+//		AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+//		builder.setTitle(getResources().getString(R.string.todo_state))
+//				.setItems(todoList.toArray(new CharSequence[todoList.size()]),
+//						new DialogInterface.OnClickListener() {
+//							@Override
+//							public void onClick(DialogInterface dialog,
+//									int which) {
+//								String selectedTodo = todoList.get(which);
+//								setNewTodo(selectedTodo);
+//							}
+//						});
+//		return builder.create();
+		return null;
 	}
 	
 	private void setNewTodo(String selectedTodo) {
-		if (selectedTodo.equals(node.todo))
-			return;
-
-		ContentResolver resolver = getContext().getContentResolver();
-		
-		OrgNode newNode;
-		try {
-			newNode = new OrgNode(node.id, resolver);
-		} catch (OrgNodeNotFoundException e) {
-			e.printStackTrace();
-			return;
-		}
-		newNode.todo = selectedTodo;
-		node.generateApplyWriteEdits(newNode, null, resolver);
-		node.write(resolver);
-		OrgUtils.announceSyncDone(getContext());
+//		if (selectedTodo.equals(node.todo))
+//			return;
+//
+//		ContentResolver resolver = getContext().getContentResolver();
+//
+//		OrgNode newNode;
+//		try {
+//			newNode = new OrgNode(node.id, resolver);
+//		} catch (OrgNodeNotFoundException e) {
+//			e.printStackTrace();
+//			return;
+//		}
+//		newNode.todo = selectedTodo;
+//		node.generateApplyWriteEdits(newNode, null, resolver);
+//		node.write(resolver);
+//		OrgUtils.announceSyncDone(getContext());
 	}
 	
 	private OrgNode node;
@@ -153,9 +161,9 @@ public class OutlineItem extends RelativeLayout implements Checkable {
 			todoSpan.setSpan(new ForegroundColorSpan(active ? theme.c1Red : theme.caLGreen), 0,
 					todo.length(), 0);
 			todoButton.setText(todoSpan);
-			todoButton.setVisibility(VISIBLE);
+			todoButton.setVisibility(View.VISIBLE);
 		} else {
-			todoButton.setVisibility(GONE);
+			todoButton.setVisibility(View.GONE);
 		}
 	}
 	
@@ -238,23 +246,6 @@ public class OutlineItem extends RelativeLayout implements Checkable {
 			tagsView.setVisibility(View.VISIBLE);
 		} else
 			tagsView.setVisibility(View.GONE);
-	}
-
-	@Override
-	public boolean isChecked() {
-		return false;
-	}
-
-	@Override
-	public void setChecked(boolean checked) {
-		if(checked)
-			setBackgroundResource(R.drawable.outline_item_selected);
-		else
-			setBackgroundResource(0);
-	}
-
-	@Override
-	public void toggle() {
 	}
 
 }

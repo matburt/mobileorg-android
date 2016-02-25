@@ -1,7 +1,5 @@
 package com.matburt.mobileorg.Services;
 
-import java.util.ArrayList;
-
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -10,6 +8,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
+import android.util.Log;
 
 import com.matburt.mobileorg.Gui.SynchronizerNotification;
 import com.matburt.mobileorg.Gui.SynchronizerNotificationCompat;
@@ -24,6 +23,8 @@ import com.matburt.mobileorg.Synchronizers.Synchronizer;
 import com.matburt.mobileorg.Synchronizers.SynchronizerInterface;
 import com.matburt.mobileorg.Synchronizers.UbuntuOneSynchronizer;
 import com.matburt.mobileorg.Synchronizers.WebDAVSynchronizer;
+
+import java.util.ArrayList;
 
 public class SyncService extends Service implements
 		SharedPreferences.OnSharedPreferenceChangeListener {
@@ -72,6 +73,7 @@ public class SyncService extends Service implements
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		String action = intent.getStringExtra(ACTION);
+        Log.v("sync","In start and actio is : "+action);
 		if (action != null && action.equals(START_ALARM))
 			setAlarm();
 		else if (action != null && action.equals(STOP_ALARM))
@@ -115,6 +117,7 @@ public class SyncService extends Service implements
     }
 
 	private void runSynchronizer() {
+        Log.v("sync", "runSynchronizer");
 		unsetAlarm();
 		final Synchronizer synchronizer = this.getSynchronizer();
 		final OrgDatabase db = new OrgDatabase(this);

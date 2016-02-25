@@ -1,6 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources>
-
     <string name="app_name">MobileOrgActivity</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
@@ -206,7 +204,7 @@
     <string name="preference_properties_drawer_fields">Fields</string>
     <string name="preference_properties_drawer_files_summary">Restrict display to specific files. List of filenames separated by \';\'. Leave empty for no restriction.</string>
     <string name="preference_properties_drawer_files">Files</string>
-    
+
     <string name="preference_sync_wifi_only">Sync with Wifi only</string>
     <string name="preference_sync_wifi_only_summary">Only try to synchronize when Wireless is up</string>
     <string name="preference_view_on_click">View on click</string>
@@ -216,7 +214,7 @@
     <string name="preference_capture_with_timestamp_summary">Captured nodes will have a timestamp added</string>
     <string name="preference_selected_todos">Quick Todo keywords</string>
     <string name="preference_selected_todos_summary">Select the TODO keywords available in outline for quick select. Separated by space.</string>
-    
+
     <!-- preference keys -->
     <string name="key_properties_drawer_include_fields">propertiesDrawerIncludeFields</string>
     <string name="key_properties_drawer_include_files">propertiesDrawerIncludeFiles</string>

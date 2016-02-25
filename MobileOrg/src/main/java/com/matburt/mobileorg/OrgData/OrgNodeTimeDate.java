@@ -1,10 +1,10 @@
 package com.matburt.mobileorg.OrgData;
 
+import android.text.TextUtils;
+
 import java.util.Calendar;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import android.text.TextUtils;
 
 public class OrgNodeTimeDate {
 	public TYPE type = TYPE.Scheduled;

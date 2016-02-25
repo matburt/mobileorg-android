@@ -5,19 +5,16 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.support.v7.view.ActionMode;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.widget.ListView;
 
-import com.actionbarsherlock.view.ActionMode;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuInflater;
-import com.actionbarsherlock.view.MenuItem;
-import com.matburt.mobileorg.R;
-import com.matburt.mobileorg.Gui.ViewActivity;
-import com.matburt.mobileorg.Gui.Capture.EditActivity;
-import com.matburt.mobileorg.Gui.Capture.EditActivityController;
 import com.matburt.mobileorg.OrgData.OrgFile;
 import com.matburt.mobileorg.OrgData.OrgNode;
+import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Services.CalendarSyncService;
 import com.matburt.mobileorg.Services.TimeclockService;
 import com.matburt.mobileorg.util.OrgFileNotFoundException;
@@ -50,7 +47,7 @@ public class OutlineActionMode implements ActionMode.Callback {
 		this.list = list;
 		this.adapter = (OutlineAdapter) list.getAdapter();
 		this.listPosition = position;
-		this.node = adapter.getItem(position);
+		this.node = adapter.items.get(position);
 	}
 	
 	@Override
@@ -84,10 +81,6 @@ public class OutlineActionMode implements ActionMode.Callback {
 	@Override
 	public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
 		switch (item.getItemId()) {
-
-		case R.id.menu_edit:
-			runEditNodeActivity(node.id, context);
-			break;
 		case R.id.menu_delete:
 			runDeleteNode();
 			break;
@@ -103,17 +96,10 @@ public class OutlineActionMode implements ActionMode.Callback {
 		case R.id.menu_archive_tosibling:
 			runArchiveNode(true);
 			break;
-		case R.id.menu_view:
-			runViewNodeActivity();
-			break;
 		case R.id.menu_recover:
 			runRecover();
 			break;
 
-		case R.id.menu_capturechild:
-			runCaptureActivity(node.id, context);
-			break;
-			
 		default:
 			mode.finish();
 			return false;
@@ -123,27 +109,6 @@ public class OutlineActionMode implements ActionMode.Callback {
 		return true;
 	}
 
-	
-	public static void runEditNodeActivity(long nodeId, Context context) {
-		Intent intent = new Intent(context, EditActivity.class);
-		intent.putExtra(EditActivityController.ACTIONMODE, EditActivityController.ACTIONMODE_EDIT);
-		intent.putExtra(EditActivityController.NODE_ID, nodeId);
-		context.startActivity(intent);
-	}
-	
-	public static  void runCaptureActivity(long id, Context context) {
-		Intent intent = new Intent(context, EditActivity.class);
-		
-		String captureMode = EditActivityController.ACTIONMODE_CREATE;
-		if (PreferenceUtils.useAdvancedCapturing()) {
-			captureMode = EditActivityController.ACTIONMODE_ADDCHILD;
-		}
-		
-		intent.putExtra(EditActivityController.ACTIONMODE, captureMode);
-		intent.putExtra(EditActivityController.NODE_ID, id);
-		context.startActivity(intent);
-	}
-	
 	private void runDeleteNode() {	
 		AlertDialog.Builder builder = new AlertDialog.Builder(context);
 		builder.setMessage(R.string.prompt_node_delete)
@@ -221,17 +186,8 @@ public class OutlineActionMode implements ActionMode.Callback {
 			OrgUtils.announceSyncDone(context);
 		} catch (OrgFileNotFoundException e) {}
 	}
-	
-	public static void runViewNodeActivity(long nodeId, Context context) {
-		Intent intent = new Intent(context, ViewActivity.class);
-		intent.putExtra(ViewActivity.NODE_ID, nodeId);
-		context.startActivity(intent);
-	}
-	
-	private void runViewNodeActivity() {		
-		runViewNodeActivity(node.id, context);
-	}
-	
+
+
 	private void runTimeClockingService() {
 		Intent intent = new Intent(context, TimeclockService.class);
 		intent.putExtra(TimeclockService.NODE_ID, node.id);

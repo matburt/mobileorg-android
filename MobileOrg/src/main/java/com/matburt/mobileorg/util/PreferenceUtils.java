@@ -1,15 +1,15 @@
 package com.matburt.mobileorg.util;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-
-import com.matburt.mobileorg.OrgData.MobileOrgApplication;
-
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
+
+import com.matburt.mobileorg.OrgData.MobileOrgApplication;
+
+import java.util.ArrayList;
+import java.util.HashSet;
 
 public class PreferenceUtils {
 	private static final int DEFAULT_FONTSIZE = 14;

@@ -1,12 +1,5 @@
 package com.matburt.mobileorg.Synchronizers;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Handler;
@@ -25,6 +18,13 @@ import com.dropbox.client2.session.Session.AccessType;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.util.FileUtils;
 import com.matburt.mobileorg.util.OrgUtils;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 
 public class DropboxSynchronizer implements SynchronizerInterface {
 

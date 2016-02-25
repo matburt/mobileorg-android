@@ -1,7 +1,5 @@
 package com.matburt.mobileorg.Gui.Wizard;
 
-import java.util.ArrayList;
-
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,6 +11,8 @@ import android.widget.CompoundButton;
 import android.widget.TextView;
 
 import com.matburt.mobileorg.R;
+
+import java.util.ArrayList;
 
 public class FolderAdapter extends ArrayAdapter<String> {
 	private int currentChecked = -1;

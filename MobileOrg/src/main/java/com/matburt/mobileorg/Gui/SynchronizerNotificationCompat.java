@@ -9,8 +9,8 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationCompat.Builder;
 import android.widget.RemoteViews;
 
+import com.matburt.mobileorg.OrgNodeListActivity;
 import com.matburt.mobileorg.R;
-import com.matburt.mobileorg.Gui.Outline.OutlineActivity;
 
 public class SynchronizerNotificationCompat {
 	private NotificationManager notificationManager;
@@ -25,7 +25,7 @@ public class SynchronizerNotificationCompat {
 	public void errorNotification(String errorMsg) {
 		this.notificationManager = (NotificationManager) context
 				.getSystemService(Context.NOTIFICATION_SERVICE);
-		Intent notifyIntent = new Intent(context, OutlineActivity.class);
+		Intent notifyIntent = new Intent(context, OrgNodeListActivity.class);
 		notifyIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
 				| Intent.FLAG_ACTIVITY_SINGLE_TOP);
 
@@ -36,7 +36,7 @@ public class SynchronizerNotificationCompat {
 		builder.setContentIntent(contentIntent);
 		builder.setSmallIcon(R.drawable.icon);
 		builder.setContentTitle("Synchronization failed");
-		
+
 		notification = builder.getNotification();
 		notification.contentView = notification.contentView = new RemoteViews(
 				context.getPackageName(), R.layout.sync_notification);
@@ -48,11 +48,11 @@ public class SynchronizerNotificationCompat {
 				false);
 		notificationManager.notify(notifyRef, notification);
 	}
-	
+
 	public void setupNotification() {
 		this.notificationManager = (NotificationManager) context
 				.getSystemService(Context.NOTIFICATION_SERVICE);
-		Intent notifyIntent = new Intent(context, OutlineActivity.class);
+		Intent notifyIntent = new Intent(context, OrgNodeListActivity.class);
 		notifyIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
 				| Intent.FLAG_ACTIVITY_SINGLE_TOP);
 

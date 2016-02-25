@@ -18,9 +18,9 @@ import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.widget.RemoteViews;
 
-import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.OrgData.MobileOrgApplication;
 import com.matburt.mobileorg.OrgData.OrgNode;
+import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.util.OrgNodeNotFoundException;
 
 public class TimeclockService extends Service {

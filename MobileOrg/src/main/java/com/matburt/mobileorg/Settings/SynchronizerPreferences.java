@@ -1,5 +1,4 @@
 package com.matburt.mobileorg.Settings;
-import java.util.HashMap;
 
 import android.app.Activity;
 import android.content.Context;
@@ -18,6 +17,8 @@ import com.matburt.mobileorg.Settings.Synchronizers.SDCardSettingsActivity;
 import com.matburt.mobileorg.Settings.Synchronizers.ScpSettingsActivity;
 import com.matburt.mobileorg.Settings.Synchronizers.UbuntuOneSettingsActivity;
 import com.matburt.mobileorg.Settings.Synchronizers.WebDAVSettingsActivity;
+
+import java.util.HashMap;
 
 public class SynchronizerPreferences extends Preference {
 	private TextView mDetails;

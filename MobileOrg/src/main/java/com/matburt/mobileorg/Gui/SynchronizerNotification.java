@@ -8,8 +8,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 
+import com.matburt.mobileorg.OrgNodeListActivity;
 import com.matburt.mobileorg.R;
-import com.matburt.mobileorg.Gui.Outline.OutlineActivity;
 
 @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
 public class SynchronizerNotification extends SynchronizerNotificationCompat {
@@ -26,7 +26,7 @@ public class SynchronizerNotification extends SynchronizerNotificationCompat {
 	@Override
 	public void errorNotification(String errorMsg) {
 		this.notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-		Intent notifyIntent = new Intent(context, OutlineActivity.class);
+		Intent notifyIntent = new Intent(context, OrgNodeListActivity.class);
 		notifyIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
                               | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         notifyIntent.putExtra("ERROR_MESSAGE", errorMsg);
@@ -51,7 +51,7 @@ public class SynchronizerNotification extends SynchronizerNotificationCompat {
 	public void setupNotification() {
 		this.notificationManager = (NotificationManager) context
 				.getSystemService(Context.NOTIFICATION_SERVICE);
-		Intent notifyIntent = new Intent(context, OutlineActivity.class);
+		Intent notifyIntent = new Intent(context, OrgNodeListActivity.class);
 		notifyIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
 				| Intent.FLAG_ACTIVITY_SINGLE_TOP);
 

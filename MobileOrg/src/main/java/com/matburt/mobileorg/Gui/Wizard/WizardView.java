@@ -67,7 +67,7 @@ public class WizardView extends HorizontalScrollView implements
 	}
 
 	private static void setButtonState(Button b, boolean state,
-			View.OnClickListener e) {
+			OnClickListener e) {
 		b.setOnClickListener(e);
 		b.setEnabled(state);
 	}
@@ -181,7 +181,7 @@ public class WizardView extends HorizontalScrollView implements
 		View v = LayoutInflater.from(getContext()).inflate(resId, null);
 		container.addView(v);
 	}
-	
+
 	public void addPage(View view) {
 		container.addView(view);
 	}
@@ -240,14 +240,14 @@ public class WizardView extends HorizontalScrollView implements
 			super.onScrollChanged(l, t, oldl, oldt);
 	}
 
-	class NextPageButtonListener implements View.OnClickListener {
+	class NextPageButtonListener implements OnClickListener {
 		@Override
 		public void onClick(View v) {
 			scrollRight();
 		}
 	}
 
-	class PreviousPageButtonListener implements View.OnClickListener {
+	class PreviousPageButtonListener implements OnClickListener {
 		@Override
 		public void onClick(View v) {
 			scrollLeft();

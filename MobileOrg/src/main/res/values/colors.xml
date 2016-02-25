@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
-    <color name="actionbar_separator">#3A5FCD</color>
-    <color name="actionbar_background_start">#3A5FCD</color>
-    <color name="actionbar_background_end">#27408B</color>
-
+    <color name="colorPrimary">#3F51B5</color>
+    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorAccent">#FF4081</color>
+    <color name="colorRed">#ff0000</color>
+    <color name="colorGreen">#169c01</color>
+    <color name="colorYellow">#b3ad00</color>
+    <color name="colorGray">#74746e</color>
+    <color name="colorBlue">#040d93</color>
 </resources>

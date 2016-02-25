@@ -1,19 +1,18 @@
 package com.matburt.mobileorg.util;
 
+import android.content.ContentResolver;
+import android.content.Context;
+import android.preference.PreferenceManager;
+
+import com.matburt.mobileorg.Gui.Theme.DefaultTheme;
+import com.matburt.mobileorg.OrgData.OrgNode;
+
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import android.content.ContentResolver;
-import android.content.Context;
-import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
-
-import com.matburt.mobileorg.Gui.Theme.DefaultTheme;
-import com.matburt.mobileorg.OrgData.OrgNode;
 
 public class OrgNode2Html {
 

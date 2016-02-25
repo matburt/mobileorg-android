@@ -12,7 +12,7 @@
         android:name=".OrgData.MobileOrgApplication"
         android:icon="@drawable/icon"
         android:label="MobileOrg"
-        android:theme="@style/Theme.MobileOrg.Dark" >
+        android:theme="@style/AppTheme" >
         <meta-data
             android:name="android.app.default_searchable"
             android:value=".Gui.SearchActivity" />
@@ -57,89 +57,28 @@
         </receiver>
 
         <activity
-            android:name=".Gui.Outline.OutlineActivity"
-            android:label="MobileOrg" >
+            android:name=".OrgNodeListActivity"
+            android:label="MobileOrg"
+            android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
             <intent-filter>
                 <action android:name="com.matburt.mobileorg.SYNC_FAILED" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".Gui.ViewActivity"
-            android:label="Org View" >
-            <intent-filter>
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </activity>
-        <activity
-            android:name=".Gui.Capture.EditActivity"
-            android:exported="true"
-            android:label="Org Capture"
-            android:windowSoftInputMode="adjustPan" >
-            <intent-filter>
-                <action android:name="com.matburt.mobileorg.CAPTURE" />
-                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.SEND" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-
-                <data android:mimeType="text/*" />
-            </intent-filter>
-            
-            <intent-filter>
-                <action android:name="com.matburt.mobileorg.CAPTURE" />
-                <action android:name="android.intent.action.SEND" />
- 
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="com.google.android.voicesearch.SELF_NOTE" />
- 
-                <data android:mimeType="text/plain" />
-            </intent-filter>
-
-            <intent-filter>
-                <action android:name="com.matburt.mobileorg.CAPTURE" />
-                <action android:name="com.google.android.gm.action.AUTO_SEND" >
-                </action>
- 
-                <category android:name="android.intent.category.DEFAULT" />
- 
-                <data android:mimeType="*/*" >
-                </data>
-            </intent-filter>
-        </activity>
-        <activity android:name=".Gui.SearchActivity" >
-            <intent-filter>
-                <action android:name="android.intent.action.SEARCH" />
-            </intent-filter>
-
-            <meta-data
-                android:name="android.app.searchable"
-                android:resource="@xml/searchable" />
-        </activity>
-        <activity
-            android:name=".Plugin.SyncEditActivity"
-            android:exported="true"
-            android:icon="@drawable/icon"
-            android:label="@string/sync_plugin" >
-            <intent-filter>
-                <action android:name="com.twofortyfouram.locale.intent.action.EDIT_SETTING" />
-            </intent-filter>
-        </activity>
         <activity
             android:name=".Settings.SettingsActivity"
-            android:label="MobileOrg Settings" >
+            android:label="MobileOrg Settings"
+            android:theme="@style/AppTheme.NoActionBar">
         </activity>
         <activity
             android:name=".Gui.Wizard.WizardActivity"
-            android:label="MobileOrg Wizard" >
+            android:label="MobileOrg Wizard"
+            android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="com.matburt.mobileorg.Settings.SETUP_WIZARD" />
 
@@ -148,9 +87,11 @@
         </activity>
         <activity
             android:name=".Gui.CertificateConflictActivity"
-            android:label="MobileOrg Certificate Conflict" >
+            android:label="MobileOrg Certificate Conflict"
+            android:theme="@style/AppTheme.NoActionBar">
         </activity>
-        <activity android:name=".Gui.FileDecryptionActivity" >
+        <activity android:name=".Gui.FileDecryptionActivity"
+            android:theme="@style/AppTheme.NoActionBar">
         </activity>
         <activity
             android:name=".Settings.Synchronizers.WebDAVSettingsActivity"
@@ -204,22 +145,6 @@
         <activity android:name=".Gui.Agenda.AgendaActivity" >
         </activity>
 
-        <receiver android:name=".Gui.Widget.CaptureWidgetProvider"
-            android:label="MobileOrg Capture" >
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-            </intent-filter>
-
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/capture_widget_provider" />
-        </receiver>
-
-        <activity android:name=".Gui.Widget.CaptureWidgetConfig" >
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
-            </intent-filter>
-        </activity>
     </application>
 
 </manifest>

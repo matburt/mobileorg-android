@@ -8,10 +8,10 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ListView;
 
-import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Gui.Wizard.FolderAdapter;
 import com.matburt.mobileorg.Gui.Wizard.LocalDirectoryBrowser;
 import com.matburt.mobileorg.Gui.Wizard.WizardView;
+import com.matburt.mobileorg.R;
 
 public class SDCardWizard extends Wizard {
 	

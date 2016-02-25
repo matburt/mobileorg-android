@@ -1,5 +1,23 @@
 package com.matburt.mobileorg.util;
 
+import android.app.Activity;
+import android.content.ContentResolver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo.State;
+import android.preference.PreferenceManager;
+import android.text.TextUtils;
+import android.util.Log;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
+
+import com.matburt.mobileorg.OrgData.OrgFile;
+import com.matburt.mobileorg.OrgData.OrgNode;
+import com.matburt.mobileorg.R;
+import com.matburt.mobileorg.Synchronizers.Synchronizer;
+
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -13,25 +31,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
-
-import android.app.Activity;
-import android.content.ContentResolver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.SharedPreferences;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
-import android.net.NetworkInfo.State;
-import android.preference.PreferenceManager;
-import android.text.TextUtils;
-import android.util.Log;
-import android.widget.ArrayAdapter;
-import android.widget.Spinner;
-
-import com.matburt.mobileorg.R;
-import com.matburt.mobileorg.OrgData.OrgFile;
-import com.matburt.mobileorg.OrgData.OrgNode;
-import com.matburt.mobileorg.Synchronizers.Synchronizer;
 
 public class OrgUtils {
 	
@@ -145,14 +144,14 @@ public class OrgUtils {
         }
     }
     
-    public static void setTheme(Activity activity) {
-    	String themeName = PreferenceUtils.getThemeName();
-    	
-    	if(themeName.equals("Dark"))
-    		activity.setTheme(R.style.Theme_MobileOrg_Dark);
-    	else 
-    		activity.setTheme(R.style.Theme_MobileOrg_Light);
-    }
+//    public static void setTheme(Activity activity) {
+//    	String themeName = PreferenceUtils.getThemeName();
+
+//    	if(themeName.equals("Dark"))
+//    		activity.setTheme(R.style.Theme_MobileOrg_Dark);
+//    	else
+//    		activity.setTheme(R.style.Theme_MobileOrg_Light);
+//    }
     
 	public static byte[] serializeObject(Object o) {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -216,7 +215,7 @@ public class OrgUtils {
 		State wifi = conMan.getNetworkInfo(ConnectivityManager.TYPE_WIFI)
 				.getState();
 
-		if (wifi == NetworkInfo.State.CONNECTED)
+		if (wifi == State.CONNECTED)
 			return true;
 		else
 			return false;
@@ -229,7 +228,7 @@ public class OrgUtils {
 		State mobile = conMan.getNetworkInfo(ConnectivityManager.TYPE_MOBILE)
 				.getState();
 
-		if (mobile == NetworkInfo.State.CONNECTED)
+		if (mobile == State.CONNECTED)
 			return true;
 		else
 			return false;

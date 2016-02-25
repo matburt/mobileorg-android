@@ -1,10 +1,10 @@
 package com.matburt.mobileorg.OrgData;
 
+import android.util.Log;
+
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import android.util.Log;
 
 public class OrgNodeParser {
 	private static final int TODO_GROUP = 1;

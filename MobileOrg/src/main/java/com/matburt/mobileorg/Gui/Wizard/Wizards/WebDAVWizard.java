@@ -10,8 +10,8 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 
-import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Gui.Wizard.WizardView;
+import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Synchronizers.WebDAVSynchronizer;
 
 public class WebDAVWizard extends Wizard {

@@ -1,13 +1,13 @@
 package com.matburt.mobileorg.OrgData;
 
+import android.text.TextUtils;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import android.text.TextUtils;
 
 public class OrgNodePayload {
 	private StringBuilder payload = new StringBuilder();
@@ -148,7 +148,7 @@ public class OrgNodePayload {
 		return Pattern.compile(pattern);
 	}
 	
-	private String stripDate(OrgNodeTimeDate.TYPE type) {		
+	private String stripDate(OrgNodeTimeDate.TYPE type) {
 		prepareCleanedPayload();
 
 		Matcher matcher = getTimestampMatcher(type).matcher(
