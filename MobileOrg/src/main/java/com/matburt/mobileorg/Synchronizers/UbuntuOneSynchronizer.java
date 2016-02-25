@@ -103,9 +103,7 @@ private static final String BASE_TOKEN_NAME = "Ubuntu One @ MobileOrg:";
     }
 
     public boolean isConfigured() {
-        if (this.consumer_key.equals(""))
-            return false;
-        return true;
+        return !this.consumer_key.equals("");
     }
 
 	public void signRequest(HttpRequest request) {
@@ -327,7 +325,7 @@ private static final String BASE_TOKEN_NAME = "Ubuntu One @ MobileOrg:";
     }
 
 	protected HttpResponse executeRequest(HttpUriRequest request)
-			throws ClientProtocolException, IOException {
+			throws IOException {
 		DefaultHttpClient httpClient = new DefaultHttpClient();
         final HttpParams httpParameters = httpClient.getParams();
         HttpConnectionParams.setConnectionTimeout(httpParameters, 60000);
@@ -365,7 +363,7 @@ private static final String BASE_TOKEN_NAME = "Ubuntu One @ MobileOrg:";
 	}
 
 	private JSONObject responseToJson(HttpResponse response)
-			throws UnsupportedEncodingException, IOException, JSONException {
+			throws IOException, JSONException {
 		BufferedReader reader = new BufferedReader(new InputStreamReader(
 				response.getEntity().getContent(), "UTF-8"));
 		StringBuilder builder = new StringBuilder();

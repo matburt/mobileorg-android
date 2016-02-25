@@ -215,10 +215,7 @@ public class OrgUtils {
 		State wifi = conMan.getNetworkInfo(ConnectivityManager.TYPE_WIFI)
 				.getState();
 
-		if (wifi == State.CONNECTED)
-			return true;
-		else
-			return false;
+		return wifi == State.CONNECTED;
 	}
 
 	public static boolean isMobileOnline(Context context) {
@@ -228,10 +225,7 @@ public class OrgUtils {
 		State mobile = conMan.getNetworkInfo(ConnectivityManager.TYPE_MOBILE)
 				.getState();
 
-		if (mobile == State.CONNECTED)
-			return true;
-		else
-			return false;
+		return mobile == State.CONNECTED;
 	}
 	
 	

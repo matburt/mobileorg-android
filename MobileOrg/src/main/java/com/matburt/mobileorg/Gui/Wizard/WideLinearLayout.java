@@ -28,7 +28,7 @@ public class WideLinearLayout extends LinearLayout {
 		int height = MeasureSpec.getSize(h);
 		// and its children
 		for (int i = 0; i < getChildCount(); i++) {
-			View page = (View) getChildAt(i);
+			View page = getChildAt(i);
 			// page.measure(screenWidth,hs);
 			ViewGroup.LayoutParams lp = page.getLayoutParams();
 			lp.width = screenWidth;

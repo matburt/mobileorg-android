@@ -82,7 +82,7 @@ public abstract class Wizard {
 
 	public enum TYPE {
 		WebDAV, Dropbox, Ubuntu, SDCard, SSH, Null
-	};
+	}
 
 	public static Wizard getWizard(TYPE type, WizardView wizardView,
 			Context context) {

@@ -64,7 +64,7 @@ public class UbuntuOneWizard extends Wizard {
 
 	private void loginUbuntuOne() {
 		final UbuntuOneSynchronizer uos = new UbuntuOneSynchronizer(
-				(Context) context);
+				context);
 		uos.username = ubuntuoneEmail.getText().toString();
 		uos.password = ubuntuonePass.getText().toString();
 

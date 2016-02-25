@@ -163,12 +163,9 @@ public class WebDAVSynchronizer implements SynchronizerInterface {
 			return false;
 
 		Pattern checkUrl = Pattern.compile("http.*\\.(?:org|txt)$");
-		if (!checkUrl.matcher(this.remoteIndexPath).find()) {
-			return false;
-		}
+        return checkUrl.matcher(this.remoteIndexPath).find();
 
-		return true;
-	}
+    }
 
 
     private void handleChangedCertificate() {
@@ -182,8 +179,7 @@ public class WebDAVSynchronizer implements SynchronizerInterface {
 		putUrlFile(urlActual, contents);
 	}
 
-	public BufferedReader getRemoteFile(String filename) throws IOException, CertificateException,
-                                                                   SSLHandshakeException {
+	public BufferedReader getRemoteFile(String filename) throws IOException, CertificateException {
 		String orgUrl = this.remotePath + filename;
         InputStream mainFile = null;
         try {

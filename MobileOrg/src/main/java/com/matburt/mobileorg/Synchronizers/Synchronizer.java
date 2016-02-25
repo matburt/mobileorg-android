@@ -96,7 +96,7 @@ public class Synchronizer {
 	 * remote.
 	 */
 	public void pushCaptures() throws IOException,
-			CertificateException, SSLHandshakeException {
+			CertificateException {
 		final String filename = CAPTURE_FILE;
 		
 		notify.updateNotification("Uploading captures");
@@ -133,7 +133,7 @@ public class Synchronizer {
 	 * and downloads them.
 	 * @return 
 	 */
-	public ArrayList<String> pull(OrgFileParser parser) throws SSLHandshakeException, CertificateException, IOException {
+	public ArrayList<String> pull(OrgFileParser parser) throws CertificateException, IOException {
 		HashMap<String,String> remoteChecksums = getAndParseChecksumFile();
 		ArrayList<String> changedFiles = getFilesThatChangedRemotely(remoteChecksums);
 		
@@ -155,7 +155,7 @@ public class Synchronizer {
 	private void pull(OrgFileParser parser, ArrayList<String> filesToGet,
 			HashMap<String, String> filenameMap,
 			HashMap<String, String> remoteChecksums)
-			throws SSLHandshakeException, CertificateException, IOException {
+			throws CertificateException, IOException {
 		final int totalNumberOfFiles = filesToGet.size() + 2;
 		int fileIndex = 1;
 		for (String filename : filesToGet) {
@@ -169,7 +169,7 @@ public class Synchronizer {
 		}
 	}
 
-	private HashMap<String, String> getAndParseIndexFile() throws SSLHandshakeException, CertificateException, IOException {
+	private HashMap<String, String> getAndParseIndexFile() throws CertificateException, IOException {
 		String remoteIndexContents = FileUtils.read(syncher.getRemoteFile(INDEX_FILE));
 		OrgProviderUtils.setTodos(
 				OrgFileParser.getTodosFromIndex(remoteIndexContents), resolver);
@@ -183,7 +183,7 @@ public class Synchronizer {
 		return filenameMap;
 	}
 	
-	private HashMap<String, String> getAndParseChecksumFile() throws SSLHandshakeException, CertificateException, IOException {
+	private HashMap<String, String> getAndParseChecksumFile() throws CertificateException, IOException {
 		String remoteChecksumContents = FileUtils.read(syncher.getRemoteFile("checksums.dat"));
 
 		HashMap<String, String> remoteChecksums = OrgFileParser

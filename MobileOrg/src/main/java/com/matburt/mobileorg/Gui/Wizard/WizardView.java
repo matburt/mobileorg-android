@@ -84,7 +84,7 @@ public class WizardView extends HorizontalScrollView implements
 		if (container != null)
 			for (int i = page; i < container.getChildCount(); i++) {
 				// get the pageview container
-				View pageContainer = (View) container.getChildAt(i);
+				View pageContainer = container.getChildAt(i);
 				// last page doesn't have a next button
 				View nextButton = pageContainer
 						.findViewById(R.id.wizard_next_button);
@@ -98,7 +98,7 @@ public class WizardView extends HorizontalScrollView implements
 	// disable/enable all buttons for given page
 	public void setNavButtonStateOnPage(int page, boolean state, int page_type) {
 		// get the pageview container
-		View pageContainer = (View) container.getChildAt(page);
+		View pageContainer = container.getChildAt(page);
 		Button prevButton = (Button) pageContainer
 				.findViewById(R.id.wizard_previous_button);
 		Button nextButton = (Button) pageContainer
@@ -256,7 +256,7 @@ public class WizardView extends HorizontalScrollView implements
 
 	// hide keyboard if showing
 	private void hideKeyboard() {
-		InputMethodManager imm = (InputMethodManager) ((Activity) getContext())
+		InputMethodManager imm = (InputMethodManager) getContext()
 				.getSystemService(Context.INPUT_METHOD_SERVICE);
 		imm.hideSoftInputFromWindow(getWindowToken(), 0);
 	}

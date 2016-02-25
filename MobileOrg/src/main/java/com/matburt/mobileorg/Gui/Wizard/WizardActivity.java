@@ -38,13 +38,13 @@ public class WizardActivity extends Activity implements RadioGroup.OnCheckedChan
 		syncGroup.clearCheck();
 		syncGroup.setOnCheckedChangeListener(this);
 
-		syncWebDav = ((RadioButton) findViewById(R.id.sync_webdav)).getId();
-		syncDropBox = ((RadioButton) findViewById(R.id.sync_dropbox)).getId();
-		syncUbuntuOne = ((RadioButton) findViewById(R.id.sync_ubuntuone))
+		syncWebDav = findViewById(R.id.sync_webdav).getId();
+		syncDropBox = findViewById(R.id.sync_dropbox).getId();
+		syncUbuntuOne = findViewById(R.id.sync_ubuntuone)
 				.getId();
-		syncSdCard = ((RadioButton) findViewById(R.id.sync_sdcard)).getId();
-		syncNull = ((RadioButton) findViewById(R.id.sync_null)).getId();
-		syncSSH = ((RadioButton) findViewById(R.id.sync_ssh)).getId();
+		syncSdCard = findViewById(R.id.sync_sdcard).getId();
+		syncNull = findViewById(R.id.sync_null).getId();
+		syncSSH = findViewById(R.id.sync_ssh).getId();
 		
 		ViewTreeObserver observer = wizardView.getViewTreeObserver();
 		if (observer.isAlive()) { 

@@ -173,7 +173,7 @@ public class SettingsActivity extends PreferenceActivity implements
 	private void populateTodoKeywords() {
 		ListPreference defaultTodo = (ListPreference) findPreference(KEY_DEFAULT_TODO);
 
-		ArrayList<String> todoList = OrgProviderUtils.getTodos(getContentResolver());;
+		ArrayList<String> todoList = OrgProviderUtils.getTodos(getContentResolver());
 
 		CharSequence[] todos = new CharSequence[todoList.size() + 1];
 		int i = 0;

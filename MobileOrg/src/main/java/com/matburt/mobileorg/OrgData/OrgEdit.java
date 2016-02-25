@@ -20,8 +20,8 @@ public class OrgEdit {
 		ARCHIVE_SIBLING,
 		DELETE,
 		ADDHEADING
-	};
-	
+	}
+
 	public TYPE type = null;
 	public String nodeId = "";
 	public String title = "";

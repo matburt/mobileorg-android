@@ -26,10 +26,8 @@ public class SDCardSynchronizer implements SynchronizerInterface {
     
 
     public boolean isConfigured() {
-        if (remoteIndexPath.equals(""))
-            return false;
-        return true;
-    }
+		return !remoteIndexPath.equals("");
+	}
 
 	public void putRemoteFile(String filename, String contents) throws IOException {
 		String outfilePath = this.remotePath + filename;

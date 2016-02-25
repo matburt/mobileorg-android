@@ -45,24 +45,24 @@ public class CalendarComptabilityWrappers {
 		public Integer AVAILABILITY_BUSY = 0;
 		public Integer AVAILABILITY_FREE = 1;
 		public Integer AVAILABILITY_TENTATIVE = 2;
-	};
-	
+	}
+
 	public class intCalendars {
 		public Uri CONTENT_URI;
 		public String _ID = "_id";
 		public String CALENDAR_DISPLAY_NAME = "displayName";
 		public String ACCOUNT_NAME = "accountName";
 		public String VISIBLE = "selected";
-	};
-	
+	}
+
 	public class intReminders {
 		public Uri CONTENT_URI;
 		public String MINUTES = "minutes";
 		public String EVENT_ID = "event_id";
 		public String METHOD = "method";
 		public int METHOD_ALERT = 1;
-	};
-	
+	}
+
 	public class intCalendarAlerts {
 		public Uri CONTENT_URI;
 		public String EVENT_ID = "event_id";
@@ -72,8 +72,8 @@ public class CalendarComptabilityWrappers {
 		public String MINUTES = "minutes";
 		public String STATE = "state";
 		public int STATE_SCHEDULED = 0;
-	};
-	
+	}
+
 	/**
 	 * Hack to support phones with Android <3.0
 	 */

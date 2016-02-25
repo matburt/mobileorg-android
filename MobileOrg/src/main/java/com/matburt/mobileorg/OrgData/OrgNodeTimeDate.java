@@ -22,7 +22,7 @@ public class OrgNodeTimeDate {
 		Deadline,
 		Timestamp,
 		InactiveTimestamp
-	};
+	}
 
 	public OrgNodeTimeDate(TYPE type) {
 		this.type = type;

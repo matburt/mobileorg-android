@@ -194,12 +194,10 @@ public class CalendarSyncService extends Service implements
 		
 		if (this.showDone == false && isTodoActive == false)
 			return false;
-		
 
-		if (this.showPast == false && date.isInPast())
-			return false;
-		
-		return true;
+
+		return !(this.showPast == false && date.isInPast());
+
 	}
 	
 	private MultiMap<CalendarEntry> getCalendarEntries(String filename) {

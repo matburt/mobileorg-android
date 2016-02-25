@@ -269,11 +269,8 @@ public class OrgNode {
 		
 		int childCount = childCursor.getCount();
 		childCursor.close();
-		
-		if(childCount > 0)
-			return true;
-		else
-			return false;
+
+		return childCount > 0;
 	}
 	
 	public static boolean hasChildren (long node_id, ContentResolver resolver) {
@@ -562,12 +559,9 @@ public class OrgNode {
 	}
 
 	public boolean equals(OrgNode node) {
-		if (name.equals(node.name) && tags.equals(node.tags)
+		return name.equals(node.name) && tags.equals(node.tags)
 				&& priority.equals(node.priority) && todo.equals(node.todo)
-				&& payload.equals(node.payload))
-			return true;
-		else
-			return false;
+				&& payload.equals(node.payload);
 	}
 
 	

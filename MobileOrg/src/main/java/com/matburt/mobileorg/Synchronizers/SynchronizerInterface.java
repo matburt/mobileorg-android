@@ -12,12 +12,12 @@ public interface SynchronizerInterface {
 	 * Called before running the synchronizer to ensure that it's configuration
 	 * is in a valid state.
 	 */
-	public boolean isConfigured();
+	boolean isConfigured();
 
 	/**
 	 * Called before running the synchronizer to ensure it can connect.
 	 */
-	public boolean isConnectable();
+	boolean isConnectable();
 	
 	/**
 	 * Replaces the file on the remote end with the given content.
@@ -25,7 +25,7 @@ public interface SynchronizerInterface {
 	 * @param filename Name of the file, without path
 	 * @param contents Content of the new file
 	 */
-	public void putRemoteFile(String filename, String contents)
+	void putRemoteFile(String filename, String contents)
         throws IOException;
 
 	/**
@@ -34,11 +34,11 @@ public interface SynchronizerInterface {
 	 * @param filename
 	 *            Name of the file, without path
 	 */
-	public BufferedReader getRemoteFile(String filename)
-        throws IOException, CertificateException, SSLHandshakeException;
+	BufferedReader getRemoteFile(String filename)
+        throws IOException, CertificateException;
 
 	/**
 	 * Use this to disconnect from any services and cleanup.
 	 */
-	public void postSynchronize();
+	void postSynchronize();
 }

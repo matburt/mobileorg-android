@@ -24,6 +24,7 @@ import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -57,7 +58,9 @@ public class OrgNodeDetailFragment extends Fragment {
 
     private long nodeId;
     private OrgNodeTree tree;
-    private int gray, red, green, yellow, blue, foreground;
+    private int gray, red, green, yellow, blue, foreground, black;
+    private static int nTitleColors = 3;
+    private int[] titleColor;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -77,7 +80,13 @@ public class OrgNodeDetailFragment extends Fragment {
         yellow = ContextCompat.getColor(getContext(), R.color.colorYellow);
         blue = ContextCompat.getColor(getContext(), R.color.colorBlue);
         foreground = ContextCompat.getColor(getContext(), R.color.colorPrimary);
-        
+        black = ContextCompat.getColor(getContext(), R.color.colorBlack);
+
+        titleColor = new int[nTitleColors];
+        titleColor[0] = blue;
+        titleColor[1] = green;
+        titleColor[2] = black;
+
         if (getArguments().containsKey(NODE_ID)) {
             this.nodeId = getArguments().getLong(NODE_ID);
             try {
@@ -143,9 +152,8 @@ public class OrgNodeDetailFragment extends Fragment {
         @Override
         public void onBindViewHolder(final ViewHolder holder, int position) {
             holder.mItem = idTreeMap.get(position);
-            OrgNode theNode = idTreeMap.get(position).node;
             holder.setup(holder.mItem.node);
-            setupTodo(holder.todoButton, theNode.todo);
+
             holder.mView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -155,26 +163,9 @@ public class OrgNodeDetailFragment extends Fragment {
             });
         }
 
-        public void setupTodo(Button button, String todo) {
-            if(!TextUtils.isEmpty(todo)) {
-                Spannable todoSpan = new SpannableString(todo + " ");
-
-                boolean active = OrgProviderUtils.isTodoActive(todo, resolver);
-
-                int red = ContextCompat.getColor(getContext(), R.color.colorRed);
-                int green = ContextCompat.getColor(getContext(), R.color.colorGreen);
-                todoSpan.setSpan(new ForegroundColorSpan(active ? red : green), 0,
-                        todo.length(), 0);
-                button.setText(todoSpan);
-                button.setVisibility(View.VISIBLE);
-                button.setTextColor(active ? red : green);
-            } else {
-                button.setVisibility(View.GONE);
-            }
-        }
 
 
-        
+
         @Override
         public int getItemCount() {
             return idTreeMap.size();
@@ -221,38 +212,39 @@ public class OrgNodeDetailFragment extends Fragment {
                 final ArrayList<String> todoList = todos;
                 AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
                 builder.setTitle(getResources().getString(R.string.todo_state))
-				.setItems(todoList.toArray(new CharSequence[todoList.size()]),
-                        new DialogInterface.OnClickListener() {
-							@Override
-							public void onClick(DialogInterface dialog,
-									int which) {
-								String selectedTodo = todoList.get(which);
-								setNewTodo(selectedTodo);
-							}
-						});
+                        .setItems(todoList.toArray(new CharSequence[todoList.size()]),
+                                new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog,
+                                                        int which) {
+                                        String selectedTodo = todoList.get(which);
+                                        setNewTodo(selectedTodo);
+                                    }
+                                });
                 return builder.create();
             }
 
 
 
-	private void setNewTodo(String selectedTodo) {
-		if (selectedTodo.equals(mItem.node.todo))
-			return;
+            private void setNewTodo(String selectedTodo) {
+                if (selectedTodo.equals(mItem.node.todo))
+                    return;
 
-		ContentResolver resolver = getContext().getContentResolver();
+                ContentResolver resolver = getContext().getContentResolver();
 
-		OrgNode newNode;
-		try {
-			newNode = new OrgNode(mItem.node.id, resolver);
-		} catch (OrgNodeNotFoundException e) {
-			e.printStackTrace();
-			return;
-		}
-		newNode.todo = selectedTodo;
-		mItem.node.generateApplyWriteEdits(newNode, null, resolver);
-		mItem.node.write(resolver);
-		OrgUtils.announceSyncDone(getContext());
-	}
+                OrgNode newNode;
+                try {
+                    newNode = new OrgNode(mItem.node.id, resolver);
+                } catch (OrgNodeNotFoundException e) {
+                    e.printStackTrace();
+                    return;
+                }
+                newNode.todo = selectedTodo;
+                mItem.node.generateApplyWriteEdits(newNode, null, resolver);
+                mItem.node.write(resolver);
+                OrgUtils.announceSyncDone(getContext());
+                setupTodo();
+            }
 //            @Override
 //            public String toString() {
 //                return super.toString() + " '" + mContentView.getText() + "'";
@@ -336,7 +328,6 @@ public class OrgNodeDetailFragment extends Fragment {
                         tagsView.setText(tags);
 
 
-                    tagsView.setTextColor(gray);
                     tagsView.setVisibility(View.VISIBLE);
                 } else
                     tagsView.setVisibility(View.GONE);
@@ -344,6 +335,24 @@ public class OrgNodeDetailFragment extends Fragment {
 
             public void setLevelFormating(boolean enabled) {
                 this.levelFormatting = enabled;
+            }
+
+            public void setupTodo() {
+                String todoString = this.mItem.node.todo;
+                if(!TextUtils.isEmpty(todoString)) {
+                    Spannable todoSpan = new SpannableString(todoString + " ");
+
+                    boolean active = OrgProviderUtils.isTodoActive(todoString, resolver);
+
+                    int red = ContextCompat.getColor(getContext(), R.color.colorRed);
+                    int green = ContextCompat.getColor(getContext(), R.color.colorGreen);
+                    todoSpan.setSpan(new ForegroundColorSpan(active ? red : green), 0,
+                            todoString.length(), 0);
+                    todoButton.setText(todoSpan);
+                    todoButton.setTextColor(active ? red : green);
+                } else {
+                    todoButton.setVisibility(View.GONE);
+                }
             }
 
             public void setup(OrgNode node) {
@@ -361,7 +370,7 @@ public class OrgNodeDetailFragment extends Fragment {
                     applyLevelFormating(node.level, titleSpan);
                 setupTitle(node.name, titleSpan);
                 setupPriority(node.priority, titleSpan);
-//                setupTodo(node.todo, theme, resolver);
+                setupTodo();
 
                 if (levelFormatting)
                     applyLevelIndentation(node.level, titleSpan);
@@ -371,6 +380,8 @@ public class OrgNodeDetailFragment extends Fragment {
 
                 titleSpan.setSpan(new StyleSpan(Typeface.NORMAL), 0, titleSpan.length(), 0);
                 titleView.setText(titleSpan);
+                int colorId = (int) Math.min(node.level-1,nTitleColors-1);
+                titleView.setTextColor(titleColor[colorId]);
             }
 
             public void setupChildrenIndicator(OrgNode node, SpannableStringBuilder titleSpan) {

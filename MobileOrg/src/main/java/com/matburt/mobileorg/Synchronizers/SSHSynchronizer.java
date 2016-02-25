@@ -116,14 +116,12 @@ public class SSHSynchronizer implements SynchronizerInterface {
 
 	@Override
 	public boolean isConfigured() {
-		if (this.appSettings.getString("scpPath", "").equals("")
-				|| this.appSettings.getString("scpUser", "").equals("")
-				|| this.appSettings.getString("scpHost", "").equals("")
-				|| (this.appSettings.getString("scpPass", "").equals("") && this.appSettings
-						.getString("scpPubFile", "").equals("")))
-			return false;
-		return true;
-	}
+        return !(this.appSettings.getString("scpPath", "").equals("")
+                || this.appSettings.getString("scpUser", "").equals("")
+                || this.appSettings.getString("scpHost", "").equals("")
+                || (this.appSettings.getString("scpPass", "").equals("") && this.appSettings
+                .getString("scpPubFile", "").equals("")));
+    }
 
     public void connect() throws JSchException {
 		JSch jsch = new JSch();

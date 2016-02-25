@@ -84,11 +84,8 @@ public class PreferenceUtils {
 		Context context = MobileOrgApplication.getContext();
 		String syncSource = PreferenceManager.getDefaultSharedPreferences(context)
 		.getString("syncSource", "");
-		
-		if(TextUtils.isEmpty(syncSource))
-			return false;
-		else
-			return true;
+
+		return !TextUtils.isEmpty(syncSource);
 	}
 
 	public static boolean isUpgradedVersion() {
@@ -105,8 +102,8 @@ public class PreferenceUtils {
 	            editor.commit();
 	            return true;
 	        }
-	    } catch (Exception e) { };
-	    return false;
+	    } catch (Exception e) { }
+		return false;
 	}
 
 	public static ArrayList<String> getSelectedTodos() {

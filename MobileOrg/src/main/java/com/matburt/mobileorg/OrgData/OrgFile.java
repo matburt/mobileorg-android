@@ -85,11 +85,8 @@ public class OrgFile {
 				Files.DEFAULT_COLUMNS, null, null, null);
 		int count = cursor.getCount();
 		cursor.close();
-		
-		if(count > 0)
-			return true;
-		else
-			return false;		
+
+		return count > 0;
 	}
 	
 	public OrgNode getOrgNode(ContentResolver resolver) {
@@ -165,16 +162,11 @@ public class OrgFile {
 	public boolean generateEditsForFile() {
 		if(filename.equals(CAPTURE_FILE))
 			return false;
-		if(filename.equals(AGENDA_FILE))
-			return false;
-		return true;
+		return !filename.equals(AGENDA_FILE);
 	}
 	
 	public boolean equals(OrgFile file) {
-		if (filename.equals(file.filename) && name.equals(file.name))
-			return true;
-		else
-			return false;
+		return filename.equals(file.filename) && name.equals(file.name);
 	}
 	
 	public String toString(ContentResolver resolver) {		

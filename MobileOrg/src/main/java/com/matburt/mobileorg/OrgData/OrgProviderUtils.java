@@ -315,11 +315,8 @@ public class OrgProviderUtils {
 			cursor.moveToFirst();
 			int isdone = cursor.getInt(cursor.getColumnIndex(Todos.ISDONE));
 			cursor.close();
-			
-			if(isdone == 0)
-				return true;
-			else
-				return false;
+
+			return isdone == 0;
 		}
 		
 		return false;

@@ -24,7 +24,7 @@
         android:layout_centerVertical="true"
         android:layout_toRightOf="@+id/outline_item_level"
         android:background="@android:color/transparent"
-        android:focusable="false"
+        android:focusable="true"
         android:minHeight="30dp"
         android:minWidth="40dp"
         android:text="" />
@@ -33,7 +33,6 @@
         android:id="@+id/outline_item_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
         android:layout_centerVertical="true"
         android:layout_toRightOf="@+id/outline_item_todo"
         android:text=""
@@ -47,6 +46,8 @@
         android:layout_alignParentRight="true"
         android:layout_below="@+id/outline_item_title"
         android:paddingLeft="10dp"
+        android:textStyle="bold"
+        android:textColor="@color/colorGray"
         android:text="" >
     </TextView>
 

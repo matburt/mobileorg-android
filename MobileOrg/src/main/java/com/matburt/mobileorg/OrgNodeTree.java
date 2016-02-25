@@ -21,7 +21,7 @@ public class OrgNodeTree {
         folded,
         children,
         subtree,
-    };
+    }
 
     private Visibility visibility;
     private ArrayList<OrgNodeTree> children;
@@ -63,13 +63,17 @@ public class OrgNodeTree {
      */
     NavigableMap<Integer,OrgNodeTree> getVisibleNodesArray(){
         TreeMap<Integer,OrgNodeTree> result = new TreeMap<>();
-        idConstructor = 0;
+        idConstructor = -1;
         fillMap(result, this);
         return result;
     }
 
     private static void fillMap(TreeMap<Integer,OrgNodeTree> map, OrgNodeTree tree){
-        map.put(idConstructor++, tree);
+        // The root node is the filename node
+        // It must not be added
+        if(idConstructor > -1) map.put(idConstructor++, tree);
+        else idConstructor++;
+
         if(tree.visibility == Visibility.folded) return;
 
         for(OrgNodeTree child: tree.children) fillMap(map, child);

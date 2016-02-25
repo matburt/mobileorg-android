@@ -16,21 +16,21 @@ import java.util.Arrays;
 
 public interface DirectoryBrowser {
 
-	public void browseTo(String directory);
+	void browseTo(String directory);
 	
-	public void browseTo(int position);
+	void browseTo(int position);
 	
-	public String get(int position);
+	String get(int position);
 	
-	public String getAbsolutePath(int position);
+	String getAbsolutePath(int position);
 	
-	public boolean isCurrentDirectoryRoot();
+	boolean isCurrentDirectoryRoot();
 	
-	public ArrayList<String> list();
+	ArrayList<String> list();
 	
 	//Class for browsing local file system
 	
-	public class LocalDirectoryBrowser implements DirectoryBrowser {
+	class LocalDirectoryBrowser implements DirectoryBrowser {
 	    ArrayList<String> directoryNames = new ArrayList<String>();
 	    ArrayList<File> directoryListing = new ArrayList<File>();
 	    File curDirectory;
@@ -90,7 +90,7 @@ public interface DirectoryBrowser {
 		}
 	}
 
-    public class UbuntuOneDirectoryBrowser implements DirectoryBrowser {
+    class UbuntuOneDirectoryBrowser implements DirectoryBrowser {
         UbuntuOneSynchronizer onesync;
 
 		ArrayList<String> directoryNames = new ArrayList<String>();
@@ -149,7 +149,7 @@ public interface DirectoryBrowser {
 		}
     }
 	
-	public class DropboxDirectoryBrowser implements DirectoryBrowser {
+	class DropboxDirectoryBrowser implements DirectoryBrowser {
 		DropboxAPI<AndroidAuthSession> dropbox;
 		//array list for adapter
 		ArrayList<String> directoryNames = new ArrayList<String>();
