@@ -80,10 +80,11 @@ public class TodoDialog {
             int green = ContextCompat.getColor(context, R.color.colorGreen);
             todoSpan.setSpan(new ForegroundColorSpan(active ? red : green), 0,
                     todoString.length(), 0);
+            if(toggleVisibility) button.setVisibility(View.VISIBLE);
             button.setText(todoSpan);
             button.setTextColor(active ? red : green);
         } else {
-            if(toggleVisibility) button.setVisibility(View.GONE);
+            if(toggleVisibility) button.setVisibility(View.INVISIBLE);
             else button.setText(context.getResources().getString(R.string.no_state));
         }
     }

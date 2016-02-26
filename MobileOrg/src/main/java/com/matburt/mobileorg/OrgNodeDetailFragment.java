@@ -228,7 +228,6 @@ public class OrgNodeDetailFragment extends Fragment {
 
             public OrgNodeTree mItem;
             private TextView titleView;
-            private TextView tagsView;
             private Button todoButton;
             private TextView levelView;
             private boolean levelFormatting = true;
@@ -239,13 +238,11 @@ public class OrgNodeDetailFragment extends Fragment {
                 mView = view;
 
                 titleView = (TextView) view.findViewById(R.id.outline_item_title);
-                tagsView = (TextView) view.findViewById(R.id.outline_item_tags);
                 todoButton = (Button) view.findViewById(R.id.outline_item_todo);
                 levelView = (TextView) view.findViewById(R.id.outline_item_level);
                 todoButton.setOnClickListener(todoClick);
 
                 int fontSize = PreferenceUtils.getFontSize();
-                tagsView.setTextSize(fontSize);
                 todoButton.setTextSize(fontSize);
             }
 
@@ -334,19 +331,6 @@ public class OrgNodeDetailFragment extends Fragment {
                 }
             }
 
-            public void setupTags(String tags, String tagsInherited) {
-                if(!TextUtils.isEmpty(tags) || !TextUtils.isEmpty(tagsInherited)) {
-                    if (!TextUtils.isEmpty(tagsInherited))
-                        tagsView.setText(tags + "::" + tagsInherited);
-                    else
-                        tagsView.setText(tags);
-
-
-                    tagsView.setVisibility(View.VISIBLE);
-                } else
-                    tagsView.setVisibility(View.GONE);
-            }
-
             public void setLevelFormating(boolean enabled) {
                 this.levelFormatting = enabled;
             }
@@ -355,7 +339,6 @@ public class OrgNodeDetailFragment extends Fragment {
 
             public void setup(OrgNode node) {
                 this.mItem.node = node;
-                setupTags(node.tags, node.tags_inherited);
 
                 SpannableStringBuilder titleSpan = new SpannableStringBuilder(node.name);
 

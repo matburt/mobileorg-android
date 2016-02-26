@@ -71,7 +71,7 @@
         </activity>
 
         <activity
-            android:name=".Settings"
+            android:name=".Settings.SettingsActivity"
             android:label="MobileOrg Settings"
             android:theme="@style/AppTheme.NoActionBar">
         </activity>
