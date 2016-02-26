@@ -34,7 +34,8 @@
 
     </android.support.design.widget.AppBarLayout>
 
-    <android.support.v4.widget.NestedScrollView
+    <LinearLayout
+        android:orientation="vertical"
         android:id="@+id/orgnode_detail_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

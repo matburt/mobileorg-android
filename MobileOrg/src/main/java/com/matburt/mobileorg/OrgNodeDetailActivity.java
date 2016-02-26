@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.ActionBar;
@@ -54,13 +55,15 @@ public class OrgNodeDetailActivity extends AppCompatActivity {
             // Create the detail fragment and add it to the activity
             // using a fragment transaction.
             Bundle arguments = new Bundle();
+            Long nodeId = getIntent().getLongExtra(OrgNodeDetailFragment.NODE_ID, -1);
             arguments.putLong(OrgNodeDetailFragment.NODE_ID,
-                    getIntent().getLongExtra(OrgNodeDetailFragment.NODE_ID, -1));
+                    nodeId);
             OrgNodeDetailFragment fragment = new OrgNodeDetailFragment();
             fragment.setArguments(arguments);
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.orgnode_detail_container, fragment)
+                    .replace(R.id.orgnode_detail_container, fragment)
                     .commit();
+            Log.i("commit", "commited with id : "+nodeId);
         }
     }
 

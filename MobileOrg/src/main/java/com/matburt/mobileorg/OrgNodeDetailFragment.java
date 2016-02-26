@@ -1,21 +1,18 @@
 package com.matburt.mobileorg;
 
 import android.app.Activity;
-import android.app.Dialog;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
-import android.support.design.widget.CollapsingToolbarLayout;
 import android.os.Bundle;
+import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
@@ -35,13 +32,10 @@ import android.widget.TextView;
 
 import com.matburt.mobileorg.OrgData.OrgFileParser;
 import com.matburt.mobileorg.OrgData.OrgNode;
-import com.matburt.mobileorg.OrgData.OrgProviderUtils;
 import com.matburt.mobileorg.util.OrgNodeNotFoundException;
-import com.matburt.mobileorg.util.OrgUtils;
 import com.matburt.mobileorg.util.PreferenceUtils;
 import com.matburt.mobileorg.util.TodoDialog;
 
-import java.util.ArrayList;
 import java.util.NavigableMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -60,9 +54,10 @@ public class OrgNodeDetailFragment extends Fragment {
 
     private long nodeId;
     private OrgNodeTree tree;
-    private int gray, red, green, yellow, blue, foreground, black;
+    private int gray, red, green, yellow, blue, foreground, foregroundDark, black;
     private static int nTitleColors = 3;
     private int[] titleColor;
+    private int[] titleFontSize;
     RecyclerViewAdapter adapter;
 
     /**
@@ -83,13 +78,20 @@ public class OrgNodeDetailFragment extends Fragment {
         yellow = ContextCompat.getColor(getContext(), R.color.colorYellow);
         blue = ContextCompat.getColor(getContext(), R.color.colorBlue);
         foreground = ContextCompat.getColor(getContext(), R.color.colorPrimary);
+        foregroundDark = ContextCompat.getColor(getContext(), R.color.colorPrimaryDark);
         black = ContextCompat.getColor(getContext(), R.color.colorBlack);
 
         titleColor = new int[nTitleColors];
-        titleColor[0] = blue;
-        titleColor[1] = green;
+        titleColor[0] = foregroundDark;
+        titleColor[1] = foreground;
         titleColor[2] = black;
 
+        titleFontSize = new int[nTitleColors];
+        titleFontSize[0] = 25;
+        titleFontSize[1] = 20;
+        titleFontSize[2] = 16;
+        
+        Log.i("commit", "received with : " + getArguments().getLong(NODE_ID));
         if (getArguments().containsKey(NODE_ID)) {
             this.nodeId = getArguments().getLong(NODE_ID);
             try {
@@ -105,14 +107,13 @@ public class OrgNodeDetailFragment extends Fragment {
                 appBarLayout.setTitle(tree.node.getCleanedName());
             }
         }
-
         adapter = new RecyclerViewAdapter(tree);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.view_fragment, container, false);
+        View rootView = inflater.inflate(R.layout.node_summary_recycler_fragment, container, false);
 
         if (tree ==null) return rootView;
 
@@ -202,6 +203,7 @@ public class OrgNodeDetailFragment extends Fragment {
         @Override
         public void onBindViewHolder(final ViewHolder holder, int position) {
             holder.mItem = idTreeMap.get(position);
+            holder.level = holder.mItem.node.level;
             holder.setup(holder.mItem.node);
 
             holder.mView.setOnClickListener(new View.OnClickListener() {
@@ -230,6 +232,7 @@ public class OrgNodeDetailFragment extends Fragment {
             private Button todoButton;
             private TextView levelView;
             private boolean levelFormatting = true;
+            public long level;
 
             public ViewHolder(View view) {
                 super(view);
@@ -287,7 +290,9 @@ public class OrgNodeDetailFragment extends Fragment {
 
             public void setupTitle(String name, SpannableStringBuilder titleSpan) {
                 titleView.setGravity(Gravity.LEFT);
-                titleView.setTextSize(PreferenceUtils.getFontSize());
+                titleView.setTextSize(titleFontSize[Math.min((int)level-1, nTitleColors)]);
+                if(level==1) titleView.setTypeface(null, Typeface.BOLD);
+                else titleView.setTypeface(null,Typeface.NORMAL);
 
                 if (name.startsWith("COMMENT"))
                     titleSpan.setSpan(new ForegroundColorSpan(gray), 0,
@@ -371,9 +376,9 @@ public class OrgNodeDetailFragment extends Fragment {
                 if(this.mItem.getVisibility()== OrgNodeTree.Visibility.folded)
                     setupChildrenIndicator(node, titleSpan);
 
-                titleSpan.setSpan(new StyleSpan(Typeface.NORMAL), 0, titleSpan.length(), 0);
+//                titleSpan.setSpan(new StyleSpan(Typeface.NORMAL), 0, titleSpan.length(), 0);
                 titleView.setText(titleSpan);
-                int colorId = (int) Math.min(node.level-1,nTitleColors-1);
+                int colorId = (int) Math.min(level-1,nTitleColors-1);
                 titleView.setTextColor(titleColor[colorId]);
             }
 
