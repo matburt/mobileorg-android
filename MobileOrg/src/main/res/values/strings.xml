@@ -12,6 +12,9 @@
     <string name="tags">Tags</string>
     <string name="priority">Priority</string>
     <string name="todo_state">Todo state</string>
+    <string name="scheduled">Scheduled</string>
+    <string name="deadline">Deadline</string>
+    <string name="no_state">No state</string>
     <string name="back">Back</string>
     <string name="cancel">Cancel</string>
     <string name="save">Save</string>

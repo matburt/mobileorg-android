@@ -16,7 +16,6 @@ import java.util.TreeMap;
  */
 public class OrgNodeTree {
     public OrgNode node;
-    public int id;
     public enum Visibility {
         folded,
         children,

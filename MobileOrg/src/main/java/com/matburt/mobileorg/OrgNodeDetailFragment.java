@@ -7,17 +7,18 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
-import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
@@ -32,18 +33,19 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.matburt.mobileorg.Gui.Theme.DefaultTheme;
 import com.matburt.mobileorg.OrgData.OrgFileParser;
 import com.matburt.mobileorg.OrgData.OrgNode;
 import com.matburt.mobileorg.OrgData.OrgProviderUtils;
 import com.matburt.mobileorg.util.OrgNodeNotFoundException;
 import com.matburt.mobileorg.util.OrgUtils;
 import com.matburt.mobileorg.util.PreferenceUtils;
+import com.matburt.mobileorg.util.TodoDialog;
 
 import java.util.ArrayList;
 import java.util.NavigableMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 
 /**
  * A fragment representing a single OrgNode detail screen.
@@ -61,6 +63,7 @@ public class OrgNodeDetailFragment extends Fragment {
     private int gray, red, green, yellow, blue, foreground, black;
     private static int nTitleColors = 3;
     private int[] titleColor;
+    RecyclerViewAdapter adapter;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -102,6 +105,8 @@ public class OrgNodeDetailFragment extends Fragment {
                 appBarLayout.setTitle(tree.node.getCleanedName());
             }
         }
+
+        adapter = new RecyclerViewAdapter(tree);
     }
 
     @Override
@@ -118,21 +123,66 @@ public class OrgNodeDetailFragment extends Fragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         setupRecyclerView(recyclerView);
 
+        class SimpleItemTouchHelperCallback extends ItemTouchHelper.Callback {
+            private final RecyclerViewAdapter mAdapter;
+            public SimpleItemTouchHelperCallback(RecyclerViewAdapter adapter) {
+                mAdapter = adapter;
+            }
+
+            @Override
+            public int getMovementFlags(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder) {
+                int dragFlags = ItemTouchHelper.UP | ItemTouchHelper.DOWN;
+                int swipeFlags = ItemTouchHelper.START | ItemTouchHelper.END;
+                return makeMovementFlags(dragFlags, swipeFlags);
+            }
+
+
+            @Override
+            public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
+                // Create new fragment and transaction
+                Fragment newFragment = new EditNodeEntryFragment();
+                Bundle args = new Bundle();
+                long id = mAdapter.idTreeMap.get(viewHolder.getAdapterPosition()).node.id;
+                args.putLong(NODE_ID, id);
+                newFragment.setArguments(args);
+                FragmentTransaction transaction = getFragmentManager().beginTransaction();
+
+                // Replace whatever is in the fragment_container view with this fragment,
+                // and add the transaction to the back stack
+                transaction.replace(R.id.orgnode_detail_container, newFragment);
+                transaction.addToBackStack(null);
+
+// Commit the transaction
+                transaction.commit();
+            }
+
+            @Override
+            public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder,
+                                  RecyclerView.ViewHolder target) {
+                return false;
+            }
+
+        };
+
+        SimpleItemTouchHelperCallback callback = new SimpleItemTouchHelperCallback(adapter);
+        ItemTouchHelper touchHelper = new ItemTouchHelper(callback);
+        touchHelper.attachToRecyclerView(recyclerView);
+
         return rootView;
     }
 
     private void setupRecyclerView(@NonNull RecyclerView recyclerView) {
-        recyclerView.setAdapter(new SimpleItemRecyclerViewAdapter(tree));
+        recyclerView.setAdapter(adapter);
     }
 
 
-    public class SimpleItemRecyclerViewAdapter
-            extends RecyclerView.Adapter<SimpleItemRecyclerViewAdapter.ViewHolder> {
+    public class RecyclerViewAdapter
+            extends RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder> {
 
         private NavigableMap<Integer, OrgNodeTree> idTreeMap;
         private final OrgNodeTree tree;
 
-        public SimpleItemRecyclerViewAdapter(OrgNodeTree root) {
+        public RecyclerViewAdapter(OrgNodeTree root) {
             tree = root;
             refresh();
         }
@@ -199,52 +249,11 @@ public class OrgNodeDetailFragment extends Fragment {
             private View.OnClickListener todoClick = new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    createTodoDialog().show();
+                    new TodoDialog(getContext(),mItem.node, todoButton);
                 }
             };
 
-            private Dialog createTodoDialog() {
-                ArrayList<String> todos = PreferenceUtils.getSelectedTodos();
 
-                if (todos.size() == 0)
-                    todos = OrgProviderUtils.getTodos(getContext().getContentResolver());
-
-                final ArrayList<String> todoList = todos;
-                AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-                builder.setTitle(getResources().getString(R.string.todo_state))
-                        .setItems(todoList.toArray(new CharSequence[todoList.size()]),
-                                new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog,
-                                                        int which) {
-                                        String selectedTodo = todoList.get(which);
-                                        setNewTodo(selectedTodo);
-                                    }
-                                });
-                return builder.create();
-            }
-
-
-
-            private void setNewTodo(String selectedTodo) {
-                if (selectedTodo.equals(mItem.node.todo))
-                    return;
-
-                ContentResolver resolver = getContext().getContentResolver();
-
-                OrgNode newNode;
-                try {
-                    newNode = new OrgNode(mItem.node.id, resolver);
-                } catch (OrgNodeNotFoundException e) {
-                    e.printStackTrace();
-                    return;
-                }
-                newNode.todo = selectedTodo;
-                mItem.node.generateApplyWriteEdits(newNode, null, resolver);
-                mItem.node.write(resolver);
-                OrgUtils.announceSyncDone(getContext());
-                setupTodo();
-            }
 //            @Override
 //            public String toString() {
 //                return super.toString() + " '" + mContentView.getText() + "'";
@@ -337,23 +346,7 @@ public class OrgNodeDetailFragment extends Fragment {
                 this.levelFormatting = enabled;
             }
 
-            public void setupTodo() {
-                String todoString = this.mItem.node.todo;
-                if(!TextUtils.isEmpty(todoString)) {
-                    Spannable todoSpan = new SpannableString(todoString + " ");
 
-                    boolean active = OrgProviderUtils.isTodoActive(todoString, resolver);
-
-                    int red = ContextCompat.getColor(getContext(), R.color.colorRed);
-                    int green = ContextCompat.getColor(getContext(), R.color.colorGreen);
-                    todoSpan.setSpan(new ForegroundColorSpan(active ? red : green), 0,
-                            todoString.length(), 0);
-                    todoButton.setText(todoSpan);
-                    todoButton.setTextColor(active ? red : green);
-                } else {
-                    todoButton.setVisibility(View.GONE);
-                }
-            }
 
             public void setup(OrgNode node) {
                 this.mItem.node = node;
@@ -370,7 +363,7 @@ public class OrgNodeDetailFragment extends Fragment {
                     applyLevelFormating(node.level, titleSpan);
                 setupTitle(node.name, titleSpan);
                 setupPriority(node.priority, titleSpan);
-                setupTodo();
+                TodoDialog.setupTodoButton(getContext(), node, todoButton, true);
 
                 if (levelFormatting)
                     applyLevelIndentation(node.level, titleSpan);
