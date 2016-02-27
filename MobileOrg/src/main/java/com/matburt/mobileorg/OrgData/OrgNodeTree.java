@@ -1,13 +1,8 @@
-package com.matburt.mobileorg;
+package com.matburt.mobileorg.OrgData;
 
 import android.content.ContentResolver;
-import android.util.Log;
-
-import com.matburt.mobileorg.OrgData.OrgNode;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.NavigableMap;
 import java.util.TreeMap;
 
@@ -26,7 +21,7 @@ public class OrgNodeTree {
     private ArrayList<OrgNodeTree> children;
     private static int idConstructor;
 
-    OrgNodeTree(OrgNode root, ContentResolver resolver){
+    public OrgNodeTree(OrgNode root, ContentResolver resolver){
         if(root == null) return;
         node = root;
         children = new ArrayList<>();
@@ -60,7 +55,7 @@ public class OrgNodeTree {
     /**
      * Generate a mapping between an OrgNode from the tree and its index in the tree
      */
-    NavigableMap<Integer,OrgNodeTree> getVisibleNodesArray(){
+    public NavigableMap<Integer,OrgNodeTree> getVisibleNodesArray(){
         TreeMap<Integer,OrgNodeTree> result = new TreeMap<>();
         idConstructor = -1;
         fillMap(result, this);

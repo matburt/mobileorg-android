@@ -11,6 +11,7 @@ public class MobileOrgApplication extends Application {
 	
     @Override
     public void onCreate() {
+        super.onCreate();
     	instance = this;
 		SyncService.startAlarm(getApplicationContext());
     }

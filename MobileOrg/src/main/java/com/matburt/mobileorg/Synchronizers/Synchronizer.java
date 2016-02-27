@@ -68,17 +68,18 @@ public class Synchronizer {
 	public ArrayList<String> runSynchronizer(OrgFileParser parser) {
 		if (!syncher.isConfigured()) {
 			notify.errorNotification("Sync not configured");
-			return new ArrayList<String>();
+			return new ArrayList<>();
 		}
 		
 		if (!syncher.isConnectable()) {
 			notify.errorNotification("No network connection available");
-			return new ArrayList<String>();
+			return new ArrayList<>();
 		}
 		
 		try {
 			announceStartSync();
 			ArrayList<String> changedFiles = pull(parser);
+            Log.v("sync","changed files : "+changedFiles.size());
 			pushCaptures();
 			announceSyncDone();
 			return changedFiles;
@@ -86,7 +87,7 @@ public class Synchronizer {
 			showErrorNotification(e);
             Log.e("Synchronizer", "Error synchronizing", e);
             OrgUtils.announceSyncDone(context);
-			return new ArrayList<String>();
+			return new ArrayList<>();
 		}
 	}
 
@@ -98,7 +99,8 @@ public class Synchronizer {
 	public void pushCaptures() throws IOException,
 			CertificateException {
 		final String filename = CAPTURE_FILE;
-		
+		Log.v("sync","sync running");
+
 		notify.updateNotification("Uploading captures");
 		
 		String localContents = "";
@@ -109,7 +111,7 @@ public class Synchronizer {
 		} catch (OrgFileNotFoundException e) {}
 		
 		localContents += OrgEdit.editsToString(resolver);
-
+        Log.v("sync","local content size : "+localContents.length());
 		if (localContents.equals(""))
 			return;
 		String remoteContent = FileUtils.read(syncher.getRemoteFile(filename));

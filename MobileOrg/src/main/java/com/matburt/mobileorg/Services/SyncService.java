@@ -73,7 +73,6 @@ public class SyncService extends Service implements
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		String action = intent.getStringExtra(ACTION);
-        Log.v("sync","In start and actio is : "+action);
 		if (action != null && action.equals(START_ALARM))
 			setAlarm();
 		else if (action != null && action.equals(STOP_ALARM))
@@ -117,7 +116,6 @@ public class SyncService extends Service implements
     }
 
 	private void runSynchronizer() {
-        Log.v("sync", "runSynchronizer");
 		unsetAlarm();
 		final Synchronizer synchronizer = this.getSynchronizer();
 		final OrgDatabase db = new OrgDatabase(this);
@@ -128,7 +126,6 @@ public class SyncService extends Service implements
 			public void run() {
 				ArrayList<String> changedFiles = synchronizer.runSynchronizer(parser);				
 				String[] files = changedFiles.toArray(new String[changedFiles.size()]);
-				
 				if(calendarEnabled) {
 					Intent calIntent = new Intent(getBaseContext(), CalendarSyncService.class);
 					calIntent.putExtra(CalendarSyncService.PUSH, true);

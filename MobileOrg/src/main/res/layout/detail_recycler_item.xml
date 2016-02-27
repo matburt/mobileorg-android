@@ -18,19 +18,21 @@
         android:textAppearance="?android:attr/textAppearanceMedium" >
     </TextView>
 
-     <Button
+    <Button
         android:id="@+id/outline_item_todo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
+        android:layout_marginLeft="10dp"
+        android:layout_marginStart="10dp"
         android:background="@android:color/transparent"
         android:focusable="true"
         android:minHeight="30dp"
         android:minWidth="40dp"
-        android:text="" />
-    
+        android:text="@string/no_state" />
+
     <TextView
         android:id="@+id/outline_item_title"
         android:layout_width="wrap_content"

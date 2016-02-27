@@ -41,10 +41,10 @@ public class OutlineAdapter extends RecyclerView.Adapter<OutlineItem> {
 		this.resolver = context.getContentResolver();
 
 		this.theme = DefaultTheme.getTheme(context);
-		init();
+		refresh();
 	}
 
-	public void init() {
+	public void refresh() {
 		clear();
 
 		for (OrgNode node : OrgProviderUtils.getOrgNodeChildren(-1, resolver))
@@ -92,19 +92,6 @@ public class OutlineAdapter extends RecyclerView.Adapter<OutlineItem> {
 		});
     }
 
-
-	public void refresh() {
-		ArrayList<Long> expandedNodeIds = new ArrayList<Long>();
-		int size = this.expanded.size();
-		for(int i = 0; i < size; i++) {
-			if(this.expanded.get(i))
-				expandedNodeIds.add(getItemId(i));
-		}
-		
-		init();
-
-        expandNodes(expandedNodeIds);
-	}
 
 	private void expandNodes(ArrayList<Long> nodeIds) {
 		while (nodeIds.size() != 0) {

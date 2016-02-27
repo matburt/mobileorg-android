@@ -25,6 +25,7 @@ import android.net.Uri;
 
 import com.matburt.mobileorg.Gui.Outline.OutlineAdapter;
 import com.matburt.mobileorg.Gui.Wizard.WizardActivity;
+import com.matburt.mobileorg.OrgData.OrgProviderUtils;
 import com.matburt.mobileorg.Settings.SettingsActivity;
 import com.matburt.mobileorg.util.OrgUtils;
 import com.matburt.mobileorg.Synchronizers.Synchronizer;
@@ -154,7 +155,6 @@ public class OrgNodeListActivity extends AppCompatActivity {
     }
 
     public void runSynchronize(View view) {
-        Log.v("sync","should run synch");
         startService(new Intent(this, SyncService.class));
     }
 
@@ -204,6 +204,58 @@ public class OrgNodeListActivity extends AppCompatActivity {
             showUpgradePopup();
     }
 
+    @Override
+    protected void onDestroy() {
+        unregisterReceiver(this.syncReceiver);
+        super.onDestroy();
+    }
+
+    public void refreshDisplay() {
+//        this.listView.refresh();
+        refreshTitle();
+    }
+
+
+    private void refreshTitle() {
+        this.getSupportActionBar().setTitle("MobileOrg " + getChangesString());
+    }
+
+    private String getChangesString() {
+        int changes = OrgProviderUtils.getChangesCount(getContentResolver());
+        if(changes > 0)
+            return "[" + changes + "]";
+        else
+            return "";
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        refreshTitle();
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        if (intent.getAction().equals(SYNC_FAILED)) {
+            Bundle extrasBundle = intent.getExtras();
+            String errorMsg = extrasBundle.getString("ERROR_MESSAGE");
+            showSyncFailPopup(errorMsg);
+        }
+    }
+
+    private void showSyncFailPopup(String errorMsg) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage(errorMsg);
+        builder.setCancelable(false);
+        builder.setPositiveButton(R.string.ok,
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.dismiss();
+                    }
+                });
+        builder.create().show();
+    }
+
 
     private class SynchServiceReceiver extends BroadcastReceiver {
         @Override
@@ -215,14 +267,8 @@ public class OrgNodeListActivity extends AppCompatActivity {
 
             if(syncStart) {
                 synchronizerMenuItem.setVisible(false);
-                setSupportProgress(Window.PROGRESS_START);
-                setSupportProgressBarIndeterminate(true);
-                setSupportProgressBarIndeterminateVisibility(true);
             } else if (syncDone) {
-                Log.v("sync","synced !!");
-                setSupportProgressBarVisibility(false);
-                setSupportProgressBarIndeterminateVisibility(false);
-                recyclerView.getAdapter().notifyDataSetChanged();
+                ((OutlineAdapter)recyclerView.getAdapter()).refresh();
                 synchronizerMenuItem.setVisible(true);
 
                 if (showToast)
@@ -230,13 +276,7 @@ public class OrgNodeListActivity extends AppCompatActivity {
                             R.string.sync_successful,
                             Toast.LENGTH_SHORT).show();
             } else if (progress >= 0 && progress <= 100) {
-                if(progress == 100)
-                    setSupportProgressBarIndeterminateVisibility(false);
-
-                setSupportProgressBarIndeterminate(false);
-                int normalizedProgress = (Window.PROGRESS_END - Window.PROGRESS_START) / 100 * progress;
-                setSupportProgress(normalizedProgress);
-//                refreshDisplay();
+//                int normalizedProgress = (Window.PROGRESS_END - Window.PROGRESS_START) / 100 * progress;
             }
         }
     }

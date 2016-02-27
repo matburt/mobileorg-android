@@ -32,6 +32,7 @@ import android.widget.TextView;
 
 import com.matburt.mobileorg.OrgData.OrgFileParser;
 import com.matburt.mobileorg.OrgData.OrgNode;
+import com.matburt.mobileorg.OrgData.OrgNodeTree;
 import com.matburt.mobileorg.util.OrgNodeNotFoundException;
 import com.matburt.mobileorg.util.PreferenceUtils;
 import com.matburt.mobileorg.util.TodoDialog;
