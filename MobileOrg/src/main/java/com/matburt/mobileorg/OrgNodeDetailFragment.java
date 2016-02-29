@@ -28,6 +28,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.matburt.mobileorg.OrgData.OrgFileParser;
 import com.matburt.mobileorg.OrgData.OrgNode;
@@ -172,10 +173,6 @@ public class OrgNodeDetailFragment extends Fragment {
                                   RecyclerView.ViewHolder target) {
                 return false;
             }
-            
-
-
-
         };
 
         SimpleItemTouchHelperCallback callback = new SimpleItemTouchHelperCallback(adapter);
@@ -235,29 +232,63 @@ public class OrgNodeDetailFragment extends Fragment {
 
         @Override
         public void onBindViewHolder(final RecyclerView.ViewHolder _holder, final int position) {
-            if(idHlightedPosition> -1 && (position==idHlightedPosition || position==idHlightedPosition+2)) return;
-            final ViewHolder holder = (ViewHolder)_holder;
-            holder.mItem = idTreeMap.get((long)position);
-            holder.level = holder.mItem.node.level;
-            holder.setup(holder.mItem.node);
+            if(idHlightedPosition> -1 && (position==idHlightedPosition || position==idHlightedPosition+2)){
+                final InsertNodeViewHolder holder = (InsertNodeViewHolder) _holder;
+                holder.sameLevel.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (position == idHlightedPosition)
+                            Toast.makeText(getContext(), "before same", Toast.LENGTH_SHORT).show();
+                        else
+                            Toast.makeText(getContext(), "after  same", Toast.LENGTH_SHORT).show();
+                    }
+                });
 
-            holder.mView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    holder.mItem.toggleVisibility();
-                    refresh();
-                }
-            });
+                holder.neightbourgLevel.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (position == idHlightedPosition)
+                            Toast.makeText(getContext(), "before neighbourg", Toast.LENGTH_SHORT).show();
+                        else
+                            Toast.makeText(getContext(), "after  neightbourg", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            } else {
+                final ViewHolder holder = (ViewHolder) _holder;
+                holder.mItem = idTreeMap.get((long) position);
+                holder.level = holder.mItem.node.level;
+                holder.setup(holder.mItem.node);
 
-            holder.mView.setOnLongClickListener(new View.OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View v) {
-                    idHlightedPosition = position;
-                    insertItem(position);
-                    notifyDataSetChanged();
-                    return false;
-                }
-            });
+                holder.mView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if(idHlightedPosition>-1){
+                            closeInsertItem();
+                            return;
+                        }
+
+                        holder.mItem.toggleVisibility();
+                        refresh();
+                    }
+                });
+
+                holder.mView.setOnLongClickListener(new View.OnLongClickListener() {
+                    @Override
+                    public boolean onLongClick(View v) {
+                        if(idHlightedPosition>-1){
+                            idTreeMap = tree.getVisibleNodesArray();
+                            if(idHlightedPosition<position) idHlightedPosition = position-2;
+                            else idHlightedPosition = position;
+                        } else {
+                            idHlightedPosition = position;
+                        }
+
+                        insertItem((int)idHlightedPosition);
+                        notifyDataSetChanged();
+                        return false;
+                    }
+                });
+            }
         }
 
         /**
@@ -274,9 +305,16 @@ public class OrgNodeDetailFragment extends Fragment {
             idTreeMap = newIdTreeMap;
         }
 
+        private void closeInsertItem(){
+            idHlightedPosition = -1;
+            refresh();
+        }
+
         @Override
         public int getItemCount() {
-            return idTreeMap.size();
+            int count = idTreeMap.size();
+            if(idHlightedPosition>-1) count+=2;
+            return count;
         }
 
         @Override
@@ -289,9 +327,14 @@ public class OrgNodeDetailFragment extends Fragment {
         }
 
         public class InsertNodeViewHolder extends RecyclerView.ViewHolder {
-             public InsertNodeViewHolder(View view) {
-                 super(view);
-             }
+            public final View mView;
+            private Button sameLevel, neightbourgLevel;
+            public InsertNodeViewHolder(View view) {
+                super(view);
+                mView = view;
+                sameLevel = (Button) view.findViewById(R.id.insert_same_level);
+                neightbourgLevel = (Button) view.findViewById(R.id.insert_neighbourg_level);
+            }
         }
 
         public class ViewHolder extends RecyclerView.ViewHolder {
@@ -320,6 +363,10 @@ public class OrgNodeDetailFragment extends Fragment {
             private View.OnClickListener todoClick = new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    if(idHlightedPosition>-1){
+                        closeInsertItem();
+                        return;
+                    }
                     new TodoDialog(getContext(),mItem.node, todoButton);
                 }
             };
