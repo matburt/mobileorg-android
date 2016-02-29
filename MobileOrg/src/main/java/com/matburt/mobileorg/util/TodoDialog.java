@@ -9,6 +9,7 @@ import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
@@ -62,6 +63,7 @@ public class TodoDialog {
             return;
         }
         newNode.todo = selectedTodo;
+        Log.v("todo", "new todo : "+newNode.todo);
         node.generateApplyWriteEdits(newNode, null, resolver);
         node.write(resolver);
         OrgUtils.announceSyncDone(context);

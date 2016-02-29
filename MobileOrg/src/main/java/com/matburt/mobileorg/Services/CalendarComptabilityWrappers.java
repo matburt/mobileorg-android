@@ -141,19 +141,15 @@ public class CalendarComptabilityWrappers {
 		}
 		if (managedCursor != null) {
 			calendarUriBase = "content://com.android.calendar";
-			managedCursor.close();
 		} else {
 			calendars = Uri.parse("content://calendar/calendars");
 			try {
 				managedCursor = context.getContentResolver().query(calendars, null, null, null, null);
 			} catch (Exception e) {
 			}
-			if (managedCursor != null) {
-				calendarUriBase = "content://calendar";
-				managedCursor.close();
-			}
+			if (managedCursor != null) calendarUriBase = "content://calendar";
 		}
-		
+		if(managedCursor!=null) managedCursor.close();
 		return calendarUriBase;
 	}
 }

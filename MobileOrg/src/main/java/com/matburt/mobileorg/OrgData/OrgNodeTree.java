@@ -19,7 +19,7 @@ public class OrgNodeTree {
 
     private Visibility visibility;
     private ArrayList<OrgNodeTree> children;
-    private static int idConstructor;
+    private static long idConstructor;
 
     public OrgNodeTree(OrgNode root, ContentResolver resolver){
         if(root == null) return;
@@ -55,14 +55,14 @@ public class OrgNodeTree {
     /**
      * Generate a mapping between an OrgNode from the tree and its index in the tree
      */
-    public NavigableMap<Integer,OrgNodeTree> getVisibleNodesArray(){
-        TreeMap<Integer,OrgNodeTree> result = new TreeMap<>();
+    public NavigableMap<Long,OrgNodeTree> getVisibleNodesArray(){
+        TreeMap<Long,OrgNodeTree> result = new TreeMap<>();
         idConstructor = -1;
         fillMap(result, this);
         return result;
     }
 
-    private static void fillMap(TreeMap<Integer,OrgNodeTree> map, OrgNodeTree tree){
+    private static void fillMap(TreeMap<Long,OrgNodeTree> map, OrgNodeTree tree){
         // The root node is the filename node
         // It must not be added
         if(idConstructor > -1) map.put(idConstructor++, tree);

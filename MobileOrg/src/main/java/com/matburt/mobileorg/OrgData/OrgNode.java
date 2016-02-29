@@ -53,10 +53,15 @@ public class OrgNode {
 	public OrgNode(long id, ContentResolver resolver) throws OrgNodeNotFoundException {
 		Cursor cursor = resolver.query(OrgData.buildIdUri(id),
 				OrgData.DEFAULT_COLUMNS, null, null, null);
-		if(cursor == null || cursor.moveToFirst() == false)
-			throw new OrgNodeNotFoundException("Node with id \"" + id + "\" not found");
+		if(cursor == null)
+            throw new OrgNodeNotFoundException("Node with id \"" + id + "\" not found");
+
+        if(!cursor.moveToFirst()){
+            cursor.close();
+            throw new OrgNodeNotFoundException("Node with id \"" + id + "\" not found");
+        }
 		set(cursor);
-		cursor.close();
+        cursor.close();
 	}
 
 	public OrgNode(Cursor cursor) throws OrgNodeNotFoundException {
@@ -64,15 +69,14 @@ public class OrgNode {
 	}
 	
 	public void set(Cursor cursor) throws OrgNodeNotFoundException {
-		Log.v("detail", "building payload");
-		if (cursor != null && cursor.getCount() > 0) {
+        if (cursor != null && cursor.getCount() > 0) {
 			if(cursor.isBeforeFirst() || cursor.isAfterLast())
 				cursor.moveToFirst();
 			id = cursor.getLong(cursor.getColumnIndexOrThrow("_id"));
 			parentId = cursor.getLong(cursor
-					.getColumnIndexOrThrow(OrgData.PARENT_ID));
+                    .getColumnIndexOrThrow(OrgData.PARENT_ID));
 			fileId = cursor.getLong(cursor
-					.getColumnIndexOrThrow(OrgData.FILE_ID));
+                    .getColumnIndexOrThrow(OrgData.FILE_ID));
 			level = cursor.getLong(cursor.getColumnIndexOrThrow(OrgData.LEVEL));
 			priority = cursor.getString(cursor
 					.getColumnIndexOrThrow(OrgData.PRIORITY));
@@ -83,12 +87,13 @@ public class OrgNode {
 			name = cursor.getString(cursor.getColumnIndexOrThrow(OrgData.NAME));
 			payload = cursor.getString(cursor
 					.getColumnIndexOrThrow(OrgData.PAYLOAD));
-			Log.v("detail","and payload is :"+payload.toString());
 		} else {
 			throw new OrgNodeNotFoundException(
 					"Failed to create OrgNode from cursor");
-		}	
-	}
+		}
+        Log.v("todo","reset : "+name);
+
+    }
 	
 	public String getFilename(ContentResolver resolver) {
 		try {
@@ -145,7 +150,7 @@ public class OrgNode {
 		updateNode(resolver);
 		
 		String nodeId = getNodeId(resolver);
-		if (nodeId.startsWith("olp:") == false) { // Update all nodes that have this :ID:
+		if (!nodeId.startsWith("olp:")) { // Update all nodes that have this :ID:
 			String nodeIdQuery = "%" + nodeId + "%";
 			resolver.update(OrgData.CONTENT_URI, getSimpleContentValues(),
 					OrgData.PAYLOAD + " LIKE ?", new String[] { nodeIdQuery });
@@ -171,15 +176,17 @@ public class OrgNode {
 			Cursor query = resolver.query(OrgData.CONTENT_URI,
 					OrgData.DEFAULT_COLUMNS, nodeIdQuery, null,
 					null);
+
+            OrgNode node = null;
 			try {
-				OrgNode node = new OrgNode(query);
-				query.close();
-				return node;
+				node = new OrgNode(query);
 			} catch (OrgNodeNotFoundException e) {
-				if (query != null)
-					query.close();
-			}
-		}
+
+            } finally {
+                if (query != null)  query.close();
+            }
+            return node;
+        }
 		
 		return this;
 	}
@@ -286,7 +293,9 @@ public class OrgNode {
 	public OrgNode getParent(ContentResolver resolver) throws OrgNodeNotFoundException {
 		Cursor cursor = resolver.query(OrgData.buildIdUri(this.parentId),
 				OrgData.DEFAULT_COLUMNS, null, null, null);
-		return new OrgNode(cursor);
+        OrgNode parent = new OrgNode(cursor);
+        if(cursor!=null) cursor.close();
+		return parent;
 	}
 	
 	public ArrayList<String> getSiblingsStringArray(ContentResolver resolver) {

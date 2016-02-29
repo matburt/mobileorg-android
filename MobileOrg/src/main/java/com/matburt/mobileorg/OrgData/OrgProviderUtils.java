@@ -261,7 +261,7 @@ public class OrgProviderUtils {
 				OrgData.DEFAULT_COLUMNS, OrgData.NAME + "=? AND " + OrgData.PARENT_ID + "=-1", new String[] {fileAlias}, null);
 		OrgNode node = new OrgNode();
 		node.set(cursor);
-		
+		cursor.close();
 		return node;
 	}
 	
@@ -318,7 +318,9 @@ public class OrgProviderUtils {
 
 			return isdone == 0;
 		}
-		
+
+		if(cursor!=null) cursor.close();
+
 		return false;
 	}
 	

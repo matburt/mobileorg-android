@@ -148,11 +148,13 @@ public class CalendarSyncService extends Service implements
 
 		MultiMap<CalendarEntry> entries = getCalendarEntries(filename);
 
-		while (scheduledQuery.isAfterLast() == false) {
+		while (!scheduledQuery.isAfterLast()) {
 			try {
 				OrgNode node = new OrgNode(scheduledQuery);
 				syncNode(node, entries, filename);
-			} catch (OrgNodeNotFoundException e) {}
+			} catch (OrgNodeNotFoundException e) {
+				scheduledQuery.close();
+			}
 			scheduledQuery.moveToNext();
 		}
 		scheduledQuery.close();
@@ -204,18 +206,19 @@ public class CalendarSyncService extends Service implements
 		refreshPreferences();
 
 		Cursor query = calendarWrapper.getCalendarCursor(filename);
+		if(query==null) return new MultiMap<>();
 
-		MultiMap<CalendarEntry> map = new MultiMap<CalendarEntry>();
+		MultiMap<CalendarEntry> map = new MultiMap<>();
 		CalendarEntriesParser entriesParser = new CalendarEntriesParser(calendarWrapper.calendar.events,
 				query);
 
-		while (query.isAfterLast() == false) {
+		while (!query.isAfterLast()) {
 			CalendarEntry entry = entriesParser.getEntryFromCursor(query);
 			map.put(entry.dtStart, entry);
 
 			query.moveToNext();
 		}
-
+		query.close();
 		return map;
 	}
 

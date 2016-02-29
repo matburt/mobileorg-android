@@ -7,7 +7,6 @@ import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
-import android.support.annotation.NonNull;
 import android.os.Bundle;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v4.app.Fragment;
@@ -38,6 +37,7 @@ import com.matburt.mobileorg.util.PreferenceUtils;
 import com.matburt.mobileorg.util.TodoDialog;
 
 import java.util.NavigableMap;
+import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -54,12 +54,16 @@ public class OrgNodeDetailFragment extends Fragment {
     private ContentResolver resolver;
 
     private long nodeId;
+    private long lastEditedPosition;
+    private long idHlightedPosition;
+
     private OrgNodeTree tree;
     private int gray, red, green, yellow, blue, foreground, foregroundDark, black;
     private static int nTitleColors = 3;
     private int[] titleColor;
     private int[] titleFontSize;
     RecyclerViewAdapter adapter;
+
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -71,6 +75,9 @@ public class OrgNodeDetailFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        lastEditedPosition = -1;
+        idHlightedPosition = -1;
+
         this.resolver = getActivity().getContentResolver();
 
         gray = ContextCompat.getColor(getContext(), R.color.colorGray);
@@ -123,7 +130,7 @@ public class OrgNodeDetailFragment extends Fragment {
         recyclerView.addItemDecoration(new DividerItemDecoration(getContext()));
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        setupRecyclerView(recyclerView);
+        recyclerView.setAdapter(adapter);
 
         class SimpleItemTouchHelperCallback extends ItemTouchHelper.Callback {
             private final RecyclerViewAdapter mAdapter;
@@ -144,7 +151,9 @@ public class OrgNodeDetailFragment extends Fragment {
                 // Create new fragment and transaction
                 Fragment newFragment = new EditNodeEntryFragment();
                 Bundle args = new Bundle();
-                long id = mAdapter.idTreeMap.get(viewHolder.getAdapterPosition()).node.id;
+                long position = (long)viewHolder.getAdapterPosition();
+                long id = mAdapter.idTreeMap.get(position).node.id;
+                lastEditedPosition = position;
                 args.putLong(NODE_ID, id);
                 newFragment.setArguments(args);
                 FragmentTransaction transaction = getFragmentManager().beginTransaction();
@@ -163,6 +172,9 @@ public class OrgNodeDetailFragment extends Fragment {
                                   RecyclerView.ViewHolder target) {
                 return false;
             }
+            
+
+
 
         };
 
@@ -173,15 +185,20 @@ public class OrgNodeDetailFragment extends Fragment {
         return rootView;
     }
 
-    private void setupRecyclerView(@NonNull RecyclerView recyclerView) {
-        recyclerView.setAdapter(adapter);
+    @Override
+    public void onResume(){
+        super.onResume();
+        if(lastEditedPosition > -1) {
+            adapter.refreshItem(lastEditedPosition);
+            adapter.notifyDataSetChanged();
+            lastEditedPosition = -1;
+        }
     }
 
-
     public class RecyclerViewAdapter
-            extends RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder> {
+            extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-        private NavigableMap<Integer, OrgNodeTree> idTreeMap;
+        private NavigableMap<Long, OrgNodeTree> idTreeMap;
         private final OrgNodeTree tree;
 
         public RecyclerViewAdapter(OrgNodeTree root) {
@@ -191,19 +208,36 @@ public class OrgNodeDetailFragment extends Fragment {
 
         void refresh(){
             idTreeMap = tree.getVisibleNodesArray();
+//            holder.setup(holder.mItem.node);
             notifyDataSetChanged();
         }
 
-        @Override
-        public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            View view = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.detail_recycler_item, parent, false);
-            return new ViewHolder(view);
+        public void refreshItem(long position){
+            OrgNodeTree tree = idTreeMap.get(position);
+            if(tree != null) tree.node.updateAllNodes(getContext().getContentResolver());
         }
 
         @Override
-        public void onBindViewHolder(final ViewHolder holder, int position) {
-            holder.mItem = idTreeMap.get(position);
+        public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            View view;
+            switch(viewType){
+                case 0:
+                    view = LayoutInflater.from(parent.getContext())
+                            .inflate(R.layout.detail_recycler_item, parent, false);
+                    return new ViewHolder(view);
+                case 1:
+                    view = LayoutInflater.from(parent.getContext())
+                            .inflate(R.layout.insert_node_before, parent, false);
+                    return new InsertNodeViewHolder(view);
+            }
+            return null;
+        }
+
+        @Override
+        public void onBindViewHolder(final RecyclerView.ViewHolder _holder, final int position) {
+            if(idHlightedPosition> -1 && (position==idHlightedPosition || position==idHlightedPosition+2)) return;
+            final ViewHolder holder = (ViewHolder)_holder;
+            holder.mItem = idTreeMap.get((long)position);
             holder.level = holder.mItem.node.level;
             holder.setup(holder.mItem.node);
 
@@ -214,14 +248,50 @@ public class OrgNodeDetailFragment extends Fragment {
                     refresh();
                 }
             });
+
+            holder.mView.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    idHlightedPosition = position;
+                    insertItem(position);
+                    notifyDataSetChanged();
+                    return false;
+                }
+            });
         }
 
-
-
+        /**
+         * Add an item before and after position
+         * @param position
+         */
+        private void insertItem(int position){
+            NavigableMap<Long, OrgNodeTree> newIdTreeMap = new TreeMap<>();
+            long newId = 0, oldId = 0;
+            while(oldId<idTreeMap.size()) {
+                if(oldId==(long)position || oldId==(long)position+1) newId++;
+                newIdTreeMap.put(newId++, idTreeMap.get(oldId++));
+            }
+            idTreeMap = newIdTreeMap;
+        }
 
         @Override
         public int getItemCount() {
             return idTreeMap.size();
+        }
+
+        @Override
+        public int getItemViewType(int position) {
+            if(idHlightedPosition>-1) {
+                if (position == idHlightedPosition) return 1;
+                if (position == idHlightedPosition + 2) return 1;
+            }
+            return 0;
+        }
+
+        public class InsertNodeViewHolder extends RecyclerView.ViewHolder {
+             public InsertNodeViewHolder(View view) {
+                 super(view);
+             }
         }
 
         public class ViewHolder extends RecyclerView.ViewHolder {

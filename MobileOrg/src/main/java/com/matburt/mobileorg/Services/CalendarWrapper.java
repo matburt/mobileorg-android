@@ -148,7 +148,9 @@ public class CalendarWrapper {
 				new String[] { calendar.calendars._ID,
 						calendar.calendars.CALENDAR_DISPLAY_NAME }, null, null,
 				null);
-		if (cursor != null && cursor.moveToFirst()) {
+		if (cursor == null) return -1;
+
+		if(cursor.moveToFirst()) {
 			for (int i = 0; i < cursor.getCount(); i++) {
 				int calId = cursor.getInt(0);
 				String calName = cursor.getString(1);
@@ -159,8 +161,8 @@ public class CalendarWrapper {
 				}
 				cursor.moveToNext();
 			}
-			cursor.close();
 		}
+		cursor.close();
 		return -1;
 	}
 
@@ -183,7 +185,7 @@ public class CalendarWrapper {
 				calendar.events.DESCRIPTION + " LIKE ?",
 				new String[] { CALENDAR_ORGANIZER + ":" + filename + "%" },
 				null);
-		query.moveToFirst();
+		if(query != null) query.moveToFirst();
 		
 		return query;
 	}
@@ -200,11 +202,8 @@ public class CalendarWrapper {
 					new String[] { calendar.calendars._ID,
 							calendar.calendars.CALENDAR_DISPLAY_NAME }, null,
 					null, null);
-			if (cursor == null)
-				return result;
-
-			if (cursor.getCount() == 0) {
-				cursor.close();
+			if (cursor == null || cursor.getCount() == 0) {
+				if(cursor!=null) cursor.close();
 				return result;
 			}
 
