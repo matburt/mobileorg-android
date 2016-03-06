@@ -4,7 +4,6 @@ import android.content.ContentResolver;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -33,7 +32,6 @@ public class EditNodeEntryFragment extends Fragment {
          long nodeId = getArguments().getLong(NODE_ID);
 
         ContentResolver resolver = getActivity().getContentResolver();
-        Log.v("id", "nodeid : " + nodeId);
         try {
             node = new OrgNode(nodeId,resolver);
         } catch (OrgNodeNotFoundException e) {
@@ -73,7 +71,6 @@ public class EditNodeEntryFragment extends Fragment {
         title.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                Log.v("focus","de bien");
                 title.setFocusable(true);
                 title.requestFocus();
                 return false;

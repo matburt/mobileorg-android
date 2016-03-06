@@ -7,7 +7,6 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
-import android.util.Log;
 
 //import com.matburt.mobileorg.Gui.Outline.OutlineItem;
 import com.matburt.mobileorg.OrgData.OrgContract.OrgData;
@@ -91,7 +90,6 @@ public class OrgNode {
 			throw new OrgNodeNotFoundException(
 					"Failed to create OrgNode from cursor");
 		}
-        Log.v("todo","reset : "+name);
 
     }
 	
@@ -495,7 +493,6 @@ public class OrgNode {
 			ContentResolver resolver) {
 		ArrayList<OrgEdit> generateEditNodes = generateApplyEditNodes(newNode, olpPath, resolver);
 		boolean generateEdits = !getFilename(resolver).equals(FileUtils.CAPTURE_FILE);
-				
 		if(generateEdits)
 			for(OrgEdit edit: generateEditNodes)
 				edit.write(resolver);
@@ -513,6 +510,7 @@ public class OrgNode {
 			edits.add(new OrgEdit(this, OrgEdit.TYPE.HEADING, newNode.name, resolver));
 			this.name = newNode.name;			
 		}
+
 		if (newNode.todo != null && !todo.equals(newNode.todo)) {
 			edits.add(new OrgEdit(this, OrgEdit.TYPE.TODO, newNode.todo, resolver));
 			this.todo = newNode.todo;
@@ -538,7 +536,7 @@ public class OrgNode {
 			this.fileId = newNode.fileId;
 			this.level = parent.level + 1;
 		}
-		
+
 		return edits;
 	}
 	

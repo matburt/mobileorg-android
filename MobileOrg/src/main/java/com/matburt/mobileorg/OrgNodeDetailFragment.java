@@ -187,7 +187,6 @@ public class OrgNodeDetailFragment extends Fragment {
         super.onResume();
         if(lastEditedPosition > -1) {
             adapter.refreshItem(lastEditedPosition);
-            adapter.notifyDataSetChanged();
             lastEditedPosition = -1;
         }
     }
@@ -211,7 +210,12 @@ public class OrgNodeDetailFragment extends Fragment {
 
         public void refreshItem(long position){
             OrgNodeTree tree = idTreeMap.get(position);
-            if(tree != null) tree.node.updateAllNodes(getContext().getContentResolver());
+            if(tree == null) return;
+            try {
+                tree.node = new OrgNode(tree.node.id,resolver);
+            } catch (OrgNodeNotFoundException e) {
+                e.printStackTrace();
+            }
         }
 
         @Override
