@@ -7,18 +7,19 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
+
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
 import android.widget.Toast;
 
 import android.net.Uri;
@@ -74,8 +75,17 @@ public class OrgNodeListActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                // Replace whatever is in the fragment_container view with this fragment,
+                // and add the transaction to the back stack
+                if (findViewById(R.id.orgnode_detail_container) != null) {
+                    Fragment newFragment = new EditNodeFragment();
+                    FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+                    transaction.replace(R.id.orgnode_detail_container, newFragment);
+                    transaction.commit();
+                } else {
+                    Intent intent = new Intent(view.getContext(), EditNodeActivity.class);
+                    startActivity(intent);
+                }
             }
         });
 
@@ -145,8 +155,6 @@ public class OrgNodeListActivity extends AppCompatActivity {
         }
         return false;
     }
-
-
 
     public void runHelp(View view) {
         Intent intent = new Intent(Intent.ACTION_VIEW,

@@ -114,6 +114,10 @@
             android:label="Ubuntu One Settings" >
         </activity>
 
+        <activity
+            android:name=".EditNodeActivity">
+        </activity>
+
         <service android:name=".Services.TimeclockService" >
         </service>
 

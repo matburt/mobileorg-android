@@ -3,7 +3,6 @@ package com.matburt.mobileorg;
 import android.content.ContentResolver;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -11,13 +10,12 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import com.matburt.mobileorg.OrgData.OrgNode;
 import com.matburt.mobileorg.util.OrgNodeNotFoundException;
 import com.matburt.mobileorg.util.TodoDialog;
 
-public class EditNodeEntryFragment extends Fragment {
+public class EditNodeFragment extends Fragment {
     public static String NODE_ID = "node_id";
     private OrgNode node;
 
@@ -27,15 +25,21 @@ public class EditNodeEntryFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-         final View rootView = inflater.inflate(R.layout.edit_node_entry, container, false);
+        final View rootView = inflater.inflate(R.layout.edit_node_entry, container, false);
 
-         long nodeId = getArguments().getLong(NODE_ID);
+        long nodeId;
+        if(getArguments()!=null) nodeId = getArguments().getLong(NODE_ID, -1);
+        else nodeId = -1;
 
-        ContentResolver resolver = getActivity().getContentResolver();
-        try {
-            node = new OrgNode(nodeId,resolver);
-        } catch (OrgNodeNotFoundException e) {
-            e.printStackTrace();
+        if(nodeId > -1) {
+            ContentResolver resolver = getActivity().getContentResolver();
+            try {
+                node = new OrgNode(nodeId, resolver);
+            } catch (OrgNodeNotFoundException e) {
+                e.printStackTrace();
+            }
+        } else {
+            node = new OrgNode();
         }
 
         todo = (Button) rootView.findViewById(R.id.todo);

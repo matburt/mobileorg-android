@@ -21,7 +21,6 @@ import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -100,7 +99,7 @@ public class OrgNodeDetailFragment extends Fragment {
         titleFontSize[1] = 20;
         titleFontSize[2] = 16;
         
-        Log.i("commit", "received with : " + getArguments().getLong(NODE_ID));
+
         if (getArguments().containsKey(NODE_ID)) {
             this.nodeId = getArguments().getLong(NODE_ID);
             try {
@@ -150,7 +149,7 @@ public class OrgNodeDetailFragment extends Fragment {
             @Override
             public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
                 // Create new fragment and transaction
-                Fragment newFragment = new EditNodeEntryFragment();
+                Fragment newFragment = new EditNodeFragment();
                 Bundle args = new Bundle();
                 long position = (long)viewHolder.getAdapterPosition();
                 long id = mAdapter.idTreeMap.get(position).node.id;
