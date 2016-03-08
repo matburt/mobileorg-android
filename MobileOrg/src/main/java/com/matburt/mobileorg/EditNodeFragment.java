@@ -1,33 +1,48 @@
 package com.matburt.mobileorg;
 
+import android.app.DatePickerDialog;
+import android.app.Dialog;
+import android.app.TimePickerDialog;
 import android.content.ContentResolver;
 import android.os.Bundle;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
+import android.text.format.DateFormat;
+import android.text.style.BulletSpan;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.TimePicker;
 
 import com.matburt.mobileorg.OrgData.OrgNode;
+import com.matburt.mobileorg.OrgData.OrgNodeTimeDate;
 import com.matburt.mobileorg.util.OrgNodeNotFoundException;
 import com.matburt.mobileorg.util.TodoDialog;
 
+import java.util.Calendar;
+
 public class EditNodeFragment extends Fragment {
     public static String NODE_ID = "node_id";
+    static public long nodeId;
     private OrgNode node;
 
-    EditText title, content, schedule, deadline;
+    EditText title, content;
+    Button schedule, deadline;
     private Button todo;
+
+    static OrgNodeTimeDate.TYPE currentDateTimeDialog;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         final View rootView = inflater.inflate(R.layout.edit_node_entry, container, false);
 
-        long nodeId;
         if(getArguments()!=null) nodeId = getArguments().getLong(NODE_ID, -1);
         else nodeId = -1;
 
@@ -40,6 +55,8 @@ public class EditNodeFragment extends Fragment {
             }
         } else {
             node = new OrgNode();
+            node.write(getContext().getContentResolver());
+            nodeId = node.id;
         }
 
         todo = (Button) rootView.findViewById(R.id.todo);
@@ -49,6 +66,7 @@ public class EditNodeFragment extends Fragment {
         todo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                currentDateTimeDialog = OrgNodeTimeDate.TYPE.Scheduled;
                 new TodoDialog(getContext(), node, todo);
             }
         });
@@ -90,13 +108,97 @@ public class EditNodeFragment extends Fragment {
             }
         });
 
-        schedule = (EditText) rootView.findViewById(R.id.scheduled);
+        schedule = (Button) rootView.findViewById(R.id.scheduled);
 //        schedule.setText(node.name);
 
+        schedule.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                currentDateTimeDialog = OrgNodeTimeDate.TYPE.Scheduled;
+                setupDateTimeDialog();
+            }
+        });
 
-        deadline = (EditText) rootView.findViewById(R.id.deadline);
+        deadline = (Button) rootView.findViewById(R.id.deadline);
 //        deadline.setText(node.name);
 
         return rootView;
+    }
+
+    private void setupDateTimeDialog(){
+        DialogFragment newFragment = new DatePickerFragment();
+        newFragment.show(getActivity().getSupportFragmentManager(), "datePicker");
+    }
+
+    public static class TimePickerFragment extends DialogFragment
+            implements TimePickerDialog.OnTimeSetListener {
+        static private int day = -1, month = -1, year = -1;
+
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            // Use the current time as the default values for the picker
+            final Calendar c = Calendar.getInstance();
+            int hour = c.get(Calendar.HOUR_OF_DAY);
+            int minute = c.get(Calendar.MINUTE);
+
+            day = getArguments().getInt("day");
+            month = getArguments().getInt("month");
+            year = getArguments().getInt("year");
+
+            // Create a new instance of TimePickerDialog and return it
+            return new TimePickerDialog(getActivity(), this, hour, minute,
+                    DateFormat.is24HourFormat(getActivity()));
+        }
+
+        public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+            ContentResolver resolver = getActivity().getContentResolver();
+            OrgNode node = null;
+            try {
+                node = new OrgNode(nodeId, resolver);
+            } catch (OrgNodeNotFoundException e) {
+                e.printStackTrace();
+                return;
+            }
+
+            node.getOrgNodePayload().insertOrReplaceDate(
+                    new OrgNodeTimeDate(
+                            EditNodeFragment.currentDateTimeDialog,
+                            day,
+                            month,
+                            year
+                    )
+            );
+            Log.v("timestamp","test : "+node.getOrgNodePayload().getScheduled());
+
+        }
+
+    }
+
+    public static class DatePickerFragment extends DialogFragment
+            implements DatePickerDialog.OnDateSetListener {
+
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            // Use the current date as the default date in the picker
+            final Calendar c = Calendar.getInstance();
+            int year = c.get(Calendar.YEAR);
+            int month = c.get(Calendar.MONTH);
+            int day = c.get(Calendar.DAY_OF_MONTH);
+
+            // Create a new instance of DatePickerDialog and return it
+            return new DatePickerDialog(getActivity(), this, year, month, day);
+        }
+
+        public void onDateSet(DatePicker view, int year, int month, int day) {
+            Bundle bundle = new Bundle();
+            bundle.putInt("year",year);
+            bundle.putInt("month",month);
+            bundle.putInt("day",day);
+            TimePickerFragment newFragment = new TimePickerFragment();
+            newFragment.setArguments(bundle);
+            newFragment.show(getActivity().getSupportFragmentManager(), "timePicker");
+        }
+
+
     }
 }

@@ -168,19 +168,19 @@ public class OrgNodePayload {
 		return result;
 	}
 	
-	public void insertOrReplaceDate(OrgNodeTimeDate.TYPE type, String date) {
-		Matcher matcher = getTimestampMatcher(type).matcher(payload);
+	public void insertOrReplaceDate(OrgNodeTimeDate date) {
+		Matcher matcher = getTimestampMatcher(date.type).matcher(payload);
 		
-		String formatedDate = OrgNodeTimeDate.formatDate(type, date);
+		String formatedDate = date.toFormatedString();
 		
 		if (matcher.find()) {
-			if (TextUtils.isEmpty(date)) // Date was set to empty
-				payload.delete(matcher.start(), matcher.end());
-			else // Replace existing date
-				payload.replace(matcher.start(1), matcher.end(), formatedDate);
+//			if (TextUtils.isEmpty(date)) // Date was set to empty
+//				payload.delete(matcher.start(), matcher.end());
+//			else // Replace existing date
+			payload.replace(matcher.start(1), matcher.end(), formatedDate);
 		}
-		else if(TextUtils.isEmpty(date) == false) // Insert new date
-			payload.insert(0, formatedDate + "\n");
+//		else if(TextUtils.isEmpty(date) == false) // Insert new date
+		else payload.insert(0, formatedDate + "\n");
 		
 		resetCachedValues();
 	}

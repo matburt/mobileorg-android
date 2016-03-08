@@ -22,7 +22,7 @@ android:orientation="vertical" >
             android:layout_alignParentStart="true"
             />
 
-        <EditText
+        <Button
             android:id="@+id/deadline"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -34,8 +34,7 @@ android:orientation="vertical" >
             android:focusable="false"
             />
 
-        <EditText
-            android:focusable="false"
+        <Button
             android:id="@+id/scheduled"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

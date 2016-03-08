@@ -28,6 +28,16 @@ public class OrgNodeTimeDate {
 		this.type = type;
 	}
 
+	public OrgNodeTimeDate(TYPE type, int day, int month, int year) {
+		this(type);
+		setDate(day, month, year);
+	}
+
+	public void setDate(int day, int month, int year) {
+		this.dayOfMonth = day;
+		this.monthOfYear = month;
+		this.year = year;
+	}
 
 	public void setToCurrentDate() {
 		final Calendar c = Calendar.getInstance();
@@ -39,6 +49,7 @@ public class OrgNodeTimeDate {
 	private static final Pattern schedulePattern = Pattern
 			.compile("((\\d{4})-(\\d{1,2})-(\\d{1,2}))(?:[^\\d]*)"
 					+ "((\\d{1,2})\\:(\\d{2}))?(-((\\d{1,2})\\:(\\d{2})))?");
+
 	public void parseDate(String date) {
 		if(date == null)
 			return;
