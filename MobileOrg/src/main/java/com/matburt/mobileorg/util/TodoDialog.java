@@ -20,14 +20,14 @@ import com.matburt.mobileorg.R;
 import java.util.ArrayList;
 
 public class TodoDialog {
-    final private Context context;
-    final private OrgNode node;
-    final private Button button;
+    private final Context context;
+    private final OrgNode node;
+    private final Button button;
 
-    public TodoDialog(Context context, OrgNode node, Button button) {
-        this.context = context;
-        this.node = node;
-        this.button = button;
+    public TodoDialog(Context _context, OrgNode _node, Button _button) {
+        this.context = _context;
+        this.node = _node;
+        this.button = _button;
 
        ArrayList<String> todos = PreferenceUtils.getSelectedTodos();
 
@@ -43,13 +43,15 @@ public class TodoDialog {
                             public void onClick(DialogInterface dialog,
                                                 int which) {
                                 String selectedTodo = todoList.get(which);
-                                setNewTodo(selectedTodo);
+                                if(node.id > -1) updateOrgNodeTodo(selectedTodo);
+                                else node.todo = selectedTodo;
+                                setupTodoButton(context,node,button, false);
                             }
                         });
         builder.create().show();
     }
 
-    private void setNewTodo(String selectedTodo) {
+    private void updateOrgNodeTodo(String selectedTodo) {
         if (selectedTodo.equals(node.todo))
             return;
 
@@ -63,11 +65,10 @@ public class TodoDialog {
             return;
         }
         newNode.todo = selectedTodo;
-        Log.v("todo", "new todo : "+newNode.todo);
+        Log.v("todo", "new todo : " + newNode.todo);
         node.generateApplyWriteEdits(newNode, null, resolver);
         node.write(resolver);
         OrgUtils.announceSyncDone(context);
-        setupTodoButton(context,node,button, false);
     }
 
     static public void setupTodoButton(Context context, OrgNode node,

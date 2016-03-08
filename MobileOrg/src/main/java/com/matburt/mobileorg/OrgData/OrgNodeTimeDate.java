@@ -33,10 +33,21 @@ public class OrgNodeTimeDate {
 		setDate(day, month, year);
 	}
 
+	public OrgNodeTimeDate(TYPE type, int day, int month, int year, int startTimeOfDay, int startMinute) {
+		this(type);
+		setDate(day, month, year);
+		setTime(startTimeOfDay, startMinute);
+	}
+
 	public void setDate(int day, int month, int year) {
 		this.dayOfMonth = day;
 		this.monthOfYear = month;
 		this.year = year;
+	}
+
+	public void setTime(int startTimeOfDay, int startMinute) {
+		this.startTimeOfDay = startTimeOfDay;
+		this.startMinute = startMinute;
 	}
 
 	public void setToCurrentDate() {

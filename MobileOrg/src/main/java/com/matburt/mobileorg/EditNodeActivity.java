@@ -9,6 +9,8 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 
@@ -23,7 +25,7 @@ public class EditNodeActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_orgnode_detail);
+        setContentView(R.layout.activity_edit_node);
 //        Toolbar toolbar = (Toolbar) findViewById(R.id.detail_toolbar);
 //        setSupportActionBar(toolbar);
 //
@@ -57,9 +59,17 @@ public class EditNodeActivity extends AppCompatActivity {
 
             EditNodeFragment fragment = new EditNodeFragment();
             getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.orgnode_detail_container, fragment)
+                    .replace(R.id.edit_node_container, fragment)
                     .commit();
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.edit_node_menu, menu);
+
+        return true;
     }
 
     @Override

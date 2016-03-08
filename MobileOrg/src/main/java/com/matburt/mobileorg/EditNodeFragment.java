@@ -8,7 +8,6 @@ import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.text.format.DateFormat;
-import android.text.style.BulletSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -30,10 +29,10 @@ import java.util.Calendar;
 public class EditNodeFragment extends Fragment {
     public static String NODE_ID = "node_id";
     static public long nodeId;
-    private OrgNode node;
+    static private OrgNode node;
 
     EditText title, content;
-    Button schedule, deadline;
+    static Button schedule, deadline;
     private Button todo;
 
     static OrgNodeTimeDate.TYPE currentDateTimeDialog;
@@ -109,8 +108,6 @@ public class EditNodeFragment extends Fragment {
         });
 
         schedule = (Button) rootView.findViewById(R.id.scheduled);
-//        schedule.setText(node.name);
-
         schedule.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -120,9 +117,30 @@ public class EditNodeFragment extends Fragment {
         });
 
         deadline = (Button) rootView.findViewById(R.id.deadline);
-//        deadline.setText(node.name);
+        deadline.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                currentDateTimeDialog = OrgNodeTimeDate.TYPE.Deadline;
+                setupDateTimeDialog();
+            }
+        });
 
+
+        setupTimeStampButtons();
+
+        getActivity().invalidateOptionsMenu();
         return rootView;
+    }
+
+    static private void setupTimeStampButtons() {
+        String scheduleText = node.getOrgNodePayload().getScheduled();
+        String deadlineText = node.getOrgNodePayload().getDeadline();
+        if(scheduleText.length() > 0) schedule.setText(scheduleText);
+        else schedule.setText(schedule.getResources().getString(R.string.scheduled));
+
+        if(deadlineText.length() > 0) deadline.setText(deadlineText);
+        else deadline.setText(deadline.getResources().getString(R.string.deadline));
+
     }
 
     private void setupDateTimeDialog(){
@@ -150,7 +168,7 @@ public class EditNodeFragment extends Fragment {
                     DateFormat.is24HourFormat(getActivity()));
         }
 
-        public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+        public void onTimeSet(TimePicker view, int hourOfDay, int minuteOfDay) {
             ContentResolver resolver = getActivity().getContentResolver();
             OrgNode node = null;
             try {
@@ -165,13 +183,14 @@ public class EditNodeFragment extends Fragment {
                             EditNodeFragment.currentDateTimeDialog,
                             day,
                             month,
-                            year
+                            year,
+                            hourOfDay,
+                            minuteOfDay
                     )
             );
             Log.v("timestamp","test : "+node.getOrgNodePayload().getScheduled());
 
         }
-
     }
 
     public static class DatePickerFragment extends DialogFragment
@@ -190,15 +209,23 @@ public class EditNodeFragment extends Fragment {
         }
 
         public void onDateSet(DatePicker view, int year, int month, int day) {
-            Bundle bundle = new Bundle();
-            bundle.putInt("year",year);
-            bundle.putInt("month",month);
-            bundle.putInt("day",day);
-            TimePickerFragment newFragment = new TimePickerFragment();
-            newFragment.setArguments(bundle);
-            newFragment.show(getActivity().getSupportFragmentManager(), "timePicker");
+            node.getOrgNodePayload().insertOrReplaceDate(
+                    new OrgNodeTimeDate(
+                            EditNodeFragment.currentDateTimeDialog,
+                            day,
+                            month,
+                            year
+                    )
+            );
+
+            setupTimeStampButtons();
+//            Bundle bundle = new Bundle();
+//            bundle.putInt("year",year);
+//            bundle.putInt("month",month);
+//            bundle.putInt("day",day);
+//            TimePickerFragment newFragment = new TimePickerFragment();
+//            newFragment.setArguments(bundle);
+//            newFragment.show(getActivity().getSupportFragmentManager(), "timePicker");
         }
-
-
     }
 }

@@ -71,24 +71,6 @@ public class OrgNodeListActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         toolbar.setTitle(getTitle());
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                // Replace whatever is in the fragment_container view with this fragment,
-                // and add the transaction to the back stack
-                if (findViewById(R.id.orgnode_detail_container) != null) {
-                    Fragment newFragment = new EditNodeFragment();
-                    FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-                    transaction.replace(R.id.orgnode_detail_container, newFragment);
-                    transaction.commit();
-                } else {
-                    Intent intent = new Intent(view.getContext(), EditNodeActivity.class);
-                    startActivity(intent);
-                }
-            }
-        });
-
         Intent intent = getIntent();
         node_id = intent.getLongExtra(NODE_ID, -1);
 
@@ -109,6 +91,15 @@ public class OrgNodeListActivity extends AppCompatActivity {
         this.syncReceiver = new SynchServiceReceiver();
         registerReceiver(this.syncReceiver, new IntentFilter(
                 Synchronizer.SYNC_UPDATE));
+
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(view.getContext(), EditNodeActivity.class);
+                startActivity(intent);
+            }
+        });
 
     }
 

@@ -115,7 +115,8 @@
         </activity>
 
         <activity
-            android:name=".EditNodeActivity">
+            android:name=".EditNodeActivity"
+            android:label="New node">
         </activity>
 
         <service android:name=".Services.TimeclockService" >
