@@ -13,39 +13,59 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.TimePicker;
 
 import com.matburt.mobileorg.OrgData.OrgNode;
 import com.matburt.mobileorg.OrgData.OrgNodeTimeDate;
+import com.matburt.mobileorg.OrgData.OrgProviderUtils;
 import com.matburt.mobileorg.util.OrgNodeNotFoundException;
 import com.matburt.mobileorg.util.TodoDialog;
 
+import org.w3c.dom.Text;
+
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 
 public class EditNodeFragment extends Fragment {
     public static String NODE_ID = "node_id";
     static public long nodeId;
     static private OrgNode node;
 
+    Spinner filename;
     EditText title, content;
     static Button schedule, deadline;
     private Button todo;
 
     static OrgNodeTimeDate.TYPE currentDateTimeDialog;
+    final static private String CAPTURE_FILENAME = "capture.org";
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         final View rootView = inflater.inflate(R.layout.edit_node_entry, container, false);
 
+        filename = (Spinner) rootView.findViewById(R.id.filename);
+        todo = (Button) rootView.findViewById(R.id.todo);
+        title = (EditText) rootView.findViewById(R.id.title);
+        schedule = (Button) rootView.findViewById(R.id.scheduled);
+        content = (EditText) rootView.findViewById(R.id.content);
+        deadline = (Button) rootView.findViewById(R.id.deadline);
+
         if(getArguments()!=null) nodeId = getArguments().getLong(NODE_ID, -1);
         else nodeId = -1;
 
         if(nodeId > -1) {
+            // Editing already existing node
             ContentResolver resolver = getActivity().getContentResolver();
             try {
                 node = new OrgNode(nodeId, resolver);
@@ -53,12 +73,11 @@ public class EditNodeFragment extends Fragment {
                 e.printStackTrace();
             }
         } else {
+            // Creating new node
             node = new OrgNode();
-            node.write(getContext().getContentResolver());
-            nodeId = node.id;
-        }
 
-        todo = (Button) rootView.findViewById(R.id.todo);
+
+        }
 
         TodoDialog.setupTodoButton(getContext(), node, todo, false);
 
@@ -70,10 +89,9 @@ public class EditNodeFragment extends Fragment {
             }
         });
 
-        title = (EditText) rootView.findViewById(R.id.title);
+
         title.setText(node.name);
 
-        content = (EditText) rootView.findViewById(R.id.content);
         String payload = node.getCleanedPayload();
         if(payload.length()>0){
             content.setText(payload);
@@ -107,7 +125,6 @@ public class EditNodeFragment extends Fragment {
             }
         });
 
-        schedule = (Button) rootView.findViewById(R.id.scheduled);
         schedule.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -116,7 +133,6 @@ public class EditNodeFragment extends Fragment {
             }
         });
 
-        deadline = (Button) rootView.findViewById(R.id.deadline);
         deadline.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -125,8 +141,10 @@ public class EditNodeFragment extends Fragment {
             }
         });
 
-
         setupTimeStampButtons();
+
+        // Add spinner for filename
+        addFileNameSpinner(rootView);
 
         getActivity().invalidateOptionsMenu();
         return rootView;
@@ -141,6 +159,62 @@ public class EditNodeFragment extends Fragment {
         if(deadlineText.length() > 0) deadline.setText(deadlineText);
         else deadline.setText(deadline.getResources().getString(R.string.deadline));
 
+    }
+
+
+
+    private void addFileNameSpinner(View view){
+        if(node.id > -1){
+            // Only show spinner when creating new node
+            TextView file = (TextView)view.findViewById(R.id.filename_textview);
+            file.setVisibility(View.GONE);
+            filename.setVisibility(View.GONE);
+            return;
+        }
+
+        List<String> list = new ArrayList<>();
+        list.add(CAPTURE_FILENAME);
+        for( OrgNode node : OrgProviderUtils.getFileNodes(getContext()) ) {
+            if (!node.name.equals(CAPTURE_FILENAME)) list.add(node.name);
+        }
+        list.add(getResources().getString(R.string.new_file));
+
+        ArrayAdapter<String> dataAdapter = new ArrayAdapter<>(getContext(),
+                android.R.layout.simple_spinner_item, list);
+        dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        filename.setAdapter(dataAdapter);
+        filename.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                for( OrgNode node : OrgProviderUtils.getFileNodes(getContext()) ) {
+                    if(node.name.equals(((TextView)view).getText())) {
+                        EditNodeFragment.node.fileId = node.fileId;
+                        EditNodeFragment.node.parentId = node.id;
+                        EditNodeFragment.node.level = 1;
+                    }
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+    }
+
+    /**
+     * Called by EditNodeActivity when the OK button from the menu bar is pressed
+     */
+    public void onOKPressed(){
+        node.name = title.getText().toString();
+        node.setPayload( content.getText().toString() );
+        node.write(getContext().getContentResolver());
+    }
+
+    /**
+     * Called by EditNodeActivity when the Cancel button from the menu bar is pressed
+     */
+    public void onCancelPressed(){
     }
 
     private void setupDateTimeDialog(){
@@ -170,13 +244,6 @@ public class EditNodeFragment extends Fragment {
 
         public void onTimeSet(TimePicker view, int hourOfDay, int minuteOfDay) {
             ContentResolver resolver = getActivity().getContentResolver();
-            OrgNode node = null;
-            try {
-                node = new OrgNode(nodeId, resolver);
-            } catch (OrgNodeNotFoundException e) {
-                e.printStackTrace();
-                return;
-            }
 
             node.getOrgNodePayload().insertOrReplaceDate(
                     new OrgNodeTimeDate(

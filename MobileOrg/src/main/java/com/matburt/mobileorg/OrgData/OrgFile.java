@@ -4,6 +4,7 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
+import android.util.Log;
 
 import com.matburt.mobileorg.OrgData.OrgContract.Files;
 import com.matburt.mobileorg.OrgData.OrgContract.OrgData;
@@ -122,6 +123,7 @@ public class OrgFile {
 		values.put(Files.NODE_ID, nodeId);
 		
 		Uri uri = resolver.insert(Files.CONTENT_URI, values);
+		Log.v("uri", "uri : " + uri);
 		return Long.parseLong(Files.getId(uri));
 	}
 	

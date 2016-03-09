@@ -21,6 +21,7 @@ import android.view.View;
  * in a {@link OrgNodeListActivity}.
  */
 public class EditNodeActivity extends AppCompatActivity {
+    EditNodeFragment fragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,7 +58,7 @@ public class EditNodeActivity extends AppCompatActivity {
             // Create the detail fragment and add it to the activity
             // using a fragment transaction.
 
-            EditNodeFragment fragment = new EditNodeFragment();
+            fragment = new EditNodeFragment();
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.edit_node_container, fragment)
                     .commit();
@@ -74,8 +75,8 @@ public class EditNodeActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        if (id == android.R.id.home) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
             // This ID represents the Home or Up button. In the case of this
             // activity, the Up button is shown. Use NavUtils to allow users
             // to navigate up one level in the application structure. For
@@ -85,7 +86,19 @@ public class EditNodeActivity extends AppCompatActivity {
             //
             NavUtils.navigateUpTo(this, new Intent(this, OrgNodeListActivity.class));
             return true;
+
+            case R.id.edit_menu_ok:
+                fragment.onOKPressed();
+                Intent intent = new Intent(this, OrgNodeListActivity.class);
+                startActivity(intent);
+                return true;
+            case R.id.edit_menu_cancel:
+                fragment.onCancelPressed();
+                intent = new Intent(this, OrgNodeListActivity.class);
+                startActivity(intent);
+                return true;
         }
-        return super.onOptionsItemSelected(item);
+//        return super.onOptionsItemSelected(item);
+        return false;
     }
 }

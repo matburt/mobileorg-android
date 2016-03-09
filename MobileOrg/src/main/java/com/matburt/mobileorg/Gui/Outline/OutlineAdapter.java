@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -47,8 +48,11 @@ public class OutlineAdapter extends RecyclerView.Adapter<OutlineItem> {
 	public void refresh() {
 		clear();
 
-		for (OrgNode node : OrgProviderUtils.getOrgNodeChildren(-1, resolver))
+		for (OrgNode node : OrgProviderUtils.getOrgNodeChildren(-1, resolver)){
+			Log.v("uri", "parent : " + node.parentId + " , id : " + node.id + " , fileId : " + node.fileId);
 			add(node);
+		}
+
 
         notifyDataSetChanged();
 	}

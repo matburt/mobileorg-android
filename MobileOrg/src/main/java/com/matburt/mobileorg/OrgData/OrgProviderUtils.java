@@ -2,6 +2,7 @@ package com.matburt.mobileorg.OrgData;
 
 import android.content.ContentResolver;
 import android.content.ContentValues;
+import android.content.Context;
 import android.database.Cursor;
 import android.text.TextUtils;
 
@@ -18,6 +19,7 @@ import com.matburt.mobileorg.util.OrgNodeNotFoundException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -43,7 +45,16 @@ public class OrgProviderUtils {
 		cursor.close();
 		return checksums;
 	}
-	
+
+	/**
+	 *
+	 * @param context
+	 * @return the list of nodes corresponding to a file
+	 */
+	public static List<OrgNode> getFileNodes(Context context){
+        return OrgProviderUtils.getOrgNodeChildren(-1, context.getContentResolver());
+    }
+
 	public static ArrayList<String> getFilenames(ContentResolver resolver) {
 		ArrayList<String> result = new ArrayList<String>();
 
