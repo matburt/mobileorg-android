@@ -51,12 +51,7 @@ public class SSHSynchronizer implements SynchronizerInterface {
             port = Integer.parseInt(tmpPort);
         }
         pass = appSettings.getString("scpPass", "");
-
-        try {
-            this.connect();
-        } catch (Exception e) {
-            Log.e("MobileOrg", "SSH Connection failed");
-        }
+        Log.v("sync: ", "pass: "+pass);
 	}
 
     public String testConnection(String path, String user, String pass, String host, int port, String pubFile) {
@@ -195,6 +190,17 @@ public class SSHSynchronizer implements SynchronizerInterface {
 
 	@Override
 	public boolean isConnectable() {
-		return OrgUtils.isNetworkOnline(context);
-	}
+        if( ! OrgUtils.isNetworkOnline(context) ) return false;
+
+        try {
+            Log.v("sync","trying connect");
+            this.connect();
+            Log.v("sync","session success");
+        } catch (Exception e) {
+            Log.e("MobileOrg", "SSH Connection failed");
+            return false;
+        }
+
+        return true;
+    }
 }

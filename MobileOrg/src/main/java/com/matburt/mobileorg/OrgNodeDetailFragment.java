@@ -160,7 +160,7 @@ public class OrgNodeDetailFragment extends Fragment {
 
                 // Replace whatever is in the fragment_container view with this fragment,
                 // and add the transaction to the back stack
-                transaction.replace(R.id.orgnode_detail_container, newFragment);
+                transaction.replace(R.id.orgnode_detail_container, newFragment, "edit_node_fragment");
                 transaction.addToBackStack(null);
 
 // Commit the transaction

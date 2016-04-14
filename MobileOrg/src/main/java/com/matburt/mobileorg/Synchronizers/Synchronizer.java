@@ -111,7 +111,10 @@ public class Synchronizer {
 		} catch (OrgFileNotFoundException e) {}
 		
 		localContents += OrgEdit.editsToString(resolver);
-        Log.v("sync","local content size : "+localContents.length());
+
+		Log.v("sync","local content size : "+localContents.length());
+		Log.v("sync","local content  : "+localContents);
+
 		if (localContents.equals(""))
 			return;
 		String remoteContent = FileUtils.read(syncher.getRemoteFile(filename));

@@ -383,7 +383,15 @@ public class OrgProviderUtils {
 		
 		return changes;
 	}
-	
+
+	public static String getChangesString(ContentResolver content) {
+		int changes = OrgProviderUtils.getChangesCount(content);
+		if(changes > 0)
+			return "[" + changes + "]";
+		else
+			return "";
+	}
+
 	public static ArrayList<OrgNode> getOrgNodeChildren(long nodeId, ContentResolver resolver) {
 		
 		String sort = nodeId == -1 ? OrgData.NAME_SORT : null;

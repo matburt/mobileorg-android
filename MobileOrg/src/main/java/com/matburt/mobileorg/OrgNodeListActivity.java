@@ -209,28 +209,15 @@ public class OrgNodeListActivity extends AppCompatActivity {
         super.onDestroy();
     }
 
-    public void refreshDisplay() {
-//        this.listView.refresh();
-        refreshTitle();
-    }
-
-
     private void refreshTitle() {
-        this.getSupportActionBar().setTitle("MobileOrg " + getChangesString());
+        this.getSupportActionBar().setTitle("MobileOrg " + OrgProviderUtils.getChangesString(getContentResolver()));
     }
 
-    private String getChangesString() {
-        int changes = OrgProviderUtils.getChangesCount(getContentResolver());
-        if(changes > 0)
-            return "[" + changes + "]";
-        else
-            return "";
-    }
 
     @Override
     protected void onResume() {
         super.onResume();
-        refreshTitle();
+        runSynchronize(null);
     }
 
     @Override
@@ -274,6 +261,8 @@ public class OrgNodeListActivity extends AppCompatActivity {
                     Toast.makeText(context,
                             R.string.sync_successful,
                             Toast.LENGTH_SHORT).show();
+
+                refreshTitle();
             } else if (progress >= 0 && progress <= 100) {
 //                int normalizedProgress = (Window.PROGRESS_END - Window.PROGRESS_START) / 100 * progress;
             }

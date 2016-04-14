@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.Fragment;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
@@ -65,6 +66,19 @@ public class OrgNodeDetailActivity extends AppCompatActivity {
                     .commit();
             Log.i("commit", "commited with id : "+nodeId);
         }
+    }
+
+    @Override
+    public void onBackPressed()
+    {
+        // Writing changes currently done in the fragment EditNodeFragment if any
+        EditNodeFragment fragment = (EditNodeFragment) getSupportFragmentManager().findFragmentByTag("edit_node_fragment");
+        if(fragment != null){
+            fragment.onOKPressed();
+        }
+
+        // code here to show dialog
+        super.onBackPressed();  // optional depending on your needs
     }
 
     @Override

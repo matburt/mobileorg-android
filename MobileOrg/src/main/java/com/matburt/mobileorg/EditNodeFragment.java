@@ -7,8 +7,11 @@ import android.content.ContentResolver;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.text.format.DateFormat;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -107,6 +110,24 @@ public class EditNodeFragment extends Fragment {
 //            }
 //        });
 //
+
+//        content.addTextChangedListener(new TextWatcher() {
+//            @Override
+//            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+//
+//            }
+//
+//            @Override
+//            public void onTextChanged(CharSequence s, int start, int before, int count) {
+//
+//            }
+//
+//            @Override
+//            public void afterTextChanged(Editable s) {
+//                content.setText(s);
+//            }
+//        });
+
         title.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -115,6 +136,7 @@ public class EditNodeFragment extends Fragment {
                 return false;
             }
         });
+
 
         final LinearLayout layout = (LinearLayout)rootView.findViewById(R.id.view_fragment_layout);
         rootView.setOnTouchListener(new View.OnTouchListener() {
