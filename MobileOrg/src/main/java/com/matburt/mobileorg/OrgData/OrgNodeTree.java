@@ -1,6 +1,7 @@
 package com.matburt.mobileorg.OrgData;
 
 import android.content.ContentResolver;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.NavigableMap;
@@ -26,7 +27,10 @@ public class OrgNodeTree {
         node = root;
         children = new ArrayList<>();
         visibility = Visibility.subtree;
-        for(OrgNode child: root.getChildren(resolver)) children.add(new OrgNodeTree(child, resolver));
+        for(OrgNode child: root.getChildren(resolver)){
+            Log.v("newNode", "child : " + child.name);
+            children.add(new OrgNodeTree(child, resolver));
+        }
     }
 
     public Visibility getVisibility(){

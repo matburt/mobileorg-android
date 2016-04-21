@@ -66,6 +66,11 @@ public class Synchronizer {
  	 * @return List of files that where changed.
  	 */
 	public ArrayList<String> runSynchronizer(OrgFileParser parser) {
+		if(syncher == null) {
+			notify.errorNotification("Sync not configured");
+			return new ArrayList<>();
+		}
+
 		if (!syncher.isConfigured()) {
 			notify.errorNotification("Sync not configured");
 			return new ArrayList<>();
@@ -286,6 +291,7 @@ public class Synchronizer {
 	}
 	
 	public void close() {
+		if(syncher == null) return;
 		syncher.postSynchronize();
 	}
 }

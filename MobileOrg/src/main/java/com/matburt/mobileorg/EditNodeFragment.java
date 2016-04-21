@@ -26,6 +26,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
+import com.matburt.mobileorg.OrgData.OrgEdit;
 import com.matburt.mobileorg.OrgData.OrgNode;
 import com.matburt.mobileorg.OrgData.OrgNodeTimeDate;
 import com.matburt.mobileorg.OrgData.OrgProviderUtils;
@@ -40,10 +41,11 @@ import java.util.List;
 
 public class EditNodeFragment extends Fragment {
     public static String NODE_ID = "node_id";
-    static public long nodeId;
+    public static String PARENT_ID = "parent_id";
+    static public long nodeId = -1, parentId = -1;
     static private OrgNode node;
 
-    Spinner filename;
+//    Spinner filename;
     EditText title, content;
     static Button schedule, deadline;
     private Button todo;
@@ -57,19 +59,24 @@ public class EditNodeFragment extends Fragment {
                              Bundle savedInstanceState) {
         final View rootView = inflater.inflate(R.layout.edit_node_entry, container, false);
 
-        filename = (Spinner) rootView.findViewById(R.id.filename);
+//        filename = (Spinner) rootView.findViewById(R.id.filename);
         todo = (Button) rootView.findViewById(R.id.todo);
         title = (EditText) rootView.findViewById(R.id.title);
         schedule = (Button) rootView.findViewById(R.id.scheduled);
         content = (EditText) rootView.findViewById(R.id.content);
         deadline = (Button) rootView.findViewById(R.id.deadline);
 
-        if(getArguments()!=null) nodeId = getArguments().getLong(NODE_ID, -1);
-        else nodeId = -1;
+        Bundle bundle = getArguments();
+        if(bundle!=null){
+            nodeId = bundle.getLong(NODE_ID, -1);
+            parentId = bundle.getLong(PARENT_ID, -1);
+        }
+
+
+        ContentResolver resolver = getActivity().getContentResolver();
 
         if(nodeId > -1) {
             // Editing already existing node
-            ContentResolver resolver = getActivity().getContentResolver();
             try {
                 node = new OrgNode(nodeId, resolver);
             } catch (OrgNodeNotFoundException e) {
@@ -78,8 +85,16 @@ public class EditNodeFragment extends Fragment {
         } else {
             // Creating new node
             node = new OrgNode();
-
-
+            node.parentId = parentId;
+            Log.v("newNode","parentId : "+parentId);
+            try {
+                OrgNode parentNode = new OrgNode(parentId, resolver);
+                node.level = parentNode.level + 1;
+                node.fileId = parentNode.fileId;
+                Log.v("newNode","fileId : "+node.fileId);
+            } catch (OrgNodeNotFoundException e) {
+                e.printStackTrace();
+            }
         }
 
         TodoDialog.setupTodoButton(getContext(), node, todo, false);
@@ -166,7 +181,7 @@ public class EditNodeFragment extends Fragment {
         setupTimeStampButtons();
 
         // Add spinner for filename
-        addFileNameSpinner(rootView);
+//        addFileNameSpinner(rootView);
 
         getActivity().invalidateOptionsMenu();
         return rootView;
@@ -185,52 +200,58 @@ public class EditNodeFragment extends Fragment {
 
 
 
-    private void addFileNameSpinner(View view){
-        if(node.id > -1){
-            // Only show spinner when creating new node
-            TextView file = (TextView)view.findViewById(R.id.filename_textview);
-            file.setVisibility(View.GONE);
-            filename.setVisibility(View.GONE);
-            return;
-        }
-
-        List<String> list = new ArrayList<>();
-        list.add(CAPTURE_FILENAME);
-        for( OrgNode node : OrgProviderUtils.getFileNodes(getContext()) ) {
-            if (!node.name.equals(CAPTURE_FILENAME)) list.add(node.name);
-        }
-        list.add(getResources().getString(R.string.new_file));
-
-        ArrayAdapter<String> dataAdapter = new ArrayAdapter<>(getContext(),
-                android.R.layout.simple_spinner_item, list);
-        dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        filename.setAdapter(dataAdapter);
-        filename.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                for( OrgNode node : OrgProviderUtils.getFileNodes(getContext()) ) {
-                    if(node.name.equals(((TextView)view).getText())) {
-                        EditNodeFragment.node.fileId = node.fileId;
-                        EditNodeFragment.node.parentId = node.id;
-                        EditNodeFragment.node.level = 1;
-                    }
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
-    }
+//    private void addFileNameSpinner(View view){
+//        if(node.id > -1){
+//            // Only show spinner when creating new node
+//            TextView file = (TextView)view.findViewById(R.id.filename_textview);
+//            file.setVisibility(View.GONE);
+//            filename.setVisibility(View.GONE);
+//            return;
+//        }
+//
+//        List<String> list = new ArrayList<>();
+//        list.add(CAPTURE_FILENAME);
+//        for( OrgNode node : OrgProviderUtils.getFileNodes(getContext()) ) {
+//            if (!node.name.equals(CAPTURE_FILENAME)) list.add(node.name);
+//        }
+//        list.add(getResources().getString(R.string.new_file));
+//
+//        ArrayAdapter<String> dataAdapter = new ArrayAdapter<>(getContext(),
+//                android.R.layout.simple_spinner_item, list);
+//        dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+//        filename.setAdapter(dataAdapter);
+//        filename.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+//            @Override
+//            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+//                for( OrgNode node : OrgProviderUtils.getFileNodes(getContext()) ) {
+//                    if(node.name.equals(((TextView)view).getText())) {
+//                        EditNodeFragment.node.fileId = node.fileId;
+//                        EditNodeFragment.node.parentId = node.id;
+//                        EditNodeFragment.node.level = 1;
+//                    }
+//                }
+//            }
+//
+//            @Override
+//            public void onNothingSelected(AdapterView<?> parent) {
+//
+//            }
+//        });
+//    }
 
     /**
      * Called by EditNodeActivity when the OK button from the menu bar is pressed
      */
     public void onOKPressed(){
+        ContentResolver resolver = getContext().getContentResolver();
         node.name = title.getText().toString();
-        node.setPayload( content.getText().toString() );
-        node.write(getContext().getContentResolver());
+        node.setPayload(content.getText().toString());
+        node.write(resolver);
+
+        if(nodeId < 0){
+            OrgEdit edit = node.createParentNewheading(resolver);
+            edit.write(resolver);
+        }
     }
 
     /**

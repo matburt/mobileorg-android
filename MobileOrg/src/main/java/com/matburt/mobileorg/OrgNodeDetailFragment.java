@@ -3,14 +3,13 @@ package com.matburt.mobileorg;
 import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -21,13 +20,13 @@ import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.matburt.mobileorg.OrgData.OrgFileParser;
 import com.matburt.mobileorg.OrgData.OrgNode;
@@ -50,6 +49,7 @@ import java.util.regex.Pattern;
  */
 public class OrgNodeDetailFragment extends Fragment {
     public static String NODE_ID = "node_id";
+    public static String PARENT_ID = "parent_id";
 
     private ContentResolver resolver;
 
@@ -57,7 +57,6 @@ public class OrgNodeDetailFragment extends Fragment {
     private long lastEditedPosition;
     private long idHlightedPosition;
 
-    private OrgNodeTree tree;
     private int gray, red, green, yellow, blue, foreground, foregroundDark, black;
     private static int nTitleColors = 3;
     private int[] titleColor;
@@ -98,22 +97,23 @@ public class OrgNodeDetailFragment extends Fragment {
         titleFontSize[0] = 25;
         titleFontSize[1] = 20;
         titleFontSize[2] = 16;
-        
+
+        OrgNodeTree tree = null;
 
         if (getArguments().containsKey(NODE_ID)) {
             this.nodeId = getArguments().getLong(NODE_ID);
             try {
-                this.tree = new OrgNodeTree(new OrgNode(nodeId, resolver), resolver);
+                tree = new OrgNodeTree(new OrgNode(nodeId, resolver), resolver);
             } catch (OrgNodeNotFoundException e) {
 //                displayError();
 //                TODO: implement error
             }
 
             Activity activity = this.getActivity();
-            CollapsingToolbarLayout appBarLayout = (CollapsingToolbarLayout) activity.findViewById(R.id.toolbar_layout);
-            if (appBarLayout != null && tree != null) {
-                appBarLayout.setTitle(tree.node.getCleanedName());
-            }
+//            AppBarLayout appBarLayout = (AppBarLayout) activity.findViewById(R.id.app_bar);
+//            if (appBarLayout != null && tree != null) {
+//                appBarLayout.setTitle(tree.node.getCleanedName());
+//            }
         }
         adapter = new RecyclerViewAdapter(tree);
     }
@@ -122,8 +122,6 @@ public class OrgNodeDetailFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.node_summary_recycler_fragment, container, false);
-
-        if (tree ==null) return rootView;
 
         RecyclerView recyclerView = (RecyclerView)rootView.findViewById(R.id.node_recycler_view);
         assert recyclerView != null;
@@ -148,23 +146,13 @@ public class OrgNodeDetailFragment extends Fragment {
 
             @Override
             public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
-                // Create new fragment and transaction
-                Fragment newFragment = new EditNodeFragment();
-                Bundle args = new Bundle();
                 long position = (long)viewHolder.getAdapterPosition();
-                long id = mAdapter.idTreeMap.get(position).node.id;
+                OrgNode node = mAdapter.idTreeMap.get(position).node;
+                int id = (int)node.id;
+                int parentId = (int)node.parentId;
                 lastEditedPosition = position;
-                args.putLong(NODE_ID, id);
-                newFragment.setArguments(args);
-                FragmentTransaction transaction = getFragmentManager().beginTransaction();
 
-                // Replace whatever is in the fragment_container view with this fragment,
-                // and add the transaction to the back stack
-                transaction.replace(R.id.orgnode_detail_container, newFragment, "edit_node_fragment");
-                transaction.addToBackStack(null);
-
-// Commit the transaction
-                transaction.commit();
+                createEditNodeFragment(id, parentId);
             }
 
             @Override
@@ -184,26 +172,56 @@ public class OrgNodeDetailFragment extends Fragment {
     @Override
     public void onResume(){
         super.onResume();
+        Log.v("newNode", "last : " + lastEditedPosition);
         if(lastEditedPosition > -1) {
-            adapter.refreshItem(lastEditedPosition);
+            try {
+                adapter.tree = new OrgNodeTree(new OrgNode(nodeId, resolver), resolver);
+            } catch (OrgNodeNotFoundException e) {
+//                displayError();
+//                TODO: implement error
+            }
+
             lastEditedPosition = -1;
+            adapter.closeInsertItem();
         }
+    }
+
+    void createEditNodeFragment(int id, int parentId) {
+        Bundle args = new Bundle();
+        args.putLong(NODE_ID, id);
+        args.putLong(PARENT_ID, parentId);
+
+        Intent intent = new Intent(getActivity(), EditNodeActivity.class);
+        intent.putExtras(args);
+        startActivity(intent);
+//        // Create new fragment and transaction
+//        Fragment newFragment = new EditNodeFragment();
+//        newFragment.setArguments(args);
+//        FragmentTransaction transaction = getFragmentManager().beginTransaction();
+//
+//        // Replace whatever is in the fragment_container view with this fragment,
+//        // and add the transaction to the back stack
+//        transaction.replace(R.id.orgnode_detail_container, newFragment, "edit_node_fragment");
+//        transaction.addToBackStack(null);
+//
+//        // Commit the transaction
+//        transaction.commit();
     }
 
     public class RecyclerViewAdapter
             extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         private NavigableMap<Long, OrgNodeTree> idTreeMap;
-        private final OrgNodeTree tree;
+        private OrgNodeTree tree;
 
         public RecyclerViewAdapter(OrgNodeTree root) {
             tree = root;
             refresh();
         }
 
+
         void refresh(){
             idTreeMap = tree.getVisibleNodesArray();
-//            holder.setup(holder.mItem.node);
             notifyDataSetChanged();
         }
 
@@ -235,25 +253,24 @@ public class OrgNodeDetailFragment extends Fragment {
 
         @Override
         public void onBindViewHolder(final RecyclerView.ViewHolder _holder, final int position) {
-            if(idHlightedPosition> -1 && (position==idHlightedPosition || position==idHlightedPosition+2)){
+            if(idHlightedPosition> -1 && ( position==idHlightedPosition+1)){
                 final InsertNodeViewHolder holder = (InsertNodeViewHolder) _holder;
+
                 holder.sameLevel.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        if (position == idHlightedPosition)
-                            Toast.makeText(getContext(), "before same", Toast.LENGTH_SHORT).show();
-                        else
-                            Toast.makeText(getContext(), "after  same", Toast.LENGTH_SHORT).show();
+                        int parentId = (int)idTreeMap.get(idHlightedPosition).node.parentId;
+                        lastEditedPosition = position;
+                        createEditNodeFragment(-1, parentId);
                     }
                 });
 
-                holder.neightbourgLevel.setOnClickListener(new View.OnClickListener() {
+                holder.childLevel.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        if (position == idHlightedPosition)
-                            Toast.makeText(getContext(), "before neighbourg", Toast.LENGTH_SHORT).show();
-                        else
-                            Toast.makeText(getContext(), "after  neightbourg", Toast.LENGTH_SHORT).show();
+                        int parentId = (int) idTreeMap.get(idHlightedPosition).node.id;
+                        lastEditedPosition = position;
+                        createEditNodeFragment(-1, parentId);
                     }
                 });
             } else {
@@ -280,7 +297,7 @@ public class OrgNodeDetailFragment extends Fragment {
                     public boolean onLongClick(View v) {
                         if(idHlightedPosition>-1){
                             idTreeMap = tree.getVisibleNodesArray();
-                            if(idHlightedPosition<position) idHlightedPosition = position-2;
+                            if(idHlightedPosition<position) idHlightedPosition = position-1;
                             else idHlightedPosition = position;
                         } else {
                             idHlightedPosition = position;
@@ -302,7 +319,8 @@ public class OrgNodeDetailFragment extends Fragment {
             NavigableMap<Long, OrgNodeTree> newIdTreeMap = new TreeMap<>();
             long newId = 0, oldId = 0;
             while(oldId<idTreeMap.size()) {
-                if(oldId==(long)position || oldId==(long)position+1) newId++;
+                if(oldId==(long)position+1) newId++;
+//                if(oldId==(long)position || oldId==(long)position+1) newId++;
                 newIdTreeMap.put(newId++, idTreeMap.get(oldId++));
             }
             idTreeMap = newIdTreeMap;
@@ -316,27 +334,28 @@ public class OrgNodeDetailFragment extends Fragment {
         @Override
         public int getItemCount() {
             int count = idTreeMap.size();
-            if(idHlightedPosition>-1) count+=2;
+            if(idHlightedPosition>-1) count++;
             return count;
         }
 
         @Override
         public int getItemViewType(int position) {
             if(idHlightedPosition>-1) {
-                if (position == idHlightedPosition) return 1;
-                if (position == idHlightedPosition + 2) return 1;
+//                if (position == idHlightedPosition) return 1;
+//                if (position == idHlightedPosition + 2) return 1;
+                if (position == idHlightedPosition + 1) return 1;
             }
             return 0;
         }
 
         public class InsertNodeViewHolder extends RecyclerView.ViewHolder {
             public final View mView;
-            private Button sameLevel, neightbourgLevel;
+            private Button sameLevel, childLevel;
             public InsertNodeViewHolder(View view) {
                 super(view);
                 mView = view;
                 sameLevel = (Button) view.findViewById(R.id.insert_same_level);
-                neightbourgLevel = (Button) view.findViewById(R.id.insert_neighbourg_level);
+                childLevel = (Button) view.findViewById(R.id.insert_neighbourg_level);
             }
         }
 

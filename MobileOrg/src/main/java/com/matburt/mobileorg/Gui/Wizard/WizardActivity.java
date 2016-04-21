@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.ViewTreeObserver;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
@@ -26,6 +27,7 @@ public class WizardActivity extends Activity implements RadioGroup.OnCheckedChan
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
+		Log.v("sync", "onCreate Wizard");
 //		OrgUtils.setTheme(this);
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.wizard);

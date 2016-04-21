@@ -114,7 +114,10 @@ public class OrgFile {
 		values.put(OrgData.FILE_ID, id);
 		resolver.update(OrgData.buildIdUri(nodeId), values, null, null);
 	}
-	
+
+	/*
+	Insert a new file node in the database
+	 */
 	private long addFileNode(long nodeId, ContentResolver resolver) {
 		ContentValues values = new ContentValues();
 		values.put(Files.FILENAME, filename);

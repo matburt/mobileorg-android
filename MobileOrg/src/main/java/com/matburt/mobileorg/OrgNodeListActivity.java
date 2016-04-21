@@ -163,6 +163,7 @@ public class OrgNodeListActivity extends AppCompatActivity {
     }
 
     public void runShowWizard(View view) {
+        Log.v("sync","runShowWizard");
         startActivity(new Intent(this, WizardActivity.class));
     }
 
@@ -196,7 +197,8 @@ public class OrgNodeListActivity extends AppCompatActivity {
 
 
     private void displayNewUserDialogs() {
-        if (PreferenceUtils.isSyncConfigured() == false)
+        Log.v("sync","isSync : "+PreferenceUtils.isSyncConfigured());
+        if (! PreferenceUtils.isSyncConfigured())
             runShowWizard(null);
 
         if (PreferenceUtils.isUpgradedVersion())

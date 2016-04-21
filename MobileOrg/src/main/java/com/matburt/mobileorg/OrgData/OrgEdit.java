@@ -133,10 +133,11 @@ public class OrgEdit {
 	public static String editsToString(ContentResolver resolver) {		
 		Cursor cursor = resolver.query(Edits.CONTENT_URI,
 				Edits.DEFAULT_COLUMNS, null, null, null);
+		if(cursor == null) return "";
 		cursor.moveToFirst();
 
 		StringBuilder result = new StringBuilder();
-		while (cursor.isAfterLast() == false) {
+		while (! cursor.isAfterLast()) {
 			result.append(new OrgEdit(cursor).toString());
 			cursor.moveToNext();
 		}

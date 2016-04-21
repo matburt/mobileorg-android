@@ -7,6 +7,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
+import android.util.Log;
 
 //import com.matburt.mobileorg.Gui.Outline.OutlineItem;
 import com.matburt.mobileorg.OrgData.OrgContract.OrgData;
@@ -135,6 +136,7 @@ public class OrgNode {
     }
 
 	private long addNode(ContentResolver resolver) {
+		Log.v("newNode", "inserting : " + OrgData.CONTENT_URI);
 		Uri uri = resolver.insert(OrgData.CONTENT_URI, getContentValues());
 		this.id = Long.parseLong(OrgData.getId(uri));
 		return id;
@@ -448,29 +450,26 @@ public class OrgNode {
 	}
 	
 	public OrgEdit createParentNewheading(ContentResolver resolver) {
-		return createParentNewheading(resolver, "");
-	}
-	
-	public OrgEdit createParentNewheading(ContentResolver resolver, String olpPath) {
-		OrgNode parent = getParentSafe(olpPath, resolver);
-		this.level = parent.level + 1;
+        OrgNode parent = null;
+        try {
+            parent = getParent(resolver);
+        } catch (OrgNodeNotFoundException e) {
+            e.printStackTrace();
+        }
+        this.level = parent.level + 1;
 
-		boolean generateEdit = true;
 		try {
 			OrgFile file = new OrgFile(parent.fileId, resolver);
-			generateEdit = file.generateEditsForFile();
 		} catch (OrgFileNotFoundException e) {}
 		
-		if (generateEdit) {
-			// Add new heading nodes; need the entire content of node without
-			// star headings
-			long tempLevel = level;
-			level = 0;
-			OrgEdit edit = new OrgEdit(parent, OrgEdit.TYPE.ADDHEADING, this.toString(), resolver);
-			level = tempLevel;
-			return edit;
-		} else
-			return new OrgEdit();
+
+		// Add new heading nodes; need the entire content of node without
+		// star headings
+		long tempLevel = level;
+		level = 0;
+		OrgEdit edit = new OrgEdit(parent, OrgEdit.TYPE.ADDHEADING, this.toString(), resolver);
+		level = tempLevel;
+		return edit;
 	}
 	
 	public OrgNode getParentSafe(String olpPath, ContentResolver resolver) {

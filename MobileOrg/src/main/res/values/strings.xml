@@ -25,6 +25,7 @@
     <string name="set_title_here">Set title here</string>
     <string name="set_content_here">Set content here</string>
     <string name="insert_node">Insert node</string>
+    <string name="insert_child_node">Insert child node</string>
     <string name="new_file">Create new file</string>
     <string name="file">File</string>
 

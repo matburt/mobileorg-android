@@ -59,6 +59,7 @@ public class EditNodeActivity extends AppCompatActivity {
             // using a fragment transaction.
 
             fragment = new EditNodeFragment();
+            fragment.setArguments(getIntent().getExtras());
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.edit_node_container, fragment)
                     .commit();
@@ -89,13 +90,15 @@ public class EditNodeActivity extends AppCompatActivity {
 
             case R.id.edit_menu_ok:
                 fragment.onOKPressed();
-                Intent intent = new Intent(this, OrgNodeListActivity.class);
-                startActivity(intent);
+                finish();
+//                Intent intent = new Intent(this, OrgNodeListActivity.class);
+//                startActivity(intent);
                 return true;
             case R.id.edit_menu_cancel:
                 fragment.onCancelPressed();
-                intent = new Intent(this, OrgNodeListActivity.class);
-                startActivity(intent);
+                finish();
+//                intent = new Intent(this, OrgNodeListActivity.class);
+//                startActivity(intent);
                 return true;
         }
 //        return super.onOptionsItemSelected(item);
