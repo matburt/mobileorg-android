@@ -1,5 +1,6 @@
 package com.matburt.mobileorg;
 
+import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -7,6 +8,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AlertDialog;
@@ -20,12 +22,14 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import android.net.Uri;
 
 import com.matburt.mobileorg.Gui.Outline.OutlineAdapter;
 import com.matburt.mobileorg.Gui.Wizard.WizardActivity;
+import com.matburt.mobileorg.OrgData.OrgFile;
 import com.matburt.mobileorg.OrgData.OrgProviderUtils;
 import com.matburt.mobileorg.Settings.SettingsActivity;
 import com.matburt.mobileorg.util.OrgUtils;
@@ -96,8 +100,31 @@ public class OrgNodeListActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(view.getContext(), EditNodeActivity.class);
-                startActivity(intent);
+                AlertDialog.Builder alert = new AlertDialog.Builder(OrgNodeListActivity.this);
+
+                alert.setTitle(R.string.new_file);
+                alert.setMessage(getResources().getString(R.string.filename) + ":");
+
+// Set an EditText view to get user input
+                final EditText input = new EditText(OrgNodeListActivity.this);
+                alert.setView(input);
+
+                alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        String value = input.getText().toString();
+                        OrgFile newFile = new OrgFile(value,null, "");
+                        newFile.addFile(getContentResolver());
+                        ((OutlineAdapter)recyclerView.getAdapter()).refresh();
+                    }
+                });
+
+                alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        // Canceled.
+                    }
+                });
+
+                alert.show();
             }
         });
 
@@ -155,7 +182,7 @@ public class OrgNodeListActivity extends AppCompatActivity {
     }
 
     public void runShowWizard(View view) {
-        Log.v("sync","runShowWizard");
+        Log.v("sync", "runShowWizard");
         startActivity(new Intent(this, WizardActivity.class));
     }
 
