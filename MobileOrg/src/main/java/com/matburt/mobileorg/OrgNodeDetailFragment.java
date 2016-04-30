@@ -3,6 +3,7 @@ package com.matburt.mobileorg;
 import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
@@ -11,6 +12,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
@@ -24,8 +26,6 @@ import android.util.Log;
 import android.view.ContextMenu;
 import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -130,7 +130,6 @@ public class OrgNodeDetailFragment extends Fragment {
 
     @Override
     public boolean onContextItemSelected(MenuItem item) {
-        Log.v("context", "onContextItemSelected");
         return super.onContextItemSelected(item);
     }
 
@@ -187,20 +186,27 @@ public class OrgNodeDetailFragment extends Fragment {
         return rootView;
     }
 
+    /**
+     * Recreate the OrgNodeTree and refresh the Adapter
+     */
+    public void refresh(){
+        try {
+            adapter.tree = new OrgNodeTree(new OrgNode(nodeId, resolver), resolver);
+        } catch (OrgNodeNotFoundException e) {
+//                displayError();
+//                TODO: implement error
+        }
+
+        lastEditedPosition = -1;
+        adapter.closeInsertItem();
+    }
+
     @Override
     public void onResume(){
         super.onResume();
         Log.v("newNode", "last : " + lastEditedPosition);
         if(lastEditedPosition > -1) {
-            try {
-                adapter.tree = new OrgNodeTree(new OrgNode(nodeId, resolver), resolver);
-            } catch (OrgNodeNotFoundException e) {
-//                displayError();
-//                TODO: implement error
-            }
-
-            lastEditedPosition = -1;
-            adapter.closeInsertItem();
+            refresh();
         }
     }
 
@@ -223,11 +229,10 @@ public class OrgNodeDetailFragment extends Fragment {
 
         public RecyclerViewAdapter(OrgNodeTree root) {
             tree = root;
-            refresh();
+            refreshVisibility();
         }
 
-
-        void refresh(){
+        void refreshVisibility(){
             idTreeMap = tree.getVisibleNodesArray();
             notifyDataSetChanged();
         }
@@ -239,7 +244,7 @@ public class OrgNodeDetailFragment extends Fragment {
                 case 0:
                     view = LayoutInflater.from(parent.getContext())
                             .inflate(R.layout.detail_recycler_item, parent, false);
-                    return new ViewHolder(view);
+                    return new ItemViewHolder(view);
                 case 1:
                     view = LayoutInflater.from(parent.getContext())
                             .inflate(R.layout.insert_node_before, parent, false);
@@ -274,8 +279,25 @@ public class OrgNodeDetailFragment extends Fragment {
                         createEditNodeFragment(-1, parentId, 0);
                     }
                 });
+
+                holder.deleteNodeButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        new AlertDialog.Builder(getActivity())
+                                .setMessage(R.string.prompt_node_delete)
+                                .setIcon(android.R.drawable.ic_dialog_alert)
+                                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+
+                                    public void onClick(DialogInterface dialog, int whichButton) {
+                                        OrgNode currentNode = idTreeMap.get(idHlightedPosition).node;
+                                        currentNode.deleteNode(resolver);
+                                        refresh();
+                                    }})
+                                .setNegativeButton(android.R.string.no, null).show();
+                    }
+                });
             } else {
-                final ViewHolder holder = (ViewHolder) _holder;
+                final ItemViewHolder holder = (ItemViewHolder) _holder;
                 holder.mItem = idTreeMap.get((long) position);
                 holder.level = holder.mItem.node.level;
                 holder.setup(holder.mItem.node);
@@ -289,7 +311,7 @@ public class OrgNodeDetailFragment extends Fragment {
                         }
 
                         holder.mItem.toggleVisibility();
-                        refresh();
+                        refreshVisibility();
                     }
                 });
 
@@ -329,7 +351,7 @@ public class OrgNodeDetailFragment extends Fragment {
 
         private void closeInsertItem(){
             idHlightedPosition = -1;
-            refresh();
+            refreshVisibility();
         }
 
         @Override
@@ -351,16 +373,17 @@ public class OrgNodeDetailFragment extends Fragment {
 
         public class InsertNodeViewHolder extends RecyclerView.ViewHolder {
             public final View mView;
-            private Button sameLevel, childLevel;
+            private Button sameLevel, childLevel, deleteNodeButton;
             public InsertNodeViewHolder(View view) {
                 super(view);
                 mView = view;
                 sameLevel = (Button) view.findViewById(R.id.insert_same_level);
                 childLevel = (Button) view.findViewById(R.id.insert_neighbourg_level);
+                deleteNodeButton = (Button) view.findViewById(R.id.delete_node);
             }
         }
 
-        public class ViewHolder extends RecyclerView.ViewHolder implements View.OnCreateContextMenuListener {
+        public class ItemViewHolder extends RecyclerView.ViewHolder implements View.OnCreateContextMenuListener {
             public final View mView;
 
             public OrgNodeTree mItem;
@@ -370,7 +393,7 @@ public class OrgNodeDetailFragment extends Fragment {
             private boolean levelFormatting = true;
             public long level;
 
-            public ViewHolder(View view) {
+            public ItemViewHolder(View view) {
                 super(view);
                 mView = view;
 
@@ -388,12 +411,12 @@ public class OrgNodeDetailFragment extends Fragment {
             public void onCreateContextMenu(ContextMenu menu, View v,
                                             ContextMenu.ContextMenuInfo menuInfo) {
                 Log.v("context", "onCreateContextMenu");
-                menu.add(Menu.NONE, R.id.edit_menu_ok,
-                        Menu.NONE, "blah");
+//                menu.add(Menu.NONE, R.id.edit_menu_ok,
+//                        Menu.NONE, "blahtos");
             }
 
 //            @Override
-//            public void onViewRecycled(ViewHolder holder) {
+//            public void onViewRecycled(ItemViewHolder holder) {
 //                holder.itemView.setOnLongClickListener(null);
 //                super.onViewRecycled(holder);
 //            }

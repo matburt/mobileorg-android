@@ -7,20 +7,10 @@
         android:icon="@drawable/ic_menu_agenda"
         android:title="@string/menu_agenda"/>
     <item
-        android:id="@+id/menu_outline"
-        android:icon="@drawable/ic_menu_agenda"
-        android:title="@string/menu_outline"/>
-    <item
         android:id="@+id/menu_sync"
         android:icon="@drawable/ic_menu_refresh"
         app:showAsAction="ifRoom"
         android:title="@string/menu_sync"/>
-    <item
-        android:id="@+id/menu_capturechild"
-        android:icon="@drawable/ic_menu_add"
-        app:showAsAction="ifRoom"
-        android:title="@string/menu_capture"
-        android:visible="true"/>
     <item
         android:id="@+id/menu_search"
         android:icon="@drawable/ic_menu_search"

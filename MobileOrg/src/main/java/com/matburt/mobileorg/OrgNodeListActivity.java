@@ -129,14 +129,6 @@ public class OrgNodeListActivity extends AppCompatActivity {
                 runShowSettings(null);
                 return true;
 
-            case R.id.menu_outline:
-                runExpandableOutline(-1);
-                return true;
-
-            case R.id.menu_capturechild:
-//                OutlineActionMode.runCaptureActivity(listView.getCheckedNodeId(), this);
-                return true;
-
             case R.id.menu_search:
                 return runSearch();
 
@@ -165,13 +157,6 @@ public class OrgNodeListActivity extends AppCompatActivity {
     public void runShowWizard(View view) {
         Log.v("sync","runShowWizard");
         startActivity(new Intent(this, WizardActivity.class));
-    }
-
-
-    private void runExpandableOutline(long id) {
-        Intent intent = new Intent(this, OrgNodeListActivity.class);
-        intent.putExtra(OrgNodeListActivity.NODE_ID, id);
-        startActivity(intent);
     }
 
     private boolean runSearch() {
@@ -254,7 +239,8 @@ public class OrgNodeListActivity extends AppCompatActivity {
             int progress = intent.getIntExtra(Synchronizer.SYNC_PROGRESS_UPDATE, -1);
 
             if(syncStart) {
-                synchronizerMenuItem.setVisible(false);
+                if(synchronizerMenuItem != null)
+                    synchronizerMenuItem.setVisible(false);
             } else if (syncDone) {
                 ((OutlineAdapter)recyclerView.getAdapter()).refresh();
                 synchronizerMenuItem.setVisible(true);
