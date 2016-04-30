@@ -5,6 +5,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.matburt.mobileorg.OrgData.OrgContract.Edits;
 import com.matburt.mobileorg.OrgData.OrgContract.Files;
@@ -395,6 +396,7 @@ public class OrgProviderUtils {
 	public static ArrayList<OrgNode> getOrgNodeChildren(long nodeId, ContentResolver resolver) {
 		
 		String sort = nodeId == -1 ? OrgData.NAME_SORT : null;
+		Log.v("sort", "sort : " + sort);
 		Cursor childCursor = resolver.query(OrgData.buildChildrenUri(nodeId),
 				OrgData.DEFAULT_COLUMNS, null, null, sort);
 

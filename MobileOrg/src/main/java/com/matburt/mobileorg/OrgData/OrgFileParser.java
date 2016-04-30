@@ -43,7 +43,7 @@ public class OrgFileParser {
 		this.orgFile = orgFile;
 
 		this.parseStack = new ParseStack();
-		this.parseStack.add(0, orgFile.nodeId, "");
+		this.parseStack.add(0, orgFile.nodeId, "", 0);
 		
 		this.payload = new StringBuilder();
 		
@@ -63,9 +63,8 @@ public class OrgFileParser {
 		db.beginTransaction();
 		try {
 			String currentLine;
-			while ((currentLine = breader.readLine()) != null)
-				parseLine(currentLine);
-			
+			while ((currentLine = breader.readLine()) != null) parseLine(currentLine);
+
 			// Add payload to the final node
 			db.fastInsertNodePayload(parseStack.getCurrentNodeId(), this.payload.toString());
 
@@ -81,7 +80,6 @@ public class OrgFileParser {
 	}
 
 	private void parseLine(String line) {
-		Log.v("parsing", "parseLine : " + line);
 		if (TextUtils.isEmpty(line))
 			return;
 
@@ -96,19 +94,26 @@ public class OrgFileParser {
 	}
 	
 	private void parseHeading(String thisLine, int numstars) {
+        int position = 0;
+
 		if (numstars == parseStack.getCurrentLevel()) { // Node on same level
+            position = parseStack.getCurrentPosition() + 1;
 			parseStack.pop();
 		} else if (numstars < parseStack.getCurrentLevel()) { // Node on lower level
-			while (numstars <= parseStack.getCurrentLevel())
-				parseStack.pop();
+			while (numstars <= parseStack.getCurrentLevel()){
+                parseStack.pop();
+            }
 		}
         
 		OrgNode node = this.orgNodeParser.parseLine(thisLine, numstars);
 		node.tags_inherited = parseStack.getCurrentTags();
 		node.fileId = orgFile.id;
 		node.parentId = parseStack.getCurrentNodeId();
-		long newId = db.fastInsertNode(node);
-		parseStack.add(numstars, newId, node.tags);      
+        node.position = position;
+        Log.v("parser", "parseLine # : " + position + " - line : " + thisLine);
+
+        long newId = db.fastInsertNode(node);
+		parseStack.add(numstars, newId, node.tags, position);
     }
 
 	private static final Pattern starPattern = Pattern.compile("^(\\**)\\s");
@@ -122,17 +127,27 @@ public class OrgFileParser {
 	
     
 	private class ParseStack {
-		private Stack<Pair<Integer, Long>> parseStack;
-		private Stack<String> tagStack;
+        private class Item {
+            int level;
+            long nodeId;
+            String tag;
+            int position;
+
+            public Item(Integer level, Long nodeId, String tags){
+                this.level = level;
+                this.nodeId = nodeId;
+                this.tag = tags;
+            }
+        }
+
+		private Stack<Item> stack;
 
 		public ParseStack() {
-			this.parseStack = new Stack<Pair<Integer, Long>>();
-			this.tagStack = new Stack<String>();
+			this.stack = new Stack<Item>();
 		}
 		
-		public void add(int level, long nodeId, String tags) {
-			parseStack.push(new Pair<Integer, Long>(level, nodeId));
-			tagStack.push(stripTags(tags));
+		public void add(int level, long nodeId, String tags, int position) {
+			stack.push(new Item(level, nodeId, stripTags(tags)));
 		}
 		
 		private String stripTags(String tags) {
@@ -154,21 +169,24 @@ public class OrgFileParser {
 		}
 		
 		public void pop() {
-			this.parseStack.pop();
-			this.tagStack.pop();
+			this.stack.pop();
 		}
 		
 		public int getCurrentLevel() {
-			return parseStack.peek().first;
+			return stack.peek().level;
 		}
 		
 		public long getCurrentNodeId() {
-			return parseStack.peek().second;
+			return stack.peek().nodeId;
 		}
 		
 		public String getCurrentTags() {
-			return tagStack.peek();
+			return stack.peek().tag;
 		}
+
+        public int getCurrentPosition(){
+            return stack.peek().position;
+        }
 	}
 	
 	

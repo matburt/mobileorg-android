@@ -21,19 +21,29 @@ import java.util.HashMap;
 import java.util.regex.Matcher;
 
 public class OrgNode {
-	public static final String ARCHIVE_NODE = "Archive";
-	
+
 	public long id = -1;
 	public long parentId = -1;
 	public long fileId = -1;
-	
+
+    // The headline level
 	public long level = 0;
+
+    // The priority tag
 	public String priority = "";
+
+    // The TODO state
 	public String todo = "";
+
 	public String tags = "";
 	public String tags_inherited = "";
 	public String name = "";
+
+    // The payload is a string containing the raw string corresponding to this mode
 	private String payload = "";
+
+    // The ordering of the same level siblings
+    public int position = 0;
 	
 	private OrgNodePayload orgNodePayload = null;
 
@@ -47,6 +57,7 @@ public class OrgNode {
 		this.tags = node.tags;
 		this.tags_inherited = node.tags_inherited;
 		this.name = node.name;
+        this.position = node.position;
 		setPayload(node.getPayload());
 	}
 	
@@ -79,7 +90,7 @@ public class OrgNode {
                     .getColumnIndexOrThrow(OrgData.FILE_ID));
 			level = cursor.getLong(cursor.getColumnIndexOrThrow(OrgData.LEVEL));
 			priority = cursor.getString(cursor
-					.getColumnIndexOrThrow(OrgData.PRIORITY));
+                    .getColumnIndexOrThrow(OrgData.PRIORITY));
 			todo = cursor.getString(cursor.getColumnIndexOrThrow(OrgData.TODO));
 			tags = cursor.getString(cursor.getColumnIndexOrThrow(OrgData.TAGS));
 			tags_inherited = cursor.getString(cursor
@@ -87,6 +98,8 @@ public class OrgNode {
 			name = cursor.getString(cursor.getColumnIndexOrThrow(OrgData.NAME));
 			payload = cursor.getString(cursor
 					.getColumnIndexOrThrow(OrgData.PAYLOAD));
+            position = cursor.getInt(cursor
+                    .getColumnIndexOrThrow(OrgData.POSITION));
 		} else {
 			throw new OrgNodeNotFoundException(
 					"Failed to create OrgNode from cursor");
@@ -161,11 +174,11 @@ public class OrgNode {
 		if(parentId == -1)
 			return this;
 		
-		if (getFilename(resolver).equals(OrgFile.AGENDA_FILE) == false)
+		if (!getFilename(resolver).equals(OrgFile.AGENDA_FILE))
 			return this;
 		
 		String nodeId = getNodeId(resolver);
-		if (nodeId.startsWith("olp:") == false) { // Update all nodes that have this :ID:
+		if (!nodeId.startsWith("olp:")) { // Update all nodes that have this :ID:
 			String nodeIdQuery = OrgData.PAYLOAD + " LIKE '%" + nodeId + "%'";
 			try {
 				OrgFile agendaFile = new OrgFile(OrgFile.AGENDA_FILE, resolver);
@@ -217,7 +230,8 @@ public class OrgNode {
 		values.put(OrgData.PAYLOAD, payload);
 		values.put(OrgData.PRIORITY, priority);
 		values.put(OrgData.TAGS, tags);
-		values.put(OrgData.TAGS_INHERITED, tags_inherited);
+        values.put(OrgData.TAGS_INHERITED, tags_inherited);
+        values.put(OrgData.POSITION, position);
 		return values;
 	}
 	
@@ -260,7 +274,7 @@ public class OrgNode {
 	}
 	
 	public OrgNode getChild(String name, ContentResolver resolver) throws OrgNodeNotFoundException {
-		ArrayList<OrgNode> children = getChildren(resolver);
+        ArrayList<OrgNode> children = getChildren(resolver);
 		
 		for(OrgNode child: children) {
 			if(child.name.equals(name))
@@ -430,7 +444,7 @@ public class OrgNode {
 	}
 	
 	public String getPayload() {
-		preparePayload();
+        preparePayload();
 		return this.orgNodePayload.get();
 	}
 
@@ -521,7 +535,7 @@ public class OrgNode {
 		if (newNode.getPayload() != null && !newNode.getPayload().equals(getPayload())) {
 			edits.add(new OrgEdit(this, OrgEdit.TYPE.BODY, newNode.getPayload(), resolver));
 			setPayload(newNode.getPayload());
-		}
+        }
 		if (tags != null && !tags.equals(newNode.tags)) {
 			edits.add(new OrgEdit(this, OrgEdit.TYPE.TAGS, newNode.tags, resolver));
 			this.tags = newNode.tags;
@@ -573,47 +587,10 @@ public class OrgNode {
 	
 	public void deleteNode(ContentResolver resolver) {
 		OrgEdit edit = new OrgEdit(this, OrgEdit.TYPE.DELETE, resolver);
-		edit.write(resolver);
-		resolver.delete(OrgData.buildIdUri(id), null, null);
+        edit.write(resolver);
+        resolver.delete(OrgData.buildIdUri(id), null, null);
 	}
-	
-	public OrgEdit archiveNode(ContentResolver resolver) {
-		OrgEdit edit = new OrgEdit(this, OrgEdit.TYPE.ARCHIVE, resolver);
-		edit.write(resolver);
-		resolver.delete(OrgData.buildIdUri(id), null, null);
-		return edit;
-	}
-	
-	public OrgEdit archiveNodeToSibling(ContentResolver resolver) {
-		OrgEdit edit = new OrgEdit(this, OrgEdit.TYPE.ARCHIVE_SIBLING, resolver);
-		edit.write(resolver);
 
-		OrgNode parent;
-		try {
-			parent = getParent(resolver);
-		} catch (OrgNodeNotFoundException e) {
-			throw new IllegalArgumentException(
-					"Could't archive correctly, didn't find parent of node "
-							+ this.name);
-		}
-		
-		OrgNode archiveNode;
-		try {
-			archiveNode = parent.getChild(ARCHIVE_NODE, resolver);
-		} catch (OrgNodeNotFoundException e) {
-			archiveNode = new OrgNode();
-			archiveNode.name = ARCHIVE_NODE;
-			archiveNode.parentId = parent.id;
-			archiveNode.fileId = parent.fileId;
-			archiveNode.write(resolver);
-		}
-
-		this.parentId = archiveNode.id;
-		this.write(resolver);
-
-		return edit;
-	}
-	
 	public void addLogbook(long startTime, long endTime, String elapsedTime, ContentResolver resolver) {
 		StringBuilder rawPayload = new StringBuilder(getPayload());
 		rawPayload = OrgNodePayload.addLogbook(rawPayload, startTime, endTime, elapsedTime);

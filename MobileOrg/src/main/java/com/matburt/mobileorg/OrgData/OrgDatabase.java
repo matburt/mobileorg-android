@@ -5,6 +5,7 @@ import android.database.DatabaseUtils.InsertHelper;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
+import android.util.Log;
 
 import com.matburt.mobileorg.OrgData.OrgContract.OrgData;
 
@@ -19,7 +20,8 @@ public class OrgDatabase extends SQLiteOpenHelper {
 	private int orgdata_priorityColumn;
 	private int orgdata_parentidColumn;
 	private int orgdata_fileidColumn;
-	private int orgdata_levelColumn;
+    private int orgdata_levelColumn;
+    private int orgdata_positionColumn;
 	
 	private InsertHelper orgdataInsertHelper;
 	private SQLiteStatement addPayloadStatement;
@@ -75,7 +77,8 @@ public class OrgDatabase extends SQLiteOpenHelper {
 				+ "tags text,"
 				+ "tags_inherited text,"
 				+ "payload text,"
-				+ "name text)");
+				+ "name text,"
+                + "position integer)");
 	}
 	
 	@Override
@@ -98,14 +101,15 @@ public class OrgDatabase extends SQLiteOpenHelper {
 	
 	public long fastInsertNode(OrgNode node) {
 		prepareOrgdataInsert();
-		orgdataInsertHelper.bind(orgdata_parentidColumn, node.parentId);
+        orgdataInsertHelper.bind(orgdata_parentidColumn, node.parentId);
 		orgdataInsertHelper.bind(orgdata_nameColumn, node.name);
 		orgdataInsertHelper.bind(orgdata_todoColumn, node.todo);
 		orgdataInsertHelper.bind(orgdata_priorityColumn, node.priority);
 		orgdataInsertHelper.bind(orgdata_fileidColumn, node.fileId);
 		orgdataInsertHelper.bind(orgdata_tagsColumn, node.tags);
 		orgdataInsertHelper.bind(orgdata_tagsInheritedColumn, node.tags_inherited);
-		orgdataInsertHelper.bind(orgdata_levelColumn, node.level);
+        orgdataInsertHelper.bind(orgdata_levelColumn, node.level);
+        orgdataInsertHelper.bind(orgdata_positionColumn, node.position);
 		return orgdataInsertHelper.execute();
 	}
 		
@@ -129,7 +133,8 @@ public class OrgDatabase extends SQLiteOpenHelper {
 			this.orgdata_fileidColumn = orgdataInsertHelper.getColumnIndex(OrgData.FILE_ID);
 			this.orgdata_tagsColumn = orgdataInsertHelper.getColumnIndex(OrgData.TAGS);
 			this.orgdata_tagsInheritedColumn = orgdataInsertHelper.getColumnIndex(OrgData.TAGS_INHERITED);
-			this.orgdata_levelColumn = orgdataInsertHelper.getColumnIndex(OrgData.LEVEL);
+            this.orgdata_levelColumn = orgdataInsertHelper.getColumnIndex(OrgData.LEVEL);
+            this.orgdata_positionColumn = orgdataInsertHelper.getColumnIndex(OrgData.POSITION);
 		}
 		orgdataInsertHelper.prepareForInsert();
 	}

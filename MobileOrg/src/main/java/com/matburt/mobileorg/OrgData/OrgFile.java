@@ -146,7 +146,13 @@ public class OrgFile {
 	public long updateFile(ContentResolver resolver) {
 		return -1;
 	}
-	
+
+	/**
+	 * Remove all OrgData nodes associated with this file from the DB
+	 * Remove this OrgFile node from the DB
+	 * @param resolver
+	 * @return the number of OrgData nodes removed
+	 */
 	public long removeFile(ContentResolver resolver) {
 		long entriesRemoved = removeFileOrgDataNodes(resolver);
 		removeFileNode(resolver);

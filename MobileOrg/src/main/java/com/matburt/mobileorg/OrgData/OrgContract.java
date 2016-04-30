@@ -20,6 +20,7 @@ public class OrgContract {
 		String PARENT_ID = "parent_id";
 		String FILE_ID = "file_id";
 		String LEVEL = "level";
+		String POSITION = "position";
 		String PRIORITY = "priority";
 		String TAGS = "tags";
 		String TAGS_INHERITED = "tags_inherited";
@@ -92,7 +93,7 @@ public class OrgContract {
 
 		
 		public static final String[] DEFAULT_COLUMNS = { ID, NAME, TODO, TAGS, TAGS_INHERITED,
-				PARENT_ID, PAYLOAD, LEVEL, PRIORITY, FILE_ID };
+				PARENT_ID, PAYLOAD, LEVEL, PRIORITY, FILE_ID, POSITION };
 	}
 	
 	public static class Edits implements EditsColumns {

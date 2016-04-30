@@ -200,7 +200,11 @@ public class Synchronizer {
 				.getChecksums(remoteChecksumContents);
 		return remoteChecksums;
 	}
-	
+
+	/**
+	Compare local and remote checksums to see which files have changed.
+	@return the list of remotely changed files
+	*/
 	private ArrayList<String> getFilesThatChangedRemotely(HashMap<String, String> remoteChecksums) {
 		HashMap<String, String> localChecksums = OrgProviderUtils.getFileChecksums(resolver);
 		
@@ -217,7 +221,15 @@ public class Synchronizer {
 		
 		return filesToGet;
 	}
-	
+
+    /**
+     * Remove local OrgFile from the database
+     * Parse remote file, add it and all its OrdData nodes to the database
+     * @param orgFile
+     * @param parser
+     * @throws CertificateException
+     * @throws IOException
+     */
 	private void getAndParseFile(OrgFile orgFile, OrgFileParser parser)
 			throws CertificateException, IOException {
 		Log.v("getter","parsing : "+orgFile);

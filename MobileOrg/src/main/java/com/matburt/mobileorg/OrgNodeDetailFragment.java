@@ -21,8 +21,12 @@ import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
 import android.util.Log;
+import android.view.ContextMenu;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -71,6 +75,10 @@ public class OrgNodeDetailFragment extends Fragment {
     public OrgNodeDetailFragment() {
     }
 
+    public String sayHello(){
+        return "fragment id : "+idHlightedPosition;
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -116,6 +124,13 @@ public class OrgNodeDetailFragment extends Fragment {
 //            }
         }
         adapter = new RecyclerViewAdapter(tree);
+
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        Log.v("context", "onContextItemSelected");
+        return super.onContextItemSelected(item);
     }
 
     @Override
@@ -129,6 +144,8 @@ public class OrgNodeDetailFragment extends Fragment {
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         recyclerView.setAdapter(adapter);
+
+        registerForContextMenu(recyclerView);
 
         class SimpleItemTouchHelperCallback extends ItemTouchHelper.Callback {
             private final RecyclerViewAdapter mAdapter;
@@ -194,18 +211,6 @@ public class OrgNodeDetailFragment extends Fragment {
         Intent intent = new Intent(getActivity(), EditNodeActivity.class);
         intent.putExtras(args);
         startActivity(intent);
-//        // Create new fragment and transaction
-//        Fragment newFragment = new EditNodeFragment();
-//        newFragment.setArguments(args);
-//        FragmentTransaction transaction = getFragmentManager().beginTransaction();
-//
-//        // Replace whatever is in the fragment_container view with this fragment,
-//        // and add the transaction to the back stack
-//        transaction.replace(R.id.orgnode_detail_container, newFragment, "edit_node_fragment");
-//        transaction.addToBackStack(null);
-//
-//        // Commit the transaction
-//        transaction.commit();
     }
 
     public class RecyclerViewAdapter
@@ -312,7 +317,7 @@ public class OrgNodeDetailFragment extends Fragment {
         }
 
         /**
-         * Add an item before and after position
+         * Add an item before position
          * @param position
          */
         private void insertItem(int position){
@@ -359,7 +364,7 @@ public class OrgNodeDetailFragment extends Fragment {
             }
         }
 
-        public class ViewHolder extends RecyclerView.ViewHolder {
+        public class ViewHolder extends RecyclerView.ViewHolder implements View.OnCreateContextMenuListener {
             public final View mView;
 
             public OrgNodeTree mItem;
@@ -380,7 +385,22 @@ public class OrgNodeDetailFragment extends Fragment {
 
                 int fontSize = PreferenceUtils.getFontSize();
                 todoButton.setTextSize(fontSize);
+                view.setOnCreateContextMenuListener(this);
             }
+
+            @Override
+            public void onCreateContextMenu(ContextMenu menu, View v,
+                                            ContextMenu.ContextMenuInfo menuInfo) {
+                Log.v("context", "onCreateContextMenu");
+                menu.add(Menu.NONE, R.id.edit_menu_ok,
+                        Menu.NONE, "blah");
+            }
+
+//            @Override
+//            public void onViewRecycled(ViewHolder holder) {
+//                holder.itemView.setOnLongClickListener(null);
+//                super.onViewRecycled(holder);
+//            }
 
             private View.OnClickListener todoClick = new View.OnClickListener() {
                 @Override
