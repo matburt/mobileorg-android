@@ -32,6 +32,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.matburt.mobileorg.OrgData.OrgContract;
 import com.matburt.mobileorg.OrgData.OrgFileParser;
 import com.matburt.mobileorg.OrgData.OrgNode;
 import com.matburt.mobileorg.OrgData.OrgNodeTree;
@@ -169,7 +170,7 @@ public class OrgNodeDetailFragment extends Fragment {
                 int parentId = (int)node.parentId;
                 lastEditedPosition = position;
 
-                createEditNodeFragment(id, parentId);
+                createEditNodeFragment(id, parentId, 0);
             }
 
             @Override
@@ -203,10 +204,11 @@ public class OrgNodeDetailFragment extends Fragment {
         }
     }
 
-    void createEditNodeFragment(int id, int parentId) {
+    void createEditNodeFragment(int id, int parentId, int siblingPosition) {
         Bundle args = new Bundle();
         args.putLong(NODE_ID, id);
         args.putLong(PARENT_ID, parentId);
+        args.putInt(OrgContract.OrgData.POSITION, siblingPosition);
 
         Intent intent = new Intent(getActivity(), EditNodeActivity.class);
         intent.putExtras(args);
@@ -228,16 +230,6 @@ public class OrgNodeDetailFragment extends Fragment {
         void refresh(){
             idTreeMap = tree.getVisibleNodesArray();
             notifyDataSetChanged();
-        }
-
-        public void refreshItem(long position){
-            OrgNodeTree tree = idTreeMap.get(position);
-            if(tree == null) return;
-            try {
-                tree.node = new OrgNode(tree.node.id,resolver);
-            } catch (OrgNodeNotFoundException e) {
-                e.printStackTrace();
-            }
         }
 
         @Override
@@ -264,9 +256,13 @@ public class OrgNodeDetailFragment extends Fragment {
                 holder.sameLevel.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        int parentId = (int)idTreeMap.get(idHlightedPosition).node.parentId;
+                        OrgNode currentNode = idTreeMap.get(idHlightedPosition).node;
+                        int parentId = (int)currentNode.parentId;
                         lastEditedPosition = position;
-                        createEditNodeFragment(-1, parentId);
+
+                        // Place the node right after this one in the adapter
+                        int siblingPosition = currentNode.position + 1;
+                        createEditNodeFragment(-1, parentId, siblingPosition);
                     }
                 });
 
@@ -275,7 +271,7 @@ public class OrgNodeDetailFragment extends Fragment {
                     public void onClick(View v) {
                         int parentId = (int) idTreeMap.get(idHlightedPosition).node.id;
                         lastEditedPosition = position;
-                        createEditNodeFragment(-1, parentId);
+                        createEditNodeFragment(-1, parentId, 0);
                     }
                 });
             } else {

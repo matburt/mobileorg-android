@@ -286,7 +286,7 @@ public class OrgNode {
 	
 	public boolean hasChildren(ContentResolver resolver) {
 		Cursor childCursor = resolver.query(OrgData.buildChildrenUri(id),
-				OrgData.DEFAULT_COLUMNS, null, null, null);
+                OrgData.DEFAULT_COLUMNS, null, null, null);
 		
 		int childCount = childCursor.getCount();
 		childCursor.close();
@@ -311,7 +311,8 @@ public class OrgNode {
         if(cursor!=null) cursor.close();
 		return parent;
 	}
-	
+
+
 	public ArrayList<String> getSiblingsStringArray(ContentResolver resolver) {
 		try {
 			OrgNode parent = getParent(resolver);
@@ -321,12 +322,27 @@ public class OrgNode {
 			throw new IllegalArgumentException("Couldn't get parent for node " + name);
 		}
 	}
-	
-	public OrgNode getSibling(String name, ContentResolver resolver) throws OrgNodeNotFoundException {
-		OrgNode parent = getParent(resolver);
-		return parent.getChild(name, resolver);
+
+	public ArrayList<OrgNode> getSiblings(ContentResolver resolver) {
+        try {
+            OrgNode parent = getParent(resolver);
+            return parent.getChildren(resolver);
+        } catch (OrgNodeNotFoundException e) {
+			throw new IllegalArgumentException("Couldn't get parent for node " + name);
+		}
 	}
-	
+
+    public void shiftNextSiblingNodes(ContentResolver resolver){
+        for(OrgNode sibling: getSiblings(resolver) ){
+            if(sibling.position >= position && sibling.id != this.id) {
+                ++sibling.position;
+                sibling.updateNode(resolver);
+                Log.v("position", "new pos : " + sibling.position);
+                Log.v("position", sibling.getCleanedName());
+            }
+        }
+    }
+
 	public boolean isFilenode(ContentResolver resolver) {
 		try {
 			OrgFile file = new OrgFile(fileId, resolver);
@@ -475,7 +491,6 @@ public class OrgNode {
 		try {
 			OrgFile file = new OrgFile(parent.fileId, resolver);
 		} catch (OrgFileNotFoundException e) {}
-		
 
 		// Add new heading nodes; need the entire content of node without
 		// star headings

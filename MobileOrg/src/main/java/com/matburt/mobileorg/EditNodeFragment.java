@@ -26,6 +26,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
+import com.matburt.mobileorg.OrgData.OrgContract;
 import com.matburt.mobileorg.OrgData.OrgEdit;
 import com.matburt.mobileorg.OrgData.OrgNode;
 import com.matburt.mobileorg.OrgData.OrgNodeTimeDate;
@@ -43,6 +44,7 @@ public class EditNodeFragment extends Fragment {
     public static String NODE_ID = "node_id";
     public static String PARENT_ID = "parent_id";
     static public long nodeId = -1, parentId = -1;
+    private int position = 0;
     static private OrgNode node;
 
 //    Spinner filename;
@@ -70,6 +72,8 @@ public class EditNodeFragment extends Fragment {
         if(bundle!=null){
             nodeId = bundle.getLong(NODE_ID, -1);
             parentId = bundle.getLong(PARENT_ID, -1);
+            position = bundle.getInt(OrgContract.OrgData.POSITION, 0);
+            Log.v("position","position : "+position);
         }
 
 
@@ -86,6 +90,7 @@ public class EditNodeFragment extends Fragment {
             // Creating new node
             node = new OrgNode();
             node.parentId = parentId;
+            node.position = position;
             Log.v("newNode","parentId : "+parentId);
             try {
                 OrgNode parentNode = new OrgNode(parentId, resolver);
@@ -249,6 +254,8 @@ public class EditNodeFragment extends Fragment {
         node.write(resolver);
 
         if(nodeId < 0){
+            node.shiftNextSiblingNodes(resolver);
+
             OrgEdit edit = node.createParentNewheading(resolver);
             edit.write(resolver);
         }
