@@ -1,50 +1,104 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/LinearLayout1"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
+    android:layout_height="wrap_content"
     android:minHeight="@dimen/outline_item"
-    android:orientation="horizontal"
+    android:orientation="vertical"
+    android:background="?android:selectableItemBackground"
     android:paddingLeft="5dp"
-    android:paddingRight="5dp" >
+    android:paddingRight="5dp">
 
-    <TextView
-        android:id="@+id/outline_item_level"
-        android:layout_width="wrap_content"
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/LinearLayout1"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:minHeight="@dimen/outline_item"
+        android:orientation="horizontal"
+        android:background="?android:selectableItemBackground"
+        android:paddingLeft="5dp"
+        android:paddingRight="5dp" >
+
+
+        <TextView
+            android:id="@+id/outline_item_level"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:text=""
+            android:textAppearance="?android:attr/textAppearanceMedium" >
+        </TextView>
+
+        <Button
+            android:id="@+id/outline_item_todo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginLeft="10dp"
+            android:layout_marginStart="10dp"
+            android:background="@android:color/transparent"
+            android:focusable="true"
+            android:minHeight="30dp"
+            android:minWidth="40dp"
+            android:text="@string/no_state" />
+
+        <TextView
+            android:id="@+id/outline_item_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_toRightOf="@id/outline_item_level"
+            android:layout_toEndOf="@id/outline_item_level"
+            android:layout_toLeftOf="@id/outline_item_todo"
+            android:layout_toStartOf="@id/outline_item_todo"
+            android:text=""
+            android:textAppearance="?android:attr/textAppearanceMedium" >
+        </TextView>
+    </RelativeLayout>
+
+    <LinearLayout
+        android:id="@+id/item_modifiers"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:text=""
-        android:textAppearance="?android:attr/textAppearanceMedium" >
-    </TextView>
+        android:orientation="horizontal"
+        android:visibility="gone"
+        >
 
-    <Button
-        android:id="@+id/outline_item_todo"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
-        android:layout_marginLeft="10dp"
-        android:layout_marginStart="10dp"
-        android:background="@android:color/transparent"
-        android:focusable="true"
-        android:minHeight="30dp"
-        android:minWidth="40dp"
-        android:text="@string/no_state" />
+        <Button
+            android:id="@+id/insert_same_level"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="@string/insert_node"
+            android:layout_weight="1"
+            android:gravity="center"
+            />
 
-    <TextView
-        android:id="@+id/outline_item_title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-        android:layout_toRightOf="@id/outline_item_level"
-        android:layout_toEndOf="@id/outline_item_level"
-        android:layout_toLeftOf="@id/outline_item_todo"
-        android:layout_toStartOf="@id/outline_item_todo"
-        android:text=""
-        android:textAppearance="?android:attr/textAppearanceMedium" >
-    </TextView>
+        <View
+            android:layout_height="match_parent"
+            android:layout_width="1dp"
+            android:background="@android:color/darker_gray"
+            />
+
+        <Button
+            android:id="@+id/insert_neighbourg_level"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="@string/insert_child_node"
+            android:layout_weight="1"
+            android:gravity="center"
+            />
+
+        <Button
+            android:id="@+id/delete_node"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="@string/delete_node"
+            android:layout_weight="1"
+            android:gravity="center"
+            />
+    </LinearLayout>
 
 
-</RelativeLayout>
+</LinearLayout>

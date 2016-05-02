@@ -5,18 +5,25 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.view.ActionMode;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.matburt.mobileorg.Gui.Theme.DefaultTheme;
+import com.matburt.mobileorg.OrgData.OrgFile;
 import com.matburt.mobileorg.OrgData.OrgNode;
 import com.matburt.mobileorg.OrgData.OrgProviderUtils;
 import com.matburt.mobileorg.OrgNodeDetailActivity;
 import com.matburt.mobileorg.OrgNodeDetailFragment;
 import com.matburt.mobileorg.R;
+import com.matburt.mobileorg.util.OrgFileNotFoundException;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -24,24 +31,78 @@ import java.util.List;
 
 public class OutlineAdapter extends RecyclerView.Adapter<OutlineItem> {
 
+	private final AppCompatActivity activity;
 	private ContentResolver resolver;
 	private boolean mTwoPanes = false;
-	private List<Boolean> expanded = new ArrayList<Boolean>();
-	public List<OrgNode> items = new ArrayList<OrgNode>();
+	public List<OrgNode> items = new ArrayList<>();
+    private SparseBooleanArray selectedItems;
+    ActionMode actionMode;
+
+
+    private ActionMode.Callback mDeleteMode = new ActionMode.Callback() {
+		@Override
+		public boolean onPrepareActionMode(ActionMode actionMode, Menu menu) {
+            Log.v("selection","onPrepare");
+            String wordItem;
+            int count = getSelectedItemCount();
+            if(count == 1) wordItem = activity.getResources().getString(R.string.file);
+            else wordItem = activity.getResources().getString(R.string.files);
+            menu.findItem(R.id.action_text).setTitle(count + " " + wordItem);
+			return false;
+		}
+
+		@Override
+		public void onDestroyActionMode(ActionMode actionMode) {
+            OutlineAdapter.this.clearSelections();
+		}
+
+		@Override
+		public boolean onCreateActionMode(ActionMode actionMode, Menu menu) {
+			MenuInflater inflater = activity.getMenuInflater();
+			inflater.inflate(R.menu.main_context_action_bar, menu);
+
+			return true;
+		}
+
+		@Override
+		public boolean onActionItemClicked(ActionMode actionMode, MenuItem menuItem) {
+            Log.v("selection","item clicked");
+            switch (menuItem.getItemId()) {
+                case R.id.item_delete:
+                    List<Integer> selectedItems = getSelectedItems();
+                    for(Integer num: selectedItems){
+                        OrgNode node = items.get(num);
+                        try {
+                            OrgFile file = new OrgFile(node.fileId, resolver);
+                            file.removeFile(resolver);
+                        } catch (OrgFileNotFoundException e) {
+                            e.printStackTrace();
+                        }
+
+                        node.deleteNode(activity.getContentResolver());
+                        Log.v("selection","deleting : "+items.get(num).name);
+                    }
+                    refresh();
+                    actionMode.finish();
+                    return true;
+            }
+            return false;
+        }
+	};
 
 	private DefaultTheme theme;
-
-	private boolean levelIndentation = true;
 
 	public void setHasTwoPanes(boolean _hasTwoPanes){
 		mTwoPanes = _hasTwoPanes;
 	}
 
-	public OutlineAdapter(Context context) {
+	public OutlineAdapter(AppCompatActivity activity) {
 		super();
-		this.resolver = context.getContentResolver();
+		this.activity = activity;
+        this.resolver = activity.getContentResolver();
 
-		this.theme = DefaultTheme.getTheme(context);
+		this.theme = DefaultTheme.getTheme(activity);
+        selectedItems = new SparseBooleanArray();
 		refresh();
 	}
 
@@ -49,7 +110,6 @@ public class OutlineAdapter extends RecyclerView.Adapter<OutlineItem> {
 		clear();
 
 		for (OrgNode node : OrgProviderUtils.getOrgNodeChildren(-1, resolver)){
-			Log.v("uri", "parent : " + node.parentId + " , id : " + node.id + " , fileId : " + node.fileId);
 			add(node);
 		}
 
@@ -67,149 +127,112 @@ public class OutlineAdapter extends RecyclerView.Adapter<OutlineItem> {
     }
 
 
-    @Override public void onBindViewHolder(OutlineItem holder, int position) {
+    @Override
+    public void onBindViewHolder(final OutlineItem holder, final int position) {
 		holder.titleView.setText(items.get(position).name);
 //		holder.mContentView.setText(items.get(position).levelView.getText());
 
+        holder.mView.setActivated(selectedItems.get(position, false));
+
 		final long itemId = getItemId(position);
 		holder.mView.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
+            @Override
+            public void onClick(View v) {
+                if (getSelectedItemCount() > 0) {
+                    toggleSelection(position);
+                } else {
+                    if (mTwoPanes) {
+                        Bundle arguments = new Bundle();
+                        arguments.putLong(OrgNodeDetailFragment.NODE_ID, itemId);
+                        OrgNodeDetailFragment fragment = new OrgNodeDetailFragment();
+                        fragment.setArguments(arguments);
 
-				if (mTwoPanes) {
-					Bundle arguments = new Bundle();
-					arguments.putLong(OrgNodeDetailFragment.NODE_ID, itemId);
-					OrgNodeDetailFragment fragment = new OrgNodeDetailFragment();
-					fragment.setArguments(arguments);
+                        AppCompatActivity activity = (AppCompatActivity) v.getContext();
+                        activity.getSupportFragmentManager().beginTransaction()
+                                .replace(R.id.orgnode_detail_container, fragment)
+                                .commit();
+                    } else {
+                        Context context = v.getContext();
+                        Intent intent = new Intent(context, OrgNodeDetailActivity.class);
+                        intent.putExtra(OrgNodeDetailFragment.NODE_ID, itemId);
+                        context.startActivity(intent);
+                    }
+                }
+            }
+        });
 
-					AppCompatActivity activity = (AppCompatActivity)v.getContext();
-					activity.getSupportFragmentManager().beginTransaction()
-							.replace(R.id.orgnode_detail_container, fragment)
-							.commit();
-				} else {
-					Context context = v.getContext();
-					Intent intent = new Intent(context, OrgNodeDetailActivity.class);
-					intent.putExtra(OrgNodeDetailFragment.NODE_ID, itemId);
-					context.startActivity(intent);
-				}
-			}
-		});
+        holder.mView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                toggleSelection(position);
+                return true;
+            }
+        });
+
+	}
+
+	public void clear() {
+        this.items.clear();
     }
 
-
-	private void expandNodes(ArrayList<Long> nodeIds) {
-		while (nodeIds.size() != 0) {
-			Long nodeId = nodeIds.get(0);
-			for (int nodesPosition = 0; nodesPosition < getItemCount(); nodesPosition++) {
-				if (getItemId(nodesPosition) == nodeId) {
-					expand(nodesPosition);
-					break;
-				}
-			}
-			nodeIds.remove(0);
-		}
-	}
-	
-//	@Override
-//	public View getView(int position, View convertView, ViewGroup parent) {
-//		OutlineItem outlineItem = (OutlineItem) convertView;
-//		if (convertView == null)
-//			outlineItem = new OutlineItem(getContext());
-//
-//		outlineItem.setLevelFormating(levelIndentation);
-//		outlineItem.setup(getItem(position), this.expanded.get(position), theme, resolver);
-//		return outlineItem;
-//	}
-
-	public void setLevelIndentation(boolean enabled) {
-		this.levelIndentation = enabled;
-	}
-	
-	public void clear() {
-		this.items.clear();
-		this.expanded.clear();
-	}
-
-	public void add(OrgNode node) {
+    public void add(OrgNode node) {
 		this.items.add(node);
-		this.expanded.add(false);
 	}
 
 	public void insert(OrgNode node, int index) {
 		this.items.add(index, node);
-		this.expanded.add(index, false);
 	}
 	
 	public void insertAll(ArrayList<OrgNode> nodes, int position) {
-		Collections.reverse(nodes);
-		for(OrgNode node: nodes)
+        Collections.reverse(nodes);
+        for (OrgNode node: nodes)
 			insert(node, position);
 //		notifyDataSetInvalidated();
 	}
 
-	public void remove(OrgNode node) {
-		int position = items.indexOf(node);
-		if(position > -1) {
-			this.expanded.remove(position);
-			this.items.remove(position);
-		}
-	}
-
-	public boolean getExpanded(int position) {
-		if(position < 0 || position > this.expanded.size())
-			return false;
-		
-		return this.expanded.get(position);
-	}
-	
-	public void collapseExpand(int position) {
-		if(position >= getItemCount() || position >= this.expanded.size() || position < 0)
-			return;
-		
-		if(this.expanded.get(position))
-			collapse(items.get(position), position);
-		else
-			expand(position);
-	}
-	
-	public void collapse(OrgNode node, int position) {
-		int activePos = position + 1;
-		while(activePos < this.expanded.size()) {
-			if(items.get(activePos).level <= node.level)
-				break;
-			collapse(items.get(activePos), activePos);
-			remove(items.get(activePos));
-		}
-		this.expanded.set(position, false);
-	}
-
-	public void expand(OrgNode node) {
-		int index = items.indexOf(node);
-		if(index>-1) expand(index);
-	}
-
-	public void expand(int position) {
-		OrgNode node = items.get(position);
-		insertAll(node.getChildren(resolver), position + 1);
-		this.expanded.set(position, true);
-	}
 	
 	@Override
 	public long getItemId(int position) {
 		OrgNode node = items.get(position);
 		return node.id;
 	}
-	
-	public int findParent(int position) {
-		if(position >= getItemCount() || position < 0)
-			return -1;
-		
-		long currentLevel = items.get(position).level;
-		for(int activePos = position - 1; activePos >= 0; activePos--) {
-			if(items.get(activePos).level < currentLevel)
-				return activePos;
-		}
-		
-		return -1;
-	}
+
+    public void toggleSelection(int pos) {
+        Log.v("selection", "selection pos : " + pos);
+        int countBefore = getSelectedItemCount();
+        if (selectedItems.get(pos, false)) {
+            selectedItems.delete(pos);
+        }
+        else {
+            selectedItems.put(pos, true);
+        }
+        notifyItemChanged(pos);
+        int countAfter = getSelectedItemCount();
+        if(countBefore == 0 && countAfter > 0)
+            actionMode = activity.startSupportActionMode(mDeleteMode);
+        if(countAfter == 0 && actionMode != null)
+            actionMode.finish();
+        if(countAfter > 0 && actionMode != null){
+            actionMode.invalidate();
+        }
+
+    }
+
+    public void clearSelections() {
+        selectedItems.clear();
+        notifyDataSetChanged();
+    }
+
+    public int getSelectedItemCount() {
+        return selectedItems.size();
+    }
+
+    public List<Integer> getSelectedItems() {
+        List<Integer> items =
+                new ArrayList<>(selectedItems.size());
+        for (int i = 0; i < selectedItems.size(); i++) {
+            items.add(selectedItems.keyAt(i));
+        }
+        return items;
+    }
 }

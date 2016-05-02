@@ -3,8 +3,7 @@ package com.matburt.mobileorg.OrgData;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.text.TextUtils;
-import android.util.Log;
-import android.util.Pair;
+
 
 import com.matburt.mobileorg.OrgData.OrgContract.OrgData;
 import com.matburt.mobileorg.util.OrgFileNotFoundException;
@@ -116,7 +115,6 @@ public class OrgFileParser {
 		node.fileId = orgFile.id;
 		node.parentId = parseStack.getCurrentNodeId();
         node.position = position.get(numstars-1);
-        Log.v("position", "parseLine # : " + node.position + " - line : " + thisLine);
 
         long newId = db.fastInsertNode(node);
 		parseStack.add(numstars, newId, node.tags);

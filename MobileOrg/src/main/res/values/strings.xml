@@ -28,6 +28,7 @@
     <string name="insert_child_node">Insert child node</string>
     <string name="new_file">Create new file</string>
     <string name="file">File</string>
+    <string name="files">Files</string>
     <string name="delete_node">Delete node</string>
     <string name="filename">Filename</string>
 

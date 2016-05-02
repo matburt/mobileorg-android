@@ -25,6 +25,7 @@ import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
 
 import javax.net.ssl.SSLHandshakeException;
 
@@ -207,10 +208,19 @@ public class Synchronizer {
 	*/
 	private ArrayList<String> getFilesThatChangedRemotely(HashMap<String, String> remoteChecksums) {
 		HashMap<String, String> localChecksums = OrgProviderUtils.getFileChecksums(resolver);
+		Log.v("sync","size localchecksum : "+localChecksums.size());
+		for(Map.Entry<String, String> s: localChecksums.entrySet()){
+			Log.v("sync", "key test : "+s.getKey());
+		}
 		
 		ArrayList<String> filesToGet = new ArrayList<String>();
 
 		for (String key : remoteChecksums.keySet()) {
+			Log.v("sync", "key : "+key);
+
+			if (localChecksums.containsKey(key)){
+				Log.v("sync","key : "+key+ "\ncompare "+localChecksums.get(key) + " with "+remoteChecksums.get(key));
+			}
 			if (localChecksums.containsKey(key)
 					&& localChecksums.get(key).equals(remoteChecksums.get(key)))
 				continue;

@@ -12,7 +12,7 @@
         android:name=".OrgData.MobileOrgApplication"
         android:icon="@drawable/icon"
         android:label="MobileOrg"
-        android:theme="@style/AppTheme" >
+        android:theme="@style/AppTheme.NoActionBar" >
         <meta-data
             android:name="android.app.default_searchable"
             android:value=".Gui.SearchActivity" />
@@ -59,7 +59,7 @@
         <activity
             android:name=".OrgNodeListActivity"
             android:label="MobileOrg"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:theme="@style/ActionModeAppTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

@@ -4,12 +4,10 @@
     <item
         android:id="@+id/agenda_entry_cancel"
         android:icon="@drawable/ic_menu_close_clear_cancel"
-        android:showAsAction="always"
         android:title="@string/menu_cancel"/>
     <item
         android:id="@+id/agenda_entry_save"
         android:icon="@drawable/ic_menu_save"
-        android:showAsAction="always"
         android:title="Save"/>
 
 </menu>

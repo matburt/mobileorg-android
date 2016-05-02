@@ -8,9 +8,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v4.app.DialogFragment;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
@@ -18,6 +15,7 @@ import android.support.v7.widget.Toolbar;
 import android.support.design.widget.FloatingActionButton;
 
 import android.util.Log;
+import android.util.SparseBooleanArray;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -49,10 +47,6 @@ import com.matburt.mobileorg.Services.SyncService;
 public class OrgNodeListActivity extends AppCompatActivity {
 
     public final static String NODE_ID = "node_id";
-    private final static String OUTLINE_NODES = "nodes";
-    private final static String OUTLINE_CHECKED_POS = "selection";
-    private final static String OUTLINE_SCROLL_POS = "scrollPosition";
-
     public final static String SYNC_FAILED = "com.matburt.mobileorg.SYNC_FAILED";
 
     /**
