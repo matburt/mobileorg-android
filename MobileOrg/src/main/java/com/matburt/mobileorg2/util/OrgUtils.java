@@ -151,7 +151,21 @@ public class OrgUtils {
 //    	else
 //    		activity.setTheme(R.style.Theme_MobileOrg_Light);
 //    }
-    
+
+
+	public static String rightTrim(String str) {
+		int last = str.length() - 1;
+		int end = last;
+
+		while ((end >= 0) && (str.charAt(end) <= ' ')) {
+			end--;
+		}
+		if (end == last) {
+			return str;
+		}
+		return str.substring(0, end + 1);
+	}
+
 	public static byte[] serializeObject(Object o) {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 

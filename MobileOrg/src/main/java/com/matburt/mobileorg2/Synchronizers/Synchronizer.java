@@ -36,7 +36,7 @@ import java.util.Map;
  * needed.
  */
 public class Synchronizer {
-	public static final String SYNC_UPDATE = "com.matburt.mobileorg.Synchronizer.action.SYNC_UPDATE";
+	public static final String SYNC_UPDATE = "com.matburt.mobileorg2.Synchronizer.action.SYNC_UPDATE";
 	public static final String SYNC_DONE = "sync_done";
 	public static final String SYNC_START = "sync_start";
 	public static final String SYNC_PROGRESS_UPDATE = "progress_update";

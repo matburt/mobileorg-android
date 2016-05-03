@@ -35,13 +35,11 @@ public class EditNodeFragment extends Fragment {
     private int position = 0;
     static private OrgNode node;
 
-//    Spinner filename;
     EditText title, content;
     static Button schedule, deadline;
-    private Button todo;
+    private Button todo, priority;
 
     static OrgNodeTimeDate.TYPE currentDateTimeDialog;
-    final static private String CAPTURE_FILENAME = "capture.org";
 
 
     @Override
@@ -49,12 +47,14 @@ public class EditNodeFragment extends Fragment {
                              Bundle savedInstanceState) {
         final View rootView = inflater.inflate(R.layout.edit_node_entry, container, false);
 
-//        filename = (Spinner) rootView.findViewById(R.id.filename);
         todo = (Button) rootView.findViewById(R.id.todo);
-        title = (EditText) rootView.findViewById(R.id.title);
+        priority = (Button) rootView.findViewById(R.id.priority);
         schedule = (Button) rootView.findViewById(R.id.scheduled);
-        content = (EditText) rootView.findViewById(R.id.content);
+
         deadline = (Button) rootView.findViewById(R.id.deadline);
+
+        title = (EditText)getActivity().findViewById(R.id.title);
+        content = (EditText) getActivity().findViewById(R.id.content);
 
         Bundle bundle = getArguments();
         if(bundle!=null){
@@ -75,19 +75,7 @@ public class EditNodeFragment extends Fragment {
                 e.printStackTrace();
             }
         } else {
-            // Creating new node
-            node = new OrgNode();
-            node.parentId = parentId;
-            node.position = position;
-            Log.v("newNode","parentId : "+parentId);
-            try {
-                OrgNode parentNode = new OrgNode(parentId, resolver);
-                node.level = parentNode.level + 1;
-                node.fileId = parentNode.fileId;
-                Log.v("newNode","fileId : "+node.fileId);
-            } catch (OrgNodeNotFoundException e) {
-                e.printStackTrace();
-            }
+            createNewNode(resolver);
         }
 
         TodoDialog.setupTodoButton(getContext(), node, todo, false);
@@ -100,41 +88,14 @@ public class EditNodeFragment extends Fragment {
             }
         });
 
+        priority.setText(node.priority);
 
         title.setText(node.name);
 
         String payload = node.getCleanedPayload();
         if(payload.length()>0){
             content.setText(payload);
-            content.setTextColor(getResources().getColor(R.color.colorBlack));
         }
-//
-//        content.setOnTouchListener(new View.OnTouchListener() {
-//            @Override
-//            public boolean onTouch(View v, MotionEvent event) {
-//                content.setFocusable(true);
-//                content.requestFocus();
-//                return false;
-//            }
-//        });
-//
-
-//        content.addTextChangedListener(new TextWatcher() {
-//            @Override
-//            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-//
-//            }
-//
-//            @Override
-//            public void onTextChanged(CharSequence s, int start, int before, int count) {
-//
-//            }
-//
-//            @Override
-//            public void afterTextChanged(Editable s) {
-//                content.setText(s);
-//            }
-//        });
 
         title.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -144,7 +105,6 @@ public class EditNodeFragment extends Fragment {
                 return false;
             }
         });
-
 
         final LinearLayout layout = (LinearLayout)rootView.findViewById(R.id.view_fragment_layout);
         rootView.setOnTouchListener(new View.OnTouchListener() {
@@ -180,6 +140,21 @@ public class EditNodeFragment extends Fragment {
         return rootView;
     }
 
+    private void createNewNode(ContentResolver resolver){
+        // Creating new node
+        node = new OrgNode();
+        node.parentId = parentId;
+        node.position = position;
+        Log.v("newNode","parentId : "+parentId);
+        try {
+            OrgNode parentNode = new OrgNode(parentId, resolver);
+            node.level = parentNode.level + 1;
+            node.fileId = parentNode.fileId;
+            Log.v("newNode","fileId : "+node.fileId);
+        } catch (OrgNodeNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
     static private void setupTimeStampButtons() {
         String scheduleText = node.getOrgNodePayload().getScheduled();
         String deadlineText = node.getOrgNodePayload().getDeadline();
@@ -190,47 +165,6 @@ public class EditNodeFragment extends Fragment {
         else deadline.setText(deadline.getResources().getString(R.string.deadline));
 
     }
-
-
-
-//    private void addFileNameSpinner(View view){
-//        if(node.id > -1){
-//            // Only show spinner when creating new node
-//            TextView file = (TextView)view.findViewById(R.id.filename_textview);
-//            file.setVisibility(View.GONE);
-//            filename.setVisibility(View.GONE);
-//            return;
-//        }
-//
-//        List<String> list = new ArrayList<>();
-//        list.add(CAPTURE_FILENAME);
-//        for( OrgNode node : OrgProviderUtils.getFileNodes(getContext()) ) {
-//            if (!node.name.equals(CAPTURE_FILENAME)) list.add(node.name);
-//        }
-//        list.add(getResources().getString(R.string.new_file));
-//
-//        ArrayAdapter<String> dataAdapter = new ArrayAdapter<>(getContext(),
-//                android.R.layout.simple_spinner_item, list);
-//        dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-//        filename.setAdapter(dataAdapter);
-//        filename.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-//            @Override
-//            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-//                for( OrgNode node : OrgProviderUtils.getFileNodes(getContext()) ) {
-//                    if(node.name.equals(((TextView)view).getText())) {
-//                        EditNodeFragment.node.fileId = node.fileId;
-//                        EditNodeFragment.node.parentId = node.id;
-//                        EditNodeFragment.node.level = 1;
-//                    }
-//                }
-//            }
-//
-//            @Override
-//            public void onNothingSelected(AdapterView<?> parent) {
-//
-//            }
-//        });
-//    }
 
     /**
      * Called by EditNodeActivity when the OK button from the menu bar is pressed

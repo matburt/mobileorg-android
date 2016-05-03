@@ -33,6 +33,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.matburt.mobileorg2.OrgData.OrgContract;
@@ -304,9 +305,11 @@ public class OrgNodeDetailFragment extends Fragment {
                 public boolean onLongClick(View v) {
 //                    ((AppCompatActivity)getActivity()).startSupportActionMode(mActionModeCallback);
                     Log.v("selection","long click");
+
                     if(highlightedView != null){
                         setItemModifiersVisibility(highlightedView, View.GONE);
                     }
+
                     idHlightedPosition = position;
                     highlightedView = holder.mView;
 
@@ -317,7 +320,7 @@ public class OrgNodeDetailFragment extends Fragment {
 
 //                    insertItem((int)idHlightedPosition);
 //                    notifyDataSetChanged();
-                    return false;
+                    return true;
                 }
             });
 
@@ -364,8 +367,14 @@ public class OrgNodeDetailFragment extends Fragment {
 
         private void closeInsertItem(){
             idHlightedPosition = -1;
-            highlightedView = null;
+            if(highlightedView != null){
+                setItemModifiersVisibility(highlightedView, View.GONE);
+                highlightedView = null;
+            }
+
             refreshVisibility();
+
+
         }
 
         @Override
@@ -377,8 +386,8 @@ public class OrgNodeDetailFragment extends Fragment {
             public final View mView;
             private Button sameLevel, childLevel, deleteNodeButton;
             public OrgNodeTree mItem;
-            private TextView titleView;
-            private Button todoButton;
+            private TextView titleView, contentView;
+            private Button todoButton, priorityButton;
 
             private TextView levelView;
             private boolean levelFormatting = true;
@@ -389,7 +398,9 @@ public class OrgNodeDetailFragment extends Fragment {
                 mView = view;
 
                 titleView = (TextView) view.findViewById(R.id.outline_item_title);
+                contentView = (TextView) view.findViewById(R.id.outline_item_content);
                 todoButton = (Button) view.findViewById(R.id.outline_item_todo);
+                priorityButton = (Button) view.findViewById(R.id.outline_item_priority);
                 levelView = (TextView) view.findViewById(R.id.outline_item_level);
                 todoButton.setOnClickListener(todoClick);
                 sameLevel = (Button) view.findViewById(R.id.insert_same_level);
@@ -424,13 +435,11 @@ public class OrgNodeDetailFragment extends Fragment {
 //            }
 
 
-            public void setupPriority(String priority, SpannableStringBuilder titleSpan) {
-                if (priority != null && !TextUtils.isEmpty(priority)) {
-                    Spannable prioritySpan = new SpannableString(priority + " ");
-                    int yellow = ContextCompat.getColor(getContext(), R.color.colorYellow);
-                    prioritySpan.setSpan(new ForegroundColorSpan(yellow), 0,
-                            priority.length(), 0);
-                    titleSpan.insert(0, prioritySpan);
+            public void setupPriority(String priority) {
+                if (TextUtils.isEmpty(priority)) {
+                    priorityButton.setVisibility(View.GONE);
+                } else {
+                    priorityButton.setText(priority);
                 }
             }
 
@@ -513,7 +522,7 @@ public class OrgNodeDetailFragment extends Fragment {
                 if (levelFormatting)
                     applyLevelFormating(node.level, titleSpan);
                 setupTitle(node.name, titleSpan);
-                setupPriority(node.priority, titleSpan);
+                setupPriority(node.priority);
                 TodoDialog.setupTodoButton(getContext(), node, todoButton, true);
 
                 if (levelFormatting)
@@ -527,6 +536,35 @@ public class OrgNodeDetailFragment extends Fragment {
                 int colorId = (int) Math.min(level-1,nTitleColors-1);
                 titleView.setTextColor(titleColor[colorId]);
                 mView.setSelected(isSelected);
+                String cleanedPayload = node.getCleanedPayload();
+                contentView.setText(cleanedPayload);
+
+                if(cleanedPayload.equals("")){
+                    RelativeLayout.LayoutParams layoutParams =
+                            (RelativeLayout.LayoutParams)titleView.getLayoutParams();
+                    layoutParams.addRule(RelativeLayout.CENTER_VERTICAL, RelativeLayout.TRUE);
+                    titleView.setLayoutParams(layoutParams);
+
+                    layoutParams =
+                            (RelativeLayout.LayoutParams)todoButton.getLayoutParams();
+                    layoutParams.addRule(RelativeLayout.CENTER_VERTICAL, RelativeLayout.TRUE);
+                    todoButton.setLayoutParams(layoutParams);
+
+                    contentView.setVisibility(View.GONE);
+                } else {
+                    RelativeLayout.LayoutParams layoutParams =
+                            (RelativeLayout.LayoutParams)titleView.getLayoutParams();
+                    layoutParams.removeRule(RelativeLayout.CENTER_VERTICAL);
+                    titleView.setLayoutParams(layoutParams);
+
+                    layoutParams =
+                            (RelativeLayout.LayoutParams)todoButton.getLayoutParams();
+                    layoutParams.removeRule(RelativeLayout.CENTER_VERTICAL);
+                    todoButton.setLayoutParams(layoutParams);
+
+
+                    contentView.setVisibility(View.VISIBLE);
+                }
             }
 
             public void setupChildrenIndicator(OrgNode node, SpannableStringBuilder titleSpan) {

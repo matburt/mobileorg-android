@@ -77,7 +77,8 @@
         </activity>
         <activity
             android:name="com.matburt.mobileorg2.OrgNodeDetailActivity"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:theme="@style/ActionModeAppTheme">
+
         </activity>
         <activity
             android:name="com.matburt.mobileorg2.Gui.Wizard.WizardActivity"
@@ -116,7 +117,8 @@
 
         <activity
             android:name="com.matburt.mobileorg2.EditNodeActivity"
-            android:label="New node">
+            android:theme="@style/ActionModeAppTheme"
+            >
         </activity>
 
         <service android:name="com.matburt.mobileorg2.Services.TimeclockService" >

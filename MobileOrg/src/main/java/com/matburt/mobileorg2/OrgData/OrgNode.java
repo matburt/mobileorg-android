@@ -9,7 +9,6 @@ import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Log;
 
-//import com.matburt.mobileorg.Gui.Outline.OutlineItem;
 import com.matburt.mobileorg2.OrgData.OrgContract.OrgData;
 import com.matburt.mobileorg2.util.FileUtils;
 import com.matburt.mobileorg2.util.OrgFileNotFoundException;
@@ -148,7 +147,6 @@ public class OrgNode {
     }
 
 	private long addNode(ContentResolver resolver) {
-		Log.v("newNode", "inserting : " + OrgData.CONTENT_URI);
 		Uri uri = resolver.insert(OrgData.CONTENT_URI, getContentValues());
 		this.id = Long.parseLong(OrgData.getId(uri));
 		return id;

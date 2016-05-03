@@ -30,7 +30,7 @@ public class SynchronizerNotification extends SynchronizerNotificationCompat {
 		notifyIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
                               | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         notifyIntent.putExtra("ERROR_MESSAGE", errorMsg);
-        notifyIntent.setAction("com.matburt.mobileorg.SYNC_FAILED");
+        notifyIntent.setAction("com.matburt.mobileorg2.SYNC_FAILED");
 
 		PendingIntent contentIntent = PendingIntent.getActivity(context, 0, notifyIntent, 0);
 		

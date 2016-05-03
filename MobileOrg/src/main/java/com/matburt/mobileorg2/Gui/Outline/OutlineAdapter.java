@@ -2,8 +2,10 @@ package com.matburt.mobileorg2.Gui.Outline;
 
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.RecyclerView;
@@ -69,21 +71,22 @@ public class OutlineAdapter extends RecyclerView.Adapter<OutlineItem> {
             Log.v("selection","item clicked");
             switch (menuItem.getItemId()) {
                 case R.id.item_delete:
-                    List<Integer> selectedItems = getSelectedItems();
-                    for(Integer num: selectedItems){
-                        OrgNode node = items.get(num);
-                        try {
-                            OrgFile file = new OrgFile(node.fileId, resolver);
-                            file.removeFile(resolver);
-                        } catch (OrgFileNotFoundException e) {
-                            e.printStackTrace();
-                        }
-
-                        node.deleteNode(activity.getContentResolver());
-                        Log.v("selection","deleting : "+items.get(num).name);
+                    String message;
+                    int numSelectedItems = getSelectedItemCount();
+                    if(numSelectedItems == 1) message = activity.getResources().getString(R.string.prompt_delete_file);
+                    else {
+                        message = activity.getResources().getString(R.string.prompt_delete_files);
+                        message = message.replace("#", String.valueOf(numSelectedItems));
                     }
-                    refresh();
-                    actionMode.finish();
+
+                    new AlertDialog.Builder(activity)
+                            .setMessage(message)
+                            .setIcon(android.R.drawable.ic_dialog_alert)
+                            .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int whichButton) {
+                                    deleteSelectedFiles();
+                                }})
+                            .setNegativeButton(android.R.string.no, null).show();
                     return true;
             }
             return false;
@@ -91,6 +94,24 @@ public class OutlineAdapter extends RecyclerView.Adapter<OutlineItem> {
 	};
 
 	private DefaultTheme theme;
+
+    private void deleteSelectedFiles(){
+        List<Integer> selectedItems = getSelectedItems();
+        for(Integer num: selectedItems){
+            OrgNode node = items.get(num);
+            try {
+                OrgFile file = new OrgFile(node.fileId, resolver);
+                file.removeFile(resolver);
+            } catch (OrgFileNotFoundException e) {
+                e.printStackTrace();
+            }
+
+            node.deleteNode(activity.getContentResolver());
+            Log.v("selection","deleting : "+items.get(num).name);
+        }
+        refresh();
+        actionMode.finish();
+    }
 
 	public void setHasTwoPanes(boolean _hasTwoPanes){
 		mTwoPanes = _hasTwoPanes;

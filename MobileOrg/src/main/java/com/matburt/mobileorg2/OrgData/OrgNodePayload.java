@@ -1,5 +1,9 @@
 package com.matburt.mobileorg2.OrgData;
 
+import android.util.Log;
+
+import com.matburt.mobileorg2.util.OrgUtils;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -52,7 +56,24 @@ public class OrgNodePayload {
 		if(this.cleanPayload == null)
 			cleanPayload();
 
-		return this.cleanPayload.toString().trim();
+		return this.cleanPayload.toString();
+	}
+
+	private void trimEachLine() {
+		String cleanPayload = this.cleanPayload.toString();
+		String lines[] = cleanPayload.split("\\n");
+		int N = lines.length;
+		if (N == 0){
+			this.cleanPayload = new StringBuilder("");
+			return;
+		}
+
+		String result = lines[0].trim();
+		for (int i = 1; i < N; ++i) {
+			String trimedLine = lines[i].trim();
+			if (trimedLine.length() > 0) result += "\n" + trimedLine;
+		}
+		this.cleanPayload = new StringBuilder(result);
 	}
 	
 	public String getId() {
@@ -109,6 +130,7 @@ public class OrgNodePayload {
 
 		stripProperties();
 		stripFileProperties();
+		trimEachLine();
 	}
 	
 	public String getScheduled() {
@@ -210,7 +232,7 @@ public class OrgNodePayload {
 				}
 			}
 			properties.add(cleanPayload.substring(start, end) + "\n");
-			cleanPayload.delete(start, end);
+			cleanPayload.delete(start, end+1);
 			propm = propertiesLine.matcher(this.cleanPayload);
 		}
 		

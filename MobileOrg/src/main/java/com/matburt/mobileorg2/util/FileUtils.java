@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Environment;
 import android.preference.PreferenceManager;
+import android.util.Log;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -120,9 +121,7 @@ public class FileUtils {
 	public File getFile() {
 		String storageMode = getStorageMode();
 		if (storageMode.equals("internal") || storageMode.equals("")) {
-			File morgFile = new File("/data/data/com.matburt.mobileorg/files",
-					fileName);
-			return morgFile;
+			return new File(context.getFilesDir(),	fileName);
 		} else if (storageMode.equals("sdcard")) {
 			File root = Environment.getExternalStorageDirectory();
 			File morgDir = new File(root, "mobileorg");

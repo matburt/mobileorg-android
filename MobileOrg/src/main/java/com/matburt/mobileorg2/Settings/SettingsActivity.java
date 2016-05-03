@@ -238,7 +238,7 @@ public class SettingsActivity extends PreferenceActivity implements
 		syncSource.setEntryValues(values);
 	}
 
-	private static final String SYNCHRONIZER_PLUGIN_ACTION = "com.matburt.mobileorg.SYNCHRONIZE";
+	private static final String SYNCHRONIZER_PLUGIN_ACTION = "com.matburt.mobileorg2.SYNCHRONIZE";
 	public static final int SYNCHRONIZER_PREFERENCES = 10;
 	
 	private static List<PackageItemInfo> getSynchronizerPlugins(Context context) {
