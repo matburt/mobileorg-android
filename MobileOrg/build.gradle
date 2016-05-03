@@ -5,7 +5,7 @@ android {
     buildToolsVersion "23.0.2"
 
     defaultConfig {
-        applicationId "com.matburt.mobileorg"
+        applicationId "com.matburt.mobileorg2"
         minSdkVersion 15
         targetSdkVersion 23
         versionCode 1

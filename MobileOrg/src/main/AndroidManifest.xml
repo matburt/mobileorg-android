@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.matburt.mobileorg" >
+    package="com.matburt.mobileorg2" >
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
@@ -9,9 +9,9 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
 
     <application
-        android:name=".OrgData.MobileOrgApplication"
+        android:name="com.matburt.mobileorg2.OrgData.MobileOrgApplication"
         android:icon="@drawable/icon"
-        android:label="MobileOrg"
+        android:label="MobileOrg2"
         android:theme="@style/AppTheme.NoActionBar" >
         <meta-data
             android:name="android.app.default_searchable"
@@ -31,24 +31,24 @@
 
         <service android:name=".Gui.Widget.MobileOrgWidget$MobileOrgWidgetService" >
         </service>
-        <service android:name=".Services.SyncService" >
+        <service android:name="com.matburt.mobileorg2.Services.SyncService" >
             <intent-filter>
                 <category android:name="android.intent.category.DEFAULT" />
 
-                <action android:name="com.matburt.mobileorg.SYNC_SERVICE" />
+                <action android:name="com.matburt.mobileorg2.SYNC_SERVICE" />
             </intent-filter>
         </service>
 
         <provider
-            android:name=".OrgData.OrgProvider"
-            android:authorities="com.matburt.mobileorg.OrgData.OrgProvider" />
+            android:name="com.matburt.mobileorg2.OrgData.OrgProvider"
+            android:authorities="com.matburt.mobileorg2.OrgData.OrgProvider" />
 
-        <receiver android:name=".Plugin.Synchronize" >
+        <receiver android:name="com.matburt.mobileorg2.Plugin.Synchronize" >
             <intent-filter>
                 <action android:name="com.twofortyfouram.locale.intent.action.FIRE_SETTING" />
             </intent-filter>
         </receiver>
-        <receiver android:name=".Services.MobileOrgStartupIntentReceiver" >
+        <receiver android:name="com.matburt.mobileorg2.Services.MobileOrgStartupIntentReceiver" >
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
 
@@ -57,7 +57,7 @@
         </receiver>
 
         <activity
-            android:name=".OrgNodeListActivity"
+            android:name="com.matburt.mobileorg2.OrgNodeListActivity"
             android:label="MobileOrg"
             android:theme="@style/ActionModeAppTheme">
             <intent-filter>
@@ -66,64 +66,64 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
             <intent-filter>
-                <action android:name="com.matburt.mobileorg.SYNC_FAILED" />
+                <action android:name="com.matburt.mobileorg2.SYNC_FAILED" />
             </intent-filter>
         </activity>
 
         <activity
-            android:name=".Settings.SettingsActivity"
+            android:name="com.matburt.mobileorg2.Settings.SettingsActivity"
             android:label="MobileOrg Settings"
             android:theme="@style/AppTheme.NoActionBar">
         </activity>
         <activity
-            android:name=".OrgNodeDetailActivity"
+            android:name="com.matburt.mobileorg2.OrgNodeDetailActivity"
             android:theme="@style/AppTheme.NoActionBar">
         </activity>
         <activity
-            android:name=".Gui.Wizard.WizardActivity"
+            android:name="com.matburt.mobileorg2.Gui.Wizard.WizardActivity"
             android:label="MobileOrg Wizard"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
-                <action android:name="com.matburt.mobileorg.Settings.SETUP_WIZARD" />
+                <action android:name="com.matburt.mobileorg2.Settings.SETUP_WIZARD" />
 
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
         <activity
-            android:name=".Gui.CertificateConflictActivity"
+            android:name="com.matburt.mobileorg2.Gui.CertificateConflictActivity"
             android:label="MobileOrg Certificate Conflict"
             android:theme="@style/AppTheme.NoActionBar">
         </activity>
-        <activity android:name=".Gui.FileDecryptionActivity"
+        <activity android:name="com.matburt.mobileorg2.Gui.FileDecryptionActivity"
             android:theme="@style/AppTheme.NoActionBar">
         </activity>
         <activity
-            android:name=".Settings.Synchronizers.WebDAVSettingsActivity"
+            android:name="com.matburt.mobileorg2.Settings.Synchronizers.WebDAVSettingsActivity"
             android:label="WebDAV Settings" >
         </activity>
         <activity
-            android:name=".Settings.Synchronizers.SDCardSettingsActivity"
+            android:name="com.matburt.mobileorg2.Settings.Synchronizers.SDCardSettingsActivity"
             android:label="SDCard Settings" >
         </activity>
         <activity
-            android:name=".Settings.Synchronizers.ScpSettingsActivity"
+            android:name="com.matburt.mobileorg2.Settings.Synchronizers.ScpSettingsActivity"
             android:label="Scp Settings" >
         </activity>
         <activity
-            android:name=".Settings.Synchronizers.UbuntuOneSettingsActivity"
+            android:name="com.matburt.mobileorg2.Settings.Synchronizers.UbuntuOneSettingsActivity"
             android:label="Ubuntu One Settings" >
         </activity>
 
         <activity
-            android:name=".EditNodeActivity"
+            android:name="com.matburt.mobileorg2.EditNodeActivity"
             android:label="New node">
         </activity>
 
-        <service android:name=".Services.TimeclockService" >
+        <service android:name="com.matburt.mobileorg2.Services.TimeclockService" >
         </service>
 
         <activity
-            android:name=".Services.TimeclockDialog"
+            android:name="com.matburt.mobileorg2.Services.TimeclockDialog"
             android:theme="@android:style/Theme.Dialog" >
         </activity>
         <activity android:name=".Gui.Agenda.AgendaSettings" >
@@ -146,7 +146,7 @@
             </intent-filter>
         </activity>
 
-        <service android:name=".Services.CalendarSyncService" >
+        <service android:name="com.matburt.mobileorg2.Services.CalendarSyncService" >
         </service>
 
         <activity android:name=".Gui.Agenda.AgendasActivity" >

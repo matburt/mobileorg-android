@@ -1,4 +1,4 @@
-package com.matburt.mobileorg;
+package com.matburt.mobileorg2;
 
 import org.junit.Test;
 

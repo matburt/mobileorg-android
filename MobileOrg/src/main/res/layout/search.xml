@@ -4,7 +4,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical" >
 
-    <com.matburt.mobileorg.Gui.Outline.OutlineListView
+    <com.matburt.mobileorg2.Gui.Outline.OutlineListView
         android:id="@+id/search_list"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"

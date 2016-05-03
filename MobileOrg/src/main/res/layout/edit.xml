@@ -18,7 +18,7 @@
             android:paddingTop="3dip" >
 
             <fragment
-                android:name="com.matburt.mobileorg.Gui.Capture.HeadingFragment"
+                android:name="com.matburt.mobileorg2.Gui.Capture.HeadingFragment"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:tag="headingFragment"
@@ -32,7 +32,7 @@
             android:paddingTop="3dip" >
 
             <fragment
-                android:name="com.matburt.mobileorg.Gui.Capture.LocationFragment"
+                android:name="com.matburt.mobileorg2.Gui.Capture.LocationFragment"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:tag="locationFragment" />
@@ -45,7 +45,7 @@
             android:paddingTop="3dip" >
 
             <fragment
-                android:name="com.matburt.mobileorg.Gui.Capture.TagsFragment"
+                android:name="com.matburt.mobileorg2.Gui.Capture.TagsFragment"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:tag="tagsFragment" />
@@ -58,7 +58,7 @@
             android:paddingTop="3dip" >
 
             <fragment
-                android:name="com.matburt.mobileorg.Gui.Capture.DatesFragment"
+                android:name="com.matburt.mobileorg2.Gui.Capture.DatesFragment"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:tag="datesFragment" />
@@ -72,7 +72,7 @@
             android:paddingTop="3dip" >
 
             <fragment
-                android:name="com.matburt.mobileorg.Gui.Capture.PayloadFragment"
+                android:name="com.matburt.mobileorg2.Gui.Capture.PayloadFragment"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:tag="payloadFragment" />
