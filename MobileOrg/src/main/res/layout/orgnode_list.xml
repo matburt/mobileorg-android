@@ -6,8 +6,6 @@
     android:name="com.matburt.mobileorg2.OrgNodeListFragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_marginLeft="16dp"
-    android:layout_marginRight="16dp"
     app:layoutManager="LinearLayoutManager"
     tools:context="com.matburt.mobileorg2.OrgNodeListActivity"
-    tools:listitem="@layout/orgnode_list_content" />
+    tools:listitem="@layout/outline_item" />

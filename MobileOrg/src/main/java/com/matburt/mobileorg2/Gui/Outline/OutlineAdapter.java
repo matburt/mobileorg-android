@@ -17,6 +17,8 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.TextView;
 
 import com.matburt.mobileorg2.Gui.Theme.DefaultTheme;
 import com.matburt.mobileorg2.OrgData.OrgFile;
@@ -26,96 +28,22 @@ import com.matburt.mobileorg2.OrgNodeDetailActivity;
 import com.matburt.mobileorg2.OrgNodeDetailFragment;
 import com.matburt.mobileorg2.R;
 import com.matburt.mobileorg2.util.OrgFileNotFoundException;
+import com.matburt.mobileorg2.util.PreferenceUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class OutlineAdapter extends RecyclerView.Adapter<OutlineItem> {
+public class OutlineAdapter extends RecyclerView.Adapter<OutlineAdapter.OutlineItem> {
 
-	private final AppCompatActivity activity;
+
+    private final AppCompatActivity activity;
 	private ContentResolver resolver;
 	private boolean mTwoPanes = false;
 	public List<OrgNode> items = new ArrayList<>();
     private SparseBooleanArray selectedItems;
     ActionMode actionMode;
 
-
-    private ActionMode.Callback mDeleteMode = new ActionMode.Callback() {
-		@Override
-		public boolean onPrepareActionMode(ActionMode actionMode, Menu menu) {
-            Log.v("selection","onPrepare");
-            String wordItem;
-            int count = getSelectedItemCount();
-            if(count == 1) wordItem = activity.getResources().getString(R.string.file);
-            else wordItem = activity.getResources().getString(R.string.files);
-            menu.findItem(R.id.action_text).setTitle(count + " " + wordItem);
-			return false;
-		}
-
-		@Override
-		public void onDestroyActionMode(ActionMode actionMode) {
-            OutlineAdapter.this.clearSelections();
-		}
-
-		@Override
-		public boolean onCreateActionMode(ActionMode actionMode, Menu menu) {
-			MenuInflater inflater = activity.getMenuInflater();
-			inflater.inflate(R.menu.main_context_action_bar, menu);
-
-			return true;
-		}
-
-		@Override
-		public boolean onActionItemClicked(ActionMode actionMode, MenuItem menuItem) {
-            Log.v("selection","item clicked");
-            switch (menuItem.getItemId()) {
-                case R.id.item_delete:
-                    String message;
-                    int numSelectedItems = getSelectedItemCount();
-                    if(numSelectedItems == 1) message = activity.getResources().getString(R.string.prompt_delete_file);
-                    else {
-                        message = activity.getResources().getString(R.string.prompt_delete_files);
-                        message = message.replace("#", String.valueOf(numSelectedItems));
-                    }
-
-                    new AlertDialog.Builder(activity)
-                            .setMessage(message)
-                            .setIcon(android.R.drawable.ic_dialog_alert)
-                            .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int whichButton) {
-                                    deleteSelectedFiles();
-                                }})
-                            .setNegativeButton(android.R.string.no, null).show();
-                    return true;
-            }
-            return false;
-        }
-	};
-
-	private DefaultTheme theme;
-
-    private void deleteSelectedFiles(){
-        List<Integer> selectedItems = getSelectedItems();
-        for(Integer num: selectedItems){
-            OrgNode node = items.get(num);
-            try {
-                OrgFile file = new OrgFile(node.fileId, resolver);
-                file.removeFile(resolver);
-            } catch (OrgFileNotFoundException e) {
-                e.printStackTrace();
-            }
-
-            node.deleteNode(activity.getContentResolver());
-            Log.v("selection","deleting : "+items.get(num).name);
-        }
-        refresh();
-        actionMode.finish();
-    }
-
-	public void setHasTwoPanes(boolean _hasTwoPanes){
-		mTwoPanes = _hasTwoPanes;
-	}
 
 	public OutlineAdapter(AppCompatActivity activity) {
 		super();
@@ -151,7 +79,6 @@ public class OutlineAdapter extends RecyclerView.Adapter<OutlineItem> {
     @Override
     public void onBindViewHolder(final OutlineItem holder, final int position) {
 		holder.titleView.setText(items.get(position).name);
-//		holder.mContentView.setText(items.get(position).levelView.getText());
 
         holder.mView.setActivated(selectedItems.get(position, false));
 
@@ -256,4 +183,98 @@ public class OutlineAdapter extends RecyclerView.Adapter<OutlineItem> {
         }
         return items;
     }
+
+    private ActionMode.Callback mDeleteMode = new ActionMode.Callback() {
+        @Override
+        public boolean onPrepareActionMode(ActionMode actionMode, Menu menu) {
+            Log.v("selection","onPrepare");
+            String wordItem;
+            int count = getSelectedItemCount();
+            if(count == 1) wordItem = activity.getResources().getString(R.string.file);
+            else wordItem = activity.getResources().getString(R.string.files);
+            menu.findItem(R.id.action_text).setTitle(count + " " + wordItem);
+            return false;
+        }
+
+        @Override
+        public void onDestroyActionMode(ActionMode actionMode) {
+            OutlineAdapter.this.clearSelections();
+        }
+
+        @Override
+        public boolean onCreateActionMode(ActionMode actionMode, Menu menu) {
+            MenuInflater inflater = activity.getMenuInflater();
+            inflater.inflate(R.menu.main_context_action_bar, menu);
+
+            return true;
+        }
+
+        @Override
+        public boolean onActionItemClicked(ActionMode actionMode, MenuItem menuItem) {
+            Log.v("selection","item clicked");
+            switch (menuItem.getItemId()) {
+                case R.id.item_delete:
+                    String message;
+                    int numSelectedItems = getSelectedItemCount();
+                    if(numSelectedItems == 1) message = activity.getResources().getString(R.string.prompt_delete_file);
+                    else {
+                        message = activity.getResources().getString(R.string.prompt_delete_files);
+                        message = message.replace("#", String.valueOf(numSelectedItems));
+                    }
+
+                    new AlertDialog.Builder(activity)
+                            .setMessage(message)
+                            .setIcon(android.R.drawable.ic_dialog_alert)
+                            .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int whichButton) {
+                                    deleteSelectedFiles();
+                                }})
+                            .setNegativeButton(android.R.string.no, null).show();
+                    return true;
+            }
+            return false;
+        }
+    };
+
+
+
+
+    private DefaultTheme theme;
+
+    private void deleteSelectedFiles(){
+        List<Integer> selectedItems = getSelectedItems();
+        for(Integer num: selectedItems){
+            OrgNode node = items.get(num);
+            try {
+                OrgFile file = new OrgFile(node.fileId, resolver);
+                file.removeFile(resolver);
+            } catch (OrgFileNotFoundException e) {
+                e.printStackTrace();
+            }
+
+            node.deleteNode(activity.getContentResolver());
+            Log.v("selection","deleting : "+items.get(num).name);
+        }
+        refresh();
+        actionMode.finish();
+    }
+
+    public void setHasTwoPanes(boolean _hasTwoPanes){
+        mTwoPanes = _hasTwoPanes;
+    }
+
+    public class OutlineItem extends RecyclerView.ViewHolder {
+        public final View mView;
+        public TextView titleView;
+
+        public OutlineItem(View view) {
+            super(view);
+            mView = view;
+            titleView = (TextView) view.findViewById(R.id.title);
+
+        }
+    }
+
+
+
 }

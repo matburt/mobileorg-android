@@ -1,25 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.matburt.mobileorg2" >
+    package="com.matburt.mobileorg2">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_CALENDAR" />
     <uses-permission android:name="android.permission.WRITE_CALENDAR" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
-        android:name="com.matburt.mobileorg2.OrgData.MobileOrgApplication"
+        android:name=".OrgData.MobileOrgApplication"
         android:icon="@drawable/icon"
         android:label="MobileOrg2"
-        android:theme="@style/AppTheme.NoActionBar" >
+        android:theme="@style/AppTheme.NoActionBar">
         <meta-data
             android:name="android.app.default_searchable"
             android:value=".Gui.SearchActivity" />
 
         <receiver
             android:name=".Gui.Widget.MobileOrgWidget"
-            android:label="MobileOrg Tasks" >
+            android:label="MobileOrg Tasks">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
@@ -29,9 +29,8 @@
                 android:resource="@xml/widget_mobileorg" />
         </receiver>
 
-        <service android:name=".Gui.Widget.MobileOrgWidget$MobileOrgWidgetService" >
-        </service>
-        <service android:name="com.matburt.mobileorg2.Services.SyncService" >
+        <service android:name=".Gui.Widget.MobileOrgWidget$MobileOrgWidgetService"></service>
+        <service android:name=".Services.SyncService">
             <intent-filter>
                 <category android:name="android.intent.category.DEFAULT" />
 
@@ -40,15 +39,15 @@
         </service>
 
         <provider
-            android:name="com.matburt.mobileorg2.OrgData.OrgProvider"
+            android:name=".OrgData.OrgProvider"
             android:authorities="com.matburt.mobileorg2.OrgData.OrgProvider" />
 
-        <receiver android:name="com.matburt.mobileorg2.Plugin.Synchronize" >
+        <receiver android:name=".Plugin.Synchronize">
             <intent-filter>
                 <action android:name="com.twofortyfouram.locale.intent.action.FIRE_SETTING" />
             </intent-filter>
         </receiver>
-        <receiver android:name="com.matburt.mobileorg2.Services.MobileOrgStartupIntentReceiver" >
+        <receiver android:name=".Services.MobileOrgStartupIntentReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
 
@@ -57,7 +56,7 @@
         </receiver>
 
         <activity
-            android:name="com.matburt.mobileorg2.OrgNodeListActivity"
+            android:name=".OrgNodeListActivity"
             android:label="MobileOrg"
             android:theme="@style/ActionModeAppTheme">
             <intent-filter>
@@ -69,19 +68,15 @@
                 <action android:name="com.matburt.mobileorg2.SYNC_FAILED" />
             </intent-filter>
         </activity>
-
         <activity
-            android:name="com.matburt.mobileorg2.Settings.SettingsActivity"
+            android:name=".Settings.SettingsActivity"
             android:label="MobileOrg Settings"
-            android:theme="@style/AppTheme.NoActionBar">
-        </activity>
+            android:theme="@style/AppTheme.NoActionBar"></activity>
         <activity
-            android:name="com.matburt.mobileorg2.OrgNodeDetailActivity"
-            android:theme="@style/ActionModeAppTheme">
-
-        </activity>
+            android:name=".OrgNodeDetailActivity"
+            android:theme="@style/ActionModeAppTheme"></activity>
         <activity
-            android:name="com.matburt.mobileorg2.Gui.Wizard.WizardActivity"
+            android:name=".Gui.Wizard.WizardActivity"
             android:label="MobileOrg Wizard"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
@@ -91,51 +86,39 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.matburt.mobileorg2.Gui.CertificateConflictActivity"
+            android:name=".Gui.CertificateConflictActivity"
             android:label="MobileOrg Certificate Conflict"
-            android:theme="@style/AppTheme.NoActionBar">
-        </activity>
-        <activity android:name="com.matburt.mobileorg2.Gui.FileDecryptionActivity"
-            android:theme="@style/AppTheme.NoActionBar">
-        </activity>
+            android:theme="@style/AppTheme.NoActionBar"></activity>
         <activity
-            android:name="com.matburt.mobileorg2.Settings.Synchronizers.WebDAVSettingsActivity"
-            android:label="WebDAV Settings" >
-        </activity>
+            android:name=".Gui.FileDecryptionActivity"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
         <activity
-            android:name="com.matburt.mobileorg2.Settings.Synchronizers.SDCardSettingsActivity"
-            android:label="SDCard Settings" >
-        </activity>
+            android:name=".Settings.Synchronizers.WebDAVSettingsActivity"
+            android:label="WebDAV Settings"></activity>
         <activity
-            android:name="com.matburt.mobileorg2.Settings.Synchronizers.ScpSettingsActivity"
-            android:label="Scp Settings" >
-        </activity>
+            android:name=".Settings.Synchronizers.SDCardSettingsActivity"
+            android:label="SDCard Settings"></activity>
         <activity
-            android:name="com.matburt.mobileorg2.Settings.Synchronizers.UbuntuOneSettingsActivity"
-            android:label="Ubuntu One Settings" >
-        </activity>
+            android:name=".Settings.Synchronizers.ScpSettingsActivity"
+            android:label="Scp Settings"></activity>
+        <activity
+            android:name=".Settings.Synchronizers.UbuntuOneSettingsActivity"
+            android:label="Ubuntu One Settings"></activity>
+        <activity
+            android:name=".EditNodeActivity"
+            android:theme="@style/ActionModeAppTheme"></activity>
+
+        <service android:name=".Services.TimeclockService"></service>
 
         <activity
-            android:name="com.matburt.mobileorg2.EditNodeActivity"
-            android:theme="@style/ActionModeAppTheme"
-            >
-        </activity>
-
-        <service android:name="com.matburt.mobileorg2.Services.TimeclockService" >
-        </service>
-
-        <activity
-            android:name="com.matburt.mobileorg2.Services.TimeclockDialog"
-            android:theme="@android:style/Theme.Dialog" >
-        </activity>
-        <activity android:name=".Gui.Agenda.AgendaSettings" >
-        </activity>
-        <activity android:name=".Gui.Agenda.AgendaEntrySetting" >
-        </activity>
+            android:name=".Services.TimeclockDialog"
+            android:theme="@android:style/Theme.Dialog"></activity>
+        <activity android:name=".Gui.Agenda.AgendaSettings"></activity>
+        <activity android:name=".Gui.Agenda.AgendaEntrySetting"></activity>
         <activity
             android:name="com.dropbox.client2.android.AuthActivity"
             android:configChanges="orientation|keyboard"
-            android:launchMode="singleTask" >
+            android:launchMode="singleTask">
             <intent-filter>
 
                 <!-- Change this to be db- followed by your app key -->
@@ -148,14 +131,14 @@
             </intent-filter>
         </activity>
 
-        <service android:name="com.matburt.mobileorg2.Services.CalendarSyncService" >
-        </service>
+        <service android:name=".Services.CalendarSyncService"></service>
 
-        <activity android:name=".Gui.Agenda.AgendasActivity" >
-        </activity>
-        <activity android:name=".Gui.Agenda.AgendaActivity" >
-        </activity>
-
+        <activity android:name=".Gui.Agenda.AgendasActivity"></activity>
+        <activity android:name=".Gui.Agenda.AgendaActivity"></activity>
+        <activity
+            android:name="layout.com.aaa.ScrollingActivity"
+            android:label="@string/title_activity_scrolling"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 
 </manifest>
