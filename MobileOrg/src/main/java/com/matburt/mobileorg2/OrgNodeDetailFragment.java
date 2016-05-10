@@ -17,8 +17,6 @@ import android.support.v7.view.ActionMode;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
-import android.text.Spannable;
-import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
@@ -71,7 +69,9 @@ public class OrgNodeDetailFragment extends Fragment {
     private int[] titleColor;
     private int[] titleFontSize;
     RecyclerViewAdapter adapter;
-
+    Button insertNodeButton;
+    RecyclerView recyclerView;
+    TextView insertNodeText;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -174,14 +174,26 @@ public class OrgNodeDetailFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.node_summary_recycler_fragment, container, false);
 
-        RecyclerView recyclerView = (RecyclerView)rootView.findViewById(R.id.node_recycler_view);
+
+
+        recyclerView = (RecyclerView)rootView.findViewById(R.id.node_recycler_view);
         assert recyclerView != null;
         recyclerView.addItemDecoration(new DividerItemDecoration(getContext()));
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         recyclerView.setAdapter(adapter);
 
-//        registerForContextMenu(recyclerView);
+        insertNodeButton = (Button)rootView.findViewById(R.id.empty_recycler);
+        insertNodeText = (TextView)rootView.findViewById(R.id.empty_recycler_text);
+
+
+
+        insertNodeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                createEditNodeFragment(-1, (int)OrgNodeDetailFragment.this.nodeId, 0);
+            }
+        });
 
         class SimpleItemTouchHelperCallback extends ItemTouchHelper.Callback {
             private final RecyclerViewAdapter mAdapter;
@@ -219,6 +231,7 @@ public class OrgNodeDetailFragment extends Fragment {
         ItemTouchHelper touchHelper = new ItemTouchHelper(callback);
         touchHelper.attachToRecyclerView(recyclerView);
 
+        refresh();
         return rootView;
     }
 
@@ -235,15 +248,26 @@ public class OrgNodeDetailFragment extends Fragment {
 
         lastEditedPosition = -1;
         adapter.closeInsertItem();
+
+        int size = adapter.getItemCount();
+
+        if(size == 0){
+            recyclerView.setVisibility(View.GONE);
+            insertNodeButton.setVisibility(View.VISIBLE);
+            insertNodeText.setVisibility(View.VISIBLE);
+        } else {
+            insertNodeButton.setVisibility(View.GONE);
+            insertNodeText.setVisibility(View.GONE);
+            recyclerView.setVisibility(View.VISIBLE);
+        }
     }
 
     @Override
     public void onResume(){
         super.onResume();
-        Log.v("newNode", "last : " + lastEditedPosition);
-        if(lastEditedPosition > -1) {
-            refresh();
-        }
+
+        refresh();
+
     }
 
     void createEditNodeFragment(int id, int parentId, int siblingPosition) {

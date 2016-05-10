@@ -6,7 +6,11 @@ import android.support.v7.widget.Toolbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.ActionBar;
 import android.support.v4.app.NavUtils;
+import android.util.Log;
 import android.view.MenuItem;
+
+import com.matburt.mobileorg2.OrgData.OrgNode;
+import com.matburt.mobileorg2.util.OrgNodeNotFoundException;
 
 /**
  * An activity representing a single OrgNode detail screen. This
@@ -51,6 +55,16 @@ public class OrgNodeDetailActivity extends AppCompatActivity {
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.orgnode_detail_container, fragment, "detail_fragment")
                     .commit();
+                Log.v("title","title0");
+
+            if(actionBar != null) {
+                try {
+                    OrgNode node = new OrgNode(nodeId, getContentResolver());
+                    actionBar.setTitle(node.name);
+                } catch (OrgNodeNotFoundException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 
