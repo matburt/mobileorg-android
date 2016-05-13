@@ -163,18 +163,19 @@ public class OrgProviderUtils {
 		cursor.close();
 		return tags;
 	}
-	
+
 	public static ArrayList<String> cursorToArrayList(Cursor cursor) {
-		ArrayList<String> list = new ArrayList<String>();
+		ArrayList<String> list = new ArrayList<>();
+		if(cursor == null) return list;
 		cursor.moveToFirst();
 
-		while (cursor.isAfterLast() == false) {
-			list.add(cursor.getString(cursor.getColumnIndex("name")));
+		while (!cursor.isAfterLast()) {
+			list.add(cursor.getString(0));
 			cursor.moveToNext();
 		}
 		return list;
 	}
-	
+
 	public static ArrayList<OrgNode> getOrgNodePathFromTopLevel(long node_id, ContentResolver resolver) {
 		ArrayList<OrgNode> nodes = new ArrayList<OrgNode>();
 		

@@ -34,6 +34,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.matburt.mobileorg2.Gui.Outline.OutlineAdapter;
 import com.matburt.mobileorg2.OrgData.OrgContract;
 import com.matburt.mobileorg2.OrgData.OrgFileParser;
 import com.matburt.mobileorg2.OrgData.OrgNode;
@@ -54,8 +55,6 @@ import java.util.regex.Pattern;
  * on handsets.
  */
 public class OrgNodeDetailFragment extends Fragment {
-    public static String NODE_ID = "node_id";
-    public static String PARENT_ID = "parent_id";
 
     private ContentResolver resolver;
 
@@ -150,20 +149,14 @@ public class OrgNodeDetailFragment extends Fragment {
 
         OrgNodeTree tree = null;
 
-        if (getArguments().containsKey(NODE_ID)) {
-            this.nodeId = getArguments().getLong(NODE_ID);
+        if (getArguments().containsKey(OrgContract.NODE_ID)) {
+            this.nodeId = getArguments().getLong(OrgContract.NODE_ID);
             try {
                 tree = new OrgNodeTree(new OrgNode(nodeId, resolver), resolver);
             } catch (OrgNodeNotFoundException e) {
 //                displayError();
 //                TODO: implement error
             }
-
-            Activity activity = this.getActivity();
-//            AppBarLayout appBarLayout = (AppBarLayout) activity.findViewById(R.id.app_bar);
-//            if (appBarLayout != null && tree != null) {
-//                appBarLayout.setTitle(tree.node.getCleanedName());
-//            }
         }
         adapter = new RecyclerViewAdapter(tree);
 
@@ -272,8 +265,8 @@ public class OrgNodeDetailFragment extends Fragment {
 
     void createEditNodeFragment(int id, int parentId, int siblingPosition) {
         Bundle args = new Bundle();
-        args.putLong(NODE_ID, id);
-        args.putLong(PARENT_ID, parentId);
+        args.putLong(OrgContract.NODE_ID, id);
+        args.putLong(OrgContract.PARENT_ID, parentId);
         args.putInt(OrgContract.OrgData.POSITION, siblingPosition);
 
         Intent intent = new Intent(getActivity(), EditNodeActivity.class);
@@ -498,22 +491,6 @@ public class OrgNodeDetailFragment extends Fragment {
                 formatLinks(titleSpan);
             }
 
-            public void setupAgendaBlock(SpannableStringBuilder titleSpan) {
-                titleSpan.delete(0, OrgFileParser.BLOCK_SEPARATOR_PREFIX.length());
-
-                titleSpan.setSpan(new ForegroundColorSpan(foreground), 0,
-                        titleSpan.length(), 0);
-                titleSpan.setSpan(new StyleSpan(Typeface.BOLD), 0,
-                        titleSpan.length(), 0);
-
-                titleView.setTextSize(PreferenceUtils.getFontSize() + 4);
-                //titleView.setBackgroundColor(theme.c4Blue);
-                titleView.setGravity(Gravity.CENTER_VERTICAL
-                        | Gravity.CENTER_HORIZONTAL);
-
-                titleView.setText(titleSpan);
-            }
-
             public final Pattern urlPattern = Pattern.compile("\\[\\[[^\\]]*\\]\\[([^\\]]*)\\]\\]");
             private void formatLinks(SpannableStringBuilder titleSpan) {
                 Matcher matcher = urlPattern.matcher(titleSpan);
@@ -528,20 +505,9 @@ public class OrgNodeDetailFragment extends Fragment {
                 }
             }
 
-            public void setLevelFormating(boolean enabled) {
-                this.levelFormatting = enabled;
-            }
-
-
-
             public void setup(OrgNode node, boolean isSelected) {
                 this.mItem.node = node;
                 SpannableStringBuilder titleSpan = new SpannableStringBuilder(node.name);
-
-                if(node.name.startsWith(OrgFileParser.BLOCK_SEPARATOR_PREFIX)) {
-                    setupAgendaBlock(titleSpan);
-                    return;
-                }
 
                 if (levelFormatting)
                     applyLevelFormating(node.level, titleSpan);

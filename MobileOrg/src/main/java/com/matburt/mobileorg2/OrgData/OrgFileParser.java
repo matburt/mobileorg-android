@@ -5,8 +5,6 @@ import android.content.Context;
 import android.text.TextUtils;
 
 
-import com.matburt.mobileorg2.OrgData.OrgContract.OrgData;
-import com.matburt.mobileorg2.util.OrgFileNotFoundException;
 import com.matburt.mobileorg2.util.PreferenceUtils;
 
 import java.io.BufferedReader;
@@ -23,8 +21,6 @@ public class OrgFileParser {
 	private ContentResolver resolver;    
     private OrgDatabase db;
  
-    private boolean combineAgenda = false;
-
     private ParseStack parseStack;
 	private StringBuilder payload;
 	private OrgFile orgFile;
@@ -54,7 +50,6 @@ public class OrgFileParser {
 	}
 	
 	public void parse(OrgFile orgFile, BufferedReader breader, Context context) {
-		this.combineAgenda = PreferenceUtils.getCombineBlockAgendas();
 		this.excludedTags = PreferenceUtils.getExcludedTags();
 		
 		parse(orgFile, breader);
@@ -68,17 +63,12 @@ public class OrgFileParser {
 			while ((currentLine = breader.readLine()) != null) parseLine(currentLine);
 
 			// Add payload to the final node
-			db.fastInsertNodePayload(parseStack.getCurrentNodeId(), this.payload.toString());
+			db.fastInsertNodePayloadAndTimestamps(parseStack.getCurrentNodeId(), this.payload.toString());
 
 		} catch (IOException e) {}
 		
 		db.endTransaction();
 
-		if(combineAgenda && orgFile.filename.equals(OrgFile.AGENDA_FILE)) {
-			try {
-				combineBlockAgendas();
-			} catch (OrgFileNotFoundException e) {}
-		}
 	}
 
 	private void parseLine(String line) {
@@ -87,7 +77,7 @@ public class OrgFileParser {
 
 		int numstars = numberOfStars(line);
 		if (numstars > 0) {
-			db.fastInsertNodePayload(parseStack.getCurrentNodeId(), this.payload.toString());
+			db.fastInsertNodePayloadAndTimestamps(parseStack.getCurrentNodeId(), this.payload.toString());
 			this.payload = new StringBuilder();
 			parseHeading(line, numstars);
 		} else {
@@ -159,7 +149,7 @@ public class OrgFileParser {
 			
 			StringBuilder result = new StringBuilder();
 			for (String tag: tags.split(":")) {
-				if (excludedTags.contains(tag) == false) {
+				if (!excludedTags.contains(tag)) {
 					result.append(tag);
 					result.append(":");
 				}
@@ -188,66 +178,7 @@ public class OrgFileParser {
 		}
 
 	}
-	
-	
-	public static final String BLOCK_SEPARATOR_PREFIX = "#HEAD#";	
-	private void combineBlockAgendas() throws OrgFileNotFoundException {		
-		OrgNode agendaFile = OrgProviderUtils.getOrgNodeFromFilename(
-				OrgFile.AGENDA_FILE, resolver);
-		
-		String previousAgendaBlockTitle = "";
-		OrgNode previousBlockNode = null;
-		
-		for(OrgNode node: agendaFile.getChildren(resolver)) {
-			if(node.name.indexOf(">") == -1)
-				continue;
-			
-			String agendaBlockName = node.name.substring(0, node.name.indexOf(">"));
-			String blockEntryName = node.name.substring(node.name.indexOf(">") + 1);
-			
-			if(TextUtils.isEmpty(agendaBlockName) == false) { // Is a block agenda
-				if(agendaBlockName.equals(previousAgendaBlockTitle) == false) { // Create new node to contain block agenda	
-					previousAgendaBlockTitle = agendaBlockName;
 
-					previousBlockNode = new OrgNode();
-					previousBlockNode.fileId = agendaFile.fileId;
-					previousBlockNode.name = agendaBlockName;
-					previousBlockNode.parentId = agendaFile.id;
-					previousBlockNode.level = agendaFile.level + 1;
-					previousBlockNode.id = db.fastInsertNode(previousBlockNode);
-				}
-				
-				ArrayList<OrgNode> children = node.getChildren(resolver);
-				if(blockEntryName.startsWith("Day-agenda") || blockEntryName.startsWith("Week-agenda")) {
-					for(OrgNode child: children)
-						cloneChildren(child, previousBlockNode, child.name);
-				} else
-					cloneChildren(node, previousBlockNode, blockEntryName); // Normal cloning
-				
-				resolver.delete(OrgData.buildIdUri(node.id), null, null);
-			}
-		}
-	}
-
-	private void cloneChildren(OrgNode node, OrgNode parent, String blockTitle) {
-		OrgNode blockSeparator = new OrgNode();
-		blockSeparator.name = BLOCK_SEPARATOR_PREFIX + blockTitle;
-		blockSeparator.fileId = parent.fileId;
-		blockSeparator.parentId = parent.id;
-		blockSeparator.level = parent.level + 1;
-		db.fastInsertNode(blockSeparator);
-		
-		for(OrgNode child: node.getChildren(resolver)) {
-			OrgNode clonedChild = new OrgNode(child);
-			clonedChild.parentId = parent.id;
-			clonedChild.fileId = parent.fileId;
-			clonedChild.level = parent.level + 1;
-			long id = db.fastInsertNode(clonedChild);
-			db.fastInsertNodePayload(id, child.getPayload());
-			resolver.delete(OrgData.buildIdUri(node.id), null, null);
-		}
-	}
-    
 	/**
 	 * Parses the checksum file.
 	 * @return HashMap with Filename->checksum
@@ -272,7 +203,7 @@ public class OrgFileParser {
 	public static HashMap<String, String> getFilesFromIndex(String filecontents) {
 		Pattern indexOrgFilePattern = Pattern.compile(fileMatchPattern);
 		Matcher indexOrgFileMatcher = indexOrgFilePattern.matcher(filecontents);
-		HashMap<String, String> allOrgFiles = new HashMap<String, String>();
+		HashMap<String, String> allOrgFiles = new HashMap<>();
 				
 		while (indexOrgFileMatcher.find()) {
 			allOrgFiles.put(indexOrgFileMatcher.group(1), indexOrgFileMatcher.group(2));
@@ -283,32 +214,37 @@ public class OrgFileParser {
 	
 	
 	private static final Pattern getTodos = Pattern
-			.compile("#\\+TODO:([^\\|]+)(\\| ([^\\n]*))*");
+			.compile("#\\+TODO:([^\\|]+)(\\| (.*))*");
+
 	public static ArrayList<HashMap<String, Boolean>> getTodosFromIndex(String filecontents) {
-		Matcher m = getTodos.matcher(filecontents);
-		ArrayList<HashMap<String, Boolean>> todoList = new ArrayList<HashMap<String, Boolean>>();
-		while (m.find()) {
-			String lastTodo = "";
-			HashMap<String, Boolean> holding = new HashMap<String, Boolean>();
-			Boolean isDone = false;
-			for (int idx = 1; idx <= m.groupCount(); idx++) {
-				if (m.group(idx) != null && m.group(idx).trim().length() > 0) {
-					if (m.group(idx).indexOf("|") != -1) {
-						isDone = true;
-						continue;
-					}
-					String[] grouping = m.group(idx).trim().split("\\s+");
-					for (String group : grouping) {
-						lastTodo = group.trim();
-						holding.put(group.trim(), isDone);
+		String[] lines = filecontents.split("\\n");
+		ArrayList<HashMap<String, Boolean>> todoList = new ArrayList<>();
+		for(String line: lines){
+			Matcher m = getTodos.matcher(line);
+			while (m.find()) {
+				String lastTodo = "";
+				HashMap<String, Boolean> holding = new HashMap<>();
+				Boolean isDone = false;
+				for (int idx = 1; idx <= m.groupCount(); idx++) {
+					if (m.group(idx) != null && m.group(idx).trim().length() > 0) {
+						if (m.group(idx).contains("|")) {
+							isDone = true;
+							continue;
+						}
+						String[] grouping = m.group(idx).trim().split("\\s+");
+						for (String group : grouping) {
+							lastTodo = group.trim();
+							holding.put(group.trim(), isDone);
+						}
 					}
 				}
+				if (!isDone) {
+					holding.put(lastTodo, true);
+				}
+				todoList.add(holding);
 			}
-			if (!isDone) {
-				holding.put(lastTodo, true);
-			}
-			todoList.add(holding);
 		}
+
 		return todoList;
 	}
 	

@@ -22,6 +22,9 @@ public class FileUtils {
 
 	public static final String CAPTURE_FILE = "mobileorg.org";
 	public static final String CAPTURE_FILE_ALIAS = "Captures";
+	public static final String INDEX_FILE = "index.org";
+	public static final String CHECKSUM_FILE = "checksums.dat";
+	public static final String AGENDA_FILE = "agendas.org";
 
 	private Context context;
 	private String fileName;

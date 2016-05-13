@@ -27,16 +27,19 @@ public class OrgNodeParser {
 	public OrgNodeParser(ArrayList<String> todos) {
 		final String patternString = patternStart + "(?:("
 				+ getTodoRegex(todos) + ")\\s)?" + patternEnd;
+		Log.v("regex","patternString : "+patternString);
 		this.pattern = Pattern.compile(patternString);
 	}
 
-	private String getTodoRegex(ArrayList<String> todos) {
+	private static String getTodoRegex(ArrayList<String> todos) {
 		if (todos.isEmpty())
 			return "";
 
 		StringBuilder result = new StringBuilder();
-		for (String todo : todos)
+		for (String todo : todos){
 			result.append(todo).append("|");
+		}
+
 		result.deleteCharAt(result.length() - 1);
 
 		return result.toString();

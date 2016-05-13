@@ -21,6 +21,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.matburt.mobileorg2.Gui.Theme.DefaultTheme;
+import com.matburt.mobileorg2.OrgData.OrgContract;
 import com.matburt.mobileorg2.OrgData.OrgFile;
 import com.matburt.mobileorg2.OrgData.OrgNode;
 import com.matburt.mobileorg2.OrgData.OrgProviderUtils;
@@ -35,8 +36,6 @@ import java.util.Collections;
 import java.util.List;
 
 public class OutlineAdapter extends RecyclerView.Adapter<OutlineAdapter.OutlineItem> {
-
-
     private final AppCompatActivity activity;
 	private ContentResolver resolver;
 	private boolean mTwoPanes = false;
@@ -78,9 +77,18 @@ public class OutlineAdapter extends RecyclerView.Adapter<OutlineAdapter.OutlineI
 
     @Override
     public void onBindViewHolder(final OutlineItem holder, final int position) {
-		holder.titleView.setText(items.get(position).name);
+        int positionInItems = position - 1;
 
-        holder.mView.setActivated(selectedItems.get(position, false));
+        String title;
+        if(position != 0){
+            title = items.get(positionInItems).name;
+        } else {
+            title = activity.getResources().getString(R.string.menu_agenda);
+        }
+
+        holder.titleView.setText(title);
+
+        holder.mView.setActivated(selectedItems.get(positionInItems, false));
 
 		final long itemId = getItemId(position);
 		holder.mView.setOnClickListener(new View.OnClickListener() {
@@ -91,7 +99,7 @@ public class OutlineAdapter extends RecyclerView.Adapter<OutlineAdapter.OutlineI
                 } else {
                     if (mTwoPanes) {
                         Bundle arguments = new Bundle();
-                        arguments.putLong(OrgNodeDetailFragment.NODE_ID, itemId);
+                        arguments.putLong(OrgContract.NODE_ID, itemId);
                         OrgNodeDetailFragment fragment = new OrgNodeDetailFragment();
                         fragment.setArguments(arguments);
 
@@ -99,10 +107,16 @@ public class OutlineAdapter extends RecyclerView.Adapter<OutlineAdapter.OutlineI
                         activity.getSupportFragmentManager().beginTransaction()
                                 .replace(R.id.orgnode_detail_container, fragment)
                                 .commit();
+                        // TODO: add agenda fragment
                     } else {
                         Context context = v.getContext();
                         Intent intent = new Intent(context, OrgNodeDetailActivity.class);
-                        intent.putExtra(OrgNodeDetailFragment.NODE_ID, itemId);
+                        if(position == 0){
+                            intent.putExtra(OrgContract.NODE_ID, OrgContract.AGENDA_ID);
+                        } else {
+                            intent.putExtra(OrgContract.NODE_ID, itemId);
+                        }
+
                         context.startActivity(intent);
                     }
                 }

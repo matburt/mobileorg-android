@@ -3,6 +3,8 @@ package com.matburt.mobileorg2.OrgData;
 import android.text.TextUtils;
 
 import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -38,6 +40,7 @@ public class OrgNodeTimeDate {
 		setDate(day, month, year);
 		setTime(startTimeOfDay, startMinute);
 	}
+
 
 	public void setDate(int day, int month, int year) {
 		this.dayOfMonth = day;
@@ -93,6 +96,13 @@ public class OrgNodeTimeDate {
 	
 	public String getEndTime() {
 		return String.format("%02d:%02d", endTimeOfDay, endMinute);
+	}
+
+	public long getTimeInMillis(){
+		int hour = startTimeOfDay > -1 ? startTimeOfDay : 0;
+		int minute = startMinute > -1 ? startMinute : 0;
+
+		return new GregorianCalendar(year, monthOfYear, dayOfMonth, hour, minute).getTimeInMillis();
 	}
 	
 	

@@ -24,18 +24,14 @@ public class OrgNode {
 	public long parentId = -1;
 	public long fileId = -1;
 
-    // The headline level
-	public long level = 0;
-
-    // The priority tag
-	public String priority = "";
-
-    // The TODO state
-	public String todo = "";
-
+	public long level = 0; // The headline level
+	public String priority = ""; // The priority tag
+	public String todo = "";    // The TODO state
 	public String tags = "";
 	public String tags_inherited = "";
 	public String name = "";
+    public long scheduled;
+    public long deadline;
 
     // The payload is a string containing the raw string corresponding to this mode
 	private String payload = "";
@@ -56,6 +52,8 @@ public class OrgNode {
 		this.tags_inherited = node.tags_inherited;
 		this.name = node.name;
         this.position = node.position;
+        this.scheduled = node.scheduled;
+        this.deadline = node.deadline;
 		setPayload(node.getPayload());
 	}
 	
@@ -81,7 +79,7 @@ public class OrgNode {
         if (cursor != null && cursor.getCount() > 0) {
 			if(cursor.isBeforeFirst() || cursor.isAfterLast())
 				cursor.moveToFirst();
-			id = cursor.getLong(cursor.getColumnIndexOrThrow("_id"));
+			id = cursor.getLong(cursor.getColumnIndexOrThrow(OrgData.ID));
 			parentId = cursor.getLong(cursor
                     .getColumnIndexOrThrow(OrgData.PARENT_ID));
 			fileId = cursor.getLong(cursor
@@ -98,6 +96,11 @@ public class OrgNode {
 					.getColumnIndexOrThrow(OrgData.PAYLOAD));
             position = cursor.getInt(cursor
                     .getColumnIndexOrThrow(OrgData.POSITION));
+            scheduled = cursor.getLong(cursor
+                    .getColumnIndexOrThrow(OrgData.SCHEDULED));
+            deadline = cursor.getLong(cursor
+                    .getColumnIndexOrThrow(OrgData.DEADLINE));
+
 		} else {
 			throw new OrgNodeNotFoundException(
 					"Failed to create OrgNode from cursor");
@@ -229,6 +232,8 @@ public class OrgNode {
 		values.put(OrgData.TAGS, tags);
         values.put(OrgData.TAGS_INHERITED, tags_inherited);
         values.put(OrgData.POSITION, position);
+        values.put(OrgData.SCHEDULED, scheduled);
+        values.put(OrgData.DEADLINE, deadline);
 		return values;
 	}
 	
@@ -368,20 +373,7 @@ public class OrgNode {
 
 		return true;
 	}
-	
-	public boolean areChildrenEditable(ContentResolver resolver) {
-		if(id < 0) // Node is not in database
-			return false;
-		
-		try {
-			OrgFile agendaFile = new OrgFile(OrgFile.AGENDA_FILE, resolver);
-			if (agendaFile != null && agendaFile.id == fileId) // In agenda file
-				return false;
-		} catch (OrgFileNotFoundException e) {}
 
-		return true;
-	}
-	
 	public String getCleanedName() {
 		StringBuilder nameBuilder = new StringBuilder(this.name);
 		
@@ -470,6 +462,19 @@ public class OrgNode {
 		this.orgNodePayload = null;
 		this.payload = payload;
 	}
+
+    public void addDate(OrgNodeTimeDate date){
+        this.orgNodePayload.insertOrReplaceDate(date);
+        switch (date.type){
+            case Deadline:
+                deadline = date.getTimeInMillis();
+                break;
+            case Scheduled:
+                scheduled = date.getTimeInMillis();
+                break;
+        }
+        return;
+    }
 	
 	public OrgNodePayload getOrgNodePayload() {
 		preparePayload();
@@ -516,8 +521,10 @@ public class OrgNode {
 	
 	public void generateApplyWriteEdits(OrgNode newNode, String olpPath,
 			ContentResolver resolver) {
+		Log.v("sync","generateApplyWrite 1 ");
 		ArrayList<OrgEdit> generateEditNodes = generateApplyEditNodes(newNode, olpPath, resolver);
 		boolean generateEdits = !getFilename(resolver).equals(FileUtils.CAPTURE_FILE);
+		Log.v("sync","generateEdits : "+generateEdits);
 		if(generateEdits)
 			for(OrgEdit edit: generateEditNodes)
 				edit.write(resolver);
@@ -529,8 +536,8 @@ public class OrgNode {
 	
 	public ArrayList<OrgEdit> generateApplyEditNodes(OrgNode newNode,
 			String olpPath, ContentResolver resolver) {
-		ArrayList<OrgEdit> edits = new ArrayList<OrgEdit>();
-
+		ArrayList<OrgEdit> edits = new ArrayList<>();
+		Log.v("sync","generateApplyEditNodes");
 		if (!name.equals(newNode.name)) {
 			edits.add(new OrgEdit(this, OrgEdit.TYPE.HEADING, newNode.name, resolver));
 			this.name = newNode.name;			
@@ -544,6 +551,7 @@ public class OrgNode {
 			edits.add(new OrgEdit(this, OrgEdit.TYPE.PRIORITY, newNode.priority, resolver));
 			this.priority = newNode.priority;
 		}
+
 		if (newNode.getPayload() != null && !newNode.getPayload().equals(getPayload())) {
 			edits.add(new OrgEdit(this, OrgEdit.TYPE.BODY, newNode.getPayload(), resolver));
 			setPayload(newNode.getPayload());

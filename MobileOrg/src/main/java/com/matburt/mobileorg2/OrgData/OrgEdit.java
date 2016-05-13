@@ -4,6 +4,7 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
+import android.util.Log;
 
 import com.matburt.mobileorg2.OrgData.OrgContract.Edits;
 
@@ -27,7 +28,7 @@ public class OrgEdit {
 	public String title = "";
 	public String oldValue = "";
 	public String newValue = "";
-		
+
 	public OrgEdit() {
 	}
 	
@@ -96,9 +97,11 @@ public class OrgEdit {
 	}
 
 	public long write(ContentResolver resolver) {
+		Log.v("sync","write edits");
 		if(this.type == null)
 			return -1;
-		
+		Log.v("sync","olvValue : "+oldValue.trim());
+		Log.v("sync","newValue : "+newValue);
 		ContentValues values = new ContentValues();
 		values.put(Edits.TYPE, getType());
 		values.put(Edits.DATA_ID, nodeId);
@@ -118,7 +121,7 @@ public class OrgEdit {
 		result.append("* F(edit:" + getType() + ") [[" + nodeId + "]["
 				+ title.trim() + "]]\n");
 		result.append("** Old value\n" + oldValue.trim() + "\n");
-		result.append("** New value\n" + newValue.trim() + "\n");
+		result.append("** New value\n" + newValue + "\n");
 		result.append("** End of edit" + "\n\n");
 				
 		return result.toString().replace(":ORIGINAL_ID:", ":ID:");

@@ -1,6 +1,7 @@
 package com.matburt.mobileorg2.Synchronizers;
 
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.security.cert.CertificateException;
 
@@ -33,7 +34,7 @@ public interface SynchronizerInterface {
 	 *            Name of the file, without path
 	 */
 	BufferedReader getRemoteFile(String filename)
-        throws IOException, CertificateException;
+        throws FileNotFoundException, IOException, CertificateException;
 
 	/**
 	 * Use this to disconnect from any services and cleanup.

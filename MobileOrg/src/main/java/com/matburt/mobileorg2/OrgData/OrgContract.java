@@ -1,9 +1,10 @@
 package com.matburt.mobileorg2.OrgData;
 
+import android.hardware.camera2.params.StreamConfigurationMap;
 import android.net.Uri;
+import android.util.StringBuilderPrinter;
 
 public class OrgContract {
-	
 	interface EditsColumns {
 		String ID = "_id";
 		String TYPE = "type";
@@ -25,6 +26,8 @@ public class OrgContract {
 		String TAGS = "tags";
 		String TAGS_INHERITED = "tags_inherited";
 		String PAYLOAD = "payload";
+		String DEADLINE = "deadline";
+		String SCHEDULED = "scheduled";
 	}
 	
 	interface FilesColumns {
@@ -63,8 +66,12 @@ public class OrgContract {
 	private static final String PATH_PRIORITIES = "priorities";
 	private static final String PATH_FILES = "files";
 	private static final String PATH_SEARCH = "search";
-	
-	
+
+	static public long AGENDA_ID = -2;
+	public static String NODE_ID = "node_id";
+	public static String PARENT_ID = "parent_id";
+
+
 	public static class OrgData implements OrgDataColumns {
 		public static final Uri CONTENT_URI = 
 				BASE_CONTENT_URI.buildUpon().appendPath(PATH_ORGDATA).build();
@@ -94,7 +101,7 @@ public class OrgContract {
 
 		
 		public static final String[] DEFAULT_COLUMNS = { ID, NAME, TODO, TAGS, TAGS_INHERITED,
-				PARENT_ID, PAYLOAD, LEVEL, PRIORITY, FILE_ID, POSITION };
+				PARENT_ID, PAYLOAD, LEVEL, PRIORITY, FILE_ID, POSITION, SCHEDULED, DEADLINE };
 	}
 	
 	public static class Edits implements EditsColumns {

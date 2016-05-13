@@ -189,4 +189,22 @@ public class OrgFile {
 	public String toString(ContentResolver resolver) {		
 		return OrgProviderUtils.nodesToString(nodeId, 0, resolver).toString();
 	}
+
+	/**
+	 * Return the file content including the edited content
+	 * @param filename
+	 * @param resolver
+     * @return
+     */
+	static public String getFileContentWithEdits(String filename, ContentResolver resolver){
+		String content = "";
+		try {
+			OrgFile file = new OrgFile(filename, resolver);
+			content += file.toString(resolver);
+		} catch (OrgFileNotFoundException e) {}
+
+		content += OrgEdit.editsToString(resolver);
+
+		return content;
+	}
 }

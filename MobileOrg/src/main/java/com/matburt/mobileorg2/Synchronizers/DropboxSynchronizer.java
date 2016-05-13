@@ -23,6 +23,7 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
@@ -105,7 +106,7 @@ public class DropboxSynchronizer implements SynchronizerInterface {
         } catch (DropboxUnlinkedException e) {
             throw new IOException("Dropbox Authentication Failed, re-run setup wizard");
         } catch (DropboxException e) {
-            throw new IOException("Fetching " + filename + ": " + e.toString());
+            throw new FileNotFoundException("Fetching " + filename + ": " + e.toString());
         }
 	}
 
@@ -118,7 +119,7 @@ public class DropboxSynchronizer implements SynchronizerInterface {
     private void connect() {
 
         AndroidAuthSession session = buildSession();
-        dropboxApi = new DropboxAPI<AndroidAuthSession>(session);
+        dropboxApi = new DropboxAPI<>(session);
         if (!dropboxApi.getSession().isLinked()) {
             isLoggedIn = false;
             Log.d("MobileOrg", "Dropbox account was unlinked...");

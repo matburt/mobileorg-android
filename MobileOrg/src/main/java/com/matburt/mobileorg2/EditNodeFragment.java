@@ -163,7 +163,6 @@ public class EditNodeFragment extends Fragment {
 
         if(deadlineText.length() > 0) deadline.setText(deadlineText);
         else deadline.setText(deadline.getResources().getString(R.string.deadline));
-
     }
 
     /**
@@ -171,16 +170,27 @@ public class EditNodeFragment extends Fragment {
      */
     public void onOKPressed(){
         ContentResolver resolver = getContext().getContentResolver();
+        String payload = "";
+        for(int i = 0;i<=node.level;++i) payload += ' ';
+        payload+=content.getText().toString();
+
         node.name = title.getText().toString();
-        node.setPayload(content.getText().toString());
-        node.write(resolver);
-
-        if(nodeId < 0){
+        node.setPayload(payload);
+        if(nodeId > -1){
+            try {
+                Log.v("sync","hello");
+                OrgNode original = new OrgNode(nodeId, resolver);
+                original.generateApplyWriteEdits(node, null, resolver);
+            } catch (OrgNodeNotFoundException e) {
+                Log.v("sync","loser");
+                e.printStackTrace();
+            }
+        } else {
             node.shiftNextSiblingNodes(resolver);
-
             OrgEdit edit = node.createParentNewheading(resolver);
             edit.write(resolver);
         }
+        node.write(resolver);
     }
 
     /**
@@ -248,7 +258,7 @@ public class EditNodeFragment extends Fragment {
         }
 
         public void onDateSet(DatePicker view, int year, int month, int day) {
-            node.getOrgNodePayload().insertOrReplaceDate(
+            node.addDate(
                     new OrgNodeTimeDate(
                             EditNodeFragment.currentDateTimeDialog,
                             day,

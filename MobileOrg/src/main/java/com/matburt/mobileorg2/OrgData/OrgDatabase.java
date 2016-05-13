@@ -24,6 +24,7 @@ public class OrgDatabase extends SQLiteOpenHelper {
 	
 	private InsertHelper orgdataInsertHelper;
 	private SQLiteStatement addPayloadStatement;
+	private SQLiteStatement addTimestampsStatement;
 	
 	public interface Tables {
 		String EDITS = "edits";
@@ -77,7 +78,9 @@ public class OrgDatabase extends SQLiteOpenHelper {
 				+ "tags_inherited text,"
 				+ "payload text,"
 				+ "name text,"
-                + "position integer)");
+                + "position integer,"
+				+ "scheduled integer,"
+				+ "deadline integer)");
 	}
 	
 	@Override
@@ -112,14 +115,29 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		return orgdataInsertHelper.execute();
 	}
 		
-	public void fastInsertNodePayload(Long id, final String payload) {
+	public void fastInsertNodePayloadAndTimestamps(Long id, final String payload) {
 		if(addPayloadStatement == null)
 			addPayloadStatement = getWritableDatabase()
 					.compileStatement("UPDATE orgdata SET payload=? WHERE _id=?");
-		
+
 		addPayloadStatement.bindString(1, payload);
 		addPayloadStatement.bindLong(2, id);
 		addPayloadStatement.execute();
+
+
+		OrgNodePayload orgNodePayload = new OrgNodePayload(payload);
+		String scheduled = orgNodePayload.getScheduled();
+		String deadline = orgNodePayload.getDeadline();
+		if(!scheduled.equals("") || deadline.equals("")){
+			if(addTimestampsStatement == null)
+				addTimestampsStatement = getWritableDatabase()
+						.compileStatement("UPDATE orgdata SET Timestamps=? WHERE _id=?");
+
+			addTimestampsStatement.bindString(1, Timestamps);
+			addTimestampsStatement.bindLong(2, id);
+			addTimestampsStatement.execute();
+		}
+
 	}
 	
 	private void prepareOrgdataInsert() {

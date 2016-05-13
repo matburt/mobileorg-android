@@ -2,6 +2,7 @@ package com.matburt.mobileorg2;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.ActionBar;
@@ -9,6 +10,7 @@ import android.support.v4.app.NavUtils;
 import android.util.Log;
 import android.view.MenuItem;
 
+import com.matburt.mobileorg2.OrgData.OrgContract;
 import com.matburt.mobileorg2.OrgData.OrgNode;
 import com.matburt.mobileorg2.util.OrgNodeNotFoundException;
 
@@ -47,10 +49,17 @@ public class OrgNodeDetailActivity extends AppCompatActivity {
             // Create the detail fragment and add it to the activity
             // using a fragment transaction.
             Bundle arguments = new Bundle();
-            Long nodeId = getIntent().getLongExtra(OrgNodeDetailFragment.NODE_ID, -1);
-            arguments.putLong(OrgNodeDetailFragment.NODE_ID,
-                    nodeId);
-            OrgNodeDetailFragment fragment = new OrgNodeDetailFragment();
+            Long nodeId = getIntent().getLongExtra(OrgContract.NODE_ID, -1);
+            arguments.putLong(OrgContract.NODE_ID, nodeId);
+
+            Fragment fragment;
+
+            if(nodeId == OrgContract.AGENDA_ID){
+                fragment = new AgendaFragment();
+            } else {
+                fragment = new OrgNodeDetailFragment();
+            }
+
             fragment.setArguments(arguments);
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.orgnode_detail_container, fragment, "detail_fragment")
