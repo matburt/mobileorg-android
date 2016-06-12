@@ -1,13 +1,12 @@
 package com.matburt.mobileorg2;
 
-import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.TypedArray;
+import android.database.Cursor;
 import android.graphics.Canvas;
-import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -17,12 +16,7 @@ import android.support.v7.view.ActionMode;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
-import android.text.SpannableStringBuilder;
-import android.text.TextUtils;
-import android.text.style.ForegroundColorSpan;
-import android.text.style.StyleSpan;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -31,22 +25,16 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.matburt.mobileorg2.Gui.Outline.OutlineAdapter;
 import com.matburt.mobileorg2.OrgData.OrgContract;
-import com.matburt.mobileorg2.OrgData.OrgFileParser;
 import com.matburt.mobileorg2.OrgData.OrgNode;
 import com.matburt.mobileorg2.OrgData.OrgNodeTree;
+import com.matburt.mobileorg2.OrgData.OrgProviderUtils;
 import com.matburt.mobileorg2.util.OrgNodeNotFoundException;
-import com.matburt.mobileorg2.util.PreferenceUtils;
 import com.matburt.mobileorg2.util.TodoDialog;
 
 import java.util.NavigableMap;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 
 /**
  * A fragment representing a single OrgNode detail screen.
@@ -63,10 +51,7 @@ public class OrgNodeDetailFragment extends Fragment {
     private long idHlightedPosition;
     private View highlightedView = null;
 
-    private int gray, red, green, yellow, blue, foreground, foregroundDark, black, background, highlightedBackground;
-    private static int nTitleColors = 3;
-    private int[] titleColor;
-    private int[] titleFontSize;
+
     RecyclerViewAdapter adapter;
     Button insertNodeButton;
     RecyclerView recyclerView;
@@ -128,36 +113,27 @@ public class OrgNodeDetailFragment extends Fragment {
 
         this.resolver = getActivity().getContentResolver();
 
-        gray = ContextCompat.getColor(getContext(), R.color.colorGray);
-        red = ContextCompat.getColor(getContext(), R.color.colorRed);
-        green = ContextCompat.getColor(getContext(), R.color.colorGreen);
-        yellow = ContextCompat.getColor(getContext(), R.color.colorYellow);
-        blue = ContextCompat.getColor(getContext(), R.color.colorBlue);
-        foreground = ContextCompat.getColor(getContext(), R.color.colorPrimary);
-        foregroundDark = ContextCompat.getColor(getContext(), R.color.colorPrimaryDark);
-        black = ContextCompat.getColor(getContext(), R.color.colorBlack);
-
-        titleColor = new int[nTitleColors];
-        titleColor[0] = foregroundDark;
-        titleColor[1] = foreground;
-        titleColor[2] = black;
-
-        titleFontSize = new int[nTitleColors];
-        titleFontSize[0] = 25;
-        titleFontSize[1] = 20;
-        titleFontSize[2] = 16;
-
         OrgNodeTree tree = null;
+
 
         if (getArguments().containsKey(OrgContract.NODE_ID)) {
             this.nodeId = getArguments().getLong(OrgContract.NODE_ID);
-            try {
-                tree = new OrgNodeTree(new OrgNode(nodeId, resolver), resolver);
-            } catch (OrgNodeNotFoundException e) {
+
+            if(nodeId == OrgContract.TODO_ID){
+                Cursor cursor = resolver.query(OrgContract.OrgData.CONTENT_URI,
+                OrgContract.OrgData.DEFAULT_COLUMNS, "todo is not null and todo <> ''", null, OrgContract.OrgData.NAME_SORT);
+                tree = new OrgNodeTree(OrgProviderUtils.orgDataCursorToArrayList(cursor));
+                if(cursor != null) cursor.close();
+            } else {
+                try {
+                    tree = new OrgNodeTree(new OrgNode(nodeId, resolver), resolver);
+                } catch (OrgNodeNotFoundException e) {
 //                displayError();
 //                TODO: implement error
+                }
             }
         }
+
         adapter = new RecyclerViewAdapter(tree);
 
     }
@@ -178,8 +154,6 @@ public class OrgNodeDetailFragment extends Fragment {
 
         insertNodeButton = (Button)rootView.findViewById(R.id.empty_recycler);
         insertNodeText = (TextView)rootView.findViewById(R.id.empty_recycler_text);
-
-
 
         insertNodeButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -258,9 +232,7 @@ public class OrgNodeDetailFragment extends Fragment {
     @Override
     public void onResume(){
         super.onResume();
-
         refresh();
-
     }
 
     void createEditNodeFragment(int id, int parentId, int siblingPosition) {
@@ -275,7 +247,7 @@ public class OrgNodeDetailFragment extends Fragment {
     }
 
     public class RecyclerViewAdapter
-            extends RecyclerView.Adapter<RecyclerViewAdapter.ItemViewHolder> {
+            extends RecyclerView.Adapter<ItemViewHolder> {
 
         private NavigableMap<Long, OrgNodeTree> idTreeMap;
         private OrgNodeTree tree;
@@ -302,7 +274,7 @@ public class OrgNodeDetailFragment extends Fragment {
             holder.mItem = idTreeMap.get((long) position);
             holder.level = holder.mItem.node.level;
             boolean isSelected = (position == idHlightedPosition);
-            holder.setup(holder.mItem.node, isSelected);
+            holder.setup(holder.mItem.node, isSelected, getContext());
 
             holder.mView.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -340,6 +312,18 @@ public class OrgNodeDetailFragment extends Fragment {
                     return true;
                 }
             });
+
+            holder.todoButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if(idHlightedPosition>-1){
+                        closeInsertItem();
+                        return;
+                    }
+                    new TodoDialog(getContext(),holder.mItem.node, holder.todoButton);
+                }
+            });
+
 
             holder.sameLevel.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -399,172 +383,7 @@ public class OrgNodeDetailFragment extends Fragment {
             return idTreeMap.size();
         }
 
-        public class ItemViewHolder extends RecyclerView.ViewHolder {
-            public final View mView;
-            private Button sameLevel, childLevel, deleteNodeButton;
-            public OrgNodeTree mItem;
-            private TextView titleView, contentView;
-            private Button todoButton, priorityButton;
 
-            private TextView levelView;
-            private boolean levelFormatting = true;
-            public long level;
-
-            public ItemViewHolder(View view) {
-                super(view);
-                mView = view;
-
-                titleView = (TextView) view.findViewById(R.id.outline_item_title);
-                contentView = (TextView) view.findViewById(R.id.outline_item_content);
-                todoButton = (Button) view.findViewById(R.id.outline_item_todo);
-                priorityButton = (Button) view.findViewById(R.id.outline_item_priority);
-                levelView = (TextView) view.findViewById(R.id.outline_item_level);
-                todoButton.setOnClickListener(todoClick);
-                sameLevel = (Button) view.findViewById(R.id.insert_same_level);
-                childLevel = (Button) view.findViewById(R.id.insert_neighbourg_level);
-                deleteNodeButton = (Button) view.findViewById(R.id.delete_node);
-
-                int fontSize = PreferenceUtils.getFontSize();
-                todoButton.setTextSize(fontSize);
-            }
-
-//            @Override
-//            public void onViewRecycled(ItemViewHolder holder) {
-//                holder.itemView.setOnLongClickListener(null);
-//                super.onViewRecycled(holder);
-//            }
-
-            private View.OnClickListener todoClick = new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if(idHlightedPosition>-1){
-                        closeInsertItem();
-                        return;
-                    }
-                    new TodoDialog(getContext(),mItem.node, todoButton);
-                }
-            };
-
-
-//            @Override
-//            public String toString() {
-//                return super.toString() + " '" + mContentView.getText() + "'";
-//            }
-
-
-            public void setupPriority(String priority) {
-                if (TextUtils.isEmpty(priority)) {
-                    priorityButton.setVisibility(View.GONE);
-                } else {
-                    priorityButton.setText(priority);
-                }
-            }
-
-            public void applyLevelIndentation(long level, SpannableStringBuilder item) {
-                String indentString = "";
-                for(int i = 0; i < level; i++)
-                    indentString += "   ";
-
-                this.levelView.setText(indentString);
-            }
-
-            public void applyLevelFormating(long level, SpannableStringBuilder item) {
-//                item.setSpan(
-//                        new ForegroundColorSpan(theme.levelColors[(int) Math
-//                                .abs((level) % theme.levelColors.length)]), 0, item
-//                                .length(), 0);
-            }
-
-            public void setupTitle(String name, SpannableStringBuilder titleSpan) {
-                titleView.setGravity(Gravity.LEFT);
-                titleView.setTextSize(titleFontSize[Math.min((int)level-1, nTitleColors)]);
-                if(level==1) titleView.setTypeface(null, Typeface.BOLD);
-                else titleView.setTypeface(null,Typeface.NORMAL);
-
-                if (name.startsWith("COMMENT"))
-                    titleSpan.setSpan(new ForegroundColorSpan(gray), 0,
-                            "COMMENT".length(), 0);
-                else if (name.equals("Archive"))
-                    titleSpan.setSpan(new ForegroundColorSpan(gray), 0,
-                            "Archive".length(), 0);
-
-                formatLinks(titleSpan);
-            }
-
-            public final Pattern urlPattern = Pattern.compile("\\[\\[[^\\]]*\\]\\[([^\\]]*)\\]\\]");
-            private void formatLinks(SpannableStringBuilder titleSpan) {
-                Matcher matcher = urlPattern.matcher(titleSpan);
-                while(matcher.find()) {
-                    titleSpan.delete(matcher.start(), matcher.end());
-                    titleSpan.insert(matcher.start(), matcher.group(1));
-
-                    titleSpan.setSpan(new ForegroundColorSpan(blue),
-                            matcher.start(), matcher.start() + matcher.group(1).length(), 0);
-
-                    matcher = urlPattern.matcher(titleSpan);
-                }
-            }
-
-            public void setup(OrgNode node, boolean isSelected) {
-                this.mItem.node = node;
-                SpannableStringBuilder titleSpan = new SpannableStringBuilder(node.name);
-
-                if (levelFormatting)
-                    applyLevelFormating(node.level, titleSpan);
-                setupTitle(node.name, titleSpan);
-                setupPriority(node.priority);
-                TodoDialog.setupTodoButton(getContext(), node, todoButton, true);
-
-                if (levelFormatting)
-                    applyLevelIndentation(node.level, titleSpan);
-
-                if(this.mItem.getVisibility()== OrgNodeTree.Visibility.folded)
-                    setupChildrenIndicator(node, titleSpan);
-
-//                titleSpan.setSpan(new StyleSpan(Typeface.NORMAL), 0, titleSpan.length(), 0);
-                titleView.setText(titleSpan);
-                int colorId = (int) Math.min(level-1,nTitleColors-1);
-                titleView.setTextColor(titleColor[colorId]);
-                mView.setSelected(isSelected);
-                String cleanedPayload = node.getCleanedPayload();
-                contentView.setText(cleanedPayload);
-
-                if(cleanedPayload.equals("")){
-                    RelativeLayout.LayoutParams layoutParams =
-                            (RelativeLayout.LayoutParams)titleView.getLayoutParams();
-                    layoutParams.addRule(RelativeLayout.CENTER_VERTICAL, RelativeLayout.TRUE);
-                    titleView.setLayoutParams(layoutParams);
-
-                    layoutParams =
-                            (RelativeLayout.LayoutParams)todoButton.getLayoutParams();
-                    layoutParams.addRule(RelativeLayout.CENTER_VERTICAL, RelativeLayout.TRUE);
-                    todoButton.setLayoutParams(layoutParams);
-
-                    contentView.setVisibility(View.GONE);
-                } else {
-                    RelativeLayout.LayoutParams layoutParams =
-                            (RelativeLayout.LayoutParams)titleView.getLayoutParams();
-                    layoutParams.removeRule(RelativeLayout.CENTER_VERTICAL);
-                    titleView.setLayoutParams(layoutParams);
-
-                    layoutParams =
-                            (RelativeLayout.LayoutParams)todoButton.getLayoutParams();
-                    layoutParams.removeRule(RelativeLayout.CENTER_VERTICAL);
-                    todoButton.setLayoutParams(layoutParams);
-
-
-                    contentView.setVisibility(View.VISIBLE);
-                }
-            }
-
-            public void setupChildrenIndicator(OrgNode node, SpannableStringBuilder titleSpan) {
-                if (node.hasChildren(resolver)) {
-                    titleSpan.append("...");
-                    titleSpan.setSpan(new ForegroundColorSpan(foreground),
-                            titleSpan.length() - "...".length(), titleSpan.length(), 0);
-                }
-            }
-        }
 
 
     }

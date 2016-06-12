@@ -3,6 +3,7 @@ package com.matburt.mobileorg2.OrgData;
 import android.content.ContentResolver;
 import android.util.Log;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.NavigableMap;
 import java.util.TreeMap;
@@ -22,15 +23,43 @@ public class OrgNodeTree {
     private ArrayList<OrgNodeTree> children;
     private static long idConstructor;
 
-    public OrgNodeTree(OrgNode root, ContentResolver resolver){
-        if(root == null) return;
+    private OrgNodeTree(OrgNode root, ContentResolver resolver, boolean isRecursive){
         node = root;
         children = new ArrayList<>();
         visibility = Visibility.subtree;
-        for(OrgNode child: root.getChildren(resolver)){
-            Log.v("newNode", "child : " + child.name);
-            children.add(new OrgNodeTree(child, resolver));
+
+        if(isRecursive && root != null) {
+            for (OrgNode child : root.getChildren(resolver)) {
+                Log.v("newNode", "child : " + child.name);
+                children.add(new OrgNodeTree(child, resolver));
+            }
         }
+    }
+
+    /**
+     * Create a tree with only the root
+     * @param root
+     */
+    public OrgNodeTree(OrgNode root){
+        this(root,null, false);
+    }
+
+    /**
+     * Create a tree and all sub-trees
+     * @param root
+     * @param resolver
+     */
+    public OrgNodeTree(OrgNode root, ContentResolver resolver){
+        this(root, resolver, true);
+    }
+
+    /**
+     * Create a flat tree from an ArrayList
+     * @param arrayList
+     */
+    public OrgNodeTree(ArrayList<OrgNode> arrayList){
+        this((OrgNode)null);
+        for(OrgNode node: arrayList) children.add(new OrgNodeTree(node));
     }
 
     public Visibility getVisibility(){

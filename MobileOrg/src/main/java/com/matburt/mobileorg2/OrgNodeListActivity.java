@@ -84,6 +84,8 @@ public class OrgNodeListActivity extends AppCompatActivity {
             ((OutlineAdapter)recyclerView.getAdapter()).setHasTwoPanes(true);
         }
 
+        new Style(this);
+
         this.syncReceiver = new SynchServiceReceiver();
         registerReceiver(this.syncReceiver, new IntentFilter(
                 Synchronizer.SYNC_UPDATE));

@@ -52,13 +52,7 @@ public class OrgNodeDetailActivity extends AppCompatActivity {
             Long nodeId = getIntent().getLongExtra(OrgContract.NODE_ID, -1);
             arguments.putLong(OrgContract.NODE_ID, nodeId);
 
-            Fragment fragment;
-
-            if(nodeId == OrgContract.AGENDA_ID){
-                fragment = new AgendaFragment();
-            } else {
-                fragment = new OrgNodeDetailFragment();
-            }
+            Fragment fragment = new OrgNodeDetailFragment();
 
             fragment.setArguments(arguments);
             getSupportFragmentManager().beginTransaction()
@@ -67,11 +61,14 @@ public class OrgNodeDetailActivity extends AppCompatActivity {
                 Log.v("title","title0");
 
             if(actionBar != null) {
-                try {
-                    OrgNode node = new OrgNode(nodeId, getContentResolver());
-                    actionBar.setTitle(node.name);
-                } catch (OrgNodeNotFoundException e) {
-                    e.printStackTrace();
+                if(nodeId == OrgContract.TODO_ID) actionBar.setTitle(getResources().getString(R.string.menu_todos));
+                else {
+                    try {
+                        OrgNode node = new OrgNode(nodeId, getContentResolver());
+                        actionBar.setTitle(node.name);
+                    } catch (OrgNodeNotFoundException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         }

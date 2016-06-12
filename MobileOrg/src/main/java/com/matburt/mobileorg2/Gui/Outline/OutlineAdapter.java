@@ -17,7 +17,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.TextView;
 
 import com.matburt.mobileorg2.Gui.Theme.DefaultTheme;
@@ -29,7 +28,6 @@ import com.matburt.mobileorg2.OrgNodeDetailActivity;
 import com.matburt.mobileorg2.OrgNodeDetailFragment;
 import com.matburt.mobileorg2.R;
 import com.matburt.mobileorg2.util.OrgFileNotFoundException;
-import com.matburt.mobileorg2.util.PreferenceUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -83,7 +81,7 @@ public class OutlineAdapter extends RecyclerView.Adapter<OutlineAdapter.OutlineI
         if(position != 0){
             title = items.get(positionInItems).name;
         } else {
-            title = activity.getResources().getString(R.string.menu_agenda);
+            title = activity.getResources().getString(R.string.menu_todos);
         }
 
         holder.titleView.setText(title);
@@ -112,7 +110,7 @@ public class OutlineAdapter extends RecyclerView.Adapter<OutlineAdapter.OutlineI
                         Context context = v.getContext();
                         Intent intent = new Intent(context, OrgNodeDetailActivity.class);
                         if(position == 0){
-                            intent.putExtra(OrgContract.NODE_ID, OrgContract.AGENDA_ID);
+                            intent.putExtra(OrgContract.NODE_ID, OrgContract.TODO_ID);
                         } else {
                             intent.putExtra(OrgContract.NODE_ID, itemId);
                         }

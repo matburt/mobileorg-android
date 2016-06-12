@@ -1,8 +1,6 @@
 package com.matburt.mobileorg2.OrgData;
 
-import android.hardware.camera2.params.StreamConfigurationMap;
 import android.net.Uri;
-import android.util.StringBuilderPrinter;
 
 public class OrgContract {
 	interface EditsColumns {
@@ -67,7 +65,7 @@ public class OrgContract {
 	private static final String PATH_FILES = "files";
 	private static final String PATH_SEARCH = "search";
 
-	static public long AGENDA_ID = -2;
+	static public long TODO_ID = -2;
 	public static String NODE_ID = "node_id";
 	public static String PARENT_ID = "parent_id";
 
