@@ -66,6 +66,7 @@ public class OrgContract {
 	private static final String PATH_SEARCH = "search";
 
 	static public long TODO_ID = -2;
+	static public long AGENDA_ID = -3;
 	public static String NODE_ID = "node_id";
 	public static String PARENT_ID = "parent_id";
 

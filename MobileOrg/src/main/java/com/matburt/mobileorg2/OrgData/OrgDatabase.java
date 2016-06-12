@@ -84,8 +84,8 @@ public class OrgDatabase extends SQLiteOpenHelper {
 				+ "payload text,"
 				+ "name text,"
                 + "position integer,"
-				+ "scheduled integer,"
-				+ "deadline integer)");
+				+ "scheduled integer default -1,"
+				+ "deadline integer default -1)");
 	}
 	
 	@Override
@@ -120,14 +120,14 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		return orgdataInsertHelper.execute();
 	}
 		
-	public void fastInsertNodePayload(Long id, final String payload, final HashMap<String, String> timestamps) {
+	public void fastInsertNodePayload(Long id, final String payload, final HashMap<String, Integer> timestamps) {
 		if (addPayloadStatement == null)
 			addPayloadStatement = getWritableDatabase()
 					.compileStatement("UPDATE orgdata SET payload=?, scheduled=?, deadline=? WHERE _id=?");
 
 		addPayloadStatement.bindString(1, payload);
-		addPayloadStatement.bindString(2, timestamps.get(Scheduled)!=null ? timestamps.get(Scheduled): "NULL");
-		addPayloadStatement.bindString(2, timestamps.get(Deadline)!=null ? timestamps.get(Deadline): "NULL");
+		addPayloadStatement.bindLong(2, timestamps.get(Scheduled)!=null ? timestamps.get(Scheduled): -1);
+		addPayloadStatement.bindLong(3, timestamps.get(Deadline)!=null ? timestamps.get(Deadline): -1);
 		addPayloadStatement.bindLong(4, id);
 		addPayloadStatement.execute();
 	}

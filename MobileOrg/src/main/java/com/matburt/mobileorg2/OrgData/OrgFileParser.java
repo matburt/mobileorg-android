@@ -3,6 +3,7 @@ package com.matburt.mobileorg2.OrgData;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.text.TextUtils;
+import android.util.Log;
 
 
 import com.matburt.mobileorg2.util.PreferenceUtils;
@@ -30,7 +31,7 @@ public class OrgFileParser {
 	private OrgNodeParser orgNodeParser;
 	private HashSet<String> excludedTags;
     private HashMap<Integer, Integer> position;
-	private HashMap<String, String> timestamps;
+	private HashMap<String, Integer> timestamps;
 
 	public OrgFileParser(OrgDatabase db, ContentResolver resolver) {
 		this.db = db;
@@ -132,11 +133,11 @@ public class OrgFileParser {
 	/**
 	 * Parse the line for any timestamps
 	 * @param line
-	 * @return A HashMap<String,String> where first key is timestamp type and second is value.
+	 * @return A HashMap<String,int> where first key is timestamp type and second is value.
 	 * Return null if no timestamp found.
 	 */
-	private HashMap<String, String> parseTimestamps(String line){
-		HashMap<String, String> result = new HashMap<>();
+	private HashMap<String, Integer> parseTimestamps(String line){
+		HashMap<String, Integer> result = new HashMap<>();
 
 		HashMap<String, OrgNodeTimeDate.TYPE> timestamps = new HashMap<>();
 		timestamps.put(OrgDatabase.Scheduled, OrgNodeTimeDate.TYPE.Scheduled);
@@ -147,10 +148,9 @@ public class OrgFileParser {
 			Matcher matcher = OrgNodePayload.getTimestampMatcher(entry.getValue())
 					.matcher(payload);
 
-			if (matcher.find()) {
-				result.put(entry.getKey(), matcher.group());
-			}
-		}
+            String str = OrgNodePayload.getDateFromTimestampMatcher(matcher);
+            result.put(entry.getKey(), 0);
+        }
 
 		return result;
 	}

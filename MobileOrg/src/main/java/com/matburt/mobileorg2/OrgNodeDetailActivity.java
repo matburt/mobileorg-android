@@ -52,7 +52,10 @@ public class OrgNodeDetailActivity extends AppCompatActivity {
             Long nodeId = getIntent().getLongExtra(OrgContract.NODE_ID, -1);
             arguments.putLong(OrgContract.NODE_ID, nodeId);
 
-            Fragment fragment = new OrgNodeDetailFragment();
+            Fragment fragment;
+
+            if(nodeId == OrgContract.AGENDA_ID) fragment = new AgendaFragment();
+            else fragment = new OrgNodeDetailFragment();
 
             fragment.setArguments(arguments);
             getSupportFragmentManager().beginTransaction()
@@ -62,7 +65,9 @@ public class OrgNodeDetailActivity extends AppCompatActivity {
 
             if(actionBar != null) {
                 if(nodeId == OrgContract.TODO_ID) actionBar.setTitle(getResources().getString(R.string.menu_todos));
-                else {
+                else if (nodeId == OrgContract.AGENDA_ID){
+                    actionBar.setTitle(getResources().getString(R.string.menu_agenda));
+                } else {
                     try {
                         OrgNode node = new OrgNode(nodeId, getContentResolver());
                         actionBar.setTitle(node.name);

@@ -1,9 +1,5 @@
 package com.matburt.mobileorg2.OrgData;
 
-import android.util.Log;
-
-import com.matburt.mobileorg2.util.OrgUtils;
-
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -164,27 +160,33 @@ public class OrgNodePayload {
 			pattern = timestampLookbehind + "(" + timestampPattern + ")";
 		else
 			pattern = "(" + OrgNodeTimeDate.typeToFormated(type) + "\\s*" + timestampPattern + ")";
-		
+
+
 		return Pattern.compile(pattern);
 	}
-	
-	private String stripDate(OrgNodeTimeDate.TYPE type) {
+
+    public static String getDateFromTimestampMatcher(Matcher matcher){
+        String result = "";
+
+        if(matcher.find()) {
+            result = matcher.group(2);
+
+            if(matcher.group(3) != null)
+                result += matcher.group(3);
+        }
+        return result;
+    }
+
+    private String stripDate(OrgNodeTimeDate.TYPE type) {
 		prepareCleanedPayload();
 
 		Matcher matcher = getTimestampMatcher(type).matcher(
 				cleanPayload.toString());
-		
-		String result = "";
-		
-		if(matcher.find()) {
-			result = matcher.group(2);
 
-			if(matcher.group(3) != null)
-				result += matcher.group(3);
-			
-			cleanPayload.delete(matcher.start(), matcher.end());
-		}
-		
+        String result = getDateFromTimestampMatcher(matcher);
+
+		if(matcher.find()) cleanPayload.delete(matcher.start(), matcher.end());
+
 		return result;
 	}
 	

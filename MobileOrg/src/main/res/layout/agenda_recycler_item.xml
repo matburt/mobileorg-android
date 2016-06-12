@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:minHeight="@dimen/outline_item"
+    android:orientation="vertical"
+    android:background="?android:selectableItemBackground"
+    android:paddingLeft="5dp"
+    android:paddingRight="5dp"
+    android:paddingBottom="5dp"
+    android:paddingTop="5dp"
+    >
+
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/LinearLayout1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="@dimen/outline_item"
+        android:orientation="horizontal"
+        android:background="?android:selectableItemBackground"
+        android:paddingLeft="5dp"
+        android:paddingRight="5dp" >
+
+        <TextView
+            android:id="@+id/outline_item_level"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:text=""
+            android:textAppearance="?android:attr/textAppearanceMedium" >
+        </TextView>
+
+
+        <Button
+            android:id="@+id/outline_item_todo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginLeft="10dp"
+            android:layout_marginStart="10dp"
+            android:background="@android:color/transparent"
+            android:focusable="true"
+            android:minHeight="30dp"
+            android:minWidth="40dp"
+            android:text="@string/no_state" />
+
+        <Button
+            android:id="@+id/outline_item_priority"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_marginStart="10dp"
+            android:background="@android:color/transparent"
+            android:focusable="true"
+            android:minHeight="30dp"
+            android:minWidth="40dp"
+            android:layout_toLeftOf="@id/outline_item_todo"
+            android:layout_toStartOf="@id/outline_item_todo"
+            android:text="@string/no_state" />
+
+        <TextView
+            android:id="@+id/outline_item_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/outline_item_level"
+            android:layout_toEndOf="@id/outline_item_level"
+            android:layout_toLeftOf="@id/outline_item_priority"
+            android:layout_toStartOf="@id/outline_item_priority"
+            android:text=""
+            android:textAppearance="?android:attr/textAppearanceMedium" >
+        </TextView>
+
+        <TextView
+            android:id="@+id/outline_item_content"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/outline_item_level"
+            android:layout_toEndOf="@id/outline_item_level"
+            android:layout_below="@id/outline_item_title"
+            android:text=""
+            android:textAppearance="?android:attr/textAppearanceSmall" >
+        </TextView>
+    </RelativeLayout>
+
+    <LinearLayout
+        android:id="@+id/item_modifiers"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:visibility="gone"
+        >
+
+        <Button
+            android:id="@+id/insert_same_level"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="@string/insert_node"
+            android:layout_weight="1"
+            android:gravity="center"
+            />
+
+        <View
+            android:layout_height="match_parent"
+            android:layout_width="1dp"
+            android:background="@android:color/darker_gray"
+            />
+
+        <Button
+            android:id="@+id/insert_neighbourg_level"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="@string/insert_child_node"
+            android:layout_weight="1"
+            android:gravity="center"
+            />
+
+        <Button
+            android:id="@+id/delete_node"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="@string/delete_node"
+            android:layout_weight="1"
+            android:gravity="center"
+            />
+    </LinearLayout>
+
+
+</LinearLayout>

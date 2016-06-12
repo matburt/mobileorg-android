@@ -41,6 +41,8 @@ public class OutlineAdapter extends RecyclerView.Adapter<OutlineAdapter.OutlineI
     private SparseBooleanArray selectedItems;
     ActionMode actionMode;
 
+    // Number of added items. Here it is two: Agenda and Todos.
+    private int numExtraItems = 2;
 
 	public OutlineAdapter(AppCompatActivity activity) {
 		super();
@@ -64,7 +66,7 @@ public class OutlineAdapter extends RecyclerView.Adapter<OutlineAdapter.OutlineI
 	}
 
 	@Override public int getItemCount() {
-		return items.size();
+		return items.size() + numExtraItems;
 	}
 
     @Override public OutlineItem onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -75,13 +77,15 @@ public class OutlineAdapter extends RecyclerView.Adapter<OutlineAdapter.OutlineI
 
     @Override
     public void onBindViewHolder(final OutlineItem holder, final int position) {
-        int positionInItems = position - 1;
+        int positionInItems = position - numExtraItems;
 
         String title;
-        if(position != 0){
-            title = items.get(positionInItems).name;
-        } else {
+        if(position == 0) {
             title = activity.getResources().getString(R.string.menu_todos);
+        } else if (position == 1){
+            title = activity.getResources().getString(R.string.menu_agenda);
+        } else {
+            title = items.get(positionInItems).name;
         }
 
         holder.titleView.setText(title);
@@ -109,8 +113,11 @@ public class OutlineAdapter extends RecyclerView.Adapter<OutlineAdapter.OutlineI
                     } else {
                         Context context = v.getContext();
                         Intent intent = new Intent(context, OrgNodeDetailActivity.class);
+
                         if(position == 0){
                             intent.putExtra(OrgContract.NODE_ID, OrgContract.TODO_ID);
+                        } else if (position == 1){
+                            intent.putExtra(OrgContract.NODE_ID, OrgContract.AGENDA_ID);
                         } else {
                             intent.putExtra(OrgContract.NODE_ID, itemId);
                         }
@@ -139,21 +146,10 @@ public class OutlineAdapter extends RecyclerView.Adapter<OutlineAdapter.OutlineI
 		this.items.add(node);
 	}
 
-	public void insert(OrgNode node, int index) {
-		this.items.add(index, node);
-	}
-	
-	public void insertAll(ArrayList<OrgNode> nodes, int position) {
-        Collections.reverse(nodes);
-        for (OrgNode node: nodes)
-			insert(node, position);
-//		notifyDataSetInvalidated();
-	}
-
-	
 	@Override
 	public long getItemId(int position) {
-		OrgNode node = items.get(position);
+        if(position < numExtraItems) return -1;
+		OrgNode node = items.get(position - numExtraItems);
 		return node.id;
 	}
 
