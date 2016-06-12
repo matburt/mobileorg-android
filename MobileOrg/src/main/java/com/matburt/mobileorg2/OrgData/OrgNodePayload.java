@@ -155,7 +155,7 @@ public class OrgNodePayload {
 	}
 	
 	
-	private Pattern getTimestampMatcher(OrgNodeTimeDate.TYPE type) {
+	static public Pattern getTimestampMatcher(OrgNodeTimeDate.TYPE type) {
 		final String timestampPattern =  "<([^>]+)>" + "(?:\\s*--\\s*<([^>]+)>)?";
 		final String timestampLookbehind = "(?<!(?:SCHEDULED:|DEADLINE:)\\s?)";
 		

@@ -8,9 +8,14 @@ import android.database.sqlite.SQLiteStatement;
 
 import com.matburt.mobileorg2.OrgData.OrgContract.OrgData;
 
+import java.util.HashMap;
+
 public class OrgDatabase extends SQLiteOpenHelper {
 	private static final String DATABASE_NAME = "MobileOrg.db";
 	private static final int DATABASE_VERSION = 5;
+
+	public  static final String Scheduled = "SCHEDULED";
+	public static final String Deadline = "DEADLINE";
 
 	private int orgdata_nameColumn;
 	private int orgdata_todoColumn;
@@ -115,30 +120,18 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		return orgdataInsertHelper.execute();
 	}
 		
-	public void fastInsertNodePayloadAndTimestamps(Long id, final String payload) {
-		if(addPayloadStatement == null)
+	public void fastInsertNodePayload(Long id, final String payload, final HashMap<String, String> timestamps) {
+		if (addPayloadStatement == null)
 			addPayloadStatement = getWritableDatabase()
-					.compileStatement("UPDATE orgdata SET payload=? WHERE _id=?");
+					.compileStatement("UPDATE orgdata SET payload=?, scheduled=?, deadline=? WHERE _id=?");
 
 		addPayloadStatement.bindString(1, payload);
-		addPayloadStatement.bindLong(2, id);
+		addPayloadStatement.bindString(2, timestamps.get(Scheduled)!=null ? timestamps.get(Scheduled): "NULL");
+		addPayloadStatement.bindString(2, timestamps.get(Deadline)!=null ? timestamps.get(Deadline): "NULL");
+		addPayloadStatement.bindLong(4, id);
 		addPayloadStatement.execute();
-
-
-		OrgNodePayload orgNodePayload = new OrgNodePayload(payload);
-		String scheduled = orgNodePayload.getScheduled();
-		String deadline = orgNodePayload.getDeadline();
-		if(!scheduled.equals("") || deadline.equals("")){
-			if(addTimestampsStatement == null)
-				addTimestampsStatement = getWritableDatabase()
-						.compileStatement("UPDATE orgdata SET Timestamps=? WHERE _id=?");
-
-			addTimestampsStatement.bindString(1, Timestamps);
-			addTimestampsStatement.bindLong(2, id);
-			addTimestampsStatement.execute();
-		}
-
 	}
+
 	
 	private void prepareOrgdataInsert() {
 		if(this.orgdataInsertHelper == null) {

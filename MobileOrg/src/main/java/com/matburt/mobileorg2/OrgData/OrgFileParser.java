@@ -9,16 +9,19 @@ import com.matburt.mobileorg2.util.PreferenceUtils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.security.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class OrgFileParser {
+	public static final String BLOCK_SEPARATOR_PREFIX = "#HEAD#";
 
-	private ContentResolver resolver;    
+	private ContentResolver resolver;
     private OrgDatabase db;
  
     private ParseStack parseStack;
@@ -27,7 +30,8 @@ public class OrgFileParser {
 	private OrgNodeParser orgNodeParser;
 	private HashSet<String> excludedTags;
     private HashMap<Integer, Integer> position;
-	
+	private HashMap<String, String> timestamps;
+
 	public OrgFileParser(OrgDatabase db, ContentResolver resolver) {
 		this.db = db;
 		this.resolver = resolver;
@@ -58,12 +62,14 @@ public class OrgFileParser {
 	public void parse(OrgFile orgFile, BufferedReader breader) {
 		init(orgFile);
 		db.beginTransaction();
+		timestamps = new HashMap<>();
+
 		try {
 			String currentLine;
 			while ((currentLine = breader.readLine()) != null) parseLine(currentLine);
 
 			// Add payload to the final node
-			db.fastInsertNodePayloadAndTimestamps(parseStack.getCurrentNodeId(), this.payload.toString());
+			db.fastInsertNodePayload(parseStack.getCurrentNodeId(), this.payload.toString(), timestamps);
 
 		} catch (IOException e) {}
 		
@@ -71,16 +77,19 @@ public class OrgFileParser {
 
 	}
 
+
 	private void parseLine(String line) {
 		if (TextUtils.isEmpty(line))
 			return;
 
 		int numstars = numberOfStars(line);
 		if (numstars > 0) {
-			db.fastInsertNodePayloadAndTimestamps(parseStack.getCurrentNodeId(), this.payload.toString());
+			timestamps = new HashMap<>();
+			db.fastInsertNodePayload(parseStack.getCurrentNodeId(), this.payload.toString(), timestamps);
 			this.payload = new StringBuilder();
 			parseHeading(line, numstars);
 		} else {
+			timestamps = parseTimestamps(line);
 			payload.append(line).append("\n");
 		}
 	}
@@ -117,6 +126,33 @@ public class OrgFileParser {
 			return matcher.end(1) - matcher.start(1);
 		} else
 			return 0;
+	}
+
+
+	/**
+	 * Parse the line for any timestamps
+	 * @param line
+	 * @return A HashMap<String,String> where first key is timestamp type and second is value.
+	 * Return null if no timestamp found.
+	 */
+	private HashMap<String, String> parseTimestamps(String line){
+		HashMap<String, String> result = new HashMap<>();
+
+		HashMap<String, OrgNodeTimeDate.TYPE> timestamps = new HashMap<>();
+		timestamps.put(OrgDatabase.Scheduled, OrgNodeTimeDate.TYPE.Scheduled);
+		timestamps.put(OrgDatabase.Deadline, OrgNodeTimeDate.TYPE.Deadline);
+
+
+		for(Map.Entry<String, OrgNodeTimeDate.TYPE> entry: timestamps.entrySet()){
+			Matcher matcher = OrgNodePayload.getTimestampMatcher(entry.getValue())
+					.matcher(payload);
+
+			if (matcher.find()) {
+				result.put(entry.getKey(), matcher.group());
+			}
+		}
+
+		return result;
 	}
 	
     
