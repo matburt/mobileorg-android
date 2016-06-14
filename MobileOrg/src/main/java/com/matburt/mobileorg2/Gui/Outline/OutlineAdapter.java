@@ -18,6 +18,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.matburt.mobileorg2.Gui.Theme.DefaultTheme;
 import com.matburt.mobileorg2.OrgData.OrgContract;
@@ -97,6 +98,7 @@ public class OutlineAdapter extends RecyclerView.Adapter<OutlineAdapter.OutlineI
             @Override
             public void onClick(View v) {
                 if (getSelectedItemCount() > 0) {
+                    if(!isSelectableItem(position)) return;
                     toggleSelection(position);
                 } else {
                     if (mTwoPanes) {
@@ -128,15 +130,28 @@ public class OutlineAdapter extends RecyclerView.Adapter<OutlineAdapter.OutlineI
             }
         });
 
+
         holder.mView.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
+                // Do nothing when user select Agenda.org or Todos.org
+
+                if(!isSelectableItem(position)) return true;
                 toggleSelection(position);
                 return true;
             }
         });
 
 	}
+
+    private boolean isSelectableItem(int position){
+        if(position < numExtraItems){
+            String text = activity.getResources().getString(R.string.unselectable_item);
+            Toast.makeText(activity, text, Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        return true;
+    }
 
 	public void clear() {
         this.items.clear();
@@ -252,6 +267,7 @@ public class OutlineAdapter extends RecyclerView.Adapter<OutlineAdapter.OutlineI
     private void deleteSelectedFiles(){
         List<Integer> selectedItems = getSelectedItems();
         for(Integer num: selectedItems){
+            num -= numExtraItems;
             OrgNode node = items.get(num);
             try {
                 OrgFile file = new OrgFile(node.fileId, resolver);

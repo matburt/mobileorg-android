@@ -120,14 +120,14 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		return orgdataInsertHelper.execute();
 	}
 		
-	public void fastInsertNodePayload(Long id, final String payload, final HashMap<String, Integer> timestamps) {
+	public void fastInsertNodePayload(Long id, final String payload, final HashMap<OrgNodeTimeDate.TYPE, Long> timestamps) {
 		if (addPayloadStatement == null)
 			addPayloadStatement = getWritableDatabase()
 					.compileStatement("UPDATE orgdata SET payload=?, scheduled=?, deadline=? WHERE _id=?");
 
 		addPayloadStatement.bindString(1, payload);
-		addPayloadStatement.bindLong(2, timestamps.get(Scheduled)!=null ? timestamps.get(Scheduled): -1);
-		addPayloadStatement.bindLong(3, timestamps.get(Deadline)!=null ? timestamps.get(Deadline): -1);
+		addPayloadStatement.bindLong(2, timestamps.get(OrgNodeTimeDate.TYPE.Scheduled)!=null ? timestamps.get(OrgNodeTimeDate.TYPE.Scheduled): -1);
+		addPayloadStatement.bindLong(3, timestamps.get(OrgNodeTimeDate.TYPE.Deadline)!=null ? timestamps.get(OrgNodeTimeDate.TYPE.Deadline): -1);
 		addPayloadStatement.bindLong(4, id);
 		addPayloadStatement.execute();
 	}

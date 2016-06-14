@@ -156,4 +156,19 @@ public class OrgNodeTimeDate {
 			return OrgNodeTimeDate.typeToFormated(type) + "<" + timestamp + ">";
 		}
 	}
+
+	static public Pattern getTimestampMatcher(OrgNodeTimeDate.TYPE type) {
+		final String timestampPattern =  "<([^>]+)>" + "(?:\\s*--\\s*<([^>]+)>)?";
+		final String timestampLookbehind = "\\s*(?<!(?:SCHEDULED:|DEADLINE:)\\s?)";
+
+		String pattern;
+		if(type == OrgNodeTimeDate.TYPE.Timestamp)
+			pattern = timestampLookbehind + "(" + timestampPattern + ")";
+		else
+			pattern = "\\s*(" + OrgNodeTimeDate.typeToFormated(type) + "\\s*" + timestampPattern + ")";
+
+
+		return Pattern.compile(pattern);
+	}
+
 }

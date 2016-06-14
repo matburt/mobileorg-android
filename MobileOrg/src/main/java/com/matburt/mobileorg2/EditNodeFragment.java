@@ -156,8 +156,8 @@ public class EditNodeFragment extends Fragment {
         }
     }
     static private void setupTimeStampButtons() {
-        String scheduleText = node.getOrgNodePayload().getScheduled();
-        String deadlineText = node.getOrgNodePayload().getDeadline();
+        String scheduleText = node.getOrgNodePayload().getTimestamp(OrgNodeTimeDate.TYPE.Scheduled);
+        String deadlineText = node.getOrgNodePayload().getTimestamp(OrgNodeTimeDate.TYPE.Deadline);
         if(scheduleText.length() > 0) schedule.setText(scheduleText);
         else schedule.setText(schedule.getResources().getString(R.string.scheduled));
 
@@ -237,7 +237,7 @@ public class EditNodeFragment extends Fragment {
                             minuteOfDay
                     )
             );
-            Log.v("timestamp","test : "+node.getOrgNodePayload().getScheduled());
+            Log.v("timestamp","test : "+node.getOrgNodePayload().getTimestamp(OrgNodeTimeDate.TYPE.Scheduled));
 
         }
     }

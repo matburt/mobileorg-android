@@ -16,14 +16,18 @@ public class OrgNodePayload {
 	/** Can be :ID: or :ORIGINAL_ID: (for nodes agendas.org) */
 	private String id = null;
 
-	private String scheduled = null;
-	private String deadline = null;
-	private String timestamp = null;
-	
+
+	private HashMap<OrgNodeTimeDate.TYPE, String> timestampPayloads;
+
 	public OrgNodePayload(String payload) {
 		if(payload == null)
 			payload = "";
+
+		timestampPayloads = new HashMap<>();
 		set(payload);
+
+
+//		for(Timestamp timestamp: Timestamp.values()) timestampPayloads.put(timestamp, "");
 	}
 	
 	public void set(String payload) {
@@ -33,10 +37,8 @@ public class OrgNodePayload {
 	
 	private void resetCachedValues() {
 		this.cleanPayload = null;
-		this.scheduled = null;
-		this.deadline = null;
-		this.timestamp = null;
 		this.id = null;
+		this.timestampPayloads.clear();
 	}
 	
 	public String get() {
@@ -120,49 +122,22 @@ public class OrgNodePayload {
 	}
 	
 	private void cleanPayload() {
-		this.scheduled = getScheduled();
-		this.deadline = getDeadline();
-		this.timestamp = getTimestamp();
+		for(OrgNodeTimeDate.TYPE type: OrgNodeTimeDate.TYPE.values())
+			getTimestamp(type);
 
 		stripProperties();
 		stripFileProperties();
 		trimEachLine();
 	}
-	
-	public String getScheduled() {
-		if(this.scheduled == null)
-			this.scheduled = stripDate(OrgNodeTimeDate.TYPE.Scheduled);
-		
-		return this.scheduled;
-	}
-	
-	public String getDeadline() {
-		if(this.deadline == null)
-			this.deadline = stripDate(OrgNodeTimeDate.TYPE.Deadline);
-		
-		return this.deadline;
-	}
-	
-	public String getTimestamp() {
-		if(this.timestamp == null)
-			this.timestamp = stripDate(OrgNodeTimeDate.TYPE.Timestamp);
-		
-		return this.timestamp;
-	}
-	
-	
-	static public Pattern getTimestampMatcher(OrgNodeTimeDate.TYPE type) {
-		final String timestampPattern =  "<([^>]+)>" + "(?:\\s*--\\s*<([^>]+)>)?";
-		final String timestampLookbehind = "(?<!(?:SCHEDULED:|DEADLINE:)\\s?)";
-		
-		String pattern;
-		if(type == OrgNodeTimeDate.TYPE.Timestamp)
-			pattern = timestampLookbehind + "(" + timestampPattern + ")";
-		else
-			pattern = "(" + OrgNodeTimeDate.typeToFormated(type) + "\\s*" + timestampPattern + ")";
 
+	public String getTimestamp(OrgNodeTimeDate.TYPE type) {
+		String result = timestampPayloads.get(type);
+		if(result != null) return result; // return cached result if any
 
-		return Pattern.compile(pattern);
+		result = stripDate(type);
+		timestampPayloads.put(type, result);
+
+		return result;
 	}
 
     public static String getDateFromTimestampMatcher(Matcher matcher){
@@ -180,7 +155,7 @@ public class OrgNodePayload {
     private String stripDate(OrgNodeTimeDate.TYPE type) {
 		prepareCleanedPayload();
 
-		Matcher matcher = getTimestampMatcher(type).matcher(
+		Matcher matcher = OrgNodeTimeDate.getTimestampMatcher(type).matcher(
 				cleanPayload.toString());
 
         String result = getDateFromTimestampMatcher(matcher);
@@ -191,7 +166,7 @@ public class OrgNodePayload {
 	}
 	
 	public void insertOrReplaceDate(OrgNodeTimeDate date) {
-		Matcher matcher = getTimestampMatcher(date.type).matcher(payload);
+		Matcher matcher = OrgNodeTimeDate.getTimestampMatcher(date.type).matcher(payload);
 		
 		String formatedDate = date.toFormatedString();
 		
@@ -275,27 +250,15 @@ public class OrgNodePayload {
 	public ArrayList<OrgNodeDate> getDates(String title) {
 		ArrayList<OrgNodeDate> result = new ArrayList<OrgNodeDate>();
 
-		try {
-			OrgNodeDate scheduledEntry = new OrgNodeDate(getScheduled());
-			scheduledEntry.type = "SC: ";
-			scheduledEntry.setTitle(title);
-			result.add(scheduledEntry);
-		} catch (IllegalArgumentException e) {}
-		
-		try {
-			OrgNodeDate deadlineEntry = new OrgNodeDate(getDeadline());
-			deadlineEntry.type = "DL: ";
-			deadlineEntry.setTitle(title);
-			result.add(deadlineEntry);
-		} catch (IllegalArgumentException e) {}
+        for(OrgNodeTimeDate.TYPE type: OrgNodeTimeDate.TYPE.values()){
+            try {
+                OrgNodeDate scheduledEntry = new OrgNodeDate(getTimestamp(type));
+                scheduledEntry.type = type;
+                scheduledEntry.setTitle(title);
+                result.add(scheduledEntry);
+            } catch (IllegalArgumentException e) {}
+        }
 
-		try {
-			OrgNodeDate timestampEntry = new OrgNodeDate(getTimestamp());
-			timestampEntry.type = "";
-			timestampEntry.setTitle(title);
-			result.add(timestampEntry);
-		} catch (IllegalArgumentException e) {}
-		
 		return result;
 	}
 	

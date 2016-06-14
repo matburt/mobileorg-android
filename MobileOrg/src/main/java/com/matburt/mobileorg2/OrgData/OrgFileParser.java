@@ -3,18 +3,16 @@ package com.matburt.mobileorg2.OrgData;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.text.TextUtils;
-import android.util.Log;
-
 
 import com.matburt.mobileorg2.util.PreferenceUtils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.security.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -31,11 +29,12 @@ public class OrgFileParser {
 	private OrgNodeParser orgNodeParser;
 	private HashSet<String> excludedTags;
     private HashMap<Integer, Integer> position;
-	private HashMap<String, Integer> timestamps;
+	private HashMap<OrgNodeTimeDate.TYPE, Long> timestamps;
 
 	public OrgFileParser(OrgDatabase db, ContentResolver resolver) {
 		this.db = db;
 		this.resolver = resolver;
+		timestamps = new HashMap<>();
 	}
 
 	private void init(OrgFile orgFile) {
@@ -63,7 +62,6 @@ public class OrgFileParser {
 	public void parse(OrgFile orgFile, BufferedReader breader) {
 		init(orgFile);
 		db.beginTransaction();
-		timestamps = new HashMap<>();
 
 		try {
 			String currentLine;
@@ -85,12 +83,12 @@ public class OrgFileParser {
 
 		int numstars = numberOfStars(line);
 		if (numstars > 0) {
-			timestamps = new HashMap<>();
+			timestamps.clear();
 			db.fastInsertNodePayload(parseStack.getCurrentNodeId(), this.payload.toString(), timestamps);
 			this.payload = new StringBuilder();
 			parseHeading(line, numstars);
 		} else {
-			timestamps = parseTimestamps(line);
+			parseTimestamps(line);
 			payload.append(line).append("\n");
 		}
 	}
@@ -136,23 +134,24 @@ public class OrgFileParser {
 	 * @return A HashMap<String,int> where first key is timestamp type and second is value.
 	 * Return null if no timestamp found.
 	 */
-	private HashMap<String, Integer> parseTimestamps(String line){
-		HashMap<String, Integer> result = new HashMap<>();
+	private void parseTimestamps(String line){
+		timestamps.clear();
+		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
 
-		HashMap<String, OrgNodeTimeDate.TYPE> timestamps = new HashMap<>();
-		timestamps.put(OrgDatabase.Scheduled, OrgNodeTimeDate.TYPE.Scheduled);
-		timestamps.put(OrgDatabase.Deadline, OrgNodeTimeDate.TYPE.Deadline);
-
-
-		for(Map.Entry<String, OrgNodeTimeDate.TYPE> entry: timestamps.entrySet()){
-			Matcher matcher = OrgNodePayload.getTimestampMatcher(entry.getValue())
-					.matcher(payload);
+		for(OrgNodeTimeDate.TYPE type: OrgNodeTimeDate.TYPE.values()){
+			Matcher matcher = OrgNodeTimeDate.getTimestampMatcher(type)
+					.matcher(line);
 
             String str = OrgNodePayload.getDateFromTimestampMatcher(matcher);
-            result.put(entry.getKey(), 0);
-        }
+			if(str.equals("")) continue;
+			try {
+				timestamps.put(type, format.parse(str).getTime());
+			} catch (ParseException e) {
+				e.printStackTrace();
+			}
+		}
 
-		return result;
+
 	}
 	
     

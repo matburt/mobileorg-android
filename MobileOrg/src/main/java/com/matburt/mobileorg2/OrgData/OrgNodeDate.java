@@ -6,6 +6,7 @@ import android.util.Log;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -14,7 +15,7 @@ public class OrgNodeDate {
 	public long beginTime = 0;
 	public long endTime = 0;
 	public int allDay = 0;
-	public String type = "";
+	public OrgNodeTimeDate.TYPE type;
 	private String title = "";
 
 	private static final SimpleDateFormat dateTimeformatter = new SimpleDateFormat("yyyy-MM-dd HH:mm");
@@ -95,6 +96,17 @@ public class OrgNodeDate {
 	}
 	
 	public String getTitle() {
-		return this.type + this.title;
+		return getTimestampTypeHint(this.type) + this.title;
+	}
+
+	static private String getTimestampTypeHint(OrgNodeTimeDate.TYPE type) {
+		switch (type) {
+			case Deadline:
+				return "DL : ";
+			case Scheduled:
+				return "SC : ";
+			default:
+				return "";
+		}
 	}
 }
