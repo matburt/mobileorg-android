@@ -26,6 +26,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.HashSet;
 
 public class DropboxSynchronizer implements SynchronizerInterface {
 
@@ -69,6 +70,11 @@ public class DropboxSynchronizer implements SynchronizerInterface {
         return session;
     }
 
+    @Override
+    public String getFilesDir() {
+        return null;
+    }
+
     public boolean isConfigured() {
         return isLoggedIn && !this.remoteIndexPath.equals("");
     }
@@ -110,7 +116,13 @@ public class DropboxSynchronizer implements SynchronizerInterface {
         }
 	}
 
-    
+    @Override
+    public HashSet<String> synchronize() {
+
+        return null;
+    }
+
+
     /**
      * This handles authentication if the user's token & secret
      * are stored locally, so we don't have to store user-name & password

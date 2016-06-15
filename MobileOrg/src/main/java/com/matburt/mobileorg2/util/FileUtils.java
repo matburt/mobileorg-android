@@ -155,17 +155,21 @@ public class FileUtils {
 		writer.close();
 	}
 
-	public void remove() {
-		String storageMode = getStorageMode();
-		if (storageMode.equals("internal") || storageMode.equals("")) {
-			context.deleteFile(this.fileName);
-		} else if (storageMode.equals("sdcard")) {
-			File root = Environment.getExternalStorageDirectory();
-			File morgDir = new File(root, "mobileorg");
-			File morgFile = new File(morgDir, this.fileName);
-			morgFile.delete();
+	public static boolean deleteFile(File file) {
+		if (file != null) {
+			if (file.isDirectory()) {
+				String[] children = file.list();
+				for (int i = 0; i < children.length; i++) {
+					boolean success = deleteFile(new File(file, children[i]));
+					if (!success) {
+						return false;
+					}
+				}
+			}
+			return file.delete();
 		}
-	}
+		return false;
+    }
 
 	private String getStorageMode() {
 		return PreferenceManager.getDefaultSharedPreferences(this.context)

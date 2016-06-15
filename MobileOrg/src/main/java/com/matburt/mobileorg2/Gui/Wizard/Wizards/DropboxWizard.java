@@ -1,5 +1,6 @@
 package com.matburt.mobileorg2.Gui.Wizard.Wizards;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -165,6 +166,7 @@ public class DropboxWizard extends Wizard {
 		
 		editor.putString("syncSource", "dropbox");
 		editor.putString("dropboxPath", directoryAdapter.getCheckedDirectory() + "/");
-		editor.commit();
+		editor.apply();
+		((Activity) context).finish();
 	}
 }

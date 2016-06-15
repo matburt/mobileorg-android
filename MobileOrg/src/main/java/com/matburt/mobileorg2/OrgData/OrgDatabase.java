@@ -14,9 +14,6 @@ public class OrgDatabase extends SQLiteOpenHelper {
 	private static final String DATABASE_NAME = "MobileOrg.db";
 	private static final int DATABASE_VERSION = 5;
 
-	public  static final String Scheduled = "SCHEDULED";
-	public static final String Deadline = "DEADLINE";
-
 	private int orgdata_nameColumn;
 	private int orgdata_todoColumn;
 	private int orgdata_tagsColumn;

@@ -1,5 +1,6 @@
 package com.matburt.mobileorg2.Gui.Wizard.Wizards;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.HandlerThread;
@@ -95,6 +96,7 @@ public class WebDAVWizard extends Wizard {
 		editor.putString("webPass", webdavPass.getText().toString());
 		editor.putString("webUser", webdavUser.getText().toString());
 		
-		editor.commit();
+		editor.apply();
+		((Activity) context).finish();
 	}
 }

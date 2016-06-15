@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringReader;
+import java.util.HashSet;
 
 public class SSHSynchronizer implements SynchronizerInterface {
 	private final String LT = "MobileOrg";
@@ -109,7 +110,12 @@ public class SSHSynchronizer implements SynchronizerInterface {
         return directoryActual;
     }
 
-	@Override
+    @Override
+    public  String getFilesDir() {
+        return context.getFilesDir() + "/" + JGitWrapper.GIT_DIR + "/";
+    }
+
+    @Override
 	public boolean isConfigured() {
         return !(this.appSettings.getString("scpPath", "").equals("")
                 || this.appSettings.getString("scpUser", "").equals("")
@@ -142,6 +148,10 @@ public class SSHSynchronizer implements SynchronizerInterface {
 			Log.d(LT, e.getLocalizedMessage());
             throw e;
 		}
+    }
+
+    public HashSet<String> synchronize(){
+        return JGitWrapper.pull(context);
     }
 
     public void putRemoteFile(String filename, String contents) throws IOException {
@@ -203,4 +213,6 @@ public class SSHSynchronizer implements SynchronizerInterface {
 
         return true;
     }
+
+
 }

@@ -20,8 +20,7 @@ public class OrgNodeTree {
     }
 
     private Visibility visibility;
-    private ArrayList<OrgNodeTree> children;
-    private static long idConstructor;
+    public ArrayList<OrgNodeTree> children;
 
     private OrgNodeTree(OrgNode root, ContentResolver resolver, boolean isRecursive){
         node = root;
@@ -90,19 +89,19 @@ public class OrgNodeTree {
      */
     public NavigableMap<Long,OrgNodeTree> getVisibleNodesArray(){
         TreeMap<Long,OrgNodeTree> result = new TreeMap<>();
-        idConstructor = -1;
-        fillMap(result, this);
+        long idConstructor = -1;
+        fillMap(result, this, idConstructor);
         return result;
     }
 
-    private static void fillMap(TreeMap<Long,OrgNodeTree> map, OrgNodeTree tree){
+    private static void fillMap(TreeMap<Long,OrgNodeTree> map, OrgNodeTree tree, long idConstructor){
         // The root node is the filename node
         // It must not be added
-        if(idConstructor > -1) map.put(idConstructor++, tree);
-        else idConstructor++;
+        map.put(idConstructor++, tree);
 
         if(tree.visibility == Visibility.folded) return;
 
-        for(OrgNodeTree child: tree.children) fillMap(map, child);
+//        for(OrgNodeTree child: tree.children) fillMap(map, child);
+        for(OrgNodeTree child: tree.children) map.put(idConstructor++, child);
     }
 }

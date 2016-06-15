@@ -11,6 +11,7 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.HashSet;
 
 public class SDCardSynchronizer implements SynchronizerInterface {	
 
@@ -23,9 +24,14 @@ public class SDCardSynchronizer implements SynchronizerInterface {
 	
 		this.remotePath = new File(remoteIndexPath) + "/";
 	}
-    
 
-    public boolean isConfigured() {
+
+	@Override
+	public String getFilesDir() {
+		return null;
+	}
+
+	public boolean isConfigured() {
 		return !remoteIndexPath.equals("");
 	}
 
@@ -43,6 +49,12 @@ public class SDCardSynchronizer implements SynchronizerInterface {
 		File file = new File(filePath);
 		FileInputStream fileIS = new FileInputStream(file);
 		return new BufferedReader(new InputStreamReader(fileIS));
+	}
+
+	@Override
+	public HashSet<String> synchronize() {
+
+		return null;
 	}
 
 

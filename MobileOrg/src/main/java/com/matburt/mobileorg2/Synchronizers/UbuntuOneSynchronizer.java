@@ -35,6 +35,7 @@ import java.net.URI;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.HashSet;
 
 import oauth.signpost.commonshttp.CommonsHttpOAuthConsumer;
 import oauth.signpost.exception.OAuthException;
@@ -100,6 +101,11 @@ private static final String BASE_TOKEN_NAME = "Ubuntu One @ MobileOrg:";
 
     public String testConnection(String user, String pass) {
         return "";
+    }
+
+    @Override
+    public String getFilesDir() {
+        return null;
     }
 
     public boolean isConfigured() {
@@ -207,6 +213,12 @@ private static final String BASE_TOKEN_NAME = "Ubuntu One @ MobileOrg:";
         } catch (Exception e) {
             Log.e("MobileOrg", "Exception in Ubuntu One Fetch File: " + e.toString());
         }
+        return null;
+    }
+
+    @Override
+    public HashSet<String> synchronize() {
+
         return null;
     }
 

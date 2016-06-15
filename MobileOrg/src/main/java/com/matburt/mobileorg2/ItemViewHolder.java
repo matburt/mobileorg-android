@@ -23,7 +23,6 @@ import java.util.regex.Pattern;
 public class ItemViewHolder extends RecyclerView.ViewHolder {
     public final View mView;
     public Button sameLevel, childLevel, deleteNodeButton;
-    public OrgNodeTree mItem;
     private TextView titleView, contentView;
     public Button todoButton, priorityButton;
 
@@ -110,16 +109,15 @@ public class ItemViewHolder extends RecyclerView.ViewHolder {
         }
     }
 
-    public void setup(OrgNode node, boolean isSelected, Context context) {
-        this.mItem.node = node;
-
+    public void setup(OrgNodeTree root, boolean isSelected, Context context) {
+        OrgNode node = root.node;
         SpannableStringBuilder titleSpan = new SpannableStringBuilder(node.name);
 
         setupTitle(node.name, titleSpan);
         setupPriority(node.priority);
         TodoDialog.setupTodoButton(context, node, todoButton, true);
 
-        if(this.mItem.getVisibility()== OrgNodeTree.Visibility.folded)
+        if(root.getVisibility()== OrgNodeTree.Visibility.folded)
             setupChildrenIndicator(node, titleSpan, context);
 
 //                titleSpan.setSpan(new StyleSpan(Typeface.NORMAL), 0, titleSpan.length(), 0);

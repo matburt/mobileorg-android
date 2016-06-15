@@ -1,11 +1,18 @@
 package com.matburt.mobileorg2.Synchronizers;
 
+import android.content.Context;
+
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.security.cert.CertificateException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 
 public interface SynchronizerInterface {
+
+	String getFilesDir();
 
 	/**
 	 * Called before running the synchronizer to ensure that it's configuration
@@ -35,6 +42,9 @@ public interface SynchronizerInterface {
 	 */
 	BufferedReader getRemoteFile(String filename)
         throws FileNotFoundException, IOException, CertificateException;
+
+	HashSet<String> synchronize();
+
 
 	/**
 	 * Use this to disconnect from any services and cleanup.

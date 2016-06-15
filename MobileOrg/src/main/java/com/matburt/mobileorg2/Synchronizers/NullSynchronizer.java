@@ -1,10 +1,18 @@
 package com.matburt.mobileorg2.Synchronizers;
 
+import android.content.Context;
+
 import java.io.BufferedReader;
+import java.util.HashSet;
 
 public class NullSynchronizer implements SynchronizerInterface {
 
     public NullSynchronizer() {
+    }
+
+    @Override
+    public String getFilesDir() {
+        return null;
     }
 
     public boolean isConfigured() {
@@ -15,6 +23,12 @@ public class NullSynchronizer implements SynchronizerInterface {
     }
 
     public BufferedReader getRemoteFile(String filename) {
+        return null;
+    }
+
+    @Override
+    public HashSet<String> synchronize() {
+
         return null;
     }
 

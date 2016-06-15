@@ -27,6 +27,7 @@ import java.net.URL;
 import java.security.SecureRandom;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.HashSet;
 import java.util.regex.Pattern;
 
 import javax.net.ssl.HostnameVerifier;
@@ -158,7 +159,12 @@ public class WebDAVSynchronizer implements SynchronizerInterface {
         }
     }
 
-	public boolean isConfigured() {
+    @Override
+    public String getFilesDir() {
+        return null;
+    }
+
+    public boolean isConfigured() {
 		if (this.remoteIndexPath.equals(""))
 			return false;
 
@@ -202,6 +208,12 @@ public class WebDAVSynchronizer implements SynchronizerInterface {
             throw e;
         }
 	}
+
+    @Override
+    public HashSet<String> synchronize() {
+
+        return null;
+    }
 
     /* See: http://stackoverflow.com/questions/1217141/self-signed-ssl-acceptance-android */
     private void handleTrustRelationship(Context c) {

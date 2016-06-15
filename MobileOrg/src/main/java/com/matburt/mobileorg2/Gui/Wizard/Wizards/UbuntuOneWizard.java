@@ -1,5 +1,6 @@
 package com.matburt.mobileorg2.Gui.Wizard.Wizards;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.HandlerThread;
@@ -125,6 +126,7 @@ public class UbuntuOneWizard extends Wizard {
 		editor.putString("ubuntuOnePath",
 				directoryAdapter.getCheckedDirectory() + "/");
 		
-		editor.commit();
+		editor.apply();
+		((Activity) context).finish();
 	}
 }

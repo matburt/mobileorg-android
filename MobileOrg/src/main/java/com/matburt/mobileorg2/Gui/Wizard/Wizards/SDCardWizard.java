@@ -1,5 +1,6 @@
 package com.matburt.mobileorg2.Gui.Wizard.Wizards;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
@@ -57,6 +58,8 @@ public class SDCardWizard extends Wizard {
 		editor.putString("indexFilePath",
 				directoryAdapter.getCheckedDirectory());
 		
-		editor.commit();
+		editor.apply();
+		((Activity) context).finish();
+
 	}
 }

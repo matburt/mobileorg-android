@@ -24,6 +24,7 @@ import com.matburt.mobileorg2.Synchronizers.UbuntuOneSynchronizer;
 import com.matburt.mobileorg2.Synchronizers.WebDAVSynchronizer;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 public class SyncService extends Service implements
 		SharedPreferences.OnSharedPreferenceChangeListener {
@@ -123,7 +124,7 @@ public class SyncService extends Service implements
 
 		Thread syncThread = new Thread() {
 			public void run() {
-				ArrayList<String> changedFiles = synchronizer.runSynchronizer(parser);				
+				HashSet<String> changedFiles = synchronizer.runSynchronizer(parser);
 				String[] files = changedFiles.toArray(new String[changedFiles.size()]);
 				if(calendarEnabled) {
 					Intent calIntent = new Intent(getBaseContext(), CalendarSyncService.class);

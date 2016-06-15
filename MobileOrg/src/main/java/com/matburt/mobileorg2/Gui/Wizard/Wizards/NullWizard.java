@@ -1,5 +1,6 @@
 package com.matburt.mobileorg2.Gui.Wizard.Wizards;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
@@ -38,6 +39,7 @@ public class NullWizard extends Wizard {
 		SharedPreferences.Editor editor = appSettings.edit();
 		
 		editor.putString("syncSource", "null");
-		editor.commit();
+		editor.apply();
+		((Activity) context).finish();
 	}
 }

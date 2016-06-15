@@ -20,7 +20,9 @@ import com.matburt.mobileorg2.util.OrgFileNotFoundException;
 import com.matburt.mobileorg2.util.OrgUtils;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
@@ -64,44 +66,53 @@ public class Synchronizer {
     /**
      * @return List of files that where changed.
      */
-    public ArrayList<String> runSynchronizer(OrgFileParser parser) {
+    public HashSet<String> runSynchronizer(OrgFileParser parser) {
         if(syncher == null) {
             notify.errorNotification("Sync not configured");
-            return new ArrayList<>();
+            return new HashSet<>();
         }
 
         if (!syncher.isConfigured()) {
             notify.errorNotification("Sync not configured");
-            return new ArrayList<>();
+            return new HashSet<>();
         }
 
         if (!syncher.isConnectable()) {
             notify.errorNotification("No network connection available");
-            return new ArrayList<>();
+            return new HashSet<>();
         }
 
         try {
             announceStartSync();
+            HashSet<String> changedFiles = syncher.synchronize();
 
-            String remoteIndexContents = FileUtils.read(syncher.getRemoteFile(FileUtils.INDEX_FILE));
-            String remoteChecksumContents = FileUtils.read(syncher.getRemoteFile(FileUtils.CHECKSUM_FILE));
+            for (String filename : changedFiles) {
+                OrgFile orgFile = new OrgFile(filename, filename,"");
+                FileReader fileReader = new FileReader(syncher.getFilesDir() + filename);
+                BufferedReader bufferedReader = new BufferedReader(fileReader);
 
-            HashMap<String,String> remoteChecksums = OrgFileParser.getChecksums(remoteChecksumContents);
-            HashMap<String,String> filenameMap     = parseIndexFile(remoteIndexContents);
+                OrgFileParser.parseFile(orgFile, bufferedReader, parser, context);
+            }
 
-            discardAgenda(filenameMap, remoteChecksums);
-
-            ArrayList<String> changedFiles = pullChangedFiles(parser, remoteChecksums, filenameMap);
-            Log.v("sync","changed files : "+changedFiles.size());
-            pushCaptures();
-            pushNewFiles(filenameMap.keySet(), remoteIndexContents, remoteChecksumContents);
+//            String remoteIndexContents = FileUtils.read(syncher.getRemoteFile(FileUtils.INDEX_FILE));
+//            String remoteChecksumContents = FileUtils.read(syncher.getRemoteFile(FileUtils.CHECKSUM_FILE));
+//
+//            HashMap<String,String> remoteChecksums = OrgFileParser.getChecksums(remoteChecksumContents);
+//            HashMap<String,String> filenameMap     = parseIndexFile(remoteIndexContents);
+//
+//            discardAgenda(filenameMap, remoteChecksums);
+//
+//            ArrayList<String> changedFiles = pullChangedFiles(parser, remoteChecksums, filenameMap);
+//            Log.v("sync","changed files : "+changedFiles.size());
+//            pushCaptures();
+//            pushNewFiles(filenameMap.keySet(), remoteIndexContents, remoteChecksumContents);
             announceSyncDone();
             return changedFiles;
         } catch (Exception e) {
             showErrorNotification(e);
             Log.e("Synchronizer", "Error synchronizing", e);
             OrgUtils.announceSyncDone(context);
-            return new ArrayList<>();
+            return new HashSet<>();
         }
     }
 
@@ -221,7 +232,9 @@ public class Synchronizer {
 
             OrgFile orgFile = new OrgFile(filename, filenameMap.get(filename),
                     remoteChecksums.get(filename));
-            getAndParseFile(orgFile, parser);
+                   BufferedReader breader = syncher.getRemoteFile(orgFile.filename);
+            OrgFileParser.parseFile(orgFile, breader, parser, context);
+
         }
 
         announceProgressDownload("", changedFiles.size() + 1, changedFiles.size() + 2);
@@ -272,43 +285,6 @@ public class Synchronizer {
         return filesToGet;
     }
 
-    /**
-     * Remove local OrgFile from the database
-     * Parse remote file, add it and all its OrdData nodes to the database
-     * @param orgFile
-     * @param parser
-     * @throws CertificateException
-     * @throws IOException
-     */
-    private void getAndParseFile(OrgFile orgFile, OrgFileParser parser)
-            throws CertificateException, IOException {
-        Log.v("getter","parsing : "+orgFile);
-        BufferedReader breader = syncher.getRemoteFile(orgFile.filename);
-
-        // TODO Generate checksum of file and compare to remoteChecksum
-
-        try {
-            new OrgFile(orgFile.filename, resolver).removeFile(resolver);
-        } catch (OrgFileNotFoundException e) { /* file did not exist */ }
-
-        if (orgFile.isEncrypted())
-            decryptAndParseFile(orgFile, breader);
-        else {
-            parser.parse(orgFile, breader, this.context);
-        }
-    }
-
-    private void decryptAndParseFile(OrgFile orgFile, BufferedReader reader) {
-        try {
-            Intent intent = new Intent(context, FileDecryptionActivity.class);
-            intent.putExtra("data", FileUtils.read(reader).getBytes());
-            intent.putExtra("filename", orgFile.filename);
-            intent.putExtra("filenameAlias", orgFile.name);
-            intent.putExtra("checksum", orgFile.checksum);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            context.startActivity(intent);
-        } catch(IOException e) {}
-    }
 
 
     private void announceStartSync() {
@@ -356,4 +332,5 @@ public class Synchronizer {
         if(syncher == null) return;
         syncher.postSynchronize();
     }
+
 }

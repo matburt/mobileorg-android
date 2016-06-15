@@ -2,12 +2,18 @@ package com.matburt.mobileorg2.OrgData;
 
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
 import android.text.TextUtils;
+import android.util.Log;
 
+import com.matburt.mobileorg2.Gui.FileDecryptionActivity;
+import com.matburt.mobileorg2.util.FileUtils;
+import com.matburt.mobileorg2.util.OrgFileNotFoundException;
 import com.matburt.mobileorg2.util.PreferenceUtils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.security.cert.CertificateException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -58,8 +64,11 @@ public class OrgFileParser {
 		
 		parse(orgFile, breader);
 	}
-	
+
+
+
 	public void parse(OrgFile orgFile, BufferedReader breader) {
+		Log.v("parse","parsing : "+orgFile.name);
 		init(orgFile);
 		db.beginTransaction();
 
@@ -319,4 +328,31 @@ public class OrgFileParser {
 		
 		return tagList;
 	}
+
+
+    public static void decryptAndParseFile(OrgFile orgFile, BufferedReader reader, Context context) {
+        try {
+            Intent intent = new Intent(context, FileDecryptionActivity.class);
+            intent.putExtra("data", FileUtils.read(reader).getBytes());
+            intent.putExtra("filename", orgFile.filename);
+            intent.putExtra("filenameAlias", orgFile.name);
+            intent.putExtra("checksum", orgFile.checksum);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            context.startActivity(intent);
+        } catch(IOException e) {}
+    }
+
+	public static void parseFile(OrgFile orgFile, BufferedReader breader, OrgFileParser parser, Context context){
+		ContentResolver resolver = context.getContentResolver();
+		try {
+			new OrgFile(orgFile.filename, resolver).removeFile(resolver);
+		} catch (OrgFileNotFoundException e) { /* file did not exist */ }
+
+		if (orgFile.isEncrypted())
+			decryptAndParseFile(orgFile, breader, context);
+		else {
+			parser.parse(orgFile, breader, context);
+		}
+	}
+
 }

@@ -40,7 +40,6 @@ public abstract class Wizard {
 			@Override
 			public void onClick(View v) {
 				saveSettings();
-				((Activity) context).finish();
 			}
 		});
 	}
