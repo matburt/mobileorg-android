@@ -118,7 +118,7 @@ public class SyncService extends Service implements
 	private void runSynchronizer() {
 		unsetAlarm();
 		final Synchronizer synchronizer = this.getSynchronizer();
-		final OrgDatabase db = new OrgDatabase(this);
+		final OrgDatabase db = OrgDatabase.getInstance(this);
 		final OrgFileParser parser = new OrgFileParser(db, getContentResolver());
 		final boolean calendarEnabled = appSettings.getBoolean("calendarEnabled", false);
 
@@ -133,7 +133,6 @@ public class SyncService extends Service implements
 					getBaseContext().startService(calIntent);
 				}
 				synchronizer.close();
-				db.close();
 				syncRunning = false;
 				setAlarm();
 			}

@@ -2,12 +2,10 @@ package com.matburt.mobileorg2.Synchronizers;
 
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.Intent;
 import android.database.Cursor;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.matburt.mobileorg2.Gui.FileDecryptionActivity;
 import com.matburt.mobileorg2.Gui.SynchronizerNotificationCompat;
 import com.matburt.mobileorg2.OrgData.OrgContract.Edits;
 import com.matburt.mobileorg2.OrgData.OrgContract.Files;
@@ -20,7 +18,6 @@ import com.matburt.mobileorg2.util.OrgFileNotFoundException;
 import com.matburt.mobileorg2.util.OrgUtils;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -94,18 +91,7 @@ public class Synchronizer {
                 OrgFileParser.parseFile(orgFile, bufferedReader, parser, context);
             }
 
-//            String remoteIndexContents = FileUtils.read(syncher.getRemoteFile(FileUtils.INDEX_FILE));
-//            String remoteChecksumContents = FileUtils.read(syncher.getRemoteFile(FileUtils.CHECKSUM_FILE));
-//
-//            HashMap<String,String> remoteChecksums = OrgFileParser.getChecksums(remoteChecksumContents);
-//            HashMap<String,String> filenameMap     = parseIndexFile(remoteIndexContents);
-//
 //            discardAgenda(filenameMap, remoteChecksums);
-//
-//            ArrayList<String> changedFiles = pullChangedFiles(parser, remoteChecksums, filenameMap);
-//            Log.v("sync","changed files : "+changedFiles.size());
-//            pushCaptures();
-//            pushNewFiles(filenameMap.keySet(), remoteIndexContents, remoteChecksumContents);
             announceSyncDone();
             return changedFiles;
         } catch (Exception e) {
@@ -243,8 +229,6 @@ public class Synchronizer {
     }
 
     private HashMap<String, String> parseIndexFile(String remoteIndexContents) throws CertificateException, IOException {
-        OrgProviderUtils.setTodos(
-                OrgFileParser.getTodosFromIndex(remoteIndexContents), resolver);
         OrgProviderUtils.setPriorities(
                 OrgFileParser.getPrioritiesFromIndex(remoteIndexContents),
                 resolver);

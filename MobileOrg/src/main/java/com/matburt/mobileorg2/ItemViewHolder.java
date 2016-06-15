@@ -27,13 +27,14 @@ public class ItemViewHolder extends RecyclerView.ViewHolder {
     public Button todoButton, priorityButton;
 
     private TextView levelView;
-    public long level;
+    OrgNode node;
 
 
-
-    public ItemViewHolder(View view) {
+    public ItemViewHolder(View view, OrgNode node) {
         super(view);
         mView = view;
+
+        this.node = node;
 
         titleView = (TextView) view.findViewById(R.id.outline_item_title);
         contentView = (TextView) view.findViewById(R.id.outline_item_content);
@@ -81,8 +82,8 @@ public class ItemViewHolder extends RecyclerView.ViewHolder {
 
     public void setupTitle(String name, SpannableStringBuilder titleSpan) {
         titleView.setGravity(Gravity.LEFT);
-        titleView.setTextSize(Style.titleFontSize[Math.min((int)level-1, Style.nTitleColors)]);
-        if(level==1) titleView.setTypeface(null, Typeface.BOLD);
+        titleView.setTextSize(Style.titleFontSize[Math.min((int)getLevel()-1, Style.nTitleColors)]);
+        if(getLevel()==1) titleView.setTypeface(null, Typeface.BOLD);
         else titleView.setTypeface(null, Typeface.NORMAL);
 
         if (name.startsWith("COMMENT"))
@@ -110,7 +111,6 @@ public class ItemViewHolder extends RecyclerView.ViewHolder {
     }
 
     public void setup(OrgNodeTree root, boolean isSelected, Context context) {
-        OrgNode node = root.node;
         SpannableStringBuilder titleSpan = new SpannableStringBuilder(node.name);
 
         setupTitle(node.name, titleSpan);
@@ -122,7 +122,7 @@ public class ItemViewHolder extends RecyclerView.ViewHolder {
 
 //                titleSpan.setSpan(new StyleSpan(Typeface.NORMAL), 0, titleSpan.length(), 0);
         titleView.setText(titleSpan);
-        int colorId = (int) Math.min(level-1,Style.nTitleColors-1);
+        int colorId = (int) Math.min(getLevel()-1,Style.nTitleColors-1);
         titleView.setTextColor(Style.titleColor[colorId]);
         mView.setSelected(isSelected);
         String cleanedPayload = node.getCleanedPayload();
@@ -162,5 +162,10 @@ public class ItemViewHolder extends RecyclerView.ViewHolder {
             titleSpan.setSpan(new ForegroundColorSpan(Style.foreground),
                     titleSpan.length() - "...".length(), titleSpan.length(), 0);
         }
+    }
+
+    private long getLevel(){
+        if(node != null) return node.level;
+        return -1;
     }
 }

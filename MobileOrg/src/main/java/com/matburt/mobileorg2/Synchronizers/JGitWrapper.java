@@ -1,6 +1,7 @@
 package com.matburt.mobileorg2.Synchronizers;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
@@ -9,6 +10,7 @@ import android.widget.Toast;
 import com.matburt.mobileorg2.OrgData.OrgDatabase;
 import com.matburt.mobileorg2.OrgData.OrgFile;
 import com.matburt.mobileorg2.OrgData.OrgFileParser;
+import com.matburt.mobileorg2.R;
 import com.matburt.mobileorg2.util.FileUtils;
 
 import org.eclipse.jgit.api.Git;
@@ -79,6 +81,7 @@ public class JGitWrapper {
 
     static public class CloneGitRepoTask extends AsyncTask<String, Void, Object> {
         Context context;
+        ProgressDialog progress;
 
         public CloneGitRepoTask(Context context){
             this.context = context;
@@ -137,7 +140,10 @@ public class JGitWrapper {
 		@Override
 		protected void onPreExecute() {
 			super.onPreExecute();
-//			progress.show();
+            progress = new ProgressDialog(context);
+            progress.setMessage(context.getString(R.string.please_wait));
+            progress.setTitle(context.getString(R.string.signing_in));
+            progress.show();
 		}
 
 		@Override
@@ -145,7 +151,7 @@ public class JGitWrapper {
 
             parseAll();
 
-//			progress.dismiss();
+			progress.dismiss();
 			if (exception == null) {
 				Toast.makeText(context, "Synchronization successful !", Toast.LENGTH_LONG).show();
 				((Activity) context).finish();
@@ -183,7 +189,7 @@ public class JGitWrapper {
                     e.printStackTrace();
                 }
                 BufferedReader bufferedReader = new BufferedReader(fileReader);
-                final OrgDatabase db = new OrgDatabase(context);
+                OrgDatabase db = OrgDatabase.getInstance(context);
 
                 final OrgFileParser parser = new OrgFileParser(db, context.getContentResolver());
 

@@ -65,7 +65,7 @@ public class OrgProvider extends ContentProvider {
 	
 	@Override
 	public boolean onCreate() {
-		this.dbHelper = new OrgDatabase(getContext());
+		this.dbHelper = OrgDatabase.getInstance(getContext());
 		return false;
 	}
 	
@@ -87,7 +87,13 @@ public class OrgProvider extends ContentProvider {
 			contentValues = new ContentValues();
 		
 		SQLiteDatabase db = dbHelper.getWritableDatabase();
-		long rowId = db.insert(tableName, null, contentValues);
+		long rowId = 0;
+
+		try {
+			rowId = db.insert(tableName, null, contentValues);
+		} catch (Exception e){
+			e.printStackTrace();
+		}
 
 		if (rowId > 0) {
 			Uri noteUri = ContentUris.withAppendedId(uri, rowId);

@@ -44,13 +44,12 @@ import java.util.NavigableMap;
  * in two-pane mode (on tablets) or a {@link OrgNodeDetailActivity}
  * on handsets.
  */
-public class OrgNodeDetailFragment extends Fragment {
+public class OrgNodeDetailFragment extends Fragment implements SwipeInterface{
 
     private ContentResolver resolver;
 
     private long nodeId;
-    private long lastEditedPosition;
-    private long idHlightedPosition;
+    private OrgNode selectedNode;
     private View highlightedView = null;
 
 
@@ -58,6 +57,18 @@ public class OrgNodeDetailFragment extends Fragment {
     Button insertNodeButton;
     RecyclerView recyclerView;
     TextView insertNodeText;
+
+    ActivitySwipeDetector swipeDetector;
+
+    @Override
+    public void left2right(View v) {
+        createEditNodeFragment(v.getId(), 0, 0);
+    }
+
+    @Override
+    public void right2left(View v) {
+        createEditNodeFragment(v.getId(), 0, 0);
+    }
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -110,13 +121,11 @@ public class OrgNodeDetailFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        lastEditedPosition = -1;
-        idHlightedPosition = -1;
-
         this.resolver = getActivity().getContentResolver();
 
         OrgNodeTree tree = null;
 
+        swipeDetector = new ActivitySwipeDetector(this);
 
         if (getArguments().containsKey(OrgContract.NODE_ID)) {
             this.nodeId = getArguments().getLong(OrgContract.NODE_ID);
@@ -181,12 +190,11 @@ public class OrgNodeDetailFragment extends Fragment {
             @Override
             public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
                 long position = (long)viewHolder.getAdapterPosition();
-                OrgNode node = mAdapter.idTreeMap.get(position).node;
-                int id = (int)node.id;
-                int parentId = (int)node.parentId;
-                lastEditedPosition = position;
+//                OrgNode node = mAdapter.idTreeMap.get(position).node;
+//                int id = (int)node.id;
+//                int parentId = (int)node.parentId;
+//
 
-                createEditNodeFragment(id, parentId, 0);
             }
 
             @Override
@@ -196,9 +204,9 @@ public class OrgNodeDetailFragment extends Fragment {
             }
         };
 
-        SimpleItemTouchHelperCallback callback = new SimpleItemTouchHelperCallback(adapter);
-        ItemTouchHelper touchHelper = new ItemTouchHelper(callback);
-        touchHelper.attachToRecyclerView(recyclerView);
+//        SimpleItemTouchHelperCallback callback = new SimpleItemTouchHelperCallback(adapter);
+//        ItemTouchHelper touchHelper = new ItemTouchHelper(callback);
+//        touchHelper.attachToRecyclerView(recyclerView);
 
         refresh();
         return rootView;
@@ -215,7 +223,6 @@ public class OrgNodeDetailFragment extends Fragment {
 //                TODO: implement error
         }
 
-        lastEditedPosition = -1;
         adapter.closeInsertItem();
 
         int size = adapter.getItemCount();
@@ -251,7 +258,6 @@ public class OrgNodeDetailFragment extends Fragment {
     public class RecyclerViewAdapter
             extends RecyclerView.Adapter<MultipleItemsViewHolder> {
 
-        private NavigableMap<Long, OrgNodeTree> idTreeMap;
         private OrgNodeTree tree;
 
         public RecyclerViewAdapter(OrgNodeTree root) {
@@ -273,11 +279,8 @@ public class OrgNodeDetailFragment extends Fragment {
         @Override
         public void onBindViewHolder(final MultipleItemsViewHolder holder, final int position) {
             OrgNodeTree root  = tree.children.get(position);
-//            holder.mItem = idTreeMap.get((long) position);
 
-            Log.v("items","root is : "+root.node.name);
             LinearLayout rootView = (LinearLayout)holder.view.findViewById(R.id.layout_inside_cardview);
-            Log.v("view","view : "+rootView);
             rootView.removeAllViewsInLayout();
 
             ArrayList<OrgNodeTree> items = new ArrayList<>();
@@ -286,130 +289,123 @@ public class OrgNodeDetailFragment extends Fragment {
                 items.add(child);
             }
 
-            for(OrgNodeTree child: items) {
-                Log.v("items","subitems: "+child.node.name);
-            }
-            for(OrgNodeTree child: items) {
-                View view = LayoutInflater.from(getContext())
+            for(final OrgNodeTree child: items) {
+                final View view = LayoutInflater.from(getContext())
                     .inflate(R.layout.subnode_layout, null);
 
-                Log.v("items","view : "+view);
+                view.setId((int)child.node.id);
 
-                ItemViewHolder item = new ItemViewHolder(view);
-                item.level = child.node.level;
-                boolean isSelected = (position == idHlightedPosition);
+                if(child == items.get(items.size()-1)){
+                    view.findViewById(R.id.delimiter).setVisibility(View.GONE);
+                }
+
+                final ItemViewHolder item = new ItemViewHolder(view, child.node);
+
+                boolean isSelected = (item.node == selectedNode);
                 item.setup(child, isSelected, getContext());
 
-//                item.mView.setOnClickListener(new View.OnClickListener() {
-//                    @Override
-//                    public void onClick(View v) {
-//                        if (idHlightedPosition > -1) {
-//                            closeInsertItem();
-//                            return;
-//                        }
-//
+                item.mView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (selectedNode != null) {
+                            closeInsertItem();
+                            return;
+                        }
+
 //                        item.mItem.toggleVisibility();
 //                        refreshVisibility();
-//                    }
-//                });
-//
-//                item.mView.setOnLongClickListener(new View.OnLongClickListener() {
-//                    @Override
-//                    public boolean onLongClick(View v) {
-////                    ((AppCompatActivity)getActivity()).startSupportActionMode(mActionModeCallback);
-//                        Log.v("selection", "long click");
-//
-//                        if (highlightedView != null) {
+                    }
+                });
+
+                item.mView.setOnLongClickListener(new View.OnLongClickListener() {
+                    @Override
+                    public boolean onLongClick(View v) {
+//                    ((AppCompatActivity)getActivity()).startSupportActionMode(mActionModeCallback);
+                        Log.v("selection", "long click");
+                        Log.v("selection", "selected node : "+selectedNode);
+                        Log.v("selection", "highlighted : "+highlightedView);
+                        if (selectedNode != null) {
+                            closeInsertItem();
 //                            setItemModifiersVisibility(highlightedView, View.GONE);
-//                        }
-//
-//                        idHlightedPosition = position;
-//                        highlightedView = item.mView;
-//
-//                        setItemModifiersVisibility(highlightedView, View.VISIBLE);
-////                    item.mView.setSelected(true);
-//
-//
-////                    insertItem((int)idHlightedPosition);
-////                    notifyDataSetChanged();
-//                        return true;
-//                    }
-//                });
-//
-//                item.todoButton.setOnClickListener(new View.OnClickListener() {
-//                    @Override
-//                    public void onClick(View v) {
-//                        if (idHlightedPosition > -1) {
-//                            closeInsertItem();
-//                            return;
-//                        }
-//                        new TodoDialog(getContext(), item.mItem.node, item.todoButton);
-//                    }
-//                });
-//
-//
-//                item.sameLevel.setOnClickListener(new View.OnClickListener() {
-//                    @Override
-//                    public void onClick(View v) {
-//                        OrgNode currentNode = idTreeMap.get(idHlightedPosition).node;
-//                        int parentId = (int) currentNode.parentId;
-//                        lastEditedPosition = position;
-//
-//                        // Place the node right after this one in the adapter
-//                        int siblingPosition = currentNode.position + 1;
-//                        createEditNodeFragment(-1, parentId, siblingPosition);
-//                    }
-//                });
-//
-//                item.childLevel.setOnClickListener(new View.OnClickListener() {
-//                    @Override
-//                    public void onClick(View v) {
-//                        int parentId = (int) idTreeMap.get(idHlightedPosition).node.id;
-//                        lastEditedPosition = position;
-//                        createEditNodeFragment(-1, parentId, 0);
-//                    }
-//                });
-//
-//                item.deleteNodeButton.setOnClickListener(new View.OnClickListener() {
-//                    @Override
-//                    public void onClick(View v) {
-//                        new AlertDialog.Builder(getActivity())
-//                                .setMessage(R.string.prompt_node_delete)
-//                                .setIcon(android.R.drawable.ic_dialog_alert)
-//                                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-//
-//                                    public void onClick(DialogInterface dialog, int whichButton) {
-//                                        OrgNode currentNode = idTreeMap.get(idHlightedPosition).node;
-//                                        currentNode.deleteNode(resolver);
-//                                        refresh();
-//                                    }
-//                                })
-//                                .setNegativeButton(android.R.string.no, null).show();
-//                    }
-//                });
+                        }
+
+                        selectedNode = item.node;
+                        highlightedView = view;
+
+                        setItemModifiersVisibility(highlightedView, View.VISIBLE);
+//                    item.mView.setSelected(true);
+
+                        notifyItemChanged(position);
+                        return true;
+                    }
+                });
+
+                item.todoButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (selectedNode != null) {
+                            closeInsertItem();
+                            return;
+                        }
+                        new TodoDialog(getContext(), child.node, item.todoButton);
+                    }
+                });
+
+
+                item.sameLevel.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        OrgNode currentNode = item.node;
+                        int parentId = (int) currentNode.parentId;
+
+                        // Place the node right after this one in the adapter
+                        int siblingPosition = currentNode.position + 1;
+                        createEditNodeFragment(-1, parentId, siblingPosition);
+                    }
+                });
+
+                item.childLevel.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        int parentId = (int) item.node.id;
+                        createEditNodeFragment(-1, parentId, 0);
+                    }
+                });
+
+                item.deleteNodeButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        new AlertDialog.Builder(getActivity())
+                                .setMessage(R.string.prompt_node_delete)
+                                .setIcon(android.R.drawable.ic_dialog_alert)
+                                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+
+                                    public void onClick(DialogInterface dialog, int whichButton) {
+                                        item.node.deleteNode(resolver);
+                                        refresh();
+                                    }
+                                })
+                                .setNegativeButton(android.R.string.no, null).show();
+                    }
+                });
+                view.setOnTouchListener(swipeDetector);
                 rootView.addView(view);
             }
         }
 
 
         private void closeInsertItem(){
-            idHlightedPosition = -1;
+            selectedNode = null;
             if(highlightedView != null){
                 setItemModifiersVisibility(highlightedView, View.GONE);
                 highlightedView = null;
             }
 
             refreshVisibility();
-
-
         }
 
         @Override
         public int getItemCount() {
-            Log.v("items","count : "+tree.children.size());
-            for(OrgNodeTree child : tree.children){
-                Log.v("items","name : "+child.node.name);
-            }
             return tree.children.size();
         }
 

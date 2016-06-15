@@ -72,10 +72,9 @@ public class FileDecryptionActivity extends Activity
 			BufferedReader reader = new BufferedReader(new InputStreamReader(
 					new ByteArrayInputStream(decryptedData.getBytes())));
 
-			OrgDatabase db = new OrgDatabase(this);
+			OrgDatabase db = OrgDatabase.getInstance(this);
 			OrgFileParser parser = new OrgFileParser(db, getContentResolver());
 			parser.parse(new OrgFile(filename, name, checksum), reader, this);
-			db.close();
 			break;
 		}
 		finish();

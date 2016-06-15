@@ -98,31 +98,31 @@ public class OrgProviderUtils {
 		cursor.close();
 		return result;
 	}
-	
-	public static void setTodos(ArrayList<HashMap<String, Boolean>> todos,
-			ContentResolver resolver) {
-		resolver.delete(Todos.CONTENT_URI, null, null);
 
-		int grouping = 0;
-		for (HashMap<String, Boolean> entry : todos) {
-			for (String name : entry.keySet()) {
-				ContentValues values = new ContentValues();
-				values.put(Todos.NAME, name);
-				values.put(Todos.GROUP, grouping);
+	public static void addTodos(HashMap<String, Boolean> todos,
+								ContentResolver resolver) {
+		if(todos == null) return;
+		for (String name : todos.keySet()) {
+			ContentValues values = new ContentValues();
+			values.put(Todos.NAME, name);
+			values.put(Todos.GROUP, 0);
 
-				if (entry.get(name))
-					values.put(Todos.ISDONE, 1);
+			if (todos.get(name))
+				values.put(Todos.ISDONE, 1);
+
+			try{
 				resolver.insert(Todos.CONTENT_URI, values);
+			} catch (Exception e){
+				e.printStackTrace();
 			}
-			grouping++;
 		}
 	}
 	public static ArrayList<String> getTodos(ContentResolver resolver) {
 		Cursor cursor = resolver.query(Todos.CONTENT_URI, new String[] { Todos.NAME }, null, null, Todos.ID);
+		if(cursor==null) return new ArrayList<>();
 
 		ArrayList<String> todos = cursorToArrayList(cursor);
 
-		cursor.close();
 		return todos;
 	}
 	

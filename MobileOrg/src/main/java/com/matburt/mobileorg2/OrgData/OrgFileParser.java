@@ -97,6 +97,10 @@ public class OrgFileParser {
 			this.payload = new StringBuilder();
 			parseHeading(line, numstars);
 		} else {
+			Log.v("todos","name : "+line);
+			HashMap<String,Boolean> map = parseTodos(line);
+			Log.v("todos","res : "+ (map != null ? map.toString() : ""));
+			OrgProviderUtils.addTodos(parseTodos(line), resolver);
 			parseTimestamps(line);
 			payload.append(line).append("\n");
 		}
@@ -260,36 +264,32 @@ public class OrgFileParser {
 	private static final Pattern getTodos = Pattern
 			.compile("#\\+TODO:([^\\|]+)(\\| (.*))*");
 
-	public static ArrayList<HashMap<String, Boolean>> getTodosFromIndex(String filecontents) {
-		String[] lines = filecontents.split("\\n");
-		ArrayList<HashMap<String, Boolean>> todoList = new ArrayList<>();
-		for(String line: lines){
-			Matcher m = getTodos.matcher(line);
-			while (m.find()) {
-				String lastTodo = "";
-				HashMap<String, Boolean> holding = new HashMap<>();
-				Boolean isDone = false;
-				for (int idx = 1; idx <= m.groupCount(); idx++) {
-					if (m.group(idx) != null && m.group(idx).trim().length() > 0) {
-						if (m.group(idx).contains("|")) {
-							isDone = true;
-							continue;
-						}
-						String[] grouping = m.group(idx).trim().split("\\s+");
-						for (String group : grouping) {
-							lastTodo = group.trim();
-							holding.put(group.trim(), isDone);
-						}
+	public static HashMap<String, Boolean> parseTodos(String line) {
+		HashMap<String, Boolean> result = null;
+
+		Matcher m = getTodos.matcher(line);
+		if (m.find()) {
+			result = new HashMap<>();
+			String lastTodo = "";
+			Boolean isDone = false;
+			for (int idx = 1; idx <= m.groupCount(); idx++) {
+				if (m.group(idx) != null && m.group(idx).trim().length() > 0) {
+					if (m.group(idx).contains("|")) {
+						isDone = true;
+						continue;
+					}
+					String[] grouping = m.group(idx).trim().split("\\s+");
+					for (String group : grouping) {
+						lastTodo = group.trim();
+						result.put(group.trim(), isDone);
 					}
 				}
-				if (!isDone) {
-					holding.put(lastTodo, true);
-				}
-				todoList.add(holding);
+			}
+			if (!isDone) {
+				result.put(lastTodo, true);
 			}
 		}
-
-		return todoList;
+		return result;
 	}
 	
 	private static final Pattern getPriorities = Pattern

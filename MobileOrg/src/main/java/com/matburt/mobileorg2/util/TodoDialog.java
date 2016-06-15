@@ -34,6 +34,7 @@ public class TodoDialog {
         if (todos.size() == 0)
             todos = OrgProviderUtils.getTodos(context.getContentResolver());
 
+
         final ArrayList<String> todoList = todos;
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle(context.getResources().getString(R.string.todo_state))

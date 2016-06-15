@@ -36,8 +36,15 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		String TODOS = "todos";
 		String ORGDATA = "orgdata";
 	}
-	
-	public OrgDatabase(Context context) {
+
+	private static OrgDatabase mInstance = null;
+
+	public static OrgDatabase getInstance(Context context){
+		if(mInstance == null) mInstance = new OrgDatabase(context);
+		return mInstance;
+	}
+
+	private OrgDatabase(Context context) {
 		super(context, DATABASE_NAME, null, DATABASE_VERSION);
 	}
 	
@@ -53,7 +60,8 @@ public class OrgDatabase extends SQLiteOpenHelper {
 				+ "_id integer primary key autoincrement,"
 				+ "todogroup integer,"
 				+ "name text,"
-				+ "isdone integer default 0)");
+				+ "isdone integer default 0,"
+				+ "UNIQUE(todogroup, name) ON CONFLICT IGNORE)");
 		db.execSQL("CREATE TABLE IF NOT EXISTS priorities("
 				+ "_id integer primary key autoincrement,"
 				+ "name text)");
