@@ -30,11 +30,9 @@ public class ItemViewHolder extends RecyclerView.ViewHolder {
     OrgNode node;
 
 
-    public ItemViewHolder(View view, OrgNode node) {
+    public ItemViewHolder(View view) {
         super(view);
         mView = view;
-
-        this.node = node;
 
         titleView = (TextView) view.findViewById(R.id.outline_item_title);
         contentView = (TextView) view.findViewById(R.id.outline_item_content);

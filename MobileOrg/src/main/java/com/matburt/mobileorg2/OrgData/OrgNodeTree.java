@@ -89,7 +89,7 @@ public class OrgNodeTree {
      */
     public NavigableMap<Long,OrgNodeTree> getVisibleNodesArray(){
         TreeMap<Long,OrgNodeTree> result = new TreeMap<>();
-        long idConstructor = -1;
+        long idConstructor = 0;
         fillMap(result, this, idConstructor);
         return result;
     }

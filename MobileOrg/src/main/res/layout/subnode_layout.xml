@@ -119,21 +119,4 @@
             android:gravity="center"
             />
     </LinearLayout>
-
-
-    <View
-        android:id="@+id/delimiter"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/colorLightGray"
-        android:layout_marginTop="5dp"
-
-        android:layout_marginLeft="10dp"
-        android:layout_marginStart="10dp"
-        android:layout_marginRight="10dp"
-        android:layout_marginEnd="10dp"
-        
-        
-        />
-
 </LinearLayout>

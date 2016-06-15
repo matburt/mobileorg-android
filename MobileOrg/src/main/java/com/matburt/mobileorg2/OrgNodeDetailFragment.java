@@ -34,7 +34,6 @@ import com.matburt.mobileorg2.OrgData.OrgProviderUtils;
 import com.matburt.mobileorg2.util.OrgNodeNotFoundException;
 import com.matburt.mobileorg2.util.TodoDialog;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.NavigableMap;
 
@@ -44,7 +43,7 @@ import java.util.NavigableMap;
  * in two-pane mode (on tablets) or a {@link OrgNodeDetailActivity}
  * on handsets.
  */
-public class OrgNodeDetailFragment extends Fragment implements SwipeInterface{
+public class OrgNodeDetailFragment extends Fragment {
 
     private ContentResolver resolver;
 
@@ -53,22 +52,10 @@ public class OrgNodeDetailFragment extends Fragment implements SwipeInterface{
     private View highlightedView = null;
 
 
-    RecyclerViewAdapter adapter;
+    MainRecyclerViewAdapter adapter;
     Button insertNodeButton;
     RecyclerView recyclerView;
     TextView insertNodeText;
-
-    ActivitySwipeDetector swipeDetector;
-
-    @Override
-    public void left2right(View v) {
-        createEditNodeFragment(v.getId(), 0, 0);
-    }
-
-    @Override
-    public void right2left(View v) {
-        createEditNodeFragment(v.getId(), 0, 0);
-    }
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -125,16 +112,14 @@ public class OrgNodeDetailFragment extends Fragment implements SwipeInterface{
 
         OrgNodeTree tree = null;
 
-        swipeDetector = new ActivitySwipeDetector(this);
-
         if (getArguments().containsKey(OrgContract.NODE_ID)) {
             this.nodeId = getArguments().getLong(OrgContract.NODE_ID);
 
-            if(nodeId == OrgContract.TODO_ID){
+            if (nodeId == OrgContract.TODO_ID) {
                 Cursor cursor = resolver.query(OrgContract.OrgData.CONTENT_URI,
-                OrgContract.OrgData.DEFAULT_COLUMNS, "todo is not null and todo <> ''", null, OrgContract.OrgData.NAME_SORT);
+                        OrgContract.OrgData.DEFAULT_COLUMNS, "todo is not null and todo <> ''", null, OrgContract.OrgData.NAME_SORT);
                 tree = new OrgNodeTree(OrgProviderUtils.orgDataCursorToArrayList(cursor));
-                if(cursor != null) cursor.close();
+                if (cursor != null) cursor.close();
             } else {
                 try {
                     tree = new OrgNodeTree(new OrgNode(nodeId, resolver), resolver);
@@ -145,7 +130,7 @@ public class OrgNodeDetailFragment extends Fragment implements SwipeInterface{
             }
         }
 
-        adapter = new RecyclerViewAdapter(tree);
+        adapter = new MainRecyclerViewAdapter(tree);
 
     }
 
@@ -155,58 +140,24 @@ public class OrgNodeDetailFragment extends Fragment implements SwipeInterface{
         View rootView = inflater.inflate(R.layout.node_summary_recycler_fragment, container, false);
 
 
-
-        recyclerView = (RecyclerView)rootView.findViewById(R.id.node_recycler_view);
+        recyclerView = (RecyclerView) rootView.findViewById(R.id.node_recycler_view);
         assert recyclerView != null;
 //        recyclerView.addItemDecoration(new DividerItemDecoration(getContext()));
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         recyclerView.setAdapter(adapter);
 
-        insertNodeButton = (Button)rootView.findViewById(R.id.empty_recycler);
-        insertNodeText = (TextView)rootView.findViewById(R.id.empty_recycler_text);
+        insertNodeButton = (Button) rootView.findViewById(R.id.empty_recycler);
+        insertNodeText = (TextView) rootView.findViewById(R.id.empty_recycler_text);
 
         insertNodeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                createEditNodeFragment(-1, (int)OrgNodeDetailFragment.this.nodeId, 0);
+                createEditNodeFragment(-1, (int) OrgNodeDetailFragment.this.nodeId, 0);
             }
         });
 
-        class SimpleItemTouchHelperCallback extends ItemTouchHelper.Callback {
-            private final RecyclerViewAdapter mAdapter;
-            public SimpleItemTouchHelperCallback(RecyclerViewAdapter adapter) {
-                mAdapter = adapter;
-            }
 
-            @Override
-            public int getMovementFlags(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder) {
-                int dragFlags = ItemTouchHelper.UP | ItemTouchHelper.DOWN;
-                int swipeFlags = ItemTouchHelper.START | ItemTouchHelper.END;
-                return makeMovementFlags(dragFlags, swipeFlags);
-            }
-
-
-            @Override
-            public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
-                long position = (long)viewHolder.getAdapterPosition();
-//                OrgNode node = mAdapter.idTreeMap.get(position).node;
-//                int id = (int)node.id;
-//                int parentId = (int)node.parentId;
-//
-
-            }
-
-            @Override
-            public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder,
-                                  RecyclerView.ViewHolder target) {
-                return false;
-            }
-        };
-
-//        SimpleItemTouchHelperCallback callback = new SimpleItemTouchHelperCallback(adapter);
-//        ItemTouchHelper touchHelper = new ItemTouchHelper(callback);
-//        touchHelper.attachToRecyclerView(recyclerView);
 
         refresh();
         return rootView;
@@ -215,7 +166,7 @@ public class OrgNodeDetailFragment extends Fragment implements SwipeInterface{
     /**
      * Recreate the OrgNodeTree and refresh the Adapter
      */
-    public void refresh(){
+    public void refresh() {
         try {
             adapter.tree = new OrgNodeTree(new OrgNode(nodeId, resolver), resolver);
         } catch (OrgNodeNotFoundException e) {
@@ -223,11 +174,9 @@ public class OrgNodeDetailFragment extends Fragment implements SwipeInterface{
 //                TODO: implement error
         }
 
-        adapter.closeInsertItem();
-
         int size = adapter.getItemCount();
 
-        if(size == 0){
+        if (size == 0) {
             recyclerView.setVisibility(View.GONE);
             insertNodeButton.setVisibility(View.VISIBLE);
             insertNodeText.setVisibility(View.VISIBLE);
@@ -239,8 +188,9 @@ public class OrgNodeDetailFragment extends Fragment implements SwipeInterface{
     }
 
     @Override
-    public void onResume(){
+    public void onResume() {
         super.onResume();
+        Log.v("resume", "resume");
         refresh();
     }
 
@@ -255,17 +205,17 @@ public class OrgNodeDetailFragment extends Fragment implements SwipeInterface{
         startActivity(intent);
     }
 
-    public class RecyclerViewAdapter
+    public class MainRecyclerViewAdapter
             extends RecyclerView.Adapter<MultipleItemsViewHolder> {
 
         private OrgNodeTree tree;
 
-        public RecyclerViewAdapter(OrgNodeTree root) {
+        public MainRecyclerViewAdapter(OrgNodeTree root) {
             tree = root;
             refreshVisibility();
         }
 
-        void refreshVisibility(){
+        void refreshVisibility() {
             notifyDataSetChanged();
         }
 
@@ -278,125 +228,182 @@ public class OrgNodeDetailFragment extends Fragment implements SwipeInterface{
 
         @Override
         public void onBindViewHolder(final MultipleItemsViewHolder holder, final int position) {
-            OrgNodeTree root  = tree.children.get(position);
+            OrgNodeTree root = tree.children.get(position);
 
-            LinearLayout rootView = (LinearLayout)holder.view.findViewById(R.id.layout_inside_cardview);
-            rootView.removeAllViewsInLayout();
+            SecondaryRecyclerViewAdapter secondaryAdapter = new SecondaryRecyclerViewAdapter(root);
 
-            ArrayList<OrgNodeTree> items = new ArrayList<>();
-            items.add(root);
-            for(OrgNodeTree child: root.children) {
-                items.add(child);
+            RecyclerView secondaryRecyclerView = (RecyclerView) holder.view.findViewById(R.id.node_recycler_view);
+            secondaryRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+            secondaryRecyclerView.setAdapter(secondaryAdapter);
+
+            SimpleItemTouchHelperCallback callback = new SimpleItemTouchHelperCallback(secondaryAdapter);
+            ItemTouchHelper touchHelper = new ItemTouchHelper(callback);
+            touchHelper.attachToRecyclerView(secondaryRecyclerView);
+        }
+
+        @Override
+        public int getItemCount() {
+            return tree.children.size();
+        }
+
+        class SimpleItemTouchHelperCallback extends ItemTouchHelper.Callback {
+            private final RecyclerView.Adapter mAdapter;
+
+            public SimpleItemTouchHelperCallback(RecyclerView.Adapter adapter) {
+                mAdapter = adapter;
             }
 
-            for(final OrgNodeTree child: items) {
-                final View view = LayoutInflater.from(getContext())
-                    .inflate(R.layout.subnode_layout, null);
+            @Override
+            public int getMovementFlags(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder) {
+                int dragFlags = ItemTouchHelper.UP | ItemTouchHelper.DOWN;
+                int swipeFlags = ItemTouchHelper.START | ItemTouchHelper.END;
+                return makeMovementFlags(dragFlags, swipeFlags);
+            }
 
-                view.setId((int)child.node.id);
 
-                if(child == items.get(items.size()-1)){
-                    view.findViewById(R.id.delimiter).setVisibility(View.GONE);
-                }
+            @Override
+            public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
+                long position = (long) viewHolder.getAdapterPosition();
+//                OrgNode node = mAdapter.idTreeMap.get(position).node;
+//                int id = (int)node.id;
+//                int parentId = (int)node.parentId;
 
-                final ItemViewHolder item = new ItemViewHolder(view, child.node);
+                ItemViewHolder item = (ItemViewHolder) viewHolder;
+                createEditNodeFragment((int)item.node.id, -1, -1);
+            }
 
-                boolean isSelected = (item.node == selectedNode);
-                item.setup(child, isSelected, getContext());
+            @Override
+            public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder,
+                                  RecyclerView.ViewHolder target) {
+                return false;
+            }
+        }
+        ;
 
-                item.mView.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        if (selectedNode != null) {
-                            closeInsertItem();
-                            return;
-                        }
+
+    }
+
+    public class SecondaryRecyclerViewAdapter
+            extends RecyclerView.Adapter<ItemViewHolder> {
+
+        private OrgNodeTree tree;
+        NavigableMap<Long, OrgNodeTree> items;
+
+        public SecondaryRecyclerViewAdapter(OrgNodeTree root) {
+            tree = root;
+            refreshVisibility();
+            items = tree.getVisibleNodesArray();
+        }
+
+        void refreshVisibility() {
+            notifyDataSetChanged();
+        }
+
+        @Override
+        public ItemViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            View view = LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.subnode_layout, parent, false);
+            return new ItemViewHolder(view);
+        }
+
+        @Override
+        public void onBindViewHolder(final ItemViewHolder item, final int position) {
+            final OrgNodeTree tree = items.get((long)position);
+            item.node = tree.node;
+
+            boolean isSelected = (item.node == selectedNode);
+            item.setup(tree, isSelected, getContext());
+
+            item.mView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (selectedNode != null) {
+                        closeInsertItem();
+                        return;
+                    }
 
 //                        item.mItem.toggleVisibility();
 //                        refreshVisibility();
-                    }
-                });
+                }
+            });
 
-                item.mView.setOnLongClickListener(new View.OnLongClickListener() {
-                    @Override
-                    public boolean onLongClick(View v) {
+            item.mView.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
 //                    ((AppCompatActivity)getActivity()).startSupportActionMode(mActionModeCallback);
-                        Log.v("selection", "long click");
-                        Log.v("selection", "selected node : "+selectedNode);
-                        Log.v("selection", "highlighted : "+highlightedView);
-                        if (selectedNode != null) {
-                            closeInsertItem();
+                    Log.v("selection", "long click");
+                    Log.v("selection", "selected node : " + selectedNode);
+                    Log.v("selection", "highlighted : " + highlightedView);
+                    if (selectedNode != null) {
+                        closeInsertItem();
 //                            setItemModifiersVisibility(highlightedView, View.GONE);
-                        }
+                    }
 
-                        selectedNode = item.node;
-                        highlightedView = view;
+                    selectedNode = item.node;
+                    highlightedView = item.mView;
 
-                        setItemModifiersVisibility(highlightedView, View.VISIBLE);
+                    setItemModifiersVisibility(highlightedView, View.VISIBLE);
 //                    item.mView.setSelected(true);
 
-                        notifyItemChanged(position);
-                        return true;
+                    notifyItemChanged(position);
+                    return true;
+                }
+            });
+
+            item.todoButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (selectedNode != null) {
+                        closeInsertItem();
+                        return;
                     }
-                });
-
-                item.todoButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        if (selectedNode != null) {
-                            closeInsertItem();
-                            return;
-                        }
-                        new TodoDialog(getContext(), child.node, item.todoButton);
-                    }
-                });
+                    new TodoDialog(getContext(), tree.node, item.todoButton);
+                }
+            });
 
 
-                item.sameLevel.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        OrgNode currentNode = item.node;
-                        int parentId = (int) currentNode.parentId;
+            item.sameLevel.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    OrgNode currentNode = item.node;
+                    int parentId = (int) currentNode.parentId;
 
-                        // Place the node right after this one in the adapter
-                        int siblingPosition = currentNode.position + 1;
-                        createEditNodeFragment(-1, parentId, siblingPosition);
-                    }
-                });
+                    // Place the node right after this one in the adapter
+                    int siblingPosition = currentNode.position + 1;
+                    createEditNodeFragment(-1, parentId, siblingPosition);
+                }
+            });
 
-                item.childLevel.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        int parentId = (int) item.node.id;
-                        createEditNodeFragment(-1, parentId, 0);
-                    }
-                });
+            item.childLevel.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    int parentId = (int) item.node.id;
+                    createEditNodeFragment(-1, parentId, 0);
+                }
+            });
 
-                item.deleteNodeButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        new AlertDialog.Builder(getActivity())
-                                .setMessage(R.string.prompt_node_delete)
-                                .setIcon(android.R.drawable.ic_dialog_alert)
-                                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+            item.deleteNodeButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    new AlertDialog.Builder(getActivity())
+                            .setMessage(R.string.prompt_node_delete)
+                            .setIcon(android.R.drawable.ic_dialog_alert)
+                            .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
 
-                                    public void onClick(DialogInterface dialog, int whichButton) {
-                                        item.node.deleteNode(resolver);
-                                        refresh();
-                                    }
-                                })
-                                .setNegativeButton(android.R.string.no, null).show();
-                    }
-                });
-                view.setOnTouchListener(swipeDetector);
-                rootView.addView(view);
-            }
+                                public void onClick(DialogInterface dialog, int whichButton) {
+                                    item.node.deleteNode(resolver);
+                                    refresh();
+                                }
+                            })
+                            .setNegativeButton(android.R.string.no, null).show();
+                }
+            });
         }
 
 
-        private void closeInsertItem(){
+        private void closeInsertItem() {
             selectedNode = null;
-            if(highlightedView != null){
+            if (highlightedView != null) {
                 setItemModifiersVisibility(highlightedView, View.GONE);
                 highlightedView = null;
             }
@@ -406,10 +413,15 @@ public class OrgNodeDetailFragment extends Fragment implements SwipeInterface{
 
         @Override
         public int getItemCount() {
-            return tree.children.size();
+            return items.size();
         }
 
+        void setItemModifiersVisibility(View view, int visibility){
+            LinearLayout itemModifiers = (LinearLayout) view.findViewById(R.id.item_modifiers);
+            if(itemModifiers != null) itemModifiers.setVisibility(visibility);
+        }
     }
+
 
     public class DividerItemDecoration extends RecyclerView.ItemDecoration {
 
@@ -452,11 +464,7 @@ public class OrgNodeDetailFragment extends Fragment implements SwipeInterface{
             }
         }
     }
-
-    static void setItemModifiersVisibility(View view, int visibility){
-        LinearLayout itemModifiers = (LinearLayout) view.findViewById(R.id.item_modifiers);
-        if(itemModifiers != null) itemModifiers.setVisibility(visibility);
-    }
 }
+
 
 

@@ -21,13 +21,12 @@
         card_view:cardCornerRadius="4dp"
         android:layout_margin="5dp">
 
-        <LinearLayout
-            android:id="@+id/layout_inside_cardview"
+        <android.support.v7.widget.RecyclerView
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/node_recycler_view"
+            android:scrollbars="vertical"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-        </LinearLayout>
+            android:layout_height="match_parent"/>
 
     </android.support.v7.widget.CardView>
 
