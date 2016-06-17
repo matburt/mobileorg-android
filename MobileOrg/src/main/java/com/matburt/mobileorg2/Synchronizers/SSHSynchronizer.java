@@ -151,7 +151,9 @@ public class SSHSynchronizer implements SynchronizerInterface {
     }
 
     public HashSet<String> synchronize(){
-        return JGitWrapper.pull(context);
+        HashSet<String> changedFiles = JGitWrapper.pull(context);
+        JGitWrapper.push(context);
+        return changedFiles;
     }
 
     public void putRemoteFile(String filename, String contents) throws IOException {
@@ -204,7 +206,7 @@ public class SSHSynchronizer implements SynchronizerInterface {
 
         try {
             Log.v("sync","trying connect");
-            this.connect();
+//            this.connect();
             Log.v("sync","session success");
         } catch (Exception e) {
             Log.e("MobileOrg", "SSH Connection failed");

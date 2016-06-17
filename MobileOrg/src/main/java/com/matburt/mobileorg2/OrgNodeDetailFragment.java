@@ -185,6 +185,7 @@ public class OrgNodeDetailFragment extends Fragment {
             insertNodeText.setVisibility(View.GONE);
             recyclerView.setVisibility(View.VISIBLE);
         }
+        adapter.notifyDataSetChanged();
     }
 
     @Override

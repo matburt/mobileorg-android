@@ -47,5 +47,5 @@ public class ActivitySwipeDetector implements View.OnTouchListener {
         }
         return false;
     }
-
 }
+

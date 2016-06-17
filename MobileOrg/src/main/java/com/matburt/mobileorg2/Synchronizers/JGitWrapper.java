@@ -7,6 +7,9 @@ import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.Session;
 import com.matburt.mobileorg2.OrgData.OrgDatabase;
 import com.matburt.mobileorg2.OrgData.OrgFile;
 import com.matburt.mobileorg2.OrgData.OrgFileParser;
@@ -16,13 +19,16 @@ import com.matburt.mobileorg2.util.FileUtils;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.PullResult;
 import org.eclipse.jgit.api.errors.CanceledException;
+import org.eclipse.jgit.api.errors.ConcurrentRefUpdateException;
 import org.eclipse.jgit.api.errors.DetachedHeadException;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidConfigurationException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.NoHeadException;
+import org.eclipse.jgit.api.errors.NoMessageException;
 import org.eclipse.jgit.api.errors.RefNotFoundException;
 import org.eclipse.jgit.api.errors.TransportException;
+import org.eclipse.jgit.api.errors.UnmergedPathsException;
 import org.eclipse.jgit.api.errors.WrongRepositoryStateException;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.errors.UnsupportedCredentialItem;
@@ -32,9 +38,13 @@ import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.eclipse.jgit.transport.CredentialItem;
 import org.eclipse.jgit.transport.CredentialsProvider;
+import org.eclipse.jgit.transport.JschConfigSessionFactory;
+import org.eclipse.jgit.transport.OpenSshConfig;
 import org.eclipse.jgit.transport.PushResult;
 import org.eclipse.jgit.transport.URIish;
+import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
+import org.eclipse.jgit.util.FS;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -49,35 +59,23 @@ public class JGitWrapper {
 
     public static String GIT_DIR = "git_dir";
 
-    final static CredentialsProvider allowHosts = new CredentialsProvider() {
 
+
+    class CustomConfigSessionFactory extends JschConfigSessionFactory
+    {
         @Override
-        public boolean supports(CredentialItem... items) {
-            for (CredentialItem item : items) {
-                if ((item instanceof CredentialItem.YesNoType)) {
-                    return true;
-                }
-            }
-            return false;
+        protected void configure(OpenSshConfig.Host hc, Session session) {
+            session.setConfig("StrictHostKeyChecking", "yes");
         }
 
         @Override
-        public boolean get(URIish uri, CredentialItem... items) throws UnsupportedCredentialItem {
-            for (CredentialItem item : items) {
-                if (item instanceof CredentialItem.YesNoType) {
-                    ((CredentialItem.YesNoType) item).setValue(true);
-                    return true;
-                }
-            }
-            return false;
+        protected JSch getJSch(final OpenSshConfig.Host hc, FS fs) throws JSchException {
+            JSch jsch = super.getJSch(hc, fs);
+            jsch.removeAllIdentity();
+            jsch.addIdentity( "/data/data/yoyo" );
+            return jsch;
         }
-
-        @Override
-        public boolean isInteractive() {
-            return false;
-        }
-
-    };
+    }
 
     static public class CloneGitRepoTask extends AsyncTask<String, Void, Object> {
         Context context;
@@ -85,7 +83,6 @@ public class JGitWrapper {
 
         public CloneGitRepoTask(Context context){
             this.context = context;
-            CredentialsProvider.setDefault(allowHosts);
         }
 
 		protected Object doInBackground(String... params) {
@@ -98,8 +95,8 @@ public class JGitWrapper {
 			final String hostActual = params[3];
 			final String portActual = params[4];
 
-			String REMOTE_URL = "ssh://" + userActual + ":" + passActual + "@" + hostActual + ":" + portActual + pathActual;
-
+//			String REMOTE_URL = "ssh://" + userActual + ":" + passActual + "@" + hostActual + ":" + portActual + pathActual;
+            String REMOTE_URL = hostActual+"/"+pathActual;
 			Git git;
             System.setProperty("user.home", context.getFilesDir().getAbsolutePath() );
            Log.v("git","user home : "+System.getProperty("user.home"));
@@ -109,10 +106,12 @@ public class JGitWrapper {
 				git = Git.cloneRepository()
 						.setURI(REMOTE_URL)
 						.setDirectory(localPath)
-						.setCredentialsProvider(allowHosts)
+//						.setCredentialsProvider(allowHosts)
+                        .setCredentialsProvider(new CredentialsProviderAllowHost(userActual, passActual))
 						.setBare(false)
 						.call();
 			} catch (Exception e) {
+                e.printStackTrace();
 				return e;
 			}
 
@@ -201,6 +200,42 @@ public class JGitWrapper {
     }
 
 
+    public static void push(Context context){
+        Log.v("git","pushing");
+
+        File repoDir = new File(context.getFilesDir()+"/"+ GIT_DIR+"/.git");
+        Git git = null;
+        try {
+            git = Git.open(repoDir);
+            // Stage all changed files, omitting new files, and commit with one command
+            git.commit()
+                    .setAll(true)
+                    .setMessage("Commit changes to all files")
+                    .call();
+
+            git.push()
+                    .setCredentialsProvider(new CredentialsProviderAllowHost("wizmer", ""))
+                    .call();
+            System.out.println("Committed all changes to repository at ");
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (UnmergedPathsException e) {
+            e.printStackTrace();
+        } catch (WrongRepositoryStateException e) {
+            e.printStackTrace();
+        } catch (ConcurrentRefUpdateException e) {
+            e.printStackTrace();
+        } catch (NoHeadException e) {
+            e.printStackTrace();
+        } catch (NoMessageException e) {
+            e.printStackTrace();
+        } catch (GitAPIException e) {
+            e.printStackTrace();
+        }
+
+
+    }
+
     public static HashSet<String> pull(Context context){
         File repoDir = new File(context.getFilesDir()+"/"+ GIT_DIR+"/.git");
         Log.v("git","pulling");
@@ -213,7 +248,7 @@ public class JGitWrapper {
 
             new Git(repository)
                     .pull()
-                    .setCredentialsProvider(allowHosts)
+                    .setCredentialsProvider(new CredentialsProviderAllowHost("wizmer", ""))
                     .call();
             ObjectId head = repository.resolve("HEAD^{tree}");
 
