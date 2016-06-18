@@ -21,7 +21,6 @@ import com.matburt.mobileorg2.OrgData.OrgProviderUtils;
 import com.matburt.mobileorg2.util.MultiMap;
 import com.matburt.mobileorg2.util.OrgFileNotFoundException;
 import com.matburt.mobileorg2.util.OrgNodeNotFoundException;
-import com.matburt.mobileorg2.util.OrgUtils;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -49,6 +48,9 @@ public class CalendarSyncService extends Service implements
 
 	private HashSet<String> activeTodos = new HashSet<String>();
 	private HashSet<String> allTodos = new HashSet<String>();
+	private int inserted = 0;
+	private int deleted = 0;
+	private int unchanged = 0;
 
 	@Override
 	public IBinder onBind(Intent intent) {
@@ -77,14 +79,14 @@ public class CalendarSyncService extends Service implements
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		if (intent == null)
 			return 0;
-		
+
 		refreshPreferences();
-		
+
 		final String[] fileList = intent.getStringArrayExtra(FILELIST);
 		final boolean clearDB = intent.getBooleanExtra(CLEARDB, false);
 		final boolean pull = intent.getBooleanExtra(PULL, false);
 		final boolean push = intent.getBooleanExtra(PUSH, false);
-		
+
 		new Thread() {
 			public void run() {
 				if (clearDB) {
@@ -92,21 +94,16 @@ public class CalendarSyncService extends Service implements
 						calendarWrapper.deleteFileEntries(fileList);
 					else
 						calendarWrapper.deleteEntries();
-				} 
-				
+				}
+
 				if (push) {
 					if (fileList != null)
 						syncFiles(fileList);
 					else
 						syncFiles();
-					
-					if (pullEnabled)
-						assimilateCalendar();
 				}
-				
-				if (pull) {
-					assimilateCalendar();
-				}
+
+
 			}
 		}.start();
 
@@ -127,11 +124,6 @@ public class CalendarSyncService extends Service implements
 			}
 		}
 	}
-
-
-	private int inserted = 0;
-	private int deleted = 0;
-	private int unchanged = 0;
 
 	private void syncFile(String filename) {
 		inserted = 0;
@@ -230,36 +222,6 @@ public class CalendarSyncService extends Service implements
 			}
 		}
 	}
-	
-	
-	private void assimilateCalendar() {
-		Cursor query = calendarWrapper.getUnassimilatedCalendarCursor();
-		
-		CalendarEntriesParser entriesParser = new CalendarEntriesParser(
-				calendarWrapper.calendar.events, query);
-				
-		while(query.isAfterLast() == false) {
-			CalendarEntry entry = entriesParser.getEntryFromCursor(query);
-			OrgNode node = entry.convertToOrgNode();
-			
-			OrgFile captureFile = OrgProviderUtils
-					.getOrCreateCaptureFile(getContentResolver());
-			node.fileId = captureFile.id;
-			node.parentId = captureFile.nodeId;
-			node.level = 1;
-						
-			node.write(getContentResolver());
-			
-			if (this.pullDelete)
-				calendarWrapper.deleteEntry(entry);
-			
-			query.moveToNext();
-		}
-		
-		query.close();
-		OrgUtils.announceSyncDone(this);
-	}
-
 
 	private void refreshPreferences() {
 		this.pullEnabled = sharedPreferences.getBoolean("calendarPull", false);

@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.HashSet;
 
-public class SDCardSynchronizer implements SynchronizerInterface {	
+public class SDCardSynchronizer extends Synchronizer {	
 
 	private String remoteIndexPath;
 	private String remotePath;
@@ -27,7 +27,7 @@ public class SDCardSynchronizer implements SynchronizerInterface {
 
 
 	@Override
-	public String getFilesDir() {
+	public String getRelativeFilesDir() {
 		return null;
 	}
 
@@ -59,7 +59,12 @@ public class SDCardSynchronizer implements SynchronizerInterface {
 
 
 	@Override
-	public void postSynchronize() {		
+	public void postSynchronize() {
+	}
+
+	@Override
+	public void addFile(String filename) {
+
 	}
 
 

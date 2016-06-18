@@ -1,8 +1,6 @@
 package com.matburt.mobileorg2.Synchronizers;
 
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.jcraft.jsch.Channel;
@@ -14,71 +12,30 @@ import com.matburt.mobileorg2.util.OrgUtils;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.util.HashSet;
 
-public class SSHSynchronizer implements SynchronizerInterface {
-	private final String LT = "MobileOrg";
-
-	private String user;
-	private String host;
-	private String path;
-    private String pass;
-    private int port;
-    private String pubFile;
-
-	private Session session;
-
-	private SharedPreferences appSettings;
-
+public class SSHSynchronizer extends Synchronizer {
+    private final String LT = "MobileOrg";
+    AuthData authData;
+    private Session session;
 	private Context context;
 
 	public SSHSynchronizer(Context context) {
 		this.context = context;
-		this.appSettings = PreferenceManager
-				.getDefaultSharedPreferences(context.getApplicationContext());
-		path = appSettings.getString("scpPath", "");
-		user = appSettings.getString("scpUser", "");
-        host = appSettings.getString("scpHost", "");
-        pubFile = appSettings.getString("scpPubFile", "");
-        String tmpPort = appSettings.getString("scpPort", "");
-        if (tmpPort.equals("")) {
-            port = 22;
-        }
-        else {
-            port = Integer.parseInt(tmpPort);
-        }
-        pass = appSettings.getString("scpPass", "");
-        Log.v("sync: ", "pass: "+pass);
-	}
+        authData = AuthData.getInstance(context);
+    }
 
     public String testConnection(String path, String user, String pass, String host, int port, String pubFile) {
-        this.path = path;
-        this.user = user;
-        this.pass = pass;
-        this.host = host;
-        this.port = port;
-        this.pubFile = pubFile;
-
-        if (this.path.indexOf("index.org") < 0) {
-            Log.i("MobileOrg", "Invalid ssh path, must point to index.org");
-            return "Invalid ssh path, must point to index.org";
-        }
-
-        if (this.path.equals("") ||
-            this.user.equals("") ||
-            this.host.equals("") ||
-            (this.pass.equals("") && this.pubFile.equals(""))) {
-            Log.i("MobileOrg", "Test Connection Failed for not being configured");
-            return "Missing configuration values";
-        }
+        if (!authData.isValid()) return "Missing configuration values";
 
         try {
             this.connect();
-            BufferedReader r = this.getRemoteFile(this.getFileName());
+            BufferedReader r = this.getRemoteFile(authData.getFileName());
             r.close();
         }
         catch (Exception e) {
@@ -89,53 +46,35 @@ public class SSHSynchronizer implements SynchronizerInterface {
         return null;
     }
 
-    private String getFileName() {
-        String[] pathElements = this.path.split("/");
-        if (pathElements.length > 0) {
-            return pathElements[pathElements.length-1];
-        }
-        return "";
-    }
-
-    private String getRootUrl() {
-        String[] pathElements = this.path.split("/");
-        String directoryActual = "/";
-        if (pathElements.length > 1) {
-            for (int i = 0; i < pathElements.length - 1; i++) {
-                if (pathElements[i].length() > 0) {
-                    directoryActual += pathElements[i] + "/";
-                }
-            }
-        }
-        return directoryActual;
-    }
-
     @Override
-    public  String getFilesDir() {
-        return context.getFilesDir() + "/" + JGitWrapper.GIT_DIR + "/";
+    public String getRelativeFilesDir() {
+        return JGitWrapper.GIT_DIR;
     }
 
     @Override
 	public boolean isConfigured() {
-        return !(this.appSettings.getString("scpPath", "").equals("")
-                || this.appSettings.getString("scpUser", "").equals("")
-                || this.appSettings.getString("scpHost", "").equals("")
-                || (this.appSettings.getString("scpPass", "").equals("") && this.appSettings
-                .getString("scpPubFile", "").equals("")));
+        return !(authData.getPath().equals("")
+                || authData.getUser().equals("")
+                || authData.getHost().equals("")
+                || authData.getPassword().equals("")
+                && authData.getPubFile().equals(""));
     }
 
     public void connect() throws JSchException {
 		JSch jsch = new JSch();
 		try {
-			session = jsch.getSession(user, host, port);
-            if (!pubFile.equals("") && !pass.equals("")) {
-                jsch.addIdentity(pubFile, pass);
-            }
-            else if (!pubFile.equals("")) {
-                jsch.addIdentity(pubFile);
+            session = jsch.getSession(
+                    authData.getUser(),
+                    authData.getHost(),
+                    authData.getPort());
+
+            if (!authData.getPubFile().equals("") && !authData.getPassword().equals("")) {
+                jsch.addIdentity(authData.getPubFile(), authData.getPubFile());
+            } else if (!authData.getPubFile().equals("")) {
+                jsch.addIdentity(authData.getPubFile());
             }
             else {
-                session.setPassword(pass);
+                session.setPassword(authData.getPassword());
             }
 
 			java.util.Properties config = new java.util.Properties();
@@ -152,7 +91,7 @@ public class SSHSynchronizer implements SynchronizerInterface {
 
     public HashSet<String> synchronize(){
         HashSet<String> changedFiles = JGitWrapper.pull(context);
-        JGitWrapper.push(context);
+        new JGitWrapper.PushGitRepoTask(context).execute();
         return changedFiles;
     }
 
@@ -163,7 +102,7 @@ public class SSHSynchronizer implements SynchronizerInterface {
             ChannelSftp sftpChannel = (ChannelSftp) channel;
             ByteArrayInputStream bas = new ByteArrayInputStream(contents.getBytes());
 
-            sftpChannel.put(bas, this.getRootUrl() + filename);
+            sftpChannel.put(bas, authData.getRootUrl() + filename);
             sftpChannel.exit();
         } catch (Exception e) {
             Log.e("MobileOrg", "Exception in putRemoteFile: " + e.toString());
@@ -177,8 +116,8 @@ public class SSHSynchronizer implements SynchronizerInterface {
             Channel channel = session.openChannel( "sftp" );
             channel.connect();
             ChannelSftp sftpChannel = (ChannelSftp) channel;
-            Log.i("MobileOrg", "SFTP Getting: " + this.getRootUrl() + filename);
-            InputStream in = sftpChannel.get(this.getRootUrl() + filename);
+            Log.i("MobileOrg", "SFTP Getting: " + authData.getRootUrl() + filename);
+            InputStream in = sftpChannel.get(authData.getRootUrl() + filename);
 
             BufferedReader r = new BufferedReader(new InputStreamReader(in));
             contents = new StringBuilder();
@@ -200,8 +139,14 @@ public class SSHSynchronizer implements SynchronizerInterface {
 			this.session.disconnect();
 	}
 
-	@Override
-	public boolean isConnectable() {
+    @Override
+    public void addFile(String filename) {
+        Log.v("sync", "addding file");
+        JGitWrapper.add(filename, context);
+    }
+
+    @Override
+    public boolean isConnectable() {
         if( ! OrgUtils.isNetworkOnline(context) ) return false;
 
         try {
@@ -216,5 +161,13 @@ public class SSHSynchronizer implements SynchronizerInterface {
         return true;
     }
 
+    @Override
+    public void clearRepository(Context context) {
+        File dir = new File(getAbsoluteFilesDir(context));
+        for (File file : dir.listFiles()) {
+            if (file.getName().equals(".git")) continue;
+            file.delete();
+        }
+    }
 
 }

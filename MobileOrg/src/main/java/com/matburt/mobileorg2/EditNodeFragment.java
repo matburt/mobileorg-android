@@ -32,15 +32,22 @@ public class EditNodeFragment extends Fragment {
     public static String NODE_ID = "node_id";
     public static String PARENT_ID = "parent_id";
     static public long nodeId = -1, parentId = -1;
-    private int position = 0;
-    static private OrgNode node;
-
-    EditText title, content;
     static Button schedule, deadline;
+    static OrgNodeTimeDate.TYPE currentDateTimeDialog;
+    static private OrgNode node;
+    EditText title, content;
+    private int position = 0;
     private Button todo, priority;
 
-    static OrgNodeTimeDate.TYPE currentDateTimeDialog;
+    static private void setupTimeStampButtons() {
+        String scheduleText = node.getOrgNodePayload().getTimestamp(OrgNodeTimeDate.TYPE.Scheduled);
+        String deadlineText = node.getOrgNodePayload().getTimestamp(OrgNodeTimeDate.TYPE.Deadline);
+        if (scheduleText.length() > 0) schedule.setText(scheduleText);
+        else schedule.setText(schedule.getResources().getString(R.string.scheduled));
 
+        if (deadlineText.length() > 0) deadline.setText(deadlineText);
+        else deadline.setText(deadline.getResources().getString(R.string.deadline));
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -155,18 +162,12 @@ public class EditNodeFragment extends Fragment {
             e.printStackTrace();
         }
     }
-    static private void setupTimeStampButtons() {
-        String scheduleText = node.getOrgNodePayload().getTimestamp(OrgNodeTimeDate.TYPE.Scheduled);
-        String deadlineText = node.getOrgNodePayload().getTimestamp(OrgNodeTimeDate.TYPE.Deadline);
-        if(scheduleText.length() > 0) schedule.setText(scheduleText);
-        else schedule.setText(schedule.getResources().getString(R.string.scheduled));
-
-        if(deadlineText.length() > 0) deadline.setText(deadlineText);
-        else deadline.setText(deadline.getResources().getString(R.string.deadline));
-    }
 
     /**
      * Called by EditNodeActivity when the OK button from the menu bar is pressed
+     * Triggers the update mechanism
+     * First the new node is written to the DB
+     * Then the file is written to disk
      */
     public void onOKPressed(){
         ContentResolver resolver = getContext().getContentResolver();
@@ -180,17 +181,17 @@ public class EditNodeFragment extends Fragment {
             try {
                 Log.v("sync","hello");
                 OrgNode original = new OrgNode(nodeId, resolver);
-                original.generateApplyWriteEdits(node, null, resolver);
+                node.write(resolver);
+                OrgEdit.updateFile(original, node, getContext());
             } catch (OrgNodeNotFoundException e) {
                 Log.v("sync","loser");
                 e.printStackTrace();
             }
         } else {
             node.shiftNextSiblingNodes(resolver);
-            OrgEdit edit = node.createParentNewheading(resolver);
-            edit.write(resolver);
+            node.write(resolver);
+            OrgEdit.updateFile(null, node, getContext());
         }
-        node.write(resolver);
     }
 
     /**

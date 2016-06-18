@@ -5,14 +5,14 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.support.design.widget.FloatingActionButton;
-
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -21,17 +21,15 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import android.net.Uri;
-
 import com.matburt.mobileorg2.Gui.Outline.OutlineAdapter;
 import com.matburt.mobileorg2.Gui.Wizard.WizardActivity;
 import com.matburt.mobileorg2.OrgData.OrgFile;
 import com.matburt.mobileorg2.OrgData.OrgProviderUtils;
-import com.matburt.mobileorg2.Settings.SettingsActivity;
-import com.matburt.mobileorg2.util.OrgUtils;
-import com.matburt.mobileorg2.Synchronizers.Synchronizer;
-import com.matburt.mobileorg2.util.PreferenceUtils;
 import com.matburt.mobileorg2.Services.SyncService;
+import com.matburt.mobileorg2.Settings.SettingsActivity;
+import com.matburt.mobileorg2.Synchronizers.SynchronizerManager;
+import com.matburt.mobileorg2.util.OrgUtils;
+import com.matburt.mobileorg2.util.PreferenceUtils;
 
 
 /**
@@ -88,10 +86,10 @@ public class OrgNodeListActivity extends AppCompatActivity {
 
         this.syncReceiver = new SynchServiceReceiver();
         registerReceiver(this.syncReceiver, new IntentFilter(
-                Synchronizer.SYNC_UPDATE));
+                SynchronizerManager.SYNC_UPDATE));
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
+        if (fab != null) fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 AlertDialog.Builder alert = new AlertDialog.Builder(OrgNodeListActivity.this);
@@ -107,7 +105,7 @@ public class OrgNodeListActivity extends AppCompatActivity {
                     public void onClick(DialogInterface dialog, int whichButton) {
                         String value = input.getText().toString();
                         OrgFile newFile = new OrgFile(value,null, "");
-                        newFile.addFile(getContentResolver());
+                        newFile.addFile(OrgNodeListActivity.this);
                         ((OutlineAdapter)recyclerView.getAdapter()).refresh();
                     }
                 });
@@ -254,10 +252,10 @@ public class OrgNodeListActivity extends AppCompatActivity {
     private class SynchServiceReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            boolean syncStart = intent.getBooleanExtra(Synchronizer.SYNC_START, false);
-            boolean syncDone = intent.getBooleanExtra(Synchronizer.SYNC_DONE, false);
-            boolean showToast = intent.getBooleanExtra(Synchronizer.SYNC_SHOW_TOAST, false);
-            int progress = intent.getIntExtra(Synchronizer.SYNC_PROGRESS_UPDATE, -1);
+            boolean syncStart = intent.getBooleanExtra(SynchronizerManager.SYNC_START, false);
+            boolean syncDone = intent.getBooleanExtra(SynchronizerManager.SYNC_DONE, false);
+            boolean showToast = intent.getBooleanExtra(SynchronizerManager.SYNC_SHOW_TOAST, false);
+            int progress = intent.getIntExtra(SynchronizerManager.SYNC_PROGRESS_UPDATE, -1);
 
             if(syncStart) {
                 if(synchronizerMenuItem != null)

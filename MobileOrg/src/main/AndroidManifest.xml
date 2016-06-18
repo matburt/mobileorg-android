@@ -109,9 +109,6 @@
 
         <service android:name=".Services.TimeclockService"></service>
 
-        <activity
-            android:name=".Services.TimeclockDialog"
-            android:theme="@android:style/Theme.Dialog"></activity>
         <activity android:name=".Gui.Agenda.AgendaSettings"></activity>
         <activity android:name=".Gui.Agenda.AgendaEntrySetting"></activity>
         <activity

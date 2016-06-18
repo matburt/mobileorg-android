@@ -28,7 +28,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.HashSet;
 
-public class DropboxSynchronizer implements SynchronizerInterface {
+public class DropboxSynchronizer extends Synchronizer {
 
 	private String remoteIndexPath;
 	private String remotePath;
@@ -71,7 +71,7 @@ public class DropboxSynchronizer implements SynchronizerInterface {
     }
 
     @Override
-    public String getFilesDir() {
+    public String getRelativeFilesDir() {
         return null;
     }
 
@@ -185,8 +185,13 @@ public class DropboxSynchronizer implements SynchronizerInterface {
 	public void postSynchronize() {
 	}
 
-	@Override
-	public boolean isConnectable() {
+    @Override
+    public void addFile(String filename) {
+
+    }
+
+    @Override
+    public boolean isConnectable() {
 		return OrgUtils.isNetworkOnline(context);
 	}
 }

@@ -16,7 +16,6 @@ import android.text.TextUtils;
 
 import com.matburt.mobileorg2.OrgData.OrgProviderUtils;
 import com.matburt.mobileorg2.R;
-import com.matburt.mobileorg2.Services.CalendarSyncService;
 import com.matburt.mobileorg2.Services.CalendarWrapper;
 import com.matburt.mobileorg2.Settings.Synchronizers.SDCardSettingsActivity;
 import com.matburt.mobileorg2.Settings.Synchronizers.ScpSettingsActivity;
@@ -31,7 +30,8 @@ import java.util.List;
 public class SettingsActivity extends PreferenceActivity implements
 		SharedPreferences.OnSharedPreferenceChangeListener {
 	public static final String KEY_SYNC_SOURCE = "syncSource";
-	
+	public static final int SYNCHRONIZER_PREFERENCES = 10;
+	private static final String SYNCHRONIZER_PLUGIN_ACTION = "com.matburt.mobileorg2.SYNCHRONIZE";
 	private String KEY_AUTO_SYNC_INTERVAL;
 	private String KEY_VIEW_RECURSION_MAX;
 	private String KEY_DEFAULT_TODO;
@@ -40,15 +40,47 @@ public class SettingsActivity extends PreferenceActivity implements
 	private String KEY_THEME;
 	private String KEY_FONT_SIZE;
 	private String KEY_QUICK_TODOS;
-
-	
 	private SharedPreferences appSettings;
-	
+	private Preference.OnPreferenceClickListener onClearDBClick = new Preference.OnPreferenceClickListener() {
+		@Override
+		public boolean onPreferenceClick(Preference preference) {
+			new AlertDialog.Builder(SettingsActivity.this)
+					.setIcon(android.R.drawable.ic_dialog_alert)
+					.setTitle(R.string.preference_clear_db_dialog_title)
+					.setMessage(R.string.preference_clear_db_dialog_message)
+					.setPositiveButton(R.string.yes,
+							new DialogInterface.OnClickListener() {
+
+								@Override
+								public void onClick(DialogInterface dialog,
+													int which) {
+
+
+								}
+
+							}).setNegativeButton(R.string.no, null).show();
+			return false;
+		}
+	};
+
+	private static List<PackageItemInfo> getSynchronizerPlugins(Context context) {
+		Intent discoverSynchro = new Intent(SYNCHRONIZER_PLUGIN_ACTION);
+		List<ResolveInfo> packages = context.getPackageManager()
+				.queryIntentActivities(discoverSynchro, 0);
+
+		ArrayList<PackageItemInfo> out = new ArrayList<PackageItemInfo>();
+
+		for (ResolveInfo info : packages)
+			out.add(info.activityInfo);
+
+		return out;
+	}
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 //		OrgUtils.setTheme(this);
 		super.onCreate(savedInstanceState);
-		
+
 		addPreferencesFromResource(R.xml.preferences);
 
 		init();
@@ -61,7 +93,7 @@ public class SettingsActivity extends PreferenceActivity implements
 
 	private void init() {
 		this.appSettings = getPreferenceScreen().getSharedPreferences();
-		
+
 		this.KEY_AUTO_SYNC_INTERVAL = getString(R.string.key_autoSyncInterval);
 		this.KEY_VIEW_RECURSION_MAX = getString(R.string.key_viewRecursionMax);
 		this.KEY_DEFAULT_TODO = getString(R.string.key_defaultTodo);
@@ -70,7 +102,7 @@ public class SettingsActivity extends PreferenceActivity implements
 		this.KEY_THEME = getString(R.string.key_theme);
 		this.KEY_FONT_SIZE = getString(R.string.key_fontSize);
 		this.KEY_QUICK_TODOS = getString(R.string.key_quick_todos);
-		
+
 		initSettings();
 	}
 	
@@ -86,7 +118,6 @@ public class SettingsActivity extends PreferenceActivity implements
 		updatePreferenceSummary(KEY_QUICK_TODOS);
 	}
 
-
 	@Override
 	public void onSharedPreferenceChanged(SharedPreferences sharedPreferences,
 			String key) {
@@ -98,18 +129,17 @@ public class SettingsActivity extends PreferenceActivity implements
 		super.onResume();
 		this.appSettings.registerOnSharedPreferenceChangeListener(this);
 	}
-	
+
 	@Override
 	public void onPause() {
 		this.appSettings.unregisterOnSharedPreferenceChangeListener(this);
 		super.onPause();
 	}
-	
 
 	private void updatePreferenceSummary(String key) {
 		if (key == null)
 			return;
-		
+
 		Preference pref = findPreference(key);
 		if (pref == null)
 			return;
@@ -138,7 +168,7 @@ public class SettingsActivity extends PreferenceActivity implements
 		} else if (key.equals(KEY_THEME)) {
 			summary = appSettings.getString(key, "");
 		} else if (key.equals(KEY_FONT_SIZE)) {
-			summary = appSettings.getString(key, "");			
+			summary = appSettings.getString(key, "");
 		} else if (key.equals(KEY_QUICK_TODOS)) {
 			summary = appSettings.getString(key, "");
 		}
@@ -237,48 +267,4 @@ public class SettingsActivity extends PreferenceActivity implements
 		syncSource.setEntries(entries);
 		syncSource.setEntryValues(values);
 	}
-
-	private static final String SYNCHRONIZER_PLUGIN_ACTION = "com.matburt.mobileorg2.SYNCHRONIZE";
-	public static final int SYNCHRONIZER_PREFERENCES = 10;
-	
-	private static List<PackageItemInfo> getSynchronizerPlugins(Context context) {
-		Intent discoverSynchro = new Intent(SYNCHRONIZER_PLUGIN_ACTION);
-		List<ResolveInfo> packages = context.getPackageManager()
-				.queryIntentActivities(discoverSynchro, 0);
-
-		ArrayList<PackageItemInfo> out = new ArrayList<PackageItemInfo>();
-
-		for (ResolveInfo info : packages)
-			out.add(info.activityInfo);
-
-		return out;
-	}
-	
-	
-	private Preference.OnPreferenceClickListener onClearDBClick = new Preference.OnPreferenceClickListener() {
-		@Override
-		public boolean onPreferenceClick(Preference preference) {
-			new AlertDialog.Builder(SettingsActivity.this)
-					.setIcon(android.R.drawable.ic_dialog_alert)
-					.setTitle(R.string.preference_clear_db_dialog_title)
-					.setMessage(R.string.preference_clear_db_dialog_message)
-					.setPositiveButton(R.string.yes,
-							new DialogInterface.OnClickListener() {
-
-								@Override
-								public void onClick(DialogInterface dialog,
-										int which) {
-									OrgProviderUtils
-											.clearDB(getContentResolver());
-									OrgUtils.announceSyncDone(getApplicationContext());
-									
-									Intent clearCalDBIntent = new Intent(getBaseContext(), CalendarSyncService.class);
-									clearCalDBIntent.putExtra(CalendarSyncService.CLEARDB, true);
-									startService(clearCalDBIntent);
-								}
-
-							}).setNegativeButton(R.string.no, null).show();
-			return false;
-		}
-	};
 }

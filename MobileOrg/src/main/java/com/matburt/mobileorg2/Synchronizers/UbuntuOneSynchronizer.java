@@ -41,7 +41,7 @@ import oauth.signpost.commonshttp.CommonsHttpOAuthConsumer;
 import oauth.signpost.exception.OAuthException;
 import oauth.signpost.signature.HmacSha1MessageSigner;
 
-public class UbuntuOneSynchronizer implements SynchronizerInterface {
+public class UbuntuOneSynchronizer extends Synchronizer {
 
 private static final String BASE_TOKEN_NAME = "Ubuntu One @ MobileOrg:";
 	private static final String CONSUMER_KEY = "consumer_key";
@@ -104,7 +104,7 @@ private static final String BASE_TOKEN_NAME = "Ubuntu One @ MobileOrg:";
     }
 
     @Override
-    public String getFilesDir() {
+    public String getRelativeFilesDir() {
         return null;
     }
 
@@ -277,8 +277,13 @@ private static final String BASE_TOKEN_NAME = "Ubuntu One @ MobileOrg:";
 	public void postSynchronize() {
     }
 
-	public boolean login() {
-		invalidate();
+    @Override
+    public void addFile(String filename) {
+
+    }
+
+    public boolean login() {
+        invalidate();
 		try {
             Log.i("MobileOrg", "Logging into Ubuntu One");
 			DefaultHttpClient httpClient = new DefaultHttpClient();

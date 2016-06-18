@@ -3,25 +3,17 @@ package com.matburt.mobileorg2.OrgData;
 import android.content.ContentResolver;
 import android.util.Log;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.NavigableMap;
+import java.util.Stack;
 import java.util.TreeMap;
 
-/**
- * Created by bcoste on 25/02/16.
- */
 public class OrgNodeTree {
     public OrgNode node;
-    public enum Visibility {
-        folded,
-        children,
-        subtree,
-    }
-
-    private Visibility visibility;
     public ArrayList<OrgNodeTree> children;
-
+    private Visibility visibility;
     private OrgNodeTree(OrgNode root, ContentResolver resolver, boolean isRecursive){
         node = root;
         children = new ArrayList<>();
@@ -37,10 +29,11 @@ public class OrgNodeTree {
 
     /**
      * Create a tree with only the root
+     *
      * @param root
      */
-    public OrgNodeTree(OrgNode root){
-        this(root,null, false);
+    public OrgNodeTree(OrgNode root) {
+        this(root, null, false);
     }
 
     /**
@@ -48,7 +41,7 @@ public class OrgNodeTree {
      * @param root
      * @param resolver
      */
-    public OrgNodeTree(OrgNode root, ContentResolver resolver){
+    public OrgNodeTree(OrgNode root, ContentResolver resolver) {
         this(root, resolver, true);
     }
 
@@ -59,6 +52,46 @@ public class OrgNodeTree {
     public OrgNodeTree(ArrayList<OrgNode> arrayList){
         this((OrgNode)null);
         for(OrgNode node: arrayList) children.add(new OrgNodeTree(node));
+    }
+
+    static public ArrayList<OrgNode> getFullNodeArray(OrgNodeTree root) {
+        return getFullNodeArray(root, false);
+    }
+
+    static public ArrayList<OrgNode> getFullNodeArray(OrgNodeTree root, boolean excludeRoot) {
+        Stack<OrgNodeTree> stack = new Stack<>();
+        ArrayList<OrgNode> result = new ArrayList<>();
+        stack.push(root);
+        int count = 0;
+        while (!stack.empty()) {
+            OrgNodeTree tree = stack.pop();
+
+            Collections.sort(tree.children, new Comparator<OrgNodeTree>() {
+                @Override
+                public int compare(OrgNodeTree a, OrgNodeTree b) {
+                    if (a.node.position < b.node.position) return 1;
+                    if (a.node.position > b.node.position) return -1;
+                    return 0;
+                }
+            });
+
+            for (OrgNodeTree child : tree.children) stack.push(child);
+            if (!excludeRoot || count > 0) result.add(tree.node);
+            count++;
+        }
+
+        return result;
+    }
+
+    private static void fillMap(TreeMap<Long, OrgNodeTree> map, OrgNodeTree tree, long idConstructor) {
+        // The root node is the filename node
+        // It must not be added
+        map.put(idConstructor++, tree);
+
+        if (tree.visibility == Visibility.folded) return;
+
+//        for(OrgNodeTree child: tree.children) fillMap(map, child);
+        for (OrgNodeTree child : tree.children) map.put(idConstructor++, child);
     }
 
     public Visibility getVisibility(){
@@ -94,14 +127,9 @@ public class OrgNodeTree {
         return result;
     }
 
-    private static void fillMap(TreeMap<Long,OrgNodeTree> map, OrgNodeTree tree, long idConstructor){
-        // The root node is the filename node
-        // It must not be added
-        map.put(idConstructor++, tree);
-
-        if(tree.visibility == Visibility.folded) return;
-
-//        for(OrgNodeTree child: tree.children) fillMap(map, child);
-        for(OrgNodeTree child: tree.children) map.put(idConstructor++, child);
+    public enum Visibility {
+        folded,
+        children,
+        subtree,
     }
 }

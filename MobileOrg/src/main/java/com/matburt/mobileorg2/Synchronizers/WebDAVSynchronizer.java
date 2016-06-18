@@ -37,63 +37,7 @@ import javax.net.ssl.SSLHandshakeException;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.X509TrustManager;
 
-public class WebDAVSynchronizer implements SynchronizerInterface {
-
-    class IntelligentX509TrustManager implements X509TrustManager {
-        Context c;
-
-        public IntelligentX509TrustManager(Context c) {
-            super();
-            this.c = c;
-        }
-
-        public boolean validateCertificate(int hash, String description) {
-            SharedPreferences appSettings = 
-                PreferenceManager.getDefaultSharedPreferences(this.c);
-            Editor edit = appSettings.edit();
-            int existingHash = appSettings.getInt("webCertHash", 0);
-            if (existingHash == 0) {
-                Log.i("MobileOrg", "Storing new certificate");
-                edit.putInt("webCertHash", hash);
-                edit.putString("webCertDescr", description);
-                edit.commit();
-                return true;
-            }
-            else if (existingHash != hash) {
-                Log.i("MobileOrg", "Conflicting Certificate Hash");
-                edit.putInt("webConflictHash", hash);
-                edit.putString("webConflictHashDesc", description);
-                edit.commit();
-                return true;
-                //WARNING: NOTE: This disables the requirement to validate the certificate.
-                //               a better way is needed for those certs whose hash changes
-                //               all the time
-                //return false;
-            }
-            Log.i("MobileOrg", "Certificates match");
-            return true;
-        }
-
-        public void checkClientTrusted(X509Certificate[] chain,
-                                       String authType) throws CertificateException {}
-
-        public void checkServerTrusted(X509Certificate[] chain,
-                                       String authType) throws CertificateException {
-            for (int i = 0; i < chain.length; i++) {
-                String descr = chain[i].toString();
-                int hash = chain[i].hashCode();
-                Log.i("MobileOrg", "Validating certificate hash");
-                if (!this.validateCertificate(hash, descr)) {
-                    throw new CertificateException("Conflicting certificate found with hash " + 
-                                                   Integer.toString(hash));
-                }
-            }
-        }
-
-        public X509Certificate[] getAcceptedIssuers() {
-            return new X509Certificate[0];
-        }
-    }
+public class WebDAVSynchronizer extends Synchronizer {
 
 	private String remoteIndexPath;
 	private String remotePath;
@@ -101,7 +45,6 @@ public class WebDAVSynchronizer implements SynchronizerInterface {
     private String password;
 	private Context context;
 	private Resources r;
-	
 	public WebDAVSynchronizer(Context parentContext) {
 		this.context = parentContext;
 		this.r = context.getResources();
@@ -160,7 +103,7 @@ public class WebDAVSynchronizer implements SynchronizerInterface {
     }
 
     @Override
-    public String getFilesDir() {
+    public String getRelativeFilesDir() {
         return null;
     }
 
@@ -173,19 +116,18 @@ public class WebDAVSynchronizer implements SynchronizerInterface {
 
     }
 
-
     private void handleChangedCertificate() {
         Intent i = new Intent(this.context, CertificateConflictActivity.class);
         i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         this.context.startActivity(i);
     }
-	
+
 	public void putRemoteFile(String filename, String contents) throws IOException {
 		String urlActual = this.getRootUrl() + filename;
 		putUrlFile(urlActual, contents);
 	}
 
-	public BufferedReader getRemoteFile(String filename) throws IOException, CertificateException {
+    public BufferedReader getRemoteFile(String filename) throws IOException, CertificateException {
 		String orgUrl = this.remotePath + filename;
         InputStream mainFile = null;
         try {
@@ -193,7 +135,7 @@ public class WebDAVSynchronizer implements SynchronizerInterface {
 
             if (mainFile == null) {
                 return null;
-            } 
+            }
 
             return new BufferedReader(new InputStreamReader(mainFile));
         }
@@ -328,11 +270,72 @@ public class WebDAVSynchronizer implements SynchronizerInterface {
 	}
 
 	@Override
-	public void postSynchronize() {		
-	}
+    public void postSynchronize() {
+    }
 
-	@Override
-	public boolean isConnectable() {
+    @Override
+    public void addFile(String filename) {
+
+    }
+
+    @Override
+    public boolean isConnectable() {
 		return OrgUtils.isNetworkOnline(context);
 	}
+
+    class IntelligentX509TrustManager implements X509TrustManager {
+        Context c;
+
+        public IntelligentX509TrustManager(Context c) {
+            super();
+            this.c = c;
+        }
+
+        public boolean validateCertificate(int hash, String description) {
+            SharedPreferences appSettings =
+                    PreferenceManager.getDefaultSharedPreferences(this.c);
+            Editor edit = appSettings.edit();
+            int existingHash = appSettings.getInt("webCertHash", 0);
+            if (existingHash == 0) {
+                Log.i("MobileOrg", "Storing new certificate");
+                edit.putInt("webCertHash", hash);
+                edit.putString("webCertDescr", description);
+                edit.commit();
+                return true;
+            } else if (existingHash != hash) {
+                Log.i("MobileOrg", "Conflicting Certificate Hash");
+                edit.putInt("webConflictHash", hash);
+                edit.putString("webConflictHashDesc", description);
+                edit.commit();
+                return true;
+                //WARNING: NOTE: This disables the requirement to validate the certificate.
+                //               a better way is needed for those certs whose hash changes
+                //               all the time
+                //return false;
+            }
+            Log.i("MobileOrg", "Certificates match");
+            return true;
+        }
+
+        public void checkClientTrusted(X509Certificate[] chain,
+                                       String authType) throws CertificateException {
+        }
+
+        public void checkServerTrusted(X509Certificate[] chain,
+                                       String authType) throws CertificateException {
+            for (int i = 0; i < chain.length; i++) {
+                String descr = chain[i].toString();
+                int hash = chain[i].hashCode();
+                Log.i("MobileOrg", "Validating certificate hash");
+                if (!this.validateCertificate(hash, descr)) {
+                    throw new CertificateException("Conflicting certificate found with hash " +
+                            Integer.toString(hash));
+                }
+            }
+        }
+
+        public X509Certificate[] getAcceptedIssuers() {
+            return new X509Certificate[0];
+        }
+    }
 }

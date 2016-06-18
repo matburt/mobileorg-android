@@ -15,7 +15,7 @@ import android.widget.Spinner;
 import com.matburt.mobileorg2.OrgData.OrgFile;
 import com.matburt.mobileorg2.OrgData.OrgNode;
 import com.matburt.mobileorg2.R;
-import com.matburt.mobileorg2.Synchronizers.Synchronizer;
+import com.matburt.mobileorg2.Synchronizers.SynchronizerManager;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -95,20 +95,20 @@ public class OrgUtils {
 	}
 	
 	public static void announceSyncDone(Context context) {
-		Intent intent = new Intent(Synchronizer.SYNC_UPDATE);
-		intent.putExtra(Synchronizer.SYNC_DONE, true);
+		Intent intent = new Intent(SynchronizerManager.SYNC_UPDATE);
+		intent.putExtra(SynchronizerManager.SYNC_DONE, true);
 		context.sendBroadcast(intent);
 	}
 	
 	public static void announceSyncStart(Context context) {
-		Intent intent = new Intent(Synchronizer.SYNC_UPDATE);
-		intent.putExtra(Synchronizer.SYNC_START, true);
+		Intent intent = new Intent(SynchronizerManager.SYNC_UPDATE);
+		intent.putExtra(SynchronizerManager.SYNC_START, true);
 		context.sendBroadcast(intent);
 	}
 	
 	public static void announceSyncUpdateProgress(int progress, Context context) {
-		Intent intent = new Intent(Synchronizer.SYNC_UPDATE);
-		intent.putExtra(Synchronizer.SYNC_PROGRESS_UPDATE, progress);
+		Intent intent = new Intent(SynchronizerManager.SYNC_UPDATE);
+		intent.putExtra(SynchronizerManager.SYNC_PROGRESS_UPDATE, progress);
 		context.sendBroadcast(intent);
 	}
 
@@ -134,25 +134,6 @@ public class OrgUtils {
         return contents;
     }
     
-
-    public static class SortIgnoreCase implements Comparator<Object> {
-        public int compare(Object o1, Object o2) {
-            String s1 = (String) o1;
-            String s2 = (String) o2;
-            return s1.toLowerCase().compareTo(s2.toLowerCase());
-        }
-    }
-    
-//    public static void setTheme(Activity activity) {
-//    	String themeName = PreferenceUtils.getThemeName();
-
-//    	if(themeName.equals("Dark"))
-//    		activity.setTheme(R.style.Theme_MobileOrg_Dark);
-//    	else
-//    		activity.setTheme(R.style.Theme_MobileOrg_Light);
-//    }
-
-
 	public static String rightTrim(String str) {
 		int last = str.length() - 1;
 		int end = last;
@@ -165,6 +146,15 @@ public class OrgUtils {
 		}
 		return str.substring(0, end + 1);
 	}
+
+//    public static void setTheme(Activity activity) {
+//    	String themeName = PreferenceUtils.getThemeName();
+
+//    	if(themeName.equals("Dark"))
+//    		activity.setTheme(R.style.Theme_MobileOrg_Dark);
+//    	else
+//    		activity.setTheme(R.style.Theme_MobileOrg_Light);
+//    }
 
 	public static byte[] serializeObject(Object o) {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -202,8 +192,7 @@ public class OrgUtils {
 			return null;
 		}
 	}
-	
-	
+
 	/**
 	 * @param keyID the ID of the StringArray that contains the labels
 	 * @param valID the ID of the StringArray that contains the values
@@ -219,7 +208,6 @@ public class OrgUtils {
 		}
 		return null;
 	}
-	
 	
 	public static boolean isWifiOnline(Context context) {
 		ConnectivityManager conMan = (ConnectivityManager) context
@@ -240,8 +228,7 @@ public class OrgUtils {
 
 		return mobile == State.CONNECTED;
 	}
-	
-	
+
 	public static boolean isNetworkOnline(Context context) {
 		SharedPreferences prefs = PreferenceManager
 				.getDefaultSharedPreferences(context);
@@ -254,5 +241,13 @@ public class OrgUtils {
 		else
 			return OrgUtils.isWifiOnline(context)
 					|| OrgUtils.isMobileOnline(context);
+	}
+
+	public static class SortIgnoreCase implements Comparator<Object> {
+		public int compare(Object o1, Object o2) {
+			String s1 = (String) o1;
+			String s2 = (String) o2;
+			return s1.toLowerCase().compareTo(s2.toLowerCase());
+		}
 	}
 }

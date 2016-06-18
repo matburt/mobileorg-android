@@ -13,6 +13,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
+import com.matburt.mobileorg2.OrgData.OrgEdit;
 import com.matburt.mobileorg2.OrgData.OrgNode;
 import com.matburt.mobileorg2.OrgData.OrgProviderUtils;
 import com.matburt.mobileorg2.R;
@@ -52,26 +53,6 @@ public class TodoDialog {
         builder.create().show();
     }
 
-    private void updateOrgNodeTodo(String selectedTodo) {
-        if (selectedTodo.equals(node.todo))
-            return;
-
-        ContentResolver resolver = context.getContentResolver();
-
-        OrgNode newNode;
-        try {
-            newNode = new OrgNode(node.id, resolver);
-        } catch (OrgNodeNotFoundException e) {
-            e.printStackTrace();
-            return;
-        }
-        newNode.todo = selectedTodo;
-        Log.v("todo", "new todo : " + newNode.todo);
-        node.generateApplyWriteEdits(newNode, null, resolver);
-        node.write(resolver);
-        OrgUtils.announceSyncDone(context);
-    }
-
     static public void setupTodoButton(Context context, OrgNode node,
                                        Button button, boolean toggleVisibility) {
         String todoString = node.todo;
@@ -92,5 +73,25 @@ public class TodoDialog {
             button.setText("");
             button.setTextColor(ContextCompat.getColor(context, R.color.colorLightGray));
         }
+    }
+
+    private void updateOrgNodeTodo(String selectedTodo) {
+        if (selectedTodo.equals(node.todo))
+            return;
+
+        ContentResolver resolver = context.getContentResolver();
+
+        OrgNode newNode;
+        try {
+            newNode = new OrgNode(node.id, resolver);
+        } catch (OrgNodeNotFoundException e) {
+            e.printStackTrace();
+            return;
+        }
+        newNode.todo = selectedTodo;
+        Log.v("todo", "new todo : " + newNode.todo);
+        OrgEdit.updateFile(node, newNode, context);
+        node.write(resolver);
+        OrgUtils.announceSyncDone(context);
     }
 }

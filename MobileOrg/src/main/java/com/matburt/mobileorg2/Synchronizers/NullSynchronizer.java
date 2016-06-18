@@ -1,17 +1,15 @@
 package com.matburt.mobileorg2.Synchronizers;
 
-import android.content.Context;
-
 import java.io.BufferedReader;
 import java.util.HashSet;
 
-public class NullSynchronizer implements SynchronizerInterface {
+public class NullSynchronizer extends Synchronizer {
 
     public NullSynchronizer() {
     }
 
     @Override
-    public String getFilesDir() {
+    public String getRelativeFilesDir() {
         return null;
     }
 
@@ -37,8 +35,13 @@ public class NullSynchronizer implements SynchronizerInterface {
 	public void postSynchronize() {
     }
 
-	@Override
-	public boolean isConnectable() {
+    @Override
+    public void addFile(String filename) {
+
+    }
+
+    @Override
+    public boolean isConnectable() {
 		return true;
 	}
 }

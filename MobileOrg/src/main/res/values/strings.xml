@@ -56,6 +56,7 @@
     <string name="sync_plugin">MobileOrg Synchronization</string>
     <string name="sync_plugin_info">This plugin allows you to trigger a MobileOrg Sync from Locale or Tasker.  If you are okay with this click \'Accept\' otherwise click \'Deny\'</string>
     <string name="sync_plugin_message">Synchronize</string>
+    <string name="sync_git_file_added">Added file : </string>
 
     <!-- error strings -->
     <string name="error_sqlio">There was a problem reading from the database, is your drive corrupted or is the SDCard mounted?</string>
@@ -133,7 +134,7 @@
     <string name="log_in_to_ssh">Log in to your SSH server</string>
     <string name="ssh_inform_choose_pub_file">OR select a file containing your *private* key (requires a file explorer program to be installed)</string>
     <string name="ssh_choose_file_button">Select your *private* key file</string>
-    <string name="null_sync_description">This is a capture only synchronizer.  It will not attempt to synchronize to any source.</string>
+    <string name="null_sync_description">This is a capture only synchronizerManager.  It will not attempt to synchronize to any source.</string>
     <string name="dropbox_login_info">This will redirect you to a login form.  After logging in it will return you to this screen to continue.</string>
     <string name="url">URL</string>
     <string name="wizard_dropbox_email_hint">user@host.com</string>

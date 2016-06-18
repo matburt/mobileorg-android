@@ -13,7 +13,6 @@ import com.matburt.mobileorg2.util.PreferenceUtils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.security.cert.CertificateException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -25,10 +24,16 @@ import java.util.regex.Pattern;
 
 public class OrgFileParser {
 	public static final String BLOCK_SEPARATOR_PREFIX = "#HEAD#";
-
+	private static final Pattern starPattern = Pattern.compile("^(\\**)\\s");
+	private static final String fileMatchPattern = "\\[file:(.*?)\\]\\[(.*?)\\]\\]";
+	private static final Pattern getTodos = Pattern
+			.compile("#\\+TODO:([^\\|]+)(\\| (.*))*");
+	private static final Pattern getPriorities = Pattern
+			.compile("#\\+ALLPRIORITIES:([^\\n]+)");
+	private static final Pattern getTags = Pattern.compile("#\\+TAGS:([^\\n]+)");
+	Context context;
 	private ContentResolver resolver;
     private OrgDatabase db;
- 
     private ParseStack parseStack;
 	private StringBuilder payload;
 	private OrgFile orgFile;
@@ -37,198 +42,24 @@ public class OrgFileParser {
     private HashMap<Integer, Integer> position;
 	private HashMap<OrgNodeTimeDate.TYPE, Long> timestamps;
 
-	public OrgFileParser(OrgDatabase db, ContentResolver resolver) {
+	public OrgFileParser(OrgDatabase db, Context context) {
 		this.db = db;
-		this.resolver = resolver;
+		this.context = context;
+		this.resolver = context.getContentResolver();
 		timestamps = new HashMap<>();
 	}
 
-	private void init(OrgFile orgFile) {
-		orgFile.removeFile(resolver);
-		orgFile.addFile(resolver);
-		this.orgFile = orgFile;
-
-		this.parseStack = new ParseStack();
-		this.parseStack.add(0, orgFile.nodeId, "");
-		
-		this.payload = new StringBuilder();
-		
-		this.orgNodeParser = new OrgNodeParser(
-				OrgProviderUtils.getTodos(resolver));
-
-        this.position = new HashMap<>();
-	}
-	
-	public void parse(OrgFile orgFile, BufferedReader breader, Context context) {
-		this.excludedTags = PreferenceUtils.getExcludedTags();
-		
-		parse(orgFile, breader);
-	}
-
-
-
-	public void parse(OrgFile orgFile, BufferedReader breader) {
-		Log.v("parse","parsing : "+orgFile.name);
-		init(orgFile);
-		db.beginTransaction();
-
-		try {
-			String currentLine;
-			while ((currentLine = breader.readLine()) != null) parseLine(currentLine);
-
-			// Add payload to the final node
-			db.fastInsertNodePayload(parseStack.getCurrentNodeId(), this.payload.toString(), timestamps);
-
-		} catch (IOException e) {}
-		
-		db.endTransaction();
-
-	}
-
-
-	private void parseLine(String line) {
-		if (TextUtils.isEmpty(line))
-			return;
-
-		int numstars = numberOfStars(line);
-		if (numstars > 0) {
-			timestamps.clear();
-			db.fastInsertNodePayload(parseStack.getCurrentNodeId(), this.payload.toString(), timestamps);
-			this.payload = new StringBuilder();
-			parseHeading(line, numstars);
-		} else {
-			Log.v("todos","name : "+line);
-			HashMap<String,Boolean> map = parseTodos(line);
-			Log.v("todos","res : "+ (map != null ? map.toString() : ""));
-			OrgProviderUtils.addTodos(parseTodos(line), resolver);
-			parseTimestamps(line);
-			payload.append(line).append("\n");
-		}
-	}
-	
-	private void parseHeading(String thisLine, int numstars) {
-        int currentLevel = parseStack.getCurrentLevel();
-
-        if(position.get(numstars-1) == null) position.put(numstars-1, 0);
-        if (numstars <= currentLevel) {
-            int value = position.get(numstars-1);
-            position.put(numstars-1, value+1);
-		} else {
-            position.put(numstars-1, 0);
-        }
-
-		while (numstars <= parseStack.getCurrentLevel()){
-            parseStack.pop();
-        }
-
-		OrgNode node = this.orgNodeParser.parseLine(thisLine, numstars);
-		node.tags_inherited = parseStack.getCurrentTags();
-		node.fileId = orgFile.id;
-		node.parentId = parseStack.getCurrentNodeId();
-        node.position = position.get(numstars-1);
-
-        long newId = db.fastInsertNode(node);
-		parseStack.add(numstars, newId, node.tags);
-    }
-
-	private static final Pattern starPattern = Pattern.compile("^(\\**)\\s");
 	private static int numberOfStars(String thisLine) {
 		Matcher matcher = starPattern.matcher(thisLine);
-		if(matcher.find()) {
+		if (matcher.find()) {
 			return matcher.end(1) - matcher.start(1);
 		} else
 			return 0;
 	}
 
-
-	/**
-	 * Parse the line for any timestamps
-	 * @param line
-	 * @return A HashMap<String,int> where first key is timestamp type and second is value.
-	 * Return null if no timestamp found.
-	 */
-	private void parseTimestamps(String line){
-		timestamps.clear();
-		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-
-		for(OrgNodeTimeDate.TYPE type: OrgNodeTimeDate.TYPE.values()){
-			Matcher matcher = OrgNodeTimeDate.getTimestampMatcher(type)
-					.matcher(line);
-
-            String str = OrgNodePayload.getDateFromTimestampMatcher(matcher);
-			if(str.equals("")) continue;
-			try {
-				timestamps.put(type, format.parse(str).getTime());
-			} catch (ParseException e) {
-				e.printStackTrace();
-			}
-		}
-
-
-	}
-	
-    
-	private class ParseStack {
-        private class Item {
-            int level;
-            long nodeId;
-            String tag;
-
-            public Item(Integer level, Long nodeId, String tags){
-                this.level = level;
-                this.nodeId = nodeId;
-                this.tag = tags;
-            }
-        }
-
-		private Stack<Item> stack;
-
-		public ParseStack() {
-			this.stack = new Stack<Item>();
-		}
-		
-		public void add(int level, long nodeId, String tags) {
-			stack.push(new Item(level, nodeId, stripTags(tags)));
-		}
-		
-		private String stripTags(String tags) {
-			if (excludedTags == null || TextUtils.isEmpty(tags))
-				return tags;
-			
-			StringBuilder result = new StringBuilder();
-			for (String tag: tags.split(":")) {
-				if (!excludedTags.contains(tag)) {
-					result.append(tag);
-					result.append(":");
-				}
-			}
-			
-			if(!TextUtils.isEmpty(result))
-				result.deleteCharAt(result.lastIndexOf(":"));
-			
-			return result.toString();
-		}
-		
-		public void pop() {
-			this.stack.pop();
-		}
-		
-		public int getCurrentLevel() {
-			return stack.peek().level;
-		}
-		
-		public long getCurrentNodeId() {
-			return stack.peek().nodeId;
-		}
-		
-		public String getCurrentTags() {
-			return stack.peek().tag;
-		}
-
-	}
-
 	/**
 	 * Parses the checksum file.
+	 *
 	 * @return HashMap with Filename->checksum
 	 */
 	public static HashMap<String, String> getChecksums(String filecontents) {
@@ -237,32 +68,28 @@ public class OrgFileParser {
 			if (TextUtils.isEmpty(line))
 				continue;
 			String[] chksTuple = line.split("  ", 2);
-			if(chksTuple.length == 2)
+			if (chksTuple.length == 2)
 				checksums.put(chksTuple[1], chksTuple[0]);
 		}
 		return checksums;
 	}
-	
-	private static final String fileMatchPattern = "\\[file:(.*?)\\]\\[(.*?)\\]\\]";
+
 	/**
 	 * Parses the file list from index file.
+	 *
 	 * @return HashMap with Filename->Filename Alias
 	 */
 	public static HashMap<String, String> getFilesFromIndex(String filecontents) {
 		Pattern indexOrgFilePattern = Pattern.compile(fileMatchPattern);
 		Matcher indexOrgFileMatcher = indexOrgFilePattern.matcher(filecontents);
 		HashMap<String, String> allOrgFiles = new HashMap<>();
-				
+
 		while (indexOrgFileMatcher.find()) {
 			allOrgFiles.put(indexOrgFileMatcher.group(1), indexOrgFileMatcher.group(2));
 		}
 
 		return allOrgFiles;
 	}
-	
-	
-	private static final Pattern getTodos = Pattern
-			.compile("#\\+TODO:([^\\|]+)(\\| (.*))*");
 
 	public static HashMap<String, Boolean> parseTodos(String line) {
 		HashMap<String, Boolean> result = null;
@@ -291,9 +118,7 @@ public class OrgFileParser {
 		}
 		return result;
 	}
-	
-	private static final Pattern getPriorities = Pattern
-			.compile("#\\+ALLPRIORITIES:([^\\n]+)");
+
 	public static ArrayList<String> getPrioritiesFromIndex(String filecontents) {
 		Matcher t = getPriorities.matcher(filecontents);
 
@@ -308,44 +133,42 @@ public class OrgFileParser {
 		}
 		return priorities;
 	}
-	
-	
-	private static final Pattern getTags = Pattern.compile("#\\+TAGS:([^\\n]+)");
+
 	public static ArrayList<String> getTagsFromIndex(String filecontents) {
 		Matcher matcher = getTags.matcher(filecontents);
 		ArrayList<String> tagList = new ArrayList<String>();
-		
-		if(matcher.find()) {
+
+		if (matcher.find()) {
 			String tags = matcher.group(1).trim().replaceAll("[\\{\\}]", "");
 			String[] split = tags.split("\\s+");
-			
-			if(split.length == 1 && split[0].equals(""))
+
+			if (split.length == 1 && split[0].equals(""))
 				return tagList;
-			
-			for(String tag: split)
+
+			for (String tag : split)
 				tagList.add(tag);
 		}
-		
+
 		return tagList;
 	}
 
+	public static void decryptAndParseFile(OrgFile orgFile, BufferedReader reader, Context context) {
+		try {
+			Intent intent = new Intent(context, FileDecryptionActivity.class);
+			intent.putExtra("data", FileUtils.read(reader).getBytes());
+			intent.putExtra("filename", orgFile.filename);
+			intent.putExtra("filenameAlias", orgFile.name);
+			intent.putExtra("checksum", orgFile.checksum);
+			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+			context.startActivity(intent);
+		} catch (IOException e) {
+		}
+	}
 
-    public static void decryptAndParseFile(OrgFile orgFile, BufferedReader reader, Context context) {
-        try {
-            Intent intent = new Intent(context, FileDecryptionActivity.class);
-            intent.putExtra("data", FileUtils.read(reader).getBytes());
-            intent.putExtra("filename", orgFile.filename);
-            intent.putExtra("filenameAlias", orgFile.name);
-            intent.putExtra("checksum", orgFile.checksum);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            context.startActivity(intent);
-        } catch(IOException e) {}
-    }
-
-	public static void parseFile(OrgFile orgFile, BufferedReader breader, OrgFileParser parser, Context context){
+	public static void parseFile(OrgFile orgFile, BufferedReader breader, OrgFileParser parser, Context context) {
 		ContentResolver resolver = context.getContentResolver();
 		try {
-			new OrgFile(orgFile.filename, resolver).removeFile(resolver);
+			new OrgFile(orgFile.filename, resolver).removeFile(context);
 		} catch (OrgFileNotFoundException e) { /* file did not exist */ }
 
 		if (orgFile.isEncrypted())
@@ -353,6 +176,176 @@ public class OrgFileParser {
 		else {
 			parser.parse(orgFile, breader, context);
 		}
+	}
+
+	private void init(OrgFile orgFile) {
+		orgFile.removeFile(context);
+		orgFile.addFile(context);
+		this.orgFile = orgFile;
+
+		this.parseStack = new ParseStack();
+		this.parseStack.add(0, orgFile.nodeId, "");
+
+		this.payload = new StringBuilder();
+
+		this.orgNodeParser = new OrgNodeParser(
+				OrgProviderUtils.getTodos(resolver));
+
+        this.position = new HashMap<>();
+	}
+	
+	public void parse(OrgFile orgFile, BufferedReader breader, Context context) {
+		this.excludedTags = PreferenceUtils.getExcludedTags();
+
+		parse(orgFile, breader);
+	}
+
+	public void parse(OrgFile orgFile, BufferedReader breader) {
+		Log.v("parse","parsing : "+orgFile.name);
+		init(orgFile);
+		db.beginTransaction();
+
+		try {
+			String currentLine;
+			while ((currentLine = breader.readLine()) != null) parseLine(currentLine);
+
+			// Add payload to the final node
+			db.fastInsertNodePayload(parseStack.getCurrentNodeId(), this.payload.toString(), timestamps);
+
+		} catch (IOException e) {}
+
+		db.endTransaction();
+
+	}
+	
+	private void parseLine(String line) {
+		if (TextUtils.isEmpty(line))
+			return;
+
+		int numstars = numberOfStars(line);
+		if (numstars > 0) {
+			timestamps.clear();
+			db.fastInsertNodePayload(parseStack.getCurrentNodeId(), this.payload.toString(), timestamps);
+			this.payload = new StringBuilder();
+			parseHeading(line, numstars);
+		} else {
+			Log.v("todos","name : "+line);
+			HashMap<String,Boolean> map = parseTodos(line);
+			Log.v("todos","res : "+ (map != null ? map.toString() : ""));
+			OrgProviderUtils.addTodos(parseTodos(line), resolver);
+			parseTimestamps(line);
+			payload.append(line).append("\n");
+		}
+	}
+
+	private void parseHeading(String thisLine, int numstars) {
+        int currentLevel = parseStack.getCurrentLevel();
+
+        if(position.get(numstars-1) == null) position.put(numstars-1, 0);
+        if (numstars <= currentLevel) {
+            int value = position.get(numstars-1);
+            position.put(numstars-1, value+1);
+		} else {
+            position.put(numstars-1, 0);
+        }
+
+		while (numstars <= parseStack.getCurrentLevel()){
+            parseStack.pop();
+        }
+
+		OrgNode node = this.orgNodeParser.parseLine(thisLine, numstars);
+		node.tags_inherited = parseStack.getCurrentTags();
+		node.fileId = orgFile.id;
+		node.parentId = parseStack.getCurrentNodeId();
+        node.position = position.get(numstars-1);
+
+        long newId = db.fastInsertNode(node);
+		parseStack.add(numstars, newId, node.tags);
+    }
+
+	/**
+	 * Parse the line for any timestamps
+	 * @param line
+	 * @return A HashMap<String,int> where first key is timestamp type and second is value.
+	 * Return null if no timestamp found.
+	 */
+	private void parseTimestamps(String line){
+		timestamps.clear();
+		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+
+		for(OrgNodeTimeDate.TYPE type: OrgNodeTimeDate.TYPE.values()){
+			Matcher matcher = OrgNodeTimeDate.getTimestampMatcher(type)
+					.matcher(line);
+
+            String str = OrgNodePayload.getDateFromTimestampMatcher(matcher);
+			if(str.equals("")) continue;
+			try {
+				timestamps.put(type, format.parse(str).getTime());
+			} catch (ParseException e) {
+				e.printStackTrace();
+			}
+		}
+
+
+	}
+
+	private class ParseStack {
+		private Stack<Item> stack;
+
+		public ParseStack() {
+			this.stack = new Stack<Item>();
+		}
+
+		public void add(int level, long nodeId, String tags) {
+			stack.push(new Item(level, nodeId, stripTags(tags)));
+		}
+
+		private String stripTags(String tags) {
+			if (excludedTags == null || TextUtils.isEmpty(tags))
+				return tags;
+
+			StringBuilder result = new StringBuilder();
+			for (String tag: tags.split(":")) {
+				if (!excludedTags.contains(tag)) {
+					result.append(tag);
+					result.append(":");
+				}
+			}
+
+			if(!TextUtils.isEmpty(result))
+				result.deleteCharAt(result.lastIndexOf(":"));
+
+			return result.toString();
+		}
+
+		public void pop() {
+			this.stack.pop();
+		}
+
+		public int getCurrentLevel() {
+			return stack.peek().level;
+		}
+
+		public long getCurrentNodeId() {
+			return stack.peek().nodeId;
+		}
+
+		public String getCurrentTags() {
+			return stack.peek().tag;
+		}
+
+		private class Item {
+			int level;
+			long nodeId;
+			String tag;
+
+			public Item(Integer level, Long nodeId, String tags) {
+				this.level = level;
+				this.nodeId = nodeId;
+				this.tag = tags;
+			}
+		}
+
 	}
 
 }

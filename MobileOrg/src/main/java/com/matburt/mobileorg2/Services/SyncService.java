@@ -19,11 +19,10 @@ import com.matburt.mobileorg2.Synchronizers.NullSynchronizer;
 import com.matburt.mobileorg2.Synchronizers.SDCardSynchronizer;
 import com.matburt.mobileorg2.Synchronizers.SSHSynchronizer;
 import com.matburt.mobileorg2.Synchronizers.Synchronizer;
-import com.matburt.mobileorg2.Synchronizers.SynchronizerInterface;
+import com.matburt.mobileorg2.Synchronizers.SynchronizerManager;
 import com.matburt.mobileorg2.Synchronizers.UbuntuOneSynchronizer;
 import com.matburt.mobileorg2.Synchronizers.WebDAVSynchronizer;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 
 public class SyncService extends Service implements
@@ -41,6 +40,18 @@ public class SyncService extends Service implements
 
 	private boolean syncRunning;
 
+	public static void stopAlarm(Context context) {
+		Intent intent = new Intent(context, SyncService.class);
+		intent.putExtra(ACTION, SyncService.STOP_ALARM);
+		context.startService(intent);
+	}
+
+	public static void startAlarm(Context context) {
+		Intent intent = new Intent(context, SyncService.class);
+		intent.putExtra(ACTION, SyncService.START_ALARM);
+		context.startService(intent);
+	}
+	
 	@Override
 	public void onCreate() {
 		super.onCreate();
@@ -57,18 +68,6 @@ public class SyncService extends Service implements
 		this.appSettings.unregisterOnSharedPreferenceChangeListener(this);
 		super.onDestroy();
 	}
-	
-	public static void stopAlarm(Context context) {
-		Intent intent = new Intent(context, SyncService.class);
-		intent.putExtra(ACTION, SyncService.STOP_ALARM);
-		context.startService(intent);
-	}
-
-	public static void startAlarm(Context context) {
-		Intent intent = new Intent(context, SyncService.class);
-		intent.putExtra(ACTION, SyncService.START_ALARM);
-		context.startService(intent);
-	}
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
@@ -84,8 +83,8 @@ public class SyncService extends Service implements
 		return 0;
 	}
 
-    public Synchronizer getSynchronizer() {
-        SynchronizerInterface synchronizer = null;
+	public SynchronizerManager getSynchronizer() {
+		Synchronizer synchronizer = null;
 		String syncSource = appSettings.getString("syncSource", "");
 		Context c = getApplicationContext();
 		
@@ -111,20 +110,20 @@ public class SyncService extends Service implements
 			notification = new SynchronizerNotification(this);
 		else
 			notification = new SynchronizerNotificationCompat(this);
-		
-		return new Synchronizer(c, synchronizer, notification);
-    }
+
+		return SynchronizerManager.getInstance(c, synchronizer, notification);
+	}
 
 	private void runSynchronizer() {
 		unsetAlarm();
-		final Synchronizer synchronizer = this.getSynchronizer();
+		final SynchronizerManager synchronizerManager = this.getSynchronizer();
 		final OrgDatabase db = OrgDatabase.getInstance(this);
-		final OrgFileParser parser = new OrgFileParser(db, getContentResolver());
+		final OrgFileParser parser = new OrgFileParser(db, this);
 		final boolean calendarEnabled = appSettings.getBoolean("calendarEnabled", false);
 
 		Thread syncThread = new Thread() {
 			public void run() {
-				HashSet<String> changedFiles = synchronizer.runSynchronizer(parser);
+				HashSet<String> changedFiles = synchronizerManager.runSynchronizer(parser);
 				String[] files = changedFiles.toArray(new String[changedFiles.size()]);
 				if(calendarEnabled) {
 					Intent calIntent = new Intent(getBaseContext(), CalendarSyncService.class);
@@ -132,7 +131,7 @@ public class SyncService extends Service implements
 					calIntent.putExtra(CalendarSyncService.FILELIST, files);
 					getBaseContext().startService(calIntent);
 				}
-				synchronizer.close();
+				synchronizerManager.close();
 				syncRunning = false;
 				setAlarm();
 			}

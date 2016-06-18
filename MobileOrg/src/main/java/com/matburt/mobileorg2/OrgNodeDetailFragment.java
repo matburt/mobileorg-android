@@ -34,7 +34,6 @@ import com.matburt.mobileorg2.OrgData.OrgProviderUtils;
 import com.matburt.mobileorg2.util.OrgNodeNotFoundException;
 import com.matburt.mobileorg2.util.TodoDialog;
 
-import java.util.ArrayList;
 import java.util.NavigableMap;
 
 /**
@@ -45,27 +44,15 @@ import java.util.NavigableMap;
  */
 public class OrgNodeDetailFragment extends Fragment {
 
-    private ContentResolver resolver;
-
-    private long nodeId;
-    private OrgNode selectedNode;
-    private View highlightedView = null;
-
-
     MainRecyclerViewAdapter adapter;
     Button insertNodeButton;
     RecyclerView recyclerView;
     TextView insertNodeText;
-
-    /**
-     * Mandatory empty constructor for the fragment manager to instantiate the
-     * fragment (e.g. upon screen orientation changes).
-     */
-    public OrgNodeDetailFragment() {
-    }
-
+    private ContentResolver resolver;
+    private long nodeId;
+    private OrgNode selectedNode;
+    private View highlightedView = null;
     private ActionMode mActionMode = null;
-
     private ActionMode.Callback mActionModeCallback = new ActionMode.Callback() {
 
         // Called when the action mode is created; startActionMode() was called
@@ -104,6 +91,12 @@ public class OrgNodeDetailFragment extends Fragment {
         }
     };
 
+    /**
+     * Mandatory empty constructor for the fragment manager to instantiate the
+     * fragment (e.g. upon screen orientation changes).
+     */
+    public OrgNodeDetailFragment() {
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -279,7 +272,6 @@ public class OrgNodeDetailFragment extends Fragment {
                 return false;
             }
         }
-        ;
 
 
     }
@@ -287,8 +279,8 @@ public class OrgNodeDetailFragment extends Fragment {
     public class SecondaryRecyclerViewAdapter
             extends RecyclerView.Adapter<ItemViewHolder> {
 
-        private OrgNodeTree tree;
         NavigableMap<Long, OrgNodeTree> items;
+        private OrgNodeTree tree;
 
         public SecondaryRecyclerViewAdapter(OrgNodeTree root) {
             tree = root;
@@ -392,7 +384,7 @@ public class OrgNodeDetailFragment extends Fragment {
                             .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
 
                                 public void onClick(DialogInterface dialog, int whichButton) {
-                                    item.node.deleteNode(resolver);
+                                    item.node.deleteNode(getContext());
                                     refresh();
                                 }
                             })
