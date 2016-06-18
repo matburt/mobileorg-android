@@ -89,10 +89,10 @@ public class SSHSynchronizer extends Synchronizer {
 		}
     }
 
-    public HashSet<String> synchronize(){
-        HashSet<String> changedFiles = JGitWrapper.pull(context);
+    public SyncResult synchronize(){
+        SyncResult pullResult = JGitWrapper.pull(context);
         new JGitWrapper.PushGitRepoTask(context).execute();
-        return changedFiles;
+        return pullResult;
     }
 
     public void putRemoteFile(String filename, String contents) throws IOException {

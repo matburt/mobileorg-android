@@ -26,7 +26,7 @@ public class OrgFile {
 
 	public String filename = "";
 	public String name = "";
-	public String checksum = "";
+
 	public boolean includeInOutline = true;
 	public long id = -1;
 	public long nodeId = -1;
@@ -34,8 +34,7 @@ public class OrgFile {
 	public OrgFile() {
 	}
 
-	public OrgFile(String filename, String name, String checksum) {
-		this.checksum = checksum;
+	public OrgFile(String filename, String name) {
 		this.filename = filename;
 
         if (name == null || name.equals("null"))
@@ -78,7 +77,6 @@ public class OrgFile {
                 cursor.moveToFirst();
 			this.name = cursor.getString(cursor.getColumnIndexOrThrow(Files.NAME));
 			this.filename = cursor.getString(cursor.getColumnIndexOrThrow(Files.FILENAME));
-			this.checksum = cursor.getString(cursor.getColumnIndexOrThrow(Files.CHECKSUM));
 			this.id = cursor.getLong(cursor.getColumnIndexOrThrow(Files.ID));
 			this.nodeId = cursor.getLong(cursor.getColumnIndexOrThrow(Files.NODE_ID));
 		} else {
@@ -130,7 +128,6 @@ public class OrgFile {
 		ContentValues values = new ContentValues();
 		values.put(Files.FILENAME, filename);
 		values.put(Files.NAME, name);
-		values.put(Files.CHECKSUM, checksum);
 		values.put(Files.NODE_ID, nodeId);
 
 		Uri uri = resolver.insert(Files.CONTENT_URI, values);
@@ -181,18 +178,20 @@ public class OrgFile {
     }
 
 	/**
-	 * Remove all OrgData nodes associated with this file from the DB
-	 * Remove this OrgFile node from the DB
+	 * 1) Remove all OrgNode(s) associated with this file from the DB
+	 * 2) Remove this OrgFile node from the DB
+	 * 3) Remove file from disk
      *
 	 * @param resolver
 	 * @return the number of OrgData nodes removed
      */
     public long removeFile(Context context) {
         ContentResolver resolver = context.getContentResolver();
-        new File(getFilePath(context)).delete();
 
 		long entriesRemoved = removeFileOrgDataNodes(resolver);
 		removeFileNode(resolver);
+        new File(getFilePath(context)).delete();
+
         return entriesRemoved;
 	}
 
@@ -202,9 +201,11 @@ public class OrgFile {
     }
 
 	private long removeFileOrgDataNodes(ContentResolver resolver) {
+
 		int total = resolver.delete(OrgData.CONTENT_URI, OrgData.FILE_ID + "=?",
                 new String[]{Long.toString(id)});
         total += resolver.delete(OrgData.buildIdUri(nodeId), null, null);
+		Log.v("sync","remove all nodes : "+total);
 		return total;
 	}
 

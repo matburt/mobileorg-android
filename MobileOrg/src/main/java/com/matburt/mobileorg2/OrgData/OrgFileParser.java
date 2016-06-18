@@ -158,7 +158,6 @@ public class OrgFileParser {
 			intent.putExtra("data", FileUtils.read(reader).getBytes());
 			intent.putExtra("filename", orgFile.filename);
 			intent.putExtra("filenameAlias", orgFile.name);
-			intent.putExtra("checksum", orgFile.checksum);
 			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 			context.startActivity(intent);
 		} catch (IOException e) {
@@ -193,7 +192,7 @@ public class OrgFileParser {
 
         this.position = new HashMap<>();
 	}
-	
+
 	public void parse(OrgFile orgFile, BufferedReader breader, Context context) {
 		this.excludedTags = PreferenceUtils.getExcludedTags();
 
@@ -217,7 +216,7 @@ public class OrgFileParser {
 		db.endTransaction();
 
 	}
-	
+
 	private void parseLine(String line) {
 		if (TextUtils.isEmpty(line))
 			return;

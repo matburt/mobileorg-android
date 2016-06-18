@@ -65,10 +65,12 @@ public class JGitWrapper {
         }
     }
 
-    public static HashSet<String> pull(Context context) {
+
+
+    public static SyncResult pull(final Context context) {
         File repoDir = new File(context.getFilesDir() + "/" + GIT_DIR + "/.git");
         Log.v("git", "pulling");
-        HashSet<String> result = new HashSet<>();
+        SyncResult result = new SyncResult();
         try {
             Git git = Git.open(repoDir);
             Repository repository = git.getRepository();
@@ -91,12 +93,19 @@ public class JGitWrapper {
                     .setOldTree(oldTreeIter)
                     .call();
 
-
             for (DiffEntry entry : diffs) {
-                result.add(entry.getNewPath());
+                String newpath = entry.getNewPath();
+                String oldpath = entry.getOldPath();
+                Log.v("sync", "change old : "+oldpath + " -> "+newpath);
+                if(newpath.equals("/dev/null")){
+                    result.deletedFiles.add(oldpath);
+                } else if(oldpath.equals("/dev/null")) {
+                    result.newFiles.add(entry.getNewPath());
+                } else {
+                    result.changedFiles.add(entry.getNewPath());
+                }
             }
-
-
+            return result;
         } catch (IOException e) {
             e.printStackTrace();
         } catch (DetachedHeadException e) {
@@ -118,9 +127,9 @@ public class JGitWrapper {
         } catch (GitAPIException e) {
             e.printStackTrace();
         }
-
         return result;
     }
+
 
     static public class CloneGitRepoTask extends AsyncTask<String, Void, Object> {
         Context context;
@@ -130,11 +139,11 @@ public class JGitWrapper {
             this.context = context;
         }
 
-		protected Object doInBackground(String... params) {
+        protected Object doInBackground(String... params) {
             AuthData authData = AuthData.getInstance(context);
 
-			File localPath = new File(context.getFilesDir() + "/" + GIT_DIR);
-			FileUtils.deleteFile(localPath);
+            File localPath = new File(context.getFilesDir() + "/" + GIT_DIR);
+            FileUtils.deleteFile(localPath);
 
 //			String REMOTE_URL = "ssh://" + userActual + ":" + passActual + "@" + hostActual + ":" + portActual + pathActual;
             String REMOTE_URL = authData.getHost() + "/" + authData.getPath();
@@ -143,59 +152,59 @@ public class JGitWrapper {
             Log.v("git", "user home : " + System.getProperty("user.home"));
             Log.v("git","after");
 
-			try {
-				git = Git.cloneRepository()
-						.setURI(REMOTE_URL)
-						.setDirectory(localPath)
+            try {
+                git = Git.cloneRepository()
+                        .setURI(REMOTE_URL)
+                        .setDirectory(localPath)
 //						.setCredentialsProvider(allowHosts)
                         .setCredentialsProvider(new CredentialsProviderAllowHost(authData.getUser(), authData.getPassword()))
                         .setBare(false)
-						.call();
-			} catch (Exception e) {
+                        .call();
+            } catch (Exception e) {
                 e.printStackTrace();
-				return e;
-			}
+                return e;
+            }
 
-			return null;
-		}
+            return null;
+        }
 
-		@Override
-		protected void onPreExecute() {
-			super.onPreExecute();
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
             progress = new ProgressDialog(context);
             progress.setMessage(context.getString(R.string.please_wait));
             progress.setTitle(context.getString(R.string.signing_in));
             progress.show();
-		}
+        }
 
-		@Override
-		protected void onPostExecute(Object exception) {
+        @Override
+        protected void onPostExecute(Object exception) {
             OrgProviderUtils
                     .clearDB(context.getContentResolver());
 
 
             parseAll();
 
-			progress.dismiss();
-			if (exception == null) {
-				Toast.makeText(context, "Synchronization successful !", Toast.LENGTH_LONG).show();
-				((Activity) context).finish();
-				return;
-			}
+            progress.dismiss();
+            if (exception == null) {
+                Toast.makeText(context, "Synchronization successful !", Toast.LENGTH_LONG).show();
+                ((Activity) context).finish();
+                return;
+            }
 
-			if(exception instanceof TransportException){
-				Toast.makeText(context, "Authentification failed", Toast.LENGTH_LONG).show();
-			}else if (exception instanceof InvalidRemoteException) {
-				Toast.makeText(context, "Path does not exist or is not a valid repository", Toast.LENGTH_SHORT).show();
-			}else if(exception instanceof UnableToPushException){
+            if(exception instanceof TransportException){
+                Toast.makeText(context, "Authentification failed", Toast.LENGTH_LONG).show();
+            }else if (exception instanceof InvalidRemoteException) {
+                Toast.makeText(context, "Path does not exist or is not a valid repository", Toast.LENGTH_SHORT).show();
+            }else if(exception instanceof UnableToPushException){
 //				git config receive.denyCurrentBranch ignore
-				Toast.makeText(context, "Push test failed. Make sure the repository is bare.", Toast.LENGTH_LONG).show();
-			}else{
-				Toast.makeText(context, exception.toString(), Toast.LENGTH_LONG).show();
+                Toast.makeText(context, "Push test failed. Make sure the repository is bare.", Toast.LENGTH_LONG).show();
+            }else{
+                Toast.makeText(context, exception.toString(), Toast.LENGTH_LONG).show();
                 ((Exception)exception).printStackTrace();
-			}
+            }
 
-		}
+        }
 
         void parseAll(){
             SSHSynchronizer syncher = new SSHSynchronizer(context);
@@ -207,7 +216,7 @@ public class JGitWrapper {
             {
                 String filename = file[i].getName();
                 if(filename.equals(".git")) continue;
-                OrgFile orgFile = new OrgFile(filename, filename,"");
+                OrgFile orgFile = new OrgFile(filename, filename);
                 FileReader fileReader = null;
                 try {
                     fileReader = new FileReader(syncher.getAbsoluteFilesDir(context) + "/" + filename);
