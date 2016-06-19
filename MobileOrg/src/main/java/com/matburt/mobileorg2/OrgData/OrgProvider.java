@@ -13,7 +13,6 @@ import com.matburt.mobileorg2.OrgData.OrgContract.Edits;
 import com.matburt.mobileorg2.OrgData.OrgContract.Files;
 import com.matburt.mobileorg2.OrgData.OrgContract.OrgData;
 import com.matburt.mobileorg2.OrgData.OrgContract.Search;
-import com.matburt.mobileorg2.OrgData.OrgDatabase.Tables;
 import com.matburt.mobileorg2.util.SelectionBuilder;
 
 public class OrgProvider extends ContentProvider {
@@ -131,65 +130,66 @@ public class OrgProvider extends ContentProvider {
 	
 	private SelectionBuilder buildSelectionFromUri(Uri uri) {
 		final SelectionBuilder builder = new SelectionBuilder();
-		switch (uriMatcher.match(uri)) {
-		case ORGDATA:
-			return builder.table(Tables.ORGDATA);
-		case ORGDATA_ID:
-			return builder.table(Tables.ORGDATA).where(OrgData.ID + "=?", OrgData.getId(uri));
-		case ORGDATA_PARENT:
-			return builder.table(Tables.ORGDATA).where(OrgData.ID + "=?", OrgData.getId(uri));
-		case ORGDATA_CHILDREN:
-			return builder.table(Tables.ORGDATA).where(OrgData.PARENT_ID + "=?", OrgData.getId(uri));
-		case FILES:
-			return builder.table(Tables.FILES);
-		case FILES_ID:
-			return builder.table(Tables.FILES).where(Files.ID + "=?", Files.getId(uri));
-		case FILES_FILENAME:
-			return builder.table(Tables.FILES).where(Files.FILENAME + "=?", Files.getFilename(uri));
-		case EDITS:
-			return builder.table(Tables.EDITS);
-		case EDITS_ID:
-			return builder.table(Tables.EDITS).where(Edits.ID + "=?", Edits.getId(uri));
-		case TAGS:
-			return builder.table(Tables.TAGS);
-		case TODOS:
-			return builder.table(Tables.TODOS);
-		case PRIORITIES:
-			return builder.table(Tables.PRIORITIES);
-		case SEARCH:
-			final String search = Search.getSearchTerm(uri);
-			return builder.table(Tables.ORGDATA).where("name LIKE %?%", search);
-		default:
-			throw new IllegalArgumentException("Unknown URI " + uri);
-		}
+//		switch (uriMatcher.match(uri)) {
+//		case ORGDATA:
+//			return builder.table(Tables.ORGDATA);
+//		case ORGDATA_ID:
+//			return builder.table(Tables.ORGDATA).where(OrgData.ID + "=?", OrgData.getId(uri));
+//		case ORGDATA_PARENT:
+//			return builder.table(Tables.ORGDATA).where(OrgData.ID + "=?", OrgData.getId(uri));
+//		case ORGDATA_CHILDREN:
+//			return builder.table(Tables.ORGDATA).where(OrgData.PARENT_ID + "=?", OrgData.getId(uri));
+//		case FILES:
+//			return builder.table(Tables.FILES);
+//		case FILES_ID:
+//			return builder.table(Tables.FILES).where(Files.ID + "=?", Files.getId(uri));
+//		case FILES_FILENAME:
+//			return builder.table(Tables.FILES).where(Files.FILENAME + "=?", Files.getFilename(uri));
+//		case EDITS:
+//			return builder.table(Tables.EDITS);
+//		case EDITS_ID:
+//			return builder.table(Tables.EDITS).where(Edits.ID + "=?", Edits.getId(uri));
+//		case TAGS:
+//			return builder.table(Tables.TAGS);
+//		case TODOS:
+//			return builder.table(Tables.TODOS);
+//		case PRIORITIES:
+//			return builder.table(Tables.PRIORITIES);
+//		case SEARCH:
+//			final String search = Search.getSearchTerm(uri);
+//			return builder.table(Tables.ORGDATA).where("name LIKE %?%", search);
+//		default:
+//			throw new IllegalArgumentException("Unknown URI " + uri);
+//		}
+		return null;
 	}
 	
 	private String getTableNameFromUri(Uri uri) {
 		String tableName = null;
 
-		switch(uriMatcher.match(uri)) {
-		case ORGDATA:
-			tableName = Tables.ORGDATA;
-			break;
-		case FILES:
-			tableName = Tables.FILES;
-			break;
-		case EDITS:
-			tableName = Tables.EDITS;
-			break;
-		case TAGS:
-			tableName = Tables.TAGS;
-			break;
-		case TODOS:
-			tableName = Tables.TODOS;
-			break;
-		case PRIORITIES:
-			tableName = Tables.PRIORITIES;
-			break;
-			
-		default:
-			throw new IllegalArgumentException("Unknown URI " + uri);
-		}
+//		switch(uriMatcher.match(uri)) {
+//		case ORGDATA:
+//			tableName = Tables.ORGDATA;
+//			break;
+//		case FILES:
+//			tableName = Tables.FILES;
+//			break;
+//		case EDITS:
+//			tableName = Tables.EDITS;
+//			break;
+//		case TAGS:
+//			tableName = Tables.TAGS;
+//			break;
+//		case TODOS:
+//			tableName = Tables.TODOS;
+//			break;
+//		case PRIORITIES:
+//			tableName = Tables.PRIORITIES;
+//			break;
+//
+//		default:
+//			throw new IllegalArgumentException("Unknown URI " + uri);
+//		}
 		
 		return tableName;
 	}

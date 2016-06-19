@@ -57,6 +57,7 @@
     <string name="sync_plugin_info">This plugin allows you to trigger a MobileOrg Sync from Locale or Tasker.  If you are okay with this click \'Accept\' otherwise click \'Deny\'</string>
     <string name="sync_plugin_message">Synchronize</string>
     <string name="sync_git_file_added">Added file : </string>
+    <string name="sync_git_merge_files">Conflict\nMerge files : </string>
 
     <!-- error strings -->
     <string name="error_sqlio">There was a problem reading from the database, is your drive corrupted or is the SDCard mounted?</string>

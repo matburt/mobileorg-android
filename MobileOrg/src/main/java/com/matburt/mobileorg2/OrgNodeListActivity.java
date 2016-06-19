@@ -104,7 +104,7 @@ public class OrgNodeListActivity extends AppCompatActivity {
                 alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
                         String value = input.getText().toString();
-                        OrgFile newFile = new OrgFile(value,null, "");
+                        OrgFile newFile = new OrgFile(value,value);
                         newFile.addFile(OrgNodeListActivity.this);
                         ((OutlineAdapter)recyclerView.getAdapter()).refresh();
                     }

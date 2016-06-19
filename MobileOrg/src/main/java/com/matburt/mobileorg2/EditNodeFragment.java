@@ -172,7 +172,7 @@ public class EditNodeFragment extends Fragment {
     public void onOKPressed(){
         ContentResolver resolver = getContext().getContentResolver();
         String payload = "";
-        for(int i = 0;i<=node.level;++i) payload += ' ';
+
         payload+=content.getText().toString();
 
         node.name = title.getText().toString();

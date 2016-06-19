@@ -121,6 +121,7 @@ public class OrgFile {
         SynchronizerManager.getInstance(null, null, null).getSyncher().addFile(filename);
     }
 
+
 	/*
 	Insert a new file node in the database
 	 */
@@ -197,6 +198,17 @@ public class OrgFile {
 
 	private long removeFileNode(ContentResolver resolver) {
 		return resolver.delete(Files.buildIdUri(id), Files.NAME + "=? AND "
+                + Files.FILENAME + "=?", new String[]{name, filename});
+    }
+
+	/**
+	 * Update this file in the DB
+	 * @param resolver
+	 * @param values
+     * @return
+     */
+	private long updateFileNode(ContentResolver resolver, ContentValues values) {
+		return resolver.update(Files.buildIdUri(id), values, Files.NAME + "=? AND "
                 + Files.FILENAME + "=?", new String[]{name, filename});
     }
 

@@ -50,7 +50,7 @@ public class FileUtils {
 			fileContents.append(line);
 			fileContents.append("\n");
 		}
-        
+
 		return fileContents.toString();
 	}
 
@@ -89,11 +89,11 @@ public class FileUtils {
 
 		return reader;
 	}
-	
+
 	public BufferedWriter getWriter() throws IOException {
 		return getWriter(false);
 	}
-	
+
 	public BufferedWriter getWriter(boolean append) throws IOException {
 		String storageMode = getStorageMode();
 		BufferedWriter writer = null;
@@ -169,18 +169,18 @@ public class FileUtils {
 			return file.delete();
 		}
 		return false;
-    }
+	}
 
 	private String getStorageMode() {
 		return PreferenceManager.getDefaultSharedPreferences(this.context)
 				.getString("storageMode", "");
 	}
-	
+
 	private String getSynchMode() {
 		return PreferenceManager.getDefaultSharedPreferences(this.context)
-				.getString("storageMode", "");		
+				.getString("storageMode", "");
 	}
-	
+
 	public String getBasePath() {
 		SharedPreferences appSettings = PreferenceManager
 				.getDefaultSharedPreferences(this.context);
@@ -197,7 +197,7 @@ public class FileUtils {
 
 		return orgBasePath;
 	}
-	
+
 	// Used by encryption
 	public byte[] getRawFileData() {
 		try {
@@ -208,7 +208,7 @@ public class FileUtils {
 			int numRead = 0;
 			while (offset < buffer.length
 					&& (numRead = is.read(buffer, offset, buffer.length
-							- offset)) >= 0) {
+					- offset)) >= 0) {
 				offset += numRead;
 			}
 			is.close();
@@ -220,5 +220,12 @@ public class FileUtils {
 		} catch (IOException e) {
 			return null;
 		}
+	}
+
+	public static String stripLastNewLine(String str){
+		int size = str.length()-1;
+		while(size >= 0 && str.charAt(size) == '\n') --size;
+		if(size<0) return "";
+		return str.substring(0, size+1);
 	}
 }

@@ -74,7 +74,7 @@ public class FileDecryptionActivity extends Activity
 
 			OrgDatabase db = OrgDatabase.getInstance(this);
 			OrgFileParser parser = new OrgFileParser(db, this);
-			parser.parse(new OrgFile(filename, name, checksum), reader, this);
+			parser.parse(new OrgFile(filename, name), reader, this);
 			break;
 		}
 		finish();

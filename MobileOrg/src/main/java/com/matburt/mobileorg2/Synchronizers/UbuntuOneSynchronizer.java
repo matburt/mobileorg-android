@@ -217,7 +217,7 @@ private static final String BASE_TOKEN_NAME = "Ubuntu One @ MobileOrg:";
     }
 
     @Override
-    public HashSet<String> synchronize() {
+    public SyncResult synchronize() {
 
         return null;
     }

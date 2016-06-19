@@ -497,7 +497,12 @@ public class OrgNode {
 		level = tempLevel;
 		return edit;
 	}
-	
+
+
+	/**
+	 * Build the the plain text string corresponding to this node
+	 * @return the node in plain text
+     */
 	public String toString() {
 		StringBuilder result = new StringBuilder();
 		
@@ -517,11 +522,16 @@ public class OrgNode {
 			result.append(" ").append(":" + tags + ":");
 		
 
-		if (payload != null && !TextUtils.isEmpty(payload))
-			result.append("\n").append(payload);
+		if (payload != null && !TextUtils.isEmpty(payload)){
+			result.append("\n");
+			if(level > 0) for(int i = 0;i<level+1; i++) result.append(" ");
+			result.append(payload.trim());
+		}
 
 		return result.toString();
 	}
+
+
 
 	public boolean equals(OrgNode node) {
 		return name.equals(node.name) && tags.equals(node.tags)

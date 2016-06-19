@@ -12,6 +12,7 @@ import com.matburt.mobileorg2.R;
 import com.matburt.mobileorg2.util.OrgUtils;
 
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.security.cert.CertificateException;
 import java.util.HashSet;
@@ -78,20 +79,35 @@ public class SynchronizerManager {
 
         try {
             announceStartSync();
-            HashSet<String> changedFiles = syncher.synchronize();
+            SyncResult pulledFiles = syncher.synchronize();
 
-            for (String filename : changedFiles) {
-                Log.v("sync", "changed file : " + filename);
-                OrgFile orgFile = new OrgFile(filename, filename, "");
-                FileReader fileReader = new FileReader(syncher.getRelativeFilesDir() + filename);
+            for (String filename : pulledFiles.deletedFiles) {
+                Log.v("sync", "deleted file: " + filename);
+
+                OrgFile orgFile = new OrgFile(filename, resolver);
+                orgFile.removeFile(context);
+            }
+
+            for (String filename : pulledFiles.newFiles) {
+                Log.v("sync", "new file: " + filename);
+                OrgFile orgFile = new OrgFile(filename, filename);
+                FileReader fileReader = new FileReader(syncher.getAbsoluteFilesDir(context) + "/" + filename);
                 BufferedReader bufferedReader = new BufferedReader(fileReader);
 
                 OrgFileParser.parseFile(orgFile, bufferedReader, parser, context);
             }
 
-//            discardAgenda(filenameMap, remoteChecksums);
+            for (String filename : pulledFiles.changedFiles) {
+                Log.v("sync", "changed file : " + filename);
+                OrgFile orgFile = new OrgFile(filename, filename);
+                FileReader fileReader = new FileReader(syncher.getAbsoluteFilesDir(context) + "/" + filename);
+                BufferedReader bufferedReader = new BufferedReader(fileReader);
+
+                OrgFileParser.parseFile(orgFile, bufferedReader, parser, context);
+            }
+
             announceSyncDone();
-            return changedFiles;
+            return pulledFiles.changedFiles;
         } catch (Exception e) {
             showErrorNotification(e);
             Log.e("SynchronizerManager", "Error synchronizing", e);

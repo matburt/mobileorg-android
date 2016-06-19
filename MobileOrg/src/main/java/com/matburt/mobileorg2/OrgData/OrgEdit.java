@@ -2,7 +2,9 @@ package com.matburt.mobileorg2.OrgData;
 
 import android.content.ContentResolver;
 import android.content.Context;
+import android.util.Log;
 
+import com.matburt.mobileorg2.util.FileUtils;
 import com.matburt.mobileorg2.util.OrgFileNotFoundException;
 import com.matburt.mobileorg2.util.OrgNodeNotFoundException;
 
@@ -60,7 +62,9 @@ public class OrgEdit {
 			OrgNodeTree tree = new OrgNodeTree(root, resolver);
 			ArrayList<OrgNode> res = OrgNodeTree.getFullNodeArray(tree, true);
 			for (OrgNode node : res) {
-				content += node.toString();
+				Log.v("content","content");
+				Log.v("content",node.toString());
+				content += FileUtils.stripLastNewLine(node.toString()) + "\n";
 			}
 
 			file.updateFile(content, context);

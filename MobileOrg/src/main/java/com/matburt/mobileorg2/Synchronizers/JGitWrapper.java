@@ -1,12 +1,23 @@
 package com.matburt.mobileorg2.Synchronizers;
 
 import android.app.Activity;
+import android.app.Application;
+import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.AsyncTask;
+import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
+import android.widget.Button;
 import android.widget.Toast;
 
+import com.matburt.mobileorg2.OrgData.OrgContract;
 import com.matburt.mobileorg2.OrgData.OrgDatabase;
 import com.matburt.mobileorg2.OrgData.OrgFile;
 import com.matburt.mobileorg2.OrgData.OrgFileParser;
@@ -14,7 +25,9 @@ import com.matburt.mobileorg2.OrgData.OrgProviderUtils;
 import com.matburt.mobileorg2.R;
 import com.matburt.mobileorg2.util.FileUtils;
 
+import org.eclipse.jgit.api.CheckoutResult;
 import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.api.errors.CanceledException;
 import org.eclipse.jgit.api.errors.ConcurrentRefUpdateException;
 import org.eclipse.jgit.api.errors.DetachedHeadException;
@@ -28,6 +41,8 @@ import org.eclipse.jgit.api.errors.TransportException;
 import org.eclipse.jgit.api.errors.UnmergedPathsException;
 import org.eclipse.jgit.api.errors.WrongRepositoryStateException;
 import org.eclipse.jgit.diff.DiffEntry;
+import org.eclipse.jgit.errors.AmbiguousObjectException;
+import org.eclipse.jgit.errors.IncorrectObjectTypeException;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectReader;
 import org.eclipse.jgit.lib.Repository;
@@ -38,13 +53,18 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 
 public class JGitWrapper {
 
+    // The git dir inside the Context.getFilesDir() folder
     public static String GIT_DIR = "git_dir";
+
+    final static String CONFLICT_FILES = "conflict_files";
 
     public static void add(String filename, Context context) {
         File repoDir = new File(context.getFilesDir() + "/" + GIT_DIR + "/.git");
@@ -71,15 +91,32 @@ public class JGitWrapper {
         File repoDir = new File(context.getFilesDir() + "/" + GIT_DIR + "/.git");
         Log.v("git", "pulling");
         SyncResult result = new SyncResult();
+        AuthData authData = AuthData.getInstance(context);
+        Git git = null;
         try {
-            Git git = Git.open(repoDir);
+            git = Git.open(repoDir);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return result;
+        }
+
+        Log.v("git", "got git");
+
+        try {
+
             Repository repository = git.getRepository();
 
             ObjectId oldHead = repository.resolve("HEAD^{tree}");
 
-            new Git(repository)
+//
+//            git.commit()
+//                    .setAll(true)
+//                    .setMessage("Commit before pulling")
+//                    .call();
+
+            git
                     .pull()
-                    .setCredentialsProvider(new CredentialsProviderAllowHost("wizmer", ""))
+                    .setCredentialsProvider(new CredentialsProviderAllowHost(authData.getUser(), authData.getPassword()))
                     .call();
             ObjectId head = repository.resolve("HEAD^{tree}");
 
@@ -93,36 +130,32 @@ public class JGitWrapper {
                     .setOldTree(oldTreeIter)
                     .call();
 
+            Log.v("sync", "Pulling succeeded");
+
             for (DiffEntry entry : diffs) {
                 String newpath = entry.getNewPath();
                 String oldpath = entry.getOldPath();
-                Log.v("sync", "change old : "+oldpath + " -> "+newpath);
-                if(newpath.equals("/dev/null")){
+                Log.v("sync", "change old : " + oldpath + " -> " + newpath);
+                if (newpath.equals("/dev/null")) {
                     result.deletedFiles.add(oldpath);
-                } else if(oldpath.equals("/dev/null")) {
+                } else if (oldpath.equals("/dev/null")) {
                     result.newFiles.add(entry.getNewPath());
                 } else {
                     result.changedFiles.add(entry.getNewPath());
                 }
             }
+            result.setState(SyncResult.State.kSuccess);
             return result;
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (DetachedHeadException e) {
-            e.printStackTrace();
-        } catch (NoHeadException e) {
-            e.printStackTrace();
-        } catch (TransportException e) {
-            e.printStackTrace();
-        } catch (InvalidConfigurationException e) {
-            e.printStackTrace();
-        } catch (InvalidRemoteException e) {
-            e.printStackTrace();
-        } catch (CanceledException e) {
-            e.printStackTrace();
-        } catch (WrongRepositoryStateException e) {
-            e.printStackTrace();
-        } catch (RefNotFoundException e) {
+        } catch(WrongRepositoryStateException e){
+            handleMergeConflict(git, context);
+        } catch (IOException
+                | DetachedHeadException
+                | TransportException
+                | InvalidConfigurationException
+                | NoHeadException
+                | RefNotFoundException
+                | InvalidRemoteException
+                | CanceledException e) {
             e.printStackTrace();
         } catch (GitAPIException e) {
             e.printStackTrace();
@@ -280,4 +313,28 @@ public class JGitWrapper {
     static class UnableToPushException extends Exception {
 
     }
+
+    private static void handleMergeConflict(Git git, Context context){
+        Status status = null;
+
+        try {
+            status = git.status().call();
+            ContentResolver resolver = context.getContentResolver();
+            for(String file: status.getConflicting()){
+//                OrgFile f = new OrgFile(f, resolver);
+//                ContentValues values = new ContentValues();
+//                values.put()
+//                f.updateFile(resolver, values);
+
+
+            }
+
+        } catch (GitAPIException e1) {
+            e1.printStackTrace();
+            return;
+        }
+
+
+    }
+
 }

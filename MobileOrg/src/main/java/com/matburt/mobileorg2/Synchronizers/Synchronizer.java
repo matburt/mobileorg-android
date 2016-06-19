@@ -38,10 +38,10 @@ public abstract class Synchronizer {
 	 * Called before running the synchronizer to ensure it can connect.
 	 */
 	abstract boolean isConnectable();
-	
+
 	/**
 	 * Replaces the file on the remote end with the given content.
-	 * 
+	 *
 	 * @param filename Name of the file, without path
 	 * @param contents Content of the new file
 	 */
@@ -50,14 +50,14 @@ public abstract class Synchronizer {
 
 	/**
 	 * Returns a BufferedReader to the remote file.
-	 * 
+	 *
 	 * @param filename
 	 *            Name of the file, without path
 	 */
 	abstract BufferedReader getRemoteFile(String filename)
 			throws IOException, CertificateException;
 
-	abstract HashSet<String> synchronize();
+	abstract SyncResult synchronize();
 
 
 	/**

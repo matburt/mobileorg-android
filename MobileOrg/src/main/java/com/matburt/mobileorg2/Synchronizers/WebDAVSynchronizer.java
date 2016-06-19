@@ -152,7 +152,7 @@ public class WebDAVSynchronizer extends Synchronizer {
 	}
 
     @Override
-    public HashSet<String> synchronize() {
+    public SyncResult synchronize() {
 
         return null;
     }
