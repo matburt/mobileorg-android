@@ -20,36 +20,42 @@ import com.matburt.mobileorg2.Synchronizers.SynchronizerManager;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
 
 public class OrgUtils {
-	
+
 	public static String getTimestamp() {
-		SimpleDateFormat sdf = new SimpleDateFormat("[yyyy-MM-dd EEE HH:mm]");		
+		SimpleDateFormat sdf = new SimpleDateFormat("[yyyy-MM-dd EEE HH:mm]");
 		return sdf.format(new Date());
 	}
 
-    
-    public static void setupSpinnerWithEmpty(Spinner spinner, ArrayList<String> data,
-			String selection) {
+
+	public static void setupSpinnerWithEmpty(Spinner spinner, ArrayList<String> data,
+											 String selection) {
 		data.add("");
 		setupSpinner(spinner, data, selection);
-    }
-    
+	}
+
 	public static void setupSpinner(Spinner spinner, ArrayList<String> data,
-			String selection) {		
+									String selection) {
 		if(!TextUtils.isEmpty(selection) && !data.contains(selection))
 			data.add(selection);
-		
+
 		ArrayAdapter<String> adapter = new ArrayAdapter<String>(spinner.getContext(),
 				android.R.layout.simple_spinner_item, data);
 		adapter.setDropDownViewResource(R.layout.edit_spinner_layout);
@@ -60,7 +66,7 @@ public class OrgUtils {
 		}
 		spinner.setSelection(pos, true);
 	}
-	
+
 	public static OrgNode getCaptureIntentContents(Intent intent) {
 		String subject = intent
 				.getStringExtra("android.intent.extra.SUBJECT");
@@ -70,7 +76,7 @@ public class OrgUtils {
 			subject = "[[" + text + "][" + subject + "]]";
 			text = "";
 		}
-		
+
 		if(subject == null)
 			subject = "";
 		if(text == null)
@@ -81,59 +87,59 @@ public class OrgUtils {
 		node.setPayload(text);
 		return node;
 	}
-	
+
 
 	public static long getNodeFromPath(String path, ContentResolver resolver) throws OrgFileNotFoundException {
 		String filename = path.substring("file://".length(), path.length());
-		
+
 		// TODO Handle links to headings instead of simply stripping it out
 		if(filename.indexOf(":") > -1)
 			filename = filename.substring(0, filename.indexOf(":"));
-				
+
 		OrgFile file = new OrgFile(filename, resolver);
 		return file.nodeId;
 	}
-	
+
 	public static void announceSyncDone(Context context) {
 		Intent intent = new Intent(SynchronizerManager.SYNC_UPDATE);
 		intent.putExtra(SynchronizerManager.SYNC_DONE, true);
 		context.sendBroadcast(intent);
 	}
-	
+
 	public static void announceSyncStart(Context context) {
 		Intent intent = new Intent(SynchronizerManager.SYNC_UPDATE);
 		intent.putExtra(SynchronizerManager.SYNC_START, true);
 		context.sendBroadcast(intent);
 	}
-	
+
 	public static void announceSyncUpdateProgress(int progress, Context context) {
 		Intent intent = new Intent(SynchronizerManager.SYNC_UPDATE);
 		intent.putExtra(SynchronizerManager.SYNC_PROGRESS_UPDATE, progress);
 		context.sendBroadcast(intent);
 	}
 
-    public static String getStringFromResource(int resource, Context context) {
-        InputStream is = context.getResources().openRawResource(resource);
-        BufferedReader br = new BufferedReader(new InputStreamReader(is));
-        String readLine = null;
-        String contents = "";
+	public static String getStringFromResource(int resource, Context context) {
+		InputStream is = context.getResources().openRawResource(resource);
+		BufferedReader br = new BufferedReader(new InputStreamReader(is));
+		String readLine = null;
+		String contents = "";
 
-        try {
-            // While the BufferedReader readLine is not null 
-            while ((readLine = br.readLine()) != null) {
-                contents += readLine + "\n";
-            }
+		try {
+			// While the BufferedReader readLine is not null
+			while ((readLine = br.readLine()) != null) {
+				contents += readLine + "\n";
+			}
 
-            // Close the InputStream and BufferedReader
-            is.close();
-            br.close();
+			// Close the InputStream and BufferedReader
+			is.close();
+			br.close();
 
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return contents;
-    }
-    
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return contents;
+	}
+
 	public static String rightTrim(String str) {
 		int last = str.length() - 1;
 		int end = last;
@@ -208,7 +214,7 @@ public class OrgUtils {
 		}
 		return null;
 	}
-	
+
 	public static boolean isWifiOnline(Context context) {
 		ConnectivityManager conMan = (ConnectivityManager) context
 				.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -248,6 +254,40 @@ public class OrgUtils {
 			String s1 = (String) o1;
 			String s2 = (String) o2;
 			return s1.toLowerCase().compareTo(s2.toLowerCase());
+		}
+	}
+
+	/**
+	 * Read content of file on disk
+	 * @param filename
+	 *                The absolute filename
+	 * @return
+	 */
+	static public String readAll(String filename){
+		try {
+			FileReader fileReader = new FileReader(filename);
+			BufferedReader bufferedReader = new BufferedReader(fileReader);
+			StringBuilder stringBuilder = new StringBuilder();
+
+			String currentLine;
+			while ((currentLine = bufferedReader.readLine()) != null) stringBuilder.append(currentLine + "\n");
+			return stringBuilder.toString();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return "";
+	}
+
+	static public void writeToFile(String filename, String content) {
+		try {
+			File file = new File(filename);
+			OutputStream outputStream = new FileOutputStream(file);
+			OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream);
+			outputStreamWriter.write(content);
+			outputStreamWriter.close();
+		}
+		catch (IOException e) {
+			Log.e("Exception", "File write failed: " + e.toString());
 		}
 	}
 }

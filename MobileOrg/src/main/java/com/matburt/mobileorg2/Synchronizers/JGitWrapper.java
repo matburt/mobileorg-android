@@ -1,31 +1,23 @@
 package com.matburt.mobileorg2.Synchronizers;
 
 import android.app.Activity;
-import android.app.Application;
-import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.AsyncTask;
-import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
-import android.support.v7.app.AlertDialog;
 import android.util.Log;
-import android.widget.Button;
 import android.widget.Toast;
 
-import com.matburt.mobileorg2.OrgData.OrgContract;
 import com.matburt.mobileorg2.OrgData.OrgDatabase;
 import com.matburt.mobileorg2.OrgData.OrgFile;
 import com.matburt.mobileorg2.OrgData.OrgFileParser;
 import com.matburt.mobileorg2.OrgData.OrgProviderUtils;
 import com.matburt.mobileorg2.R;
 import com.matburt.mobileorg2.util.FileUtils;
+import com.matburt.mobileorg2.util.OrgFileNotFoundException;
 
-import org.eclipse.jgit.api.CheckoutResult;
+import org.eclipse.jgit.api.CheckoutCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.api.errors.CanceledException;
@@ -45,7 +37,9 @@ import org.eclipse.jgit.errors.AmbiguousObjectException;
 import org.eclipse.jgit.errors.IncorrectObjectTypeException;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectReader;
+import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.merge.MergeStrategy;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 
 import java.io.BufferedReader;
@@ -147,6 +141,7 @@ public class JGitWrapper {
             result.setState(SyncResult.State.kSuccess);
             return result;
         } catch(WrongRepositoryStateException e){
+            e.printStackTrace();
             handleMergeConflict(git, context);
         } catch (IOException
                 | DetachedHeadException
@@ -297,6 +292,69 @@ public class JGitWrapper {
                 e.printStackTrace();
             } catch (WrongRepositoryStateException e) {
                 e.printStackTrace();
+                handleMergeConflict(git,context);
+            } catch (ConcurrentRefUpdateException e) {
+                e.printStackTrace();
+            } catch (NoHeadException e) {
+                e.printStackTrace();
+            } catch (NoMessageException e) {
+                e.printStackTrace();
+            } catch (GitAPIException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+    }
+
+    static public class MergeTask extends AsyncTask<String, Void, Void> {
+        Context context;
+
+        public MergeTask(Context context) {
+            this.context = context;
+        }
+
+        protected Void doInBackground(String... params) {
+            Log.v("git", "merging");
+
+            File repoDir = new File(context.getFilesDir() + "/" + GIT_DIR + "/.git");
+            Git git = null;
+            try {
+                git = Git.open(repoDir);
+
+                CheckoutCommand coCmd = git.checkout();
+// Commands are part of the api module, which include git-like calls
+                coCmd.setName("master");
+                coCmd.setCreateBranch(false); // probably not needed, just to make sure
+                Ref ref = coCmd.call();
+
+                // Stage all changed files, omitting new files, and commit with one command
+                git.merge()
+                        .setStrategy(MergeStrategy.OURS)
+                        .include(ref)
+                        .call();
+
+                git.add()
+                        .addFilepattern("google.org").call();
+
+                org.eclipse.jgit.api.Status status = git.status().call();
+                System.out.println("Added: " + status.getAdded());
+                System.out.println("Changed: " + status.getChanged());
+                System.out.println("Conflicting: " + status.getConflicting());
+                                System.out.println("Missing: " + status.getMissing());
+                System.out.println("Modified: " + status.getModified());
+                System.out.println("Removed: " + status.getRemoved());
+                System.out.println("Untracked: " + status.getUntracked());
+
+                AuthData authData = AuthData.getInstance(context);
+                git.push()
+                        .setCredentialsProvider(new CredentialsProviderAllowHost(authData.getUser(), authData.getPassword()))
+                        .call();
+                System.out.println("Committed all changes to repository at ");
+            } catch (IOException | UnmergedPathsException e) {
+                e.printStackTrace();
+            } catch (WrongRepositoryStateException e) {
+                e.printStackTrace();
+                handleMergeConflict(git,context);
             } catch (ConcurrentRefUpdateException e) {
                 e.printStackTrace();
             } catch (NoHeadException e) {
@@ -321,17 +379,17 @@ public class JGitWrapper {
             status = git.status().call();
             ContentResolver resolver = context.getContentResolver();
             for(String file: status.getConflicting()){
-//                OrgFile f = new OrgFile(f, resolver);
-//                ContentValues values = new ContentValues();
-//                values.put()
-//                f.updateFile(resolver, values);
-
-
+                OrgFile f = new OrgFile(file, resolver);
+                ContentValues values = new ContentValues();
+                values.put("comment","conflict");
+                f.updateFileInDB(resolver, values);
             }
 
         } catch (GitAPIException e1) {
             e1.printStackTrace();
             return;
+        } catch (OrgFileNotFoundException e) {
+            e.printStackTrace();
         }
 
 

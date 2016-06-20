@@ -35,13 +35,13 @@ import java.util.List;
 
 public class OutlineAdapter extends RecyclerView.Adapter<OutlineAdapter.OutlineItem> {
     private final AppCompatActivity activity;
-    public List<OrgNode> items = new ArrayList<>();
+    public List<OrgFile> items = new ArrayList<>();
     ActionMode actionMode;
     private ContentResolver resolver;
 	private boolean mTwoPanes = false;
     private SparseBooleanArray selectedItems;
     // Number of added items. Here it is two: Agenda and Todos.
-    private int numExtraItems = 2;
+    final private int numExtraItems = 2;
     private ActionMode.Callback mDeleteMode = new ActionMode.Callback() {
         @Override
         public boolean onPrepareActionMode(ActionMode actionMode, Menu menu) {
@@ -110,10 +110,9 @@ public class OutlineAdapter extends RecyclerView.Adapter<OutlineAdapter.OutlineI
 	public void refresh() {
 		clear();
 
-		for (OrgNode node : OrgProviderUtils.getOrgNodeChildren(-1, resolver)){
-			add(node);
+		for (OrgFile file : OrgProviderUtils.getFiles(resolver)){
+			add(file);
 		}
-
 
         notifyDataSetChanged();
 	}
@@ -130,7 +129,11 @@ public class OutlineAdapter extends RecyclerView.Adapter<OutlineAdapter.OutlineI
     @Override
     public void onBindViewHolder(final OutlineItem holder, final int position) {
         int positionInItems = position - numExtraItems;
-
+        OrgFile file = null;
+        try{
+            file = items.get(positionInItems);
+        } catch(ArrayIndexOutOfBoundsException ignored){}
+        final boolean conflict = (file != null && file.getState() == OrgFile.State.kConflict);
         String title;
         if(position == 0) {
             title = activity.getResources().getString(R.string.menu_todos);
@@ -141,6 +144,15 @@ public class OutlineAdapter extends RecyclerView.Adapter<OutlineAdapter.OutlineI
         }
 
         holder.titleView.setText(title);
+
+        TextView comment = (TextView)holder.mView.findViewById(R.id.comment);
+
+        if (conflict) {
+            comment.setText(R.string.conflict);
+            comment.setVisibility(View.VISIBLE);
+        } else {
+            comment.setVisibility(View.GONE);
+        }
 
         holder.mView.setActivated(selectedItems.get(positionInItems, false));
 
@@ -165,7 +177,15 @@ public class OutlineAdapter extends RecyclerView.Adapter<OutlineAdapter.OutlineI
                         // TODO: add agenda fragment
                     } else {
                         Context context = v.getContext();
-                        Intent intent = new Intent(context, OrgNodeDetailActivity.class);
+                        Intent intent;
+
+                        // Special activity for conflicted file
+                        if(conflict){
+                            intent = new Intent(context, ConflictResolverActivity.class);
+                        } else  {
+                            intent = new Intent(context, OrgNodeDetailActivity.class);
+                        }
+
 
                         if(position == 0){
                             intent.putExtra(OrgContract.NODE_ID, OrgContract.TODO_ID);
@@ -208,14 +228,14 @@ public class OutlineAdapter extends RecyclerView.Adapter<OutlineAdapter.OutlineI
         this.items.clear();
     }
 
-    public void add(OrgNode node) {
-		this.items.add(node);
+    public void add(OrgFile file) {
+		this.items.add(file);
 	}
 
 	@Override
 	public long getItemId(int position) {
         if(position < numExtraItems) return -1;
-		OrgNode node = items.get(position - numExtraItems);
+		OrgFile node = items.get(position - numExtraItems);
 		return node.id;
 	}
 
@@ -237,7 +257,6 @@ public class OutlineAdapter extends RecyclerView.Adapter<OutlineAdapter.OutlineI
         if(countAfter > 0 && actionMode != null){
             actionMode.invalidate();
         }
-
     }
 
     public void clearSelections() {
@@ -262,16 +281,8 @@ public class OutlineAdapter extends RecyclerView.Adapter<OutlineAdapter.OutlineI
         List<Integer> selectedItems = getSelectedItems();
         for(Integer num: selectedItems){
             num -= numExtraItems;
-            OrgNode node = items.get(num);
-            try {
-                OrgFile file = new OrgFile(node.fileId, resolver);
-                file.removeFile(activity);
-            } catch (OrgFileNotFoundException e) {
-                e.printStackTrace();
-            }
-
-            node.deleteNode(activity);
-            Log.v("selection","deleting : "+items.get(num).name);
+            OrgFile file = items.get(num);
+            file.removeFile(activity);
         }
         refresh();
         actionMode.finish();

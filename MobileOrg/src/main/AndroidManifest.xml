@@ -29,7 +29,7 @@
                 android:resource="@xml/widget_mobileorg" />
         </receiver>
 
-        <service android:name=".Gui.Widget.MobileOrgWidget$MobileOrgWidgetService"></service>
+        <service android:name=".Gui.Widget.MobileOrgWidget$MobileOrgWidgetService" />
         <service android:name=".Services.SyncService">
             <intent-filter>
                 <category android:name="android.intent.category.DEFAULT" />
@@ -61,6 +61,7 @@
             android:theme="@style/ActionModeAppTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
             <intent-filter>
@@ -70,10 +71,10 @@
         <activity
             android:name=".Settings.SettingsActivity"
             android:label="MobileOrg Settings"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".OrgNodeDetailActivity"
-            android:theme="@style/ActionModeAppTheme"></activity>
+            android:theme="@style/ActionModeAppTheme" />
         <activity
             android:name=".Gui.Wizard.WizardActivity"
             android:label="MobileOrg Wizard"
@@ -87,30 +88,30 @@
         <activity
             android:name=".Gui.CertificateConflictActivity"
             android:label="MobileOrg Certificate Conflict"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".Gui.FileDecryptionActivity"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".Settings.Synchronizers.WebDAVSettingsActivity"
-            android:label="WebDAV Settings"></activity>
+            android:label="WebDAV Settings" />
         <activity
             android:name=".Settings.Synchronizers.SDCardSettingsActivity"
-            android:label="SDCard Settings"></activity>
+            android:label="SDCard Settings" />
         <activity
             android:name=".Settings.Synchronizers.ScpSettingsActivity"
-            android:label="Scp Settings"></activity>
+            android:label="Scp Settings" />
         <activity
             android:name=".Settings.Synchronizers.UbuntuOneSettingsActivity"
-            android:label="Ubuntu One Settings"></activity>
+            android:label="Ubuntu One Settings" />
         <activity
             android:name=".EditNodeActivity"
-            android:theme="@style/ActionModeAppTheme"></activity>
+            android:theme="@style/ActionModeAppTheme" />
 
-        <service android:name=".Services.TimeclockService"></service>
+        <service android:name=".Services.TimeclockService" />
 
-        <activity android:name=".Gui.Agenda.AgendaSettings"></activity>
-        <activity android:name=".Gui.Agenda.AgendaEntrySetting"></activity>
+        <activity android:name=".Gui.Agenda.AgendaSettings" />
+        <activity android:name=".Gui.Agenda.AgendaEntrySetting" />
         <activity
             android:name="com.dropbox.client2.android.AuthActivity"
             android:configChanges="orientation|keyboard"
@@ -127,15 +128,15 @@
             </intent-filter>
         </activity>
 
-        <service android:name=".Services.CalendarSyncService"></service>
+        <service android:name=".Services.CalendarSyncService" />
 
-        <activity android:name=".Gui.Agenda.AgendasActivity"></activity>
-        <activity android:name=".Gui.Agenda.AgendaActivity"></activity>
+        <activity android:name=".Gui.Agenda.AgendasActivity" />
+        <activity android:name=".Gui.Agenda.AgendaActivity" />
         <activity
             android:name="layout.com.aaa.ScrollingActivity"
             android:label="@string/title_activity_scrolling"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity android:name=".Gui.Outline.ConflictResolverActivity"></activity>
     </application>
 
-  </manifest>
-
+</manifest>

@@ -13,4 +13,7 @@
     <dimen name="actionbar_height">35dip</dimen>
     <dimen name="actionbar_item_height">45dip</dimen>
     <dimen name="actionbar_item_width">45dip</dimen>
+    <!-- Default screen margins, per the Android Design guidelines. -->
+    <dimen name="activity_horizontal_margin">16dp</dimen>
+    <dimen name="activity_vertical_margin">16dp</dimen>
 </resources>

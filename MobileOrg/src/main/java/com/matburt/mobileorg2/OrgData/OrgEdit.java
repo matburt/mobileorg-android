@@ -53,24 +53,10 @@ public class OrgEdit {
 		if (newNode == null) return; // TODO: deletion of an old node
 
 		ContentResolver resolver = context.getContentResolver();
-		String content = "";
 		try {
 			OrgFile file = new OrgFile(oldNode.fileId, resolver);
-			OrgNode root = new OrgNode(file.nodeId, resolver);
-
-
-			OrgNodeTree tree = new OrgNodeTree(root, resolver);
-			ArrayList<OrgNode> res = OrgNodeTree.getFullNodeArray(tree, true);
-			for (OrgNode node : res) {
-				Log.v("content","content");
-				Log.v("content",node.toString());
-				content += FileUtils.stripLastNewLine(node.toString()) + "\n";
-			}
-
-			file.updateFile(content, context);
+			file.updateFile(file.toString(resolver), context);
 		} catch (OrgFileNotFoundException e) {
-			e.printStackTrace();
-		} catch (OrgNodeNotFoundException e) {
 			e.printStackTrace();
 		}
 

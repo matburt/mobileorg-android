@@ -32,7 +32,7 @@ public class OrgContract {
 		String ID = "_id";
 		String NAME = "name";
 		String FILENAME = "filename";
-		String CHECKSUM = "checksum";
+		String COMMENT = "comment";
 		String NODE_ID = "node_id";
 	}
 	
@@ -128,7 +128,7 @@ public class OrgContract {
 				BASE_CONTENT_URI.buildUpon().appendPath(PATH_FILES).build();
 
 		public static final String[] DEFAULT_COLUMNS = { ID, NAME, FILENAME,
-				CHECKSUM, NODE_ID };
+				COMMENT, NODE_ID };
 		public static final String DEFAULT_SORT = NAME + " ASC";
 		
 		public static String getId(Uri uri) {

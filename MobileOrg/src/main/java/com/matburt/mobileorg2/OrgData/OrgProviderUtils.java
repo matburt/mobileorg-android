@@ -33,6 +33,7 @@ public class OrgProviderUtils {
         return OrgProviderUtils.getOrgNodeChildren(-1, context.getContentResolver());
     }
 
+
 	public static ArrayList<String> getFilenames(ContentResolver resolver) {
 		ArrayList<String> result = new ArrayList<String>();
 
@@ -52,6 +53,39 @@ public class OrgProviderUtils {
 
 		cursor.close();
 		return result;
+	}
+
+
+	/**
+	 * Query the DB for the list of files
+	 * @param resolver
+     * @return
+     */
+	public static ArrayList<OrgFile> getFiles(ContentResolver resolver) {
+		ArrayList<OrgFile> result = new ArrayList<>();
+
+		Cursor cursor = resolver.query(Files.CONTENT_URI, Files.DEFAULT_COLUMNS,
+				null, null, Files.DEFAULT_SORT);
+		if(cursor == null) return result;
+		cursor.moveToFirst();
+
+		while (!cursor.isAfterLast()) {
+			OrgFile orgFile = new OrgFile();
+
+			try {
+				orgFile.set(cursor);
+				result.add(orgFile);
+			} catch (OrgFileNotFoundException e) {}
+			cursor.moveToNext();
+		}
+
+		cursor.close();
+		return result;
+	}
+
+	public static String getNonNullString(Cursor cursor, int index){
+		String result = cursor.getString(index);
+		return result!=null ? result : "";
 	}
 
 

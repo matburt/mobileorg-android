@@ -11,12 +11,14 @@ import com.matburt.mobileorg2.OrgData.OrgContract.Files;
 import com.matburt.mobileorg2.OrgData.OrgContract.OrgData;
 import com.matburt.mobileorg2.Synchronizers.Synchronizer;
 import com.matburt.mobileorg2.Synchronizers.SynchronizerManager;
+import com.matburt.mobileorg2.util.FileUtils;
 import com.matburt.mobileorg2.util.OrgFileNotFoundException;
 import com.matburt.mobileorg2.util.OrgNodeNotFoundException;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.util.ArrayList;
 
 public class OrgFile {
 	public static final String CAPTURE_FILE = "mobileorg.org";
@@ -26,10 +28,16 @@ public class OrgFile {
 
 	public String filename = "";
 	public String name = "";
+	public String comment = "";
 
 	public boolean includeInOutline = true;
 	public long id = -1;
 	public long nodeId = -1;
+
+	public enum State {
+		kOK,
+		kConflict
+	}
 
 	public OrgFile() {
 	}
@@ -71,19 +79,25 @@ public class OrgFile {
 		cursor.close();
 	}
 
+
 	public void set(Cursor cursor) throws OrgFileNotFoundException {
 		if (cursor != null && cursor.getCount() > 0) {
             if (cursor.isBeforeFirst() || cursor.isAfterLast())
                 cursor.moveToFirst();
-			this.name = cursor.getString(cursor.getColumnIndexOrThrow(Files.NAME));
-			this.filename = cursor.getString(cursor.getColumnIndexOrThrow(Files.FILENAME));
+			this.name = OrgProviderUtils.getNonNullString(cursor,
+					cursor.getColumnIndexOrThrow(Files.NAME));
+			this.filename = OrgProviderUtils.getNonNullString(cursor,
+					cursor.getColumnIndexOrThrow(Files.FILENAME));
 			this.id = cursor.getLong(cursor.getColumnIndexOrThrow(Files.ID));
 			this.nodeId = cursor.getLong(cursor.getColumnIndexOrThrow(Files.NODE_ID));
+			this.comment = OrgProviderUtils.getNonNullString(cursor,
+					cursor.getColumnIndexOrThrow(Files.COMMENT));
 		} else {
 			throw new OrgFileNotFoundException(
 					"Failed to create OrgFile from cursor");
         }
     }
+
 
 	public boolean doesFileExist(ContentResolver resolver) {
 		Cursor cursor = resolver.query(Files.buildFilenameUri(filename),
@@ -207,7 +221,7 @@ public class OrgFile {
 	 * @param values
      * @return
      */
-	private long updateFileNode(ContentResolver resolver, ContentValues values) {
+	public long updateFileInDB(ContentResolver resolver, ContentValues values) {
 		return resolver.update(Files.buildIdUri(id), values, Files.NAME + "=? AND "
                 + Files.FILENAME + "=?", new String[]{name, filename});
     }
@@ -237,4 +251,32 @@ public class OrgFile {
         Synchronizer synchronizer = SynchronizerManager.getInstance(null, null, null).getSyncher();
         return synchronizer.getAbsoluteFilesDir(context) + "/" + filename;
     }
+
+	/**
+	 * Query the state of the file (conflicted or not)
+	 * @return
+     */
+	public State getState(){
+		return comment.equals("conflict") ? State.kConflict : State.kOK;
+	}
+
+
+	public String toString(ContentResolver resolver) {
+		String result = "";
+		OrgNode root = null;
+		try {
+			root = new OrgNode(nodeId, resolver);
+			OrgNodeTree tree = new OrgNodeTree(root, resolver);
+			ArrayList<OrgNode> res = OrgNodeTree.getFullNodeArray(tree, true);
+			for (OrgNode node : res) {
+				Log.v("content", "content");
+				Log.v("content", node.toString());
+				result += FileUtils.stripLastNewLine(node.toString()) + "\n";
+			}
+		} catch (OrgNodeNotFoundException e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
 }
+
