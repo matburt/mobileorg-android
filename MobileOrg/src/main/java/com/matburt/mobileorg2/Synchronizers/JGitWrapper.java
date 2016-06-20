@@ -33,8 +33,6 @@ import org.eclipse.jgit.api.errors.TransportException;
 import org.eclipse.jgit.api.errors.UnmergedPathsException;
 import org.eclipse.jgit.api.errors.WrongRepositoryStateException;
 import org.eclipse.jgit.diff.DiffEntry;
-import org.eclipse.jgit.errors.AmbiguousObjectException;
-import org.eclipse.jgit.errors.IncorrectObjectTypeException;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectReader;
 import org.eclipse.jgit.lib.Ref;
@@ -47,18 +45,14 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 
 public class JGitWrapper {
 
+    final static String CONFLICT_FILES = "conflict_files";
     // The git dir inside the Context.getFilesDir() folder
     public static String GIT_DIR = "git_dir";
-
-    final static String CONFLICT_FILES = "conflict_files";
 
     public static void add(String filename, Context context) {
         File repoDir = new File(context.getFilesDir() + "/" + GIT_DIR + "/.git");
@@ -158,6 +152,28 @@ public class JGitWrapper {
         return result;
     }
 
+    private static void handleMergeConflict(Git git, Context context) {
+        Status status = null;
+
+        try {
+            status = git.status().call();
+            ContentResolver resolver = context.getContentResolver();
+            for (String file : status.getConflicting()) {
+                OrgFile f = new OrgFile(file, resolver);
+                ContentValues values = new ContentValues();
+                values.put("comment", "conflict");
+                f.updateFileInDB(resolver, values);
+            }
+
+        } catch (GitAPIException e1) {
+            e1.printStackTrace();
+            return;
+        } catch (OrgFileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+
+    }
 
     static public class CloneGitRepoTask extends AsyncTask<String, Void, Object> {
         Context context;
@@ -308,9 +324,11 @@ public class JGitWrapper {
 
     static public class MergeTask extends AsyncTask<String, Void, Void> {
         Context context;
+        String filename;
 
-        public MergeTask(Context context) {
+        public MergeTask(Context context, String filename) {
             this.context = context;
+            this.filename = filename;
         }
 
         protected Void doInBackground(String... params) {
@@ -334,7 +352,7 @@ public class JGitWrapper {
                         .call();
 
                 git.add()
-                        .addFilepattern("google.org").call();
+                        .addFilepattern(filename).call();
 
                 org.eclipse.jgit.api.Status status = git.status().call();
                 System.out.println("Added: " + status.getAdded());
@@ -345,11 +363,11 @@ public class JGitWrapper {
                 System.out.println("Removed: " + status.getRemoved());
                 System.out.println("Untracked: " + status.getUntracked());
 
-                AuthData authData = AuthData.getInstance(context);
-                git.push()
-                        .setCredentialsProvider(new CredentialsProviderAllowHost(authData.getUser(), authData.getPassword()))
-                        .call();
-                System.out.println("Committed all changes to repository at ");
+//                AuthData authData = AuthData.getInstance(context);
+//                git.push()
+//                        .setCredentialsProvider(new CredentialsProviderAllowHost(authData.getUser(), authData.getPassword()))
+//                        .call();
+//                System.out.println("Committed all changes to repository at ");
             } catch (IOException | UnmergedPathsException e) {
                 e.printStackTrace();
             } catch (WrongRepositoryStateException e) {
@@ -369,29 +387,6 @@ public class JGitWrapper {
     }
 
     static class UnableToPushException extends Exception {
-
-    }
-
-    private static void handleMergeConflict(Git git, Context context){
-        Status status = null;
-
-        try {
-            status = git.status().call();
-            ContentResolver resolver = context.getContentResolver();
-            for(String file: status.getConflicting()){
-                OrgFile f = new OrgFile(file, resolver);
-                ContentValues values = new ContentValues();
-                values.put("comment","conflict");
-                f.updateFileInDB(resolver, values);
-            }
-
-        } catch (GitAPIException e1) {
-            e1.printStackTrace();
-            return;
-        } catch (OrgFileNotFoundException e) {
-            e.printStackTrace();
-        }
-
 
     }
 

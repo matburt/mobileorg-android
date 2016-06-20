@@ -90,8 +90,8 @@ public class OrgNodeTree {
 
         if (tree.visibility == Visibility.folded) return;
 
-//        for(OrgNodeTree child: tree.children) fillMap(map, child);
-        for (OrgNodeTree child : tree.children) map.put(idConstructor++, child);
+        for (OrgNodeTree child : tree.children) fillMap(map, child, idConstructor);
+//        for (OrgNodeTree child : tree.children) map.put(idConstructor++, child);
     }
 
     public Visibility getVisibility(){
@@ -105,7 +105,10 @@ public class OrgNodeTree {
     public void toggleVisibility(){
         if(visibility==Visibility.folded){
             visibility = Visibility.children;
-            for(OrgNodeTree child: children) child.visibility = Visibility.folded;
+            for (OrgNodeTree child : children) {
+                Log.v("children", "child : " + child.node.name);
+                child.visibility = Visibility.folded;
+            }
         } else if(visibility==Visibility.children){
             visibility = Visibility.subtree;
             for(OrgNodeTree child: children) child.cascadeVisibility(Visibility.subtree);

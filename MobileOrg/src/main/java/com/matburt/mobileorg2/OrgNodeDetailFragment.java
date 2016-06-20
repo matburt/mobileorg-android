@@ -285,11 +285,12 @@ public class OrgNodeDetailFragment extends Fragment {
         public SecondaryRecyclerViewAdapter(OrgNodeTree root) {
             tree = root;
             refreshVisibility();
-            items = tree.getVisibleNodesArray();
         }
 
         void refreshVisibility() {
+            items = tree.getVisibleNodesArray();
             notifyDataSetChanged();
+
         }
 
         @Override
@@ -315,8 +316,8 @@ public class OrgNodeDetailFragment extends Fragment {
                         return;
                     }
 
-//                        item.mItem.toggleVisibility();
-//                        refreshVisibility();
+                    tree.toggleVisibility();
+                    refreshVisibility();
                 }
             });
 

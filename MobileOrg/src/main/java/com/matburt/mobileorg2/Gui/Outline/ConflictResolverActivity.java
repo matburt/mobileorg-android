@@ -1,11 +1,13 @@
 package com.matburt.mobileorg2.Gui.Outline;
 
+import android.content.ContentValues;
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -13,7 +15,6 @@ import android.widget.EditText;
 
 import com.matburt.mobileorg2.OrgData.OrgContract;
 import com.matburt.mobileorg2.OrgData.OrgFile;
-import com.matburt.mobileorg2.OrgData.OrgProviderUtils;
 import com.matburt.mobileorg2.OrgNodeListActivity;
 import com.matburt.mobileorg2.R;
 import com.matburt.mobileorg2.Synchronizers.JGitWrapper;
@@ -21,16 +22,11 @@ import com.matburt.mobileorg2.Synchronizers.SynchronizerManager;
 import com.matburt.mobileorg2.util.OrgFileNotFoundException;
 import com.matburt.mobileorg2.util.OrgUtils;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-
 public class ConflictResolverActivity extends AppCompatActivity {
 
     EditText editText;
     String filename;
+    Long nodeId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,7 +44,7 @@ public class ConflictResolverActivity extends AppCompatActivity {
             // Create the detail fragment and add it to the activity
             // using a fragment transaction.
             Bundle arguments = new Bundle();
-            Long nodeId = getIntent().getLongExtra(OrgContract.NODE_ID, -1);
+            nodeId = getIntent().getLongExtra(OrgContract.NODE_ID, -1);
 
             editText = (EditText)findViewById(R.id.conflict_resolver_text);
             try {
@@ -84,7 +80,18 @@ public class ConflictResolverActivity extends AppCompatActivity {
             case R.id.edit_menu_ok:
                 if(this.filename!=null && !this.filename.equals("")){
                     OrgUtils.writeToFile(this.filename, editText.getText().toString());
-                    new JGitWrapper.MergeTask(this).execute();
+                    new JGitWrapper.MergeTask(this, this.filename).execute();
+                    OrgFile f = null;
+                    try {
+                        f = new OrgFile(nodeId, this.getContentResolver());
+                        ContentValues values = new ContentValues();
+                        values.put("comment", "");
+                        f.updateFileInDB(this.getContentResolver(), values);
+                        Log.v("conflict", "conflict resolved");
+                    } catch (OrgFileNotFoundException e) {
+                        e.printStackTrace();
+                    }
+
                 }
                 NavUtils.navigateUpTo(this, new Intent(this, OrgNodeListActivity.class));
                 return true;
