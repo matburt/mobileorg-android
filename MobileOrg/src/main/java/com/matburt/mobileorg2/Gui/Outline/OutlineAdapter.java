@@ -23,25 +23,24 @@ import android.widget.Toast;
 import com.matburt.mobileorg2.Gui.Theme.DefaultTheme;
 import com.matburt.mobileorg2.OrgData.OrgContract;
 import com.matburt.mobileorg2.OrgData.OrgFile;
-import com.matburt.mobileorg2.OrgData.OrgNode;
 import com.matburt.mobileorg2.OrgData.OrgProviderUtils;
 import com.matburt.mobileorg2.OrgNodeDetailActivity;
 import com.matburt.mobileorg2.OrgNodeDetailFragment;
+import com.matburt.mobileorg2.OrgNodeListActivity;
 import com.matburt.mobileorg2.R;
-import com.matburt.mobileorg2.util.OrgFileNotFoundException;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class OutlineAdapter extends RecyclerView.Adapter<OutlineAdapter.OutlineItem> {
     private final AppCompatActivity activity;
+    // Number of added items. Here it is two: Agenda and Todos.
+    final private int numExtraItems = 2;
     public List<OrgFile> items = new ArrayList<>();
     ActionMode actionMode;
     private ContentResolver resolver;
 	private boolean mTwoPanes = false;
     private SparseBooleanArray selectedItems;
-    // Number of added items. Here it is two: Agenda and Todos.
-    final private int numExtraItems = 2;
     private ActionMode.Callback mDeleteMode = new ActionMode.Callback() {
         @Override
         public boolean onPrepareActionMode(ActionMode actionMode, Menu menu) {
@@ -115,7 +114,7 @@ public class OutlineAdapter extends RecyclerView.Adapter<OutlineAdapter.OutlineI
 		}
 
         notifyDataSetChanged();
-	}
+    }
 
 	@Override public int getItemCount() {
 		return items.size() + numExtraItems;
@@ -235,9 +234,9 @@ public class OutlineAdapter extends RecyclerView.Adapter<OutlineAdapter.OutlineI
 	@Override
 	public long getItemId(int position) {
         if(position < numExtraItems) return -1;
-		OrgFile node = items.get(position - numExtraItems);
-		return node.id;
-	}
+        OrgFile file = items.get(position - numExtraItems);
+        return file.nodeId;
+    }
 
     public void toggleSelection(int pos) {
         Log.v("selection", "selection pos : " + pos);
@@ -284,6 +283,7 @@ public class OutlineAdapter extends RecyclerView.Adapter<OutlineAdapter.OutlineI
             OrgFile file = items.get(num);
             file.removeFile(activity);
         }
+        ((OrgNodeListActivity) activity).runSynchronize(null);
         refresh();
         actionMode.finish();
     }

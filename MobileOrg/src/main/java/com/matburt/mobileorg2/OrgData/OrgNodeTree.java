@@ -11,9 +11,11 @@ import java.util.Stack;
 import java.util.TreeMap;
 
 public class OrgNodeTree {
+    private static long idConstructor;
     public OrgNode node;
     public ArrayList<OrgNodeTree> children;
     private Visibility visibility;
+
     private OrgNodeTree(OrgNode root, ContentResolver resolver, boolean isRecursive){
         node = root;
         children = new ArrayList<>();
@@ -83,15 +85,17 @@ public class OrgNodeTree {
         return result;
     }
 
-    private static void fillMap(TreeMap<Long, OrgNodeTree> map, OrgNodeTree tree, long idConstructor) {
+    private static void fillMap(TreeMap<Long, OrgNodeTree> map, OrgNodeTree tree) {
         // The root node is the filename node
         // It must not be added
-        map.put(idConstructor++, tree);
+        map.put(++idConstructor, tree);
+
+        Log.v("node", tree.node.name + " -> " + idConstructor + " -> " + tree.visibility);
 
         if (tree.visibility == Visibility.folded) return;
 
-        for (OrgNodeTree child : tree.children) fillMap(map, child, idConstructor);
-//        for (OrgNodeTree child : tree.children) map.put(idConstructor++, child);
+        for (OrgNodeTree child : tree.children) fillMap(map, child);
+
     }
 
     public Visibility getVisibility(){
@@ -125,8 +129,8 @@ public class OrgNodeTree {
      */
     public NavigableMap<Long,OrgNodeTree> getVisibleNodesArray(){
         TreeMap<Long,OrgNodeTree> result = new TreeMap<>();
-        long idConstructor = 0;
-        fillMap(result, this, idConstructor);
+        idConstructor = -1;
+        fillMap(result, this);
         return result;
     }
 

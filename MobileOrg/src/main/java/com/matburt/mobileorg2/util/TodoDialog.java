@@ -1,6 +1,5 @@
 package com.matburt.mobileorg2.util;
 
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.support.v4.content.ContextCompat;
@@ -79,19 +78,11 @@ public class TodoDialog {
         if (selectedTodo.equals(node.todo))
             return;
 
-        ContentResolver resolver = context.getContentResolver();
-
-        OrgNode newNode;
-        try {
-            newNode = new OrgNode(node.id, resolver);
-        } catch (OrgNodeNotFoundException e) {
-            e.printStackTrace();
-            return;
-        }
-        newNode.todo = selectedTodo;
-        Log.v("todo", "new todo : " + newNode.todo);
-        OrgEdit.updateFile(node, newNode, context);
-        node.write(resolver);
+        Log.v("todo", "new todo : " + node.todo);
+        node.todo = selectedTodo;
+        node.write(context);
+        OrgEdit.updateFile(node, context);
         OrgUtils.announceSyncDone(context);
+
     }
 }

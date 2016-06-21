@@ -28,6 +28,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.matburt.mobileorg2.OrgData.OrgContract;
+import com.matburt.mobileorg2.OrgData.OrgDatabase;
 import com.matburt.mobileorg2.OrgData.OrgNode;
 import com.matburt.mobileorg2.OrgData.OrgNodeTree;
 import com.matburt.mobileorg2.OrgData.OrgProviderUtils;
@@ -109,8 +110,25 @@ public class OrgNodeDetailFragment extends Fragment {
             this.nodeId = getArguments().getLong(OrgContract.NODE_ID);
 
             if (nodeId == OrgContract.TODO_ID) {
-                Cursor cursor = resolver.query(OrgContract.OrgData.CONTENT_URI,
-                        OrgContract.OrgData.DEFAULT_COLUMNS, "todo is not null and todo <> ''", null, OrgContract.OrgData.NAME_SORT);
+//                Cursor cursor = resolver.query(OrgContract.OrgData.CONTENT_URI,
+//                        OrgContract.OrgData.DEFAULT_COLUMNS, OrgContract.Todos.ISDONE + "=1",
+//                        null, OrgContract.OrgData.NAME_SORT);
+
+                String allColumns = "";
+                for (String column : OrgContract.OrgData.DEFAULT_COLUMNS)
+                    allColumns += OrgDatabase.Tables.ORGDATA + "." + column + ", ";
+                allColumns = allColumns.substring(0, allColumns.length() - 2);
+                Log.v("todo", "allcol : " + allColumns);
+
+                String todoQuery = "SELECT " + allColumns +
+                        " FROM orgdata JOIN todos " +
+                        " ON todos.name = orgdata.todo WHERE todos.isdone=0";
+
+                Log.v("todo", "query : " + todoQuery);
+
+                Cursor cursor = OrgDatabase.getInstance(getContext()).getReadableDatabase().rawQuery(todoQuery, null);
+
+
                 tree = new OrgNodeTree(OrgProviderUtils.orgDataCursorToArrayList(cursor));
                 if (cursor != null) cursor.close();
             } else {
@@ -206,11 +224,6 @@ public class OrgNodeDetailFragment extends Fragment {
 
         public MainRecyclerViewAdapter(OrgNodeTree root) {
             tree = root;
-            refreshVisibility();
-        }
-
-        void refreshVisibility() {
-            notifyDataSetChanged();
         }
 
         @Override
@@ -272,8 +285,6 @@ public class OrgNodeDetailFragment extends Fragment {
                 return false;
             }
         }
-
-
     }
 
     public class SecondaryRecyclerViewAdapter
@@ -290,7 +301,6 @@ public class OrgNodeDetailFragment extends Fragment {
         void refreshVisibility() {
             items = tree.getVisibleNodesArray();
             notifyDataSetChanged();
-
         }
 
         @Override
@@ -313,10 +323,9 @@ public class OrgNodeDetailFragment extends Fragment {
                 public void onClick(View v) {
                     if (selectedNode != null) {
                         closeInsertItem();
-                        return;
+                    } else {
+                        tree.toggleVisibility();
                     }
-
-                    tree.toggleVisibility();
                     refreshVisibility();
                 }
             });
@@ -335,11 +344,12 @@ public class OrgNodeDetailFragment extends Fragment {
 
                     selectedNode = item.node;
                     highlightedView = item.mView;
-
+                    Log.v("selection", "highlighted : " + highlightedView);
                     setItemModifiersVisibility(highlightedView, View.VISIBLE);
 //                    item.mView.setSelected(true);
 
                     notifyItemChanged(position);
+                    refreshVisibility();
                     return true;
                 }
             });
@@ -349,9 +359,11 @@ public class OrgNodeDetailFragment extends Fragment {
                 public void onClick(View v) {
                     if (selectedNode != null) {
                         closeInsertItem();
+                        refreshVisibility();
                         return;
                     }
                     new TodoDialog(getContext(), tree.node, item.todoButton);
+                    refreshVisibility();
                 }
             });
 
@@ -401,18 +413,20 @@ public class OrgNodeDetailFragment extends Fragment {
                 setItemModifiersVisibility(highlightedView, View.GONE);
                 highlightedView = null;
             }
-
-            refreshVisibility();
         }
 
         @Override
         public int getItemCount() {
+            Log.v("node", tree.node.name + " " + items.size());
             return items.size();
         }
 
         void setItemModifiersVisibility(View view, int visibility){
             LinearLayout itemModifiers = (LinearLayout) view.findViewById(R.id.item_modifiers);
-            if(itemModifiers != null) itemModifiers.setVisibility(visibility);
+            if (itemModifiers != null) {
+                Log.v("vis", "visibility : " + visibility);
+                itemModifiers.setVisibility(visibility);
+            }
         }
     }
 

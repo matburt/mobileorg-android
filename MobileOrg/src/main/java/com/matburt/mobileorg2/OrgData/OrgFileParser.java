@@ -164,6 +164,14 @@ public class OrgFileParser {
 		}
 	}
 
+	/**
+	 * Remove old file from DB, decrypt file if encrypted and then parse
+	 *
+	 * @param orgFile
+	 * @param breader
+	 * @param parser
+	 * @param context
+	 */
 	public static void parseFile(OrgFile orgFile, BufferedReader breader, OrgFileParser parser, Context context) {
 		ContentResolver resolver = context.getContentResolver();
 		try {

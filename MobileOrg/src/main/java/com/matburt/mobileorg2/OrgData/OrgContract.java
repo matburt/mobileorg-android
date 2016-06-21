@@ -3,6 +3,19 @@ package com.matburt.mobileorg2.OrgData;
 import android.net.Uri;
 
 public class OrgContract {
+	public static final String CONTENT_AUTHORITY = "com.matburt.mobileorg2.OrgData.OrgProvider";
+	private static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
+	private static final String PATH_ORGDATA = "orgdata";
+	private static final String PATH_EDITS = "edits";
+	private static final String PATH_TODOS = "todos";
+	private static final String PATH_TAGS = "tags";
+	private static final String PATH_PRIORITIES = "priorities";
+	private static final String PATH_FILES = "files";
+	private static final String PATH_SEARCH = "search";
+	static public long TODO_ID = -2;
+	static public long AGENDA_ID = -3;
+	public static String NODE_ID = "node_id";
+	public static String PARENT_ID = "parent_id";
 	interface EditsColumns {
 		String ID = "_id";
 		String TYPE = "type";
@@ -11,7 +24,6 @@ public class OrgContract {
 		String OLD_VALUE = "old_value";
 		String NEW_VALUE = "new_value";
 	}
-	
 	interface OrgDataColumns {
 		String ID = "_id";
 		String NAME = "name";
@@ -27,7 +39,7 @@ public class OrgContract {
 		String DEADLINE = "deadline";
 		String SCHEDULED = "scheduled";
 	}
-	
+
 	interface FilesColumns {
 		String ID = "_id";
 		String NAME = "name";
@@ -35,72 +47,53 @@ public class OrgContract {
 		String COMMENT = "comment";
 		String NODE_ID = "node_id";
 	}
-	
 	interface TodosColumns {
 		String ID = "_id";
 		String NAME = "name";
 		String GROUP = "todogroup";
 		String ISDONE = "isdone";
 	}
-	
 	interface TagsColumns {
 		String ID = "_id";
 		String NAME = "name";
 		String GROUP = "taggroup";
 	}
-	
 	interface PrioritiesColumns {
 		String ID = "_id";
 		String NAME = "name";
 	}
 
-	public static final String CONTENT_AUTHORITY = "com.matburt.mobileorg2.OrgData.OrgProvider";
-	private static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
-
-	private static final String PATH_ORGDATA = "orgdata";
-	private static final String PATH_EDITS = "edits";
-	private static final String PATH_TODOS = "todos";
-	private static final String PATH_TAGS = "tags";
-	private static final String PATH_PRIORITIES = "priorities";
-	private static final String PATH_FILES = "files";
-	private static final String PATH_SEARCH = "search";
-
-	static public long TODO_ID = -2;
-	static public long AGENDA_ID = -3;
-	public static String NODE_ID = "node_id";
-	public static String PARENT_ID = "parent_id";
-
-
 	public static class OrgData implements OrgDataColumns {
-		public static final Uri CONTENT_URI = 
+		public static final Uri CONTENT_URI =
 				BASE_CONTENT_URI.buildUpon().appendPath(PATH_ORGDATA).build();
+
+		public static final Uri CONTENT_URI_TODOS =
+				BASE_CONTENT_URI.buildUpon().appendPath(PATH_TODOS).build();
+		public static final String DEFAULT_SORT = ID + " ASC";
+		public static final String NAME_SORT = NAME + " ASC";
+		public static final String POSITION_SORT = POSITION + " ASC";
+		public static final String[] DEFAULT_COLUMNS = {ID, NAME, TODO, TAGS, TAGS_INHERITED,
+				PARENT_ID, PAYLOAD, LEVEL, PRIORITY, FILE_ID, POSITION, SCHEDULED, DEADLINE};
 		
 		public static String getId(Uri uri) {
 			return uri.getPathSegments().get(1);
 		}
-		
+
 		public static Uri buildIdUri(String id) {
 			return CONTENT_URI.buildUpon().appendPath(id).build();
 		}
-		
+
 		public static Uri buildIdUri(Long id) {
 			return buildIdUri(id.toString());
 		}
-		
+
 		public static Uri buildChildrenUri(String parentId) {
 			return CONTENT_URI.buildUpon().appendPath(parentId).appendPath("children").build();
 		}
-		
+
 		public static Uri buildChildrenUri(long node_id) {
 			return buildChildrenUri(Long.toString(node_id));
 		}
-		public static final String DEFAULT_SORT = ID + " ASC";
-        public static final String NAME_SORT = NAME + " ASC";
-        public static final String POSITION_SORT = POSITION + " ASC";
-
-		
-		public static final String[] DEFAULT_COLUMNS = { ID, NAME, TODO, TAGS, TAGS_INHERITED,
-				PARENT_ID, PAYLOAD, LEVEL, PRIORITY, FILE_ID, POSITION, SCHEDULED, DEADLINE };
 	}
 	
 	public static class Edits implements EditsColumns {

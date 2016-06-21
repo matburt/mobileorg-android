@@ -9,6 +9,9 @@ import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.Session;
 import com.matburt.mobileorg2.OrgData.OrgDatabase;
 import com.matburt.mobileorg2.OrgData.OrgFile;
 import com.matburt.mobileorg2.OrgData.OrgFileParser;
@@ -18,14 +21,17 @@ import com.matburt.mobileorg2.util.FileUtils;
 import com.matburt.mobileorg2.util.OrgFileNotFoundException;
 
 import org.eclipse.jgit.api.CheckoutCommand;
+import org.eclipse.jgit.api.CloneCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.Status;
+import org.eclipse.jgit.api.TransportConfigCallback;
 import org.eclipse.jgit.api.errors.CanceledException;
 import org.eclipse.jgit.api.errors.ConcurrentRefUpdateException;
 import org.eclipse.jgit.api.errors.DetachedHeadException;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidConfigurationException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
+import org.eclipse.jgit.api.errors.JGitInternalException;
 import org.eclipse.jgit.api.errors.NoHeadException;
 import org.eclipse.jgit.api.errors.NoMessageException;
 import org.eclipse.jgit.api.errors.RefNotFoundException;
@@ -38,7 +44,13 @@ import org.eclipse.jgit.lib.ObjectReader;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.merge.MergeStrategy;
+import org.eclipse.jgit.transport.JschConfigSessionFactory;
+import org.eclipse.jgit.transport.OpenSshConfig;
+import org.eclipse.jgit.transport.SshSessionFactory;
+import org.eclipse.jgit.transport.SshTransport;
+import org.eclipse.jgit.transport.Transport;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
+import org.eclipse.jgit.util.FS;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -184,23 +196,72 @@ public class JGitWrapper {
         }
 
         protected Object doInBackground(String... params) {
-            AuthData authData = AuthData.getInstance(context);
+            final AuthData authData = AuthData.getInstance(context);
+
+            final ConnectionType connection;
+            if (authData.getHost().startsWith("http")) connection = ConnectionType.kHttp;
+            else {
+                if (!authData.getPubFile().equals("")) connection = ConnectionType.kSshPubKey;
+                else connection = ConnectionType.kSshPassword;
+            }
 
             File localPath = new File(context.getFilesDir() + "/" + GIT_DIR);
             FileUtils.deleteFile(localPath);
 
-//			String REMOTE_URL = "ssh://" + userActual + ":" + passActual + "@" + hostActual + ":" + portActual + pathActual;
-            String REMOTE_URL = authData.getHost() + "/" + authData.getPath();
-            Git git;
+            CloneCommand cloneCommand = Git.cloneRepository();
+
+            StringBuilder REMOTE_URL = new StringBuilder();
+
+
+            if (connection == ConnectionType.kHttp) {
+                // http connection
+                Log.v("sync", "http");
+                REMOTE_URL.append(authData.getHost())
+                        .append("/")
+                        .append(authData.getPath());
+            } else {
+                // ssh connection
+                REMOTE_URL.append("ssh://")
+                        .append(authData.getUser())
+                        .append("@")
+                        .append(authData.getHost())
+                        .append("/")
+                        .append(authData.getPath());
+
+                final SshSessionFactory sshSessionFactory = new JschConfigSessionFactory() {
+                    @Override
+                    protected void configure(OpenSshConfig.Host host, Session session) {
+                        if (connection == ConnectionType.kSshPassword)
+                            session.setPassword(authData.getPassword());
+                    }
+
+                    @Override
+                    protected JSch createDefaultJSch(FS fs) throws JSchException {
+                        JSch defaultJSch = super.createDefaultJSch(fs);
+                        if (connection == ConnectionType.kSshPubKey)
+                            defaultJSch.addIdentity(authData.getPubFile());
+                        return defaultJSch;
+                    }
+                };
+
+                cloneCommand.setTransportConfigCallback(new TransportConfigCallback() {
+                    @Override
+                    public void configure(Transport transport) {
+                        SshTransport sshTransport = (SshTransport) transport;
+                        sshTransport.setSshSessionFactory(sshSessionFactory);
+                    }
+                });
+            }
+
             System.setProperty("user.home", context.getFilesDir().getAbsolutePath() );
             Log.v("git", "user home : " + System.getProperty("user.home"));
             Log.v("git","after");
+            Log.v("git", "remote : " + REMOTE_URL);
 
             try {
-                git = Git.cloneRepository()
-                        .setURI(REMOTE_URL)
+                cloneCommand
+                        .setURI(REMOTE_URL.toString())
                         .setDirectory(localPath)
-//						.setCredentialsProvider(allowHosts)
                         .setCredentialsProvider(new CredentialsProviderAllowHost(authData.getUser(), authData.getPassword()))
                         .setBare(false)
                         .call();
@@ -226,7 +287,6 @@ public class JGitWrapper {
             OrgProviderUtils
                     .clearDB(context.getContentResolver());
 
-
             parseAll();
 
             progress.dismiss();
@@ -247,7 +307,6 @@ public class JGitWrapper {
                 Toast.makeText(context, exception.toString(), Toast.LENGTH_LONG).show();
                 ((Exception)exception).printStackTrace();
             }
-
         }
 
         void parseAll(){
@@ -263,18 +322,26 @@ public class JGitWrapper {
                 OrgFile orgFile = new OrgFile(filename, filename);
                 FileReader fileReader = null;
                 try {
+                    Log.d("Files", "FileName:" + file[i].getName());
                     fileReader = new FileReader(syncher.getAbsoluteFilesDir(context) + "/" + filename);
+                    BufferedReader bufferedReader = new BufferedReader(fileReader);
+                    OrgDatabase db = OrgDatabase.getInstance(context);
+                    final OrgFileParser parser = new OrgFileParser(db, context);
+
+                    OrgFileParser.parseFile(orgFile, bufferedReader, parser, context);
+
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
                 }
-                BufferedReader bufferedReader = new BufferedReader(fileReader);
-                OrgDatabase db = OrgDatabase.getInstance(context);
 
-                final OrgFileParser parser = new OrgFileParser(db, context);
 
-                OrgFileParser.parseFile(orgFile, bufferedReader, parser, context);
-                Log.d("Files", "FileName:" + file[i].getName());
             }
+        }
+
+        enum ConnectionType {
+            kHttp,
+            kSshPubKey,
+            kSshPassword
         }
 
     }
@@ -316,6 +383,8 @@ public class JGitWrapper {
             } catch (NoMessageException e) {
                 e.printStackTrace();
             } catch (GitAPIException e) {
+                e.printStackTrace();
+            } catch (JGitInternalException e) {
                 e.printStackTrace();
             }
             return null;

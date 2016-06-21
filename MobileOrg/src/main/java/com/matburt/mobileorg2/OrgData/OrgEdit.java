@@ -2,13 +2,8 @@ package com.matburt.mobileorg2.OrgData;
 
 import android.content.ContentResolver;
 import android.content.Context;
-import android.util.Log;
 
-import com.matburt.mobileorg2.util.FileUtils;
 import com.matburt.mobileorg2.util.OrgFileNotFoundException;
-import com.matburt.mobileorg2.util.OrgNodeNotFoundException;
-
-import java.util.ArrayList;
 
 public class OrgEdit {
 
@@ -42,25 +37,16 @@ public class OrgEdit {
 
 	/**
 	 * Edit the org file on disk to incorporate new modifications
-	 *
-	 * @param oldNode :
-	 *                the old version of the OrgNode
-	 * @param newNode :
-	 *                the new version of the OrgNode
+	 * @param node
 	 */
-	static public void updateFile(OrgNode oldNode, OrgNode newNode, Context context) {
-		if (oldNode == null) return; // TODO: insertion of a new node
-		if (newNode == null) return; // TODO: deletion of an old node
-
+	static public void updateFile(OrgNode node, Context context) {
 		ContentResolver resolver = context.getContentResolver();
 		try {
-			OrgFile file = new OrgFile(oldNode.fileId, resolver);
+			OrgFile file = new OrgFile(node.fileId, resolver);
 			file.updateFile(file.toString(resolver), context);
 		} catch (OrgFileNotFoundException e) {
 			e.printStackTrace();
 		}
-
-
 	}
 
 	private void setOldValue(OrgNode node) {

@@ -4,6 +4,7 @@ import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.TimePickerDialog;
 import android.content.ContentResolver;
+import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
@@ -36,6 +37,7 @@ public class EditNodeFragment extends Fragment {
     static OrgNodeTimeDate.TYPE currentDateTimeDialog;
     static private OrgNode node;
     EditText title, content;
+    Context context;
     private int position = 0;
     private Button todo, priority;
 
@@ -53,6 +55,7 @@ public class EditNodeFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         final View rootView = inflater.inflate(R.layout.edit_node_entry, container, false);
+        context = getContext();
 
         todo = (Button) rootView.findViewById(R.id.todo);
         priority = (Button) rootView.findViewById(R.id.priority);
@@ -181,16 +184,16 @@ public class EditNodeFragment extends Fragment {
             try {
                 Log.v("sync","hello");
                 OrgNode original = new OrgNode(nodeId, resolver);
-                node.write(resolver);
-                OrgEdit.updateFile(original, node, getContext());
+                node.write(getContext());
+                OrgEdit.updateFile(node, context);
             } catch (OrgNodeNotFoundException e) {
                 Log.v("sync","loser");
                 e.printStackTrace();
             }
         } else {
-            node.shiftNextSiblingNodes(resolver);
-            node.write(resolver);
-            OrgEdit.updateFile(null, node, getContext());
+            node.shiftNextSiblingNodes(context);
+            node.write(getContext());
+            OrgEdit.updateFile(node, context);
         }
     }
 
@@ -278,4 +281,5 @@ public class EditNodeFragment extends Fragment {
 //            newFragment.show(getActivity().getSupportFragmentManager(), "timePicker");
         }
     }
+
 }

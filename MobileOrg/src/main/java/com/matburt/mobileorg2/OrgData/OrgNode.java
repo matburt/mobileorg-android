@@ -137,11 +137,11 @@ public class OrgNode {
 			this.orgNodePayload = new OrgNodePayload(this.payload);
 	}
 
-	public void write(ContentResolver resolver) {
+	public void write(Context context) {
 		if(id < 0)
-			addNode(resolver);
+			addNode(context);
 		else
-			updateNode(resolver);
+			updateNode(context);
 	}
 
     /**
@@ -155,19 +155,13 @@ public class OrgNode {
         return result;
     }
 
-    private long addNode(ContentResolver resolver) {
-		Uri uri = resolver.insert(OrgData.CONTENT_URI, getContentValues());
-		this.id = Long.parseLong(OrgData.getId(uri));
-		return id;
+	private int updateNode(Context context) {
+		return context.getContentResolver().update(OrgData.buildIdUri(id), getContentValues(), null, null);
 	}
-	
-	private int updateNode(ContentResolver resolver) {
-		return resolver.update(OrgData.buildIdUri(id), getContentValues(), null, null);
-	}
-	
-	public void updateAllNodes(ContentResolver resolver) {
-		updateNode(resolver);
 
+	public void updateAllNodes(Context context) {
+		updateNode(context);
+		ContentResolver resolver = context.getContentResolver();
 		String nodeId = getNodeId(resolver);
 		if (!nodeId.startsWith("olp:")) { // Update all nodes that have this :ID:
 			String nodeIdQuery = "%" + nodeId + "%";
@@ -329,12 +323,12 @@ public class OrgNode {
 		}
 	}
 
-    public void shiftNextSiblingNodes(ContentResolver resolver){
-        for(OrgNode sibling: getSiblings(resolver) ){
-            if(sibling.position >= position && sibling.id != this.id) {
+	public void shiftNextSiblingNodes(Context context) {
+		for (OrgNode sibling : getSiblings(context.getContentResolver())) {
+			if(sibling.position >= position && sibling.id != this.id) {
                 ++sibling.position;
-                sibling.updateNode(resolver);
-                Log.v("position", "new pos : " + sibling.position);
+				sibling.updateNode(context);
+				Log.v("position", "new pos : " + sibling.position);
                 Log.v("position", sibling.getCleanedName());
             }
         }
@@ -539,12 +533,29 @@ public class OrgNode {
 				&& payload.equals(node.payload);
 	}
 
+	/**
+	 * Delete this node and rewrite the file on disk
+	 *
+	 * @param context
+	 */
+	public void deleteNode(Context context) {
+		context.getContentResolver().delete(OrgData.buildIdUri(id), null, null);
+		OrgEdit.updateFile(this, context);
+	}
 
-    public void deleteNode(Context context) {
-        OrgEdit.updateFile(this, null, context);
-        context.getContentResolver().delete(OrgData.buildIdUri(id), null, null);
-    }
-	
+	/**
+	 * Add this node and rewrite the file on disk
+	 *
+	 * @param context
+	 * @return
+	 */
+	private long addNode(Context context) {
+		Uri uri = context.getContentResolver().insert(OrgData.CONTENT_URI, getContentValues());
+		this.id = Long.parseLong(OrgData.getId(uri));
+		OrgEdit.updateFile(this, context);
+		return id;
+	}
+
 	public void addAutomaticTimestamp() {
 		Context context = MobileOrgApplication.getContext();
 		boolean addTimestamp = PreferenceManager.getDefaultSharedPreferences(

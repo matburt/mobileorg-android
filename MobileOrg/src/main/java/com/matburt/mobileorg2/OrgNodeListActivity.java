@@ -97,7 +97,7 @@ public class OrgNodeListActivity extends AppCompatActivity {
                 alert.setTitle(R.string.new_file);
                 alert.setMessage(getResources().getString(R.string.filename) + ":");
 
-// Set an EditText view to get user input
+                // Set an EditText view to get user input
                 final EditText input = new EditText(OrgNodeListActivity.this);
                 alert.setView(input);
 
