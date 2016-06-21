@@ -132,7 +132,7 @@ public class OrgFile {
 		values.put(OrgData.FILE_ID, id);
 		resolver.update(OrgData.buildIdUri(nodeId), values, null, null);
         updateFile("", context);
-        SynchronizerManager.getInstance(null, null, null).getSyncher().addFile(filename);
+        SynchronizerManager.getInstance().addFile(filename);
     }
 
 
@@ -197,7 +197,7 @@ public class OrgFile {
 	 * 2) Remove this OrgFile node from the DB
 	 * 3) Remove file from disk
      *
-	 * @param resolver
+	 * @param context
 	 * @return the number of OrgData nodes removed
      */
     public long removeFile(Context context) {
@@ -248,8 +248,7 @@ public class OrgFile {
      * @return the absolute filename
      */
     public String getFilePath(Context context) {
-        Synchronizer synchronizer = SynchronizerManager.getInstance(null, null, null).getSyncher();
-        return synchronizer.getAbsoluteFilesDir(context) + "/" + filename;
+        return SynchronizerManager.getInstance().getAbsoluteFilesDir(context) + "/" + filename;
     }
 
 	/**

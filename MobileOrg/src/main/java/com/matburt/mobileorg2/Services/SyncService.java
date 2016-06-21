@@ -83,47 +83,35 @@ public class SyncService extends Service implements
 		return 0;
 	}
 
-	public SynchronizerManager getSynchronizer() {
-		Synchronizer synchronizer = null;
+	public void startSynchronizer() {
+
 		String syncSource = appSettings.getString("syncSource", "");
 		Context c = getApplicationContext();
-		
-		if (syncSource.equals("webdav"))
-			synchronizer =new WebDAVSynchronizer(c);
-		else if (syncSource.equals("sdcard"))
-			synchronizer = new SDCardSynchronizer(c);
-		else if (syncSource.equals("dropbox"))
-			synchronizer = new DropboxSynchronizer(c);
-        else if (syncSource.equals("ubuntu")) {
-            synchronizer = new UbuntuOneSynchronizer(c);
-            ((UbuntuOneSynchronizer)synchronizer).getBaseUser();
-        }
-		else if (syncSource.equals("scp"))
-			synchronizer = new SSHSynchronizer(c);
-        else if (syncSource.equals("null"))
-            synchronizer = new NullSynchronizer();
-		else
-			synchronizer = null;
-		
-		SynchronizerNotificationCompat notification;
-		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB)
-			notification = new SynchronizerNotification(this);
-		else
-			notification = new SynchronizerNotificationCompat(this);
 
-		return SynchronizerManager.getInstance(c, synchronizer, notification);
+		if (syncSource.equals("webdav"))
+			SynchronizerManager.setInstance(new WebDAVSynchronizer(c));
+		else if (syncSource.equals("sdcard"))
+			SynchronizerManager.setInstance( new SDCardSynchronizer(c));
+		else if (syncSource.equals("dropbox"))
+			SynchronizerManager.setInstance( new DropboxSynchronizer(c));
+		else if (syncSource.equals("ubuntu"))
+			SynchronizerManager.setInstance( new UbuntuOneSynchronizer(c));
+		else if (syncSource.equals("scp"))
+			SynchronizerManager.setInstance( new SSHSynchronizer(c));
+		else
+			SynchronizerManager.setInstance(new NullSynchronizer(c));
 	}
 
 	private void runSynchronizer() {
 		unsetAlarm();
-		final SynchronizerManager synchronizerManager = this.getSynchronizer();
+		startSynchronizer();
 		final OrgDatabase db = OrgDatabase.getInstance(this);
 		final OrgFileParser parser = new OrgFileParser(db, this);
 		final boolean calendarEnabled = appSettings.getBoolean("calendarEnabled", false);
 
 		Thread syncThread = new Thread() {
 			public void run() {
-				HashSet<String> changedFiles = synchronizerManager.runSynchronizer(parser);
+				HashSet<String> changedFiles = SynchronizerManager.getInstance().runSynchronizer(parser);
 				String[] files = changedFiles.toArray(new String[changedFiles.size()]);
 				if(calendarEnabled) {
 					Intent calIntent = new Intent(getBaseContext(), CalendarSyncService.class);
@@ -131,7 +119,7 @@ public class SyncService extends Service implements
 					calIntent.putExtra(CalendarSyncService.FILELIST, files);
 					getBaseContext().startService(calIntent);
 				}
-				synchronizerManager.close();
+				SynchronizerManager.getInstance().postSynchronize();
 				syncRunning = false;
 				setAlarm();
 			}

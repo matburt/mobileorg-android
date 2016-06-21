@@ -15,6 +15,7 @@ import com.dropbox.client2.exception.DropboxUnlinkedException;
 import com.dropbox.client2.session.AccessTokenPair;
 import com.dropbox.client2.session.AppKeyPair;
 import com.dropbox.client2.session.Session.AccessType;
+import com.matburt.mobileorg2.Gui.SynchronizerNotificationCompat;
 import com.matburt.mobileorg2.R;
 import com.matburt.mobileorg2.util.FileUtils;
 import com.matburt.mobileorg2.util.OrgUtils;
@@ -28,7 +29,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.HashSet;
 
-public class DropboxSynchronizer extends Synchronizer {
+public class DropboxSynchronizer extends SynchronizerManager{
 
 	private String remoteIndexPath;
 	private String remotePath;
@@ -39,6 +40,7 @@ public class DropboxSynchronizer extends Synchronizer {
 	private Context context;
     
     public DropboxSynchronizer(Context context) {
+        super(context);
     	this.context = context;
 
 		SharedPreferences sharedPreferences = PreferenceManager

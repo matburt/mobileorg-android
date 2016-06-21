@@ -19,8 +19,17 @@ import android.widget.Toast;
 
 import com.matburt.mobileorg2.Gui.Wizard.WizardView;
 import com.matburt.mobileorg2.R;
+import com.matburt.mobileorg2.Synchronizers.AuthData;
 import com.matburt.mobileorg2.Synchronizers.JGitWrapper;
 import com.matburt.mobileorg2.Synchronizers.SSHSynchronizer;
+import com.matburt.mobileorg2.Synchronizers.SynchronizerManager;
+
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
 
 public class SSHWizard extends Wizard {
 
@@ -142,7 +151,6 @@ public class SSHWizard extends Wizard {
 
 	public void saveSettings() {
 		final String pathActual = sshPath.getText().toString();
-		final String passActual = sshPass.getText().toString();
 		final String userActual = sshUser.getText().toString();
 		final String hostActual = sshHost.getText().toString();
 		String portActual = sshPort.getText().toString();
@@ -150,23 +158,25 @@ public class SSHWizard extends Wizard {
 
 		SharedPreferences appSettings = PreferenceManager
 				.getDefaultSharedPreferences(context);
+
+
 		SharedPreferences.Editor editor = appSettings.edit();
 
 		editor.putString("syncSource", "scp");
 
 		editor.putString("scpPath", pathActual);
 		editor.putString("scpUser", userActual);
-		editor.putString("scpPass", passActual);
 		editor.putString("scpHost", hostActual);
 		editor.putString("scpPort", portActual);
 		editor.putString("scpPubFile", sshPubFileActual.getText().toString());
 		editor.apply();
 
+
+		AuthData.getInstance(context).setPassword(sshPass.getText().toString());
 		Log.v("git","host0 : "+hostActual);
 
 		JGitWrapper.CloneGitRepoTask task = new JGitWrapper.CloneGitRepoTask(context);
-		task.execute(pathActual, passActual, userActual, hostActual, portActual);
-
+		task.execute(pathActual, sshPass.getText().toString(), userActual, hostActual, portActual);
 	}
 
 

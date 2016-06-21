@@ -3,6 +3,8 @@ package com.matburt.mobileorg2.Synchronizers;
 import android.content.Context;
 import android.preference.PreferenceManager;
 
+import com.matburt.mobileorg2.Gui.SynchronizerNotificationCompat;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -13,12 +15,13 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.HashSet;
 
-public class SDCardSynchronizer extends Synchronizer {	
+public class SDCardSynchronizer extends SynchronizerManager{	
 
 	private String remoteIndexPath;
 	private String remotePath;
 
     public SDCardSynchronizer(Context context) {
+		super(context);
 		this.remoteIndexPath = PreferenceManager.getDefaultSharedPreferences(
 				context).getString("indexFilePath", "");
 	

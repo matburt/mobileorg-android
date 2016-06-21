@@ -140,7 +140,12 @@ public class OrgUtils {
 		return contents;
 	}
 
-	public static String rightTrim(String str) {
+	/**
+	 * Strip trailing whitespace at end of line
+	 * @param str
+	 * @return
+     */
+	public static String rStrip(String str) {
 		int last = str.length() - 1;
 		int end = last;
 

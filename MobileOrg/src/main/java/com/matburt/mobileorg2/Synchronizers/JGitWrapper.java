@@ -48,6 +48,7 @@ import org.eclipse.jgit.transport.JschConfigSessionFactory;
 import org.eclipse.jgit.transport.OpenSshConfig;
 import org.eclipse.jgit.transport.SshSessionFactory;
 import org.eclipse.jgit.transport.SshTransport;
+import org.eclipse.jgit.transport.TransferConfig;
 import org.eclipse.jgit.transport.Transport;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 import org.eclipse.jgit.util.FS;
@@ -61,6 +62,45 @@ import java.util.List;
 
 
 public class JGitWrapper {
+    enum ConnectionType {
+        kHttp,
+        kSshPubKey,
+        kSshPassword
+    }
+
+    /**
+     * SSH configuration
+     * In charge of specifying the PubKey or the password depending on the connection type
+     */
+    static class CustomTransportConfigCallback implements TransportConfigCallback {
+        ConnectionType connection;
+        Context context;
+
+        public CustomTransportConfigCallback(Context context){
+            this.context = context;
+            this.connection = getConnectionType(context);
+        }
+
+        @Override
+        public void configure(Transport transport) {
+            SshTransport sshTransport = (SshTransport) transport;
+            sshTransport.setSshSessionFactory(new JschConfigSessionFactory(){
+                 @Override
+        protected void configure(OpenSshConfig.Host host, Session session) {
+            if (connection == ConnectionType.kSshPassword)
+                session.setPassword(AuthData.getInstance(context).getPassword());
+        }
+
+        @Override
+        protected JSch createDefaultJSch(FS fs) throws JSchException {
+            JSch defaultJSch = super.createDefaultJSch(fs);
+            if (connection == ConnectionType.kSshPubKey)
+                defaultJSch.addIdentity(AuthData.getInstance(context).getPubFile());
+            return defaultJSch;
+        }
+            });
+        }
+    }
 
     final static String CONFLICT_FILES = "conflict_files";
     // The git dir inside the Context.getFilesDir() folder
@@ -117,6 +157,7 @@ public class JGitWrapper {
             git
                     .pull()
                     .setCredentialsProvider(new CredentialsProviderAllowHost(authData.getUser(), authData.getPassword()))
+                    .setTransportConfigCallback(new CustomTransportConfigCallback(context))
                     .call();
             ObjectId head = repository.resolve("HEAD^{tree}");
 
@@ -198,12 +239,8 @@ public class JGitWrapper {
         protected Object doInBackground(String... params) {
             final AuthData authData = AuthData.getInstance(context);
 
-            final ConnectionType connection;
-            if (authData.getHost().startsWith("http")) connection = ConnectionType.kHttp;
-            else {
-                if (!authData.getPubFile().equals("")) connection = ConnectionType.kSshPubKey;
-                else connection = ConnectionType.kSshPassword;
-            }
+            final ConnectionType connection = getConnectionType(context);
+
 
             File localPath = new File(context.getFilesDir() + "/" + GIT_DIR);
             FileUtils.deleteFile(localPath);
@@ -228,29 +265,7 @@ public class JGitWrapper {
                         .append("/")
                         .append(authData.getPath());
 
-                final SshSessionFactory sshSessionFactory = new JschConfigSessionFactory() {
-                    @Override
-                    protected void configure(OpenSshConfig.Host host, Session session) {
-                        if (connection == ConnectionType.kSshPassword)
-                            session.setPassword(authData.getPassword());
-                    }
-
-                    @Override
-                    protected JSch createDefaultJSch(FS fs) throws JSchException {
-                        JSch defaultJSch = super.createDefaultJSch(fs);
-                        if (connection == ConnectionType.kSshPubKey)
-                            defaultJSch.addIdentity(authData.getPubFile());
-                        return defaultJSch;
-                    }
-                };
-
-                cloneCommand.setTransportConfigCallback(new TransportConfigCallback() {
-                    @Override
-                    public void configure(Transport transport) {
-                        SshTransport sshTransport = (SshTransport) transport;
-                        sshTransport.setSshSessionFactory(sshSessionFactory);
-                    }
-                });
+                cloneCommand.setTransportConfigCallback(new CustomTransportConfigCallback(context));
             }
 
             System.setProperty("user.home", context.getFilesDir().getAbsolutePath() );
@@ -310,8 +325,8 @@ public class JGitWrapper {
         }
 
         void parseAll(){
-            SSHSynchronizer syncher = new SSHSynchronizer(context);
-            File f = new File(syncher.getAbsoluteFilesDir(context));
+            SynchronizerManager.setInstance(new SSHSynchronizer(context));
+            File f = new File(SynchronizerManager.getInstance().getAbsoluteFilesDir(context));
             File file[] = f.listFiles();
             if (file == null) return;
             Log.d("Files", "Size: "+ file.length);
@@ -323,7 +338,7 @@ public class JGitWrapper {
                 FileReader fileReader = null;
                 try {
                     Log.d("Files", "FileName:" + file[i].getName());
-                    fileReader = new FileReader(syncher.getAbsoluteFilesDir(context) + "/" + filename);
+                    fileReader = new FileReader(SynchronizerManager.getInstance().getAbsoluteFilesDir(context) + "/" + filename);
                     BufferedReader bufferedReader = new BufferedReader(fileReader);
                     OrgDatabase db = OrgDatabase.getInstance(context);
                     final OrgFileParser parser = new OrgFileParser(db, context);
@@ -338,11 +353,6 @@ public class JGitWrapper {
             }
         }
 
-        enum ConnectionType {
-            kHttp,
-            kSshPubKey,
-            kSshPassword
-        }
 
     }
 
@@ -369,6 +379,7 @@ public class JGitWrapper {
                 AuthData authData = AuthData.getInstance(context);
                 git.push()
                         .setCredentialsProvider(new CredentialsProviderAllowHost(authData.getUser(), authData.getPassword()))
+                        .setTransportConfigCallback(new CustomTransportConfigCallback(context))
                         .call();
                 System.out.println("Committed all changes to repository at ");
             } catch (IOException | UnmergedPathsException e) {
@@ -457,6 +468,21 @@ public class JGitWrapper {
 
     static class UnableToPushException extends Exception {
 
+    }
+
+    /**
+     * Determine if connection if HTTP, SSH+PubKey, SSH+Password
+     * based on the provided path and whether or not the user has provided a PubKey
+     * @param context
+     * @return
+     */
+    static ConnectionType getConnectionType(Context context){
+        final AuthData authData = AuthData.getInstance(context);
+        if (authData.getHost().startsWith("http")) return ConnectionType.kHttp;
+        else {
+            if (!authData.getPubFile().equals("")) return ConnectionType.kSshPubKey;
+            else return ConnectionType.kSshPassword;
+        }
     }
 
 }

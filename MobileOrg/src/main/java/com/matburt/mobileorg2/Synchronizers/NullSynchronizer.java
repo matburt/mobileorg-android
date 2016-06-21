@@ -1,11 +1,16 @@
 package com.matburt.mobileorg2.Synchronizers;
 
+import android.content.Context;
+
+import com.matburt.mobileorg2.Gui.SynchronizerNotificationCompat;
+
 import java.io.BufferedReader;
 import java.util.HashSet;
 
-public class NullSynchronizer extends Synchronizer {
+public class NullSynchronizer extends SynchronizerManager{
 
-    public NullSynchronizer() {
+    public NullSynchronizer(Context context) {
+        super(context);
     }
 
     @Override

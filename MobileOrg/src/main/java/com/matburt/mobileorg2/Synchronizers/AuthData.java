@@ -5,6 +5,8 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+import com.matburt.mobileorg2.util.OrgUtils;
+
 /**
  * Created by bcoste on 17/06/16.
  */
@@ -12,38 +14,45 @@ public class AuthData {
     static AuthData mAuthData = null;
     private SharedPreferences appSettings;
 
+    private String password;
+
     private AuthData(Context context) {
         this.appSettings = PreferenceManager
                 .getDefaultSharedPreferences(context.getApplicationContext());
+        this.password = "";
     }
 
-    static AuthData getInstance(Context context) {
+    public static AuthData getInstance(Context context) {
         if (mAuthData == null) mAuthData = new AuthData(context);
         return mAuthData;
     }
 
     String getPath() {
-        return appSettings.getString("scpPath", "");
+        return OrgUtils.rStrip(appSettings.getString("scpPath", ""));
     }
 
     String getUser() {
-        return appSettings.getString("scpUser", "");
+        return OrgUtils.rStrip(appSettings.getString("scpUser", ""));
     }
 
     String getHost() {
-        return appSettings.getString("scpHost", "");
+        return OrgUtils.rStrip(appSettings.getString("scpHost", ""));
     }
 
     String getPubFile() {
-        return appSettings.getString("scpPubFile", "");
+        return OrgUtils.rStrip(appSettings.getString("scpPubFile", ""));
     }
 
     Integer getPort() {
         return Integer.parseInt(appSettings.getString("scpPort", ""));
     }
 
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
     String getPassword() {
-        return appSettings.getString("scpPass", "");
+        return password;
     }
 
     public boolean isValid() {

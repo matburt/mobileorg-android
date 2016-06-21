@@ -7,6 +7,7 @@ import android.os.Build;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+import com.matburt.mobileorg2.Gui.SynchronizerNotificationCompat;
 import com.matburt.mobileorg2.util.OrgUtils;
 
 import org.apache.http.HttpEntity;
@@ -41,7 +42,7 @@ import oauth.signpost.commonshttp.CommonsHttpOAuthConsumer;
 import oauth.signpost.exception.OAuthException;
 import oauth.signpost.signature.HmacSha1MessageSigner;
 
-public class UbuntuOneSynchronizer extends Synchronizer {
+public class UbuntuOneSynchronizer extends SynchronizerManager{
 
 private static final String BASE_TOKEN_NAME = "Ubuntu One @ MobileOrg:";
 	private static final String CONSUMER_KEY = "consumer_key";
@@ -81,6 +82,7 @@ private static final String BASE_TOKEN_NAME = "Ubuntu One @ MobileOrg:";
 	private Context context;    
 
     public UbuntuOneSynchronizer(Context context) {
+        super(context);
     	this.context = context;
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
 		this.remoteIndexPath = sharedPreferences.getString("ubuntuOnePath", "");
@@ -93,6 +95,7 @@ private static final String BASE_TOKEN_NAME = "Ubuntu One @ MobileOrg:";
         consumer_secret = sharedPreferences.getString("ubuntuConsumerSecret", "");
         access_token = sharedPreferences.getString("ubuntuAccessToken", "");
         token_secret = sharedPreferences.getString("ubuntuTokenSecret", "");
+        getBaseUser();
     }
 
     public void invalidate() {

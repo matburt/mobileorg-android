@@ -8,6 +8,7 @@ import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
+import com.matburt.mobileorg2.Gui.SynchronizerNotificationCompat;
 import com.matburt.mobileorg2.util.OrgUtils;
 
 import java.io.BufferedReader;
@@ -19,13 +20,13 @@ import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.util.HashSet;
 
-public class SSHSynchronizer extends Synchronizer {
+public class SSHSynchronizer extends SynchronizerManager {
     private final String LT = "MobileOrg";
     AuthData authData;
     private Session session;
-	private Context context;
 
 	public SSHSynchronizer(Context context) {
+        super(context);
 		this.context = context;
         authData = AuthData.getInstance(context);
     }
@@ -141,7 +142,7 @@ public class SSHSynchronizer extends Synchronizer {
 
     @Override
     public void addFile(String filename) {
-        Log.v("sync", "addding file");
+        Log.v("sync", "addding file : "+filename);
         JGitWrapper.add(filename, context);
     }
 

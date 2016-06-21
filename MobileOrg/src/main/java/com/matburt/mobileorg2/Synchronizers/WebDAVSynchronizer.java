@@ -10,6 +10,7 @@ import android.util.Base64;
 import android.util.Log;
 
 import com.matburt.mobileorg2.Gui.CertificateConflictActivity;
+import com.matburt.mobileorg2.Gui.SynchronizerNotificationCompat;
 import com.matburt.mobileorg2.R;
 import com.matburt.mobileorg2.util.FileUtils;
 import com.matburt.mobileorg2.util.OrgUtils;
@@ -37,26 +38,26 @@ import javax.net.ssl.SSLHandshakeException;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.X509TrustManager;
 
-public class WebDAVSynchronizer extends Synchronizer {
+public class WebDAVSynchronizer extends SynchronizerManager{
 
 	private String remoteIndexPath;
 	private String remotePath;
     private String username;
     private String password;
-	private Context context;
+	
 	private Resources r;
-	public WebDAVSynchronizer(Context parentContext) {
-		this.context = parentContext;
+	public WebDAVSynchronizer(Context context) {
+        super(context);
 		this.r = context.getResources();
 		SharedPreferences sharedPreferences = PreferenceManager
-				.getDefaultSharedPreferences(parentContext);
+				.getDefaultSharedPreferences(context);
 
 		this.remoteIndexPath = sharedPreferences.getString("webUrl", "");
 		this.remotePath = getRootUrl();
 
 		this.username = sharedPreferences.getString("webUser", "");
 		this.password = sharedPreferences.getString("webPass", "");
-        this.handleTrustRelationship(parentContext);
+        this.handleTrustRelationship(context);
 	}
 
     public String testConnection(String url, String user, String pass) {

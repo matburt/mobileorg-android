@@ -1,5 +1,6 @@
 package com.matburt.mobileorg2.OrgData;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.DatabaseUtils.InsertHelper;
 import android.database.sqlite.SQLiteDatabase;
@@ -91,6 +92,20 @@ public class OrgDatabase extends SQLiteOpenHelper {
                 + "position integer,"
 				+ "scheduled integer default -1,"
 				+ "deadline integer default -1)");
+
+		ContentValues values = new ContentValues();
+		values.put("_id", "0");
+		values.put("todogroup", "0");
+		values.put("name", "TODO");
+		values.put("isdone","0");
+		db.insert("todos", null, values);
+
+		values.put("_id", "1");
+		values.put("todogroup", "0");
+		values.put("name", "DONE");
+		values.put("isdone","1");
+		db.insert("todos", null, values);
+
 	}
 
 	@Override
