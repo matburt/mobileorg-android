@@ -19,3 +19,9 @@ The app is under heavy refactoring and is not out yet (a first release should be
 * Screenshots
 Here are a few screenshots of the current state of the app.
 
+[[https://github.com/wizmer/mobileorg-android/blob/master/picturesReadme/Main.png]]
+[[https://github.com/wizmer/mobileorg-android/blob/master/picturesReadme/Folded.png]]
+[[https://github.com/wizmer/mobileorg-android/blob/master/picturesReadme/ChildView.png]]
+[[https://github.com/wizmer/mobileorg-android/blob/master/picturesReadme/Expended.png]]
+[[https://github.com/wizmer/mobileorg-android/blob/master/picturesReadme/Todos.png]]
+
