@@ -275,7 +275,7 @@ public class OrgNodeDetailFragment extends Fragment {
 //                int id = (int)node.id;
 //                int parentId = (int)node.parentId;
 
-                ItemViewHolder item = (ItemViewHolder) viewHolder;
+                OrgNodeViewHolder item = (OrgNodeViewHolder) viewHolder;
                 createEditNodeFragment((int)item.node.id, -1, -1);
             }
 
@@ -288,7 +288,7 @@ public class OrgNodeDetailFragment extends Fragment {
     }
 
     public class SecondaryRecyclerViewAdapter
-            extends RecyclerView.Adapter<ItemViewHolder> {
+            extends RecyclerView.Adapter<OrgNodeViewHolder> {
 
         NavigableMap<Long, OrgNodeTree> items;
         private OrgNodeTree tree;
@@ -304,18 +304,17 @@ public class OrgNodeDetailFragment extends Fragment {
         }
 
         @Override
-        public ItemViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        public OrgNodeViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             View view = LayoutInflater.from(parent.getContext())
                     .inflate(R.layout.subnode_layout, parent, false);
-            return new ItemViewHolder(view);
+            return new OrgNodeViewHolder(view);
         }
 
         @Override
-        public void onBindViewHolder(final ItemViewHolder item, final int position) {
+        public void onBindViewHolder(final OrgNodeViewHolder item, final int position) {
             final OrgNodeTree tree = items.get((long)position);
-            item.node = tree.node;
 
-            boolean isSelected = (item.node == selectedNode);
+            boolean isSelected = (tree.node == selectedNode);
             item.setup(tree, isSelected, getContext());
 
             item.mView.setOnClickListener(new View.OnClickListener() {

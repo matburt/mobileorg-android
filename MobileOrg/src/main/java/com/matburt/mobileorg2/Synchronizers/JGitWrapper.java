@@ -23,6 +23,7 @@ import com.matburt.mobileorg2.util.OrgFileNotFoundException;
 import org.eclipse.jgit.api.CheckoutCommand;
 import org.eclipse.jgit.api.CloneCommand;
 import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.PullResult;
 import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.api.TransportConfigCallback;
 import org.eclipse.jgit.api.errors.CanceledException;
@@ -44,12 +45,14 @@ import org.eclipse.jgit.lib.ObjectReader;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.merge.MergeStrategy;
+import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.transport.JschConfigSessionFactory;
 import org.eclipse.jgit.transport.OpenSshConfig;
 import org.eclipse.jgit.transport.SshSessionFactory;
 import org.eclipse.jgit.transport.SshTransport;
 import org.eclipse.jgit.transport.TransferConfig;
 import org.eclipse.jgit.transport.Transport;
+import org.eclipse.jgit.transport.TransportHttp;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 import org.eclipse.jgit.util.FS;
 
@@ -58,6 +61,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.List;
 
 
@@ -83,22 +87,24 @@ public class JGitWrapper {
 
         @Override
         public void configure(Transport transport) {
-            SshTransport sshTransport = (SshTransport) transport;
-            sshTransport.setSshSessionFactory(new JschConfigSessionFactory(){
-                 @Override
-        protected void configure(OpenSshConfig.Host host, Session session) {
-            if (connection == ConnectionType.kSshPassword)
-                session.setPassword(AuthData.getInstance(context).getPassword());
-        }
+            try{
+                SshTransport sshTransport = (SshTransport) transport;
+                sshTransport.setSshSessionFactory(new JschConfigSessionFactory(){
+                    @Override
+                    protected void configure(OpenSshConfig.Host host, Session session) {
+                        if (connection == ConnectionType.kSshPassword)
+                            session.setPassword(AuthData.getInstance(context).getPassword());
+                    }
 
-        @Override
-        protected JSch createDefaultJSch(FS fs) throws JSchException {
-            JSch defaultJSch = super.createDefaultJSch(fs);
-            if (connection == ConnectionType.kSshPubKey)
-                defaultJSch.addIdentity(AuthData.getInstance(context).getPubFile());
-            return defaultJSch;
-        }
-            });
+                    @Override
+                    protected JSch createDefaultJSch(FS fs) throws JSchException {
+                        JSch defaultJSch = super.createDefaultJSch(fs);
+                        if (connection == ConnectionType.kSshPubKey)
+                            defaultJSch.addIdentity(AuthData.getInstance(context).getPubFile());
+                        return defaultJSch;
+                    }
+                });
+            } catch (ClassCastException ignored) { /* If connection if HTTP */ }
         }
     }
 
@@ -154,11 +160,26 @@ public class JGitWrapper {
 //                    .setMessage("Commit before pulling")
 //                    .call();
 
-            git
+            PullResult pullResult =
+                    git
                     .pull()
                     .setCredentialsProvider(new CredentialsProviderAllowHost(authData.getUser(), authData.getPassword()))
                     .setTransportConfigCallback(new CustomTransportConfigCallback(context))
                     .call();
+
+            Log.v("git","PullResult::isSuccessful : "+pullResult.isSuccessful());
+            Log.v("git","PullResult::getFetchResult : "+pullResult.getFetchResult().getMessages());
+            Log.v("git","PullResult::getMergeStatus : "+pullResult.getMergeResult().getMergeStatus().toString());
+            Status status = git.status().call();
+            Log.v("git","status changed: "+status.getChanged().toString());
+            Log.v("git","status modified : "+status.getModified().toString());
+            Log.v("git","status missing: "+status.getMissing().toString());
+            Log.v("git","status removed: "+status.getRemoved().toString());
+            Log.v("git","status untracked: "+status.getUntracked().toString());
+//            Iterator<RevCommit>refs =  git.log().call().iterator();
+//            while(refs.hasNext()){
+//                Log.v("git","rev : "+refs.next());
+//            }
             ObjectId head = repository.resolve("HEAD^{tree}");
 
             ObjectReader reader = repository.newObjectReader();
@@ -438,7 +459,7 @@ public class JGitWrapper {
                 System.out.println("Added: " + status.getAdded());
                 System.out.println("Changed: " + status.getChanged());
                 System.out.println("Conflicting: " + status.getConflicting());
-                                System.out.println("Missing: " + status.getMissing());
+                System.out.println("Missing: " + status.getMissing());
                 System.out.println("Modified: " + status.getModified());
                 System.out.println("Removed: " + status.getRemoved());
                 System.out.println("Untracked: " + status.getUntracked());

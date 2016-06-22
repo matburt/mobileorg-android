@@ -92,7 +92,11 @@ public class SSHSynchronizer extends SynchronizerManager {
 
     public SyncResult synchronize(){
         SyncResult pullResult = JGitWrapper.pull(context);
-        new JGitWrapper.PushGitRepoTask(context).execute();
+        Log.v("git", "changed : "+pullResult.changedFiles.toString());
+        Log.v("git", "new : "+pullResult.newFiles.toString());
+        Log.v("git", "deleted : "+pullResult.deletedFiles.toString());
+
+//        new JGitWrapper.PushGitRepoTask(context).execute();
         return pullResult;
     }
 

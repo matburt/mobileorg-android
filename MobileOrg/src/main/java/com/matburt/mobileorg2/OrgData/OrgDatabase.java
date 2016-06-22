@@ -6,6 +6,7 @@ import android.database.DatabaseUtils.InsertHelper;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
+import android.util.Log;
 
 import com.matburt.mobileorg2.OrgData.OrgContract.OrgData;
 
@@ -144,6 +145,8 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		if (addPayloadStatement == null)
 			addPayloadStatement = getWritableDatabase()
 					.compileStatement("UPDATE orgdata SET payload=?, scheduled=?, deadline=? WHERE _id=?");
+		Log.v("time","payload : "+payload);
+		Log.v("time","db time : "+timestamps.get(OrgNodeTimeDate.TYPE.Scheduled));
 
 		addPayloadStatement.bindString(1, payload);
 		addPayloadStatement.bindLong(2, timestamps.get(OrgNodeTimeDate.TYPE.Scheduled)!=null ? timestamps.get(OrgNodeTimeDate.TYPE.Scheduled): -1);

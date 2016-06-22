@@ -25,9 +25,6 @@ public class OrgNodePayload {
 
 		timestampPayloads = new HashMap<>();
 		set(payload);
-
-
-//		for(Timestamp timestamp: Timestamp.values()) timestampPayloads.put(timestamp, "");
 	}
 	
 	public void set(String payload) {

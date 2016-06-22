@@ -2,31 +2,19 @@ package com.matburt.mobileorg2;
 
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.res.TypedArray;
 import android.database.Cursor;
 import android.graphics.Canvas;
-import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.view.ActionMode;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
-import android.text.SpannableStringBuilder;
-import android.text.TextUtils;
-import android.text.style.ForegroundColorSpan;
-import android.text.style.StyleSpan;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -44,7 +32,14 @@ import com.matburt.mobileorg2.util.OrgNodeNotFoundException;
 import com.matburt.mobileorg2.util.PreferenceUtils;
 import com.matburt.mobileorg2.util.TodoDialog;
 
+import org.w3c.dom.Text;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashSet;
 import java.util.NavigableMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -60,15 +55,11 @@ public class AgendaFragment extends Fragment {
 
     private ContentResolver resolver;
 
-    private long nodeId;
-    private long lastEditedPosition;
-    private long idHlightedPosition;
-    private View highlightedView = null;
-
-
     RecyclerViewAdapter adapter;
     RecyclerView recyclerView;
-
+    ArrayList<OrgNode> nodesList;
+    ArrayList<String>  daysList;
+    ArrayList<PositionHelper> items;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -77,6 +68,20 @@ public class AgendaFragment extends Fragment {
     public AgendaFragment() {
     }
 
+    enum Type {
+        kNode,
+        kDate
+    };
+
+    class PositionHelper {
+        int position;
+        Type type;
+
+        PositionHelper(int position, Type type){
+            this.position = position;
+            this.type = type;
+        }
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -86,17 +91,29 @@ public class AgendaFragment extends Fragment {
         Log.v("scheduled","path : "+OrgContract.OrgData.CONTENT_URI);
         Cursor cursor = resolver.query(OrgContract.OrgData.CONTENT_URI,
                 OrgContract.OrgData.DEFAULT_COLUMNS,
-                "scheduled>0", null, null);
-//        ArrayList<OrgNode> list = OrgProviderUtils.orgDataCursorToArrayList(cursor);
-        cursor.moveToFirst();
-        while(cursor.moveToNext()){
-            Log.v("scheduled", "val : "+cursor.getInt(cursor.getColumnIndex("scheduled")));
-        }
-        cursor.close();
+                "scheduled>0", null, "scheduled");
+        nodesList = OrgProviderUtils.orgDataCursorToArrayList(cursor);
+        if(cursor!=null) cursor.close();
 
+        daysList = new ArrayList<>();
+        items = new ArrayList<>();
+        long prevDay = -1;
+        long day;
+        int nodeCursor = 0;
+        int dayCursor = 0;
+
+        for(OrgNode node : nodesList){
+            day = node.scheduled/(24*3600);
+
+            if(day != prevDay) {
+                daysList.add(SimpleDateFormat.getDateInstance().format(new Date(node.scheduled)));
+                items.add(new PositionHelper(dayCursor++, Type.kDate));
+                prevDay = day;
+            }
+            items.add(new PositionHelper(nodeCursor++, Type.kNode));
+        }
 
         adapter = new RecyclerViewAdapter();
-
     }
 
     @Override
@@ -111,36 +128,6 @@ public class AgendaFragment extends Fragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         recyclerView.setAdapter(adapter);
 
-        class SimpleItemTouchHelperCallback extends ItemTouchHelper.Callback {
-            private final RecyclerViewAdapter mAdapter;
-            public SimpleItemTouchHelperCallback(RecyclerViewAdapter adapter) {
-                mAdapter = adapter;
-            }
-
-            @Override
-            public int getMovementFlags(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder) {
-                int dragFlags = ItemTouchHelper.UP | ItemTouchHelper.DOWN;
-                int swipeFlags = ItemTouchHelper.START | ItemTouchHelper.END;
-                return makeMovementFlags(dragFlags, swipeFlags);
-            }
-
-
-            @Override
-            public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
-
-            }
-
-            @Override
-            public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder,
-                                  RecyclerView.ViewHolder target) {
-                return false;
-            }
-        };
-
-        SimpleItemTouchHelperCallback callback = new SimpleItemTouchHelperCallback(adapter);
-        ItemTouchHelper touchHelper = new ItemTouchHelper(callback);
-        touchHelper.attachToRecyclerView(recyclerView);
-
         return rootView;
     }
 
@@ -149,8 +136,27 @@ public class AgendaFragment extends Fragment {
         super.onResume();
     }
 
+
     public class RecyclerViewAdapter
-            extends RecyclerView.Adapter<RecyclerViewAdapter.ItemViewHolder> {
+            extends RecyclerView.Adapter<ItemViewHolder> {
+
+        /**
+         * The view holder for the date
+         */
+        private class DateViewHolder extends ItemViewHolder{
+            public DateViewHolder(View view) {
+                super(view);
+            }
+        }
+
+        /**
+         * The view holder for the node items
+         */
+        private class OrgItemViewHolder extends ItemViewHolder{
+            public OrgItemViewHolder(View view) {
+                super(view);
+            }
+        }
 
         public RecyclerViewAdapter() {
 
@@ -160,13 +166,65 @@ public class AgendaFragment extends Fragment {
 
         @Override
         public ItemViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            View view = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.agenda_recycler_item, parent, false);
-            return new ItemViewHolder(view);
+            View view;
+
+
+            if(viewType == Type.kDate.ordinal()){
+                view = LayoutInflater.from(parent.getContext())
+                        .inflate(R.layout.days_view_holder, parent, false);
+                return new DateViewHolder(view);
+            } else {
+                view = LayoutInflater.from(parent.getContext())
+                        .inflate(R.layout.agenda_recycler_item, parent, false);
+                return new OrgItemViewHolder(view);
+            }
         }
 
         @Override
         public void onBindViewHolder(final ItemViewHolder holder, final int position) {
+            int type = getItemViewType(position);
+
+            if(type == Type.kDate.ordinal()) onBindDateHolder((DateViewHolder)holder, position);
+            else onBindOrgItemHolder((OrgItemViewHolder)holder, position);
+        }
+
+        private void onBindOrgItemHolder(final OrgItemViewHolder holder, int position){
+            final OrgNode node = nodesList.get(items.get(position).position);
+
+            TextView title = (TextView) holder.mView.findViewById(R.id.title);
+            title.setText(node.name);
+
+            TextView details = (TextView) holder.mView.findViewById(R.id.details);
+            details.setText(node.getPayload());
+
+            TextView content = (TextView) holder.mView.findViewById(R.id.date);
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(new Date(node.scheduled));
+
+
+            content.setText(SimpleDateFormat.getTimeInstance(DateFormat.SHORT).format(new Date(node.scheduled)));
+
+
+            holder.mView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+
+                }
+            });
+
+            holder.mView.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    return true;
+                }
+            });
+        }
+
+        private void onBindDateHolder(final DateViewHolder holder, int position){
+            final String date = daysList.get(items.get(position).position);
+
+            TextView title = (TextView) holder.mView.findViewById(R.id.outline_item_title);
+            title.setText(date);
 
             holder.mView.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -185,20 +243,15 @@ public class AgendaFragment extends Fragment {
 
         @Override
         public int getItemCount() {
-            return 0;
+            return items.size();
         }
 
-        public class ItemViewHolder extends RecyclerView.ViewHolder {
-            public final View mView;
-
-            public long level;
-
-            public ItemViewHolder(View view) {
-                super(view);
-                mView = view;
-
-            }
+        @Override
+        public int getItemViewType(int position){
+           return items.get(position).type.ordinal();
         }
+
+
     }
 
     public class DividerItemDecoration extends RecyclerView.ItemDecoration {

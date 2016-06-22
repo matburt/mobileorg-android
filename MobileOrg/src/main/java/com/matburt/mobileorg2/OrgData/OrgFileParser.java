@@ -231,8 +231,8 @@ public class OrgFileParser {
 
 		int numstars = numberOfStars(line);
 		if (numstars > 0) {
-			timestamps.clear();
 			db.fastInsertNodePayload(parseStack.getCurrentNodeId(), this.payload.toString(), timestamps);
+			timestamps.clear();
 			this.payload = new StringBuilder();
 			parseHeading(line, numstars);
 		} else {
@@ -277,7 +277,6 @@ public class OrgFileParser {
 	 * Return null if no timestamp found.
 	 */
 	private void parseTimestamps(String line){
-		timestamps.clear();
 		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
 
 		for(OrgNodeTimeDate.TYPE type: OrgNodeTimeDate.TYPE.values()){
@@ -285,8 +284,10 @@ public class OrgFileParser {
 					.matcher(line);
 
             String str = OrgNodePayload.getDateFromTimestampMatcher(matcher);
+			Log.v("time",str);
 			if(str.equals("")) continue;
 			try {
+				Log.v("time","real : "+format.parse(str).getTime());
 				timestamps.put(type, format.parse(str).getTime());
 			} catch (ParseException e) {
 				e.printStackTrace();

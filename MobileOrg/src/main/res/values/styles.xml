@@ -7,6 +7,7 @@
         <item name="colorAccent">@color/colorAccent</item>
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
+        <item name="android:windowBackground">@color/background</item>
     </style>
 
     <style name="AppTheme.NoActionBar">
@@ -24,15 +25,13 @@
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
-
-    <style name="EditBorders">
-        <item name="android:background">@drawable/border</item>
-        <item name="android:padding">5dp</item>
-        <item name="android:layout_margin">5dp</item>
-    </style>
-
     <style name="AppTheme.NoActionBar.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
 
     <style name="AppTheme.NoActionBar.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
+    <style name="AppTheme.CardView" parent="Theme.AppCompat">
+        <item name="android:background">@color/background</item>
+    </style>
+
 
 </resources>

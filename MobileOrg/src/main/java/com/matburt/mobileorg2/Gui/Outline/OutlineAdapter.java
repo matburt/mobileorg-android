@@ -127,7 +127,7 @@ public class OutlineAdapter extends RecyclerView.Adapter<OutlineAdapter.OutlineI
 
     @Override
     public void onBindViewHolder(final OutlineItem holder, final int position) {
-        int positionInItems = position - numExtraItems;
+        final int positionInItems = position - numExtraItems;
         OrgFile file = null;
         try{
             file = items.get(positionInItems);
@@ -153,8 +153,9 @@ public class OutlineAdapter extends RecyclerView.Adapter<OutlineAdapter.OutlineI
             comment.setVisibility(View.GONE);
         }
 
-        holder.mView.setActivated(selectedItems.get(positionInItems, false));
+        holder.mView.setActivated(selectedItems.get(position, false));
 
+        Log.v("hightlight","onbind : "+title+" -> "+selectedItems.get(position, false));
 		final long itemId = getItemId(position);
 		holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -247,6 +248,7 @@ public class OutlineAdapter extends RecyclerView.Adapter<OutlineAdapter.OutlineI
         else {
             selectedItems.put(pos, true);
         }
+
         notifyItemChanged(pos);
         int countAfter = getSelectedItemCount();
         if(countBefore == 0 && countAfter > 0)
