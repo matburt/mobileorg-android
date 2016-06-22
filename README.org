@@ -23,8 +23,11 @@ Here are a few screenshots of the current state of the app.
 [[https://github.com/wizmer/mobileorg-android/blob/master/picturesReadme/MainResized.png]]
 
 ** File view with 3 states: folded, children only and expanded
+*** Folded
 [[https://github.com/wizmer/mobileorg-android/blob/master/picturesReadme/FoldedViewResized.png]]
+*** Children only
 [[https://github.com/wizmer/mobileorg-android/blob/master/picturesReadme/ChildViewResized.png]]
+*** Expended
 [[https://github.com/wizmer/mobileorg-android/blob/master/picturesReadme/ExpendedResized.png]]
 
 ** The TODO view
