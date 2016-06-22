@@ -3,7 +3,7 @@ A new implementation of [[https://github.com/matburt/mobileorg-android][MobileOr
 
 The app is under heavy refactoring and is not out yet (a first release should be out in the following weeks).
 
-* Current features
+** Current features
 
 - Modern design using Android new Material Design guidelines
 - Automatic Git synchronization (via SSH and HTTP). Access to the raw files in case of conflict to solve.
@@ -11,31 +11,31 @@ The app is under heavy refactoring and is not out yet (a first release should be
 - Agenda view and Todo list view generated from the org files.
 - Folding of items and sub-items.
 
-* Upcoming features
+** Upcoming features
 - Item management: reordering of items by swiping them
 - Share files button
 - Agenda notifications
 
-* Developpers
-** Install Android 6 API 24 if you haven't already:
+** Developpers
+*** Install Android 6 API 24 if you haven't already:
 Go to File -> Settings and search for "Android SDK", check "Android6.0 (Marshmallow)" and click apply.
-** Import the project from github
+*** Import the project from github
 File -> New -> Project from version control -> Github
 
-* Screenshots
+** Screenshots
 Here are a few screenshots of the current state of the app.
 
-** Main menu
+*** Main menu
 [[https://github.com/wizmer/mobileorg-android/blob/master/picturesReadme/MainResized.png]]
 
-** File view with 3 states: folded, children only and expanded
-*** Folded
+*** File view with 3 states: folded, children only and expanded
+**** Folded
 [[https://github.com/wizmer/mobileorg-android/blob/master/picturesReadme/FoldedViewResized.png]]
-*** Children only
+**** Children only
 [[https://github.com/wizmer/mobileorg-android/blob/master/picturesReadme/ChildViewResized.png]]
-*** Expended
+**** Expended
 [[https://github.com/wizmer/mobileorg-android/blob/master/picturesReadme/ExpendedResized.png]]
 
-** The TODO view
+*** The TODO view
 [[https://github.com/wizmer/mobileorg-android/blob/master/picturesReadme/TodosResized.png]]
 
