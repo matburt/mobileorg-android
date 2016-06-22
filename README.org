@@ -21,7 +21,7 @@ Here are a few screenshots of the current state of the app.
 
 [[https://github.com/wizmer/mobileorg-android/blob/master/picturesReadme/MainResized.png]]
 [[https://github.com/wizmer/mobileorg-android/blob/master/picturesReadme/FoldedViewResized.png]]
-[[https://github.com/wizmer/mobileorg-android/blob/master/picturesReadme/ChildView.png]]
-[[https://github.com/wizmer/mobileorg-android/blob/master/picturesReadme/Expended.png]]
-[[https://github.com/wizmer/mobileorg-android/blob/master/picturesReadme/Todos.png]]
+[[https://github.com/wizmer/mobileorg-android/blob/master/picturesReadme/ChildViewResized.png]]
+[[https://github.com/wizmer/mobileorg-android/blob/master/picturesReadme/ExpendedResized.png]]
+[[https://github.com/wizmer/mobileorg-android/blob/master/picturesReadme/TodosResized.png]]
 
