@@ -19,9 +19,14 @@ The app is under heavy refactoring and is not out yet (a first release should be
 * Screenshots
 Here are a few screenshots of the current state of the app.
 
+** Main menu
 [[https://github.com/wizmer/mobileorg-android/blob/master/picturesReadme/MainResized.png]]
+
+** File view with 3 states: folded, children only and expanded
 [[https://github.com/wizmer/mobileorg-android/blob/master/picturesReadme/FoldedViewResized.png]]
 [[https://github.com/wizmer/mobileorg-android/blob/master/picturesReadme/ChildViewResized.png]]
 [[https://github.com/wizmer/mobileorg-android/blob/master/picturesReadme/ExpendedResized.png]]
+
+** The TODO view
 [[https://github.com/wizmer/mobileorg-android/blob/master/picturesReadme/TodosResized.png]]
 
