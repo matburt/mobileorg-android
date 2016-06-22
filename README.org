@@ -17,10 +17,7 @@ The app is under heavy refactoring and is not out yet (a first release should be
 - Agenda notifications
 
 ** Developpers
-*** Install Android 6 API 24 if you haven't already:
-Go to File -> Settings and search for "Android SDK", check "Android6.0 (Marshmallow)" and click apply.
-*** Import the project from github
-File -> New -> Project from version control -> Github
+See [[https://github.com/wizmer/mobileorg-android/wiki/Android-Studio-setup][Android-Studio setup]] if you want to build the project.
 
 ** Screenshots
 Here are a few screenshots of the current state of the app.
