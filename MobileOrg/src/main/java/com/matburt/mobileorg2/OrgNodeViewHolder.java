@@ -80,7 +80,7 @@ public class OrgNodeViewHolder extends ItemViewHolder {
 
     public void setupTitle(String name, SpannableStringBuilder titleSpan) {
         titleView.setGravity(Gravity.LEFT);
-        titleView.setTextSize(Style.titleFontSize[Math.min((int)getLevel()-1, Style.nTitleColors)]);
+        titleView.setTextSize(Style.titleFontSize[Math.min((int)getLevel()-1, Style.nTitleColors-1)]);
         if(getLevel()==1) titleView.setTypeface(null, Typeface.BOLD);
         else titleView.setTypeface(null, Typeface.NORMAL);
 
