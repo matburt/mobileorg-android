@@ -1,4 +1,4 @@
-MobileOrg 2.0
+* MobileOrg 2.0
 A new implementation of [[https://github.com/matburt/mobileorg-android][MobileOrg]], an org mode parser for Android.
 
 The app is under heavy refactoring and is not out yet (a first release should be out in the following weeks).
