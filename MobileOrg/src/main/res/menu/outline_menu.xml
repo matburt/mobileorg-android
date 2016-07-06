@@ -3,18 +3,23 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/menu_agenda"
-        android:icon="@drawable/ic_menu_agenda"
-        android:title="@string/menu_agenda"/>
+        android:id="@+id/menu_search"
+        android:icon="@drawable/ic_menu_search"
+        android:title="@string/menu_search"
+        app:actionViewClass="android.support.v7.widget.SearchView"
+        app:showAsAction="collapseActionView|ifRoom" />
+
     <item
         android:id="@+id/menu_sync"
         android:icon="@drawable/ic_menu_refresh"
-        app:showAsAction="ifRoom"
-        android:title="@string/menu_sync"/>
+        android:title="@string/menu_sync"
+        app:showAsAction="ifRoom" />
+
     <item
-        android:id="@+id/menu_search"
-        android:icon="@drawable/ic_menu_search"
-        android:title="@string/menu_search"/>
+        android:id="@+id/menu_agenda"
+        android:icon="@drawable/ic_menu_agenda"
+        android:title="@string/menu_agenda"/>
+
     <item
         android:id="@+id/menu_help"
         android:icon="@drawable/ic_menu_help"

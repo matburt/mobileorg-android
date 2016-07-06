@@ -10,7 +10,6 @@ import android.util.Log;
 import com.matburt.mobileorg2.OrgData.OrgContract.Files;
 import com.matburt.mobileorg2.OrgData.OrgContract.OrgData;
 import com.matburt.mobileorg2.Synchronizers.Synchronizer;
-import com.matburt.mobileorg2.Synchronizers.SynchronizerManager;
 import com.matburt.mobileorg2.util.FileUtils;
 import com.matburt.mobileorg2.util.OrgFileNotFoundException;
 import com.matburt.mobileorg2.util.OrgNodeNotFoundException;
@@ -33,11 +32,6 @@ public class OrgFile {
 	public boolean includeInOutline = true;
 	public long id = -1;
 	public long nodeId = -1;
-
-	public enum State {
-		kOK,
-		kConflict
-	}
 
 	public OrgFile() {
 	}
@@ -79,7 +73,6 @@ public class OrgFile {
 		cursor.close();
 	}
 
-
 	public void set(Cursor cursor) throws OrgFileNotFoundException {
 		if (cursor != null && cursor.getCount() > 0) {
             if (cursor.isBeforeFirst() || cursor.isAfterLast())
@@ -97,7 +90,6 @@ public class OrgFile {
 					"Failed to create OrgFile from cursor");
         }
     }
-
 
 	public boolean doesFileExist(ContentResolver resolver) {
 		Cursor cursor = resolver.query(Files.buildFilenameUri(filename),
@@ -131,10 +123,7 @@ public class OrgFile {
 		ContentValues values = new ContentValues();
 		values.put(OrgData.FILE_ID, id);
 		resolver.update(OrgData.buildIdUri(nodeId), values, null, null);
-        updateFile("", context);
-        SynchronizerManager.getInstance().addFile(filename);
     }
-
 
 	/*
 	Insert a new file node in the database
@@ -198,14 +187,15 @@ public class OrgFile {
 	 * 3) Remove file from disk
      *
 	 * @param context
+	 * @param fromDisk: whether or not the file has to be deleted from disk
 	 * @return the number of OrgData nodes removed
      */
-    public long removeFile(Context context) {
-        ContentResolver resolver = context.getContentResolver();
+	public long removeFile(Context context, boolean fromDisk) {
+		ContentResolver resolver = context.getContentResolver();
 
 		long entriesRemoved = removeFileOrgDataNodes(resolver);
 		removeFileNode(resolver);
-        new File(getFilePath(context)).delete();
+		if (fromDisk) new File(getFilePath(context)).delete();
 
         return entriesRemoved;
 	}
@@ -248,8 +238,8 @@ public class OrgFile {
      * @return the absolute filename
      */
     public String getFilePath(Context context) {
-        return SynchronizerManager.getInstance().getAbsoluteFilesDir(context) + "/" + filename;
-    }
+		return Synchronizer.getInstance().getAbsoluteFilesDir(context) + "/" + filename;
+	}
 
 	/**
 	 * Query the state of the file (conflicted or not)
@@ -258,7 +248,6 @@ public class OrgFile {
 	public State getState(){
 		return comment.equals("conflict") ? State.kConflict : State.kOK;
 	}
-
 
 	public String toString(ContentResolver resolver) {
 		String result = "";
@@ -276,6 +265,12 @@ public class OrgFile {
 			e.printStackTrace();
 		}
 		return result;
+	}
+
+
+	public enum State {
+		kOK,
+		kConflict
 	}
 }
 

@@ -3,8 +3,6 @@ package com.matburt.mobileorg2.Synchronizers;
 import android.content.Context;
 import android.preference.PreferenceManager;
 
-import com.matburt.mobileorg2.Gui.SynchronizerNotificationCompat;
-
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -13,9 +11,8 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.HashSet;
 
-public class SDCardSynchronizer extends SynchronizerManager{	
+public class SDCardSynchronizer extends Synchronizer {
 
 	private String remoteIndexPath;
 	private String remotePath;

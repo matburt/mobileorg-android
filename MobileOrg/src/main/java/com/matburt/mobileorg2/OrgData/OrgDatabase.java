@@ -15,7 +15,7 @@ import java.util.HashMap;
 public class OrgDatabase extends SQLiteOpenHelper {
 	private static final String DATABASE_NAME = "MobileOrg.db";
 	private static final int DATABASE_VERSION = 5;
-
+	private static OrgDatabase mInstance = null;
 	private int orgdata_nameColumn;
 	private int orgdata_todoColumn;
 	private int orgdata_tagsColumn;
@@ -25,29 +25,27 @@ public class OrgDatabase extends SQLiteOpenHelper {
 	private int orgdata_fileidColumn;
     private int orgdata_levelColumn;
     private int orgdata_positionColumn;
-
 	private InsertHelper orgdataInsertHelper;
 	private SQLiteStatement addPayloadStatement;
 	private SQLiteStatement addTimestampsStatement;
 
-	public interface Tables {
-		String EDITS = "edits";
-		String FILES = "files";
-		String PRIORITIES = "priorities";
-		String TAGS = "tags";
-		String TODOS = "todos";
-		String ORGDATA = "orgdata";
-	}
-
-	private static OrgDatabase mInstance = null;
-
-	public static OrgDatabase getInstance(Context context){
-		if(mInstance == null) mInstance = new OrgDatabase(context);
-		return mInstance;
-	}
-
 	private OrgDatabase(Context context) {
 		super(context, DATABASE_NAME, null, DATABASE_VERSION);
+	}
+
+	/**
+	 * Open the database at startup
+	 *
+	 * @param context
+	 */
+	static public void startDB(Context context) {
+		Log.v("trace", "db started");
+		mInstance = new OrgDatabase(context);
+		Log.v("trace", "instance : " + mInstance);
+	}
+
+	public static OrgDatabase getInstance(){
+		return mInstance;
 	}
 
 	@Override
@@ -155,7 +153,6 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		addPayloadStatement.execute();
 	}
 
-
 	private void prepareOrgdataInsert() {
 		if(this.orgdataInsertHelper == null) {
 			this.orgdataInsertHelper = new InsertHelper(getWritableDatabase(), Tables.ORGDATA);
@@ -179,5 +176,14 @@ public class OrgDatabase extends SQLiteOpenHelper {
 	public void endTransaction() {
 		getWritableDatabase().setTransactionSuccessful();
 		getWritableDatabase().endTransaction();
+	}
+
+	public interface Tables {
+		String EDITS = "edits";
+		String FILES = "files";
+		String PRIORITIES = "priorities";
+		String TAGS = "tags";
+		String TODOS = "todos";
+		String ORGDATA = "orgdata";
 	}
 }

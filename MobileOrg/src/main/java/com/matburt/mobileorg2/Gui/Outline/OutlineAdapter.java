@@ -283,9 +283,9 @@ public class OutlineAdapter extends RecyclerView.Adapter<OutlineAdapter.OutlineI
         for(Integer num: selectedItems){
             num -= numExtraItems;
             OrgFile file = items.get(num);
-            file.removeFile(activity);
+            file.removeFile(activity, false);
         }
-        ((OrgNodeListActivity) activity).runSynchronize(null);
+        ((OrgNodeListActivity) activity).runSynchronize();
         refresh();
         actionMode.finish();
     }

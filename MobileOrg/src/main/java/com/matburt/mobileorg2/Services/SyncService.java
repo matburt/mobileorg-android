@@ -8,20 +8,10 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
+import android.util.Log;
 
-import com.matburt.mobileorg2.Gui.SynchronizerNotification;
-import com.matburt.mobileorg2.Gui.SynchronizerNotificationCompat;
 import com.matburt.mobileorg2.OrgData.MobileOrgApplication;
-import com.matburt.mobileorg2.OrgData.OrgDatabase;
-import com.matburt.mobileorg2.OrgData.OrgFileParser;
-import com.matburt.mobileorg2.Synchronizers.DropboxSynchronizer;
-import com.matburt.mobileorg2.Synchronizers.NullSynchronizer;
-import com.matburt.mobileorg2.Synchronizers.SDCardSynchronizer;
-import com.matburt.mobileorg2.Synchronizers.SSHSynchronizer;
 import com.matburt.mobileorg2.Synchronizers.Synchronizer;
-import com.matburt.mobileorg2.Synchronizers.SynchronizerManager;
-import com.matburt.mobileorg2.Synchronizers.UbuntuOneSynchronizer;
-import com.matburt.mobileorg2.Synchronizers.WebDAVSynchronizer;
 
 import java.util.HashSet;
 
@@ -60,6 +50,8 @@ public class SyncService extends Service implements
 		this.appSettings.registerOnSharedPreferenceChangeListener(this);
 		this.appInst = (MobileOrgApplication) this.getApplication();
 		this.alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+
+		Log.v("trace", "sync service");
 	}
 
 	@Override
@@ -83,35 +75,17 @@ public class SyncService extends Service implements
 		return 0;
 	}
 
-	public void startSynchronizer() {
 
-		String syncSource = appSettings.getString("syncSource", "");
-		Context c = getApplicationContext();
-
-		if (syncSource.equals("webdav"))
-			SynchronizerManager.setInstance(new WebDAVSynchronizer(c));
-		else if (syncSource.equals("sdcard"))
-			SynchronizerManager.setInstance( new SDCardSynchronizer(c));
-		else if (syncSource.equals("dropbox"))
-			SynchronizerManager.setInstance( new DropboxSynchronizer(c));
-		else if (syncSource.equals("ubuntu"))
-			SynchronizerManager.setInstance( new UbuntuOneSynchronizer(c));
-		else if (syncSource.equals("scp"))
-			SynchronizerManager.setInstance( new SSHSynchronizer(c));
-		else
-			SynchronizerManager.setInstance(new NullSynchronizer(c));
-	}
 
 	private void runSynchronizer() {
 		unsetAlarm();
-		startSynchronizer();
-		final OrgDatabase db = OrgDatabase.getInstance(this);
-		final OrgFileParser parser = new OrgFileParser(db, this);
+		final Synchronizer synchronizer = Synchronizer.getInstance();
+
 		final boolean calendarEnabled = appSettings.getBoolean("calendarEnabled", false);
 
 		Thread syncThread = new Thread() {
 			public void run() {
-				HashSet<String> changedFiles = SynchronizerManager.getInstance().runSynchronizer(parser);
+				HashSet<String> changedFiles = synchronizer.runSynchronizer();
 				String[] files = changedFiles.toArray(new String[changedFiles.size()]);
 				if(calendarEnabled) {
 					Intent calIntent = new Intent(getBaseContext(), CalendarSyncService.class);
@@ -119,7 +93,7 @@ public class SyncService extends Service implements
 					calIntent.putExtra(CalendarSyncService.FILELIST, files);
 					getBaseContext().startService(calIntent);
 				}
-				SynchronizerManager.getInstance().postSynchronize();
+				Synchronizer.getInstance().postSynchronize();
 				syncRunning = false;
 				setAlarm();
 			}

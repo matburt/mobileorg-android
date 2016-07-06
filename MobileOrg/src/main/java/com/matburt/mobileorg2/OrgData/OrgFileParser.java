@@ -8,7 +8,6 @@ import android.util.Log;
 
 import com.matburt.mobileorg2.Gui.FileDecryptionActivity;
 import com.matburt.mobileorg2.util.FileUtils;
-import com.matburt.mobileorg2.util.OrgFileNotFoundException;
 import com.matburt.mobileorg2.util.PreferenceUtils;
 
 import java.io.BufferedReader;
@@ -31,6 +30,7 @@ public class OrgFileParser {
 	private static final Pattern getPriorities = Pattern
 			.compile("#\\+ALLPRIORITIES:([^\\n]+)");
 	private static final Pattern getTags = Pattern.compile("#\\+TAGS:([^\\n]+)");
+	static private OrgFileParser mInstance;
 	Context context;
 	private ContentResolver resolver;
     private OrgDatabase db;
@@ -42,11 +42,19 @@ public class OrgFileParser {
     private HashMap<Integer, Integer> position;
 	private HashMap<OrgNodeTimeDate.TYPE, Long> timestamps;
 
-	public OrgFileParser(OrgDatabase db, Context context) {
-		this.db = db;
+	private OrgFileParser(Context context) {
+		this.db = OrgDatabase.getInstance();
 		this.context = context;
 		this.resolver = context.getContentResolver();
 		timestamps = new HashMap<>();
+	}
+
+	static public OrgFileParser getInstance() {
+		return mInstance;
+	}
+
+	static public void startParser(Context context) {
+		mInstance = new OrgFileParser(context);
 	}
 
 	private static int numberOfStars(String thisLine) {
@@ -169,24 +177,23 @@ public class OrgFileParser {
 	 *
 	 * @param orgFile
 	 * @param breader
-	 * @param parser
 	 * @param context
 	 */
-	public static void parseFile(OrgFile orgFile, BufferedReader breader, OrgFileParser parser, Context context) {
-		ContentResolver resolver = context.getContentResolver();
-		try {
-			new OrgFile(orgFile.filename, resolver).removeFile(context);
-		} catch (OrgFileNotFoundException e) { /* file did not exist */ }
+	public static void parseFile(OrgFile orgFile, BufferedReader breader, Context context) {
+//		ContentResolver resolver = context.getContentResolver();
+//		try {
+//			new OrgFile(orgFile.filename, resolver).removeFile(context);
+//		} catch (OrgFileNotFoundException e) { /* file did not exist */ }
 
 		if (orgFile.isEncrypted())
 			decryptAndParseFile(orgFile, breader, context);
 		else {
-			parser.parse(orgFile, breader, context);
+			OrgFileParser.getInstance().parse(orgFile, breader, context);
 		}
 	}
 
 	private void init(OrgFile orgFile) {
-		orgFile.removeFile(context);
+		orgFile.removeFile(context, false);
 		orgFile.addFile(context);
 		this.orgFile = orgFile;
 

@@ -10,7 +10,6 @@ import android.util.Base64;
 import android.util.Log;
 
 import com.matburt.mobileorg2.Gui.CertificateConflictActivity;
-import com.matburt.mobileorg2.Gui.SynchronizerNotificationCompat;
 import com.matburt.mobileorg2.R;
 import com.matburt.mobileorg2.util.FileUtils;
 import com.matburt.mobileorg2.util.OrgUtils;
@@ -28,7 +27,6 @@ import java.net.URL;
 import java.security.SecureRandom;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.HashSet;
 import java.util.regex.Pattern;
 
 import javax.net.ssl.HostnameVerifier;
@@ -38,7 +36,7 @@ import javax.net.ssl.SSLHandshakeException;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.X509TrustManager;
 
-public class WebDAVSynchronizer extends SynchronizerManager{
+public class WebDAVSynchronizer extends Synchronizer {
 
 	private String remoteIndexPath;
 	private String remotePath;

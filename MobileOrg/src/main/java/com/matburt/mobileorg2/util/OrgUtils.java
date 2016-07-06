@@ -15,13 +15,12 @@ import android.widget.Spinner;
 import com.matburt.mobileorg2.OrgData.OrgFile;
 import com.matburt.mobileorg2.OrgData.OrgNode;
 import com.matburt.mobileorg2.R;
-import com.matburt.mobileorg2.Synchronizers.SynchronizerManager;
+import com.matburt.mobileorg2.Synchronizers.Synchronizer;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
@@ -101,20 +100,20 @@ public class OrgUtils {
 	}
 
 	public static void announceSyncDone(Context context) {
-		Intent intent = new Intent(SynchronizerManager.SYNC_UPDATE);
-		intent.putExtra(SynchronizerManager.SYNC_DONE, true);
+		Intent intent = new Intent(Synchronizer.SYNC_UPDATE);
+		intent.putExtra(Synchronizer.SYNC_DONE, true);
 		context.sendBroadcast(intent);
 	}
 
 	public static void announceSyncStart(Context context) {
-		Intent intent = new Intent(SynchronizerManager.SYNC_UPDATE);
-		intent.putExtra(SynchronizerManager.SYNC_START, true);
+		Intent intent = new Intent(Synchronizer.SYNC_UPDATE);
+		intent.putExtra(Synchronizer.SYNC_START, true);
 		context.sendBroadcast(intent);
 	}
 
 	public static void announceSyncUpdateProgress(int progress, Context context) {
-		Intent intent = new Intent(SynchronizerManager.SYNC_UPDATE);
-		intent.putExtra(SynchronizerManager.SYNC_PROGRESS_UPDATE, progress);
+		Intent intent = new Intent(Synchronizer.SYNC_UPDATE);
+		intent.putExtra(Synchronizer.SYNC_PROGRESS_UPDATE, progress);
 		context.sendBroadcast(intent);
 	}
 
@@ -254,14 +253,6 @@ public class OrgUtils {
 					|| OrgUtils.isMobileOnline(context);
 	}
 
-	public static class SortIgnoreCase implements Comparator<Object> {
-		public int compare(Object o1, Object o2) {
-			String s1 = (String) o1;
-			String s2 = (String) o2;
-			return s1.toLowerCase().compareTo(s2.toLowerCase());
-		}
-	}
-
 	/**
 	 * Read content of file on disk
 	 * @param filename
@@ -293,6 +284,14 @@ public class OrgUtils {
 		}
 		catch (IOException e) {
 			Log.e("Exception", "File write failed: " + e.toString());
+		}
+	}
+
+	public static class SortIgnoreCase implements Comparator<Object> {
+		public int compare(Object o1, Object o2) {
+			String s1 = (String) o1;
+			String s2 = (String) o2;
+			return s1.toLowerCase().compareTo(s2.toLowerCase());
 		}
 	}
 }

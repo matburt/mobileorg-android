@@ -13,9 +13,6 @@
         android:icon="@drawable/icon"
         android:label="MobileOrg2"
         android:theme="@style/AppTheme.NoActionBar">
-        <meta-data
-            android:name="android.app.default_searchable"
-            android:value=".Gui.SearchActivity" />
 
         <receiver
             android:name=".Gui.Widget.MobileOrgWidget"
@@ -137,6 +134,19 @@
             android:label="@string/title_activity_scrolling"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".Gui.Outline.ConflictResolverActivity"></activity>
+
+        <activity android:name=".Gui.SearchActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.SEARCH" />
+            </intent-filter>
+            <meta-data
+                android:name="android.app.searchable"
+                android:resource="@xml/searchable" />
+        </activity>
+
+        <meta-data
+            android:name="android.app.default_searchable"
+            android:value=".Gui.SearchActivity" />
     </application>
 
 </manifest>

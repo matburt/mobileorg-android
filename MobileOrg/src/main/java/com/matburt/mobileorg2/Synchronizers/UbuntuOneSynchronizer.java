@@ -7,7 +7,6 @@ import android.os.Build;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
-import com.matburt.mobileorg2.Gui.SynchronizerNotificationCompat;
 import com.matburt.mobileorg2.util.OrgUtils;
 
 import org.apache.http.HttpEntity;
@@ -36,13 +35,12 @@ import java.net.URI;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.HashSet;
 
 import oauth.signpost.commonshttp.CommonsHttpOAuthConsumer;
 import oauth.signpost.exception.OAuthException;
 import oauth.signpost.signature.HmacSha1MessageSigner;
 
-public class UbuntuOneSynchronizer extends SynchronizerManager{
+public class UbuntuOneSynchronizer extends Synchronizer {
 
 private static final String BASE_TOKEN_NAME = "Ubuntu One @ MobileOrg:";
 	private static final String CONSUMER_KEY = "consumer_key";

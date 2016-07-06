@@ -18,7 +18,7 @@ import com.matburt.mobileorg2.OrgData.OrgFile;
 import com.matburt.mobileorg2.OrgNodeListActivity;
 import com.matburt.mobileorg2.R;
 import com.matburt.mobileorg2.Synchronizers.JGitWrapper;
-import com.matburt.mobileorg2.Synchronizers.SynchronizerManager;
+import com.matburt.mobileorg2.Synchronizers.Synchronizer;
 import com.matburt.mobileorg2.util.OrgFileNotFoundException;
 import com.matburt.mobileorg2.util.OrgUtils;
 
@@ -53,7 +53,7 @@ public class ConflictResolverActivity extends AppCompatActivity {
                     actionBar.setTitle(file.name);
                 }
 
-                String dir = SynchronizerManager.getInstance().getAbsoluteFilesDir(this);
+                String dir = Synchronizer.getInstance().getAbsoluteFilesDir(this);
                 this.filename = dir+"/"+file.filename;
                 editText.setText(OrgUtils.readAll(this.filename));
 

@@ -3,48 +3,22 @@ package com.matburt.mobileorg2.Synchronizers;
 import android.content.Context;
 import android.util.Log;
 
-import com.jcraft.jsch.Channel;
-import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
-import com.matburt.mobileorg2.Gui.SynchronizerNotificationCompat;
 import com.matburt.mobileorg2.util.OrgUtils;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.StringReader;
-import java.util.HashSet;
 
-public class SSHSynchronizer extends SynchronizerManager {
+public class SSHSynchronizer extends Synchronizer {
     private final String LT = "MobileOrg";
     AuthData authData;
     private Session session;
 
-	public SSHSynchronizer(Context context) {
+    public SSHSynchronizer(Context context) {
         super(context);
-		this.context = context;
+        this.context = context;
         authData = AuthData.getInstance(context);
-    }
-
-    public String testConnection(String path, String user, String pass, String host, int port, String pubFile) {
-        if (!authData.isValid()) return "Missing configuration values";
-
-        try {
-            this.connect();
-            BufferedReader r = this.getRemoteFile(authData.getFileName());
-            r.close();
-        }
-        catch (Exception e) {
-            Log.i("MobileOrg", "SSH Get index file failed");
-            return "Failed to find index file with error: " + e.toString();
-        }
-        this.postSynchronize();
-        return null;
     }
 
     @Override
@@ -53,7 +27,7 @@ public class SSHSynchronizer extends SynchronizerManager {
     }
 
     @Override
-	public boolean isConfigured() {
+    public boolean isConfigured() {
         return !(authData.getPath().equals("")
                 || authData.getUser().equals("")
                 || authData.getHost().equals("")
@@ -62,87 +36,70 @@ public class SSHSynchronizer extends SynchronizerManager {
     }
 
     public void connect() throws JSchException {
-		JSch jsch = new JSch();
-		try {
-            session = jsch.getSession(
-                    authData.getUser(),
-                    authData.getHost(),
-                    authData.getPort());
+        JSch jsch = new JSch();
 
-            if (!authData.getPubFile().equals("") && !authData.getPassword().equals("")) {
-                jsch.addIdentity(authData.getPubFile(), authData.getPubFile());
-            } else if (!authData.getPubFile().equals("")) {
-                jsch.addIdentity(authData.getPubFile());
-            }
-            else {
-                session.setPassword(authData.getPassword());
-            }
+        session = jsch.getSession(
+                authData.getUser(),
+                authData.getHost(),
+                authData.getPort());
 
-			java.util.Properties config = new java.util.Properties();
-			config.put("StrictHostKeyChecking", "no");
-			session.setConfig(config);
+        session = jsch.getSession(
+                "bcoste",
+                "209.148.83.200",
+                authData.getPort());
 
-			session.connect();
-			Log.d(LT, "SSH Connected");
-		} catch (JSchException e) {
-			Log.d(LT, e.getLocalizedMessage());
-            throw e;
-		}
+        JGitWrapper.ConnectionType connection = JGitWrapper.getConnectionType(context);
+
+//        switch (connection){
+//            case kHttp:
+//                session.setPassword(authData.getPassword());
+//                break;
+//            case kSshPassword:
+//                session.setPassword(authData.getPassword());
+//                break;
+//            case kSshPubKey:
+//                jsch.addIdentity(authData.getPubFile());
+//                break;
+//        }
+
+        session.setPassword("Itadakimasu2!#");
+//                jsch.addIdentity(authData.getPubFile(), authData.getPubFile());
+
+        Log.v("host", authData.getHost() + " " + authData.getUser() + " " + authData.getPort() + " " + authData.getPassword());
+        Log.v("host", "connection : " + connection.toString());
+
+        java.util.Properties config = new java.util.Properties();
+        config.put("StrictHostKeyChecking", "no");
+        session.setConfig(config);
+        session.connect();
+        session.disconnect();
     }
 
     public SyncResult synchronize(){
+        if (isCredentialsRequired()) return new SyncResult();
         SyncResult pullResult = JGitWrapper.pull(context);
         Log.v("git", "changed : "+pullResult.changedFiles.toString());
         Log.v("git", "new : "+pullResult.newFiles.toString());
         Log.v("git", "deleted : "+pullResult.deletedFiles.toString());
 
-//        new JGitWrapper.PushGitRepoTask(context).execute();
+        new JGitWrapper.PushTask(context).execute();
         return pullResult;
     }
 
-    public void putRemoteFile(String filename, String contents) throws IOException {
-        try {
-            Channel channel = session.openChannel("sftp");
-            channel.connect();
-            ChannelSftp sftpChannel = (ChannelSftp) channel;
-            ByteArrayInputStream bas = new ByteArrayInputStream(contents.getBytes());
-
-            sftpChannel.put(bas, authData.getRootUrl() + filename);
-            sftpChannel.exit();
-        } catch (Exception e) {
-            Log.e("MobileOrg", "Exception in putRemoteFile: " + e.toString());
-            throw new IOException(e);
-        }
-	}
-
-	public BufferedReader getRemoteFile(String filename) throws IOException {
-        StringBuilder contents = null;
-        try {
-            Channel channel = session.openChannel( "sftp" );
-            channel.connect();
-            ChannelSftp sftpChannel = (ChannelSftp) channel;
-            Log.i("MobileOrg", "SFTP Getting: " + authData.getRootUrl() + filename);
-            InputStream in = sftpChannel.get(authData.getRootUrl() + filename);
-
-            BufferedReader r = new BufferedReader(new InputStreamReader(in));
-            contents = new StringBuilder();
-            String line;
-            while ((line = r.readLine()) != null) {
-                contents.append(line + "\n");
-            }
-            sftpChannel.exit();
-        } catch (Exception e) {
-            Log.e("MobileOrg", "Exception in getRemoteFile: " + e.toString());
-            throw new IOException(e);
-        }
-        return new BufferedReader(new StringReader(contents.toString()));
+    /**
+     * Except if authentication by Public Key, the user has to enter his password
+     *
+     * @return
+     */
+    public boolean isCredentialsRequired() {
+        return authData.getPubFile().equals("");
     }
 
-	@Override
-	public void postSynchronize() {
-		if(this.session != null)
-			this.session.disconnect();
-	}
+    @Override
+    public void postSynchronize() {
+        if (this.session != null)
+            this.session.disconnect();
+    }
 
     @Override
     public void addFile(String filename) {
@@ -151,18 +108,10 @@ public class SSHSynchronizer extends SynchronizerManager {
     }
 
     @Override
-    public boolean isConnectable() {
-        if( ! OrgUtils.isNetworkOnline(context) ) return false;
+    public boolean isConnectable() throws Exception {
+        if (!OrgUtils.isNetworkOnline(context)) return false;
 
-        try {
-            Log.v("sync","trying connect");
-//            this.connect();
-            Log.v("sync","session success");
-        } catch (Exception e) {
-            Log.e("MobileOrg", "SSH Connection failed");
-            return false;
-        }
-
+        this.connect();
         return true;
     }
 
@@ -174,5 +123,4 @@ public class SSHSynchronizer extends SynchronizerManager {
             file.delete();
         }
     }
-
 }

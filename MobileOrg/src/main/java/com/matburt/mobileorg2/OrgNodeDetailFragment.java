@@ -126,7 +126,7 @@ public class OrgNodeDetailFragment extends Fragment {
 
                 Log.v("todo", "query : " + todoQuery);
 
-                Cursor cursor = OrgDatabase.getInstance(getContext()).getReadableDatabase().rawQuery(todoQuery, null);
+                Cursor cursor = OrgDatabase.getInstance().getReadableDatabase().rawQuery(todoQuery, null);
 
 
                 tree = new OrgNodeTree(OrgProviderUtils.orgDataCursorToArrayList(cursor));
@@ -237,7 +237,7 @@ public class OrgNodeDetailFragment extends Fragment {
         public void onBindViewHolder(final MultipleItemsViewHolder holder, final int position) {
             OrgNodeTree root = tree.children.get(position);
 
-            SecondaryRecyclerViewAdapter secondaryAdapter = new SecondaryRecyclerViewAdapter(root);
+            SecondaryRecyclerViewAdapter secondaryAdapter = new SecondaryRecyclerViewAdapter(root, position);
 
             RecyclerView secondaryRecyclerView = (RecyclerView) holder.view.findViewById(R.id.node_recycler_view);
             secondaryRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
@@ -292,10 +292,12 @@ public class OrgNodeDetailFragment extends Fragment {
 
         NavigableMap<Long, OrgNodeTree> items;
         private OrgNodeTree tree;
+        private int parentPosition;
 
-        public SecondaryRecyclerViewAdapter(OrgNodeTree root) {
+        public SecondaryRecyclerViewAdapter(OrgNodeTree root, int parentPosition) {
             tree = root;
             refreshVisibility();
+            this.parentPosition = parentPosition;
         }
 
         void refreshVisibility() {
@@ -336,19 +338,20 @@ public class OrgNodeDetailFragment extends Fragment {
                     Log.v("selection", "long click");
                     Log.v("selection", "selected node : " + selectedNode);
                     Log.v("selection", "highlighted : " + highlightedView);
-                    if (selectedNode != null) {
+                    if (highlightedView != null) {
                         closeInsertItem();
-//                            setItemModifiersVisibility(highlightedView, View.GONE);
                     }
 
                     selectedNode = item.node;
                     highlightedView = item.mView;
                     Log.v("selection", "highlighted : " + highlightedView);
-                    setItemModifiersVisibility(highlightedView, View.VISIBLE);
+//                    setItemModifiersVisibility(highlightedView, View.VISIBLE);
 //                    item.mView.setSelected(true);
 
-                    notifyItemChanged(position);
-                    refreshVisibility();
+//                    notifyItemChanged(position);
+//                    refreshVisibility();
+//                    adapter.notifyItemChanged(parentPosition, SecondaryRecyclerViewAdapter.this);
+                    adapter.notifyDataSetChanged();
                     return true;
                 }
             });

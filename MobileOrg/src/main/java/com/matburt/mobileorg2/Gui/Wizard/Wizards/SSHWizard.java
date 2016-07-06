@@ -5,8 +5,6 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
-import android.os.HandlerThread;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -15,28 +13,16 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.matburt.mobileorg2.Gui.Wizard.WizardView;
 import com.matburt.mobileorg2.R;
 import com.matburt.mobileorg2.Synchronizers.AuthData;
 import com.matburt.mobileorg2.Synchronizers.JGitWrapper;
-import com.matburt.mobileorg2.Synchronizers.SSHSynchronizer;
-import com.matburt.mobileorg2.Synchronizers.SynchronizerManager;
-
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
 
 public class SSHWizard extends Wizard {
 
-   ProgressDialog mProgressDialog;
-
 	public static final int SSH_CHOOSE_PUB = 1;
-
+	ProgressDialog mProgressDialog;
 	private EditText sshUser;
 	private EditText sshPass;
 	private EditText sshPath;
@@ -82,56 +68,11 @@ public class SSHWizard extends Wizard {
 
 		loadSettings();
 
-		Button webdavLoginButton = (Button) view
-				.findViewById(R.id.wizard_ssh_login_button);
-		webdavLoginButton.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				loginSSH();
-			}
-		});
-
 		setupDoneButton(view);
 		wizardView.addPage(view);
 		wizardView.setNavButtonStateOnPage(1, true, WizardView.LAST_PAGE);
 		wizardView.enablePage(1);
 		return view;
-	}
-
-	private void loginSSH() {
-		final String pathActual = sshPath.getText().toString();
-		final String passActual = sshPass.getText().toString();
-		final String userActual = sshUser.getText().toString();
-		final String hostActual = sshHost.getText().toString();
-		final String pubFileActual = sshPubFileActual.getText().toString();
-		String portNumGiven = sshPort.getText().toString();
-		int portNum;
-		if (portNumGiven.trim().equals("")) {
-			portNum = 22;
-		} else {
-			portNum = Integer.parseInt(portNumGiven);
-		}
-		final int portActual = portNum;
-
-		progress.show();
-
-		Thread uiThread = new HandlerThread("UIHandler");
-		uiThread.start();
-		uiHandler = new UIHandler(((HandlerThread) uiThread).getLooper());
-
-		Thread loginThread = new Thread() {
-			public void run() {
-				SSHSynchronizer sds = new SSHSynchronizer(context);
-				String extra = sds.testConnection(pathActual, userActual,
-						passActual, hostActual, portActual, pubFileActual);
-				if (extra != null) {
-					showToastRemote("Login failed: " + extra);
-					return;
-				}
-				showToastRemote("Login succeeded");
-			}
-		};
-		loginThread.start();
 	}
 
 	public void setPubFile(String pubfile) {
@@ -169,6 +110,7 @@ public class SSHWizard extends Wizard {
 		editor.putString("scpHost", hostActual);
 		editor.putString("scpPort", portActual);
 		editor.putString("scpPubFile", sshPubFileActual.getText().toString());
+		editor.putString("scpPass", sshPass.getText().toString());
 		editor.apply();
 
 

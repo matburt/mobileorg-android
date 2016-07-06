@@ -43,14 +43,9 @@ public class CredentialsProviderAllowHost extends CredentialsProvider {
         for (CredentialItem i : items) {
             if (i instanceof CredentialItem.Username)
                 continue;
-
             else if (i instanceof CredentialItem.Password)
                 continue;
-            else if ((i instanceof CredentialItem.YesNoType)) {
-                return true;
-            }
-            else
-                return false;
+            else return (i instanceof CredentialItem.YesNoType);
         }
         return true;
     }

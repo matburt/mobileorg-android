@@ -1,5 +1,6 @@
 package com.matburt.mobileorg2;
 
+import android.app.SearchManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -9,10 +10,13 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
+import android.text.InputType;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -27,7 +31,9 @@ import com.matburt.mobileorg2.OrgData.OrgFile;
 import com.matburt.mobileorg2.OrgData.OrgProviderUtils;
 import com.matburt.mobileorg2.Services.SyncService;
 import com.matburt.mobileorg2.Settings.SettingsActivity;
-import com.matburt.mobileorg2.Synchronizers.SynchronizerManager;
+import com.matburt.mobileorg2.Synchronizers.AuthData;
+import com.matburt.mobileorg2.Synchronizers.ProgressDialogAsyncTask;
+import com.matburt.mobileorg2.Synchronizers.Synchronizer;
 import com.matburt.mobileorg2.util.OrgUtils;
 import com.matburt.mobileorg2.util.PreferenceUtils;
 
@@ -44,14 +50,13 @@ public class OrgNodeListActivity extends AppCompatActivity {
 
     public final static String NODE_ID = "node_id";
     public final static String SYNC_FAILED = "com.matburt.mobileorg2.SYNC_FAILED";
-
+    boolean passwordPrompt = true;
     /**
      * Whether or not the activity is in two-pane mode, i.e. running on a tablet
      * device.
      */
 
     private Long node_id;
-
     private SynchServiceReceiver syncReceiver;
     private MenuItem synchronizerMenuItem;
     private RecyclerView recyclerView;
@@ -79,14 +84,14 @@ public class OrgNodeListActivity extends AppCompatActivity {
             // large-screen layouts (res/values-w900dp).
             // If this view is present, then the
             // activity should be in two-pane mode.
-            ((OutlineAdapter)recyclerView.getAdapter()).setHasTwoPanes(true);
+            ((OutlineAdapter) recyclerView.getAdapter()).setHasTwoPanes(true);
         }
 
         new Style(this);
 
         this.syncReceiver = new SynchServiceReceiver();
         registerReceiver(this.syncReceiver, new IntentFilter(
-                SynchronizerManager.SYNC_UPDATE));
+                Synchronizer.SYNC_UPDATE));
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         if (fab != null) fab.setOnClickListener(new View.OnClickListener() {
@@ -103,10 +108,11 @@ public class OrgNodeListActivity extends AppCompatActivity {
 
                 alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
-                        String value = input.getText().toString();
-                        OrgFile newFile = new OrgFile(value,value);
+                        String filename = input.getText().toString();
+                        OrgFile newFile = new OrgFile(filename, filename);
                         newFile.addFile(OrgNodeListActivity.this);
-                        ((OutlineAdapter)recyclerView.getAdapter()).refresh();
+                        ((OutlineAdapter) recyclerView.getAdapter()).refresh();
+                        Synchronizer.getInstance().addFile(filename);
                     }
                 });
 
@@ -120,13 +126,27 @@ public class OrgNodeListActivity extends AppCompatActivity {
             }
         });
 
+        connect();
     }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.outline_menu, menu);
         synchronizerMenuItem = menu.findItem(R.id.menu_sync);
+
+        // Get the SearchView and set the searchable configuration
+        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        MenuItem searchItem = menu.findItem(R.id.menu_search);
+
+        SearchView searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
+
+        Log.v("search", "menu.findItem(R.id.menu_search) : " + menu.findItem(R.id.menu_search));
+        Log.v("search", "menu.findItem(R.id.menu_search).getactionview : " + menu.findItem(R.id.menu_search).getActionView());
+        // Assumes current activity is the searchable activity
+        searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+        searchView.setIconifiedByDefault(false); // Do not iconify the widget; expand it by default
 
         return true;
     }
@@ -135,13 +155,14 @@ public class OrgNodeListActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        Log.v("search ", "hello selected");
         switch (item.getItemId()) {
             case android.R.id.home:
-//                listView.collapseCurrent();
                 return true;
 
             case R.id.menu_sync:
-                runSynchronize(null);
+                passwordPrompt = true;
+                connect();
                 return true;
 
             case R.id.menu_settings:
@@ -164,7 +185,7 @@ public class OrgNodeListActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    public void runSynchronize(View view) {
+    public void runSynchronize() {
         startService(new Intent(this, SyncService.class));
     }
 
@@ -201,8 +222,8 @@ public class OrgNodeListActivity extends AppCompatActivity {
 
 
     private void displayNewUserDialogs() {
-        Log.v("sync","isSync : "+PreferenceUtils.isSyncConfigured());
-        if (! PreferenceUtils.isSyncConfigured())
+        Log.v("sync", "isSync : " + PreferenceUtils.isSyncConfigured());
+        if (!PreferenceUtils.isSyncConfigured())
             runShowWizard(null);
 
         if (PreferenceUtils.isUpgradedVersion())
@@ -223,7 +244,7 @@ public class OrgNodeListActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        runSynchronize(null);
+        runSynchronize();
     }
 
     @Override
@@ -248,26 +269,56 @@ public class OrgNodeListActivity extends AppCompatActivity {
         builder.create().show();
     }
 
+    private void connect() {
+        if (Synchronizer.getInstance().isCredentialsRequired() && passwordPrompt) {
+            final AlertDialog.Builder alert = new AlertDialog.Builder(OrgNodeListActivity.this);
+            final AuthData authData = AuthData.getInstance(OrgNodeListActivity.this);
+            alert.setTitle(R.string.prompt_enter_password);
+
+            // Set an EditText view to get user input
+            final EditText input = new EditText(OrgNodeListActivity.this);
+
+            input.setInputType(InputType.TYPE_CLASS_TEXT);
+            alert.setView(input);
+            input.setText(authData.getPassword());
+
+            alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int whichButton) {
+                    authData.setPassword(input.getText().toString());
+                    Log.v("pass", "pass : " + input.getText().toString());
+
+                    runSynchronize();
+                    dialog.dismiss();
+                }
+            });
+
+            alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int whichButton) {
+                    passwordPrompt = false;
+                    dialog.dismiss();
+                }
+            });
+
+            alert.show();
+        } else {
+            runSynchronize();
+        }
+    }
 
     private class SynchServiceReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            boolean syncStart = intent.getBooleanExtra(SynchronizerManager.SYNC_START, false);
-            boolean syncDone = intent.getBooleanExtra(SynchronizerManager.SYNC_DONE, false);
-            boolean showToast = intent.getBooleanExtra(SynchronizerManager.SYNC_SHOW_TOAST, false);
-            int progress = intent.getIntExtra(SynchronizerManager.SYNC_PROGRESS_UPDATE, -1);
+            boolean syncStart = intent.getBooleanExtra(Synchronizer.SYNC_START, false);
+            boolean syncDone = intent.getBooleanExtra(Synchronizer.SYNC_DONE, false);
+            boolean showToast = intent.getBooleanExtra(Synchronizer.SYNC_SHOW_TOAST, false);
+            int progress = intent.getIntExtra(Synchronizer.SYNC_PROGRESS_UPDATE, -1);
 
-            if(syncStart) {
-                if(synchronizerMenuItem != null)
+            if (syncStart) {
+                if (synchronizerMenuItem != null)
                     synchronizerMenuItem.setVisible(false);
             } else if (syncDone) {
-                ((OutlineAdapter)recyclerView.getAdapter()).refresh();
+                ((OutlineAdapter) recyclerView.getAdapter()).refresh();
                 synchronizerMenuItem.setVisible(true);
-
-                if (showToast)
-                    Toast.makeText(context,
-                            R.string.sync_successful,
-                            Toast.LENGTH_SHORT).show();
 
                 refreshTitle();
             } else if (progress >= 0 && progress <= 100) {
@@ -275,4 +326,42 @@ public class OrgNodeListActivity extends AppCompatActivity {
             }
         }
     }
+
+    class ConnectAsyncTask extends ProgressDialogAsyncTask<String, Void, Exception> {
+
+        ConnectAsyncTask(Context context) {
+            super(context);
+            this.context = context;
+        }
+
+        @Override
+        protected void _onPreExecute() {
+
+        }
+
+        @Override
+        protected void _onPostExecute(Exception result) {
+            if (result != null) {
+                result.printStackTrace();
+                Toast.makeText(context, result.getMessage(), Toast.LENGTH_LONG).show();
+                connect();
+            }
+        }
+
+        @Override
+        protected Exception doInBackground(String... strings) {
+
+            try {
+                Synchronizer.getInstance().isConnectable();
+                return null;
+            } catch (Exception e) {
+                return e;
+            }
+        }
+    }
+
+
+
+
+
 }

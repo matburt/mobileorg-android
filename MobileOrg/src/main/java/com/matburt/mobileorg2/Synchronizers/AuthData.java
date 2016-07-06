@@ -27,32 +27,32 @@ public class AuthData {
         return mAuthData;
     }
 
-    String getPath() {
+    public String getPath() {
         return OrgUtils.rStrip(appSettings.getString("scpPath", ""));
     }
 
-    String getUser() {
+    public String getUser() {
         return OrgUtils.rStrip(appSettings.getString("scpUser", ""));
     }
 
-    String getHost() {
+    public String getHost() {
         return OrgUtils.rStrip(appSettings.getString("scpHost", ""));
     }
 
-    String getPubFile() {
+    public String getPubFile() {
         return OrgUtils.rStrip(appSettings.getString("scpPubFile", ""));
     }
 
-    Integer getPort() {
+    public Integer getPort() {
         return Integer.parseInt(appSettings.getString("scpPort", ""));
+    }
+
+    public String getPassword() {
+        return OrgUtils.rStrip(appSettings.getString("scpPass", ""));
     }
 
     public void setPassword(String password) {
         this.password = password;
-    }
-
-    String getPassword() {
-        return password;
     }
 
     public boolean isValid() {

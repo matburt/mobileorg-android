@@ -2,13 +2,13 @@ package com.matburt.mobileorg2;
 
 import android.content.Context;
 import android.graphics.Typeface;
-import android.support.v7.widget.RecyclerView;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -22,12 +22,25 @@ import java.util.regex.Pattern;
 
 public class OrgNodeViewHolder extends ItemViewHolder {
     public final View mView;
+    public final Pattern urlPattern = Pattern.compile("\\[\\[[^\\]]*\\]\\[([^\\]]*)\\]\\]");
     public Button sameLevel, childLevel, deleteNodeButton;
-    private TextView titleView, contentView;
     public Button todoButton, priorityButton;
-
-    private TextView levelView;
+    LinearLayout itemModifiers;
     OrgNode node;
+    private TextView titleView, contentView;
+    private TextView levelView;
+
+//            @Override
+//            public void onViewRecycled(OrgNodeViewHolder holder) {
+//                holder.itemView.setOnLongClickListener(null);
+//                super.onViewRecycled(holder);
+//            }
+
+
+//            @Override
+//            public String toString() {
+//                return super.toString() + " '" + mContentView.getText() + "'";
+//            }
 
 
     public OrgNodeViewHolder(View view) {
@@ -40,6 +53,7 @@ public class OrgNodeViewHolder extends ItemViewHolder {
         priorityButton = (Button) view.findViewById(R.id.outline_item_priority);
         levelView = (TextView) view.findViewById(R.id.outline_item_level);
 
+        itemModifiers = (LinearLayout) view.findViewById(R.id.item_modifiers);
         sameLevel = (Button) view.findViewById(R.id.insert_same_level);
         childLevel = (Button) view.findViewById(R.id.insert_neighbourg_level);
         deleteNodeButton = (Button) view.findViewById(R.id.delete_node);
@@ -47,20 +61,6 @@ public class OrgNodeViewHolder extends ItemViewHolder {
         int fontSize = PreferenceUtils.getFontSize();
         todoButton.setTextSize(fontSize);
     }
-
-//            @Override
-//            public void onViewRecycled(OrgNodeViewHolder holder) {
-//                holder.itemView.setOnLongClickListener(null);
-//                super.onViewRecycled(holder);
-//            }
-
-
-
-//            @Override
-//            public String toString() {
-//                return super.toString() + " '" + mContentView.getText() + "'";
-//            }
-
 
     public void setupPriority(String priority) {
         if (TextUtils.isEmpty(priority)) {
@@ -94,7 +94,6 @@ public class OrgNodeViewHolder extends ItemViewHolder {
         formatLinks(titleSpan);
     }
 
-    public final Pattern urlPattern = Pattern.compile("\\[\\[[^\\]]*\\]\\[([^\\]]*)\\]\\]");
     private void formatLinks(SpannableStringBuilder titleSpan) {
         Matcher matcher = urlPattern.matcher(titleSpan);
         while(matcher.find()) {
@@ -124,6 +123,8 @@ public class OrgNodeViewHolder extends ItemViewHolder {
         int colorId = (int) Math.min(getLevel()-1,Style.nTitleColors-1);
         titleView.setTextColor(Style.titleColor[colorId]);
         mView.setSelected(isSelected);
+        if (isSelected) itemModifiers.setVisibility(View.VISIBLE);
+        else itemModifiers.setVisibility(View.GONE);
         String cleanedPayload = node.getCleanedPayload();
         contentView.setText(cleanedPayload);
 
