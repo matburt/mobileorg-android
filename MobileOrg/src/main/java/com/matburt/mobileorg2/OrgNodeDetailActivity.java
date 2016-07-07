@@ -50,8 +50,9 @@ public class OrgNodeDetailActivity extends AppCompatActivity {
             // using a fragment transaction.
             Bundle arguments = new Bundle();
             Long nodeId = getIntent().getLongExtra(OrgContract.NODE_ID, -1);
-            arguments.putLong(OrgContract.NODE_ID, nodeId);
 
+            arguments.putLong(OrgContract.NODE_ID, nodeId);
+            arguments.putLong(OrgContract.POSITION, getIntent().getLongExtra(OrgContract.POSITION, -1));
             Fragment fragment;
 
             if(nodeId == OrgContract.AGENDA_ID) fragment = new AgendaFragment();

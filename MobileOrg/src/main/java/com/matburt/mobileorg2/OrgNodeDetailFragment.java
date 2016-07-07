@@ -107,7 +107,8 @@ public class OrgNodeDetailFragment extends Fragment {
         OrgNodeTree tree = null;
 
         if (getArguments().containsKey(OrgContract.NODE_ID)) {
-            this.nodeId = getArguments().getLong(OrgContract.NODE_ID);
+            Bundle arguments = getArguments();
+            this.nodeId = arguments.getLong(OrgContract.NODE_ID);
 
             if (nodeId == OrgContract.TODO_ID) {
 //                Cursor cursor = resolver.query(OrgContract.OrgData.CONTENT_URI,
@@ -171,6 +172,9 @@ public class OrgNodeDetailFragment extends Fragment {
 
 
         refresh();
+
+        int position = findCardViewContaining(getArguments().getLong(OrgContract.POSITION, -1));
+        recyclerView.scrollToPosition(position);
         return rootView;
     }
 
@@ -215,6 +219,33 @@ public class OrgNodeDetailFragment extends Fragment {
         Intent intent = new Intent(getActivity(), EditNodeActivity.class);
         intent.putExtras(args);
         startActivity(intent);
+    }
+
+    /**
+     * Find the CardView containing the given node id
+     *
+     * @param id
+     * @return the position of the CardView
+     */
+    int findCardViewContaining(long id) {
+        if (id < 0) return 0;
+        OrgNode node = null;
+        long cardViewMainNode = -1;
+        try {
+            do {
+                if (node != null) cardViewMainNode = node.id;
+                node = new OrgNode(id, getContext().getContentResolver());
+                id = node.parentId;
+            } while (id > -1);
+            for (int i = 0; i < adapter.tree.children.size(); i++) {
+                if (adapter.tree.children.get(i).node.id == cardViewMainNode) {
+                    return i;
+                }
+            }
+        } catch (OrgNodeNotFoundException e) {
+            e.printStackTrace();
+        }
+        return 0;
     }
 
     public class MainRecyclerViewAdapter
@@ -432,7 +463,6 @@ public class OrgNodeDetailFragment extends Fragment {
         }
     }
 
-
     public class DividerItemDecoration extends RecyclerView.ItemDecoration {
 
         private final int[] ATTRS = new int[]{android.R.attr.listDivider};
@@ -475,6 +505,4 @@ public class OrgNodeDetailFragment extends Fragment {
         }
     }
 }
-
-
 

@@ -143,10 +143,6 @@
                 android:name="android.app.searchable"
                 android:resource="@xml/searchable" />
         </activity>
-
-        <meta-data
-            android:name="android.app.default_searchable"
-            android:value=".Gui.SearchActivity" />
     </application>
 
 </manifest>

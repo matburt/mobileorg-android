@@ -13,9 +13,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.matburt.mobileorg2.OrgData.OrgContract;
+import com.matburt.mobileorg2.OrgData.OrgFile;
 import com.matburt.mobileorg2.OrgData.OrgNode;
 import com.matburt.mobileorg2.OrgData.OrgProviderUtils;
+import com.matburt.mobileorg2.OrgNodeDetailActivity;
 import com.matburt.mobileorg2.R;
+import com.matburt.mobileorg2.util.OrgFileNotFoundException;
 
 import java.util.ArrayList;
 
@@ -38,7 +42,6 @@ public class SearchActivity extends AppCompatActivity {
 
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(adapter);
-
 
         // Get the intent, verify the action and get the query
         Intent intent = getIntent();
@@ -76,9 +79,30 @@ public class SearchActivity extends AppCompatActivity {
 
         @Override
         public void onBindViewHolder(final ViewHolder holder, final int position) {
-            Log.v("search", "onbind");
+            final OrgNode node = items.get(position);
             TextView title = (TextView) holder.itemView.findViewById(R.id.title);
-            title.setText(items.get(position).name);
+            TextView payload = (TextView) holder.itemView.findViewById(R.id.payload);
+            title.setText(node.name);
+            if (node.getCleanedPayload().equals("")) payload.setVisibility(View.GONE);
+            else {
+                payload.setVisibility(View.VISIBLE);
+                payload.setText(node.getCleanedPayload());
+            }
+
+            holder.itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    try {
+                        OrgFile file = new OrgFile(node.fileId, getContentResolver());
+                        Intent intent = new Intent(SearchActivity.this, OrgNodeDetailActivity.class);
+                        intent.putExtra(OrgContract.NODE_ID, file.nodeId);
+                        intent.putExtra(OrgContract.POSITION, node.id);
+                        startActivity(intent);
+                    } catch (OrgFileNotFoundException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
         }
 
         @Override

@@ -16,6 +16,7 @@ public class OrgContract {
 	static public long AGENDA_ID = -3;
 	public static String NODE_ID = "node_id";
 	public static String PARENT_ID = "parent_id";
+	public static String POSITION = "position";
 	interface EditsColumns {
 		String ID = "_id";
 		String TYPE = "type";

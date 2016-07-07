@@ -2,6 +2,7 @@ package com.matburt.mobileorg2;
 
 import android.app.SearchManager;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -23,16 +24,15 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import com.matburt.mobileorg2.Gui.Outline.OutlineAdapter;
+import com.matburt.mobileorg2.Gui.SearchActivity;
 import com.matburt.mobileorg2.Gui.Wizard.WizardActivity;
 import com.matburt.mobileorg2.OrgData.OrgFile;
 import com.matburt.mobileorg2.OrgData.OrgProviderUtils;
 import com.matburt.mobileorg2.Services.SyncService;
 import com.matburt.mobileorg2.Settings.SettingsActivity;
 import com.matburt.mobileorg2.Synchronizers.AuthData;
-import com.matburt.mobileorg2.Synchronizers.ProgressDialogAsyncTask;
 import com.matburt.mobileorg2.Synchronizers.Synchronizer;
 import com.matburt.mobileorg2.util.OrgUtils;
 import com.matburt.mobileorg2.util.PreferenceUtils;
@@ -50,7 +50,7 @@ public class OrgNodeListActivity extends AppCompatActivity {
 
     public final static String NODE_ID = "node_id";
     public final static String SYNC_FAILED = "com.matburt.mobileorg2.SYNC_FAILED";
-    boolean passwordPrompt = true;
+    static boolean passwordPrompt = true;
     /**
      * Whether or not the activity is in two-pane mode, i.e. running on a tablet
      * device.
@@ -144,9 +144,9 @@ public class OrgNodeListActivity extends AppCompatActivity {
 
         Log.v("search", "menu.findItem(R.id.menu_search) : " + menu.findItem(R.id.menu_search));
         Log.v("search", "menu.findItem(R.id.menu_search).getactionview : " + menu.findItem(R.id.menu_search).getActionView());
-        // Assumes current activity is the searchable activity
-        searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
-        searchView.setIconifiedByDefault(false); // Do not iconify the widget; expand it by default
+        ComponentName cn = new ComponentName(this, SearchActivity.class);
+        searchView.setSearchableInfo(searchManager.getSearchableInfo(cn));
+//        searchView.setIconifiedByDefault(false); // Do not iconify the widget; expand it by default
 
         return true;
     }
@@ -170,7 +170,8 @@ public class OrgNodeListActivity extends AppCompatActivity {
                 return true;
 
             case R.id.menu_search:
-                return runSearch();
+                onSearchRequested();
+                return true;
 
             case R.id.menu_help:
                 runHelp(null);
@@ -286,7 +287,7 @@ public class OrgNodeListActivity extends AppCompatActivity {
                 public void onClick(DialogInterface dialog, int whichButton) {
                     authData.setPassword(input.getText().toString());
                     Log.v("pass", "pass : " + input.getText().toString());
-
+                    passwordPrompt = false;
                     runSynchronize();
                     dialog.dismiss();
                 }
@@ -326,42 +327,4 @@ public class OrgNodeListActivity extends AppCompatActivity {
             }
         }
     }
-
-    class ConnectAsyncTask extends ProgressDialogAsyncTask<String, Void, Exception> {
-
-        ConnectAsyncTask(Context context) {
-            super(context);
-            this.context = context;
-        }
-
-        @Override
-        protected void _onPreExecute() {
-
-        }
-
-        @Override
-        protected void _onPostExecute(Exception result) {
-            if (result != null) {
-                result.printStackTrace();
-                Toast.makeText(context, result.getMessage(), Toast.LENGTH_LONG).show();
-                connect();
-            }
-        }
-
-        @Override
-        protected Exception doInBackground(String... strings) {
-
-            try {
-                Synchronizer.getInstance().isConnectable();
-                return null;
-            } catch (Exception e) {
-                return e;
-            }
-        }
-    }
-
-
-
-
-
 }

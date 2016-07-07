@@ -92,7 +92,7 @@ public class SSHSynchronizer extends Synchronizer {
      * @return
      */
     public boolean isCredentialsRequired() {
-        return authData.getPubFile().equals("");
+        return authData.getPubFile().equals("") && authData.getPassword().equals("");
     }
 
     @Override
