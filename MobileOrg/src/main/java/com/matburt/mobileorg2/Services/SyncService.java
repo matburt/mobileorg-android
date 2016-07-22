@@ -81,18 +81,9 @@ public class SyncService extends Service implements
 		unsetAlarm();
 		final Synchronizer synchronizer = Synchronizer.getInstance();
 
-		final boolean calendarEnabled = appSettings.getBoolean("calendarEnabled", false);
-
 		Thread syncThread = new Thread() {
 			public void run() {
-				HashSet<String> changedFiles = synchronizer.runSynchronizer();
-				String[] files = changedFiles.toArray(new String[changedFiles.size()]);
-				if(calendarEnabled) {
-					Intent calIntent = new Intent(getBaseContext(), CalendarSyncService.class);
-					calIntent.putExtra(CalendarSyncService.PUSH, true);
-					calIntent.putExtra(CalendarSyncService.FILELIST, files);
-					getBaseContext().startService(calIntent);
-				}
+				synchronizer.runSynchronizer();
 				Synchronizer.getInstance().postSynchronize();
 				syncRunning = false;
 				setAlarm();

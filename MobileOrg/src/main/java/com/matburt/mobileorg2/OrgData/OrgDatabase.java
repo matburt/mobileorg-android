@@ -6,6 +6,7 @@ import android.database.DatabaseUtils.InsertHelper;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
+import android.support.v4.util.Pair;
 import android.util.Log;
 
 import com.matburt.mobileorg2.OrgData.OrgContract.OrgData;
@@ -90,7 +91,9 @@ public class OrgDatabase extends SQLiteOpenHelper {
 				+ "name text,"
                 + "position integer,"
 				+ "scheduled integer default -1,"
-				+ "deadline integer default -1)");
+				+ "scheduled_date_only integer default 0,"
+				+ "deadline integer default -1,"
+				+ "deadline_date_only integer default 0)");
 
 		ContentValues values = new ContentValues();
 		values.put("_id", "0");
@@ -139,17 +142,19 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		return orgdataInsertHelper.execute();
 	}
 
-	public void fastInsertNodePayload(Long id, final String payload, final HashMap<OrgNodeTimeDate.TYPE, Long> timestamps) {
+	public void fastInsertNodePayload(Long id, final String payload, final HashMap<OrgNodeTimeDate.TYPE, Pair<Long,Integer>> timestamps) {
 		if (addPayloadStatement == null)
 			addPayloadStatement = getWritableDatabase()
-					.compileStatement("UPDATE orgdata SET payload=?, scheduled=?, deadline=? WHERE _id=?");
+					.compileStatement("UPDATE orgdata SET payload=?, scheduled=?, deadline=?, scheduled_date_only=?, deadline_date_only=? WHERE _id=?");
 		Log.v("time","payload : "+payload);
 		Log.v("time","db time : "+timestamps.get(OrgNodeTimeDate.TYPE.Scheduled));
 
 		addPayloadStatement.bindString(1, payload);
-		addPayloadStatement.bindLong(2, timestamps.get(OrgNodeTimeDate.TYPE.Scheduled)!=null ? timestamps.get(OrgNodeTimeDate.TYPE.Scheduled): -1);
-		addPayloadStatement.bindLong(3, timestamps.get(OrgNodeTimeDate.TYPE.Deadline)!=null ? timestamps.get(OrgNodeTimeDate.TYPE.Deadline): -1);
-		addPayloadStatement.bindLong(4, id);
+		addPayloadStatement.bindLong(2, timestamps.get(OrgNodeTimeDate.TYPE.Scheduled)!=null ? timestamps.get(OrgNodeTimeDate.TYPE.Scheduled).first: -1);
+		addPayloadStatement.bindLong(3, timestamps.get(OrgNodeTimeDate.TYPE.Deadline)!=null ? timestamps.get(OrgNodeTimeDate.TYPE.Deadline).first: -1);
+		addPayloadStatement.bindLong(4, timestamps.get(OrgNodeTimeDate.TYPE.Scheduled)!=null ? timestamps.get(OrgNodeTimeDate.TYPE.Scheduled).second: -1);
+		addPayloadStatement.bindLong(5, timestamps.get(OrgNodeTimeDate.TYPE.Deadline)!=null ? timestamps.get(OrgNodeTimeDate.TYPE.Deadline).second: -1);
+		addPayloadStatement.bindLong(6, id);
 		addPayloadStatement.execute();
 	}
 

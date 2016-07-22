@@ -1,84 +1,117 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-android:id="@+id/view_fragment_layout"
-android:layout_width="fill_parent"
-android:layout_height="fill_parent"
-android:orientation="vertical" >
+    android:id="@+id/view_fragment_layout"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical" >
 
 
-    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/edit_entry_summary_layout"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="vertical">
 
-        <Button
-            android:id="@+id/todo"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/todo_state"
-            android:textSize="20sp"
-            android:padding="20dp"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            />
+            android:orientation="horizontal">
 
-       <Button
-            android:id="@+id/priority"
-            android:layout_width="wrap_content"
+            <Button
+                android:id="@+id/todo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/todo_state"
+                android:textSize="20sp"
+                android:padding="20dp"
+                />
+
+            <Button
+                android:id="@+id/priority"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/priority"
+                android:textSize="20sp"
+                android:padding="20dp"
+                android:textColor="@color/colorYellow"
+                />
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/priority"
-            android:textSize="20sp"
-            android:padding="20dp"
-           android:layout_toRightOf="@id/todo"
-           android:layout_toEndOf="@id/todo"
-           android:textColor="@color/colorYellow"
-            />
+            android:orientation="vertical">
 
-        <Button
-            android:id="@+id/scheduled"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/scheduled"
-            android:textSize="12sp"
-            android:padding="20dp"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentEnd="true"
-            />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
 
-        <Button
-            android:id="@+id/deadline"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/deadline"
-            android:textSize="12sp"
-            android:padding="20dp"
-            android:layout_below="@id/scheduled"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentEnd="true"
-            android:focusable="false"
-            />
+                <TextView
+                    android:id="@+id/scheduled_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/scheduled"
+                    android:textSize="12sp"
+                    android:padding="20dp"
+                    />
 
-    </RelativeLayout>
+                <Button
+                    android:id="@+id/scheduled_date"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/date"
+                    android:textSize="12sp"
+                    android:padding="20dp"
+                    />
+
+                <Button
+                    android:id="@+id/scheduled_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/time"
+                    android:textSize="12sp"
+                    android:padding="20dp"
+                    />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/deadline_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/deadline"
+                    android:textSize="12sp"
+                    android:padding="20dp"
+                    />
+
+                <Button
+                    android:id="@+id/deadline_date"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/date"
+                    android:textSize="12sp"
+                    android:padding="20dp"
+                    />
+
+                <Button
+                    android:id="@+id/deadline_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/time"
+                    android:textSize="12sp"
+                    android:padding="20dp"
+                    />
+            </LinearLayout>
 
 
+          
 
-    <!--<LinearLayout-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:orientation="horizontal">-->
-
-        <!--<TextView-->
-            <!--android:id="@+id/filename_textview"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:text="@string/file"/>-->
-        <!--<Spinner-->
-            <!--android:id="@+id/filename"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--/>-->
-    <!--</LinearLayout>-->
-
-
+        </LinearLayout>
+    </LinearLayout>
 </LinearLayout>

@@ -35,6 +35,8 @@ import com.matburt.mobileorg2.OrgData.OrgProviderUtils;
 import com.matburt.mobileorg2.util.OrgNodeNotFoundException;
 import com.matburt.mobileorg2.util.TodoDialog;
 
+import org.eclipse.jgit.diff.Edit;
+
 import java.util.NavigableMap;
 
 /**
@@ -165,7 +167,11 @@ public class OrgNodeDetailFragment extends Fragment {
         insertNodeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                createEditNodeFragment(-1, (int) OrgNodeDetailFragment.this.nodeId, 0);
+                EditNodeFragment.createEditNodeFragment(
+                        -1,
+                        (int) OrgNodeDetailFragment.this.nodeId,
+                        0,
+                        getContext());
             }
         });
 
@@ -210,16 +216,7 @@ public class OrgNodeDetailFragment extends Fragment {
         refresh();
     }
 
-    void createEditNodeFragment(int id, int parentId, int siblingPosition) {
-        Bundle args = new Bundle();
-        args.putLong(OrgContract.NODE_ID, id);
-        args.putLong(OrgContract.PARENT_ID, parentId);
-        args.putInt(OrgContract.OrgData.POSITION, siblingPosition);
 
-        Intent intent = new Intent(getActivity(), EditNodeActivity.class);
-        intent.putExtras(args);
-        startActivity(intent);
-    }
 
     /**
      * Find the CardView containing the given node id
@@ -307,7 +304,7 @@ public class OrgNodeDetailFragment extends Fragment {
 //                int parentId = (int)node.parentId;
 
                 OrgNodeViewHolder item = (OrgNodeViewHolder) viewHolder;
-                createEditNodeFragment((int)item.node.id, -1, -1);
+                EditNodeFragment.createEditNodeFragment((int)item.node.id, -1, -1, getContext());
             }
 
             @Override
@@ -409,7 +406,7 @@ public class OrgNodeDetailFragment extends Fragment {
 
                     // Place the node right after this one in the adapter
                     int siblingPosition = currentNode.position + 1;
-                    createEditNodeFragment(-1, parentId, siblingPosition);
+                    EditNodeFragment.createEditNodeFragment(-1, parentId, siblingPosition, getContext());
                 }
             });
 
@@ -417,7 +414,7 @@ public class OrgNodeDetailFragment extends Fragment {
                 @Override
                 public void onClick(View v) {
                     int parentId = (int) item.node.id;
-                    createEditNodeFragment(-1, parentId, 0);
+                    EditNodeFragment.createEditNodeFragment(-1, parentId, 0, getContext());
                 }
             });
 

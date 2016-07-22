@@ -31,6 +31,7 @@ public class OrgNode {
 	public String name = "";
     public long scheduled;
     public long deadline;
+	int scheduled_date_only, deadline_date_only;
     // The ordering of the same level siblings
     public int position = 0;
     // The payload is a string containing the raw string corresponding to this mode
@@ -50,6 +51,8 @@ public class OrgNode {
         this.position = node.position;
         this.scheduled = node.scheduled;
         this.deadline = node.deadline;
+		this.scheduled_date_only = node.scheduled_date_only;
+		this.deadline_date_only = node.deadline_date_only;
 		setPayload(node.getPayload());
 	}
 	
@@ -106,6 +109,7 @@ public class OrgNode {
                     .getColumnIndexOrThrow(OrgData.SCHEDULED));
             deadline = cursor.getLong(cursor
                     .getColumnIndexOrThrow(OrgData.DEADLINE));
+			scheduled_date_only = cursor.getInt(cursor.getColumnIndexOrThrow(OrgData.SCHEDULED_DATE_ONLY));
 
 		} else {
 			throw new OrgNodeNotFoundException(
@@ -159,65 +163,9 @@ public class OrgNode {
 		return context.getContentResolver().update(OrgData.buildIdUri(id), getContentValues(), null, null);
 	}
 
-	public void updateAllNodes(Context context) {
-		updateNode(context);
-		ContentResolver resolver = context.getContentResolver();
-		String nodeId = getNodeId(resolver);
-		if (!nodeId.startsWith("olp:")) { // Update all nodes that have this :ID:
-			String nodeIdQuery = "%" + nodeId + "%";
-			resolver.update(OrgData.CONTENT_URI, getSimpleContentValues(),
-					OrgData.PAYLOAD + " LIKE ?", new String[] { nodeIdQuery });
-		}
-	}
-
-	public OrgNode findOriginalNode(ContentResolver resolver) {
-		if(parentId == -1)
-			return this;
-
-        if (!getFilename(resolver).equals(OrgFile.AGENDA_FILE))
-			return this;
-
-        String nodeId = getNodeId(resolver);
-		if (!nodeId.startsWith("olp:")) { // Update all nodes that have this :ID:
-			String nodeIdQuery = OrgData.PAYLOAD + " LIKE '%" + nodeId + "%'";
-			try {
-				OrgFile agendaFile = new OrgFile(OrgFile.AGENDA_FILE, resolver);
-				if(agendaFile != null)
-					nodeIdQuery += " AND NOT " + OrgData.FILE_ID + "=" + agendaFile.nodeId;
-			} catch (OrgFileNotFoundException e) {}
-
-            Cursor query = resolver.query(OrgData.CONTENT_URI,
-					OrgData.DEFAULT_COLUMNS, nodeIdQuery, null,
-					null);
-
-            OrgNode node = null;
-			try {
-				node = new OrgNode(query);
-			} catch (OrgNodeNotFoundException e) {
-
-            } finally {
-                if (query != null)  query.close();
-            }
-            return node;
-        }
-
-        return this;
-	}
-
     public boolean isHabit() {
 		preparePayload();
 		return orgNodePayload.getProperty("STYLE").equals("habit");
-	}
-	
-	private ContentValues getSimpleContentValues() {
-		ContentValues values = new ContentValues();
-		values.put(OrgData.NAME, name);
-		values.put(OrgData.TODO, todo);
-		values.put(OrgData.PAYLOAD, payload);
-		values.put(OrgData.PRIORITY, priority);
-		values.put(OrgData.TAGS, tags);
-		values.put(OrgData.TAGS_INHERITED, tags_inherited);
-		return values;
 	}
 	
 	private ContentValues getContentValues() {
@@ -232,8 +180,10 @@ public class OrgNode {
 		values.put(OrgData.TAGS, tags);
         values.put(OrgData.TAGS_INHERITED, tags_inherited);
         values.put(OrgData.POSITION, position);
-        values.put(OrgData.SCHEDULED, scheduled);
-        values.put(OrgData.DEADLINE, deadline);
+		values.put(OrgData.SCHEDULED, scheduled);
+		values.put(OrgData.DEADLINE, deadline);
+		values.put(OrgData.SCHEDULED_DATE_ONLY, scheduled_date_only);
+		values.put(OrgData.DEADLINE_DATE_ONLY, deadline_date_only);
 		return values;
 	}
 	
@@ -456,10 +406,10 @@ public class OrgNode {
         this.orgNodePayload.insertOrReplaceDate(date);
         switch (date.type){
             case Deadline:
-                deadline = date.getTimeInMillis();
+                deadline = date.getEpochTime();
                 break;
             case Scheduled:
-                scheduled = date.getTimeInMillis();
+                scheduled = date.getEpochTime();
                 break;
         }
         return;

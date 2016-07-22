@@ -39,6 +39,8 @@ public class OrgContract {
 		String PAYLOAD = "payload";
 		String DEADLINE = "deadline";
 		String SCHEDULED = "scheduled";
+		String DEADLINE_DATE_ONLY = "deadline_date_only";
+		String SCHEDULED_DATE_ONLY = "scheduled_date_only";
 	}
 
 	interface FilesColumns {
@@ -74,7 +76,7 @@ public class OrgContract {
 		public static final String NAME_SORT = NAME + " ASC";
 		public static final String POSITION_SORT = POSITION + " ASC";
 		public static final String[] DEFAULT_COLUMNS = {ID, NAME, TODO, TAGS, TAGS_INHERITED,
-				PARENT_ID, PAYLOAD, LEVEL, PRIORITY, FILE_ID, POSITION, SCHEDULED, DEADLINE};
+				PARENT_ID, PAYLOAD, LEVEL, PRIORITY, FILE_ID, POSITION, SCHEDULED, SCHEDULED_DATE_ONLY, DEADLINE, DEADLINE_DATE_ONLY};
 		
 		public static String getId(Uri uri) {
 			return uri.getPathSegments().get(1);

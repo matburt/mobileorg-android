@@ -28,8 +28,7 @@ public class NullSynchronizer extends Synchronizer {
 
     @Override
     public SyncResult synchronize() {
-
-        return null;
+        return new SyncResult();
     }
 
 

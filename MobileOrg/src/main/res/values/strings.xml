@@ -34,6 +34,8 @@
     <string name="details">Details</string>
     <string name="no_node">You have no node in this file</string>
     <string name="conflict">Conflict</string>
+    <string name="date">Date</string>
+    <string name="time">Time</string>
 
     <!-- toasts -->
     <string name="unselectable_item">You cannot select this item</string>

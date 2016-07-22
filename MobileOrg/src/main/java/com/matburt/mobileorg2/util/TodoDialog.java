@@ -34,18 +34,21 @@ public class TodoDialog {
         if (todos.size() == 0)
             todos = OrgProviderUtils.getTodos(context.getContentResolver());
 
+        ArrayList<String> result = new ArrayList<>();
+        result.add("---");
+        result.addAll(todos);
 
-        final ArrayList<String> todoList = todos;
+        final ArrayList<String> todoList = result;
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setTitle(context.getResources().getString(R.string.todo_state))
+        builder.setTitle(R.string.todo_state)
                 .setItems(todoList.toArray(new CharSequence[todoList.size()]),
                         new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog,
                                                 int which) {
                                 String selectedTodo = todoList.get(which);
-                                if(node.id > -1) updateOrgNodeTodo(selectedTodo);
-                                else node.todo = selectedTodo;
+                                if(which == 0) selectedTodo = "";
+                                node.todo = selectedTodo;
                                 setupTodoButton(context,node,button, false);
                             }
                         });
@@ -62,6 +65,7 @@ public class TodoDialog {
 
             int red = ContextCompat.getColor(context, R.color.colorRed);
             int green = ContextCompat.getColor(context, R.color.colorGreen);
+//            int gray = ContextCompat.getColor(context, R.color.colorGray);
             todoSpan.setSpan(new ForegroundColorSpan(active ? red : green), 0,
                     todoString.length(), 0);
             if(toggleVisibility) button.setVisibility(View.VISIBLE);
@@ -72,17 +76,5 @@ public class TodoDialog {
             button.setText("");
             button.setTextColor(ContextCompat.getColor(context, R.color.colorLightGray));
         }
-    }
-
-    private void updateOrgNodeTodo(String selectedTodo) {
-        if (selectedTodo.equals(node.todo))
-            return;
-
-        Log.v("todo", "new todo : " + node.todo);
-        node.todo = selectedTodo;
-        node.write(context);
-        OrgEdit.updateFile(node, context);
-        OrgUtils.announceSyncDone(context);
-
     }
 }

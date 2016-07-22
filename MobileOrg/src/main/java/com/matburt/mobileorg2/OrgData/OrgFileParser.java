@@ -3,6 +3,7 @@ package com.matburt.mobileorg2.OrgData;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.support.v4.util.Pair;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -40,7 +41,7 @@ public class OrgFileParser {
 	private OrgNodeParser orgNodeParser;
 	private HashSet<String> excludedTags;
     private HashMap<Integer, Integer> position;
-	private HashMap<OrgNodeTimeDate.TYPE, Long> timestamps;
+	private HashMap<OrgNodeTimeDate.TYPE, OrgNodeTimeDate> timestamps;
 
 	private OrgFileParser(Context context) {
 		this.db = OrgDatabase.getInstance();
@@ -237,12 +238,13 @@ public class OrgFileParser {
 			return;
 
 		int numstars = numberOfStars(line);
-		if (numstars > 0) {
+
+		if (numstars > 0) { // new node
 			db.fastInsertNodePayload(parseStack.getCurrentNodeId(), this.payload.toString(), timestamps);
 			timestamps.clear();
 			this.payload = new StringBuilder();
 			parseHeading(line, numstars);
-		} else {
+		} else { // continuing previous node
 			Log.v("todos","name : "+line);
 			HashMap<String,Boolean> map = parseTodos(line);
 			Log.v("todos","res : "+ (map != null ? map.toString() : ""));
@@ -284,24 +286,9 @@ public class OrgFileParser {
 	 * Return null if no timestamp found.
 	 */
 	private void parseTimestamps(String line){
-		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-
 		for(OrgNodeTimeDate.TYPE type: OrgNodeTimeDate.TYPE.values()){
-			Matcher matcher = OrgNodeTimeDate.getTimestampMatcher(type)
-					.matcher(line);
-
-            String str = OrgNodePayload.getDateFromTimestampMatcher(matcher);
-			Log.v("time",str);
-			if(str.equals("")) continue;
-			try {
-				Log.v("time","real : "+format.parse(str).getTime());
-				timestamps.put(type, format.parse(str).getTime());
-			} catch (ParseException e) {
-				e.printStackTrace();
-			}
+            timestamps.put(type, new OrgNodeTimeDate(type, line));
 		}
-
-
 	}
 
 	private class ParseStack {

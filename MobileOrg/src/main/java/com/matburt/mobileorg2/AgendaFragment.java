@@ -2,6 +2,7 @@ package com.matburt.mobileorg2;
 
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.TypedArray;
 import android.database.Cursor;
 import android.graphics.Canvas;
@@ -24,10 +25,12 @@ import android.widget.TextView;
 
 import com.matburt.mobileorg2.Gui.Outline.OutlineAdapter;
 import com.matburt.mobileorg2.OrgData.OrgContract;
+import com.matburt.mobileorg2.OrgData.OrgFile;
 import com.matburt.mobileorg2.OrgData.OrgFileParser;
 import com.matburt.mobileorg2.OrgData.OrgNode;
 import com.matburt.mobileorg2.OrgData.OrgNodeTree;
 import com.matburt.mobileorg2.OrgData.OrgProviderUtils;
+import com.matburt.mobileorg2.util.OrgFileNotFoundException;
 import com.matburt.mobileorg2.util.OrgNodeNotFoundException;
 import com.matburt.mobileorg2.util.PreferenceUtils;
 import com.matburt.mobileorg2.util.TodoDialog;
@@ -191,13 +194,13 @@ public class AgendaFragment extends Fragment {
         private void onBindOrgItemHolder(final OrgItemViewHolder holder, int position){
             final OrgNode node = nodesList.get(items.get(position).position);
 
-            TextView title = (TextView) holder.mView.findViewById(R.id.title);
+            TextView title = (TextView) holder.itemView.findViewById(R.id.title);
             title.setText(node.name);
 
-            TextView details = (TextView) holder.mView.findViewById(R.id.details);
+            TextView details = (TextView) holder.itemView.findViewById(R.id.details);
             details.setText(node.getPayload());
 
-            TextView content = (TextView) holder.mView.findViewById(R.id.date);
+            TextView content = (TextView) holder.itemView.findViewById(R.id.date);
             Calendar calendar = Calendar.getInstance();
             calendar.setTime(new Date(node.scheduled));
 
@@ -205,14 +208,14 @@ public class AgendaFragment extends Fragment {
             content.setText(SimpleDateFormat.getTimeInstance(DateFormat.SHORT).format(new Date(node.scheduled)));
 
 
-            holder.mView.setOnClickListener(new View.OnClickListener() {
+            holder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-
+                    EditNodeFragment.createEditNodeFragment((int)node.id, -1, -1, getContext());
                 }
             });
 
-            holder.mView.setOnLongClickListener(new View.OnLongClickListener() {
+            holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View v) {
                     return true;
@@ -223,17 +226,17 @@ public class AgendaFragment extends Fragment {
         private void onBindDateHolder(final DateViewHolder holder, int position){
             final String date = daysList.get(items.get(position).position);
 
-            TextView title = (TextView) holder.mView.findViewById(R.id.outline_item_title);
+            TextView title = (TextView) holder.itemView.findViewById(R.id.outline_item_title);
             title.setText(date);
 
-            holder.mView.setOnClickListener(new View.OnClickListener() {
+            holder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
 
                 }
             });
 
-            holder.mView.setOnLongClickListener(new View.OnLongClickListener() {
+            holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View v) {
                     return true;

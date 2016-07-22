@@ -44,13 +44,6 @@
                 <action android:name="com.twofortyfouram.locale.intent.action.FIRE_SETTING" />
             </intent-filter>
         </receiver>
-        <receiver android:name=".Services.MobileOrgStartupIntentReceiver">
-            <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
-
-                <category android:name="android.intent.category.HOME" />
-            </intent-filter>
-        </receiver>
 
         <activity
             android:name=".OrgNodeListActivity"
@@ -124,8 +117,6 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-
-        <service android:name=".Services.CalendarSyncService" />
 
         <activity android:name=".Gui.Agenda.AgendasActivity" />
         <activity android:name=".Gui.Agenda.AgendaActivity" />

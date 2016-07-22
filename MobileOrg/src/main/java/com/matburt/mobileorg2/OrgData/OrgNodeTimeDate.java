@@ -1,6 +1,7 @@
 package com.matburt.mobileorg2.OrgData;
 
 import android.text.TextUtils;
+import android.util.Log;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -18,6 +19,7 @@ public class OrgNodeTimeDate {
 	public int startMinute = -1;
 	public int endTimeOfDay = -1;
 	public int endMinute = -1;
+	public int matchStart = -1, matchEnd = -1;
 	
 	public enum TYPE {
 		Scheduled,
@@ -28,6 +30,23 @@ public class OrgNodeTimeDate {
 
 	public OrgNodeTimeDate(TYPE type) {
 		this.type = type;
+	}
+
+	public OrgNodeTimeDate(TYPE type, String line){
+		this.type = type;
+
+//		Matcher matcher =OrgNodeTimeDate.getTimestampMatcher(type).matcher(line);
+//
+//		if(matcher.find(0)) {
+//			result = matcher.group(2);
+//
+//			if(matcher.group(3) != null){
+//				Log.v("time","group3 : "+matcher.group(3));
+//				result += matcher.group(3);
+//			}
+//
+//		}
+		parseDate(line);
 	}
 
 	public OrgNodeTimeDate(TYPE type, int day, int month, int year) {
@@ -71,6 +90,8 @@ public class OrgNodeTimeDate {
 		Matcher propm = schedulePattern.matcher(date);
 
 		if (propm.find()) {
+			matchStart = propm.start();
+			matchEnd = propm.end();
 			try {
 				year = Integer.parseInt(propm.group(2));
 				monthOfYear = Integer.parseInt(propm.group(3));
@@ -98,11 +119,11 @@ public class OrgNodeTimeDate {
 		return String.format("%02d:%02d", endTimeOfDay, endMinute);
 	}
 
-	public long getTimeInMillis(){
+	public long getEpochTime(){
 		int hour = startTimeOfDay > -1 ? startTimeOfDay : 0;
 		int minute = startMinute > -1 ? startMinute : 0;
 
-		return new GregorianCalendar(year, monthOfYear, dayOfMonth, hour, minute).getTimeInMillis();
+		return new GregorianCalendar(year, monthOfYear, dayOfMonth, hour, minute).getTimeInMillis()/1000L;
 	}
 	
 	
@@ -158,15 +179,15 @@ public class OrgNodeTimeDate {
 	}
 
 	static public Pattern getTimestampMatcher(OrgNodeTimeDate.TYPE type) {
-		final String timestampPattern =  "<([^>]+)>" + "(?:\\s*--\\s*<([^>]+)>)?";
-		final String timestampLookbehind = "\\s*(?<!(?:SCHEDULED:|DEADLINE:)\\s?)";
+		final String timestampPattern =  "<([^>]+)(\\d\\d:\\d\\d)>"; // + "(?:\\s*--\\s*<([^>]+)>)?"; for ranged date
+//		final String timestampLookbehind = "\\s*(?<!(?:SCHEDULED:|DEADLINE:)\\s?)";
 
-		String pattern;
-		if(type == OrgNodeTimeDate.TYPE.Timestamp)
-			pattern = timestampLookbehind + "(" + timestampPattern + ")";
-		else
-			pattern = "\\s*(" + OrgNodeTimeDate.typeToFormated(type) + "\\s*" + timestampPattern + ")";
+//		String pattern;
+//		if(type == OrgNodeTimeDate.TYPE.Timestamp)
+//			pattern = timestampLookbehind + "(" + timestampPattern + ")";
+//		else
 
+		String pattern = "\\s*(" + OrgNodeTimeDate.typeToFormated(type) + "\\s*" + timestampPattern + ")";
 
 		return Pattern.compile(pattern);
 	}

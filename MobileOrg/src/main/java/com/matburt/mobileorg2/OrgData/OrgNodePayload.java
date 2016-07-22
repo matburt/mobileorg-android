@@ -17,14 +17,15 @@ public class OrgNodePayload {
 	private String id = null;
 
 
-	private HashMap<OrgNodeTimeDate.TYPE, String> timestampPayloads;
+	private HashMap<OrgNodeTimeDate.TYPE, String> cachedTimestamps;
 
 	public OrgNodePayload(String payload) {
 		if(payload == null)
 			payload = "";
 
-		timestampPayloads = new HashMap<>();
-		set(payload);
+		this.cachedTimestamps = new HashMap<>();
+        this.cleanPayload = new StringBuilder(payload);
+        set(payload);
 	}
 	
 	public void set(String payload) {
@@ -33,9 +34,9 @@ public class OrgNodePayload {
 	}
 	
 	private void resetCachedValues() {
-		this.cleanPayload = null;
+		this.cleanPayload.setLength(0);
 		this.id = null;
-		this.timestampPayloads.clear();
+		this.cachedTimestamps.clear();
 	}
 	
 	public String get() {
@@ -113,11 +114,6 @@ public class OrgNodePayload {
         
     }
 	
-	private void prepareCleanedPayload() {
-		if(this.cleanPayload == null)
-			this.cleanPayload = new StringBuilder(this.payload);
-	}
-	
 	private void cleanPayload() {
 		for(OrgNodeTimeDate.TYPE type: OrgNodeTimeDate.TYPE.values())
 			getTimestamp(type);
@@ -128,40 +124,16 @@ public class OrgNodePayload {
 	}
 
 	public String getTimestamp(OrgNodeTimeDate.TYPE type) {
-		String result = timestampPayloads.get(type);
+		String result = cachedTimestamps.get(type);
 		if(result != null) return result; // return cached result if any
 
-		result = stripDate(type);
-		timestampPayloads.put(type, result);
+		OrgNodeTimeDate timeDate = new OrgNodeTimeDate(type, cleanPayload.toString());
+		if(timeDate.matchStart > -1) cleanPayload.delete(timeDate.matchStart, timeDate.matchEnd);
+		cachedTimestamps.put(type, timeDate.toString());
 
-		return result;
+		return result.toString();
 	}
 
-    public static String getDateFromTimestampMatcher(Matcher matcher){
-        String result = "";
-
-        if(matcher.find()) {
-            result = matcher.group(2);
-
-            if(matcher.group(3) != null)
-                result += matcher.group(3);
-        }
-        return result;
-    }
-
-    private String stripDate(OrgNodeTimeDate.TYPE type) {
-		prepareCleanedPayload();
-
-		Matcher matcher = OrgNodeTimeDate.getTimestampMatcher(type).matcher(
-				cleanPayload.toString());
-
-        String result = getDateFromTimestampMatcher(matcher);
-
-		if(matcher.find()) cleanPayload.delete(matcher.start(), matcher.end());
-
-		return result;
-	}
-	
 	public void insertOrReplaceDate(OrgNodeTimeDate date) {
 		Matcher matcher = OrgNodeTimeDate.getTimestampMatcher(date.type).matcher(payload);
 		
@@ -181,7 +153,6 @@ public class OrgNodePayload {
 	
 	
 	private ArrayList<String> stripProperties() {
-		prepareCleanedPayload();
 		ArrayList<String> properties = new ArrayList<String>();
 		final Pattern propertiesLine = Pattern.compile(":[A-Za-z_]+:");
 		Matcher propm = propertiesLine.matcher(this.cleanPayload);
@@ -214,7 +185,6 @@ public class OrgNodePayload {
 	}
 	
 	private ArrayList<String> stripFileProperties() {
-		prepareCleanedPayload();
 		ArrayList<String> fileProperties = new ArrayList<String>();
 		while (true) {
 			int start = cleanPayload.indexOf("#+");

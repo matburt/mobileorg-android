@@ -16,7 +16,6 @@ import android.text.TextUtils;
 
 import com.matburt.mobileorg2.OrgData.OrgProviderUtils;
 import com.matburt.mobileorg2.R;
-import com.matburt.mobileorg2.Services.CalendarWrapper;
 import com.matburt.mobileorg2.Settings.Synchronizers.SDCardSettingsActivity;
 import com.matburt.mobileorg2.Settings.Synchronizers.ScpSettingsActivity;
 import com.matburt.mobileorg2.Settings.Synchronizers.UbuntuOneSettingsActivity;
@@ -86,7 +85,6 @@ public class SettingsActivity extends PreferenceActivity implements
 		init();
 		populateSyncSources();
 		populateTodoKeywords();
-		populateCalendarNames();
         populateVersionName();
 		findPreference("clearDB").setOnPreferenceClickListener(onClearDBClick);
 	}
@@ -97,8 +95,6 @@ public class SettingsActivity extends PreferenceActivity implements
 		this.KEY_AUTO_SYNC_INTERVAL = getString(R.string.key_autoSyncInterval);
 		this.KEY_VIEW_RECURSION_MAX = getString(R.string.key_viewRecursionMax);
 		this.KEY_DEFAULT_TODO = getString(R.string.key_defaultTodo);
-		this.KEY_CALENDAR_NAME = getString(R.string.key_calendarName);
-		this.KEY_CALENDAR_REMINDER_INTERVAL = getString(R.string.key_calendarReminderInterval);
 		this.KEY_THEME = getString(R.string.key_theme);
 		this.KEY_FONT_SIZE = getString(R.string.key_fontSize);
 		this.KEY_QUICK_TODOS = getString(R.string.key_quick_todos);
@@ -186,19 +182,6 @@ public class SettingsActivity extends PreferenceActivity implements
         }
     }
 
-    private void populateCalendarNames() {
-		try {
-			ListPreference calendarName = (ListPreference) findPreference(KEY_CALENDAR_NAME);
-
-			CharSequence[] calendars = CalendarWrapper
-					.getCalendars(getApplicationContext());
-
-			calendarName.setEntries(calendars);
-			calendarName.setEntryValues(calendars);
-		} catch (Exception e) {
-			// Don't crash because of anything in calendar
-		}
-	}
 
 	private void populateTodoKeywords() {
 		ListPreference defaultTodo = (ListPreference) findPreference(KEY_DEFAULT_TODO);
