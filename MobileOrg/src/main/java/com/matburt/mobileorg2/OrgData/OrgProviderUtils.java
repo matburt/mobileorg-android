@@ -7,7 +7,7 @@ import android.database.Cursor;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.matburt.mobileorg2.OrgData.OrgContract.Edits;
+import com.matburt.mobileorg2.OrgData.OrgContract.Timestamps;
 import com.matburt.mobileorg2.OrgData.OrgContract.Files;
 import com.matburt.mobileorg2.OrgData.OrgContract.OrgData;
 import com.matburt.mobileorg2.OrgData.OrgContract.Priorities;
@@ -188,7 +188,7 @@ public class OrgProviderUtils {
 	public static void clearDB(ContentResolver resolver) {
 		resolver.delete(OrgData.CONTENT_URI, null, null);
 		resolver.delete(Files.CONTENT_URI, null, null);
-		resolver.delete(Edits.CONTENT_URI, null, null);
+		resolver.delete(Timestamps.CONTENT_URI, null, null);
 	}
 
 	public static ArrayList<String> getActiveTodos(ContentResolver resolver) {
@@ -254,39 +254,6 @@ public class OrgProviderUtils {
 				OrgData.DEFAULT_SORT);
 		
 		return cursor;
-	}
-	
-	public static int getChangesCount(ContentResolver resolver) {
-		int changes = 0;
-		Cursor cursor = resolver.query(Edits.CONTENT_URI,
-				Edits.DEFAULT_COLUMNS, null, null, null);
-		if(cursor != null) {
-			changes += cursor.getCount();
-			cursor.close();
-		}
-		
-		long file_id = -2;
-		try {
-			file_id = new OrgFile(FileUtils.CAPTURE_FILE, resolver).nodeId;
-		} catch (OrgFileNotFoundException e) {}
-		cursor = resolver.query(OrgData.CONTENT_URI, OrgData.DEFAULT_COLUMNS, OrgData.FILE_ID + "=?",
-				new String[] { Long.toString(file_id) }, null);
-		if(cursor != null) {
-			int captures = cursor.getCount();
-			if(captures > 0)
-				changes += captures;
-			cursor.close();
-		}
-		
-		return changes;
-	}
-
-	public static String getChangesString(ContentResolver content) {
-		int changes = OrgProviderUtils.getChangesCount(content);
-		if(changes > 0)
-			return "[" + changes + "]";
-		else
-			return "";
 	}
 
 	public static ArrayList<OrgNode> getOrgNodeChildren(long nodeId, ContentResolver resolver) {

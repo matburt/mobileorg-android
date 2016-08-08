@@ -2,7 +2,6 @@ package com.matburt.mobileorg2;
 
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.Intent;
 import android.content.res.TypedArray;
 import android.database.Cursor;
 import android.graphics.Canvas;
@@ -12,40 +11,22 @@ import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.matburt.mobileorg2.Gui.Outline.OutlineAdapter;
-import com.matburt.mobileorg2.OrgData.OrgContract;
-import com.matburt.mobileorg2.OrgData.OrgFile;
-import com.matburt.mobileorg2.OrgData.OrgFileParser;
+import com.matburt.mobileorg2.OrgData.OrgContract.Timestamps;
 import com.matburt.mobileorg2.OrgData.OrgNode;
-import com.matburt.mobileorg2.OrgData.OrgNodeTree;
-import com.matburt.mobileorg2.OrgData.OrgProviderUtils;
-import com.matburt.mobileorg2.util.OrgFileNotFoundException;
 import com.matburt.mobileorg2.util.OrgNodeNotFoundException;
-import com.matburt.mobileorg2.util.PreferenceUtils;
-import com.matburt.mobileorg2.util.TodoDialog;
-
-import org.w3c.dom.Text;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.NavigableMap;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 
 /**
@@ -91,12 +72,28 @@ public class AgendaFragment extends Fragment {
         super.onCreate(savedInstanceState);
         this.resolver = getActivity().getContentResolver();
 
-        Log.v("scheduled","path : "+OrgContract.OrgData.CONTENT_URI);
-        Cursor cursor = resolver.query(OrgContract.OrgData.CONTENT_URI,
-                OrgContract.OrgData.DEFAULT_COLUMNS,
-                "scheduled>0", null, "scheduled");
-        nodesList = OrgProviderUtils.orgDataCursorToArrayList(cursor);
-        if(cursor!=null) cursor.close();
+        Cursor cursor = resolver.query(Timestamps.CONTENT_URI,
+                new String[]{Timestamps.NODE_ID, Timestamps.TIMESTAMP, Timestamps.TYPE},
+                null, null, Timestamps.TIMESTAMP);
+
+        nodesList = new ArrayList<>();
+
+        if(cursor!=null) {
+            Log.v("time","count : "+cursor.getCount());
+            cursor.moveToFirst();
+
+            while (!cursor.isAfterLast()) {
+                long nodeId = cursor.getLong(cursor.getColumnIndexOrThrow(Timestamps.NODE_ID));
+                Log.v("time", "cursor id, time, type : "+nodeId + ", " + cursor.getLong(cursor.getColumnIndexOrThrow(Timestamps.TIMESTAMP)) + ", " + cursor.getLong(cursor.getColumnIndexOrThrow(Timestamps.TYPE)));
+                try {
+                    nodesList.add(new OrgNode(nodeId, resolver));
+                } catch (OrgNodeNotFoundException e) {
+                    e.printStackTrace();
+                }
+                cursor.moveToNext();
+            }
+            cursor.close();
+        }
 
         daysList = new ArrayList<>();
         items = new ArrayList<>();
@@ -106,10 +103,10 @@ public class AgendaFragment extends Fragment {
         int dayCursor = 0;
 
         for(OrgNode node : nodesList){
-            day = node.scheduled/(24*3600);
+            day = node.getScheduled().getEpochTime()/(24*3600);
 
             if(day != prevDay) {
-                daysList.add(SimpleDateFormat.getDateInstance().format(new Date(node.scheduled)));
+                daysList.add(SimpleDateFormat.getDateInstance().format(new Date(node.getScheduled().getEpochTime())));
                 items.add(new PositionHelper(dayCursor++, Type.kDate));
                 prevDay = day;
             }
@@ -202,11 +199,9 @@ public class AgendaFragment extends Fragment {
 
             TextView content = (TextView) holder.itemView.findViewById(R.id.date);
             Calendar calendar = Calendar.getInstance();
-            calendar.setTime(new Date(node.scheduled));
+            calendar.setTime(new Date(node.getScheduled().getEpochTime()));
 
-
-            content.setText(SimpleDateFormat.getTimeInstance(DateFormat.SHORT).format(new Date(node.scheduled)));
-
+            content.setText(SimpleDateFormat.getTimeInstance(DateFormat.SHORT).format(new Date(node.getScheduled().getEpochTime())));
 
             holder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override

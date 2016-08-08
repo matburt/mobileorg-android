@@ -29,9 +29,8 @@ public class OrgNode {
 	public String tags = "";
 	public String tags_inherited = "";
 	public String name = "";
-    public long scheduled;
-    public long deadline;
-	int scheduled_date_only, deadline_date_only;
+	OrgNodeTimeDate deadline, scheduled;
+
     // The ordering of the same level siblings
     public int position = 0;
     // The payload is a string containing the raw string corresponding to this mode
@@ -51,8 +50,6 @@ public class OrgNode {
         this.position = node.position;
         this.scheduled = node.scheduled;
         this.deadline = node.deadline;
-		this.scheduled_date_only = node.scheduled_date_only;
-		this.deadline_date_only = node.deadline_date_only;
 		setPayload(node.getPayload());
 	}
 	
@@ -67,7 +64,13 @@ public class OrgNode {
             throw new OrgNodeNotFoundException("Node with id \"" + id + "\" not found");
         }
 		set(cursor);
+
         cursor.close();
+	}
+
+	void setTimestamps(){
+		deadline  = new OrgNodeTimeDate(OrgNodeTimeDate.TYPE.Deadline,  id);
+		scheduled = new OrgNodeTimeDate(OrgNodeTimeDate.TYPE.Scheduled, id);
 	}
 
 	public OrgNode(Cursor cursor) throws OrgNodeNotFoundException {
@@ -105,18 +108,13 @@ public class OrgNode {
 					.getColumnIndexOrThrow(OrgData.PAYLOAD));
             position = cursor.getInt(cursor
                     .getColumnIndexOrThrow(OrgData.POSITION));
-            scheduled = cursor.getLong(cursor
-                    .getColumnIndexOrThrow(OrgData.SCHEDULED));
-            deadline = cursor.getLong(cursor
-                    .getColumnIndexOrThrow(OrgData.DEADLINE));
-			scheduled_date_only = cursor.getInt(cursor.getColumnIndexOrThrow(OrgData.SCHEDULED_DATE_ONLY));
 
 		} else {
 			throw new OrgNodeNotFoundException(
 					"Failed to create OrgNode from cursor");
 		}
-
-    }
+		setTimestamps();
+	}
 	
 	public String getFilename(ContentResolver resolver) {
 		try {
@@ -160,6 +158,17 @@ public class OrgNode {
     }
 
 	private int updateNode(Context context) {
+		Log.v("update", "scheduled: "+scheduled);
+		Log.v("update", "deadline: "+deadline);
+		if(scheduled != null){
+			Log.v("epoch","updating type scheduled");
+			scheduled.update(context, id, fileId);
+		}
+        if(deadline != null){
+			Log.v("epoch","updating type deadline");
+			deadline.update(context, id, fileId);
+			Log.v("epoch","end of deadline update");
+		}
 		return context.getContentResolver().update(OrgData.buildIdUri(id), getContentValues(), null, null);
 	}
 
@@ -180,10 +189,6 @@ public class OrgNode {
 		values.put(OrgData.TAGS, tags);
         values.put(OrgData.TAGS_INHERITED, tags_inherited);
         values.put(OrgData.POSITION, position);
-		values.put(OrgData.SCHEDULED, scheduled);
-		values.put(OrgData.DEADLINE, deadline);
-		values.put(OrgData.SCHEDULED_DATE_ONLY, scheduled_date_only);
-		values.put(OrgData.DEADLINE_DATE_ONLY, deadline_date_only);
 		return values;
 	}
 	
@@ -294,36 +299,9 @@ public class OrgNode {
 		return false;
 	}
 	
-	public boolean isNodeEditable(ContentResolver resolver) {
-		if(id < 0) // Node is not in database
-			return true;
-		
-		if(id >= 0 && parentId < 0) // Top-level node
-			return false;
-		
-		try {
-			OrgFile agendaFile = new OrgFile(OrgFile.AGENDA_FILE, resolver);
-			if (agendaFile != null && agendaFile.nodeId == parentId) // Second level in agendas file
-				return false;
-			
-			if(fileId == agendaFile.id && name.startsWith(OrgFileParser.BLOCK_SEPARATOR_PREFIX))
-				return false;
-		} catch (OrgFileNotFoundException e) {}
 
-		return true;
-	}
 
 	public String getCleanedName() {
-		StringBuilder nameBuilder = new StringBuilder(this.name);
-		
-//		Matcher matcher = OutlineItem.urlPattern.matcher(nameBuilder);
-//		while(matcher.find()) {
-//			nameBuilder.delete(matcher.start(), matcher.end());
-//			nameBuilder.insert(matcher.start(), matcher.group(1));
-//			matcher = OutlineItem.urlPattern.matcher(nameBuilder);
-//		}
-//
-//		return nameBuilder.toString();
 		return this.name;
 	}
 
@@ -370,11 +348,20 @@ public class OrgNode {
 		result.append(getStrippedNameForOlpPathLink());
 		return result.toString();
 	}
-	
-	/**
+
+    public OrgNodeTimeDate getDeadline() {
+        return deadline;
+    }
+
+    public OrgNodeTimeDate getScheduled() {
+        return scheduled;
+    }
+
+    /**
 	 * Olp paths containing certain symbols can't be applied by org-mode. To
 	 * prevent node names from injecting bad symbols, we strip them out here.
 	 */
+
 	private String getStrippedNameForOlpPathLink() {
 		String result = this.name;
 		result = result.replaceAll("\\[[^\\]]*\\]", ""); // Strip out "[*]"
@@ -406,10 +393,10 @@ public class OrgNode {
         this.orgNodePayload.insertOrReplaceDate(date);
         switch (date.type){
             case Deadline:
-                deadline = date.getEpochTime();
+                deadline = date;
                 break;
             case Scheduled:
-                scheduled = date.getEpochTime();
+                scheduled = date;
                 break;
         }
         return;
@@ -419,29 +406,6 @@ public class OrgNode {
 		preparePayload();
 		return this.orgNodePayload;
 	}
-	
-	public OrgEdit createParentNewheading(ContentResolver resolver) {
-        OrgNode parent = null;
-        try {
-            parent = getParent(resolver);
-        } catch (OrgNodeNotFoundException e) {
-            e.printStackTrace();
-        }
-        this.level = parent.level + 1;
-
-		try {
-			OrgFile file = new OrgFile(parent.fileId, resolver);
-		} catch (OrgFileNotFoundException e) {}
-
-		// Add new heading nodes; need the entire content of node without
-		// star headings
-		long tempLevel = level;
-		level = 0;
-		OrgEdit edit = new OrgEdit(parent, OrgEdit.TYPE.ADDHEADING, this.toString(), resolver);
-		level = tempLevel;
-		return edit;
-	}
-
 
 	/**
 	 * Build the the plain text string corresponding to this node
@@ -490,7 +454,7 @@ public class OrgNode {
 	 */
 	public void deleteNode(Context context) {
 		context.getContentResolver().delete(OrgData.buildIdUri(id), null, null);
-		OrgEdit.updateFile(this, context);
+		OrgFile.updateFile(this, context);
 	}
 
 	/**
@@ -502,7 +466,7 @@ public class OrgNode {
 	private long addNode(Context context) {
 		Uri uri = context.getContentResolver().insert(OrgData.CONTENT_URI, getContentValues());
 		this.id = Long.parseLong(OrgData.getId(uri));
-		OrgEdit.updateFile(this, context);
+		OrgFile.updateFile(this, context);
 		return id;
 	}
 

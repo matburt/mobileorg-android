@@ -225,7 +225,7 @@ public class OrgFileParser {
 			while ((currentLine = breader.readLine()) != null) parseLine(currentLine);
 
 			// Add payload to the final node
-			db.fastInsertNodePayload(parseStack.getCurrentNodeId(), this.payload.toString(), timestamps);
+			db.fastInsertNodePayload(parseStack.getCurrentNodeId(), this.payload.toString());
 
 		} catch (IOException e) {}
 
@@ -240,8 +240,7 @@ public class OrgFileParser {
 		int numstars = numberOfStars(line);
 
 		if (numstars > 0) { // new node
-			db.fastInsertNodePayload(parseStack.getCurrentNodeId(), this.payload.toString(), timestamps);
-			timestamps.clear();
+			db.fastInsertNodePayload(parseStack.getCurrentNodeId(), this.payload.toString());
 			this.payload = new StringBuilder();
 			parseHeading(line, numstars);
 		} else { // continuing previous node
@@ -286,16 +285,18 @@ public class OrgFileParser {
 	 * Return null if no timestamp found.
 	 */
 	private void parseTimestamps(String line){
+		timestamps.clear();
 		for(OrgNodeTimeDate.TYPE type: OrgNodeTimeDate.TYPE.values()){
             timestamps.put(type, new OrgNodeTimeDate(type, line));
 		}
+		db.fastInsertTimestamp(parseStack.getCurrentNodeId(), orgFile.id, timestamps );
 	}
 
 	private class ParseStack {
 		private Stack<Item> stack;
 
 		public ParseStack() {
-			this.stack = new Stack<Item>();
+			this.stack = new Stack<>();
 		}
 
 		public void add(int level, long nodeId, String tags) {

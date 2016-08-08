@@ -237,11 +237,6 @@ public class OrgNodeListActivity extends AppCompatActivity {
         super.onDestroy();
     }
 
-    private void refreshTitle() {
-        this.getSupportActionBar().setTitle("MobileOrg " + OrgProviderUtils.getChangesString(getContentResolver()));
-    }
-
-
     @Override
     protected void onResume() {
         super.onResume();
@@ -321,7 +316,6 @@ public class OrgNodeListActivity extends AppCompatActivity {
                 ((OutlineAdapter) recyclerView.getAdapter()).refresh();
                 synchronizerMenuItem.setVisible(true);
 
-                refreshTitle();
             } else if (progress >= 0 && progress <= 100) {
 //                int normalizedProgress = (Window.PROGRESS_END - Window.PROGRESS_START) / 100 * progress;
             }

@@ -24,7 +24,7 @@ import android.widget.LinearLayout;
 import android.widget.TimePicker;
 
 import com.matburt.mobileorg2.OrgData.OrgContract;
-import com.matburt.mobileorg2.OrgData.OrgEdit;
+import com.matburt.mobileorg2.OrgData.OrgFile;
 import com.matburt.mobileorg2.OrgData.OrgNode;
 import com.matburt.mobileorg2.OrgData.OrgNodeTimeDate;
 import com.matburt.mobileorg2.util.OrgNodeNotFoundException;
@@ -45,12 +45,6 @@ public class EditNodeFragment extends Fragment {
     private int position = 0;
     private Button todo, priority;
 
-    static private void setupTimeStampButtons() {
-        String scheduleText = node.getOrgNodePayload().getTimestamp(OrgNodeTimeDate.TYPE.Scheduled);
-        String deadlineText = node.getOrgNodePayload().getTimestamp(OrgNodeTimeDate.TYPE.Deadline);
-        if (scheduleText.length() > 0) schedule_date.setText(scheduleText);
-        if (deadlineText.length() > 0) deadline_date.setText(deadlineText);
-    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -58,13 +52,12 @@ public class EditNodeFragment extends Fragment {
         final View rootView = inflater.inflate(R.layout.edit_node_entry, container, false);
         context = getContext();
 
-        todo = (Button) rootView.findViewById(R.id.todo);
-        priority = (Button) rootView.findViewById(R.id.priority);
+        todo          = (Button) rootView.findViewById(R.id.todo);
+        priority      = (Button) rootView.findViewById(R.id.priority);
         schedule_date = (Button) rootView.findViewById(R.id.scheduled_date);
-
         deadline_date = (Button) rootView.findViewById(R.id.deadline_date);
 
-        title = (EditText)getActivity().findViewById(R.id.title);
+        title   = (EditText) getActivity().findViewById(R.id.title);
         content = (EditText) getActivity().findViewById(R.id.content);
 
         Bundle bundle = getArguments();
@@ -74,7 +67,6 @@ public class EditNodeFragment extends Fragment {
             position = bundle.getInt(OrgContract.OrgData.POSITION, 0);
             Log.v("position","position : "+position);
         }
-
 
         ContentResolver resolver = getActivity().getContentResolver();
 
@@ -94,7 +86,6 @@ public class EditNodeFragment extends Fragment {
         todo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                currentDateTimeDialog = OrgNodeTimeDate.TYPE.Scheduled;
                 new TodoDialog(getContext(), node, todo);
             }
         });
@@ -150,11 +141,15 @@ public class EditNodeFragment extends Fragment {
 
         setupTimeStampButtons();
 
-        // Add spinner for filename
-//        addFileNameSpinner(rootView);
-
         getActivity().invalidateOptionsMenu();
         return rootView;
+    }
+
+    static private void setupTimeStampButtons() {
+        String scheduleText = node.getScheduled().getDate();
+        String deadlineText = node.getDeadline().getDate();
+        if (scheduleText.length() > 0) schedule_date.setText(scheduleText);
+        if (deadlineText.length() > 0) deadline_date.setText(deadlineText);
     }
 
     private void createNewNode(ContentResolver resolver){
@@ -187,15 +182,12 @@ public class EditNodeFragment extends Fragment {
 
         node.name = title.getText().toString();
         node.setPayload(payload);
-        if(nodeId > -1){
-            Log.v("sync","hello");
-            node.write(getContext());
-            OrgEdit.updateFile(node, context);
-        } else {
-            node.shiftNextSiblingNodes(context);
-            node.write(getContext());
-            OrgEdit.updateFile(node, context);
-        }
+
+        if(nodeId <0 ) node.shiftNextSiblingNodes(context);
+
+        node.write(getContext());
+        OrgFile.updateFile(node, context);
+
     }
 
     /**

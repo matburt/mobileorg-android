@@ -5,25 +5,24 @@ import android.net.Uri;
 public class OrgContract {
 	public static final String CONTENT_AUTHORITY = "com.matburt.mobileorg2.OrgData.OrgProvider";
 	private static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
-	private static final String PATH_ORGDATA = "orgdata";
-	private static final String PATH_EDITS = "edits";
-	private static final String PATH_TODOS = "todos";
-	private static final String PATH_TAGS = "tags";
-	private static final String PATH_PRIORITIES = "priorities";
-	private static final String PATH_FILES = "files";
+	private static final String PATH_ORGDATA = OrgDatabase.Tables.ORGDATA;
+	private static final String PATH_TIMESTAMPS = OrgDatabase.Tables.TIMESTAMPS;
+	private static final String PATH_TODOS = OrgDatabase.Tables.TODOS;
+	private static final String PATH_TAGS = OrgDatabase.Tables.TAGS;
+	private static final String PATH_PRIORITIES = OrgDatabase.Tables.PRIORITIES;
+	private static final String PATH_FILES = OrgDatabase.Tables.FILES;
 	private static final String PATH_SEARCH = "search";
 	static public long TODO_ID = -2;
 	static public long AGENDA_ID = -3;
 	public static String NODE_ID = "node_id";
 	public static String PARENT_ID = "parent_id";
 	public static String POSITION = "position";
-	interface EditsColumns {
-		String ID = "_id";
+	interface TimestampsColumns {
+		String NODE_ID = "node_id";
+		String FILE_ID = "file_id";
 		String TYPE = "type";
-		String DATA_ID = "data_id";
-		String TITLE = "title";
-		String OLD_VALUE = "old_value";
-		String NEW_VALUE = "new_value";
+		String TIMESTAMP = "timestamp";
+		String ALL_DAY = "all_day";
 	}
 	interface OrgDataColumns {
 		String ID = "_id";
@@ -99,24 +98,19 @@ public class OrgContract {
 		}
 	}
 	
-	public static class Edits implements EditsColumns {
-		public static final Uri CONTENT_URI = 
-				BASE_CONTENT_URI.buildUpon().appendPath(PATH_EDITS).build();
-		
-		public static final String[] DEFAULT_COLUMNS = { ID, DATA_ID, TITLE,
-				TYPE, OLD_VALUE, NEW_VALUE };
-		
-		public static String getId(Uri uri) {
-			return uri.getPathSegments().get(1);
-		}
-		
-		public static Uri buildIdUri(String id) {
-			return CONTENT_URI.buildUpon().appendPath(id).build();
-		}
-		
+	public static class Timestamps implements TimestampsColumns {
+		public static final Uri CONTENT_URI =
+				BASE_CONTENT_URI.buildUpon().appendPath(PATH_TIMESTAMPS).build();
+
 		public static Uri buildIdUri(Long id) {
-			return buildIdUri(id.toString());
+			return CONTENT_URI.buildUpon().appendPath(id.toString()).build();
 		}
+
+		public static String getId(Uri uri) {
+			return uri.getLastPathSegment();
+		}
+
+		public static final String[] DEFAULT_COLUMNS = {NODE_ID, FILE_ID, TYPE, TIMESTAMP, ALL_DAY};
 	}
 	
 	public static class Files implements FilesColumns {
@@ -169,5 +163,18 @@ public class OrgContract {
 		public static String getSearchTerm(Uri uri) {
 			return uri.getLastPathSegment();
 		}
+	}
+
+	/**
+	 * @param tableName
+	 * @param columns
+     * @return the list of column prefixed by the table name and separated by a ","
+     */
+	public static String formatColumns(String tableName, String[] columns){
+		String result = "";
+		for (String column : columns)
+			result += tableName + "." + column + ", ";
+		result = result.substring(0, result.length() - 2); // removing the last ", "
+		return result;
 	}
 }

@@ -131,7 +131,7 @@ public class OrgNodePayload {
 		if(timeDate.matchStart > -1) cleanPayload.delete(timeDate.matchStart, timeDate.matchEnd);
 		cachedTimestamps.put(type, timeDate.toString());
 
-		return result.toString();
+		return cachedTimestamps.get(type);
 	}
 
 	public void insertOrReplaceDate(OrgNodeTimeDate date) {

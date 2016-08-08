@@ -9,6 +9,7 @@ import android.util.Log;
 
 import com.matburt.mobileorg2.OrgData.OrgContract.Files;
 import com.matburt.mobileorg2.OrgData.OrgContract.OrgData;
+import com.matburt.mobileorg2.OrgData.OrgContract.Timestamps;
 import com.matburt.mobileorg2.Synchronizers.Synchronizer;
 import com.matburt.mobileorg2.util.FileUtils;
 import com.matburt.mobileorg2.util.OrgFileNotFoundException;
@@ -181,6 +182,21 @@ public class OrgFile {
         }
     }
 
+
+	/**
+	 * Edit the org file on disk to incorporate new modifications
+	 * @param node
+	 */
+	static public void updateFile(OrgNode node, Context context) {
+		ContentResolver resolver = context.getContentResolver();
+		try {
+			OrgFile file = new OrgFile(node.fileId, resolver);
+			file.updateFile(file.toString(resolver), context);
+		} catch (OrgFileNotFoundException e) {
+			e.printStackTrace();
+		}
+	}
+
 	/**
 	 * 1) Remove all OrgNode(s) associated with this file from the DB
 	 * 2) Remove this OrgFile node from the DB
@@ -217,6 +233,8 @@ public class OrgFile {
     }
 
 	private long removeFileOrgDataNodes(ContentResolver resolver) {
+		resolver.delete(Timestamps.CONTENT_URI, Timestamps.FILE_ID + "=?",
+				new String[]{Long.toString(id)});
 
 		int total = resolver.delete(OrgData.CONTENT_URI, OrgData.FILE_ID + "=?",
                 new String[]{Long.toString(id)});

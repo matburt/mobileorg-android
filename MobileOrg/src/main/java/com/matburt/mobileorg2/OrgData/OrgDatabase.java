@@ -2,36 +2,53 @@ package com.matburt.mobileorg2.OrgData;
 
 import android.content.ContentValues;
 import android.content.Context;
-import android.database.DatabaseUtils.InsertHelper;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
-import android.support.v4.util.Pair;
 import android.util.Log;
 
 import com.matburt.mobileorg2.OrgData.OrgContract.OrgData;
 
 import java.util.HashMap;
+import java.util.Map;
 
 public class OrgDatabase extends SQLiteOpenHelper {
 	private static final String DATABASE_NAME = "MobileOrg.db";
 	private static final int DATABASE_VERSION = 5;
 	private static OrgDatabase mInstance = null;
-	private int orgdata_nameColumn;
-	private int orgdata_todoColumn;
-	private int orgdata_tagsColumn;
-	private int orgdata_tagsInheritedColumn;
-	private int orgdata_priorityColumn;
-	private int orgdata_parentidColumn;
-	private int orgdata_fileidColumn;
-    private int orgdata_levelColumn;
-    private int orgdata_positionColumn;
-	private InsertHelper orgdataInsertHelper;
+	private SQLiteStatement orgdataInsertStatement;
 	private SQLiteStatement addPayloadStatement;
 	private SQLiteStatement addTimestampsStatement;
 
+	public interface Tables {
+		String TIMESTAMPS = "timestamps";
+		String FILES = "files";
+		String PRIORITIES = "priorities";
+		String TAGS = "tags";
+		String TODOS = "todos";
+		String ORGDATA = "orgdata";
+	}
+
 	private OrgDatabase(Context context) {
 		super(context, DATABASE_NAME, null, DATABASE_VERSION);
+
+		orgdataInsertStatement = getWritableDatabase()
+				.compileStatement("INSERT INTO " + Tables.ORGDATA+ " ("
+                        + OrgData.NAME +           ", "
+                        + OrgData.TODO +           ", "
+                        + OrgData.PRIORITY +       ", "
+                        + OrgData.PARENT_ID +      ", "
+                        + OrgData.FILE_ID +        ", "
+                        + OrgData.TAGS +           ", "
+                        + OrgData.TAGS_INHERITED + ", "
+                        + OrgData.LEVEL +          ", "
+                        + OrgData.POSITION +       ") "
+                        + "VALUES (?,?,?,?,?,?,?,?,?)");
+
+		addPayloadStatement = getWritableDatabase()
+				.compileStatement("UPDATE " + Tables.ORGDATA + " SET payload=? WHERE _id=?");
+		addTimestampsStatement = getWritableDatabase()
+				.compileStatement("INSERT INTO " + Tables.TIMESTAMPS + " (timestamp, file_id, node_id, type, all_day) VALUES (?,?,?,?,?) ");
 	}
 
 	/**
@@ -51,7 +68,7 @@ public class OrgDatabase extends SQLiteOpenHelper {
 
 	@Override
 	public void onCreate(SQLiteDatabase db) {
-		db.execSQL("CREATE TABLE IF NOT EXISTS files("
+		db.execSQL("CREATE TABLE IF NOT EXISTS files ("
 				+ "_id integer primary key autoincrement,"
 				+ "node_id integer,"
 				+ "filename text,"
@@ -70,14 +87,6 @@ public class OrgDatabase extends SQLiteOpenHelper {
 				+ "_id integer primary key autoincrement,"
 				+ "taggroup integer,"
 				+ "name text)");
-		db.execSQL("CREATE TABLE IF NOT EXISTS edits("
-				+ "_id integer primary key autoincrement,"
-				+ "type text,"
-				+ "title text,"
-				+ "data_id integer,"
-				+ "old_value text,"
-				+ "new_value text,"
-				+ "changed integer)");
 		db.execSQL("CREATE TABLE IF NOT EXISTS orgdata ("
 				+ "_id integer primary key autoincrement,"
 				+ "parent_id integer default -1,"
@@ -94,6 +103,12 @@ public class OrgDatabase extends SQLiteOpenHelper {
 				+ "scheduled_date_only integer default 0,"
 				+ "deadline integer default -1,"
 				+ "deadline_date_only integer default 0)");
+		db.execSQL("CREATE TABLE IF NOT EXISTS timestamps ("
+				+ "file_id integer,"
+				+ "timestamp ,"
+				+ "type integer,"
+				+ "node_id integer,"
+				+ "all_day integer)");
 
 		ContentValues values = new ContentValues();
 		values.put("_id", "0");
@@ -117,7 +132,6 @@ public class OrgDatabase extends SQLiteOpenHelper {
 			db.execSQL("DROP TABLE IF EXISTS priorities");
 			db.execSQL("DROP TABLE IF EXISTS files");
 			db.execSQL("DROP TABLE IF EXISTS todos");
-			db.execSQL("DROP TABLE IF EXISTS edits");
 			db.execSQL("DROP TABLE IF EXISTS orgdata");
 			break;
 
@@ -129,49 +143,40 @@ public class OrgDatabase extends SQLiteOpenHelper {
 	}
 
 	public long fastInsertNode(OrgNode node) {
-		prepareOrgdataInsert();
-        orgdataInsertHelper.bind(orgdata_parentidColumn, node.parentId);
-		orgdataInsertHelper.bind(orgdata_nameColumn, node.name);
-		orgdataInsertHelper.bind(orgdata_todoColumn, node.todo);
-		orgdataInsertHelper.bind(orgdata_priorityColumn, node.priority);
-		orgdataInsertHelper.bind(orgdata_fileidColumn, node.fileId);
-		orgdataInsertHelper.bind(orgdata_tagsColumn, node.tags);
-		orgdataInsertHelper.bind(orgdata_tagsInheritedColumn, node.tags_inherited);
-        orgdataInsertHelper.bind(orgdata_levelColumn, node.level);
-        orgdataInsertHelper.bind(orgdata_positionColumn, node.position);
-		return orgdataInsertHelper.execute();
+      orgdataInsertStatement.bindString(1, node.name);
+      orgdataInsertStatement.bindString(2, node.todo);
+      orgdataInsertStatement.bindString(3, node.priority);
+      orgdataInsertStatement.bindLong(4, node.parentId);
+      orgdataInsertStatement.bindLong(5, node.fileId);
+      orgdataInsertStatement.bindString(6, node.tags);
+      orgdataInsertStatement.bindString(7, node.tags_inherited);
+      orgdataInsertStatement.bindLong(8, node.level);
+      orgdataInsertStatement.bindLong(9, node.position);
+
+      return orgdataInsertStatement.executeInsert();
 	}
 
-	public void fastInsertNodePayload(Long id, final String payload, final HashMap<OrgNodeTimeDate.TYPE, Pair<Long,Integer>> timestamps) {
-		if (addPayloadStatement == null)
-			addPayloadStatement = getWritableDatabase()
-					.compileStatement("UPDATE orgdata SET payload=?, scheduled=?, deadline=?, scheduled_date_only=?, deadline_date_only=? WHERE _id=?");
-		Log.v("time","payload : "+payload);
+	public void fastInsertTimestamp(Long id, Long fileId, final HashMap<OrgNodeTimeDate.TYPE, OrgNodeTimeDate> timestamps){
 		Log.v("time","db time : "+timestamps.get(OrgNodeTimeDate.TYPE.Scheduled));
+		for(Map.Entry<OrgNodeTimeDate.TYPE, OrgNodeTimeDate> entry: timestamps.entrySet()){
+			OrgNodeTimeDate timeDate = entry.getValue();
+			if(timeDate.getEpochTime() < 0) continue;
 
-		addPayloadStatement.bindString(1, payload);
-		addPayloadStatement.bindLong(2, timestamps.get(OrgNodeTimeDate.TYPE.Scheduled)!=null ? timestamps.get(OrgNodeTimeDate.TYPE.Scheduled).first: -1);
-		addPayloadStatement.bindLong(3, timestamps.get(OrgNodeTimeDate.TYPE.Deadline)!=null ? timestamps.get(OrgNodeTimeDate.TYPE.Deadline).first: -1);
-		addPayloadStatement.bindLong(4, timestamps.get(OrgNodeTimeDate.TYPE.Scheduled)!=null ? timestamps.get(OrgNodeTimeDate.TYPE.Scheduled).second: -1);
-		addPayloadStatement.bindLong(5, timestamps.get(OrgNodeTimeDate.TYPE.Deadline)!=null ? timestamps.get(OrgNodeTimeDate.TYPE.Deadline).second: -1);
-		addPayloadStatement.bindLong(6, id);
-		addPayloadStatement.execute();
+			addTimestampsStatement.bindLong(1, timeDate.getEpochTime());
+			addTimestampsStatement.bindLong(2, fileId);
+			addTimestampsStatement.bindLong(3, id);
+			addTimestampsStatement.bindLong(4, entry.getKey().ordinal());
+			addTimestampsStatement.bindLong(5, timeDate.isAllDay());
+			addTimestampsStatement.executeInsert();
+		}
 	}
 
-	private void prepareOrgdataInsert() {
-		if(this.orgdataInsertHelper == null) {
-			this.orgdataInsertHelper = new InsertHelper(getWritableDatabase(), Tables.ORGDATA);
-			this.orgdata_nameColumn = orgdataInsertHelper.getColumnIndex(OrgData.NAME);
-			this.orgdata_todoColumn = orgdataInsertHelper.getColumnIndex(OrgData.TODO);
-			this.orgdata_priorityColumn = orgdataInsertHelper.getColumnIndex(OrgData.PRIORITY);
-			this.orgdata_parentidColumn = orgdataInsertHelper.getColumnIndex(OrgData.PARENT_ID);
-			this.orgdata_fileidColumn = orgdataInsertHelper.getColumnIndex(OrgData.FILE_ID);
-			this.orgdata_tagsColumn = orgdataInsertHelper.getColumnIndex(OrgData.TAGS);
-			this.orgdata_tagsInheritedColumn = orgdataInsertHelper.getColumnIndex(OrgData.TAGS_INHERITED);
-            this.orgdata_levelColumn = orgdataInsertHelper.getColumnIndex(OrgData.LEVEL);
-            this.orgdata_positionColumn = orgdataInsertHelper.getColumnIndex(OrgData.POSITION);
-		}
-		orgdataInsertHelper.prepareForInsert();
+	public void fastInsertNodePayload(Long id, final String payload) {
+
+		Log.v("time","payload : "+payload);
+		addPayloadStatement.bindString(1, payload);
+		addPayloadStatement.bindLong(2, id);
+		addPayloadStatement.execute();
 	}
 
 	public void beginTransaction() {
@@ -183,12 +188,5 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		getWritableDatabase().endTransaction();
 	}
 
-	public interface Tables {
-		String EDITS = "edits";
-		String FILES = "files";
-		String PRIORITIES = "priorities";
-		String TAGS = "tags";
-		String TODOS = "todos";
-		String ORGDATA = "orgdata";
-	}
+
 }

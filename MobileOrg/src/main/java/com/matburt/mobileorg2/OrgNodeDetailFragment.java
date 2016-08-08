@@ -117,13 +117,10 @@ public class OrgNodeDetailFragment extends Fragment {
 //                        OrgContract.OrgData.DEFAULT_COLUMNS, OrgContract.Todos.ISDONE + "=1",
 //                        null, OrgContract.OrgData.NAME_SORT);
 
-                String allColumns = "";
-                for (String column : OrgContract.OrgData.DEFAULT_COLUMNS)
-                    allColumns += OrgDatabase.Tables.ORGDATA + "." + column + ", ";
-                allColumns = allColumns.substring(0, allColumns.length() - 2);
-                Log.v("todo", "allcol : " + allColumns);
-
-                String todoQuery = "SELECT " + allColumns +
+                String todoQuery = "SELECT " +
+                        OrgContract.formatColumns(
+                                OrgDatabase.Tables.ORGDATA,
+                                OrgContract.OrgData.DEFAULT_COLUMNS) +
                         " FROM orgdata JOIN todos " +
                         " ON todos.name = orgdata.todo WHERE todos.isdone=0";
 

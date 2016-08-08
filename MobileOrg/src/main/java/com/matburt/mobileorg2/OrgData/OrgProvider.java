@@ -10,10 +10,10 @@ import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.util.Log;
 
-import com.matburt.mobileorg2.OrgData.OrgContract.Edits;
 import com.matburt.mobileorg2.OrgData.OrgContract.Files;
 import com.matburt.mobileorg2.OrgData.OrgContract.OrgData;
 import com.matburt.mobileorg2.OrgData.OrgContract.Search;
+import com.matburt.mobileorg2.OrgData.OrgContract.Timestamps;
 import com.matburt.mobileorg2.OrgData.OrgDatabase.Tables;
 import com.matburt.mobileorg2.util.SelectionBuilder;
 
@@ -26,35 +26,34 @@ public class OrgProvider extends ContentProvider {
     private static final int FILES = 200;
     private static final int FILES_ID = 201;
     private static final int FILES_FILENAME = 202;
-    private static final int EDITS = 300;
-    private static final int EDITS_ID = 301;
     private static final int TAGS = 400;
     private static final int TODOS = 500;
     private static final int PRIORITIES = 600;
     private static final int SEARCH = 700;
-    private static final int TIMED = 710;
+    private static final int TIMESTAMPS = 800;
+    private static final int TIMESTAMPS_ID = 801;
     private static final UriMatcher uriMatcher = buildUriMatcher();
 
     private static UriMatcher buildUriMatcher() {
         final UriMatcher uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
-        uriMatcher.addURI(AUTHORITY, "orgdata", ORGDATA);
-        uriMatcher.addURI(AUTHORITY, "orgdata/*", ORGDATA_ID);
-        uriMatcher.addURI(AUTHORITY, "orgdata/*/parent", ORGDATA_PARENT);
-        uriMatcher.addURI(AUTHORITY, "orgdata/*/children", ORGDATA_CHILDREN);
+        uriMatcher.addURI(AUTHORITY, Tables.ORGDATA, ORGDATA);
+        uriMatcher.addURI(AUTHORITY, Tables.ORGDATA + "/*", ORGDATA_ID);
+        uriMatcher.addURI(AUTHORITY, Tables.ORGDATA + "/*/parent", ORGDATA_PARENT);
+        uriMatcher.addURI(AUTHORITY, Tables.ORGDATA + "/*/children", ORGDATA_CHILDREN);
 
-        uriMatcher.addURI(AUTHORITY, "files", FILES);
-        uriMatcher.addURI(AUTHORITY, "files/*", FILES_ID);
-        uriMatcher.addURI(AUTHORITY, "files/*/filename", FILES_FILENAME);
+        uriMatcher.addURI(AUTHORITY, Tables.FILES, FILES);
+        uriMatcher.addURI(AUTHORITY, Tables.FILES + "/*", FILES_ID);
+        uriMatcher.addURI(AUTHORITY, Tables.FILES + "/*/filename", FILES_FILENAME);
 
-        uriMatcher.addURI(AUTHORITY, "edits", EDITS);
-        uriMatcher.addURI(AUTHORITY, "edits/*", EDITS_ID);
-
-        uriMatcher.addURI(AUTHORITY, "tags", TAGS);
-        uriMatcher.addURI(AUTHORITY, "todos", TODOS);
-        uriMatcher.addURI(AUTHORITY, "priorities", PRIORITIES);
+        uriMatcher.addURI(AUTHORITY, Tables.TAGS , TAGS);
+        uriMatcher.addURI(AUTHORITY, Tables.TODOS, TODOS);
+        uriMatcher.addURI(AUTHORITY, Tables.PRIORITIES, PRIORITIES);
 
         uriMatcher.addURI(AUTHORITY, "search/*", SEARCH);
-        uriMatcher.addURI(AUTHORITY, "timed/*", TIMED);
+
+        uriMatcher.addURI(AUTHORITY, Tables.TIMESTAMPS, TIMESTAMPS);
+        uriMatcher.addURI(AUTHORITY, Tables.TIMESTAMPS + "/*", TIMESTAMPS_ID);
+
 
         return uriMatcher;
     }
@@ -143,16 +142,16 @@ public class OrgProvider extends ContentProvider {
                 return builder.table(Tables.FILES).where(Files.ID + "=?", Files.getId(uri));
             case FILES_FILENAME:
                 return builder.table(Tables.FILES).where(Files.FILENAME + "=?", Files.getFilename(uri));
-            case EDITS:
-                return builder.table(Tables.EDITS);
-            case EDITS_ID:
-                return builder.table(Tables.EDITS).where(Edits.ID + "=?", Edits.getId(uri));
             case TAGS:
                 return builder.table(Tables.TAGS);
             case TODOS:
                 return builder.table(Tables.TODOS);
             case PRIORITIES:
                 return builder.table(Tables.PRIORITIES);
+            case TIMESTAMPS:
+                return builder.table(Tables.TIMESTAMPS);
+            case TIMESTAMPS_ID:
+                return builder.table(Tables.TIMESTAMPS).where(Timestamps.NODE_ID+"=?", Timestamps.getId(uri));
             case SEARCH:
                 final String search = Search.getSearchTerm(uri);
                 return builder.table(Tables.ORGDATA).where("name LIKE %?%", search);
@@ -171,9 +170,6 @@ public class OrgProvider extends ContentProvider {
             case FILES:
                 tableName = Tables.FILES;
                 break;
-            case EDITS:
-                tableName = Tables.EDITS;
-                break;
             case TAGS:
                 tableName = Tables.TAGS;
                 break;
@@ -183,7 +179,12 @@ public class OrgProvider extends ContentProvider {
             case PRIORITIES:
                 tableName = Tables.PRIORITIES;
                 break;
-
+            case TIMESTAMPS:
+                tableName = Tables.TIMESTAMPS;
+                break;
+            case TIMESTAMPS_ID:
+                tableName = Tables.TIMESTAMPS;
+                break;
             default:
                 throw new IllegalArgumentException("Unknown URI " + uri);
         }
