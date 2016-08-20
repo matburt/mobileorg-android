@@ -1,11 +1,11 @@
-package com.matburt.mobileorg2.Synchronizers;
+package com.matburt.mobileorg.Synchronizers;
 
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
-import com.matburt.mobileorg2.util.OrgUtils;
+import com.matburt.mobileorg.util.OrgUtils;
 
 /**
  * Created by bcoste on 17/06/16.

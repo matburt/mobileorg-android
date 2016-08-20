@@ -1,4 +1,4 @@
-package com.matburt.mobileorg2.OrgData;
+package com.matburt.mobileorg.OrgData;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -16,8 +16,8 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.matburt.mobileorg2.OrgData.OrgContract.Timestamps;
-import com.matburt.mobileorg2.OrgData.OrgDatabase.Tables;
+import com.matburt.mobileorg.OrgData.OrgContract.Timestamps;
+import com.matburt.mobileorg.OrgData.OrgDatabase.Tables;
 
 public class OrgNodeTimeDate {
 	public TYPE type = TYPE.Scheduled;

@@ -1,4 +1,4 @@
-package com.matburt.mobileorg2.OrgData;
+package com.matburt.mobileorg.OrgData;
 
 import android.content.ContentResolver;
 import android.content.Context;
@@ -7,9 +7,9 @@ import android.support.v4.util.Pair;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.matburt.mobileorg2.Gui.FileDecryptionActivity;
-import com.matburt.mobileorg2.util.FileUtils;
-import com.matburt.mobileorg2.util.PreferenceUtils;
+import com.matburt.mobileorg.Gui.FileDecryptionActivity;
+import com.matburt.mobileorg.util.FileUtils;
+import com.matburt.mobileorg.util.PreferenceUtils;
 
 import java.io.BufferedReader;
 import java.io.IOException;

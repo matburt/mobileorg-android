@@ -1,4 +1,4 @@
-package com.matburt.mobileorg2;
+package com.matburt.mobileorg;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -10,9 +10,9 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 
-import com.matburt.mobileorg2.OrgData.OrgContract;
-import com.matburt.mobileorg2.OrgData.OrgNode;
-import com.matburt.mobileorg2.util.OrgNodeNotFoundException;
+import com.matburt.mobileorg.OrgData.OrgContract;
+import com.matburt.mobileorg.OrgData.OrgNode;
+import com.matburt.mobileorg.util.OrgNodeNotFoundException;
 
 /**
  * An activity representing a single OrgNode detail screen. This

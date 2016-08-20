@@ -1,4 +1,4 @@
-package com.matburt.mobileorg2.Gui.Outline;
+package com.matburt.mobileorg.Gui.Outline;
 
 import android.content.ContentResolver;
 import android.content.Context;
@@ -20,14 +20,14 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.matburt.mobileorg2.Gui.Theme.DefaultTheme;
-import com.matburt.mobileorg2.OrgData.OrgContract;
-import com.matburt.mobileorg2.OrgData.OrgFile;
-import com.matburt.mobileorg2.OrgData.OrgProviderUtils;
-import com.matburt.mobileorg2.OrgNodeDetailActivity;
-import com.matburt.mobileorg2.OrgNodeDetailFragment;
-import com.matburt.mobileorg2.OrgNodeListActivity;
-import com.matburt.mobileorg2.R;
+import com.matburt.mobileorg.Gui.Theme.DefaultTheme;
+import com.matburt.mobileorg.OrgData.OrgContract;
+import com.matburt.mobileorg.OrgData.OrgFile;
+import com.matburt.mobileorg.OrgData.OrgProviderUtils;
+import com.matburt.mobileorg.OrgNodeDetailActivity;
+import com.matburt.mobileorg.OrgNodeDetailFragment;
+import com.matburt.mobileorg.OrgNodeListActivity;
+import com.matburt.mobileorg.R;
 
 import java.util.ArrayList;
 import java.util.List;

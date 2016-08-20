@@ -1,4 +1,4 @@
-package com.matburt.mobileorg2;
+package com.matburt.mobileorg;
 
 import android.app.DatePickerDialog;
 import android.app.Dialog;
@@ -23,12 +23,12 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TimePicker;
 
-import com.matburt.mobileorg2.OrgData.OrgContract;
-import com.matburt.mobileorg2.OrgData.OrgFile;
-import com.matburt.mobileorg2.OrgData.OrgNode;
-import com.matburt.mobileorg2.OrgData.OrgNodeTimeDate;
-import com.matburt.mobileorg2.util.OrgNodeNotFoundException;
-import com.matburt.mobileorg2.util.TodoDialog;
+import com.matburt.mobileorg.OrgData.OrgContract;
+import com.matburt.mobileorg.OrgData.OrgFile;
+import com.matburt.mobileorg.OrgData.OrgNode;
+import com.matburt.mobileorg.OrgData.OrgNodeTimeDate;
+import com.matburt.mobileorg.util.OrgNodeNotFoundException;
+import com.matburt.mobileorg.util.TodoDialog;
 
 import java.util.ArrayList;
 import java.util.Calendar;

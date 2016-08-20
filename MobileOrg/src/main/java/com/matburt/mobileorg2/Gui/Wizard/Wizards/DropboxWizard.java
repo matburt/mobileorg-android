@@ -1,4 +1,4 @@
-package com.matburt.mobileorg2.Gui.Wizard.Wizards;
+package com.matburt.mobileorg.Gui.Wizard.Wizards;
 
 import android.app.Activity;
 import android.content.Context;
@@ -21,9 +21,9 @@ import com.dropbox.client2.exception.DropboxException;
 import com.dropbox.client2.session.AccessTokenPair;
 import com.dropbox.client2.session.AppKeyPair;
 import com.dropbox.client2.session.Session.AccessType;
-import com.matburt.mobileorg2.Gui.Wizard.FolderAdapter;
-import com.matburt.mobileorg2.Gui.Wizard.WizardView;
-import com.matburt.mobileorg2.R;
+import com.matburt.mobileorg.Gui.Wizard.FolderAdapter;
+import com.matburt.mobileorg.Gui.Wizard.WizardView;
+import com.matburt.mobileorg.R;
 
 public class DropboxWizard extends Wizard {
 	

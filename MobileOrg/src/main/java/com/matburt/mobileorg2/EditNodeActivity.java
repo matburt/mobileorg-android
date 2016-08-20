@@ -1,4 +1,4 @@
-package com.matburt.mobileorg2;
+package com.matburt.mobileorg;
 
 import android.content.Intent;
 import android.os.Bundle;

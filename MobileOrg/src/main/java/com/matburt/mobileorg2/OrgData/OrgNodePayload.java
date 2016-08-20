@@ -1,4 +1,4 @@
-package com.matburt.mobileorg2.OrgData;
+package com.matburt.mobileorg.OrgData;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;

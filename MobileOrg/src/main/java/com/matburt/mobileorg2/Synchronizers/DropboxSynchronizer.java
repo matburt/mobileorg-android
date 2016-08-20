@@ -1,4 +1,4 @@
-package com.matburt.mobileorg2.Synchronizers;
+package com.matburt.mobileorg.Synchronizers;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -15,9 +15,9 @@ import com.dropbox.client2.exception.DropboxUnlinkedException;
 import com.dropbox.client2.session.AccessTokenPair;
 import com.dropbox.client2.session.AppKeyPair;
 import com.dropbox.client2.session.Session.AccessType;
-import com.matburt.mobileorg2.R;
-import com.matburt.mobileorg2.util.FileUtils;
-import com.matburt.mobileorg2.util.OrgUtils;
+import com.matburt.mobileorg.R;
+import com.matburt.mobileorg.util.FileUtils;
+import com.matburt.mobileorg.util.OrgUtils;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;

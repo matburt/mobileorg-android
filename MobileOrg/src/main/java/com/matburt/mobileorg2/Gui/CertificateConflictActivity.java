@@ -1,4 +1,4 @@
-package com.matburt.mobileorg2.Gui;
+package com.matburt.mobileorg.Gui;
 
 import android.app.Activity;
 import android.content.SharedPreferences;
@@ -9,7 +9,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.matburt.mobileorg2.R;
+import com.matburt.mobileorg.R;
 
 public class CertificateConflictActivity extends Activity {
 

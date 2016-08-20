@@ -1,4 +1,4 @@
-package com.matburt.mobileorg2.OrgData;
+package com.matburt.mobileorg.OrgData;
 
 import android.content.ContentResolver;
 import android.util.Log;

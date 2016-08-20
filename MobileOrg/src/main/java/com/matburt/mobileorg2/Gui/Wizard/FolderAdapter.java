@@ -1,4 +1,4 @@
-package com.matburt.mobileorg2.Gui.Wizard;
+package com.matburt.mobileorg.Gui.Wizard;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -10,7 +10,7 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.TextView;
 
-import com.matburt.mobileorg2.R;
+import com.matburt.mobileorg.R;
 
 import java.util.ArrayList;
 

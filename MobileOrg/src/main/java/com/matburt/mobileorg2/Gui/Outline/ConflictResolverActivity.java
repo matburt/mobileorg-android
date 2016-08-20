@@ -1,4 +1,4 @@
-package com.matburt.mobileorg2.Gui.Outline;
+package com.matburt.mobileorg.Gui.Outline;
 
 import android.content.ContentValues;
 import android.content.Intent;
@@ -13,14 +13,14 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.EditText;
 
-import com.matburt.mobileorg2.OrgData.OrgContract;
-import com.matburt.mobileorg2.OrgData.OrgFile;
-import com.matburt.mobileorg2.OrgNodeListActivity;
-import com.matburt.mobileorg2.R;
-import com.matburt.mobileorg2.Synchronizers.JGitWrapper;
-import com.matburt.mobileorg2.Synchronizers.Synchronizer;
-import com.matburt.mobileorg2.util.OrgFileNotFoundException;
-import com.matburt.mobileorg2.util.OrgUtils;
+import com.matburt.mobileorg.OrgData.OrgContract;
+import com.matburt.mobileorg.OrgData.OrgFile;
+import com.matburt.mobileorg.OrgNodeListActivity;
+import com.matburt.mobileorg.R;
+import com.matburt.mobileorg.Synchronizers.JGitWrapper;
+import com.matburt.mobileorg.Synchronizers.Synchronizer;
+import com.matburt.mobileorg.util.OrgFileNotFoundException;
+import com.matburt.mobileorg.util.OrgUtils;
 
 public class ConflictResolverActivity extends AppCompatActivity {
 

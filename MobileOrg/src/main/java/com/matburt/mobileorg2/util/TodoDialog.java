@@ -1,4 +1,4 @@
-package com.matburt.mobileorg2.util;
+package com.matburt.mobileorg.util;
 
 import android.content.Context;
 import android.content.DialogInterface;
@@ -11,9 +11,9 @@ import android.text.style.ForegroundColorSpan;
 import android.view.View;
 import android.widget.Button;
 
-import com.matburt.mobileorg2.OrgData.OrgNode;
-import com.matburt.mobileorg2.OrgData.OrgProviderUtils;
-import com.matburt.mobileorg2.R;
+import com.matburt.mobileorg.OrgData.OrgNode;
+import com.matburt.mobileorg.OrgData.OrgProviderUtils;
+import com.matburt.mobileorg.R;
 
 import java.util.ArrayList;
 

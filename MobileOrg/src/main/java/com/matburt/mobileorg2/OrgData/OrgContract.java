@@ -1,9 +1,9 @@
-package com.matburt.mobileorg2.OrgData;
+package com.matburt.mobileorg.OrgData;
 
 import android.net.Uri;
 
 public class OrgContract {
-	public static final String CONTENT_AUTHORITY = "com.matburt.mobileorg2.OrgData.OrgProvider";
+	public static final String CONTENT_AUTHORITY = "com.matburt.mobileorg.OrgData.OrgProvider";
 	private static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
 	private static final String PATH_ORGDATA = OrgDatabase.Tables.ORGDATA;
 	private static final String PATH_TIMESTAMPS = OrgDatabase.Tables.TIMESTAMPS;

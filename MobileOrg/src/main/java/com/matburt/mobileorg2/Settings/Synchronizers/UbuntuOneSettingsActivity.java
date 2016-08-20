@@ -1,4 +1,4 @@
-package com.matburt.mobileorg2.Settings.Synchronizers;
+package com.matburt.mobileorg.Settings.Synchronizers;
 
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
@@ -8,7 +8,7 @@ import android.preference.Preference.OnPreferenceClickListener;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
 
-import com.matburt.mobileorg2.R;
+import com.matburt.mobileorg.R;
 
 public class UbuntuOneSettingsActivity extends PreferenceActivity implements OnPreferenceClickListener, OnSharedPreferenceChangeListener
 {

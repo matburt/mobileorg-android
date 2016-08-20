@@ -9,7 +9,7 @@
     android:divider="?android:attr/dividerHorizontal"
     android:orientation="horizontal"
     android:showDividers="middle"
-    tools:context="com.matburt.mobileorg2.OrgNodeListActivity">
+    tools:context="com.matburt.mobileorg.OrgNodeListActivity">
 
     <!--
     This layout is a two-pane layout for the OrgNodes
@@ -20,13 +20,13 @@
     <android.support.v7.widget.RecyclerView xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
         android:id="@+id/orgnode_list"
-        android:name="com.matburt.mobileorg2.OrgNodeListFragment"
+        android:name="com.matburt.mobileorg.OrgNodeListFragment"
         android:layout_width="@dimen/item_width"
         android:layout_height="match_parent"
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
         app:layoutManager="LinearLayoutManager"
-        tools:context="com.matburt.mobileorg2.OrgNodeListActivity"
+        tools:context="com.matburt.mobileorg.OrgNodeListActivity"
         tools:listitem="@layout/outline_item" />
 
     <FrameLayout

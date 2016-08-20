@@ -1,4 +1,4 @@
-package com.matburt.mobileorg2.OrgData;
+package com.matburt.mobileorg.OrgData;
 
 import android.content.ContentProvider;
 import android.content.ContentUris;
@@ -10,12 +10,12 @@ import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.util.Log;
 
-import com.matburt.mobileorg2.OrgData.OrgContract.Files;
-import com.matburt.mobileorg2.OrgData.OrgContract.OrgData;
-import com.matburt.mobileorg2.OrgData.OrgContract.Search;
-import com.matburt.mobileorg2.OrgData.OrgContract.Timestamps;
-import com.matburt.mobileorg2.OrgData.OrgDatabase.Tables;
-import com.matburt.mobileorg2.util.SelectionBuilder;
+import com.matburt.mobileorg.OrgData.OrgContract.Files;
+import com.matburt.mobileorg.OrgData.OrgContract.OrgData;
+import com.matburt.mobileorg.OrgData.OrgContract.Search;
+import com.matburt.mobileorg.OrgData.OrgContract.Timestamps;
+import com.matburt.mobileorg.OrgData.OrgDatabase.Tables;
+import com.matburt.mobileorg.util.SelectionBuilder;
 
 public class OrgProvider extends ContentProvider {
     public static final String AUTHORITY = OrgContract.CONTENT_AUTHORITY;

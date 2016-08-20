@@ -1,4 +1,4 @@
-package com.matburt.mobileorg2.Settings;
+package com.matburt.mobileorg.Settings;
 
 import android.app.AlertDialog;
 import android.content.Context;
@@ -14,13 +14,13 @@ import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.text.TextUtils;
 
-import com.matburt.mobileorg2.OrgData.OrgProviderUtils;
-import com.matburt.mobileorg2.R;
-import com.matburt.mobileorg2.Settings.Synchronizers.SDCardSettingsActivity;
-import com.matburt.mobileorg2.Settings.Synchronizers.ScpSettingsActivity;
-import com.matburt.mobileorg2.Settings.Synchronizers.UbuntuOneSettingsActivity;
-import com.matburt.mobileorg2.Settings.Synchronizers.WebDAVSettingsActivity;
-import com.matburt.mobileorg2.util.OrgUtils;
+import com.matburt.mobileorg.OrgData.OrgProviderUtils;
+import com.matburt.mobileorg.R;
+import com.matburt.mobileorg.Settings.Synchronizers.SDCardSettingsActivity;
+import com.matburt.mobileorg.Settings.Synchronizers.ScpSettingsActivity;
+import com.matburt.mobileorg.Settings.Synchronizers.UbuntuOneSettingsActivity;
+import com.matburt.mobileorg.Settings.Synchronizers.WebDAVSettingsActivity;
+import com.matburt.mobileorg.util.OrgUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +30,7 @@ public class SettingsActivity extends PreferenceActivity implements
 		SharedPreferences.OnSharedPreferenceChangeListener {
 	public static final String KEY_SYNC_SOURCE = "syncSource";
 	public static final int SYNCHRONIZER_PREFERENCES = 10;
-	private static final String SYNCHRONIZER_PLUGIN_ACTION = "com.matburt.mobileorg2.SYNCHRONIZE";
+	private static final String SYNCHRONIZER_PLUGIN_ACTION = "com.matburt.mobileorg.SYNCHRONIZE";
 	private String KEY_AUTO_SYNC_INTERVAL;
 	private String KEY_VIEW_RECURSION_MAX;
 	private String KEY_DEFAULT_TODO;

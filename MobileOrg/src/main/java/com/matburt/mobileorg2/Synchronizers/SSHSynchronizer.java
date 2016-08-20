@@ -1,4 +1,4 @@
-package com.matburt.mobileorg2.Synchronizers;
+package com.matburt.mobileorg.Synchronizers;
 
 import android.content.Context;
 import android.util.Log;
@@ -6,7 +6,7 @@ import android.util.Log;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
-import com.matburt.mobileorg2.util.OrgUtils;
+import com.matburt.mobileorg.util.OrgUtils;
 
 import java.io.File;
 

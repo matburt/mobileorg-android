@@ -1,16 +1,16 @@
-package com.matburt.mobileorg2.Synchronizers;
+package com.matburt.mobileorg.Synchronizers;
 
 import android.content.ContentResolver;
 import android.content.Context;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.matburt.mobileorg2.Gui.SynchronizerNotification;
-import com.matburt.mobileorg2.Gui.SynchronizerNotificationCompat;
-import com.matburt.mobileorg2.OrgData.OrgFile;
-import com.matburt.mobileorg2.OrgData.OrgFileParser;
-import com.matburt.mobileorg2.R;
-import com.matburt.mobileorg2.util.OrgUtils;
+import com.matburt.mobileorg.Gui.SynchronizerNotification;
+import com.matburt.mobileorg.Gui.SynchronizerNotificationCompat;
+import com.matburt.mobileorg.OrgData.OrgFile;
+import com.matburt.mobileorg.OrgData.OrgFileParser;
+import com.matburt.mobileorg.R;
+import com.matburt.mobileorg.util.OrgUtils;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -29,7 +29,7 @@ import java.util.HashSet;
  * needed.
  */
 public abstract class Synchronizer {
-    public static final String SYNC_UPDATE = "com.matburt.mobileorg2.Synchronizer.action.SYNC_UPDATE";
+    public static final String SYNC_UPDATE = "com.matburt.mobileorg.Synchronizer.action.SYNC_UPDATE";
     public static final String SYNC_DONE = "sync_done";
     public static final String SYNC_START = "sync_start";
     public static final String SYNC_PROGRESS_UPDATE = "progress_update";

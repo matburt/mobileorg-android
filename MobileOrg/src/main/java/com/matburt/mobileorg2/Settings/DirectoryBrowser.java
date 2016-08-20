@@ -1,4 +1,4 @@
-package com.matburt.mobileorg2.Settings;
+package com.matburt.mobileorg.Settings;
 
 import android.content.Context;
 import android.util.Log;
@@ -7,8 +7,8 @@ import com.dropbox.client2.DropboxAPI;
 import com.dropbox.client2.DropboxAPI.Entry;
 import com.dropbox.client2.android.AndroidAuthSession;
 import com.dropbox.client2.exception.DropboxException;
-import com.matburt.mobileorg2.R;
-import com.matburt.mobileorg2.Synchronizers.UbuntuOneSynchronizer;
+import com.matburt.mobileorg.R;
+import com.matburt.mobileorg.Synchronizers.UbuntuOneSynchronizer;
 
 import java.io.File;
 import java.util.ArrayList;

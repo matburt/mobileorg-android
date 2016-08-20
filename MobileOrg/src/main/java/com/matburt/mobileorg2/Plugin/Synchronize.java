@@ -1,10 +1,10 @@
-package com.matburt.mobileorg2.Plugin;
+package com.matburt.mobileorg.Plugin;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
-import com.matburt.mobileorg2.Services.SyncService;
+import com.matburt.mobileorg.Services.SyncService;
 
 public final class Synchronize extends BroadcastReceiver
 {

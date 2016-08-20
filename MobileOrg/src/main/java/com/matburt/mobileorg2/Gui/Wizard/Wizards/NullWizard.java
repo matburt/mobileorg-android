@@ -1,4 +1,4 @@
-package com.matburt.mobileorg2.Gui.Wizard.Wizards;
+package com.matburt.mobileorg.Gui.Wizard.Wizards;
 
 import android.app.Activity;
 import android.content.Context;
@@ -7,8 +7,8 @@ import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
 
-import com.matburt.mobileorg2.Gui.Wizard.WizardView;
-import com.matburt.mobileorg2.R;
+import com.matburt.mobileorg.Gui.Wizard.WizardView;
+import com.matburt.mobileorg.R;
 
 public class NullWizard extends Wizard {
 

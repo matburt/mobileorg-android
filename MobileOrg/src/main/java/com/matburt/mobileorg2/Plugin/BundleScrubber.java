@@ -9,7 +9,7 @@
  * governing permissions and limitations under the License.
  */
 
-package com.matburt.mobileorg2.Plugin;
+package com.matburt.mobileorg.Plugin;
 
 import android.content.Intent;
 import android.os.Bundle;

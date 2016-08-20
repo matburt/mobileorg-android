@@ -1,4 +1,4 @@
-package com.matburt.mobileorg2.Gui.Wizard.Wizards;
+package com.matburt.mobileorg.Gui.Wizard.Wizards;
 
 import android.app.Activity;
 import android.content.Context;
@@ -9,10 +9,10 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ListView;
 
-import com.matburt.mobileorg2.Gui.Wizard.FolderAdapter;
-import com.matburt.mobileorg2.Gui.Wizard.LocalDirectoryBrowser;
-import com.matburt.mobileorg2.Gui.Wizard.WizardView;
-import com.matburt.mobileorg2.R;
+import com.matburt.mobileorg.Gui.Wizard.FolderAdapter;
+import com.matburt.mobileorg.Gui.Wizard.LocalDirectoryBrowser;
+import com.matburt.mobileorg.Gui.Wizard.WizardView;
+import com.matburt.mobileorg.R;
 
 public class SDCardWizard extends Wizard {
 	

@@ -1,4 +1,4 @@
-package com.matburt.mobileorg2.Gui;
+package com.matburt.mobileorg.Gui;
 
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
@@ -9,10 +9,10 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.matburt.mobileorg2.OrgData.OrgDatabase;
-import com.matburt.mobileorg2.OrgData.OrgFile;
-import com.matburt.mobileorg2.OrgData.OrgFileParser;
-import com.matburt.mobileorg2.R;
+import com.matburt.mobileorg.OrgData.OrgDatabase;
+import com.matburt.mobileorg.OrgData.OrgFile;
+import com.matburt.mobileorg.OrgData.OrgFileParser;
+import com.matburt.mobileorg.R;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;

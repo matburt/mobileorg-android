@@ -1,4 +1,4 @@
-package com.matburt.mobileorg2.OrgData;
+package com.matburt.mobileorg.OrgData;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -7,7 +7,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
 import android.util.Log;
 
-import com.matburt.mobileorg2.OrgData.OrgContract.OrgData;
+import com.matburt.mobileorg.OrgData.OrgContract.OrgData;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -1,4 +1,4 @@
-package com.matburt.mobileorg2.Gui;
+package com.matburt.mobileorg.Gui;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -9,8 +9,8 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationCompat.Builder;
 import android.widget.RemoteViews;
 
-import com.matburt.mobileorg2.OrgNodeListActivity;
-import com.matburt.mobileorg2.R;
+import com.matburt.mobileorg.OrgNodeListActivity;
+import com.matburt.mobileorg.R;
 
 public class SynchronizerNotificationCompat {
 	private NotificationManager notificationManager;

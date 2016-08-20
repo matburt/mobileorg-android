@@ -1,10 +1,10 @@
-package com.matburt.mobileorg2.Gui.Wizard.Wizards;
+package com.matburt.mobileorg.Gui.Wizard.Wizards;
 
 import android.content.Context;
 import android.util.Log;
 
-import com.matburt.mobileorg2.Gui.Wizard.DirectoryBrowser;
-import com.matburt.mobileorg2.Synchronizers.UbuntuOneSynchronizer;
+import com.matburt.mobileorg.Gui.Wizard.DirectoryBrowser;
+import com.matburt.mobileorg.Synchronizers.UbuntuOneSynchronizer;
 
 import java.io.File;
 

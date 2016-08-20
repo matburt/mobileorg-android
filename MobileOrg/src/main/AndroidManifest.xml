@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.matburt.mobileorg2">
+    package="com.matburt.mobileorg">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
@@ -31,13 +31,13 @@
             <intent-filter>
                 <category android:name="android.intent.category.DEFAULT" />
 
-                <action android:name="com.matburt.mobileorg2.SYNC_SERVICE" />
+                <action android:name="com.matburt.mobileorg.SYNC_SERVICE" />
             </intent-filter>
         </service>
 
         <provider
             android:name=".OrgData.OrgProvider"
-            android:authorities="com.matburt.mobileorg2.OrgData.OrgProvider" />
+            android:authorities="com.matburt.mobileorg.OrgData.OrgProvider" />
 
         <receiver android:name=".Plugin.Synchronize">
             <intent-filter>
@@ -55,7 +55,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
             <intent-filter>
-                <action android:name="com.matburt.mobileorg2.SYNC_FAILED" />
+                <action android:name="com.matburt.mobileorg.SYNC_FAILED" />
             </intent-filter>
         </activity>
         <activity
@@ -70,7 +70,7 @@
             android:label="MobileOrg Wizard"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
-                <action android:name="com.matburt.mobileorg2.Settings.SETUP_WIZARD" />
+                <action android:name="com.matburt.mobileorg.Settings.SETUP_WIZARD" />
 
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>

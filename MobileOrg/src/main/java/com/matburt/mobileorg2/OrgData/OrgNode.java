@@ -1,4 +1,4 @@
-package com.matburt.mobileorg2.OrgData;
+package com.matburt.mobileorg.OrgData;
 
 import android.content.ContentResolver;
 import android.content.ContentValues;
@@ -9,10 +9,10 @@ import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.matburt.mobileorg2.OrgData.OrgContract.OrgData;
-import com.matburt.mobileorg2.util.OrgFileNotFoundException;
-import com.matburt.mobileorg2.util.OrgNodeNotFoundException;
-import com.matburt.mobileorg2.util.OrgUtils;
+import com.matburt.mobileorg.OrgData.OrgContract.OrgData;
+import com.matburt.mobileorg.util.OrgFileNotFoundException;
+import com.matburt.mobileorg.util.OrgNodeNotFoundException;
+import com.matburt.mobileorg.util.OrgUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;

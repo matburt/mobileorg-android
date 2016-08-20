@@ -1,4 +1,4 @@
-package com.matburt.mobileorg2.Services;
+package com.matburt.mobileorg.Services;
 
 import android.app.AlarmManager;
 import android.app.Notification;
@@ -18,10 +18,10 @@ import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.widget.RemoteViews;
 
-import com.matburt.mobileorg2.OrgData.MobileOrgApplication;
-import com.matburt.mobileorg2.OrgData.OrgNode;
-import com.matburt.mobileorg2.R;
-import com.matburt.mobileorg2.util.OrgNodeNotFoundException;
+import com.matburt.mobileorg.OrgData.MobileOrgApplication;
+import com.matburt.mobileorg.OrgData.OrgNode;
+import com.matburt.mobileorg.R;
+import com.matburt.mobileorg.util.OrgNodeNotFoundException;
 
 public class TimeclockService extends Service {
 	public static final String NODE_ID = "node_id";

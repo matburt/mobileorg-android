@@ -1,4 +1,4 @@
-package com.matburt.mobileorg2.Synchronizers;
+package com.matburt.mobileorg.Synchronizers;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -7,7 +7,7 @@ import android.os.Build;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
-import com.matburt.mobileorg2.util.OrgUtils;
+import com.matburt.mobileorg.util.OrgUtils;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpRequest;

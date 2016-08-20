@@ -1,4 +1,4 @@
-package com.matburt.mobileorg2.Gui;
+package com.matburt.mobileorg.Gui;
 
 import android.annotation.TargetApi;
 import android.app.Notification;
@@ -8,8 +8,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 
-import com.matburt.mobileorg2.OrgNodeListActivity;
-import com.matburt.mobileorg2.R;
+import com.matburt.mobileorg.OrgNodeListActivity;
+import com.matburt.mobileorg.R;
 
 @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
 public class SynchronizerNotification extends SynchronizerNotificationCompat {
@@ -30,7 +30,7 @@ public class SynchronizerNotification extends SynchronizerNotificationCompat {
 		notifyIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
                               | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         notifyIntent.putExtra("ERROR_MESSAGE", errorMsg);
-        notifyIntent.setAction("com.matburt.mobileorg2.SYNC_FAILED");
+        notifyIntent.setAction("com.matburt.mobileorg.SYNC_FAILED");
 
 		PendingIntent contentIntent = PendingIntent.getActivity(context, 0, notifyIntent, 0);
 		

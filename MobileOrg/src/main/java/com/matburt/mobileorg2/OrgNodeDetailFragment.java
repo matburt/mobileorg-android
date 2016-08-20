@@ -1,4 +1,4 @@
-package com.matburt.mobileorg2;
+package com.matburt.mobileorg;
 
 import android.content.ContentResolver;
 import android.content.Context;
@@ -27,13 +27,13 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.matburt.mobileorg2.OrgData.OrgContract;
-import com.matburt.mobileorg2.OrgData.OrgDatabase;
-import com.matburt.mobileorg2.OrgData.OrgNode;
-import com.matburt.mobileorg2.OrgData.OrgNodeTree;
-import com.matburt.mobileorg2.OrgData.OrgProviderUtils;
-import com.matburt.mobileorg2.util.OrgNodeNotFoundException;
-import com.matburt.mobileorg2.util.TodoDialog;
+import com.matburt.mobileorg.OrgData.OrgContract;
+import com.matburt.mobileorg.OrgData.OrgDatabase;
+import com.matburt.mobileorg.OrgData.OrgNode;
+import com.matburt.mobileorg.OrgData.OrgNodeTree;
+import com.matburt.mobileorg.OrgData.OrgProviderUtils;
+import com.matburt.mobileorg.util.OrgNodeNotFoundException;
+import com.matburt.mobileorg.util.TodoDialog;
 
 import org.eclipse.jgit.diff.Edit;
 

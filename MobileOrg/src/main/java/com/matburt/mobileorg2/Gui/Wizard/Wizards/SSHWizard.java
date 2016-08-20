@@ -1,4 +1,4 @@
-package com.matburt.mobileorg2.Gui.Wizard.Wizards;
+package com.matburt.mobileorg.Gui.Wizard.Wizards;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
@@ -14,10 +14,10 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.matburt.mobileorg2.Gui.Wizard.WizardView;
-import com.matburt.mobileorg2.R;
-import com.matburt.mobileorg2.Synchronizers.AuthData;
-import com.matburt.mobileorg2.Synchronizers.JGitWrapper;
+import com.matburt.mobileorg.Gui.Wizard.WizardView;
+import com.matburt.mobileorg.R;
+import com.matburt.mobileorg.Synchronizers.AuthData;
+import com.matburt.mobileorg.Synchronizers.JGitWrapper;
 
 public class SSHWizard extends Wizard {
 

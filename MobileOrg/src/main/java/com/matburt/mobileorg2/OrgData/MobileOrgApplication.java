@@ -1,17 +1,17 @@
-package com.matburt.mobileorg2.OrgData;
+package com.matburt.mobileorg.OrgData;
 
 import android.app.Application;
 import android.content.Context;
 import android.preference.PreferenceManager;
 
-import com.matburt.mobileorg2.Services.SyncService;
-import com.matburt.mobileorg2.Synchronizers.DropboxSynchronizer;
-import com.matburt.mobileorg2.Synchronizers.NullSynchronizer;
-import com.matburt.mobileorg2.Synchronizers.SDCardSynchronizer;
-import com.matburt.mobileorg2.Synchronizers.SSHSynchronizer;
-import com.matburt.mobileorg2.Synchronizers.Synchronizer;
-import com.matburt.mobileorg2.Synchronizers.UbuntuOneSynchronizer;
-import com.matburt.mobileorg2.Synchronizers.WebDAVSynchronizer;
+import com.matburt.mobileorg.Services.SyncService;
+import com.matburt.mobileorg.Synchronizers.DropboxSynchronizer;
+import com.matburt.mobileorg.Synchronizers.NullSynchronizer;
+import com.matburt.mobileorg.Synchronizers.SDCardSynchronizer;
+import com.matburt.mobileorg.Synchronizers.SSHSynchronizer;
+import com.matburt.mobileorg.Synchronizers.Synchronizer;
+import com.matburt.mobileorg.Synchronizers.UbuntuOneSynchronizer;
+import com.matburt.mobileorg.Synchronizers.WebDAVSynchronizer;
 
 public class MobileOrgApplication extends Application {
     

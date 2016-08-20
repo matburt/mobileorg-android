@@ -1,8 +1,8 @@
-package com.matburt.mobileorg2.Gui.Wizard;
+package com.matburt.mobileorg.Gui.Wizard;
 
 import android.content.Context;
 
-import com.matburt.mobileorg2.R;
+import com.matburt.mobileorg.R;
 
 import java.io.File;
 import java.util.ArrayList;

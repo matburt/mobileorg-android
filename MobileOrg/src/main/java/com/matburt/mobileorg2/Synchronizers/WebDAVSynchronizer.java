@@ -1,4 +1,4 @@
-package com.matburt.mobileorg2.Synchronizers;
+package com.matburt.mobileorg.Synchronizers;
 
 import android.content.Context;
 import android.content.Intent;
@@ -9,10 +9,10 @@ import android.preference.PreferenceManager;
 import android.util.Base64;
 import android.util.Log;
 
-import com.matburt.mobileorg2.Gui.CertificateConflictActivity;
-import com.matburt.mobileorg2.R;
-import com.matburt.mobileorg2.util.FileUtils;
-import com.matburt.mobileorg2.util.OrgUtils;
+import com.matburt.mobileorg.Gui.CertificateConflictActivity;
+import com.matburt.mobileorg.R;
+import com.matburt.mobileorg.util.FileUtils;
+import com.matburt.mobileorg.util.OrgUtils;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;

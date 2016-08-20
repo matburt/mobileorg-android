@@ -1,4 +1,4 @@
-package com.matburt.mobileorg2.Gui;
+package com.matburt.mobileorg.Gui;
 
 import android.app.SearchManager;
 import android.content.Intent;
@@ -13,13 +13,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.matburt.mobileorg2.OrgData.OrgContract;
-import com.matburt.mobileorg2.OrgData.OrgFile;
-import com.matburt.mobileorg2.OrgData.OrgNode;
-import com.matburt.mobileorg2.OrgData.OrgProviderUtils;
-import com.matburt.mobileorg2.OrgNodeDetailActivity;
-import com.matburt.mobileorg2.R;
-import com.matburt.mobileorg2.util.OrgFileNotFoundException;
+import com.matburt.mobileorg.OrgData.OrgContract;
+import com.matburt.mobileorg.OrgData.OrgFile;
+import com.matburt.mobileorg.OrgData.OrgNode;
+import com.matburt.mobileorg.OrgData.OrgProviderUtils;
+import com.matburt.mobileorg.OrgNodeDetailActivity;
+import com.matburt.mobileorg.R;
+import com.matburt.mobileorg.util.OrgFileNotFoundException;
 
 import java.util.ArrayList;
 

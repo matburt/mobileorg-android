@@ -1,4 +1,4 @@
-package com.matburt.mobileorg2.Gui.Wizard;
+package com.matburt.mobileorg.Gui.Wizard;
 
 import android.app.Activity;
 import android.content.Context;
@@ -14,7 +14,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.HorizontalScrollView;
 
-import com.matburt.mobileorg2.R;
+import com.matburt.mobileorg.R;
 
 public class WizardView extends HorizontalScrollView implements
 		View.OnTouchListener {

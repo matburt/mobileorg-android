@@ -1,4 +1,4 @@
-package com.matburt.mobileorg2;
+package com.matburt.mobileorg;
 
 import android.content.Context;
 import android.graphics.Typeface;
@@ -12,10 +12,10 @@ import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.matburt.mobileorg2.OrgData.OrgNode;
-import com.matburt.mobileorg2.OrgData.OrgNodeTree;
-import com.matburt.mobileorg2.util.PreferenceUtils;
-import com.matburt.mobileorg2.util.TodoDialog;
+import com.matburt.mobileorg.OrgData.OrgNode;
+import com.matburt.mobileorg.OrgData.OrgNodeTree;
+import com.matburt.mobileorg.util.PreferenceUtils;
+import com.matburt.mobileorg.util.TodoDialog;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

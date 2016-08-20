@@ -1,4 +1,4 @@
-package com.matburt.mobileorg2.Gui.Wizard;
+package com.matburt.mobileorg.Gui.Wizard;
 
 import android.app.Activity;
 import android.content.Context;
@@ -10,9 +10,9 @@ import android.util.Log;
 import android.view.ViewTreeObserver;
 import android.widget.RadioGroup;
 
-import com.matburt.mobileorg2.Gui.Wizard.Wizards.SSHWizard;
-import com.matburt.mobileorg2.Gui.Wizard.Wizards.Wizard;
-import com.matburt.mobileorg2.R;
+import com.matburt.mobileorg.Gui.Wizard.Wizards.SSHWizard;
+import com.matburt.mobileorg.Gui.Wizard.Wizards.Wizard;
+import com.matburt.mobileorg.R;
 
 public class WizardActivity extends Activity implements RadioGroup.OnCheckedChangeListener, ViewTreeObserver.OnGlobalLayoutListener  {
 

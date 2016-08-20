@@ -1,4 +1,4 @@
-package com.matburt.mobileorg2.Services;
+package com.matburt.mobileorg.Services;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
@@ -10,8 +10,8 @@ import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
-import com.matburt.mobileorg2.OrgData.MobileOrgApplication;
-import com.matburt.mobileorg2.Synchronizers.Synchronizer;
+import com.matburt.mobileorg.OrgData.MobileOrgApplication;
+import com.matburt.mobileorg.Synchronizers.Synchronizer;
 
 import java.util.HashSet;
 

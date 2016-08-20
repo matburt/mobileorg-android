@@ -1,4 +1,4 @@
-package com.matburt.mobileorg2.Gui.Wizard.Wizards;
+package com.matburt.mobileorg.Gui.Wizard.Wizards;
 
 import android.content.Context;
 import android.util.Log;
@@ -7,7 +7,7 @@ import com.dropbox.client2.DropboxAPI;
 import com.dropbox.client2.DropboxAPI.Entry;
 import com.dropbox.client2.android.AndroidAuthSession;
 import com.dropbox.client2.exception.DropboxException;
-import com.matburt.mobileorg2.Gui.Wizard.DirectoryBrowser;
+import com.matburt.mobileorg.Gui.Wizard.DirectoryBrowser;
 
 import java.io.File;
 

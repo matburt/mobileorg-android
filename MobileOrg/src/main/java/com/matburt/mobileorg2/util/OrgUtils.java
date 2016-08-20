@@ -1,4 +1,4 @@
-package com.matburt.mobileorg2.util;
+package com.matburt.mobileorg.util;
 
 import android.content.ContentResolver;
 import android.content.Context;
@@ -12,10 +12,10 @@ import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 
-import com.matburt.mobileorg2.OrgData.OrgFile;
-import com.matburt.mobileorg2.OrgData.OrgNode;
-import com.matburt.mobileorg2.R;
-import com.matburt.mobileorg2.Synchronizers.Synchronizer;
+import com.matburt.mobileorg.OrgData.OrgFile;
+import com.matburt.mobileorg.OrgData.OrgNode;
+import com.matburt.mobileorg.R;
+import com.matburt.mobileorg.Synchronizers.Synchronizer;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;

@@ -1,4 +1,4 @@
-package com.matburt.mobileorg2.Settings;
+package com.matburt.mobileorg.Settings;
 
 import android.app.Activity;
 import android.content.Context;
@@ -12,11 +12,11 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.matburt.mobileorg2.R;
-import com.matburt.mobileorg2.Settings.Synchronizers.SDCardSettingsActivity;
-import com.matburt.mobileorg2.Settings.Synchronizers.ScpSettingsActivity;
-import com.matburt.mobileorg2.Settings.Synchronizers.UbuntuOneSettingsActivity;
-import com.matburt.mobileorg2.Settings.Synchronizers.WebDAVSettingsActivity;
+import com.matburt.mobileorg.R;
+import com.matburt.mobileorg.Settings.Synchronizers.SDCardSettingsActivity;
+import com.matburt.mobileorg.Settings.Synchronizers.ScpSettingsActivity;
+import com.matburt.mobileorg.Settings.Synchronizers.UbuntuOneSettingsActivity;
+import com.matburt.mobileorg.Settings.Synchronizers.WebDAVSettingsActivity;
 
 import java.util.HashMap;
 

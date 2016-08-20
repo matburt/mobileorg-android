@@ -1,4 +1,4 @@
-package com.matburt.mobileorg2.util;
+package com.matburt.mobileorg.util;
 
 public class OrgNodeNotFoundException extends Exception {
 

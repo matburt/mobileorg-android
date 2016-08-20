@@ -1,10 +1,10 @@
-package com.matburt.mobileorg2.Gui;
+package com.matburt.mobileorg.Gui;
 
 import android.app.AlertDialog;
 import android.content.Context;
 import android.util.Log;
 
-import com.matburt.mobileorg2.R;
+import com.matburt.mobileorg.R;
 
 public class ErrorReporter
 {

@@ -1,4 +1,4 @@
-package com.matburt.mobileorg2.util;
+package com.matburt.mobileorg.util;
 
 public class OrgFileNotFoundException extends Exception {
 	private static final long serialVersionUID = -4140326020786885688L;

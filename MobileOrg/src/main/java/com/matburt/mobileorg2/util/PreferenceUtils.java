@@ -1,4 +1,4 @@
-package com.matburt.mobileorg2.util;
+package com.matburt.mobileorg.util;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -6,7 +6,7 @@ import android.content.pm.PackageInfo;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
 
-import com.matburt.mobileorg2.OrgData.MobileOrgApplication;
+import com.matburt.mobileorg.OrgData.MobileOrgApplication;
 
 import java.util.ArrayList;
 import java.util.HashSet;

@@ -1,4 +1,4 @@
-package com.matburt.mobileorg2.Synchronizers;
+package com.matburt.mobileorg.Synchronizers;
 
 import android.app.Dialog;
 import android.content.DialogInterface;
@@ -6,7 +6,7 @@ import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 
-import com.matburt.mobileorg2.R;
+import com.matburt.mobileorg.R;
 
 import java.util.ArrayList;
 

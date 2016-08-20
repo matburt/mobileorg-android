@@ -1,4 +1,4 @@
-package com.matburt.mobileorg2.Services;
+package com.matburt.mobileorg.Services;
 
 import android.app.Dialog;
 import android.app.TimePickerDialog;
@@ -12,9 +12,9 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
-import com.matburt.mobileorg2.OrgData.OrgNode;
-import com.matburt.mobileorg2.R;
-import com.matburt.mobileorg2.util.OrgNodeNotFoundException;
+import com.matburt.mobileorg.OrgData.OrgNode;
+import com.matburt.mobileorg.R;
+import com.matburt.mobileorg.util.OrgNodeNotFoundException;
 
 public class TimeclockDialog extends FragmentActivity {
 

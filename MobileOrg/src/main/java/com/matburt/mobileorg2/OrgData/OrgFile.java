@@ -1,4 +1,4 @@
-package com.matburt.mobileorg2.OrgData;
+package com.matburt.mobileorg.OrgData;
 
 import android.content.ContentResolver;
 import android.content.ContentValues;
@@ -7,13 +7,13 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.util.Log;
 
-import com.matburt.mobileorg2.OrgData.OrgContract.Files;
-import com.matburt.mobileorg2.OrgData.OrgContract.OrgData;
-import com.matburt.mobileorg2.OrgData.OrgContract.Timestamps;
-import com.matburt.mobileorg2.Synchronizers.Synchronizer;
-import com.matburt.mobileorg2.util.FileUtils;
-import com.matburt.mobileorg2.util.OrgFileNotFoundException;
-import com.matburt.mobileorg2.util.OrgNodeNotFoundException;
+import com.matburt.mobileorg.OrgData.OrgContract.Files;
+import com.matburt.mobileorg.OrgData.OrgContract.OrgData;
+import com.matburt.mobileorg.OrgData.OrgContract.Timestamps;
+import com.matburt.mobileorg.Synchronizers.Synchronizer;
+import com.matburt.mobileorg.util.FileUtils;
+import com.matburt.mobileorg.util.OrgFileNotFoundException;
+import com.matburt.mobileorg.util.OrgNodeNotFoundException;
 
 import java.io.File;
 import java.io.FileNotFoundException;

@@ -1,9 +1,9 @@
-package com.matburt.mobileorg2.Gui.Theme;
+package com.matburt.mobileorg.Gui.Theme;
 
 import android.content.Context;
 import android.graphics.Color;
 
-import com.matburt.mobileorg2.util.PreferenceUtils;
+import com.matburt.mobileorg.util.PreferenceUtils;
 
 public class DefaultTheme {
 	

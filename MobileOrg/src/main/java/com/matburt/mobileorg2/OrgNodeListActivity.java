@@ -1,4 +1,4 @@
-package com.matburt.mobileorg2;
+package com.matburt.mobileorg;
 
 import android.app.SearchManager;
 import android.content.BroadcastReceiver;
@@ -25,17 +25,17 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 
-import com.matburt.mobileorg2.Gui.Outline.OutlineAdapter;
-import com.matburt.mobileorg2.Gui.SearchActivity;
-import com.matburt.mobileorg2.Gui.Wizard.WizardActivity;
-import com.matburt.mobileorg2.OrgData.OrgFile;
-import com.matburt.mobileorg2.OrgData.OrgProviderUtils;
-import com.matburt.mobileorg2.Services.SyncService;
-import com.matburt.mobileorg2.Settings.SettingsActivity;
-import com.matburt.mobileorg2.Synchronizers.AuthData;
-import com.matburt.mobileorg2.Synchronizers.Synchronizer;
-import com.matburt.mobileorg2.util.OrgUtils;
-import com.matburt.mobileorg2.util.PreferenceUtils;
+import com.matburt.mobileorg.Gui.Outline.OutlineAdapter;
+import com.matburt.mobileorg.Gui.SearchActivity;
+import com.matburt.mobileorg.Gui.Wizard.WizardActivity;
+import com.matburt.mobileorg.OrgData.OrgFile;
+import com.matburt.mobileorg.OrgData.OrgProviderUtils;
+import com.matburt.mobileorg.Services.SyncService;
+import com.matburt.mobileorg.Settings.SettingsActivity;
+import com.matburt.mobileorg.Synchronizers.AuthData;
+import com.matburt.mobileorg.Synchronizers.Synchronizer;
+import com.matburt.mobileorg.util.OrgUtils;
+import com.matburt.mobileorg.util.PreferenceUtils;
 
 
 /**
@@ -49,7 +49,7 @@ import com.matburt.mobileorg2.util.PreferenceUtils;
 public class OrgNodeListActivity extends AppCompatActivity {
 
     public final static String NODE_ID = "node_id";
-    public final static String SYNC_FAILED = "com.matburt.mobileorg2.SYNC_FAILED";
+    public final static String SYNC_FAILED = "com.matburt.mobileorg.SYNC_FAILED";
     static boolean passwordPrompt = true;
     /**
      * Whether or not the activity is in two-pane mode, i.e. running on a tablet

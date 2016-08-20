@@ -1,4 +1,4 @@
-package com.matburt.mobileorg2;
+package com.matburt.mobileorg;
 
 import android.content.ContentResolver;
 import android.content.Context;
@@ -18,10 +18,10 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.matburt.mobileorg2.OrgData.OrgContract.Timestamps;
-import com.matburt.mobileorg2.OrgData.OrgNode;
-import com.matburt.mobileorg2.OrgData.OrgNodeTimeDate;
-import com.matburt.mobileorg2.util.OrgNodeNotFoundException;
+import com.matburt.mobileorg.OrgData.OrgContract.Timestamps;
+import com.matburt.mobileorg.OrgData.OrgNode;
+import com.matburt.mobileorg.OrgData.OrgNodeTimeDate;
+import com.matburt.mobileorg.util.OrgNodeNotFoundException;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;

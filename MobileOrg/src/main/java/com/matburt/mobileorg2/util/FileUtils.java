@@ -1,4 +1,4 @@
-package com.matburt.mobileorg2.util;
+package com.matburt.mobileorg.util;
 
 import android.content.Context;
 import android.content.SharedPreferences;
