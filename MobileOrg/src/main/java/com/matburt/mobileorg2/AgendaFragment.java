@@ -20,6 +20,7 @@ import android.widget.TextView;
 
 import com.matburt.mobileorg2.OrgData.OrgContract.Timestamps;
 import com.matburt.mobileorg2.OrgData.OrgNode;
+import com.matburt.mobileorg2.OrgData.OrgNodeTimeDate;
 import com.matburt.mobileorg2.util.OrgNodeNotFoundException;
 
 import java.text.DateFormat;
@@ -37,13 +38,12 @@ import java.util.Date;
  */
 public class AgendaFragment extends Fragment {
 
-    private ContentResolver resolver;
-
     RecyclerViewAdapter adapter;
     RecyclerView recyclerView;
     ArrayList<OrgNode> nodesList;
     ArrayList<String>  daysList;
     ArrayList<PositionHelper> items;
+    private ContentResolver resolver;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -52,19 +52,9 @@ public class AgendaFragment extends Fragment {
     public AgendaFragment() {
     }
 
-    enum Type {
-        kNode,
-        kDate
-    };
-
-    class PositionHelper {
-        int position;
-        Type type;
-
-        PositionHelper(int position, Type type){
-            this.position = position;
-            this.type = type;
-        }
+    static void setItemModifiersVisibility(View view, int visibility) {
+        LinearLayout itemModifiers = (LinearLayout) view.findViewById(R.id.item_modifiers);
+        if (itemModifiers != null) itemModifiers.setVisibility(visibility);
     }
 
     @Override
@@ -77,16 +67,18 @@ public class AgendaFragment extends Fragment {
                 null, null, Timestamps.TIMESTAMP);
 
         nodesList = new ArrayList<>();
+        ArrayList<Long> timestampType = new ArrayList<>();
 
-        if(cursor!=null) {
-            Log.v("time","count : "+cursor.getCount());
+        if (cursor != null) {
+            Log.v("time", "count : " + cursor.getCount());
             cursor.moveToFirst();
 
             while (!cursor.isAfterLast()) {
                 long nodeId = cursor.getLong(cursor.getColumnIndexOrThrow(Timestamps.NODE_ID));
-                Log.v("time", "cursor id, time, type : "+nodeId + ", " + cursor.getLong(cursor.getColumnIndexOrThrow(Timestamps.TIMESTAMP)) + ", " + cursor.getLong(cursor.getColumnIndexOrThrow(Timestamps.TYPE)));
+                Log.v("time", "cursor id, time, type : " + nodeId + ", " + cursor.getLong(cursor.getColumnIndexOrThrow(Timestamps.TIMESTAMP)) + ", " + cursor.getLong(cursor.getColumnIndexOrThrow(Timestamps.TYPE)));
                 try {
                     nodesList.add(new OrgNode(nodeId, resolver));
+                    timestampType.add(cursor.getLong(cursor.getColumnIndexOrThrow(Timestamps.TYPE)));
                 } catch (OrgNodeNotFoundException e) {
                     e.printStackTrace();
                 }
@@ -101,12 +93,29 @@ public class AgendaFragment extends Fragment {
         long day;
         int nodeCursor = 0;
         int dayCursor = 0;
+        long epoch;
 
-        for(OrgNode node : nodesList){
-            day = node.getScheduled().getEpochTime()/(24*3600);
+        final OrgNodeTimeDate.TYPE[] types = OrgNodeTimeDate.TYPE.values();
 
-            if(day != prevDay) {
-                daysList.add(SimpleDateFormat.getDateInstance().format(new Date(node.getScheduled().getEpochTime())));
+        for (OrgNode node : nodesList) {
+            Log.v("epoch", "node : " + node);
+            switch (types[timestampType.get(nodeCursor).intValue()]) {
+                case Scheduled:
+                    epoch = node.getScheduled().getEpochTime();
+                    break;
+                case Deadline:
+                    epoch = node.getDeadline().getEpochTime();
+                    break;
+                default:
+                    continue;
+            }
+
+            day = epoch / (24 * 3600);
+            Log.v("epoch", "day: " + day);
+            Log.v("epoch", "time: " + node.getScheduled().getEpochTime());
+            if (day != prevDay) {
+                Log.v("epoch", "date instance : " + SimpleDateFormat.getDateInstance().format(new Date(epoch * 1000)));
+                daysList.add(SimpleDateFormat.getDateInstance().format(new Date(epoch * 1000)));
                 items.add(new PositionHelper(dayCursor++, Type.kDate));
                 prevDay = day;
             }
@@ -121,7 +130,7 @@ public class AgendaFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.node_summary_recycler_fragment, container, false);
 
-        recyclerView = (RecyclerView)rootView.findViewById(R.id.node_recycler_view);
+        recyclerView = (RecyclerView) rootView.findViewById(R.id.node_recycler_view);
         assert recyclerView != null;
         recyclerView.addItemDecoration(new DividerItemDecoration(getContext()));
 
@@ -136,33 +145,27 @@ public class AgendaFragment extends Fragment {
         super.onResume();
     }
 
+    enum Type {
+        kNode,
+        kDate
+    }
+
+    class PositionHelper {
+        int position;
+        Type type;
+
+        PositionHelper(int position, Type type) {
+            this.position = position;
+            this.type = type;
+        }
+    }
 
     public class RecyclerViewAdapter
             extends RecyclerView.Adapter<ItemViewHolder> {
 
-        /**
-         * The view holder for the date
-         */
-        private class DateViewHolder extends ItemViewHolder{
-            public DateViewHolder(View view) {
-                super(view);
-            }
-        }
-
-        /**
-         * The view holder for the node items
-         */
-        private class OrgItemViewHolder extends ItemViewHolder{
-            public OrgItemViewHolder(View view) {
-                super(view);
-            }
-        }
-
         public RecyclerViewAdapter() {
 
         }
-
-
 
         @Override
         public ItemViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -249,6 +252,24 @@ public class AgendaFragment extends Fragment {
            return items.get(position).type.ordinal();
         }
 
+        /**
+         * The view holder for the date
+         */
+        private class DateViewHolder extends ItemViewHolder {
+            public DateViewHolder(View view) {
+                super(view);
+            }
+        }
+
+        /**
+         * The view holder for the node items
+         */
+        private class OrgItemViewHolder extends ItemViewHolder {
+            public OrgItemViewHolder(View view) {
+                super(view);
+            }
+        }
+
 
     }
 
@@ -292,11 +313,6 @@ public class AgendaFragment extends Fragment {
                 mDivider.draw(c);
             }
         }
-    }
-
-    static void setItemModifiersVisibility(View view, int visibility){
-        LinearLayout itemModifiers = (LinearLayout) view.findViewById(R.id.item_modifiers);
-        if(itemModifiers != null) itemModifiers.setVisibility(visibility);
     }
 }
 
