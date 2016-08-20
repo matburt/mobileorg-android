@@ -54,8 +54,6 @@
             <PreferenceCategory android:title="@string/preference_general" >
                 <ListPreference
                     android:defaultValue="Dark"
-                    android:entries="@array/themes"
-                    android:entryValues="@array/themes"
                     android:key="@string/key_theme"
                     android:title="@string/preference_theme" />
 
@@ -198,7 +196,7 @@
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/preference_actions" >
         <Preference android:title="@string/preference_setup_wizard" >
-            <intent android:action="com.matburt.mobileorg.Settings.SETUP_WIZARD" />
+            <intent android:action="com.matburt.mobileorg2.Settings.SETUP_WIZARD" />
         </Preference>
         <Preference
             android:key="clearDB"

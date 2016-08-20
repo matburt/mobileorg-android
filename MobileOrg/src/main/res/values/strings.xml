@@ -1,6 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources>
-
     <string name="app_name">MobileOrgActivity</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
@@ -14,6 +12,9 @@
     <string name="tags">Tags</string>
     <string name="priority">Priority</string>
     <string name="todo_state">Todo state</string>
+    <string name="scheduled">Scheduled</string>
+    <string name="deadline">Deadline</string>
+    <string name="no_state">No state</string>
     <string name="back">Back</string>
     <string name="cancel">Cancel</string>
     <string name="save">Save</string>
@@ -21,9 +22,28 @@
     <string name="warning">WARNING!</string>
     <string name="accept">Accept</string>
     <string name="deny">Deny</string>
+    <string name="set_title_here">Set title here</string>
+    <string name="set_content_here">Set content here</string>
+    <string name="insert_node">Insert node</string>
+    <string name="insert_child_node">Insert child node</string>
+    <string name="new_file">Create new file</string>
+    <string name="file">File</string>
+    <string name="files">Files</string>
+    <string name="delete_node">Delete node</string>
+    <string name="filename">Filename</string>
+    <string name="details">Details</string>
+    <string name="no_node">You have no node in this file</string>
+    <string name="conflict">Conflict</string>
+    <string name="date">Date</string>
+    <string name="time">Time</string>
+
+    <!-- toasts -->
+    <string name="unselectable_item">You cannot select this item</string>
 
     <!-- prompts -->
+    <string name="prompt_enter_password">Enter password</string>
     <string name="prompt_delete_file">Are you sure you want to delete this file?</string>
+    <string name="prompt_delete_files">Are you sure you want to delete these # files?</string>
     <string name="prompt_node_delete">Are you sure you want to delete this node?</string>
     <string name="prompt_node_archive">Are you sure you want to archive this node?</string>
     <string name="prompt_node_edit">Are you sure you want to discard changes?</string>
@@ -40,6 +60,8 @@
     <string name="sync_plugin">MobileOrg Synchronization</string>
     <string name="sync_plugin_info">This plugin allows you to trigger a MobileOrg Sync from Locale or Tasker.  If you are okay with this click \'Accept\' otherwise click \'Deny\'</string>
     <string name="sync_plugin_message">Synchronize</string>
+    <string name="sync_git_file_added">Added file : </string>
+    <string name="sync_git_merge_files">Conflict\nMerge files : </string>
 
     <!-- error strings -->
     <string name="error_sqlio">There was a problem reading from the database, is your drive corrupted or is the SDCard mounted?</string>
@@ -68,6 +90,7 @@
     <!-- menu strings -->
     <string name="menu_outline">Outline</string>
     <string name="menu_agenda">Agenda</string>
+    <string name="menu_todos">Todos</string>
     <string name="menu_capture">Capture</string>
     <string name="menu_capture_simple">Simple Capture</string>
     <string name="menu_settings">Settings</string>
@@ -116,7 +139,7 @@
     <string name="log_in_to_ssh">Log in to your SSH server</string>
     <string name="ssh_inform_choose_pub_file">OR select a file containing your *private* key (requires a file explorer program to be installed)</string>
     <string name="ssh_choose_file_button">Select your *private* key file</string>
-    <string name="null_sync_description">This is a capture only synchronizer.  It will not attempt to synchronize to any source.</string>
+    <string name="null_sync_description">This is a capture only synchronizerManager.  It will not attempt to synchronize to any source.</string>
     <string name="dropbox_login_info">This will redirect you to a login form.  After logging in it will return you to this screen to continue.</string>
     <string name="url">URL</string>
     <string name="wizard_dropbox_email_hint">user@host.com</string>
@@ -206,7 +229,7 @@
     <string name="preference_properties_drawer_fields">Fields</string>
     <string name="preference_properties_drawer_files_summary">Restrict display to specific files. List of filenames separated by \';\'. Leave empty for no restriction.</string>
     <string name="preference_properties_drawer_files">Files</string>
-    
+
     <string name="preference_sync_wifi_only">Sync with Wifi only</string>
     <string name="preference_sync_wifi_only_summary">Only try to synchronize when Wireless is up</string>
     <string name="preference_view_on_click">View on click</string>
@@ -216,7 +239,7 @@
     <string name="preference_capture_with_timestamp_summary">Captured nodes will have a timestamp added</string>
     <string name="preference_selected_todos">Quick Todo keywords</string>
     <string name="preference_selected_todos_summary">Select the TODO keywords available in outline for quick select. Separated by space.</string>
-    
+
     <!-- preference keys -->
     <string name="key_properties_drawer_include_fields">propertiesDrawerIncludeFields</string>
     <string name="key_properties_drawer_include_files">propertiesDrawerIncludeFiles</string>
@@ -251,6 +274,97 @@
     <string name="summary_web_url">Full URL path to your index.org file</string>
     <string name="title_agenda_title">Use agenda titles</string>
     <string name="summary_agenda_title">Enables use of custom agenda titles. Needs resync of agenda file to take effect</string>
+    <string name="title_activity_scrolling">ScrollingActivity</string>
+    <string name="large_text">
+        "Material is the metaphor.\n\n"
+
+        "A material metaphor is the unifying theory of a rationalized space and a system of motion."
+        "The material is grounded in tactile reality, inspired by the study of paper and ink, yet "
+        "technologically advanced and open to imagination and magic.\n"
+        "Surfaces and edges of the material provide visual cues that are grounded in reality. The "
+        "use of familiar tactile attributes helps users quickly understand affordances. Yet the "
+        "flexibility of the material creates new affordances that supercede those in the physical "
+        "world, without breaking the rules of physics.\n"
+        "The fundamentals of light, surface, and movement are key to conveying how objects move, "
+        "interact, and exist in space and in relation to each other. Realistic lighting shows "
+        "seams, divides space, and indicates moving parts.\n\n"
+
+        "Bold, graphic, intentional.\n\n"
+
+        "The foundational elements of print based design typography, grids, space, scale, color, "
+        "and use of imagery guide visual treatments. These elements do far more than please the "
+        "eye. They create hierarchy, meaning, and focus. Deliberate color choices, edge to edge "
+        "imagery, large scale typography, and intentional white space create a bold and graphic "
+        "interface that immerse the user in the experience.\n"
+        "An emphasis on user actions makes core functionality immediately apparent and provides "
+        "waypoints for the user.\n\n"
+
+        "Motion provides meaning.\n\n"
+
+        "Motion respects and reinforces the user as the prime mover. Primary user actions are "
+        "inflection points that initiate motion, transforming the whole design.\n"
+        "All action takes place in a single environment. Objects are presented to the user without "
+        "breaking the continuity of experience even as they transform and reorganize.\n"
+        "Motion is meaningful and appropriate, serving to focus attention and maintain continuity. "
+        "Feedback is subtle yet clear. Transitions are efﬁcient yet coherent.\n\n"
+
+        "3D world.\n\n"
+
+        "The material environment is a 3D space, which means all objects have x, y, and z "
+        "dimensions. The z-axis is perpendicularly aligned to the plane of the display, with the "
+        "positive z-axis extending towards the viewer. Every sheet of material occupies a single "
+        "position along the z-axis and has a standard 1dp thickness.\n"
+        "On the web, the z-axis is used for layering and not for perspective. The 3D world is "
+        "emulated by manipulating the y-axis.\n\n"
+
+        "Light and shadow.\n\n"
+
+        "Within the material environment, virtual lights illuminate the scene. Key lights create "
+        "directional shadows, while ambient light creates soft shadows from all angles.\n"
+        "Shadows in the material environment are cast by these two light sources. In Android "
+        "development, shadows occur when light sources are blocked by sheets of material at "
+        "various positions along the z-axis. On the web, shadows are depicted by manipulating the "
+        "y-axis only. The following example shows the card with a height of 6dp.\n\n"
+
+        "Resting elevation.\n\n"
+
+        "All material objects, regardless of size, have a resting elevation, or default elevation "
+        "that does not change. If an object changes elevation, it should return to its resting "
+        "elevation as soon as possible.\n\n"
+
+        "Component elevations.\n\n"
+
+        "The resting elevation for a component type is consistent across apps (e.g., FAB elevation "
+        "does not vary from 6dp in one app to 16dp in another app).\n"
+        "Components may have different resting elevations across platforms, depending on the depth "
+        "of the environment (e.g., TV has a greater depth than mobile or desktop).\n\n"
+
+        "Responsive elevation and dynamic elevation offsets.\n\n"
+
+        "Some component types have responsive elevation, meaning they change elevation in response "
+        "to user input (e.g., normal, focused, and pressed) or system events. These elevation "
+        "changes are consistently implemented using dynamic elevation offsets.\n"
+        "Dynamic elevation offsets are the goal elevation that a component moves towards, relative "
+        "to the component’s resting state. They ensure that elevation changes are consistent "
+        "across actions and component types. For example, all components that lift on press have "
+        "the same elevation change relative to their resting elevation.\n"
+        "Once the input event is completed or cancelled, the component will return to its resting "
+        "elevation.\n\n"
+
+        "Avoiding elevation interference.\n\n"
+
+        "Components with responsive elevations may encounter other components as they move between "
+        "their resting elevations and dynamic elevation offsets. Because material cannot pass "
+        "through other material, components avoid interfering with one another any number of ways, "
+        "whether on a per component basis or using the entire app layout.\n"
+        "On a component level, components can move or be removed before they cause interference. "
+        "For example, a floating action button (FAB) can disappear or move off screen before a "
+        "user picks up a card, or it can move if a snackbar appears.\n"
+        "On the layout level, design your app layout to minimize opportunities for interference. "
+        "For example, position the FAB to one side of stream of a cards so the FAB won’t interfere "
+        "when a user tries to pick up one of cards.\n\n"
+    </string>
+    <string name="action_settings">Settings</string>
 
     <!-- others -->
 

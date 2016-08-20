@@ -1,53 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/LinearLayout1"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
+    android:layout_height="wrap_content"
     android:minHeight="@dimen/outline_item"
     android:orientation="vertical"
     android:paddingLeft="5dp"
     android:paddingRight="5dp" >
 
-    <TextView
-        android:id="@+id/outline_item_level"
-        android:layout_width="wrap_content"
-        android:layout_height="fill_parent"
-        android:layout_alignParentLeft="true"
-        android:text=""
-        android:textAppearance="?android:attr/textAppearanceMedium" >
-    </TextView>
 
-    <Button
-        android:id="@+id/outline_item_todo"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-        android:layout_toRightOf="@+id/outline_item_level"
-        android:background="@android:color/transparent"
-        android:focusable="false"
-        android:minHeight="30dp"
-        android:minWidth="40dp"
-        android:text="" />
 
-    <TextView
-        android:id="@+id/outline_item_title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_centerVertical="true"
-        android:layout_toRightOf="@+id/outline_item_todo"
-        android:text=""
-        android:textAppearance="?android:attr/textAppearanceMedium" >
-    </TextView>
+    <android.support.v7.widget.CardView
+        xmlns:card_view="http://schemas.android.com/apk/res-auto"
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/card_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        card_view:cardCornerRadius="4dp"
+        android:layout_margin="5dp">
 
-    <TextView
-        android:id="@+id/outline_item_tags"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_below="@+id/outline_item_title"
-        android:paddingLeft="10dp"
-        android:text="" >
-    </TextView>
+        <LinearLayout
+            android:id="@+id/layout"
+            android:background="@drawable/background_selector"
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
-</RelativeLayout>
+            <TextView
+                android:id="@+id/title"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:textAppearance="@color/colorBlack"
+                android:text=""
+                android:padding="5dp"
+                android:textSize="18sp"/>
+
+            <TextView
+                android:id="@+id/comment"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text=""
+                android:padding="5dp"
+                android:textColor="@android:color/holo_red_dark"
+                android:textSize="18sp"
+                android:visibility="gone"/>
+
+        </LinearLayout>
+
+    </android.support.v7.widget.CardView>
+</LinearLayout>
