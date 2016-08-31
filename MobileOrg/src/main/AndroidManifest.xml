@@ -11,7 +11,7 @@
     <application
         android:name=".OrgData.MobileOrgApplication"
         android:icon="@drawable/icon"
-        android:label="MobileOrg2"
+        android:label="MobileOrg"
         android:theme="@style/AppTheme.NoActionBar">
 
         <receiver
