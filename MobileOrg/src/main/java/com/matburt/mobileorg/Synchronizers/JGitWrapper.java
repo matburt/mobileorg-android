@@ -382,10 +382,52 @@ public class JGitWrapper {
             Log.v("git", "pushing");
 
             File repoDir = new File(context.getFilesDir() + "/" + GIT_DIR + "/.git");
+
+//            File file = new File(context.getFilesDir() + "/" + GIT_DIR + "/MobileOrg");
+//            FileInputStream fis = null;
+//            BufferedInputStream bis = null;
+//            DataInputStream dis = null;
+//
+//            try {
+//                fis = new FileInputStream(file);
+//                Log.v("file", "couo");
+//                // Here BufferedInputStream is added for fast reading.
+//                bis = new BufferedInputStream(fis);
+//                dis = new DataInputStream(bis);
+//
+//                // dis.available() returns 0 if the file does not have more lines.
+//                while (dis.available() != 0) {
+//
+//                    // this statement reads the line from the file and print it to
+//                    // the console.
+//                    Log.v("file" , "content : "+dis.readLine());
+//                }
+//
+//                // dispose all the resources after using them.
+//                fis.close();
+//                bis.close();
+//                dis.close();
+//
+//            } catch (FileNotFoundException e) {
+//                e.printStackTrace();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+
             Git git = null;
             try {
                 git = Git.open(repoDir);
                 // Stage all changed files, omitting new files, and commit with one command
+
+//                org.eclipse.jgit.api.Status status = git.status().call();
+//                System.out.println("Added: " + status.getAdded());
+//                System.out.println("Changed: " + status.getChanged());
+//                System.out.println("Conflicting: " + status.getConflicting());
+//                System.out.println("Missing: " + status.getMissing());
+//                System.out.println("Modified: " + status.getModified());
+//                System.out.println("Removed: " + status.getRemoved());
+//                System.out.println("Untracked: " + status.getUntracked());
+
                 git.commit()
                         .setAll(true)
                         .setMessage("Commit changes to all files")

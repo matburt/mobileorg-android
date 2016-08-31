@@ -16,6 +16,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.matburt.mobileorg.OrgData.OrgContract.Timestamps;
@@ -25,9 +26,9 @@ import com.matburt.mobileorg.util.OrgNodeNotFoundException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.TimeZone;
 import java.util.TreeMap;
 
 
@@ -73,29 +74,24 @@ public class AgendaFragment extends Fragment {
         daysList = new ArrayList<>();
 
         // Nodes with only a deadline or a scheduled but not both
-        HashSet<OrgNode> orphanTimestampsNodes = new HashSet<>();
+        HashSet<Long> orphanTimestampsNodes = new HashSet<>();
 
         // Nodes with a deadline AND a scheduled date
-        HashSet<OrgNode> rangedTimestampsNodes = new HashSet<>();
+        HashSet<Long> rangedTimestampsNodes = new HashSet<>();
 
         if (cursor != null) {
             Log.v("time", "count : " + cursor.getCount());
 
             while (cursor.moveToNext()) {
                 long nodeId = cursor.getLong(cursor.getColumnIndexOrThrow(Timestamps.NODE_ID));
-                try {
-                    OrgNode node = new OrgNode(nodeId, resolver);
+                Log.v("time", "nodeId agenda : " + nodeId);
 
-                    if (orphanTimestampsNodes.contains(node)) {
-                        orphanTimestampsNodes.remove(node);
-                        rangedTimestampsNodes.add(node);
-                    } else {
-                        orphanTimestampsNodes.add(node);
-                    }
-                } catch (OrgNodeNotFoundException e) {
-                    e.printStackTrace();
+                if (orphanTimestampsNodes.contains(nodeId)) {
+                    orphanTimestampsNodes.remove(nodeId);
+                    rangedTimestampsNodes.add(nodeId);
+                } else {
+                    orphanTimestampsNodes.add(nodeId);
                 }
-
             }
             cursor.close();
         }
@@ -103,31 +99,42 @@ public class AgendaFragment extends Fragment {
 
         TreeMap<Long, ArrayList<OrgNode>> nodeIdsForEachDay = new TreeMap<>();
 
-        for (OrgNode node : orphanTimestampsNodes) {
-            Long day;
-            if (node.getScheduled().getEpochTime() < 0) {
-                day = node.getDeadline().getEpochTime() / (24 * 3600);
-                Log.v("deadline", "agenda deadline : " + day);
-            } else {
-                day = node.getScheduled().getEpochTime() / (24 * 3600);
-                Log.v("timestamp", "agenda scheduled: " + day);
-            }
+        for (Long nodeId : orphanTimestampsNodes) {
+            try {
+                OrgNode node = new OrgNode(nodeId, resolver);
+                Long day;
+                if (node.getScheduled().getEpochTime() < 0) {
+                    day = node.getDeadline().getEpochTime() / (24 * 3600);
+                    Log.v("deadline", "agenda deadline : " + day);
+                } else {
+                    day = node.getScheduled().getEpochTime() / (24 * 3600);
+                    Log.v("timestamp", "agenda scheduled: " + day);
+                }
 
-            if (!nodeIdsForEachDay.containsKey(day))
-                nodeIdsForEachDay.put(day, new ArrayList<OrgNode>());
-            nodeIdsForEachDay.get(day).add(node);
-        }
-
-        for (OrgNode node : rangedTimestampsNodes) {
-
-            long firstDay = node.getScheduled().getEpochTime() / (24 * 3600);
-            long lastDay = node.getDeadline().getEpochTime() / (24 * 3600);
-
-            for (long day = firstDay; day <= lastDay; day++) {
                 if (!nodeIdsForEachDay.containsKey(day))
                     nodeIdsForEachDay.put(day, new ArrayList<OrgNode>());
                 nodeIdsForEachDay.get(day).add(node);
+            } catch (OrgNodeNotFoundException e) {
+                e.printStackTrace();
             }
+        }
+
+        for (Long nodeId : rangedTimestampsNodes) {
+            try {
+                OrgNode node = new OrgNode(nodeId, resolver);
+
+                long firstDay = node.getScheduled().getEpochTime() / (24 * 3600);
+                long lastDay = node.getDeadline().getEpochTime() / (24 * 3600);
+
+                for (long day = firstDay; day <= lastDay; day++) {
+                    if (!nodeIdsForEachDay.containsKey(day))
+                        nodeIdsForEachDay.put(day, new ArrayList<OrgNode>());
+                    nodeIdsForEachDay.get(day).add(node);
+                }
+            } catch (OrgNodeNotFoundException e) {
+                e.printStackTrace();
+            }
+
         }
 
         int dayCursor = 0, nodeCursor = 0;
@@ -213,16 +220,30 @@ public class AgendaFragment extends Fragment {
             final OrgNode node = nodesList.get(items.get(position).position);
 
             TextView title = (TextView) holder.itemView.findViewById(R.id.title);
+            TextView details = (TextView) holder.itemView.findViewById(R.id.details);
+
             title.setText(node.name);
 
-            TextView details = (TextView) holder.itemView.findViewById(R.id.details);
-            details.setText(node.getPayload());
+            String textDetails = node.getPayload();
+
+            if (textDetails.equals("")) {
+                RelativeLayout.LayoutParams layoutParams =
+                        (RelativeLayout.LayoutParams) title.getLayoutParams();
+                layoutParams.addRule(RelativeLayout.CENTER_VERTICAL, RelativeLayout.TRUE);
+                title.setLayoutParams(layoutParams);
+
+                details.setVisibility(View.GONE);
+            } else {
+                details.setText(textDetails);
+            }
 
             TextView content = (TextView) holder.itemView.findViewById(R.id.date);
-            Calendar calendar = Calendar.getInstance();
-            calendar.setTime(new Date(node.getScheduled().getEpochTime()));
 
-            content.setText(SimpleDateFormat.getTimeInstance(DateFormat.SHORT).format(new Date(node.getScheduled().getEpochTime())));
+            Date date = new Date(node.getScheduled().getEpochTime() * 1000);
+
+            DateFormat dateFormat = SimpleDateFormat.getTimeInstance(DateFormat.SHORT);
+            dateFormat.setTimeZone(TimeZone.getTimeZone("GMT0"));
+            content.setText(dateFormat.format(date));
 
             holder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override

@@ -15,6 +15,7 @@ import java.util.Collections;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -53,6 +54,7 @@ public class OrgNodeTimeDate {
 	public OrgNodeTimeDate(TYPE type, int day, int month, int year) {
 		this(type);
 		setDate(day, month, year);
+		getEpochTime();
 	}
 
 	public OrgNodeTimeDate(TYPE type, int day, int month, int year, int startTimeOfDay, int startMinute) {
@@ -187,7 +189,7 @@ public class OrgNodeTimeDate {
 	
 	public String getDate() {
 		if(year < 0 || monthOfYear < 0 || dayOfMonth < 0) return "";
-		return String.format("%d-%02d-%02d", year, monthOfYear, dayOfMonth);
+		return String.format("%d-%02d-%02d", year, monthOfYear + 1, dayOfMonth);
 	}
 
 	public String getStartTime() {
@@ -203,9 +205,12 @@ public class OrgNodeTimeDate {
 		int hour = startTimeOfDay > -1 ? startTimeOfDay : 0;
 		int minute = startMinute > -1 ? startMinute : 0;
 
+		GregorianCalendar calendar = new GregorianCalendar(year, monthOfYear, dayOfMonth, hour, minute);
+		calendar.setTimeZone(TimeZone.getTimeZone("GMT0"));
+
 		if(year == -1 || dayOfMonth == -1 || monthOfYear == -1) return -1;
-		Log.v("time", "epochtime : "+new GregorianCalendar(year, monthOfYear, dayOfMonth, hour, minute).getTimeInMillis()/1000L);
-		return new GregorianCalendar(year, monthOfYear, dayOfMonth, hour, minute).getTimeInMillis()/1000L;
+		Log.v("time", "epochtime 1970 : " + new GregorianCalendar(1970, 0, 1, 1, 0).getTimeInMillis());
+		return calendar.getTimeInMillis() / 1000L;
 	}
 
 	/**

@@ -286,6 +286,9 @@ public class EditNodeFragment extends Fragment {
         }
 
         public void onDateSet(DatePicker view, int year, int month, int day) {
+            Log.v("time", "year : " + year);
+            Log.v("time", "month : " + month);
+            Log.v("time", "day : " + day);
             node.addDate(
                     new OrgNodeTimeDate(
                             EditNodeFragment.currentDateTimeDialog,

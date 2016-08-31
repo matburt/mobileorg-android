@@ -5,6 +5,7 @@ import android.graphics.Typeface;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
@@ -127,6 +128,10 @@ public class OrgNodeViewHolder extends ItemViewHolder {
         else itemModifiers.setVisibility(View.GONE);
         String cleanedPayload = node.getCleanedPayload();
         contentView.setText(cleanedPayload);
+
+        Log.v("payload", "name    : " + node.name);
+        Log.v("payload", "clean payload : " + cleanedPayload);
+        Log.v("payload", "dirty payload : " + node.getPayload());
 
         if(cleanedPayload.equals("")){
             RelativeLayout.LayoutParams layoutParams =

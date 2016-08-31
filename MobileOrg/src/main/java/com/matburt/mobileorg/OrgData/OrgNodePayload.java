@@ -67,14 +67,13 @@ public class OrgNodePayload {
 	}
 	
 	public String getCleanedPayload() {
-		if(this.cleanPayload == null)
-			cleanPayload();
-
+		cleanPayload();
 		return this.cleanPayload.toString();
 	}
 
 	private void trimEachLine() {
 		String cleanPayload = this.cleanPayload.toString();
+
 		String lines[] = cleanPayload.split("\\n");
 		int N = lines.length;
 		if (N == 0){
@@ -133,6 +132,7 @@ public class OrgNodePayload {
 	}
 
 	private void cleanPayload() {
+		cleanPayload = payload;
 		for(OrgNodeTimeDate.TYPE type: OrgNodeTimeDate.TYPE.values())
 			getTimestamp(type);
 

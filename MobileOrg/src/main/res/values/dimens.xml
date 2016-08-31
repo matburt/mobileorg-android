@@ -6,6 +6,7 @@
     <dimen name="text_margin">16dp</dimen>
 
     <dimen name="outline_item">50sp</dimen>
+    <dimen name="agenda_item">60sp</dimen>
 
     <dimen name="outline_dashitem_height">70dp</dimen>
     <dimen name="outline_dashitem_width">70dp</dimen>

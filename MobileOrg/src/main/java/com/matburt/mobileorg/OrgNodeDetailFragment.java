@@ -358,16 +358,13 @@ public class OrgNodeDetailFragment extends Fragment {
                 @Override
                 public boolean onLongClick(View v) {
 //                    ((AppCompatActivity)getActivity()).startSupportActionMode(mActionModeCallback);
-                    Log.v("selection", "long click");
-                    Log.v("selection", "selected node : " + selectedNode);
-                    Log.v("selection", "highlighted : " + highlightedView);
+
                     if (highlightedView != null) {
                         closeInsertItem();
                     }
 
                     selectedNode = item.node;
                     highlightedView = item.mView;
-                    Log.v("selection", "highlighted : " + highlightedView);
 //                    setItemModifiersVisibility(highlightedView, View.VISIBLE);
 //                    item.mView.setSelected(true);
 
