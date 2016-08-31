@@ -442,7 +442,6 @@ public class OrgNodeDetailFragment extends Fragment {
 
         @Override
         public int getItemCount() {
-            Log.v("node", tree.node.name + " " + items.size());
             return items.size();
         }
 

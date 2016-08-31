@@ -38,8 +38,11 @@ public class SshSessionFactory extends JschConfigSessionFactory {
 
     @Override
     protected void configure(OpenSshConfig.Host host, Session session) {
-        if (connection == ConnectionType.kSshPassword)
+        if (connection == ConnectionType.kSshPassword) {
+            Log.v("host", "password : " + AuthData.getInstance(context).getPassword());
             session.setPassword(AuthData.getInstance(context).getPassword());
+        }
+
     }
 
     @Override
@@ -48,6 +51,7 @@ public class SshSessionFactory extends JschConfigSessionFactory {
         Log.v("host", "pub : " + AuthData.getInstance(context).getPubFile());
         Log.v("host", "Connection type : " + connection);
         Log.v("host", "pub file : " + AuthData.getInstance(context).getPubFile());
+
         if (connection == ConnectionType.kSshPubKey)
             defaultJSch.addIdentity(AuthData.getInstance(context).getPubFile());
 

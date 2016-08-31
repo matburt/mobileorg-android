@@ -20,7 +20,6 @@ import android.widget.TextView;
 
 import com.matburt.mobileorg.OrgData.OrgContract.Timestamps;
 import com.matburt.mobileorg.OrgData.OrgNode;
-import com.matburt.mobileorg.OrgData.OrgNodeTimeDate;
 import com.matburt.mobileorg.util.OrgNodeNotFoundException;
 
 import java.text.DateFormat;
@@ -28,6 +27,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.TreeMap;
 
 
 /**
@@ -62,64 +63,81 @@ public class AgendaFragment extends Fragment {
         super.onCreate(savedInstanceState);
         this.resolver = getActivity().getContentResolver();
 
+
         Cursor cursor = resolver.query(Timestamps.CONTENT_URI,
                 new String[]{Timestamps.NODE_ID, Timestamps.TIMESTAMP, Timestamps.TYPE},
                 null, null, Timestamps.TIMESTAMP);
 
         nodesList = new ArrayList<>();
-        ArrayList<Long> timestampType = new ArrayList<>();
+        items = new ArrayList<>();
+        daysList = new ArrayList<>();
+
+        // Nodes with only a deadline or a scheduled but not both
+        HashSet<OrgNode> orphanTimestampsNodes = new HashSet<>();
+
+        // Nodes with a deadline AND a scheduled date
+        HashSet<OrgNode> rangedTimestampsNodes = new HashSet<>();
 
         if (cursor != null) {
             Log.v("time", "count : " + cursor.getCount());
-            cursor.moveToFirst();
 
-            while (!cursor.isAfterLast()) {
+            while (cursor.moveToNext()) {
                 long nodeId = cursor.getLong(cursor.getColumnIndexOrThrow(Timestamps.NODE_ID));
-                Log.v("time", "cursor id, time, type : " + nodeId + ", " + cursor.getLong(cursor.getColumnIndexOrThrow(Timestamps.TIMESTAMP)) + ", " + cursor.getLong(cursor.getColumnIndexOrThrow(Timestamps.TYPE)));
                 try {
-                    nodesList.add(new OrgNode(nodeId, resolver));
-                    timestampType.add(cursor.getLong(cursor.getColumnIndexOrThrow(Timestamps.TYPE)));
+                    OrgNode node = new OrgNode(nodeId, resolver);
+
+                    if (orphanTimestampsNodes.contains(node)) {
+                        orphanTimestampsNodes.remove(node);
+                        rangedTimestampsNodes.add(node);
+                    } else {
+                        orphanTimestampsNodes.add(node);
+                    }
                 } catch (OrgNodeNotFoundException e) {
                     e.printStackTrace();
                 }
-                cursor.moveToNext();
+
             }
             cursor.close();
         }
 
-        daysList = new ArrayList<>();
-        items = new ArrayList<>();
-        long prevDay = -1;
-        long day;
-        int nodeCursor = 0;
-        int dayCursor = 0;
-        long epoch;
 
-        final OrgNodeTimeDate.TYPE[] types = OrgNodeTimeDate.TYPE.values();
+        TreeMap<Long, ArrayList<OrgNode>> nodeIdsForEachDay = new TreeMap<>();
 
-        for (OrgNode node : nodesList) {
-            Log.v("epoch", "node : " + node);
-            switch (types[timestampType.get(nodeCursor).intValue()]) {
-                case Scheduled:
-                    epoch = node.getScheduled().getEpochTime();
-                    break;
-                case Deadline:
-                    epoch = node.getDeadline().getEpochTime();
-                    break;
-                default:
-                    continue;
+        for (OrgNode node : orphanTimestampsNodes) {
+            Long day;
+            if (node.getScheduled().getEpochTime() < 0) {
+                day = node.getDeadline().getEpochTime() / (24 * 3600);
+                Log.v("deadline", "agenda deadline : " + day);
+            } else {
+                day = node.getScheduled().getEpochTime() / (24 * 3600);
+                Log.v("timestamp", "agenda scheduled: " + day);
             }
 
-            day = epoch / (24 * 3600);
-            Log.v("epoch", "day: " + day);
-            Log.v("epoch", "time: " + node.getScheduled().getEpochTime());
-            if (day != prevDay) {
-                Log.v("epoch", "date instance : " + SimpleDateFormat.getDateInstance().format(new Date(epoch * 1000)));
-                daysList.add(SimpleDateFormat.getDateInstance().format(new Date(epoch * 1000)));
-                items.add(new PositionHelper(dayCursor++, Type.kDate));
-                prevDay = day;
+            if (!nodeIdsForEachDay.containsKey(day))
+                nodeIdsForEachDay.put(day, new ArrayList<OrgNode>());
+            nodeIdsForEachDay.get(day).add(node);
+        }
+
+        for (OrgNode node : rangedTimestampsNodes) {
+
+            long firstDay = node.getScheduled().getEpochTime() / (24 * 3600);
+            long lastDay = node.getDeadline().getEpochTime() / (24 * 3600);
+
+            for (long day = firstDay; day <= lastDay; day++) {
+                if (!nodeIdsForEachDay.containsKey(day))
+                    nodeIdsForEachDay.put(day, new ArrayList<OrgNode>());
+                nodeIdsForEachDay.get(day).add(node);
             }
-            items.add(new PositionHelper(nodeCursor++, Type.kNode));
+        }
+
+        int dayCursor = 0, nodeCursor = 0;
+        for (long day : nodeIdsForEachDay.keySet()) {
+            daysList.add(SimpleDateFormat.getDateInstance().format(new Date(day * 3600 * 24 * 1000)));
+            items.add(new PositionHelper(dayCursor++, Type.kDate));
+            for (OrgNode node : nodeIdsForEachDay.get(day)) {
+                nodesList.add(node);
+                items.add(new PositionHelper(nodeCursor++, Type.kNode));
+            }
         }
 
         adapter = new RecyclerViewAdapter();

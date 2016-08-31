@@ -39,12 +39,16 @@ public class SSHSynchronizer extends Synchronizer {
 
     public void connect() {
         try {
-            JSch jSch = new SshSessionFactory(context).createDefaultJSch(FS.detect());
+            SshSessionFactory sshSessionFactory = new SshSessionFactory(context);
+            JSch jSch = sshSessionFactory.createDefaultJSch(FS.detect());
+
 
             session = jSch.getSession(
                     authData.getUser(),
                     authData.getHost(),
                     authData.getPort());
+
+            session.setPassword(AuthData.getInstance(context).getPassword());
 
             // TODO: find a way to check for host key
 //            jSch.setKnownHosts("/storage/sdcard0/Download/known_hosts");

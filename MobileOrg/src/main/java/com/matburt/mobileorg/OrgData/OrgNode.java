@@ -159,16 +159,11 @@ public class OrgNode {
     }
 
 	private int updateNode(Context context) {
-		Log.v("update", "scheduled: "+scheduled);
-		Log.v("update", "deadline: "+deadline);
 		if(scheduled != null){
-			Log.v("epoch","updating type scheduled");
 			scheduled.update(context, id, fileId);
 		}
         if(deadline != null){
-			Log.v("epoch","updating type deadline");
 			deadline.update(context, id, fileId);
-			Log.v("epoch","end of deadline update");
 		}
 		return context.getContentResolver().update(OrgData.buildIdUri(id), getContentValues(), null, null);
 	}
@@ -391,7 +386,8 @@ public class OrgNode {
     }
 
     public void addDate(OrgNodeTimeDate date){
-        this.orgNodePayload.insertOrReplaceDate(date);
+		Log.v("timestamp", "adding date : " + date.getEpochTime() + " type : " + date.type);
+		this.orgNodePayload.insertOrReplaceDate(date);
         switch (date.type){
             case Deadline:
                 deadline = date;
@@ -465,8 +461,15 @@ public class OrgNode {
 	 * @return
 	 */
 	private long addNode(Context context) {
+
 		Uri uri = context.getContentResolver().insert(OrgData.CONTENT_URI, getContentValues());
 		this.id = Long.parseLong(OrgData.getId(uri));
+		if (scheduled != null) {
+			scheduled.update(context, id, fileId);
+		}
+		if (deadline != null) {
+			deadline.update(context, id, fileId);
+		}
 		OrgFile.updateFile(this, context);
 		return id;
 	}

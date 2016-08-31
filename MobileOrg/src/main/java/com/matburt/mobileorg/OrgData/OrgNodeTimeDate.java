@@ -76,7 +76,6 @@ public class OrgNodeTimeDate {
 				" WHERE " + Timestamps.NODE_ID + " = " + nodeId +
 				"   AND " + Timestamps.TYPE+ " = " + type.ordinal();
 
-		Log.v("todo", "query : " + todoQuery);
 		this.type = type;
 
 		Cursor cursor = OrgDatabase.getInstance().getReadableDatabase().rawQuery(todoQuery, null);
@@ -249,6 +248,7 @@ public class OrgNodeTimeDate {
 	public void update(Context context, long nodeId, long fileId) {
 		Uri uri = OrgContract.Timestamps.buildIdUri(nodeId);
 		context.getContentResolver().delete(uri, Timestamps.TYPE + "="+type.ordinal(), null);
+		if (getEpochTime() < 0) return;
 		context.getContentResolver().
 				insert(
 						uri,
