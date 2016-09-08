@@ -191,7 +191,7 @@ public class OrgFileParser {
 	}
 
 	private void init(OrgFile orgFile) {
-		orgFile.removeFile(context, true);
+		orgFile.removeFile(context, false);
 		orgFile.addFile(context);
 		this.orgFile = orgFile;
 

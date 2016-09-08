@@ -125,7 +125,7 @@ public class OrgFile {
 	}
 
 	/**
-	 * Add the file to the DB, then create file on disk
+	 * Add the file to the DB, then create file on disk if does not exist
 	 *
      * @param context
      */
@@ -137,7 +137,7 @@ public class OrgFile {
 		ContentValues values = new ContentValues();
 		values.put(OrgData.FILE_ID, id);
 		resolver.update(OrgData.buildIdUri(nodeId), values, null, null);
-		updateFile("", context);
+		if(!new File(getFilePath(context)).exists()) createFile(context);
 	}
 
 	/**
@@ -169,6 +169,14 @@ public class OrgFile {
 		long nodeId = Long.parseLong(OrgData.getId(uri));
 		return nodeId;
     }
+
+	/**
+	 * Create a file on disk
+	 * @param context
+     */
+	public void createFile(Context context){
+		updateFile("", context);
+	}
 
     /**
      * Replace the old content of the file by 'content'

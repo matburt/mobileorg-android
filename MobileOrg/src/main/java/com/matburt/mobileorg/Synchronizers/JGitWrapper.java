@@ -78,6 +78,29 @@ public class JGitWrapper {
         }
     }
 
+    public static String read(String filename, Context context) {
+        Synchronizer.setInstance(new SSHSynchronizer(context));
+        File f = new File(Synchronizer.getInstance().getAbsoluteFilesDir(context));
+        File file[] = f.listFiles();
+        if (file == null) return "no file";
+        if(filename.equals(".git")) return ".git";
+        OrgFile orgFile = new OrgFile(filename, filename);
+        FileReader fileReader = null;
+        try {
+            fileReader = new FileReader(Synchronizer.getInstance().getAbsoluteFilesDir(context) + "/" + filename);
+            BufferedReader bufferedReader = new BufferedReader(fileReader);
+
+            return FileUtils.read(bufferedReader);
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            return "looser";
+        } catch (IOException e) {
+            e.printStackTrace();
+            return "looser";
+        }
+    }
+
     public static SyncResult pull(final Context context) {
         File repoDir = new File(context.getFilesDir() + "/" + GIT_DIR + "/.git");
         Log.v("git", "pulling");
@@ -91,6 +114,9 @@ public class JGitWrapper {
             return result;
         }
 
+
+        Log.v("git", "before pull: " + read("MobileOrg" , context ));
+        Log.v("git", "HEAD: " + read(".git/HEAD" , context ));
         Log.v("git", "got git");
 
         try {
@@ -152,6 +178,7 @@ public class JGitWrapper {
                 }
             }
             result.setState(SyncResult.State.kSuccess);
+            Log.v("git", "after pull: " + read("MobileOrg" , context ));
             return result;
         } catch(WrongRepositoryStateException e){
             e.printStackTrace();
@@ -319,9 +346,9 @@ public class JGitWrapper {
         protected void onPostExecute(Object exception) {
             OrgProviderUtils
                     .clearDB(context.getContentResolver());
-
+            Log.v("git", "before parseall: " + read("MobileOrg" , context ));
             parseAll();
-
+            Log.v("git", "after parseall: " + read("MobileOrg" , context ));
             progress.dismiss();
             if (exception == null) {
                 Toast.makeText(context, "Synchronization successful !", Toast.LENGTH_LONG).show();
@@ -341,6 +368,8 @@ public class JGitWrapper {
                 ((Exception)exception).printStackTrace();
             }
         }
+
+
 
         void parseAll() {
             Synchronizer.setInstance(new SSHSynchronizer(context));
