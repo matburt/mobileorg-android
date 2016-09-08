@@ -11,7 +11,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.Switch;
 import android.widget.TextView;
 
 import com.matburt.mobileorg.Gui.Wizard.WizardView;
@@ -30,6 +32,7 @@ public class SSHWizard extends Wizard {
 	private EditText sshPort;
 
 	private TextView sshPubFileActual;
+	Switch auth_selector;
 
 	public SSHWizard(WizardView wizardView, Context context) {
 		super(wizardView, context);
@@ -39,11 +42,17 @@ public class SSHWizard extends Wizard {
 	@Override
 	public void setupFirstPage() {
 		createSSHConfig();
+
+
 	}
 
 	public View createSSHConfig() {
 		View view = LayoutInflater.from(context).inflate(
 				R.layout.wizard_ssh, null);
+
+
+		final TextView sshPasswordTitle = (TextView) view.findViewById(R.id.wizard_ssh_password_text);
+		final TextView sshPubkeyTitle = (TextView) view.findViewById(R.id.wizard_ssh_pubkey_prompt);
 
 		sshUser = (EditText) view.findViewById(R.id.wizard_ssh_username);
 		sshPass = (EditText) view.findViewById(R.id.wizard_ssh_password);
@@ -52,7 +61,7 @@ public class SSHWizard extends Wizard {
 		sshPort = (EditText) view.findViewById(R.id.wizard_ssh_port);
 		sshPubFileActual = (TextView) view
 				.findViewById(R.id.wizard_ssh_pub_file_actual);
-		Button sshPubFileSelect = (Button) view
+		final Button sshPubFileSelect = (Button) view
 				.findViewById(R.id.wizard_ssh_choose_pub_file);
 		sshPubFileSelect.setOnClickListener(new OnClickListener() {
 			@Override
@@ -66,7 +75,31 @@ public class SSHWizard extends Wizard {
 			}
 		});
 
+
+
+		auth_selector = (Switch) view.findViewById(R.id.auth_selector);
+		auth_selector.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+			@Override
+			public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+				if(b){
+					sshPass.setVisibility(View.GONE);
+					sshPasswordTitle.setVisibility(View.GONE);
+					sshPubFileSelect.setVisibility(View.VISIBLE);
+					sshPubkeyTitle.setVisibility(View.VISIBLE);
+					sshPubFileActual.setVisibility(View.VISIBLE);
+				} else {
+					sshPass.setVisibility(View.VISIBLE);
+					sshPasswordTitle.setVisibility(View.VISIBLE);
+					sshPubFileSelect.setVisibility(View.GONE);
+					sshPubkeyTitle.setVisibility(View.GONE);
+					sshPubFileActual.setVisibility(View.GONE);
+				}
+			}
+		});
+
 		loadSettings();
+
+
 
 		setupDoneButton(view);
 		wizardView.addPage(view);
@@ -87,6 +120,9 @@ public class SSHWizard extends Wizard {
 		sshPass.setText(appSettings.getString("scpPass", ""));
 		sshHost.setText(appSettings.getString("scpHost", ""));
 		sshPort.setText(appSettings.getString("scpPort", ""));
+		auth_selector.setChecked( appSettings.getBoolean("usePassword", true));
+		auth_selector.performClick();
+		auth_selector.performClick();
 		sshPubFileActual.setText(appSettings.getString("scpPubFile", ""));
 	}
 
@@ -94,6 +130,7 @@ public class SSHWizard extends Wizard {
 		final String pathActual = sshPath.getText().toString();
 		final String userActual = sshUser.getText().toString();
 		final String hostActual = sshHost.getText().toString();
+
 		String portActual = sshPort.getText().toString();
 		if(portActual.equals("")) portActual = "22";
 
@@ -109,6 +146,7 @@ public class SSHWizard extends Wizard {
 		editor.putString("scpUser", userActual);
 		editor.putString("scpHost", hostActual);
 		editor.putString("scpPort", portActual);
+		editor.putBoolean("usePassword", auth_selector.isChecked());
 		editor.putString("scpPubFile", sshPubFileActual.getText().toString());
 		editor.putString("scpPass", sshPass.getText().toString());
 		editor.apply();

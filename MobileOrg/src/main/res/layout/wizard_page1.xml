@@ -27,17 +27,21 @@
        android:layout_height="wrap_content"
        android:textSize="18dp"
        android:text="@string/wizard_webdav"
+        android:visibility="gone"
        android:checked="true"/>
     <RadioButton
        android:textSize="18dp"
        android:id="@+id/sync_dropbox"
        android:layout_width="wrap_content"
-       android:layout_height="wrap_content"
+        android:visibility="gone"
+
+        android:layout_height="wrap_content"
        android:text="@string/wizard_dropbox" />
     <RadioButton
        android:textSize="18dp"
        android:id="@+id/sync_ubuntuone"
-       android:layout_width="wrap_content"
+              android:visibility="gone"
+        android:layout_width="wrap_content"
        android:layout_height="wrap_content"
        android:text="@string/wizard_ubuntuone" />
     <RadioButton
@@ -49,13 +53,15 @@
     <RadioButton
        android:textSize="18dp"
        android:id="@+id/sync_sdcard"
-       android:layout_width="wrap_content"
+             android:visibility="gone"
+  android:layout_width="wrap_content"
        android:layout_height="wrap_content"
        android:text="@string/wizard_sdcard" />
     <RadioButton
        android:id="@+id/sync_null"
        android:layout_width="wrap_content"
-       android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:layout_height="wrap_content"
        android:textSize="18dp"
        android:text="@string/wizard_null"
        android:checked="true"/>

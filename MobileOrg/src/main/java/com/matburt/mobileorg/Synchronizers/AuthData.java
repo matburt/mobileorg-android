@@ -27,6 +27,10 @@ public class AuthData {
         return mAuthData;
     }
 
+    public boolean usePassword(){
+        return appSettings.getBoolean("usePassword", true);
+    }
+
     public String getPath() {
         return OrgUtils.rStrip(appSettings.getString("scpPath", ""));
     }

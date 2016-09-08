@@ -31,7 +31,7 @@ public class SshSessionFactory extends JschConfigSessionFactory {
         final AuthData authData = AuthData.getInstance(context);
         if (authData.getHost().startsWith("http")) return ConnectionType.kHttp;
         else {
-            if (!authData.getPubFile().equals("")) return ConnectionType.kSshPubKey;
+            if (authData.usePassword()) return ConnectionType.kSshPubKey;
             else return ConnectionType.kSshPassword;
         }
     }

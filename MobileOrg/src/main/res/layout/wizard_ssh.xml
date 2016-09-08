@@ -35,7 +35,25 @@
           android:layout_height="wrap_content"
           android:textSize="20dp"
           android:singleLine="true" android:inputType="text|textEmailAddress"/>
+
+      <LinearLayout
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:orientation="horizontal">
+        <TextView
+            android:paddingTop="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/auth_type"
+            android:textSize="20dp"/>
+        <Switch
+            android:id="@+id/auth_selector"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            />
+      </LinearLayout>
       <TextView
+          android:id="@+id/wizard_ssh_password_text"
           android:paddingTop="10dp"
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
@@ -50,6 +68,7 @@
           android:password="true"
           android:singleLine="true"/>
       <TextView
+          android:id="@+id/wizard_ssh_pubkey_prompt"
           android:paddingTop="10dp"
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"

@@ -8,7 +8,9 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.ViewTreeObserver;
+import android.widget.CompoundButton;
 import android.widget.RadioGroup;
+import android.widget.Switch;
 
 import com.matburt.mobileorg.Gui.Wizard.Wizards.SSHWizard;
 import com.matburt.mobileorg.Gui.Wizard.Wizards.Wizard;
@@ -45,7 +47,7 @@ public class WizardActivity extends Activity implements RadioGroup.OnCheckedChan
 		syncSdCard = findViewById(R.id.sync_sdcard).getId();
 		syncNull = findViewById(R.id.sync_null).getId();
 		syncSSH = findViewById(R.id.sync_ssh).getId();
-		
+
 		ViewTreeObserver observer = wizardView.getViewTreeObserver();
 		if (observer.isAlive()) { 
 		  observer.addOnGlobalLayoutListener(this);
