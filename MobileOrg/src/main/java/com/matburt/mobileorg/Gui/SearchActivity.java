@@ -32,7 +32,7 @@ public class SearchActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.search);
 
-        Log.v("search", "hello world");
+//        Log.v("search", "hello world");
 
         recyclerView = (RecyclerView) findViewById(R.id.search_recycler_view);
         assert recyclerView != null;
@@ -47,7 +47,7 @@ public class SearchActivity extends AppCompatActivity {
         Intent intent = getIntent();
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
             String query = intent.getStringExtra(SearchManager.QUERY);
-            Log.v("search", "intent is ok");
+//            Log.v("search", "intent is ok");
             doSearch(query);
         }
     }
@@ -59,7 +59,7 @@ public class SearchActivity extends AppCompatActivity {
                 getContentResolver());
         adapter.items = OrgProviderUtils
                 .orgDataCursorToArrayList(result);
-        Log.v("search", "in adapter : " + adapter.items);
+//        Log.v("search", "in adapter : " + adapter.items);
         adapter.notifyDataSetChanged();
     }
 

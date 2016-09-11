@@ -177,7 +177,7 @@ private static final String BASE_TOKEN_NAME = "Ubuntu One @ MobileOrg:";
             verifyResponse(response);
 
         } catch (Exception e) {
-            Log.e("MobileOrg", "Exception in Ubuntu One Put File: " + e.toString());
+//            Log.e("MobileOrg", "Exception in Ubuntu One Put File: " + e.toString());
 			throw new IOException("Uploading: " + filename + ": " + e.toString());
         }
     }
@@ -212,7 +212,7 @@ private static final String BASE_TOKEN_NAME = "Ubuntu One @ MobileOrg:";
             verifyResponse(response);
             return new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
         } catch (Exception e) {
-            Log.e("MobileOrg", "Exception in Ubuntu One Fetch File: " + e.toString());
+//            Log.e("MobileOrg", "Exception in Ubuntu One Fetch File: " + e.toString());
         }
         return null;
     }
@@ -234,7 +234,7 @@ private static final String BASE_TOKEN_NAME = "Ubuntu One @ MobileOrg:";
             URI uri = new URI(url.getProtocol(), url.getUserInfo(), url.getHost(),
                               url.getPort(), url.getPath(), url.getQuery(), url.getRef());
             url = uri.toURL();
-            Log.d("MobileOrg", "Getting directory list for: " + url.toString());
+//            Log.d("MobileOrg", "Getting directory list for: " + url.toString());
 			HttpGet request = new HttpGet(url.toString());
 			DefaultHttpClient httpClient = new DefaultHttpClient();
             signRequest(request);
@@ -251,7 +251,7 @@ private static final String BASE_TOKEN_NAME = "Ubuntu One @ MobileOrg:";
                 } 
             }
         } catch (Exception e) {
-            Log.e("MobileOrg", "Exception in Ubuntu One Fetch Directories: " + e.toString());
+//            Log.e("MobileOrg", "Exception in Ubuntu One Fetch Directories: " + e.toString());
         }
         return directories;
     }
@@ -270,7 +270,7 @@ private static final String BASE_TOKEN_NAME = "Ubuntu One @ MobileOrg:";
             max_bytes = dirData.getLong(MAX_BYTES);
             bytes_used = dirData.getLong(BYTES_USED);
         } catch (Exception e) {
-            Log.e("MobileOrg", "Exception in Ubuntu One Fetch Directories: " + e.toString());
+//            Log.e("MobileOrg", "Exception in Ubuntu One Fetch Directories: " + e.toString());
         }
     }
 
@@ -286,7 +286,7 @@ private static final String BASE_TOKEN_NAME = "Ubuntu One @ MobileOrg:";
     public boolean login() {
         invalidate();
 		try {
-            Log.i("MobileOrg", "Logging into Ubuntu One");
+//            Log.i("MobileOrg", "Logging into Ubuntu One");
 			DefaultHttpClient httpClient = new DefaultHttpClient();
             final HttpParams httpParameters = httpClient.getParams();
             HttpConnectionParams.setConnectionTimeout(httpParameters, 60000);
@@ -309,18 +309,18 @@ private static final String BASE_TOKEN_NAME = "Ubuntu One @ MobileOrg:";
             edit.putString("ubuntuConsumerSecret", consumer_secret);
             edit.putString("ubuntuAccessToken", access_token);
             edit.putString("ubuntuTokenSecret", token_secret);
-            Log.i("MobileOrg", "Logged in to Ubuntu One: " + consumer_key);
+//            Log.i("MobileOrg", "Logged in to Ubuntu One: " + consumer_key);
             edit.commit();
 
 			buildConsumer();
             ping_u1_url(this.username);
             return true;
 		} catch (ClientProtocolException e) {
-            Log.e("MobileOrg", "Protocol Exception: " + e.toString());
+//            Log.e("MobileOrg", "Protocol Exception: " + e.toString());
 		} catch (IOException e) {
-			Log.e("MobileOrg", "IO Exception: " + e.toString());
+//			Log.e("MobileOrg", "IO Exception: " + e.toString());
 		} catch (JSONException e) {
-            Log.e("MobileOrg", "JSONException: " + e.toString());
+//            Log.e("MobileOrg", "JSONException: " + e.toString());
 		}
         return false;
 	}
@@ -418,14 +418,14 @@ private static final String BASE_TOKEN_NAME = "Ubuntu One @ MobileOrg:";
 				response = httpClient.execute(request);
 				int statusCode = response.getStatusLine().getStatusCode();
 				if (statusCode == 400 || statusCode == 401) {
-                    Log.e("MobileOrg", "Ping failed");
+//                    Log.e("MobileOrg", "Ping failed");
 					invalidate();
 				} else {
 					return;
 				}
 			}
         } catch (Exception e) {
-            Log.e("MobileOrg", "Exception in Ubuntu One Ping: " + e.toString());
+//            Log.e("MobileOrg", "Exception in Ubuntu One Ping: " + e.toString());
         }
 		// } catch (UnsupportedEncodingException e) {
 		// 	e.printStackTrace();

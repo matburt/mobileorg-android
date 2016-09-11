@@ -48,9 +48,9 @@ public class OrgDatabase extends SQLiteOpenHelper {
 	 * @param context
 	 */
 	static public void startDB(Context context) {
-		Log.v("trace", "db started");
+//		Log.v("trace", "db started");
 		mInstance = new OrgDatabase(context);
-		Log.v("trace", "instance : " + mInstance);
+//		Log.v("trace", "instance : " + mInstance);
 	}
 
 	public static OrgDatabase getInstance(){
@@ -148,7 +148,7 @@ public class OrgDatabase extends SQLiteOpenHelper {
 	}
 
 	public void fastInsertTimestamp(Long id, Long fileId, final HashMap<OrgNodeTimeDate.TYPE, OrgNodeTimeDate> timestamps){
-		Log.v("time","db time : "+timestamps.get(OrgNodeTimeDate.TYPE.Scheduled));
+//		Log.v("time","db time : "+timestamps.get(OrgNodeTimeDate.TYPE.Scheduled));
 		for(Map.Entry<OrgNodeTimeDate.TYPE, OrgNodeTimeDate> entry: timestamps.entrySet()){
 			OrgNodeTimeDate timeDate = entry.getValue();
 			if(timeDate.getEpochTime() < 0) continue;
@@ -164,7 +164,7 @@ public class OrgDatabase extends SQLiteOpenHelper {
 
 	public void fastInsertNodePayload(Long id, final String payload) {
 
-		Log.v("time","payload : "+payload);
+//		Log.v("time","payload : "+payload);
 		addPayloadStatement.bindString(1, payload);
 		addPayloadStatement.bindLong(2, id);
 		addPayloadStatement.execute();

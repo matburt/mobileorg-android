@@ -64,7 +64,7 @@ public class TimeclockService extends Service {
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		String action = intent.getStringExtra("action");
-		Log.d("MobileOrg", "Called onStartCommand() with :" + action);
+//		Log.d("MobileOrg", "Called onStartCommand() with :" + action);
 		if(action == null) {
 			this.node_id = intent.getLongExtra(NODE_ID, -1);
 			try {

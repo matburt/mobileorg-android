@@ -153,7 +153,7 @@ public class SSHWizard extends Wizard {
 
 
 		AuthData.getInstance(context).setPassword(sshPass.getText().toString());
-		Log.v("git","host0 : "+hostActual);
+//		Log.v("git","host0 : "+hostActual);
 
 		JGitWrapper.CloneGitRepoTask task = new JGitWrapper.CloneGitRepoTask(context);
 		task.execute(pathActual, sshPass.getText().toString(), userActual, hostActual, portActual);

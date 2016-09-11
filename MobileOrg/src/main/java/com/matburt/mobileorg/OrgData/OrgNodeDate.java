@@ -51,7 +51,7 @@ public class OrgNodeDate {
 
 				return;
 			} catch (ParseException e) {
-				Log.w("MobileOrg", "Unable to parse schedule: " + date);
+//				Log.w("MobileOrg", "Unable to parse schedule: " + date);
 			}
 		} else
 			throw new IllegalArgumentException("Could not create date out of entry");

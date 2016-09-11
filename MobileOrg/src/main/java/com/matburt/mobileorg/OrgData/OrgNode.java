@@ -279,8 +279,8 @@ public class OrgNode {
 			if(sibling.position >= position && sibling.id != this.id) {
                 ++sibling.position;
 				sibling.updateNode(context);
-				Log.v("position", "new pos : " + sibling.position);
-                Log.v("position", sibling.getCleanedName());
+//				Log.v("position", "new pos : " + sibling.position);
+//                Log.v("position", sibling.getCleanedName());
             }
         }
     }
@@ -386,7 +386,7 @@ public class OrgNode {
     }
 
     public void addDate(OrgNodeTimeDate date){
-		Log.v("timestamp", "adding date : " + date.getEpochTime() + " type : " + date.type);
+//		Log.v("timestamp", "adding date : " + date.getEpochTime() + " type : " + date.type);
 		this.orgNodePayload.insertOrReplaceDate(date);
         switch (date.type){
             case Deadline:

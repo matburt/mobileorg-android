@@ -142,8 +142,8 @@ public class OrgNodeListActivity extends AppCompatActivity {
 
         SearchView searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
 
-        Log.v("search", "menu.findItem(R.id.menu_search) : " + menu.findItem(R.id.menu_search));
-        Log.v("search", "menu.findItem(R.id.menu_search).getactionview : " + menu.findItem(R.id.menu_search).getActionView());
+//        Log.v("search", "menu.findItem(R.id.menu_search) : " + menu.findItem(R.id.menu_search));
+//        Log.v("search", "menu.findItem(R.id.menu_search).getactionview : " + menu.findItem(R.id.menu_search).getActionView());
         ComponentName cn = new ComponentName(this, SearchActivity.class);
         searchView.setSearchableInfo(searchManager.getSearchableInfo(cn));
 //        searchView.setIconifiedByDefault(false); // Do not iconify the widget; expand it by default
@@ -155,7 +155,7 @@ public class OrgNodeListActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        Log.v("search ", "hello selected");
+//        Log.v("search ", "hello selected");
         switch (item.getItemId()) {
             case android.R.id.home:
                 return true;
@@ -196,7 +196,7 @@ public class OrgNodeListActivity extends AppCompatActivity {
     }
 
     public void runShowWizard(View view) {
-        Log.v("sync", "runShowWizard");
+//        Log.v("sync", "runShowWizard");
         startActivity(new Intent(this, WizardActivity.class));
     }
 
@@ -223,7 +223,7 @@ public class OrgNodeListActivity extends AppCompatActivity {
 
 
     private void displayNewUserDialogs() {
-        Log.v("sync", "isSync : " + PreferenceUtils.isSyncConfigured());
+//        Log.v("sync", "isSync : " + PreferenceUtils.isSyncConfigured());
         if (!PreferenceUtils.isSyncConfigured())
             runShowWizard(null);
 
@@ -285,7 +285,7 @@ public class OrgNodeListActivity extends AppCompatActivity {
             alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int whichButton) {
                     authData.setPassword(input.getText().toString());
-                    Log.v("pass", "pass : " + input.getText().toString());
+//                    Log.v("pass", "pass : " + input.getText().toString());
                     passwordPrompt = false;
                     runSynchronize();
                     dialog.dismiss();

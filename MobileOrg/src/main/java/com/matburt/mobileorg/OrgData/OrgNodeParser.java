@@ -25,7 +25,7 @@ public class OrgNodeParser {
 	public OrgNodeParser(ArrayList<String> todos) {
 		final String patternString = patternStart + "(?:("
 				+ getTodoRegex(todos) + ")\\s)?" + patternEnd;
-		Log.v("regex","patternString : "+patternString);
+//		Log.v("regex","patternString : "+patternString);
 		this.pattern = Pattern.compile(patternString);
 	}
 
@@ -66,7 +66,7 @@ public class OrgNodeParser {
 						+ ">" + node.name.trim();
 
 		} else {
-			Log.w("MobileOrg", "Title not matched: " + line);
+//			Log.w("MobileOrg", "Title not matched: " + line);
 			node.name = line;
 		}
 

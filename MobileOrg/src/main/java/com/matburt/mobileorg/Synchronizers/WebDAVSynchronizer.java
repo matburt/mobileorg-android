@@ -71,11 +71,11 @@ public class WebDAVSynchronizer extends Synchronizer {
         try {
             HttpURLConnection dhc = this.createConnection(this.remoteIndexPath);
             if (dhc == null) {
-                Log.i("MobileOrg", "Test Connection is null");
+//                Log.i("MobileOrg", "Test Connection is null");
                 return "Connection could not be established";
             }
 
-            Log.i("MobileOrg", "Test Path: " + this.remoteIndexPath);
+//            Log.i("MobileOrg", "Test Path: " + this.remoteIndexPath);
             InputStream mainFile = null;
             try {
                 mainFile = this.getUrlStream(this.remoteIndexPath);
@@ -87,7 +87,7 @@ public class WebDAVSynchronizer extends Synchronizer {
                 return null;
             }
             catch (FileNotFoundException e) {
-                Log.i("MobileOrg", "Got FNF");
+//                Log.i("MobileOrg", "Got FNF");
                 throw e;
             }
             catch (Exception e) {
@@ -95,7 +95,7 @@ public class WebDAVSynchronizer extends Synchronizer {
             }
         }
         catch (Exception e) {
-            Log.i("MobileOrg", "Test Exception: " + e.getMessage());
+//            Log.i("MobileOrg", "Test Exception: " + e.getMessage());
             return "Test Exception: " + e.getMessage();
         }
     }
@@ -137,12 +137,12 @@ public class WebDAVSynchronizer extends Synchronizer {
             return new BufferedReader(new InputStreamReader(mainFile));
         }
         catch (CertificateException e) {
-            Log.w("MobileOrg", "Conflicting certificate found: " + e.toString());
+//            Log.w("MobileOrg", "Conflicting certificate found: " + e.toString());
             handleChangedCertificate();
             throw e;
         }
         catch (SSLHandshakeException e) {
-            Log.e("MobileOrg", "SSLHandshakeException Exception in getRemoteFile: " + e.toString());
+//            Log.e("MobileOrg", "SSLHandshakeException Exception in getRemoteFile: " + e.toString());
             handleChangedCertificate();
             throw e;
         }
@@ -150,14 +150,6 @@ public class WebDAVSynchronizer extends Synchronizer {
 
     @Override
     public SyncResult synchronize() {
-        Log.v("webdav", "remote path: "+this.remotePath);
-        try {
-            Log.v("webdav", FileUtils.read(getRemoteFile("")));
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (CertificateException e) {
-            e.printStackTrace();
-        }
 
         return null;
     }
@@ -203,7 +195,7 @@ public class WebDAVSynchronizer extends Synchronizer {
 	}
 
 	private InputStream getUrlStream(String url) throws IOException, CertificateException {
-        Log.i("MobileOrg", "Fetching " + url);
+//        Log.i("MobileOrg", "Fetching " + url);
         HttpURLConnection con = this.createConnection(url);
         con.setRequestMethod("GET");
         con.setDoInput(true);
@@ -303,13 +295,13 @@ public class WebDAVSynchronizer extends Synchronizer {
             Editor edit = appSettings.edit();
             int existingHash = appSettings.getInt("webCertHash", 0);
             if (existingHash == 0) {
-                Log.i("MobileOrg", "Storing new certificate");
+//                Log.i("MobileOrg", "Storing new certificate");
                 edit.putInt("webCertHash", hash);
                 edit.putString("webCertDescr", description);
                 edit.commit();
                 return true;
             } else if (existingHash != hash) {
-                Log.i("MobileOrg", "Conflicting Certificate Hash");
+//                Log.i("MobileOrg", "Conflicting Certificate Hash");
                 edit.putInt("webConflictHash", hash);
                 edit.putString("webConflictHashDesc", description);
                 edit.commit();
@@ -319,7 +311,7 @@ public class WebDAVSynchronizer extends Synchronizer {
                 //               all the time
                 //return false;
             }
-            Log.i("MobileOrg", "Certificates match");
+//            Log.i("MobileOrg", "Certificates match");
             return true;
         }
 
@@ -332,7 +324,7 @@ public class WebDAVSynchronizer extends Synchronizer {
             for (int i = 0; i < chain.length; i++) {
                 String descr = chain[i].toString();
                 int hash = chain[i].hashCode();
-                Log.i("MobileOrg", "Validating certificate hash");
+//                Log.i("MobileOrg", "Validating certificate hash");
                 if (!this.validateCertificate(hash, descr)) {
                     throw new CertificateException("Conflicting certificate found with hash " +
                             Integer.toString(hash));

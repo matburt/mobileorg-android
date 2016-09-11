@@ -49,7 +49,7 @@ public class SyncService extends Service implements
 		this.appInst = (MobileOrgApplication) this.getApplication();
 		this.alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
 
-		Log.v("trace", "sync service");
+//		Log.v("trace", "sync service");
 	}
 
 	@Override

@@ -33,7 +33,7 @@ public class WebDAVWizard extends Wizard {
 	}
 
 	public View createWebDAVConfig() {
-		Log.v("webdav", "creating config");
+//		Log.v("webdav", "creating config");
 		wizardView.removePagesAfter(1);
 		
 		View view = LayoutInflater.from(context).inflate(
@@ -63,7 +63,7 @@ public class WebDAVWizard extends Wizard {
 
 
 	public void loginWebdav() {
-		Log.v("webdav", "login");
+//		Log.v("webdav", "login");
 		final String urlActual = webdavUrl.getText().toString();
 		final String passActual = webdavPass.getText().toString();
 		final String userActual = webdavUser.getText().toString();

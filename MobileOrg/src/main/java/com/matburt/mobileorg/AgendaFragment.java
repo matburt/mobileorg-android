@@ -80,11 +80,11 @@ public class AgendaFragment extends Fragment {
         HashSet<Long> rangedTimestampsNodes = new HashSet<>();
 
         if (cursor != null) {
-            Log.v("time", "count : " + cursor.getCount());
+//            Log.v("time", "count : " + cursor.getCount());
 
             while (cursor.moveToNext()) {
                 long nodeId = cursor.getLong(cursor.getColumnIndexOrThrow(Timestamps.NODE_ID));
-                Log.v("time", "nodeId agenda : " + nodeId);
+//                Log.v("time", "nodeId agenda : " + nodeId);
 
                 if (orphanTimestampsNodes.contains(nodeId)) {
                     orphanTimestampsNodes.remove(nodeId);
@@ -105,10 +105,10 @@ public class AgendaFragment extends Fragment {
                 Long day;
                 if (node.getScheduled().getEpochTime() < 0) {
                     day = node.getDeadline().getEpochTime() / (24 * 3600);
-                    Log.v("deadline", "agenda deadline : " + day);
+//                    Log.v("deadline", "agenda deadline : " + day);
                 } else {
                     day = node.getScheduled().getEpochTime() / (24 * 3600);
-                    Log.v("timestamp", "agenda scheduled: " + day);
+//                    Log.v("timestamp", "agenda scheduled: " + day);
                 }
 
                 if (!nodeIdsForEachDay.containsKey(day))

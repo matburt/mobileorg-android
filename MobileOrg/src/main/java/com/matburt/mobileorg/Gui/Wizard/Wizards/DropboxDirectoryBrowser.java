@@ -58,8 +58,7 @@ public class DropboxDirectoryBrowser extends DirectoryBrowser<String> {
 				}
 			}
 		} catch (DropboxException e) {
-			Log.d("MobileOrg",
-					"Failed to list directory for dropbox: " + e.toString());
+//			Log.d("MobileOrg",	"Failed to list directory for dropbox: " + e.toString());
 		}
 	}
 }

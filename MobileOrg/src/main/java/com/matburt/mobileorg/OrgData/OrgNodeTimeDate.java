@@ -163,12 +163,12 @@ public class OrgNodeTimeDate {
 		if(line == null)
 			return;
 
-		Log.v("timemap", "map : "+type);
-		Log.v("timemap", "line : "+line);
+//		Log.v("timemap", "map : "+type);
+//		Log.v("timemap", "line : "+line);
 		if(patterns.get(type)==null) return;
 		Matcher propm = patterns.get(type).matcher(line);
 		if (propm.find()) {
-			Log.v("timemap", "here");
+//			Log.v("timemap", "here");
 			matchStart = propm.start();
 			matchEnd = propm.end();
 			try {
@@ -209,7 +209,7 @@ public class OrgNodeTimeDate {
 		calendar.setTimeZone(TimeZone.getTimeZone("GMT0"));
 
 		if(year == -1 || dayOfMonth == -1 || monthOfYear == -1) return -1;
-		Log.v("time", "epochtime 1970 : " + new GregorianCalendar(1970, 0, 1, 1, 0).getTimeInMillis());
+//		Log.v("time", "epochtime 1970 : " + new GregorianCalendar(1970, 0, 1, 1, 0).getTimeInMillis());
 		return calendar.getTimeInMillis() / 1000L;
 	}
 
@@ -258,7 +258,7 @@ public class OrgNodeTimeDate {
 				insert(
 						uri,
 						getContentValues(nodeId, fileId));
-		Log.v("OrgNodeTimeDate","update epoch : "+getEpochTime() + " with type : "+type);
+//		Log.v("OrgNodeTimeDate","update epoch : "+getEpochTime() + " with type : "+type);
 	}
 
 	private ContentValues getContentValues(long nodeId, long fileId) {

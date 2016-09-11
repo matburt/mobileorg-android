@@ -19,7 +19,7 @@ public class ErrorReporter
 	}
 
 	public static void displayError(Context context, Exception e) {
-		Log.e(LT, e.toString());
+//		Log.e(LT, e.toString());
 		ErrorReporter.displayError(context, e.getMessage());
 	}
 }

@@ -122,7 +122,7 @@ public class OrgNodeDetailFragment extends Fragment {
                         " FROM orgdata JOIN todos " +
                         " ON todos.name = orgdata.todo WHERE todos.isdone=0";
 
-                Log.v("todo", "query : " + todoQuery);
+//                Log.v("todo", "query : " + todoQuery);
 
                 Cursor cursor = OrgDatabase.getInstance().getReadableDatabase().rawQuery(todoQuery, null);
 
@@ -209,7 +209,7 @@ public class OrgNodeDetailFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        Log.v("resume", "resume");
+//        Log.v("resume", "resume");
         refresh();
     }
 
@@ -447,7 +447,7 @@ public class OrgNodeDetailFragment extends Fragment {
         void setItemModifiersVisibility(View view, int visibility){
             LinearLayout itemModifiers = (LinearLayout) view.findViewById(R.id.item_modifiers);
             if (itemModifiers != null) {
-                Log.v("vis", "visibility : " + visibility);
+//                Log.v("vis", "visibility : " + visibility);
                 itemModifiers.setVisibility(visibility);
             }
         }

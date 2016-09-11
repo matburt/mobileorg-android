@@ -44,9 +44,8 @@ public class UbuntuOneDirectoryBrowser extends DirectoryBrowser<String> {
 		if (!isCurrentDirectoryRoot()) {
 			directoryNames.add(upOneLevel);
 			directoryListing.add(getParentPath(currentDirectory));
-			Log.d("MobileOrg", "Current directory: " + currentDirectory);
-			Log.d("MobileOrg", "Parent path: "
-					+ getParentPath(currentDirectory));
+//			Log.d("MobileOrg", "Current directory: " + currentDirectory);
+//			Log.d("MobileOrg", "Parent path: "	+ getParentPath(currentDirectory));
 		}
 		for (String item : synchronizer.getDirectoryList(directory)) {
 			directoryNames.add(item);

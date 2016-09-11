@@ -213,7 +213,7 @@ public class OrgFileParser {
 	}
 
 	public void parse(OrgFile orgFile, BufferedReader breader) {
-		Log.v("parse","parsing : "+orgFile.name);
+//		Log.v("parse","parsing : "+orgFile.name);
 		init(orgFile);
 		db.beginTransaction();
 
@@ -241,9 +241,9 @@ public class OrgFileParser {
 			this.payload = new StringBuilder();
 			parseHeading(line, numstars);
 		} else { // continuing previous node
-			Log.v("todos","name : "+line);
+//			Log.v("todos","name : "+line);
 			HashMap<String,Boolean> map = parseTodos(line);
-			Log.v("todos","res : "+ (map != null ? map.toString() : ""));
+//			Log.v("todos","res : "+ (map != null ? map.toString() : ""));
 			OrgProviderUtils.addTodos(parseTodos(line), resolver);
 			parseTimestamps(line);
 			payload.append(line).append("\n");

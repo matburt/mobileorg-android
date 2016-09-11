@@ -178,7 +178,7 @@ public class OrgUtils {
 
 			return buf;
 		} catch (IOException ioe) {
-			Log.e("serializeObject", "error", ioe);
+//			Log.e("serializeObject", "error", ioe);
 
 			return null;
 		}
@@ -193,11 +193,11 @@ public class OrgUtils {
 
 			return object;
 		} catch (ClassNotFoundException cnfe) {
-			Log.e("deserializeObject", "class not found error", cnfe);
+//			Log.e("deserializeObject", "class not found error", cnfe);
 
 			return null;
 		} catch (IOException ioe) {
-			Log.e("deserializeObject", "io error", ioe);
+//			Log.e("deserializeObject", "io error", ioe);
 
 			return null;
 		}
@@ -283,7 +283,7 @@ public class OrgUtils {
 			outputStreamWriter.close();
 		}
 		catch (IOException e) {
-			Log.e("Exception", "File write failed: " + e.toString());
+//			Log.e("Exception", "File write failed: " + e.toString());
 		}
 	}
 

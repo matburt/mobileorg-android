@@ -150,7 +150,7 @@ public class OrgFile {
 		values.put(Files.NODE_ID, nodeId);
 
 		Uri uri = resolver.insert(Files.CONTENT_URI, values);
-		Log.v("uri", "uri : " + uri);
+//		Log.v("uri", "uri : " + uri);
 		return Long.parseLong(Files.getId(uri));
 	}
 
@@ -187,17 +187,17 @@ public class OrgFile {
     public void updateFile(String content, Context context) {
         File file = new File(getFilePath(context));
         FileOutputStream outputStream = null;
-        Log.v("sync", "writing to disk a bit");
+//        Log.v("sync", "writing to disk a bit");
         try {
             outputStream = new FileOutputStream(file);
-            Log.v("sync", "writing to disk a log");
+//            Log.v("sync", "writing to disk a log");
         } catch (FileNotFoundException e) {
             e.printStackTrace();
             return;
         }
 
         try {
-            Log.v("sync", "writing to disk a content : " + content);
+//            Log.v("sync", "writing to disk a content : " + content);
             outputStream.write(content.getBytes());
             outputStream.close();
         } catch (Exception e) {
@@ -249,7 +249,7 @@ public class OrgFile {
 		int total = resolver.delete(OrgData.CONTENT_URI, OrgData.FILE_ID + "=?",
                 new String[]{Long.toString(id)});
         total += resolver.delete(OrgData.buildIdUri(nodeId), null, null);
-		Log.v("sync","remove all nodes : "+total);
+//		Log.v("sync","remove all nodes : "+total);
 		return total;
 	}
 
@@ -285,8 +285,8 @@ public class OrgFile {
 			OrgNodeTree tree = new OrgNodeTree(root, resolver);
 			ArrayList<OrgNode> res = OrgNodeTree.getFullNodeArray(tree, true);
 			for (OrgNode node : res) {
-				Log.v("content", "content");
-				Log.v("content", node.toString());
+//				Log.v("content", "content");
+//				Log.v("content", node.toString());
 				result += FileUtils.stripLastNewLine(node.toString()) + "\n";
 			}
 		} catch (OrgNodeNotFoundException e) {

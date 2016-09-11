@@ -55,8 +55,7 @@ public class FileDecryptionActivity extends Activity
 		try {
 			startActivityForResult(APGintent, DECRYPT_MESSAGE);
 		} catch (ActivityNotFoundException e) {
-			Log.e("MobileOrg", "Error: " + e.getMessage()
-					+ " while launching APG intent");
+//			Log.e("MobileOrg", "Error: " + e.getMessage() + " while launching APG intent");
 		}
 	}
     

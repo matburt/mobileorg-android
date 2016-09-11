@@ -89,8 +89,11 @@ public class SynchronizerNotification extends SynchronizerNotificationCompat {
 		if(notification == null)
 			return;
 
-		notification.contentView.setProgressBar(android.R.id.progress, 100,
-				progress, false);
+//		FIXME:
+//		This was commented because contentView is null on Android Nougat
+//	    But we must find a way to make it work
+//		notification.contentView.setProgressBar(android.R.id.progress, 100,
+//				progress, false);
 		
 		notificationManager.notify(notifyRef, notification);
 	}

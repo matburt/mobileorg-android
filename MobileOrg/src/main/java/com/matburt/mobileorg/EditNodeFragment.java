@@ -82,7 +82,7 @@ public class EditNodeFragment extends Fragment {
             nodeId = bundle.getLong(NODE_ID, -1);
             parentId = bundle.getLong(PARENT_ID, -1);
             position = bundle.getInt(OrgContract.OrgData.POSITION, 0);
-            Log.v("position", "position : " + position);
+//            Log.v("position", "position : " + position);
         }
 
         ContentResolver resolver = getActivity().getContentResolver();
@@ -167,12 +167,12 @@ public class EditNodeFragment extends Fragment {
         node = new OrgNode();
         node.parentId = parentId;
         node.position = position;
-        Log.v("newNode","parentId : "+parentId);
+//        Log.v("newNode","parentId : "+parentId);
         try {
             OrgNode parentNode = new OrgNode(parentId, resolver);
             node.level = parentNode.level + 1;
             node.fileId = parentNode.fileId;
-            Log.v("newNode","fileId : "+node.fileId);
+//            Log.v("newNode","fileId : "+node.fileId);
         } catch (OrgNodeNotFoundException e) {
             e.printStackTrace();
         }
@@ -265,7 +265,7 @@ public class EditNodeFragment extends Fragment {
                             minuteOfDay
                     )
             );
-            Log.v("timestamp", "test : " + node.getOrgNodePayload().getTimestamp(OrgNodeTimeDate.TYPE.Scheduled));
+//            Log.v("timestamp", "test : " + node.getOrgNodePayload().getTimestamp(OrgNodeTimeDate.TYPE.Scheduled));
 
         }
     }
@@ -286,9 +286,9 @@ public class EditNodeFragment extends Fragment {
         }
 
         public void onDateSet(DatePicker view, int year, int month, int day) {
-            Log.v("time", "year : " + year);
-            Log.v("time", "month : " + month);
-            Log.v("time", "day : " + day);
+//            Log.v("time", "year : " + year);
+//            Log.v("time", "month : " + month);
+//            Log.v("time", "day : " + day);
             node.addDate(
                     new OrgNodeTimeDate(
                             EditNodeFragment.currentDateTimeDialog,

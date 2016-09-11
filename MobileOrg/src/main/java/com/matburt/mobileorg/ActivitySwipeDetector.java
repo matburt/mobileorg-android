@@ -16,12 +16,12 @@ public class ActivitySwipeDetector implements View.OnTouchListener {
     }
 
     public void onRightToLeftSwipe(View v){
-        Log.i(logTag, "RightToLeftSwipe!");
+//        Log.i(logTag, "RightToLeftSwipe!");
         activity.right2left(v);
     }
 
     public void onLeftToRightSwipe(View v){
-        Log.i(logTag, "LeftToRightSwipe!");
+//        Log.i(logTag, "LeftToRightSwipe!");
         activity.left2right(v);
     }
 
@@ -41,7 +41,7 @@ public class ActivitySwipeDetector implements View.OnTouchListener {
                     if(deltaX > 0) { this.onRightToLeftSwipe(v); return true; }
                 }
                 else {
-                    Log.i(logTag, "Swipe was only " + Math.abs(deltaX) + " long, need at least " + MIN_DISTANCE);
+//                    Log.i(logTag, "Swipe was only " + Math.abs(deltaX) + " long, need at least " + MIN_DISTANCE);
                 }
             }
         }

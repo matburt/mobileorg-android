@@ -27,7 +27,7 @@ public class WizardActivity extends Activity implements RadioGroup.OnCheckedChan
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		Log.v("sync", "onCreate Wizard");
+//		Log.v("sync", "onCreate Wizard");
 //		OrgUtils.setTheme(this);
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.wizard);

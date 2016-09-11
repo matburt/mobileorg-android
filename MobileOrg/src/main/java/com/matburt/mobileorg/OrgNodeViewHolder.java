@@ -129,9 +129,9 @@ public class OrgNodeViewHolder extends ItemViewHolder {
         String cleanedPayload = node.getCleanedPayload();
         contentView.setText(cleanedPayload);
 
-        Log.v("payload", "name    : " + node.name);
-        Log.v("payload", "clean payload : " + cleanedPayload);
-        Log.v("payload", "dirty payload : " + node.getPayload());
+//        Log.v("payload", "name    : " + node.name);
+//        Log.v("payload", "clean payload : " + cleanedPayload);
+//        Log.v("payload", "dirty payload : " + node.getPayload());
 
         if(cleanedPayload.equals("")){
             RelativeLayout.LayoutParams layoutParams =

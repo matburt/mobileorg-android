@@ -208,8 +208,7 @@ public class WizardView extends HorizontalScrollView implements
 			int featureWidth = getMeasuredWidth();
 			// if scroll more than %25 of width, then go to next page
 			currentPage = ((scrollX + (featureWidth / 4 * 3)) / featureWidth);
-			Log.d(TAG, "scrollX: " + scrollX + " featureWidth: "
-					+ (featureWidth / 4 * 3) + " page: " + currentPage);
+//			Log.d(TAG, "scrollX: " + scrollX + " featureWidth: " + (featureWidth / 4 * 3) + " page: " + currentPage);
 			int scrollTo = currentPage * featureWidth;
 			smoothScrollTo(scrollTo, 0);
 			// if you don't return true, a child view will interfere
@@ -226,7 +225,7 @@ public class WizardView extends HorizontalScrollView implements
 	// page, until it's OK to do so (ex: user puts password)
 	@Override
 	public void onScrollChanged(int l, int t, int oldl, int oldt) {
-		// Log.d(TAG,"scroll: "+l+", "+oldl+" maxscroll: "+maxScrollX);
+//		// Log.d(TAG,"scroll: "+l+", "+oldl+" maxscroll: "+maxScrollX);
 		if (l > maxScrollX) {
 			// if trying to scroll past maximum allowed, then snap back
 			scrollTo(oldl, 0);
