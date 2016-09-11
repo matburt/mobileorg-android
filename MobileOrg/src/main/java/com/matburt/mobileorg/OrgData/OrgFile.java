@@ -75,8 +75,8 @@ public class OrgFile {
 
 	/**
 	 * Edit the org file on disk to incorporate new modifications
-	 *
-	 * @param node
+	 * @param node: Any node from the file
+	 * @param context: context
 	 */
 	static public void updateFile(OrgNode node, Context context) {
 		ContentResolver resolver = context.getContentResolver();
