@@ -19,7 +19,7 @@
         android:layout_height="wrap_content"
         android:textColor="@color/colorBlack"
         android:layout_gravity="center"
-        android:textSize="14sp"
+        android:textSize="18sp"
         android:text="@string/no_node"/>
 
     <Button

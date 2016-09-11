@@ -65,8 +65,7 @@ public class WebDAVSynchronizer extends Synchronizer {
         this.password = pass;
 
         if (!this.isConfigured()) {
-            Log.i("MobileOrg", "Test Connection Failed for not being configured");
-            return "Invalid URL must match: 'http://url.com/path/index.org'";
+            return "No URL specified";
         }
 
         try {
@@ -106,13 +105,12 @@ public class WebDAVSynchronizer extends Synchronizer {
         return null;
     }
 
+    @Override
     public boolean isConfigured() {
 		if (this.remoteIndexPath.equals(""))
 			return false;
 
-		Pattern checkUrl = Pattern.compile("http.*\\.(?:org|txt)$");
-        return checkUrl.matcher(this.remoteIndexPath).find();
-
+        return true;
     }
 
     private void handleChangedCertificate() {
@@ -152,6 +150,14 @@ public class WebDAVSynchronizer extends Synchronizer {
 
     @Override
     public SyncResult synchronize() {
+        Log.v("webdav", "remote path: "+this.remotePath);
+        try {
+            Log.v("webdav", FileUtils.read(getRemoteFile("")));
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (CertificateException e) {
+            e.printStackTrace();
+        }
 
         return null;
     }
@@ -177,6 +183,7 @@ public class WebDAVSynchronizer extends Synchronizer {
 		try {
             newUrl = new URL(url);
 		} catch (MalformedURLException e) {
+            e.printStackTrace();
 			return null;
 		}
 

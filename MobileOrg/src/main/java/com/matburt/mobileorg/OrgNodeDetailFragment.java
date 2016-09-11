@@ -194,7 +194,9 @@ public class OrgNodeDetailFragment extends Fragment {
 
         if (size == 0) {
             recyclerView.setVisibility(View.GONE);
-            insertNodeButton.setVisibility(View.VISIBLE);
+            int textId = (nodeId != OrgContract.TODO_ID) ? R.string.no_node : R.string.no_todo;
+            insertNodeButton.setVisibility((nodeId != OrgContract.TODO_ID) ? View.VISIBLE : View.INVISIBLE);
+            insertNodeText.setText(textId);
             insertNodeText.setVisibility(View.VISIBLE);
         } else {
             insertNodeButton.setVisibility(View.GONE);
