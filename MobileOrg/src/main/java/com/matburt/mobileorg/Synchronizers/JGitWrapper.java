@@ -5,13 +5,16 @@ import android.app.ProgressDialog;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.matburt.mobileorg.EditNodeActivity;
 import com.matburt.mobileorg.OrgData.OrgFile;
 import com.matburt.mobileorg.OrgData.OrgFileParser;
 import com.matburt.mobileorg.OrgData.OrgProviderUtils;
+import com.matburt.mobileorg.OrgNodeListActivity;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Synchronizers.SshSessionFactory.ConnectionType;
 import com.matburt.mobileorg.util.FileUtils;
@@ -347,13 +350,14 @@ public class JGitWrapper {
             if (exception == null) {
                 Toast.makeText(context, "Synchronization successful !", Toast.LENGTH_LONG).show();
                 ((Activity) context).finish();
+
+                Intent intent = new Intent(context, OrgNodeListActivity.class);
+                context.startActivity(intent);
                 return;
             }
 
-            if(exception instanceof TransportException){
-                Toast.makeText(context, "Authentification failed", Toast.LENGTH_LONG).show();
-            }else if (exception instanceof InvalidRemoteException) {
-                Toast.makeText(context, "Path does not exist or is not a valid repository", Toast.LENGTH_SHORT).show();
+            if (exception instanceof InvalidRemoteException) {
+                Toast.makeText(context, "Path does not exist or is not a valid repository", Toast.LENGTH_LONG).show();
             }else if(exception instanceof UnableToPushException) {
                 //				git config receive.denyCurrentBranch ignore
                 Toast.makeText(context, "Push test failed. Make sure the repository is bare.", Toast.LENGTH_LONG).show();

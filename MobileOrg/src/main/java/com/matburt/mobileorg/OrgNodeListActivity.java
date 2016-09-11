@@ -24,6 +24,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.matburt.mobileorg.Gui.Outline.OutlineAdapter;
 import com.matburt.mobileorg.Gui.SearchActivity;
@@ -35,6 +36,8 @@ import com.matburt.mobileorg.Synchronizers.AuthData;
 import com.matburt.mobileorg.Synchronizers.Synchronizer;
 import com.matburt.mobileorg.util.OrgUtils;
 import com.matburt.mobileorg.util.PreferenceUtils;
+
+import java.io.File;
 
 
 /**
@@ -109,6 +112,12 @@ public class OrgNodeListActivity extends AppCompatActivity {
                     public void onClick(DialogInterface dialog, int whichButton) {
                         String filename = input.getText().toString();
                         OrgFile newFile = new OrgFile(filename, filename);
+                        File file = new File(newFile.getFilePath(OrgNodeListActivity.this));
+                        if(file.exists()){
+                            Toast.makeText(OrgNodeListActivity.this, R.string.file_exists, Toast.LENGTH_SHORT)
+                                    .show();
+                            return;
+                        }
                         newFile.addFile(OrgNodeListActivity.this);
                         ((OutlineAdapter) recyclerView.getAdapter()).refresh();
                         Synchronizer.getInstance().addFile(filename);
@@ -310,7 +319,6 @@ public class OrgNodeListActivity extends AppCompatActivity {
         public void onReceive(Context context, Intent intent) {
             boolean syncStart = intent.getBooleanExtra(Synchronizer.SYNC_START, false);
             boolean syncDone = intent.getBooleanExtra(Synchronizer.SYNC_DONE, false);
-            boolean showToast = intent.getBooleanExtra(Synchronizer.SYNC_SHOW_TOAST, false);
             int progress = intent.getIntExtra(Synchronizer.SYNC_PROGRESS_UPDATE, -1);
 
             if (syncStart) {
