@@ -101,8 +101,6 @@
             android:name=".EditNodeActivity"
             android:theme="@style/ActionModeAppTheme" />
 
-        <service android:name=".Services.TimeclockService" />
-
         <activity android:name=".Gui.Agenda.AgendaSettings" />
         <activity android:name=".Gui.Agenda.AgendaEntrySetting" />
         <activity
