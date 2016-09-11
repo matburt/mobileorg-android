@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.HandlerThread;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -32,6 +33,7 @@ public class WebDAVWizard extends Wizard {
 	}
 
 	public View createWebDAVConfig() {
+		Log.v("webdav", "creating config");
 		wizardView.removePagesAfter(1);
 		
 		View view = LayoutInflater.from(context).inflate(
@@ -61,6 +63,7 @@ public class WebDAVWizard extends Wizard {
 
 
 	public void loginWebdav() {
+		Log.v("webdav", "login");
 		final String urlActual = webdavUrl.getText().toString();
 		final String passActual = webdavPass.getText().toString();
 		final String userActual = webdavUser.getText().toString();

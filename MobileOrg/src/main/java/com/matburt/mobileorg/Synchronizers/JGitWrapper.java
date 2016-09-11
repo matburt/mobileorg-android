@@ -115,10 +115,6 @@ public class JGitWrapper {
         }
 
 
-        Log.v("git", "before pull: " + read("MobileOrg" , context ));
-        Log.v("git", "HEAD: " + read(".git/HEAD" , context ));
-        Log.v("git", "got git");
-
         try {
 
             Repository repository = git.getRepository();
@@ -346,9 +342,7 @@ public class JGitWrapper {
         protected void onPostExecute(Object exception) {
             OrgProviderUtils
                     .clearDB(context.getContentResolver());
-            Log.v("git", "before parseall: " + read("MobileOrg" , context ));
             parseAll();
-            Log.v("git", "after parseall: " + read("MobileOrg" , context ));
             progress.dismiss();
             if (exception == null) {
                 Toast.makeText(context, "Synchronization successful !", Toast.LENGTH_LONG).show();
