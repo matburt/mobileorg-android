@@ -32,13 +32,14 @@ import com.matburt.mobileorg.util.TodoDialog;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.TimeZone;
 
 public class EditNodeFragment extends Fragment {
     public static String NODE_ID = "node_id";
     public static String PARENT_ID = "parent_id";
     static public long nodeId = -1, parentId = -1;
     static Button schedule_date, deadline_date, schedule_time, deadline_time;
-    static OrgNodeTimeDate.TYPE currentDateTimeDialog;
+    static OrgNodeTimeDate timeDate;
     static private OrgNode node;
     EditText title, content;
     Context context;
@@ -50,6 +51,11 @@ public class EditNodeFragment extends Fragment {
         String deadlineText = node.getDeadline().getDate();
         if (scheduleText.length() > 0) schedule_date.setText(scheduleText);
         if (deadlineText.length() > 0) deadline_date.setText(deadlineText);
+
+        String scheduleTimeText = node.getScheduled().getStartTime();
+        String deadlineTimeText = node.getDeadline().getStartTime();
+        if (scheduleTimeText.length() > 0) schedule_time.setText(scheduleTimeText);
+        if (deadlineTimeText.length() > 0) deadline_time.setText(deadlineTimeText);
     }
 
     static public void createEditNodeFragment(int id, int parentId, int siblingPosition, Context context) {
@@ -73,6 +79,9 @@ public class EditNodeFragment extends Fragment {
         priority = (Button) rootView.findViewById(R.id.priority);
         schedule_date = (Button) rootView.findViewById(R.id.scheduled_date);
         deadline_date = (Button) rootView.findViewById(R.id.deadline_date);
+
+        schedule_time = (Button) rootView.findViewById(R.id.scheduled_time);
+        deadline_time = (Button) rootView.findViewById(R.id.deadline_time);
 
         title = (EditText) getActivity().findViewById(R.id.title);
         content = (EditText) getActivity().findViewById(R.id.content);
@@ -143,18 +152,36 @@ public class EditNodeFragment extends Fragment {
         schedule_date.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                currentDateTimeDialog = OrgNodeTimeDate.TYPE.Scheduled;
-                setupDateTimeDialog();
+                timeDate = node.getScheduled();
+                setupDateDialog();
             }
         });
 
         deadline_date.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                currentDateTimeDialog = OrgNodeTimeDate.TYPE.Deadline;
-                setupDateTimeDialog();
+                timeDate = node.getDeadline();
+                setupDateDialog();
             }
         });
+
+
+        schedule_time.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                timeDate = node.getScheduled();
+                setupTimeDialog();
+            }
+        });
+
+        deadline_time.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                timeDate = node.getDeadline();
+                setupTimeDialog();
+            }
+        });
+
 
         setupTimeStampButtons();
 
@@ -206,9 +233,14 @@ public class EditNodeFragment extends Fragment {
     public void onCancelPressed(){
     }
 
-    private void setupDateTimeDialog(){
+    private void setupDateDialog(){
         DialogFragment newFragment = new DatePickerFragment();
         newFragment.show(getActivity().getSupportFragmentManager(), "datePicker");
+    }
+
+    private void setupTimeDialog(){
+        DialogFragment newFragment = new TimePickerFragment();
+        newFragment.show(getActivity().getSupportFragmentManager(), "timePicker");
     }
 
     private void showPriorityDialog() {
@@ -243,10 +275,6 @@ public class EditNodeFragment extends Fragment {
             int hour = c.get(Calendar.HOUR_OF_DAY);
             int minute = c.get(Calendar.MINUTE);
 
-            day = getArguments().getInt("day");
-            month = getArguments().getInt("month");
-            year = getArguments().getInt("year");
-
             // Create a new instance of TimePickerDialog and return it
             return new TimePickerDialog(getActivity(), this, hour, minute,
                     DateFormat.is24HourFormat(getActivity()));
@@ -254,19 +282,9 @@ public class EditNodeFragment extends Fragment {
 
         public void onTimeSet(TimePicker view, int hourOfDay, int minuteOfDay) {
             ContentResolver resolver = getActivity().getContentResolver();
-
-            node.getOrgNodePayload().insertOrReplaceDate(
-                    new OrgNodeTimeDate(
-                            EditNodeFragment.currentDateTimeDialog,
-                            day,
-                            month,
-                            year,
-                            hourOfDay,
-                            minuteOfDay
-                    )
-            );
-//            Log.v("timestamp", "test : " + node.getOrgNodePayload().getTimestamp(OrgNodeTimeDate.TYPE.Scheduled));
-
+            timeDate.startTimeOfDay = hourOfDay;
+            timeDate.startMinute = minuteOfDay;
+            setupTimeStampButtons();
         }
     }
 
@@ -281,22 +299,20 @@ public class EditNodeFragment extends Fragment {
             int month = c.get(Calendar.MONTH);
             int day = c.get(Calendar.DAY_OF_MONTH);
 
+            if(timeDate.year > -1 && timeDate.monthOfYear > -1 && timeDate.dayOfMonth > -1){
+                year = timeDate.year;
+                month = timeDate.monthOfYear;
+                day = timeDate.dayOfMonth;
+            }
+
             // Create a new instance of DatePickerDialog and return it
             return new DatePickerDialog(getActivity(), this, year, month, day);
         }
 
         public void onDateSet(DatePicker view, int year, int month, int day) {
-//            Log.v("time", "year : " + year);
-//            Log.v("time", "month : " + month);
-//            Log.v("time", "day : " + day);
-            node.addDate(
-                    new OrgNodeTimeDate(
-                            EditNodeFragment.currentDateTimeDialog,
-                            day,
-                            month,
-                            year
-                    )
-            );
+            timeDate.year = year;
+            timeDate.monthOfYear = month;
+            timeDate.dayOfMonth = day;
 
             setupTimeStampButtons();
 //            Bundle bundle = new Bundle();

@@ -21,12 +21,12 @@ import android.widget.TextView;
 
 import com.matburt.mobileorg.OrgData.OrgContract.Timestamps;
 import com.matburt.mobileorg.OrgData.OrgNode;
+import com.matburt.mobileorg.OrgData.OrgNodeTimeDate;
 import com.matburt.mobileorg.util.OrgNodeNotFoundException;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.TimeZone;
 import java.util.TreeMap;
@@ -43,7 +43,7 @@ public class AgendaFragment extends Fragment {
     RecyclerViewAdapter adapter;
     RecyclerView recyclerView;
     ArrayList<OrgNode> nodesList;
-    ArrayList<String>  daysList;
+    ArrayList<OrgNodeTimeDate>  daysList;
     ArrayList<PositionHelper> items;
     private ContentResolver resolver;
 
@@ -108,13 +108,16 @@ public class AgendaFragment extends Fragment {
 //                    Log.v("deadline", "agenda deadline : " + day);
                 } else {
                     day = node.getScheduled().getEpochTime() / (24 * 3600);
-//                    Log.v("timestamp", "agenda scheduled: " + day);
+                    Log.v("timestamp", "agenda scheduled: " + day);
                 }
 
                 if (!nodeIdsForEachDay.containsKey(day))
                     nodeIdsForEachDay.put(day, new ArrayList<OrgNode>());
                 nodeIdsForEachDay.get(day).add(node);
             } catch (OrgNodeNotFoundException e) {
+                // If we are here, it means an OrgNode has been deleted but not the corresponding
+                // timestamps from the Timestamp database. So we do the cleanup.
+                OrgNodeTimeDate.deleteTimestamp(getActivity(), nodeId, null);
                 e.printStackTrace();
             }
         }
@@ -139,7 +142,7 @@ public class AgendaFragment extends Fragment {
 
         int dayCursor = 0, nodeCursor = 0;
         for (long day : nodeIdsForEachDay.keySet()) {
-            daysList.add(SimpleDateFormat.getDateInstance().format(new Date(day * 3600 * 24 * 1000)));
+            daysList.add(new OrgNodeTimeDate(day * 3600 * 24));
             items.add(new PositionHelper(dayCursor++, Type.kDate));
             for (OrgNode node : nodeIdsForEachDay.get(day)) {
                 nodesList.add(node);
@@ -185,6 +188,8 @@ public class AgendaFragment extends Fragment {
         }
     }
 
+
+
     public class RecyclerViewAdapter
             extends RecyclerView.Adapter<ItemViewHolder> {
 
@@ -195,8 +200,6 @@ public class AgendaFragment extends Fragment {
         @Override
         public ItemViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             View view;
-
-
             if(viewType == Type.kDate.ordinal()){
                 view = LayoutInflater.from(parent.getContext())
                         .inflate(R.layout.days_view_holder, parent, false);
@@ -219,6 +222,11 @@ public class AgendaFragment extends Fragment {
         private void onBindOrgItemHolder(final OrgItemViewHolder holder, int position){
             final OrgNode node = nodesList.get(items.get(position).position);
 
+            // The day associated with this item
+            int dayPosition = position;
+            while(items.get(dayPosition).type != Type.kDate && dayPosition > 0) dayPosition--;
+            OrgNodeTimeDate date = daysList.get(items.get(dayPosition).position);
+
             TextView title = (TextView) holder.itemView.findViewById(R.id.title);
             TextView details = (TextView) holder.itemView.findViewById(R.id.details);
 
@@ -239,11 +247,12 @@ public class AgendaFragment extends Fragment {
 
             TextView content = (TextView) holder.itemView.findViewById(R.id.date);
 
-            Date date = new Date(node.getScheduled().getEpochTime() * 1000);
-
-            DateFormat dateFormat = SimpleDateFormat.getTimeInstance(DateFormat.SHORT);
-            dateFormat.setTimeZone(TimeZone.getTimeZone("GMT0"));
-            content.setText(dateFormat.format(date));
+            // If event spans on more than one day (=86499 sec), tag the enclosed days as 'all days'
+            if(node.getRangeInSec() > 86400 && date.isBetween(node.getScheduled(), node.getDeadline())){
+                content.setText(R.string.all_day);
+            } else {
+                content.setText(node.getScheduled().toString(false));
+            }
 
             holder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -261,10 +270,10 @@ public class AgendaFragment extends Fragment {
         }
 
         private void onBindDateHolder(final DateViewHolder holder, int position){
-            final String date = daysList.get(items.get(position).position);
+            final OrgNodeTimeDate date = daysList.get(items.get(position).position);
 
             TextView title = (TextView) holder.itemView.findViewById(R.id.outline_item_title);
-            title.setText(date);
+            title.setText(date.toString(true));
 
             holder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override

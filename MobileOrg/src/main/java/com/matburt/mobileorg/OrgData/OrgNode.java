@@ -353,6 +353,18 @@ public class OrgNode {
         return scheduled;
     }
 
+	/**
+	 * if scheduled and deadline are defined returns the number of seconds between them
+	 * else return -1
+	 */
+	public long getRangeInSec(){
+		long scheduled = this.scheduled.getEpochTime();
+		if(scheduled < 0) return -1;
+		long deadline = this.deadline.getEpochTime();
+		if(deadline < 0) return -1;
+		return Math.abs(deadline-scheduled);
+	}
+
     /**
 	 * Olp paths containing certain symbols can't be applied by org-mode. To
 	 * prevent node names from injecting bad symbols, we strip them out here.

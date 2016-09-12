@@ -39,6 +39,7 @@
     <string name="time">Time</string>
     <string name="auth_type">Authentication type:</string>
     <string name="file_exists">This file exists already !</string>
+    <string name="all_day">All day</string>
 
     <!-- toasts -->
     <string name="unselectable_item">You cannot select this item</string>

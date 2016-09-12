@@ -77,7 +77,7 @@ public class EditNodeActivity extends AppCompatActivity {
 //                startActivity(intent);
                 return true;
             case R.id.edit_menu_cancel:
-                fragment.onCancelPressed();
+                if(fragment != null) fragment.onCancelPressed();
                 finish();
 //                intent = new Intent(this, OrgNodeListActivity.class);
 //                startActivity(intent);

@@ -10,6 +10,8 @@ import android.util.Log;
 import com.matburt.mobileorg.OrgData.OrgContract.Timestamps;
 import com.matburt.mobileorg.OrgData.OrgDatabase.Tables;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.GregorianCalendar;
@@ -54,14 +56,16 @@ public class OrgNodeTimeDate {
 	public OrgNodeTimeDate(TYPE type, int day, int month, int year) {
 		this(type);
 		setDate(day, month, year);
-		getEpochTime();
 	}
 
 	public OrgNodeTimeDate(TYPE type, int day, int month, int year, int startTimeOfDay, int startMinute) {
-		this(type);
-		setDate(day, month, year);
+		this(type, day, month, year);
 		setTime(startTimeOfDay, startMinute);
 	}
+
+    public OrgNodeTimeDate(long epochTimeInSec){
+        setEpochTime(epochTimeInSec, false);
+    }
 
 	/**
 	 * OrgNodeTimeDate ctor from the database
@@ -129,17 +133,27 @@ public class OrgNodeTimeDate {
 
 			boolean allDay = cursor.getLong(cursor.getColumnIndexOrThrow(Timestamps.ALL_DAY)) == 1;
 
-			Calendar calendar = Calendar.getInstance();
-			calendar.setTimeInMillis(epochTime * 1000L);
-			year = calendar.get(Calendar.YEAR);
-			monthOfYear = calendar.get(Calendar.MONTH);
-			dayOfMonth = calendar.get(Calendar.DAY_OF_MONTH);
-			if(!allDay){
-				startMinute = calendar.get(Calendar.MINUTE);
-				startTimeOfDay = calendar.get(Calendar.HOUR_OF_DAY);
-			}
+            setEpochTime(epochTime, allDay);
 		}
 	}
+
+    /**
+     * Reset the OrgNodeTimeDate with this epochTime is seconds
+     * @param epochTimeInSec
+     * @param allDay
+     */
+    void setEpochTime(long epochTimeInSec, boolean allDay){
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeZone(TimeZone.getTimeZone("GMT0"));
+        calendar.setTimeInMillis(epochTimeInSec * 1000L);
+        year = calendar.get(Calendar.YEAR);
+        monthOfYear = calendar.get(Calendar.MONTH);
+        dayOfMonth = calendar.get(Calendar.DAY_OF_MONTH);
+        if(!allDay){
+            startMinute = calendar.get(Calendar.MINUTE);
+            startTimeOfDay = calendar.get(Calendar.HOUR_OF_DAY);
+        }
+    }
 
 	public void setDate(int day, int month, int year) {
 		this.dayOfMonth = day;
@@ -201,15 +215,18 @@ public class OrgNodeTimeDate {
 		return String.format("%02d:%02d", endTimeOfDay, endMinute);
 	}
 
+	/**
+	 * Return the number of seconds elapsed since the start of 1st January 1970
+	 * @return
+     */
 	public long getEpochTime(){
+		if(year == -1 || dayOfMonth == -1 || monthOfYear == -1) return -1;
 		int hour = startTimeOfDay > -1 ? startTimeOfDay : 0;
 		int minute = startMinute > -1 ? startMinute : 0;
-
+        Log.v("time", "hour : "+hour);
+        Log.v("time", "minute : "+minute);
 		GregorianCalendar calendar = new GregorianCalendar(year, monthOfYear, dayOfMonth, hour, minute);
 		calendar.setTimeZone(TimeZone.getTimeZone("GMT0"));
-
-		if(year == -1 || dayOfMonth == -1 || monthOfYear == -1) return -1;
-//		Log.v("time", "epochtime 1970 : " + new GregorianCalendar(1970, 0, 1, 1, 0).getTimeInMillis());
 		return calendar.getTimeInMillis() / 1000L;
 	}
 
@@ -222,8 +239,19 @@ public class OrgNodeTimeDate {
 		return (startTimeOfDay < 0 || startMinute < 0) ? 1 : 0;
 	}
 
-	public String toString() {
-		return getDate() + getStartTimeFormated() + getEndTimeFormated();
+    /**
+     * Format the string according to the parameter isDate
+     * @param isDate: date formating or time formating
+     * @return
+     */
+	public String toString(boolean isDate) {
+        GregorianCalendar calendar = new GregorianCalendar(year, monthOfYear, dayOfMonth, startTimeOfDay, startMinute);
+        calendar.setTimeZone(TimeZone.getTimeZone("GMT0"));
+        Log.v("time", "time : "+getEpochTime());
+        DateFormat instance = isDate ? SimpleDateFormat.getDateInstance() : SimpleDateFormat.getTimeInstance(DateFormat.SHORT);
+        instance.setTimeZone(TimeZone.getTimeZone("GMT0"));
+        return instance.format(calendar.getTime());
+
 	}
 	
 	public String toFormatedString() {
@@ -250,15 +278,19 @@ public class OrgNodeTimeDate {
 			return "-" + time;
 	}
 
+    static public void deleteTimestamp(Context context, long nodeId, String where){
+        Uri uri = OrgContract.Timestamps.buildIdUri(nodeId);
+        context.getContentResolver().delete(uri, where, null);
+    }
+
 	public void update(Context context, long nodeId, long fileId) {
-		Uri uri = OrgContract.Timestamps.buildIdUri(nodeId);
-		context.getContentResolver().delete(uri, Timestamps.TYPE + "="+type.ordinal(), null);
+        deleteTimestamp(context, nodeId, Timestamps.TYPE + "="+type.ordinal());
 		if (getEpochTime() < 0) return;
 		context.getContentResolver().
 				insert(
-						uri,
+                        OrgContract.Timestamps.buildIdUri(nodeId),
 						getContentValues(nodeId, fileId));
-//		Log.v("OrgNodeTimeDate","update epoch : "+getEpochTime() + " with type : "+type);
+		Log.v("OrgNodeTimeDate","update epoch : "+getEpochTime() + " with type : "+type);
 	}
 
 	private ContentValues getContentValues(long nodeId, long fileId) {
@@ -277,5 +309,28 @@ public class OrgNodeTimeDate {
 		Timestamp,
 		InactiveTimestamp
 	}
+
+	/**
+	 * Check if this was at least a day before date
+	 * @param date
+	 * @return
+	 */
+	public boolean isBefore(OrgNodeTimeDate date) {
+		return this.year < date.year ||
+				(this.year == date.year && (this.monthOfYear < date.monthOfYear ||
+						(this.monthOfYear == date.monthOfYear && this.dayOfMonth < date.dayOfMonth)));
+	}
+
+	/**
+	 * Check the crrent date is between start date (excluded) and to date(excluded)
+	 *
+	 * @param start: the starting date
+	 * @param end:   the ending date
+	 * @return
+	 */
+	public boolean isBetween(OrgNodeTimeDate start, OrgNodeTimeDate end) {
+		return start.isBefore(this) && this.isBefore(end);
+	}
+
 
 }
