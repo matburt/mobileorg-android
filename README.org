@@ -1,5 +1,5 @@
 * MobileOrg 2.0
-A new implementation of [[https://github.com/matburt/mobileorg-android][MobileOrg]], an org mode app for Android.
+A new implementation of [[https://github.com/matburt/mobileorg-android][MobileOrg]], an Org mode app for Android.
 
 The app is under heavy refactoring and is not out yet: a first release should be out in the following weeks.
 
@@ -7,7 +7,7 @@ The app is under heavy refactoring and is not out yet: a first release should be
 
 - Modern design using Android's Material Design guidelines
 - Automatic [[https://en.wikipedia.org/wiki/Git_%28software%29][Git]] synchronization (via SSH and HTTP). Access to the raw files in case of conflict to solve.
-- Independent of Emacs: it is no longer required to use it in conjonction with Emacs.
+- Independent of Emacs: it is no longer required to use it in conjunction with Emacs.
 - Agenda view and Todo list view generated from the org files.
 - Folding of items and sub-items.
 
