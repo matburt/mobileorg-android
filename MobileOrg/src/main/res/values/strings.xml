@@ -33,7 +33,7 @@
     <string name="filename">Filename</string>
     <string name="details">Details</string>
     <string name="no_node">You have no node in this file:</string>
-    <string name="no_todo">Lucky you !\n\nYour TODO list is empty.</string>
+    <string name="no_todo">Lucky you !\n\nYour TODO list is empty !</string>
     <string name="conflict">Conflict</string>
     <string name="date">Date</string>
     <string name="time">Time</string>

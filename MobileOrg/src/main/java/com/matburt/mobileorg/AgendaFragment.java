@@ -9,6 +9,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.util.Pair;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -27,6 +28,8 @@ import com.matburt.mobileorg.util.OrgNodeNotFoundException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.TimeZone;
 import java.util.TreeMap;
@@ -40,9 +43,30 @@ import java.util.TreeMap;
  */
 public class AgendaFragment extends Fragment {
 
+    class AgendaItem {
+        public OrgNodeTimeDate.TYPE type;
+        public OrgNode node;
+        public String text;
+        long time;
+        public AgendaItem(OrgNode node, OrgNodeTimeDate.TYPE type, long time){
+            this.node = node;
+            this.type = type;
+            this.time = time;
+
+            OrgNodeTimeDate date = new OrgNodeTimeDate(time);
+
+            if(time < 0 || (node.getRangeInSec() > 86400 && date.isBetween(node.getScheduled(), node.getDeadline()))){
+                text = getActivity().getResources().getString(R.string.all_day);
+            } else {
+                text = date.toString(false);
+            }
+
+        }
+    }
+
     RecyclerViewAdapter adapter;
     RecyclerView recyclerView;
-    ArrayList<OrgNode> nodesList;
+    ArrayList<AgendaItem> nodesList;
     ArrayList<OrgNodeTimeDate>  daysList;
     ArrayList<PositionHelper> items;
     private ContentResolver resolver;
@@ -80,11 +104,9 @@ public class AgendaFragment extends Fragment {
         HashSet<Long> rangedTimestampsNodes = new HashSet<>();
 
         if (cursor != null) {
-//            Log.v("time", "count : " + cursor.getCount());
 
             while (cursor.moveToNext()) {
                 long nodeId = cursor.getLong(cursor.getColumnIndexOrThrow(Timestamps.NODE_ID));
-//                Log.v("time", "nodeId agenda : " + nodeId);
 
                 if (orphanTimestampsNodes.contains(nodeId)) {
                     orphanTimestampsNodes.remove(nodeId);
@@ -97,23 +119,26 @@ public class AgendaFragment extends Fragment {
         }
 
 
-        TreeMap<Long, ArrayList<OrgNode>> nodeIdsForEachDay = new TreeMap<>();
+        TreeMap<Long, ArrayList<AgendaItem>> nodeIdsForEachDay = new TreeMap<>();
 
         for (Long nodeId : orphanTimestampsNodes) {
             try {
                 OrgNode node = new OrgNode(nodeId, resolver);
-                Long day;
+                Long day, time;
+                OrgNodeTimeDate.TYPE type;
                 if (node.getScheduled().getEpochTime() < 0) {
-                    day = node.getDeadline().getEpochTime() / (24 * 3600);
-//                    Log.v("deadline", "agenda deadline : " + day);
+                    type = OrgNodeTimeDate.TYPE.Deadline;
+                    time = node.getDeadline().getEpochTime();
                 } else {
-                    day = node.getScheduled().getEpochTime() / (24 * 3600);
-                    Log.v("timestamp", "agenda scheduled: " + day);
+                    time = node.getScheduled().getEpochTime();
+                    type = OrgNodeTimeDate.TYPE.Scheduled;
                 }
 
+                day = time / (24*3600);
+
                 if (!nodeIdsForEachDay.containsKey(day))
-                    nodeIdsForEachDay.put(day, new ArrayList<OrgNode>());
-                nodeIdsForEachDay.get(day).add(node);
+                    nodeIdsForEachDay.put(day, new ArrayList<AgendaItem>());
+                nodeIdsForEachDay.get(day).add(new AgendaItem(node, type, time));
             } catch (OrgNodeNotFoundException e) {
                 // If we are here, it means an OrgNode has been deleted but not the corresponding
                 // timestamps from the Timestamp database. So we do the cleanup.
@@ -125,27 +150,48 @@ public class AgendaFragment extends Fragment {
         for (Long nodeId : rangedTimestampsNodes) {
             try {
                 OrgNode node = new OrgNode(nodeId, resolver);
+                boolean scheduledBeforeDeadline = node.getScheduled().getEpochTime() < node.getDeadline().getEpochTime();
 
-                long firstDay = node.getScheduled().getEpochTime() / (24 * 3600);
-                long lastDay = node.getDeadline().getEpochTime() / (24 * 3600);
-
+                long firstTime = scheduledBeforeDeadline ? node.getScheduled().getEpochTime() : node.getDeadline().getEpochTime();
+                long lastTime  = scheduledBeforeDeadline ? node.getDeadline().getEpochTime()  : node.getScheduled().getEpochTime();
+                long firstDay = firstTime / (24 * 3600);
+                long lastDay = lastTime / (24 * 3600);
+                OrgNodeTimeDate.TYPE type;
+                long time;
                 for (long day = firstDay; day <= lastDay; day++) {
-                    if (!nodeIdsForEachDay.containsKey(day))
-                        nodeIdsForEachDay.put(day, new ArrayList<OrgNode>());
-                    nodeIdsForEachDay.get(day).add(node);
+                    if(firstDay == lastDay){
+                        if (!nodeIdsForEachDay.containsKey(day))
+                            nodeIdsForEachDay.put(day, new ArrayList<AgendaItem>());
+                        nodeIdsForEachDay.get(day).add(new AgendaItem(node, scheduledBeforeDeadline ? OrgNodeTimeDate.TYPE.Scheduled : OrgNodeTimeDate.TYPE.Deadline, firstTime));
+                        nodeIdsForEachDay.get(day).add(new AgendaItem(node, scheduledBeforeDeadline ? OrgNodeTimeDate.TYPE.Deadline : OrgNodeTimeDate.TYPE.Scheduled, lastTime));
+                    } else {
+                        if (day == firstDay) {
+                            type = scheduledBeforeDeadline ? OrgNodeTimeDate.TYPE.Scheduled : OrgNodeTimeDate.TYPE.Deadline;
+                            time = firstTime;
+                        } else if (day == lastDay) {
+                            type = scheduledBeforeDeadline ? OrgNodeTimeDate.TYPE.Deadline : OrgNodeTimeDate.TYPE.Scheduled;
+                            time = lastTime;
+                        } else {
+                            type = OrgNodeTimeDate.TYPE.Timestamp;
+                            time = -1;
+                        }
+                        if (!nodeIdsForEachDay.containsKey(day))
+                            nodeIdsForEachDay.put(day, new ArrayList<AgendaItem>());
+                        nodeIdsForEachDay.get(day).add(new AgendaItem(node, type, time));
+                    }
                 }
             } catch (OrgNodeNotFoundException e) {
                 e.printStackTrace();
             }
-
         }
 
         int dayCursor = 0, nodeCursor = 0;
         for (long day : nodeIdsForEachDay.keySet()) {
             daysList.add(new OrgNodeTimeDate(day * 3600 * 24));
             items.add(new PositionHelper(dayCursor++, Type.kDate));
-            for (OrgNode node : nodeIdsForEachDay.get(day)) {
-                nodesList.add(node);
+            Collections.sort(nodeIdsForEachDay.get(day), new TimeComparator());
+            for (AgendaItem item: nodeIdsForEachDay.get(day)) {
+                nodesList.add(item);
                 items.add(new PositionHelper(nodeCursor++, Type.kNode));
             }
         }
@@ -153,6 +199,12 @@ public class AgendaFragment extends Fragment {
         adapter = new RecyclerViewAdapter();
     }
 
+    class TimeComparator implements Comparator<AgendaItem> {
+        @Override
+        public int compare(AgendaItem a, AgendaItem b) {
+            return a.time < b.time ? -1 : a.time == b.time ? 0 : 1;
+        }
+    }
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -220,12 +272,12 @@ public class AgendaFragment extends Fragment {
         }
 
         private void onBindOrgItemHolder(final OrgItemViewHolder holder, int position){
-            final OrgNode node = nodesList.get(items.get(position).position);
+            final AgendaItem item = nodesList.get(items.get(position).position);
+            final OrgNode node = item.node;
 
             // The day associated with this item
             int dayPosition = position;
             while(items.get(dayPosition).type != Type.kDate && dayPosition > 0) dayPosition--;
-            OrgNodeTimeDate date = daysList.get(items.get(dayPosition).position);
 
             TextView title = (TextView) holder.itemView.findViewById(R.id.title);
             TextView details = (TextView) holder.itemView.findViewById(R.id.details);
@@ -248,11 +300,8 @@ public class AgendaFragment extends Fragment {
             TextView content = (TextView) holder.itemView.findViewById(R.id.date);
 
             // If event spans on more than one day (=86499 sec), tag the enclosed days as 'all days'
-            if(node.getRangeInSec() > 86400 && date.isBetween(node.getScheduled(), node.getDeadline())){
-                content.setText(R.string.all_day);
-            } else {
-                content.setText(node.getScheduled().toString(false));
-            }
+            Log.v("time", "range : "+node.getRangeInSec());
+            content.setText(item.text);
 
             holder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override

@@ -80,7 +80,8 @@ public class OrgNodeTimeDate {
 						Timestamps.DEFAULT_COLUMNS ) +
 				" FROM " + Tables.TIMESTAMPS +
 				" WHERE " + Timestamps.NODE_ID + " = " + nodeId +
-				"   AND " + Timestamps.TYPE+ " = " + type.ordinal();
+				"   AND " + Timestamps.TYPE+ " = " + type.ordinal() +
+				" ORDER BY " + Timestamps.TIMESTAMP;
 
 		this.type = type;
 
@@ -323,13 +324,15 @@ public class OrgNodeTimeDate {
 
 	/**
 	 * Check the crrent date is between start date (excluded) and to date(excluded)
-	 *
+	 * WARNING, can also be between end (first) and start (at the end) !!
 	 * @param start: the starting date
 	 * @param end:   the ending date
 	 * @return
 	 */
 	public boolean isBetween(OrgNodeTimeDate start, OrgNodeTimeDate end) {
-		return start.isBefore(this) && this.isBefore(end);
+		return
+				start.isBefore(this) && this.isBefore(end)
+						|| end.isBefore(this) && this.isBefore(start);
 	}
 
 

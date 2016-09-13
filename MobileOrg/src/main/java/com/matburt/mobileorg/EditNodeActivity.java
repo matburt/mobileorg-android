@@ -17,6 +17,7 @@ import android.view.MenuItem;
  */
 public class EditNodeActivity extends AppCompatActivity {
     EditNodeFragment fragment;
+    public static String EDIT_NODE_FRAGMENT = "edit_node_fragment_tag";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,7 +44,7 @@ public class EditNodeActivity extends AppCompatActivity {
             fragment = new EditNodeFragment();
             fragment.setArguments(getIntent().getExtras());
             getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.edit_node_container, fragment)
+                    .replace(R.id.edit_node_container, fragment, EDIT_NODE_FRAGMENT)
                     .commit();
         }
     }
@@ -71,13 +72,14 @@ public class EditNodeActivity extends AppCompatActivity {
             return true;
 
             case R.id.edit_menu_ok:
-                fragment.onOKPressed();
+
+                ((EditNodeFragment)(getSupportFragmentManager().findFragmentByTag(EDIT_NODE_FRAGMENT))).onOKPressed();
                 finish();
 //                Intent intent = new Intent(this, OrgNodeListActivity.class);
 //                startActivity(intent);
                 return true;
             case R.id.edit_menu_cancel:
-                if(fragment != null) fragment.onCancelPressed();
+                ((EditNodeFragment)(getSupportFragmentManager().findFragmentByTag(EDIT_NODE_FRAGMENT))).onCancelPressed();
                 finish();
 //                intent = new Intent(this, OrgNodeListActivity.class);
 //                startActivity(intent);

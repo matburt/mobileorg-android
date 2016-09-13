@@ -46,29 +46,6 @@ public class EditNodeFragment extends Fragment {
     private int position = 0;
     private Button todo, priority;
 
-    static private void setupTimeStampButtons() {
-        String scheduleText = node.getScheduled().getDate();
-        String deadlineText = node.getDeadline().getDate();
-        if (scheduleText.length() > 0) schedule_date.setText(scheduleText);
-        if (deadlineText.length() > 0) deadline_date.setText(deadlineText);
-
-        String scheduleTimeText = node.getScheduled().getStartTime();
-        String deadlineTimeText = node.getDeadline().getStartTime();
-        if (scheduleTimeText.length() > 0) schedule_time.setText(scheduleTimeText);
-        if (deadlineTimeText.length() > 0) deadline_time.setText(deadlineTimeText);
-    }
-
-    static public void createEditNodeFragment(int id, int parentId, int siblingPosition, Context context) {
-        Bundle args = new Bundle();
-        args.putLong(OrgContract.NODE_ID, id);
-        args.putLong(OrgContract.PARENT_ID, parentId);
-        args.putInt(OrgContract.OrgData.POSITION, siblingPosition);
-
-        Intent intent = new Intent(context, EditNodeActivity.class);
-        intent.putExtras(args);
-        context.startActivity(intent);
-    }
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -189,6 +166,30 @@ public class EditNodeFragment extends Fragment {
         return rootView;
     }
 
+    static private void setupTimeStampButtons() {
+        String scheduleText = node.getScheduled().getDate();
+        String deadlineText = node.getDeadline().getDate();
+        if (scheduleText.length() > 0) schedule_date.setText(scheduleText);
+        if (deadlineText.length() > 0) deadline_date.setText(deadlineText);
+
+        String scheduleTimeText = node.getScheduled().getStartTime();
+        String deadlineTimeText = node.getDeadline().getStartTime();
+        if (scheduleTimeText.length() > 0) schedule_time.setText(scheduleTimeText);
+        if (deadlineTimeText.length() > 0) deadline_time.setText(deadlineTimeText);
+    }
+
+    static public void createEditNodeFragment(int id, int parentId, int siblingPosition, Context context) {
+        Bundle args = new Bundle();
+        args.putLong(OrgContract.NODE_ID, id);
+        args.putLong(OrgContract.PARENT_ID, parentId);
+        args.putInt(OrgContract.OrgData.POSITION, siblingPosition);
+
+        Intent intent = new Intent(context, EditNodeActivity.class);
+        intent.putExtras(args);
+        context.startActivity(intent);
+    }
+
+
     private void createNewNode(ContentResolver resolver){
         // Creating new node
         node = new OrgNode();
@@ -249,7 +250,7 @@ public class EditNodeFragment extends Fragment {
         priorityList.add("B");
         priorityList.add("C");
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setTitle(R.string.todo_state)
+        builder.setTitle(R.string.priority)
                 .setItems(priorityList.toArray(new CharSequence[priorityList.size()]),
                         new DialogInterface.OnClickListener() {
                             @Override
