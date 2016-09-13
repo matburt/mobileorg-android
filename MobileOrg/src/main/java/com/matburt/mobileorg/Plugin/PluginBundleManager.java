@@ -67,12 +67,10 @@ public final class PluginBundleManager
          */
         if (!bundle.containsKey(BUNDLE_EXTRA_STRING_MESSAGE))
         {
-//            Log.e("MobileOrg", String.format("bundle must contain extra %s", BUNDLE_EXTRA_STRING_MESSAGE)); //$NON-NLS-1$
             return false;
         }
         if (!bundle.containsKey(BUNDLE_EXTRA_INT_VERSION_CODE))
         {
-//            Log.e("MobileOrg", String.format("bundle must contain extra %s", BUNDLE_EXTRA_INT_VERSION_CODE)); //$NON-NLS-1$
             return false;
         }
 
@@ -83,7 +81,6 @@ public final class PluginBundleManager
          */
         if (2 != bundle.keySet().size())
         {
-//            Log.e("MobileOrg", String.format("bundle must contain 2 keys, but currently contains %d keys: %s", Integer.valueOf(bundle.keySet().size()), bundle.keySet()));
             return false;
         }
 
@@ -92,7 +89,6 @@ public final class PluginBundleManager
          */
         if (TextUtils.isEmpty(bundle.getString(BUNDLE_EXTRA_STRING_MESSAGE)))
         {
-//            Log.e("MobileOrg", String.format("bundle extra %s appears to be null or empty.  It must be a non-empty string", BUNDLE_EXTRA_STRING_MESSAGE)); //$NON-NLS-1$
             return false;
         }
         
@@ -101,7 +97,6 @@ public final class PluginBundleManager
          */
         if (bundle.getInt(BUNDLE_EXTRA_INT_VERSION_CODE, 0) != bundle.getInt(BUNDLE_EXTRA_INT_VERSION_CODE, 1))
         {
-//            Log.e("MobileOrg", String.format("bundle extra %s appears to be the wrong type.  It must be an int", BUNDLE_EXTRA_INT_VERSION_CODE)); //$NON-NLS-1$
             return false;
         }
 

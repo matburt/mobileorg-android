@@ -106,7 +106,6 @@ public class JGitWrapper {
 
     public static SyncResult pull(final Context context) {
         File repoDir = new File(context.getFilesDir() + "/" + GIT_DIR + "/.git");
-//        Log.v("git", "pulling");
         SyncResult result = new SyncResult();
         AuthData authData = AuthData.getInstance(context);
         Git git = null;
@@ -137,18 +136,9 @@ public class JGitWrapper {
                             .setTransportConfigCallback(new CustomTransportConfigCallback(context))
                             .call();
 
-//            Log.v("git","PullResult::isSuccessful : "+pullResult.isSuccessful());
-//            Log.v("git","PullResult::getFetchResult : "+pullResult.getFetchResult().getMessages());
-//            Log.v("git","PullResult::getMergeStatus : "+pullResult.getMergeResult().getMergeStatus().toString());
             Status status = git.status().call();
-//            Log.v("git","status changed: "+status.getChanged().toString());
-//            Log.v("git","status modified : "+status.getModified().toString());
-//            Log.v("git","status missing: "+status.getMissing().toString());
-//            Log.v("git","status removed: "+status.getRemoved().toString());
-//            Log.v("git","status untracked: "+status.getUntracked().toString());
             //            Iterator<RevCommit>refs =  git.log().call().iterator();
             //            while(refs.hasNext()){
-//            //                Log.v("git","rev : "+refs.next());
             //            }
             ObjectId head = repository.resolve("HEAD^{tree}");
 
@@ -162,12 +152,10 @@ public class JGitWrapper {
                     .setOldTree(oldTreeIter)
                     .call();
 
-//            Log.v("sync", "Pulling succeeded");
 
             for (DiffEntry entry : diffs) {
                 String newpath = entry.getNewPath();
                 String oldpath = entry.getOldPath();
-//                Log.v("sync", "change old : " + oldpath + " -> " + newpath);
                 if (newpath.equals("/dev/null")) {
                     result.deletedFiles.add(oldpath);
                 } else if (oldpath.equals("/dev/null")) {
@@ -177,7 +165,6 @@ public class JGitWrapper {
                 }
             }
             result.setState(SyncResult.State.kSuccess);
-//            Log.v("git", "after pull: " + read("MobileOrg" , context ));
             return result;
         } catch(WrongRepositoryStateException e){
             e.printStackTrace();
@@ -226,7 +213,6 @@ public class JGitWrapper {
 
         if (SshSessionFactory.getConnectionType(context) == ConnectionType.kHttp) {
             // http connection
-//            Log.v("sync", "http");
             REMOTE_URL.append(authData.getHost())
                     .append("/")
                     .append(authData.getPath());
@@ -374,7 +360,6 @@ public class JGitWrapper {
             File f = new File(Synchronizer.getInstance().getAbsoluteFilesDir(context));
             File file[] = f.listFiles();
             if (file == null) return;
-//            Log.d("Files", "Size: "+ file.length);
             for (int i=0; i < file.length; i++)
             {
                 String filename = file[i].getName();
@@ -382,7 +367,6 @@ public class JGitWrapper {
                 OrgFile orgFile = new OrgFile(filename, filename);
                 FileReader fileReader = null;
                 try {
-//                    Log.d("Files", "FileName:" + file[i].getName());
                     fileReader = new FileReader(Synchronizer.getInstance().getAbsoluteFilesDir(context) + "/" + filename);
                     BufferedReader bufferedReader = new BufferedReader(fileReader);
 
@@ -406,7 +390,6 @@ public class JGitWrapper {
         }
 
         protected Void doInBackground(String... params) {
-//            Log.v("git", "pushing");
 
             File repoDir = new File(context.getFilesDir() + "/" + GIT_DIR + "/.git");
 
@@ -417,7 +400,6 @@ public class JGitWrapper {
 //
 //            try {
 //                fis = new FileInputStream(file);
-////                Log.v("file", "couo");
 //                // Here BufferedInputStream is added for fast reading.
 //                bis = new BufferedInputStream(fis);
 //                dis = new DataInputStream(bis);
@@ -427,7 +409,6 @@ public class JGitWrapper {
 //
 //                    // this statement reads the line from the file and print it to
 //                    // the console.
-////                    Log.v("file" , "content : "+dis.readLine());
 //                }
 //
 //                // dispose all the resources after using them.
@@ -496,7 +477,6 @@ public class JGitWrapper {
         }
 
         protected Void doInBackground(String... params) {
-//            Log.v("git", "merging");
 
             File repoDir = new File(context.getFilesDir() + "/" + GIT_DIR + "/.git");
             Git git = null;

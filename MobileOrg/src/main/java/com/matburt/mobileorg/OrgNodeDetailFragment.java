@@ -103,6 +103,7 @@ public class OrgNodeDetailFragment extends Fragment {
         super.onCreate(savedInstanceState);
         this.resolver = getActivity().getContentResolver();
 
+        Log.v("create","herelasdfjaskdfjasdfad");
         OrgNodeTree tree = null;
 
         if (getArguments().containsKey(OrgContract.NODE_ID)) {
@@ -122,7 +123,6 @@ public class OrgNodeDetailFragment extends Fragment {
                         " FROM orgdata JOIN todos " +
                         " ON todos.name = orgdata.todo WHERE todos.isdone=0";
 
-//                Log.v("todo", "query : " + todoQuery);
 
                 Cursor cursor = OrgDatabase.getInstance().getReadableDatabase().rawQuery(todoQuery, null);
 
@@ -133,8 +133,8 @@ public class OrgNodeDetailFragment extends Fragment {
                 try {
                     tree = new OrgNodeTree(new OrgNode(nodeId, resolver), resolver);
                 } catch (OrgNodeNotFoundException e) {
-//                displayError();
 //                TODO: implement error
+                    e.printStackTrace();
                 }
             }
         }
@@ -188,6 +188,7 @@ public class OrgNodeDetailFragment extends Fragment {
         } catch (OrgNodeNotFoundException e) {
 //                displayError();
 //                TODO: implement error
+            e.printStackTrace();
         }
 
         int size = adapter.getItemCount();
@@ -209,7 +210,6 @@ public class OrgNodeDetailFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-//        Log.v("resume", "resume");
         refresh();
     }
 
@@ -447,7 +447,6 @@ public class OrgNodeDetailFragment extends Fragment {
         void setItemModifiersVisibility(View view, int visibility){
             LinearLayout itemModifiers = (LinearLayout) view.findViewById(R.id.item_modifiers);
             if (itemModifiers != null) {
-//                Log.v("vis", "visibility : " + visibility);
                 itemModifiers.setVisibility(visibility);
             }
         }

@@ -187,17 +187,14 @@ public class OrgFile {
     public void updateFile(String content, Context context) {
         File file = new File(getFilePath(context));
         FileOutputStream outputStream = null;
-//        Log.v("sync", "writing to disk a bit");
         try {
             outputStream = new FileOutputStream(file);
-//            Log.v("sync", "writing to disk a log");
         } catch (FileNotFoundException e) {
             e.printStackTrace();
             return;
         }
 
         try {
-//            Log.v("sync", "writing to disk a content : " + content);
             outputStream.write(content.getBytes());
             outputStream.close();
         } catch (Exception e) {

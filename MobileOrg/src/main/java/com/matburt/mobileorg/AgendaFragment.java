@@ -300,7 +300,6 @@ public class AgendaFragment extends Fragment {
             TextView content = (TextView) holder.itemView.findViewById(R.id.date);
 
             // If event spans on more than one day (=86499 sec), tag the enclosed days as 'all days'
-            Log.v("time", "range : "+node.getRangeInSec());
             content.setText(item.text);
 
             holder.itemView.setOnClickListener(new View.OnClickListener() {

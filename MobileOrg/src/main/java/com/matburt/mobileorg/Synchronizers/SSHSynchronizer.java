@@ -65,9 +65,6 @@ public class SSHSynchronizer extends Synchronizer {
     public SyncResult synchronize(){
         if (isCredentialsRequired()) return new SyncResult();
         SyncResult pullResult = JGitWrapper.pull(context);
-//        Log.v("git", "changed : "+pullResult.changedFiles.toString());
-//        Log.v("git", "new : "+pullResult.newFiles.toString());
-//        Log.v("git", "deleted : "+pullResult.deletedFiles.toString());
 
         new JGitWrapper.PushTask(context).execute();
         return pullResult;
@@ -90,7 +87,6 @@ public class SSHSynchronizer extends Synchronizer {
 
     @Override
     public void addFile(String filename) {
-//        Log.v("sync", "addding file : "+filename);
         JGitWrapper.add(filename, context);
     }
 

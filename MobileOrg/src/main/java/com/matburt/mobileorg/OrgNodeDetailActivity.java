@@ -62,7 +62,6 @@ public class OrgNodeDetailActivity extends AppCompatActivity {
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.orgnode_detail_container, fragment, "detail_fragment")
                     .commit();
-//                Log.v("title","title0");
 
             if(actionBar != null) {
                 if(nodeId == OrgContract.TODO_ID) actionBar.setTitle(getResources().getString(R.string.menu_todos));
@@ -119,7 +118,6 @@ public class OrgNodeDetailActivity extends AppCompatActivity {
 //            case R.id.delete_node_button:
 //                OrgNodeDetailFragment fragment = (OrgNodeDetailFragment) getSupportFragmentManager().findFragmentByTag("detail_fragment");
 //                if(fragment != null){
-////                    Log.v("delete", "fragment : "+fragment.sayHello());
 //                }
 //                return true;
         }

@@ -60,7 +60,6 @@ public class OrgProvider extends ContentProvider {
 
     @Override
     public boolean onCreate() {
-//        Log.v("trace", "oncreate");
         return false;
     }
 
@@ -68,7 +67,6 @@ public class OrgProvider extends ContentProvider {
     @Override
     public Cursor query(Uri uri, String[] projection, String selection,
                         String[] selectionArgs, String sortOrder) {
-//        Log.v("trace", "query");
         final SQLiteDatabase db = OrgDatabase.getInstance().getReadableDatabase();
 
         final SelectionBuilder builder = buildSelectionFromUri(uri);

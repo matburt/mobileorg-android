@@ -280,7 +280,6 @@ public class OrgNode {
                 ++sibling.position;
 				sibling.updateNode(context);
 //				Log.v("position", "new pos : " + sibling.position);
-//                Log.v("position", sibling.getCleanedName());
             }
         }
     }

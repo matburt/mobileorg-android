@@ -87,7 +87,6 @@ public class ConflictResolverActivity extends AppCompatActivity {
                         ContentValues values = new ContentValues();
                         values.put("comment", "");
                         f.updateFileInDB(this.getContentResolver(), values);
-//                        Log.v("conflict", "conflict resolved");
                     } catch (OrgFileNotFoundException e) {
                         e.printStackTrace();
                     }

@@ -64,7 +64,6 @@ public class AuthData {
                 getFileName().equals("") ||
                 getUser().equals("") ||
                 (getHost().equals("") && getPubFile().equals(""))) {
-//            Log.i("MobileOrg", "Test Connection Failed for not being configured");
             return false;
         }
         return true;

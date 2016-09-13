@@ -225,7 +225,6 @@ public class WizardView extends HorizontalScrollView implements
 	// page, until it's OK to do so (ex: user puts password)
 	@Override
 	public void onScrollChanged(int l, int t, int oldl, int oldt) {
-//		// Log.d(TAG,"scroll: "+l+", "+oldl+" maxscroll: "+maxScrollX);
 		if (l > maxScrollX) {
 			// if trying to scroll past maximum allowed, then snap back
 			scrollTo(oldl, 0);

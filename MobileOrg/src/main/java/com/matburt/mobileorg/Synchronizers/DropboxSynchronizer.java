@@ -134,7 +134,6 @@ public class DropboxSynchronizer extends Synchronizer {
         dropboxApi = new DropboxAPI<>(session);
         if (!dropboxApi.getSession().isLinked()) {
             isLoggedIn = false;
-//            Log.d("MobileOrg", "Dropbox account was unlinked...");
             //throw new IOException("Dropbox Authentication Failed, re-run setup wizard");
         }
         else {

@@ -224,8 +224,6 @@ public class OrgNodeTimeDate {
 		if(year == -1 || dayOfMonth == -1 || monthOfYear == -1) return -1;
 		int hour = startTimeOfDay > -1 ? startTimeOfDay : 0;
 		int minute = startMinute > -1 ? startMinute : 0;
-        Log.v("time", "hour : "+hour);
-        Log.v("time", "minute : "+minute);
 		GregorianCalendar calendar = new GregorianCalendar(year, monthOfYear, dayOfMonth, hour, minute);
 		calendar.setTimeZone(TimeZone.getTimeZone("GMT0"));
 		return calendar.getTimeInMillis() / 1000L;
@@ -248,7 +246,6 @@ public class OrgNodeTimeDate {
 	public String toString(boolean isDate) {
         GregorianCalendar calendar = new GregorianCalendar(year, monthOfYear, dayOfMonth, startTimeOfDay, startMinute);
         calendar.setTimeZone(TimeZone.getTimeZone("GMT0"));
-        Log.v("time", "time : "+getEpochTime());
         DateFormat instance = isDate ? SimpleDateFormat.getDateInstance() : SimpleDateFormat.getTimeInstance(DateFormat.SHORT);
         instance.setTimeZone(TimeZone.getTimeZone("GMT0"));
         return instance.format(calendar.getTime());

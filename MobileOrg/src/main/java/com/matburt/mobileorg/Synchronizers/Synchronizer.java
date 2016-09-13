@@ -93,14 +93,12 @@ public abstract class Synchronizer {
             SyncResult pulledFiles = synchronize();
 
             for (String filename : pulledFiles.deletedFiles) {
-//                Log.v("sync", "deleted file: " + filename);
 
                 OrgFile orgFile = new OrgFile(filename, resolver);
                 orgFile.removeFile(context, true);
             }
 
             for (String filename : pulledFiles.newFiles) {
-//                Log.v("sync", "new file: " + filename);
                 OrgFile orgFile = new OrgFile(filename, filename);
                 FileReader fileReader = new FileReader(getAbsoluteFilesDir(context) + "/" + filename);
                 BufferedReader bufferedReader = new BufferedReader(fileReader);
@@ -109,7 +107,6 @@ public abstract class Synchronizer {
             }
 
             for (String filename : pulledFiles.changedFiles) {
-//                Log.v("sync", "changed file : " + filename);
                 OrgFile orgFile = new OrgFile(filename, filename);
                 FileReader fileReader = new FileReader(getAbsoluteFilesDir(context) + "/" + filename);
                 BufferedReader bufferedReader = new BufferedReader(fileReader);
@@ -121,7 +118,6 @@ public abstract class Synchronizer {
             return pulledFiles.changedFiles;
         } catch (Exception e) {
             showErrorNotification(e);
-//            Log.e("Synchronizer", "Error synchronizing", e);
         }
         return result;
     }

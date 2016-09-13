@@ -23,7 +23,6 @@ public class OrgNodeTree {
 
         if(isRecursive && root != null) {
             for (OrgNode child : root.getChildren(resolver)) {
-//                Log.v("newNode", "child : " + child.name);
                 children.add(new OrgNodeTree(child, resolver));
             }
         }
@@ -90,7 +89,6 @@ public class OrgNodeTree {
         // It must not be added
         map.put(++idConstructor, tree);
 
-//        Log.v("node", tree.node.name + " -> " + idConstructor + " -> " + tree.visibility);
 
         if (tree.visibility == Visibility.folded) return;
 
@@ -110,7 +108,6 @@ public class OrgNodeTree {
         if(visibility==Visibility.folded){
             visibility = Visibility.children;
             for (OrgNodeTree child : children) {
-//                Log.v("children", "child : " + child.node.name);
                 child.visibility = Visibility.folded;
             }
         } else if(visibility==Visibility.children){

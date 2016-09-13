@@ -44,7 +44,6 @@ public class OutlineAdapter extends RecyclerView.Adapter<OutlineAdapter.OutlineI
     private ActionMode.Callback mDeleteMode = new ActionMode.Callback() {
         @Override
         public boolean onPrepareActionMode(ActionMode actionMode, Menu menu) {
-//            Log.v("selection", "onPrepare");
             String wordItem;
             int count = getSelectedItemCount();
             if (count == 1) wordItem = activity.getResources().getString(R.string.file);
@@ -68,7 +67,6 @@ public class OutlineAdapter extends RecyclerView.Adapter<OutlineAdapter.OutlineI
 
         @Override
         public boolean onActionItemClicked(ActionMode actionMode, MenuItem menuItem) {
-//            Log.v("selection", "item clicked");
             switch (menuItem.getItemId()) {
                 case R.id.item_delete:
                     String message;
@@ -155,7 +153,6 @@ public class OutlineAdapter extends RecyclerView.Adapter<OutlineAdapter.OutlineI
 
         holder.mView.setActivated(selectedItems.get(position, false));
 
-////        Log.v("hightlight","onbind : "+title+" -> "+selectedItems.get(position, false));
         final long itemId = getItemId(position);
 		holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -166,7 +163,14 @@ public class OutlineAdapter extends RecyclerView.Adapter<OutlineAdapter.OutlineI
                 } else {
                     if (mTwoPanes) {
                         Bundle arguments = new Bundle();
-                        arguments.putLong(OrgContract.NODE_ID, itemId);
+                        if(position == 0){
+                            arguments.putLong(OrgContract.NODE_ID, OrgContract.TODO_ID);
+                        } else if (position == 1){
+                            arguments.putLong(OrgContract.NODE_ID, OrgContract.AGENDA_ID);
+                        } else {
+                            arguments.putLong(OrgContract.NODE_ID, itemId);
+                        }
+
                         OrgNodeDetailFragment fragment = new OrgNodeDetailFragment();
                         fragment.setArguments(arguments);
 
@@ -240,7 +244,6 @@ public class OutlineAdapter extends RecyclerView.Adapter<OutlineAdapter.OutlineI
     }
 
     public void toggleSelection(int pos) {
-//        Log.v("selection", "selection pos : " + pos);
         int countBefore = getSelectedItemCount();
         if (selectedItems.get(pos, false)) {
             selectedItems.delete(pos);

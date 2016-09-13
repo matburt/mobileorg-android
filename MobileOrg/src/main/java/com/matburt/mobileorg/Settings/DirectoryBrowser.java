@@ -143,8 +143,6 @@ public interface DirectoryBrowser {
 			if ( !isCurrentDirectoryRoot() ) {
 				directoryNames.add( upOneLevel );
 				directoryListing.add( getParentPath(curDirectory) );
-//                Log.d("MobileOrg", "Current directory: " + curDirectory);
-//                Log.d("MobileOrg", "Parent path: " + getParentPath(curDirectory));
 			}
             for (String item : onesync.getDirectoryList(directory)) {
                 directoryNames.add(item);
@@ -216,7 +214,6 @@ public interface DirectoryBrowser {
                     }
                 }
             } catch (DropboxException e) {
-//                Log.d("MobileOrg", "Failed to list directory for dropbox: " + e.toString());
             }
 		}
 	}

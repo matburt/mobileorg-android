@@ -53,7 +53,6 @@ public class EditNodeFragment extends Fragment {
         final View rootView = inflater.inflate(R.layout.edit_node_entry, container, false);
         context = getContext();
 
-        Log.v("state","CALLLLLLLLLLLLLLLLLLLLLLLLLLLLLED");
 
         todo = (Button) rootView.findViewById(R.id.todo);
         priority = (Button) rootView.findViewById(R.id.priority);
@@ -71,7 +70,6 @@ public class EditNodeFragment extends Fragment {
             nodeId = bundle.getLong(NODE_ID, -1);
             parentId = bundle.getLong(PARENT_ID, -1);
             position = bundle.getInt(OrgContract.OrgData.POSITION, 0);
-//            Log.v("position", "position : " + position);
         }
 
         ContentResolver resolver = getActivity().getContentResolver();
@@ -220,12 +218,10 @@ public class EditNodeFragment extends Fragment {
         node = new OrgNode();
         node.parentId = parentId;
         node.position = position;
-//        Log.v("newNode","parentId : "+parentId);
         try {
             OrgNode parentNode = new OrgNode(parentId, resolver);
             node.level = parentNode.level + 1;
             node.fileId = parentNode.fileId;
-//            Log.v("newNode","fileId : "+node.fileId);
         } catch (OrgNodeNotFoundException e) {
             e.printStackTrace();
         }
