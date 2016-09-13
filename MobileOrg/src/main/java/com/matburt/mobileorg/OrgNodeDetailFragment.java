@@ -386,7 +386,7 @@ public class OrgNodeDetailFragment extends Fragment {
                         refreshVisibility();
                         return;
                     }
-                    new TodoDialog(getContext(), tree.node, item.todoButton);
+                    new TodoDialog(getContext(), tree.node, item.todoButton, true);
                     refreshVisibility();
                 }
             });

@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
@@ -52,6 +53,8 @@ public class EditNodeFragment extends Fragment {
         final View rootView = inflater.inflate(R.layout.edit_node_entry, container, false);
         context = getContext();
 
+        Log.v("state","CALLLLLLLLLLLLLLLLLLLLLLLLLLLLLED");
+
         todo = (Button) rootView.findViewById(R.id.todo);
         priority = (Button) rootView.findViewById(R.id.priority);
         schedule_date = (Button) rootView.findViewById(R.id.scheduled_date);
@@ -84,12 +87,35 @@ public class EditNodeFragment extends Fragment {
             createNewNode(resolver);
         }
 
+
+        /**
+         * Save user changes (scheduled and time values) if a configuration change occured
+         * (like screen rotation or call)
+         */
+        if(savedInstanceState != null) {
+            node.getScheduled().year = (int) savedInstanceState.getLong("year_schedule");
+            node.getScheduled().monthOfYear = (int) savedInstanceState.getLong("month_schedule");
+            node.getScheduled().dayOfMonth = (int) savedInstanceState.getLong("day_schedule");
+            node.getScheduled().startTimeOfDay = (int) savedInstanceState.getLong("hour_schedule");
+            node.getScheduled().startMinute = (int) savedInstanceState.getLong("minute_schedule");
+
+            node.getDeadline().year = (int) savedInstanceState.getLong("year_deadline");
+            node.getDeadline().monthOfYear = (int) savedInstanceState.getLong("month_deadline");
+            node.getDeadline().dayOfMonth = (int) savedInstanceState.getLong("day_deadline");
+            node.getDeadline().startTimeOfDay = (int) savedInstanceState.getLong("hour_deadline");
+            node.getDeadline().startMinute = (int) savedInstanceState.getLong("minute_deadline");
+
+            node.todo = savedInstanceState.getString("todo");
+            node.priority = savedInstanceState.getString("priority");
+        }
+
         TodoDialog.setupTodoButton(getContext(), node, todo, false);
+
 
         todo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                new TodoDialog(getContext(), node, todo);
+                new TodoDialog(getContext(), node, todo, false);
             }
         });
 
@@ -102,7 +128,6 @@ public class EditNodeFragment extends Fragment {
         });
 
         title.setText(node.name);
-
         String payload = node.getCleanedPayload();
         if (payload.length() > 0) {
             content.setText(payload);
@@ -204,6 +229,25 @@ public class EditNodeFragment extends Fragment {
         } catch (OrgNodeNotFoundException e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putLong("year_schedule", node.getScheduled().year);
+        outState.putLong("month_schedule", node.getScheduled().monthOfYear);
+        outState.putLong("day_schedule", node.getScheduled().dayOfMonth);
+        outState.putLong("hour_schedule", node.getScheduled().startTimeOfDay);
+        outState.putLong("minute_schedule", node.getScheduled().startMinute);
+
+        outState.putLong("year_deadline", node.getDeadline().year);
+        outState.putLong("month_deadline", node.getDeadline().monthOfYear);
+        outState.putLong("day_deadline", node.getDeadline().dayOfMonth);
+        outState.putLong("hour_deadline", node.getDeadline().startTimeOfDay);
+        outState.putLong("minute_deadline", node.getDeadline().startMinute);
+
+        outState.putString("todo", node.todo);
+        outState.putString("priority", node.priority);
     }
 
     /**

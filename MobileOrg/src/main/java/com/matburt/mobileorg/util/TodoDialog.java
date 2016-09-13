@@ -23,7 +23,7 @@ public class TodoDialog {
     private final OrgNode node;
     private final Button button;
 
-    public TodoDialog(Context _context, OrgNode _node, Button _button) {
+    public TodoDialog(Context _context, OrgNode _node, Button _button, final boolean writeChangeOnTodoChanged) {
         this.context = _context;
         this.node = _node;
         this.button = _button;
@@ -49,8 +49,10 @@ public class TodoDialog {
                                 if(which == 0) selectedTodo = "";
                                 node.todo = selectedTodo;
                                 setupTodoButton(context,node,button, false);
-                                node.write(context);
-                                OrgFile.updateFile(node, context);
+                                if(writeChangeOnTodoChanged){
+                                    node.write(context);
+                                    OrgFile.updateFile(node, context);
+                                }
                             }
                         });
         builder.create().show();
