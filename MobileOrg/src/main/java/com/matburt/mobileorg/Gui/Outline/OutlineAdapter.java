@@ -5,6 +5,9 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.Fragment;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ActionMode;
@@ -20,14 +23,17 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.matburt.mobileorg.AgendaFragment;
 import com.matburt.mobileorg.Gui.Theme.DefaultTheme;
 import com.matburt.mobileorg.OrgData.OrgContract;
 import com.matburt.mobileorg.OrgData.OrgFile;
+import com.matburt.mobileorg.OrgData.OrgNode;
 import com.matburt.mobileorg.OrgData.OrgProviderUtils;
 import com.matburt.mobileorg.OrgNodeDetailActivity;
 import com.matburt.mobileorg.OrgNodeDetailFragment;
 import com.matburt.mobileorg.OrgNodeListActivity;
 import com.matburt.mobileorg.R;
+import com.matburt.mobileorg.util.OrgNodeNotFoundException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -157,12 +163,22 @@ public class OutlineAdapter extends RecyclerView.Adapter<OutlineAdapter.OutlineI
 		holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Context context = v.getContext();
+
                 if (getSelectedItemCount() > 0) {
                     if(!isSelectableItem(position)) return;
                     toggleSelection(position);
                 } else {
                     if (mTwoPanes) {
                         Bundle arguments = new Bundle();
+                        Intent intent;
+                        // Special activity for conflicted file
+                        if(conflict){
+                            intent = new Intent(context, ConflictResolverActivity.class);
+                            context.startActivity(intent);
+                            return;
+                        }
+
                         if(position == 0){
                             arguments.putLong(OrgContract.NODE_ID, OrgContract.TODO_ID);
                         } else if (position == 1){
@@ -171,16 +187,33 @@ public class OutlineAdapter extends RecyclerView.Adapter<OutlineAdapter.OutlineI
                             arguments.putLong(OrgContract.NODE_ID, itemId);
                         }
 
-                        OrgNodeDetailFragment fragment = new OrgNodeDetailFragment();
+                        Fragment fragment;
+
+                        if(arguments.getLong(OrgContract.NODE_ID) == OrgContract.AGENDA_ID) fragment = new AgendaFragment();
+                        else fragment = new OrgNodeDetailFragment();
+
                         fragment.setArguments(arguments);
 
                         AppCompatActivity activity = (AppCompatActivity) v.getContext();
                         activity.getSupportFragmentManager().beginTransaction()
                                 .replace(R.id.orgnode_detail_container, fragment)
                                 .commit();
-                        // TODO: add agenda fragment
+
+                        ActionBar actionBar = ((AppCompatActivity)context).getSupportActionBar();
+                        if(actionBar != null) {
+                            if(arguments.getLong(OrgContract.NODE_ID) == OrgContract.TODO_ID) actionBar.setTitle(context.getResources().getString(R.string.menu_todos));
+                            else if (arguments.getLong(OrgContract.NODE_ID) == OrgContract.AGENDA_ID){
+                                actionBar.setTitle(context.getResources().getString(R.string.menu_agenda));
+                            } else {
+                                try {
+                                    OrgNode node = new OrgNode(arguments.getLong(OrgContract.NODE_ID), context.getContentResolver());
+                                    actionBar.setTitle(node.name);
+                                } catch (OrgNodeNotFoundException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }
                     } else {
-                        Context context = v.getContext();
                         Intent intent;
 
                         // Special activity for conflicted file

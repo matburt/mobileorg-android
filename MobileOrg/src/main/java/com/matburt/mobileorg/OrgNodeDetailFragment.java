@@ -103,44 +103,48 @@ public class OrgNodeDetailFragment extends Fragment {
         super.onCreate(savedInstanceState);
         this.resolver = getActivity().getContentResolver();
 
-        Log.v("create","herelasdfjaskdfjasdfad");
         OrgNodeTree tree = null;
 
         if (getArguments().containsKey(OrgContract.NODE_ID)) {
             Bundle arguments = getArguments();
             this.nodeId = arguments.getLong(OrgContract.NODE_ID);
 
-            // Handling of the TODO file
-            if (nodeId == OrgContract.TODO_ID) {
+
+        }
+
+        adapter = new MainRecyclerViewAdapter();
+
+    }
+
+    private OrgNodeTree getTree(){
+        // Handling of the TODO file
+        if (nodeId == OrgContract.TODO_ID) {
 //                Cursor cursor = resolver.query(OrgContract.OrgData.CONTENT_URI,
 //                        OrgContract.OrgData.DEFAULT_COLUMNS, OrgContract.Todos.ISDONE + "=1",
 //                        null, OrgContract.OrgData.NAME_SORT);
 
-                String todoQuery = "SELECT " +
-                        OrgContract.formatColumns(
-                                OrgDatabase.Tables.ORGDATA,
-                                OrgContract.OrgData.DEFAULT_COLUMNS) +
-                        " FROM orgdata JOIN todos " +
-                        " ON todos.name = orgdata.todo WHERE todos.isdone=0";
+            String todoQuery = "SELECT " +
+                    OrgContract.formatColumns(
+                            OrgDatabase.Tables.ORGDATA,
+                            OrgContract.OrgData.DEFAULT_COLUMNS) +
+                    " FROM orgdata JOIN todos " +
+                    " ON todos.name = orgdata.todo WHERE todos.isdone=0";
 
 
-                Cursor cursor = OrgDatabase.getInstance().getReadableDatabase().rawQuery(todoQuery, null);
+            Cursor cursor = OrgDatabase.getInstance().getReadableDatabase().rawQuery(todoQuery, null);
 
-
-                tree = new OrgNodeTree(OrgProviderUtils.orgDataCursorToArrayList(cursor));
-                if (cursor != null) cursor.close();
-            } else {
-                try {
-                    tree = new OrgNodeTree(new OrgNode(nodeId, resolver), resolver);
-                } catch (OrgNodeNotFoundException e) {
+            OrgNodeTree tree = new OrgNodeTree(OrgProviderUtils.orgDataCursorToArrayList(cursor));
+            if(cursor != null) cursor.close();
+            return tree;
+        } else {
+            try {
+                return new OrgNodeTree(new OrgNode(nodeId, resolver), resolver);
+            } catch (OrgNodeNotFoundException e) {
 //                TODO: implement error
-                    e.printStackTrace();
-                }
+                e.printStackTrace();
             }
         }
-
-        adapter = new MainRecyclerViewAdapter(tree);
-
+        return null;
     }
 
     @Override
@@ -170,8 +174,6 @@ public class OrgNodeDetailFragment extends Fragment {
             }
         });
 
-
-
         refresh();
 
         int position = findCardViewContaining(getArguments().getLong(OrgContract.POSITION, -1));
@@ -183,13 +185,7 @@ public class OrgNodeDetailFragment extends Fragment {
      * Recreate the OrgNodeTree and refresh the Adapter
      */
     public void refresh() {
-        try {
-            adapter.tree = new OrgNodeTree(new OrgNode(nodeId, resolver), resolver);
-        } catch (OrgNodeNotFoundException e) {
-//                displayError();
-//                TODO: implement error
-            e.printStackTrace();
-        }
+        adapter.tree = getTree();
 
         int size = adapter.getItemCount();
 
@@ -247,8 +243,7 @@ public class OrgNodeDetailFragment extends Fragment {
 
         private OrgNodeTree tree;
 
-        public MainRecyclerViewAdapter(OrgNodeTree root) {
-            tree = root;
+        public MainRecyclerViewAdapter() {
         }
 
         @Override
