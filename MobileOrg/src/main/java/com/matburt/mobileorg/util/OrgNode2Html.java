@@ -4,8 +4,8 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.preference.PreferenceManager;
 
-import com.matburt.mobileorg.Gui.Theme.DefaultTheme;
-import com.matburt.mobileorg.OrgData.OrgNode;
+import com.matburt.mobileorg.gui.theme.DefaultTheme;
+import com.matburt.mobileorg.orgdata.OrgNode;
 
 import java.util.HashMap;
 import java.util.Iterator;

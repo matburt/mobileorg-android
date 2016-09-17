@@ -8,14 +8,13 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo.State;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
-import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 
-import com.matburt.mobileorg.OrgData.OrgFile;
-import com.matburt.mobileorg.OrgData.OrgNode;
+import com.matburt.mobileorg.orgdata.OrgFile;
+import com.matburt.mobileorg.orgdata.OrgNode;
 import com.matburt.mobileorg.R;
-import com.matburt.mobileorg.Synchronizers.Synchronizer;
+import com.matburt.mobileorg.synchronizers.Synchronizer;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;

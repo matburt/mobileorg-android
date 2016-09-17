@@ -6,7 +6,7 @@ import android.content.pm.PackageInfo;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
 
-import com.matburt.mobileorg.OrgData.MobileOrgApplication;
+import com.matburt.mobileorg.orgdata.MobileOrgApplication;
 
 import java.util.ArrayList;
 import java.util.HashSet;

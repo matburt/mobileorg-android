@@ -18,7 +18,6 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.text.InputType;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -26,14 +25,14 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.matburt.mobileorg.Gui.Outline.OutlineAdapter;
-import com.matburt.mobileorg.Gui.SearchActivity;
-import com.matburt.mobileorg.Gui.Wizard.WizardActivity;
-import com.matburt.mobileorg.OrgData.OrgFile;
-import com.matburt.mobileorg.Services.SyncService;
-import com.matburt.mobileorg.Settings.SettingsActivity;
-import com.matburt.mobileorg.Synchronizers.AuthData;
-import com.matburt.mobileorg.Synchronizers.Synchronizer;
+import com.matburt.mobileorg.gui.outline.OutlineAdapter;
+import com.matburt.mobileorg.gui.SearchActivity;
+import com.matburt.mobileorg.gui.wizard.WizardActivity;
+import com.matburt.mobileorg.orgdata.OrgFile;
+import com.matburt.mobileorg.services.SyncService;
+import com.matburt.mobileorg.settings.SettingsActivity;
+import com.matburt.mobileorg.synchronizers.AuthData;
+import com.matburt.mobileorg.synchronizers.Synchronizer;
 import com.matburt.mobileorg.util.OrgUtils;
 import com.matburt.mobileorg.util.PreferenceUtils;
 
@@ -288,7 +287,6 @@ public class OrgNodeListActivity extends AppCompatActivity {
 
             alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int whichButton) {
-                    authData.setPassword(input.getText().toString());
                     passwordPrompt = false;
                     runSynchronize();
                     dialog.dismiss();

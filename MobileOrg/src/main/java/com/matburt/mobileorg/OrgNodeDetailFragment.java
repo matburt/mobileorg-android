@@ -15,7 +15,6 @@ import android.support.v7.view.ActionMode;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -26,11 +25,11 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.matburt.mobileorg.OrgData.OrgContract;
-import com.matburt.mobileorg.OrgData.OrgDatabase;
-import com.matburt.mobileorg.OrgData.OrgNode;
-import com.matburt.mobileorg.OrgData.OrgNodeTree;
-import com.matburt.mobileorg.OrgData.OrgProviderUtils;
+import com.matburt.mobileorg.orgdata.OrgContract;
+import com.matburt.mobileorg.orgdata.OrgDatabase;
+import com.matburt.mobileorg.orgdata.OrgNode;
+import com.matburt.mobileorg.orgdata.OrgNodeTree;
+import com.matburt.mobileorg.orgdata.OrgProviderUtils;
 import com.matburt.mobileorg.util.OrgNodeNotFoundException;
 import com.matburt.mobileorg.util.TodoDialog;
 

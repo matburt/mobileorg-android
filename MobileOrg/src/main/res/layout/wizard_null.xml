@@ -1,33 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout android:orientation="vertical"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:fillViewport="true">
-  <LinearLayout
-      android:orientation="vertical"
-      android:layout_width="fill_parent"
-      android:layout_height="wrap_content">
-    <LinearLayout
-        android:orientation="vertical"
+    android:layout_height="wrap_content"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <TextView
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="20dp"
-        android:paddingLeft="20dp"
-        android:paddingRight="20dp"
-        android:id="@+id/wizard_null">
-      <TextView
-          android:layout_width="fill_parent"
-          android:layout_height="wrap_content"
-          android:text="@string/null_sync_description"
-          android:textStyle="bold"
-          android:paddingBottom="20dp"/>
-    </LinearLayout>
-    <View
-        android:layout_width="fill_parent" 
-        android:layout_height="1dp"
-        android:layout_weight="1.0" 
-        />
-    <include layout="@layout/wizard_navbar_last"/>
+        android:text="@string/null_sync_description"
+        android:textSize="24sp"
+        android:layout_gravity="center_horizontal"
+        android:gravity="center"
+        android:padding="20dp"/>
   </LinearLayout>
-</ScrollView>

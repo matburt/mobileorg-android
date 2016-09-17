@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+   xmlns:android="http://schemas.android.com/apk/res/android"
+   android:orientation="vertical"
+   android:layout_width="wrap_content"
+   android:layout_height="wrap_content"
+   android:layout_gravity="center">
+  <ImageView
+     android:src="@drawable/logo"
+     android:layout_gravity="center_horizontal"
+     android:layout_width="wrap_content"
+     android:layout_height="wrap_content"
+     android:paddingBottom="20dp"
+     />
+  <RadioGroup
+     android:layout_gravity="center"
+     android:layout_width="wrap_content"
+     android:layout_height="wrap_content"
+     android:id="@+id/sync_group">
+    <TextView
+       android:text="@string/i_want_to_sync_using"
+       android:textStyle="bold"
+       android:textSize="20sp"/>
+    <!--<RadioButton-->
+       <!--android:id="@+id/webdav"-->
+       <!--android:layout_width="wrap_content"-->
+       <!--android:layout_height="wrap_content"-->
+       <!--android:textSize="18sp"-->
+       <!--android:text="@string/wizard_webdav"-->
+       <!--android:checked="true"/>-->
+    <!--<RadioButton-->
+       <!--android:textSize="18sp"-->
+       <!--android:id="@+id/dropbox"-->
+       <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+       <!--android:text="@string/wizard_dropbox" />-->
+    <!--<RadioButton-->
+       <!--android:textSize="18sp"-->
+       <!--android:id="@+id/ubuntuone"-->
+        <!--android:layout_width="wrap_content"-->
+       <!--android:layout_height="wrap_content"-->
+       <!--android:text="@string/wizard_ubuntuone" />-->
+    <RadioButton
+       android:textSize="18sp"
+       android:id="@+id/ssh"
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       android:text="@string/wizard_ssh" />
+    <!--<RadioButton-->
+       <!--android:textSize="18sp"-->
+       <!--android:id="@+id/sdcard"-->
+            <!--android:layout_width="wrap_content"-->
+       <!--android:layout_height="wrap_content"-->
+       <!--android:text="@string/wizard_sdcard" />-->
+    <RadioButton
+       android:id="@+id/nullSync"
+       android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+       android:textSize="18sp"
+       android:text="@string/wizard_null"
+       />
+  </RadioGroup>
+
+  <Button
+      android:id="@+id/ok"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="@string/ok"
+      />
+</LinearLayout>

@@ -5,7 +5,6 @@ import android.graphics.Typeface;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
@@ -13,8 +12,8 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.matburt.mobileorg.OrgData.OrgNode;
-import com.matburt.mobileorg.OrgData.OrgNodeTree;
+import com.matburt.mobileorg.orgdata.OrgNode;
+import com.matburt.mobileorg.orgdata.OrgNodeTree;
 import com.matburt.mobileorg.util.PreferenceUtils;
 import com.matburt.mobileorg.util.TodoDialog;
 

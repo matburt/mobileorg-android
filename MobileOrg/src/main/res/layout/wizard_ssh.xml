@@ -79,7 +79,7 @@
           android:id="@+id/wizard_ssh_choose_pub_file"
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
-          android:text="@string/ssh_choose_file_button"
+          android:text="@string/generate_dsa_keys"
           android:textSize="20dp"/>
       <TextView
           android:id="@+id/wizard_ssh_pub_file_actual"

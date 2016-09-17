@@ -143,11 +143,13 @@
     <string name="log_in_to_ssh">Log in to your SSH server</string>
     <string name="ssh_inform_choose_pub_file">SSH private key</string>
     <string name="ssh_choose_file_button">Select your *private* key file</string>
-    <string name="null_sync_description">This is a capture only synchronizerManager.  It will not attempt to synchronize to any source.</string>
+    <string name="null_sync_description">No synchronization mode</string>
     <string name="dropbox_login_info">This will redirect you to a login form.  After logging in it will return you to this screen to continue.</string>
     <string name="url">URL</string>
     <string name="wizard_dropbox_email_hint">user@host.com</string>
     <string name="wizard_ubuntu_email_hint">user@host.com</string>
+    <string name="generate_dsa_keys">Generate DSA keys</string>
+    <string name="pubkey_copied">Public key copied to clipboard !</string>
 
     <!-- preference strings -->
     <string name="preferences">Preferences</string>

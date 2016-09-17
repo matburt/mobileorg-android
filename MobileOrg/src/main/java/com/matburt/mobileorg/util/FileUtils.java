@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Environment;
 import android.preference.PreferenceManager;
+import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -47,6 +48,17 @@ public class FileUtils {
 		}
 
 		return fileContents.toString();
+	}
+
+	public static String read(Context context, String filename){
+		File file = new File(filename);
+		try {
+			BufferedReader br = new BufferedReader(new FileReader(file));
+			return FileUtils.read(br);
+		} catch (IOException e) {
+			Toast.makeText(context, e.toString(), Toast.LENGTH_LONG).show();
+		}
+		return "";
 	}
 
 	public static boolean deleteFile(File file) {

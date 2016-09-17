@@ -8,12 +8,10 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.text.format.DateFormat;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -24,16 +22,15 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TimePicker;
 
-import com.matburt.mobileorg.OrgData.OrgContract;
-import com.matburt.mobileorg.OrgData.OrgFile;
-import com.matburt.mobileorg.OrgData.OrgNode;
-import com.matburt.mobileorg.OrgData.OrgNodeTimeDate;
+import com.matburt.mobileorg.orgdata.OrgContract;
+import com.matburt.mobileorg.orgdata.OrgFile;
+import com.matburt.mobileorg.orgdata.OrgNode;
+import com.matburt.mobileorg.orgdata.OrgNodeTimeDate;
 import com.matburt.mobileorg.util.OrgNodeNotFoundException;
 import com.matburt.mobileorg.util.TodoDialog;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.TimeZone;
 
 public class EditNodeFragment extends Fragment {
     public static String NODE_ID = "node_id";

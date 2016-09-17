@@ -7,11 +7,10 @@ import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.MenuItem;
 
-import com.matburt.mobileorg.OrgData.OrgContract;
-import com.matburt.mobileorg.OrgData.OrgNode;
+import com.matburt.mobileorg.orgdata.OrgContract;
+import com.matburt.mobileorg.orgdata.OrgNode;
 import com.matburt.mobileorg.util.OrgNodeNotFoundException;
 
 /**

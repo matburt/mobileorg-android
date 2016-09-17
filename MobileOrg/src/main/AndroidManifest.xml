@@ -11,26 +11,17 @@
 
         />
 
+    <!-- TODO: look at this backup thing the above warning is talking about-->
     <application
-        android:name=".OrgData.MobileOrgApplication"
+        android:name=".orgdata.MobileOrgApplication"
         android:icon="@drawable/icon"
         android:label="MobileOrg"
         android:theme="@style/AppTheme.NoActionBar">
 
-        <receiver
-            android:name=".Gui.Widget.MobileOrgWidget"
-            android:label="MobileOrg Tasks">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-            </intent-filter>
 
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/widget_mobileorg" />
-        </receiver>
-
-        <service android:name=".Gui.Widget.MobileOrgWidget$MobileOrgWidgetService" />
-        <service android:name=".Services.SyncService">
+        <service
+            android:name=".services.SyncService"
+            android:exported="false">
             <intent-filter>
                 <category android:name="android.intent.category.DEFAULT" />
 
@@ -39,10 +30,13 @@
         </service>
 
         <provider
-            android:name=".OrgData.OrgProvider"
-            android:authorities="com.matburt.mobileorg.OrgData.OrgProvider" />
+            android:name=".orgdata.OrgProvider"
+            android:authorities="com.matburt.mobileorg.orgdata.OrgProvider"
+            android:exported="false"/>
 
-        <receiver android:name=".Plugin.Synchronize">
+        <receiver
+            android:name=".plugin.Synchronize"
+            android:exported="false">
             <intent-filter>
                 <action android:name="com.twofortyfouram.locale.intent.action.FIRE_SETTING" />
             </intent-filter>
@@ -62,14 +56,14 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".Settings.SettingsActivity"
+            android:name=".settings.SettingsActivity"
             android:label="MobileOrg Settings"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".OrgNodeDetailActivity"
             android:theme="@style/ActionModeAppTheme" />
         <activity
-            android:name=".Gui.Wizard.WizardActivity"
+            android:name=".gui.wizard.WizardActivity"
             android:label="MobileOrg Wizard"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
@@ -79,30 +73,28 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".Gui.CertificateConflictActivity"
+            android:name=".gui.CertificateConflictActivity"
             android:label="MobileOrg Certificate Conflict"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".Gui.FileDecryptionActivity"
+            android:name=".gui.FileDecryptionActivity"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".Settings.Synchronizers.WebDAVSettingsActivity"
+            android:name=".settings.synchronizers.WebDAVSettingsActivity"
             android:label="WebDAV Settings" />
         <activity
-            android:name=".Settings.Synchronizers.SDCardSettingsActivity"
+            android:name=".settings.synchronizers.SDCardSettingsActivity"
             android:label="SDCard Settings" />
         <activity
-            android:name=".Settings.Synchronizers.ScpSettingsActivity"
+            android:name=".settings.synchronizers.ScpSettingsActivity"
             android:label="Scp Settings" />
         <activity
-            android:name=".Settings.Synchronizers.UbuntuOneSettingsActivity"
+            android:name=".settings.synchronizers.UbuntuOneSettingsActivity"
             android:label="Ubuntu One Settings" />
         <activity
             android:name=".EditNodeActivity"
             android:theme="@style/ActionModeAppTheme" />
 
-        <activity android:name=".Gui.Agenda.AgendaSettings" />
-        <activity android:name=".Gui.Agenda.AgendaEntrySetting" />
         <activity
             android:name="com.dropbox.client2.android.AuthActivity"
             android:configChanges="orientation|keyboard"
@@ -119,15 +111,9 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".Gui.Agenda.AgendasActivity" />
-        <activity android:name=".Gui.Agenda.AgendaActivity" />
-        <activity
-            android:name="layout.com.aaa.ScrollingActivity"
-            android:label="@string/title_activity_scrolling"
-            android:theme="@style/AppTheme.NoActionBar" />
-        <activity android:name=".Gui.Outline.ConflictResolverActivity"></activity>
+        <activity android:name=".gui.outline.ConflictResolverActivity"/>
 
-        <activity android:name=".Gui.SearchActivity">
+        <activity android:name=".gui.SearchActivity">
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
             </intent-filter>
@@ -135,6 +121,10 @@
                 android:name="android.app.searchable"
                 android:resource="@xml/searchable" />
         </activity>
+        <activity android:name=".gui.wizard.wizards.DropboxWizard"/>
+        <activity android:name=".gui.wizard.wizards.SDCardWizard"/>
+        <activity android:name=".gui.wizard.wizards.SSHWizard"/>
+        <activity android:name=".gui.wizard.wizards.UbuntuOneWizard"/>
+        <activity android:name=".gui.wizard.wizards.WebDAVWizard"/>
     </application>
-
 </manifest>
