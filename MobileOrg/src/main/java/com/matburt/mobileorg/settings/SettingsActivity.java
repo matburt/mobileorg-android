@@ -53,8 +53,7 @@ public class SettingsActivity extends PreferenceActivity implements
 								@Override
 								public void onClick(DialogInterface dialog,
 													int which) {
-
-
+									OrgProviderUtils.clearDB(getContentResolver());
 								}
 
 							}).setNegativeButton(R.string.no, null).show();
@@ -83,10 +82,10 @@ public class SettingsActivity extends PreferenceActivity implements
 		addPreferencesFromResource(R.xml.preferences);
 
 		init();
-		populateSyncSources();
-		populateTodoKeywords();
+//		populateSyncSources();
+//		populateTodoKeywords();
         populateVersionName();
-		findPreference("clearDB").setOnPreferenceClickListener(onClearDBClick);
+//		findPreference("clearDB").setOnPreferenceClickListener(onClearDBClick);
 	}
 
 	private void init() {

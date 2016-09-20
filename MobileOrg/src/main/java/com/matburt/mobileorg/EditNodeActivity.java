@@ -73,8 +73,8 @@ public class EditNodeActivity extends AppCompatActivity {
 
             case R.id.edit_menu_ok:
 
-                ((EditNodeFragment)(getSupportFragmentManager().findFragmentByTag(EDIT_NODE_FRAGMENT))).onOKPressed();
-                finish();
+                boolean shouldFinish = ((EditNodeFragment)(getSupportFragmentManager().findFragmentByTag(EDIT_NODE_FRAGMENT))).onOKPressed();
+                if(shouldFinish) finish();
 //                Intent intent = new Intent(this, OrgNodeListActivity.class);
 //                startActivity(intent);
                 return true;

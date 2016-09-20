@@ -117,6 +117,7 @@ public abstract class Synchronizer {
             return pulledFiles.changedFiles;
         } catch (Exception e) {
             showErrorNotification(e);
+            e.printStackTrace();
         }
         return result;
     }

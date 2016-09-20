@@ -184,14 +184,9 @@ public class OrgProviderUtils {
 
 
 	public static void clearDB(ContentResolver resolver) {
-		try {
-			resolver.delete(OrgData.CONTENT_URI, null, null);
-			resolver.delete(Files.CONTENT_URI, null, null);
-			resolver.delete(Timestamps.CONTENT_URI, null, null);
-		} catch( IllegalArgumentException e){
-			e.printStackTrace();
-		}
-
+		resolver.delete(OrgData.CONTENT_URI, null, null);
+		resolver.delete(Files.CONTENT_URI, null, null);
+		resolver.delete(Timestamps.CONTENT_URI, null, null);
 	}
 	
 	public static boolean isTodoActive(String todo, ContentResolver resolver) {

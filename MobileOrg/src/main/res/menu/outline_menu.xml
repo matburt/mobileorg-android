@@ -15,15 +15,13 @@
         android:title="@string/menu_sync"
         app:showAsAction="ifRoom" />
 
-    <item
-        android:id="@+id/menu_agenda"
-        android:icon="@drawable/ic_menu_agenda"
-        android:title="@string/menu_agenda"/>
 
     <item
         android:id="@+id/menu_help"
         android:icon="@drawable/ic_menu_help"
-        android:title="@string/menu_help"/>
+        android:title="@string/menu_help"
+        />
+
     <item
         android:id="@+id/menu_settings"
         android:icon="@drawable/ic_menu_preferences"

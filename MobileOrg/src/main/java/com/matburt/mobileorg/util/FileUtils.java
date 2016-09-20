@@ -56,7 +56,7 @@ public class FileUtils {
 			BufferedReader br = new BufferedReader(new FileReader(file));
 			return FileUtils.read(br);
 		} catch (IOException e) {
-			Toast.makeText(context, e.toString(), Toast.LENGTH_LONG).show();
+			e.printStackTrace();
 		}
 		return "";
 	}

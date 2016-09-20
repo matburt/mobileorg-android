@@ -75,7 +75,7 @@ public class SSHSynchronizer extends Synchronizer {
      * @return
      */
     public boolean isCredentialsRequired() {
-        return AuthData.getPublicKey(context).equals("") && authData.getPassword().equals("");
+        return false;
     }
 
     @Override

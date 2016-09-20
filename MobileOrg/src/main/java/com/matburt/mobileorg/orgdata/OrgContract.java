@@ -3,7 +3,7 @@ package com.matburt.mobileorg.orgdata;
 import android.net.Uri;
 
 public class OrgContract {
-	public static final String CONTENT_AUTHORITY = "com.matburt.mobileorg.OrgData.OrgProvider";
+	public static final String CONTENT_AUTHORITY = "com.matburt.mobileorg.orgdata.OrgProvider";
 	private static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
 	private static final String PATH_ORGDATA = OrgDatabase.Tables.ORGDATA;
 	private static final String PATH_TIMESTAMPS = OrgDatabase.Tables.TIMESTAMPS;

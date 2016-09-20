@@ -21,6 +21,7 @@ import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TimePicker;
+import android.widget.Toast;
 
 import com.matburt.mobileorg.orgdata.OrgContract;
 import com.matburt.mobileorg.orgdata.OrgFile;
@@ -30,7 +31,9 @@ import com.matburt.mobileorg.util.OrgNodeNotFoundException;
 import com.matburt.mobileorg.util.TodoDialog;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.List;
 
 public class EditNodeFragment extends Fragment {
     public static String NODE_ID = "node_id";
@@ -248,8 +251,18 @@ public class EditNodeFragment extends Fragment {
      * Triggers the update mechanism
      * First the new node is written to the DB
      * Then the file is written to disk
+     * @return : whether or not, the fragment must finish
      */
-    public void onOKPressed(){
+    public boolean onOKPressed(){
+        List<OrgNodeTimeDate> timedates = Arrays.asList(node.getDeadline(), node.getScheduled());
+        for(OrgNodeTimeDate timedate: timedates){
+            if(     (timedate.startMinute >= 0 || timedate.startTimeOfDay >= 0) &&
+                    (timedate.dayOfMonth < 0 || timedate.monthOfYear < 0 || timedate.year < 0)){
+                Toast.makeText(context,R.string.pick_a_date,Toast.LENGTH_LONG).show();
+                return false;
+            }
+        }
+
         ContentResolver resolver = getContext().getContentResolver();
         String payload = "";
 
@@ -262,7 +275,7 @@ public class EditNodeFragment extends Fragment {
 
         node.write(getContext());
         OrgFile.updateFile(node, context);
-
+        return true;
     }
 
     /**
@@ -304,7 +317,6 @@ public class EditNodeFragment extends Fragment {
 
     public static class TimePickerFragment extends DialogFragment
             implements TimePickerDialog.OnTimeSetListener {
-        static private int day = -1, month = -1, year = -1;
 
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -319,7 +331,6 @@ public class EditNodeFragment extends Fragment {
         }
 
         public void onTimeSet(TimePicker view, int hourOfDay, int minuteOfDay) {
-            ContentResolver resolver = getActivity().getContentResolver();
             timeDate.startTimeOfDay = hourOfDay;
             timeDate.startMinute = minuteOfDay;
             setupTimeStampButtons();
@@ -351,15 +362,7 @@ public class EditNodeFragment extends Fragment {
             timeDate.year = year;
             timeDate.monthOfYear = month;
             timeDate.dayOfMonth = day;
-
             setupTimeStampButtons();
-//            Bundle bundle = new Bundle();
-//            bundle.putInt("year",year);
-//            bundle.putInt("month",month);
-//            bundle.putInt("day",day);
-//            TimePickerFragment newFragment = new TimePickerFragment();
-//            newFragment.setArguments(bundle);
-//            newFragment.show(getActivity().getSupportFragmentManager(), "timePicker");
         }
     }
 }

@@ -47,8 +47,6 @@ public class SyncService extends Service implements
 		this.appSettings.registerOnSharedPreferenceChangeListener(this);
 		this.appInst = (MobileOrgApplication) this.getApplication();
 		this.alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-
-//		Log.v("trace", "sync service");
 	}
 
 	@Override
