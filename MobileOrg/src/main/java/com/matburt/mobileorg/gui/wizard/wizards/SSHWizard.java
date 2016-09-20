@@ -1,9 +1,7 @@
 package com.matburt.mobileorg.gui.wizard.wizards;
 
-import android.app.ProgressDialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -18,17 +16,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.matburt.mobileorg.R;
-import com.matburt.mobileorg.synchronizers.AuthData;
-import com.matburt.mobileorg.synchronizers.CredentialsProviderAllowHost;
 import com.matburt.mobileorg.synchronizers.JGitWrapper;
 
-import org.eclipse.jgit.transport.CredentialsProvider;
-import org.eclipse.jgit.transport.SshSessionFactory;
-
 public class SSHWizard extends AppCompatActivity {
-
-	public static final int SSH_CHOOSE_PUB = 1;
-	ProgressDialog mProgressDialog;
 	private EditText sshUser;
 	private EditText sshPass;
 	private EditText sshPath;
@@ -66,8 +56,6 @@ public class SSHWizard extends AppCompatActivity {
 			}
 		});
 
-
-
 		auth_selector = (Switch) findViewById(R.id.auth_selector);
 		auth_selector.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
 			@Override
@@ -89,10 +77,14 @@ public class SSHWizard extends AppCompatActivity {
 		});
 
 		loadSettings();
-	}
 
-	public void setPubFile(String pubfile) {
-		this.sshPubFileActual.setText(pubfile);
+        Button done = (Button) findViewById(R.id.done);
+        done.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                saveSettings();
+            }
+        });
 	}
 
 	private void loadSettings() {
@@ -103,7 +95,7 @@ public class SSHWizard extends AppCompatActivity {
 		sshPass.setText(appSettings.getString("scpPass", ""));
 		sshHost.setText(appSettings.getString("scpHost", ""));
 		sshPort.setText(appSettings.getString("scpPort", ""));
-		auth_selector.setChecked( appSettings.getBoolean("usePassword", true));
+		auth_selector.setChecked(appSettings.getBoolean("usePassword", true));
 		auth_selector.performClick();
 		auth_selector.performClick();
 		sshPubFileActual.setText(appSettings.getString("scpPubFile", ""));
@@ -137,7 +129,4 @@ public class SSHWizard extends AppCompatActivity {
 		JGitWrapper.CloneGitRepoTask task = new JGitWrapper.CloneGitRepoTask(this);
 		task.execute(pathActual, sshPass.getText().toString(), userActual, hostActual, portActual);
 	}
-
-
-
 }

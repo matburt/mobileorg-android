@@ -184,30 +184,14 @@ public class OrgProviderUtils {
 
 
 	public static void clearDB(ContentResolver resolver) {
-		resolver.delete(OrgData.CONTENT_URI, null, null);
-		resolver.delete(Files.CONTENT_URI, null, null);
-		resolver.delete(Timestamps.CONTENT_URI, null, null);
-	}
-
-	public static ArrayList<String> getActiveTodos(ContentResolver resolver) {
-		ArrayList<String> result = new ArrayList<String>();
-
-		Cursor cursor = resolver.query(Todos.CONTENT_URI,
-				Todos.DEFAULT_COLUMNS, null, null, null);
-		if(cursor == null)
-			return result;
-		
-		cursor.moveToFirst();
-		
-		while (cursor.isAfterLast() == false) {
-			int isdone = cursor.getInt(cursor.getColumnIndex(Todos.ISDONE));
-
-			if (isdone == 0)
-				result.add(cursor.getString(cursor.getColumnIndex(Todos.NAME)));
-			cursor.moveToNext();
+		try {
+			resolver.delete(OrgData.CONTENT_URI, null, null);
+			resolver.delete(Files.CONTENT_URI, null, null);
+			resolver.delete(Timestamps.CONTENT_URI, null, null);
+		} catch( IllegalArgumentException e){
+			e.printStackTrace();
 		}
-		cursor.close();
-		return result;
+
 	}
 	
 	public static boolean isTodoActive(String todo, ContentResolver resolver) {
@@ -228,22 +212,6 @@ public class OrgProviderUtils {
 		if(cursor!=null) cursor.close();
 
 		return false;
-	}
-	
-	public static Cursor getFileSchedule(String filename, boolean showHabits, ContentResolver resolver) throws OrgFileNotFoundException {
-		OrgFile file = new OrgFile(filename, resolver);
-		
-		String whereQuery = OrgData.FILE_ID + "=? AND (" + OrgData.PAYLOAD + " LIKE '%<%>%'";
-
-		if(showHabits == false)
-			whereQuery += " AND NOT " + OrgData.PAYLOAD + " LIKE '%:STYLE: habit%'";
-		
-		whereQuery += ")";
-			
-		Cursor cursor = resolver.query(OrgData.CONTENT_URI, OrgData.DEFAULT_COLUMNS, whereQuery,
-				new String[] { Long.toString(file.id) }, null);
-		cursor.moveToFirst();
-		return cursor;
 	}
 	
 	public static Cursor search(String query, ContentResolver resolver) {

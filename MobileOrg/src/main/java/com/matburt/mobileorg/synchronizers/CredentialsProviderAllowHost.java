@@ -103,5 +103,4 @@ public class CredentialsProviderAllowHost extends CredentialsProvider {
             password = null;
         }
     }
-
 }

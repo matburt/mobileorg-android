@@ -327,11 +327,13 @@ public class JGitWrapper {
 
         @Override
         protected void onPostExecute(Object exception) {
-            OrgProviderUtils
-                    .clearDB(context.getContentResolver());
-            parseAll();
+
             progress.dismiss();
             if (exception == null) {
+                OrgProviderUtils
+                        .clearDB(context.getContentResolver());
+                parseAll();
+
                 Toast.makeText(context, "Synchronization successful !", Toast.LENGTH_LONG).show();
                 ((Activity) context).finish();
 

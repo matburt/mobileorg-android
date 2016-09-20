@@ -51,12 +51,17 @@ public class AuthData {
     static public String PRIVATE_KEY = "dsa";
     static public String PUBLIC_KEY = PRIVATE_KEY + ".pub";
 
-    public static String getPublicKey(Context context){
-        return FileUtils.read(context, context.getFilesDir().getAbsoluteFile() + "/" + PUBLIC_KEY);
+    public static String getPrivateKeyPath(Context context){
+        return context.getFilesDir().getAbsoluteFile() + "/" + PRIVATE_KEY;
     }
 
-    public static String getPrivateKey(Context context){
-        return FileUtils.read(context, context.getFilesDir().getAbsoluteFile() + "/" + PRIVATE_KEY);
+    public static String getPublicKeyPath(Context context){
+        return context.getFilesDir().getAbsoluteFile() + "/" + PUBLIC_KEY;
     }
+
+    public static String getPublicKey(Context context){
+        return FileUtils.read(context, getPublicKeyPath(context));
+    }
+
 
 }

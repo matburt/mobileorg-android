@@ -53,7 +53,7 @@ public class SshSessionFactory extends JschConfigSessionFactory {
         JSch defaultJSch = super.createDefaultJSch(fs);
 
         if (connection == ConnectionType.kSshPubKey)
-            defaultJSch.addIdentity(AuthData.getPrivateKey(context));
+            defaultJSch.addIdentity(AuthData.getPrivateKeyPath(context));
 
 
         return defaultJSch;

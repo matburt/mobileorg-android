@@ -223,8 +223,14 @@ public class OrgFile {
 	}
 
 	private long removeFileNode(ContentResolver resolver) {
-		return resolver.delete(Files.buildIdUri(id), Files.NAME + "=? AND "
-                + Files.FILENAME + "=?", new String[]{name, filename});
+		int total = 0;
+		try {
+			total += resolver.delete(Files.buildIdUri(id), Files.NAME + "=? AND "
+					+ Files.FILENAME + "=?", new String[]{name, filename});
+		} catch (IllegalArgumentException e){
+			// Uri does not exist, no need to delete
+		}
+		return total;
     }
 
 	/**
@@ -239,12 +245,18 @@ public class OrgFile {
     }
 
 	private long removeFileOrgDataNodes(ContentResolver resolver) {
-		resolver.delete(Timestamps.CONTENT_URI, Timestamps.FILE_ID + "=?",
-				new String[]{Long.toString(id)});
+		int total = 0;
+		try{
+			resolver.delete(Timestamps.CONTENT_URI, Timestamps.FILE_ID + "=?",
+					new String[]{Long.toString(id)});
 
-		int total = resolver.delete(OrgData.CONTENT_URI, OrgData.FILE_ID + "=?",
-                new String[]{Long.toString(id)});
-        total += resolver.delete(OrgData.buildIdUri(nodeId), null, null);
+			total += resolver.delete(OrgData.CONTENT_URI, OrgData.FILE_ID + "=?",
+					new String[]{Long.toString(id)});
+			total += resolver.delete(OrgData.buildIdUri(nodeId), null, null);
+		} catch (IllegalArgumentException e){
+			// DB does not exist. No need to delete.
+		}
+
 //		Log.v("sync","remove all nodes : "+total);
 		return total;
 	}

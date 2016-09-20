@@ -4,10 +4,6 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:fillViewport="true">      
-  <LinearLayout
-      android:orientation="vertical"
-      android:layout_width="fill_parent"
-      android:layout_height="wrap_content">
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="fill_parent"
@@ -127,19 +123,14 @@
           android:inputType="number"
           android:defaultValue="22"
           android:singleLine="true"/>
-      <!--<Button-->
-          <!--android:layout_marginTop="20dp"-->
-          <!--android:id="@+id/wizard_ssh_login_button"-->
-          <!--android:layout_width="wrap_content"-->
-          <!--android:layout_height="wrap_content"-->
-          <!--android:text="@string/login_ssh"-->
-          <!--android:textSize="20dp"/>-->
+      <Button
+          android:layout_marginTop="20dp"
+          android:id="@+id/done"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_gravity="end"
+          android:layout_marginBottom="20dp"
+          android:text="@string/ok"
+          android:textSize="20sp"/>
     </LinearLayout>
-    <View
-        android:layout_width="fill_parent" 
-        android:layout_height="1dp"
-        android:layout_weight="1.0" 
-        />
-    <include layout="@layout/wizard_navbar_last"/>
-  </LinearLayout>
 </ScrollView>
