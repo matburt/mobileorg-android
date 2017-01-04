@@ -1,38 +1,3 @@
 * MobileOrg 2.0
-A new implementation of [[https://github.com/matburt/mobileorg-android][MobileOrg]], an Org mode app for Android.
-
-The app is under heavy refactoring and is not out yet: a first release should be out in the following weeks.
-
-** Current features
-
-- Modern design using Android's Material Design guidelines
-- Automatic [[https://en.wikipedia.org/wiki/Git_%28software%29][Git]] synchronization (via SSH and HTTP). Access to the raw files in case of conflict to solve.
-- Independent of Emacs: it is no longer required to use it in conjunction with Emacs.
-- Agenda view and Todo list view generated from the org files.
-- Folding of items and sub-items.
-
-** Upcoming features
-- Item management: reordering of items by swiping them
-- Share files button
-- Agenda notifications
-
-** Developpers
-See [[https://github.com/wizmer/mobileorg-android/wiki/Android-Studio-setup][Android-Studio setup]] if you want to build the project.
-
-** Screenshots
-Here are a few screenshots of the current state of the app.
-
-*** Main menu
-[[https://github.com/wizmer/mobileorg-android/blob/master/picturesReadme/MainResized.png]]
-
-*** File view with 3 states: folded, children only and expanded
-**** Folded
-[[https://github.com/wizmer/mobileorg-android/blob/master/picturesReadme/FoldedViewResized.png]]
-**** Children only
-[[https://github.com/wizmer/mobileorg-android/blob/master/picturesReadme/ChildViewResized.png]]
-**** Expanded
-[[https://github.com/wizmer/mobileorg-android/blob/master/picturesReadme/ExpendedResized.png]]
-
-*** The TODO view
-[[https://github.com/wizmer/mobileorg-android/blob/master/picturesReadme/TodosResized.png]]
+This repository is no longer maintained. Please consider switching to [[https://github.com/wizmer/syncorg][SyncOrg]], the modern version of this project.
 
