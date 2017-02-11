@@ -1,3 +1,0 @@
-* MobileOrg
-This repository is no longer maintained. Please consider switching to [[https://github.com/wizmer/syncorg][SyncOrg]], the modern version of this project.
-
